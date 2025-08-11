@@ -336,40 +336,27 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
 
           {/* Status ativo */}
           <div className="bg-blue-50 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-900 mb-3">💡 Sugestões por Nível:</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-              <div className="space-y-1">
-                <div className="font-medium text-blue-800">Níveis 1-10: Flash Iniciante</div>
-                <div className="text-blue-700">Guloseimas básicas (15-30 Gold)</div>
-                <div className="font-medium text-blue-800">Níveis 11-25: Flash Aprendiz</div>
-                <div className="text-blue-700">Tempo de tela, escolhas (40-75 Gold)</div>
-                <div className="font-medium text-blue-800">Níveis 26-50: Flash Júnior</div>
-                <div className="text-blue-700">Atividades, brinquedos pequenos (100-250 Gold)</div>
+            <h4 className="font-semibold text-blue-900 mb-3">💡 Sugestões de Níveis:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="space-y-2">
+                <div><strong>Níveis 1-10:</strong> Guloseimas básicas (15-60 Gold)</div>
+                <div><strong>Níveis 11-25:</strong> Tempo de tela, escolhas (40-75 Gold)</div>
+                <div><strong>Níveis 26-50:</strong> Atividades, brinquedos pequenos (100-250 Gold)</div>
               </div>
-              <div className="space-y-1">
-                <div className="font-medium text-blue-800">Níveis 51-75: Flash Responsável</div>
-                <div className="text-blue-700">Brinquedos médios, roupas (300-800 Gold)</div>
-                <div className="font-medium text-blue-800">Níveis 76-90: Flash Disciplinado</div>
-                <div className="text-blue-700">Eletrônicos, passeios (600-1500 Gold)</div>
-                <div className="font-medium text-blue-800">Níveis 91-100: Flash Master</div>
-                <div className="text-blue-700">Recompensas épicas (1800-2500 Gold)</div>
+              <div className="space-y-2">
+                <div><strong>Níveis 51-75:</strong> Brinquedos médios, roupas (300-800 Gold)</div>
+                <div><strong>Níveis 76-90:</strong> Eletrônicos, passeios (600-1500 Gold)</div>
+                <div><strong>Níveis 91-100:</strong> Recompensas épicas (1800-2500 Gold)</div>
               </div>
             </div>
+            
+            <div className="mt-3 p-3 bg-blue-100 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>💡 Dica:</strong> Defina o nível necessário baseado no valor da recompensa. 
+                Recompensas mais valiosas devem ter níveis mais altos para manter a motivação!
+              </p>
+            </div>
           </div>
-
-          <div className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              id="isActive"
-              checked={formData.isActive}
-              onChange={(e) => handleInputChange('isActive', e.target.checked)}
-              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-              Recompensa ativa (aparecerá na loja do Heitor)
-            </label>
-          </div>
-
           {/* Botões */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
             <button

@@ -758,6 +758,7 @@ export class FirestoreService {
         costGold: reward.costGold,
         emoji: reward.emoji,
         active: true,
+        requiredLevel: 1, // Default level for existing rewards
         createdAt: nowTs(),
         updatedAt: nowTs()
       });
@@ -891,6 +892,7 @@ export class FirestoreService {
         emoji: reward.emoji,
         requiredLevel: reward.requiredLevel || 1,
         active: reward.active,
+        requiredLevel: 1, // Default level for existing rewards
         createdAt: nowTs(),
         updatedAt: nowTs()
       });

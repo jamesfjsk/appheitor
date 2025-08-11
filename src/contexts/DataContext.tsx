@@ -322,6 +322,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       category: rewardData.category || 'custom',
       costGold: rewardData.costGold || 50,
       emoji: rewardData.emoji || '🎁',
+      requiredLevel: rewardData.requiredLevel || 1,
       active: rewardData.active !== false, // Default to true
       ownerId: childUid
     };
