@@ -148,10 +148,10 @@ const RewardManager: React.FC = () => {
                   transition={{ delay: index * 0.05 }}
                   className="bg-white rounded-lg p-4 border border-purple-200 hover:border-purple-300 transition-colors"
                 >
-                          {reward.requiredLevel && reward.requiredLevel > 1 && (
+                          {template.requiredLevel && template.requiredLevel > 1 && (
                             <div className="flex items-center gap-1 text-xs text-purple-600 mt-1">
                               <Crown className="w-3 h-3" />
-                              Nível {reward.requiredLevel}+
+                              Nível {template.requiredLevel}+
                             </div>
                           )}
                   <div className="flex items-start justify-between mb-2">
