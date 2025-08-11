@@ -305,3 +305,4 @@ export function getRewardsUnlockedAtLevel(level: number): LevelRewardTemplate[] 
 export function isRewardUnlocked(requiredLevel: number, currentLevel: number): boolean {
   return currentLevel >= requiredLevel;
 }
+}
