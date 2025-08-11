@@ -60,6 +60,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     const redemption = getRedemptionStatus(reward.id);
     const goldCost = reward.costGold || 0;
     const hasEnoughGold = (progress.availableGold || 0) >= goldCost;
+    const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
     const notPending = !redemption || (redemption.status !== 'pending' && redemption.status !== 'approved');
     
     console.log('🔥 Verificando se pode resgatar:', {
@@ -67,11 +68,14 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
       goldCost,
       availableGold: progress.availableGold,
       hasEnoughGold,
+      isUnlocked,
+      requiredLevel: reward.requiredLevel,
+      currentLevel,
       notPending,
-      canRedeem: hasEnoughGold && notPending
+      canRedeem: hasEnoughGold && notPending && isUnlocked
     });
     
-    return hasEnoughGold && notPending;
+    return hasEnoughGold && notPending && isUnlocked;
   };
 
   const handleRedeem = async (reward: Reward) => {
