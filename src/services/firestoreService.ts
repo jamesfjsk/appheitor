@@ -288,6 +288,10 @@ export class FirestoreService {
   }
 
   static async updateReward(rewardId: string, updates: Partial<Reward>): Promise<void> {
+    if (!rewardId || typeof rewardId !== 'string' || rewardId.trim() === '') {
+      throw new Error('Invalid rewardId: must be a non-empty string');
+    }
+    
     const rewardRef = doc(db, 'rewards', rewardId);
     console.log('🔥 FirestoreService: Updating reward:', { rewardId, updates });
     await updateDoc(rewardRef, {
