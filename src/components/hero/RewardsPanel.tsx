@@ -47,7 +47,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     
     return true;
   });
-  );
 
   const getRedemptionStatus = (rewardId: string) => {
     const redemption = redemptions
@@ -61,7 +60,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     const redemption = getRedemptionStatus(reward.id);
     const goldCost = reward.costGold || 0;
     const hasEnoughGold = (progress.availableGold || 0) >= goldCost;
-    const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
     const notPending = !redemption || (redemption.status !== 'pending' && redemption.status !== 'approved');
     
     console.log('🔥 Verificando se pode resgatar:', {
@@ -69,14 +67,11 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
       goldCost,
       availableGold: progress.availableGold,
       hasEnoughGold,
-      isUnlocked,
-      requiredLevel: reward.requiredLevel,
-      currentLevel,
       notPending,
-      canRedeem: hasEnoughGold && notPending && isUnlocked
+      canRedeem: hasEnoughGold && notPending
     });
     
-    return hasEnoughGold && notPending && isUnlocked;
+    return hasEnoughGold && notPending;
   };
 
   const handleRedeem = async (reward: Reward) => {
@@ -156,8 +151,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Categories */}
-        <div className="p-6 border-b border-white/20 space-y-4">
-          {/* Category Filters */}
+        <div className="p-6 border-b border-white/20">
           <div className="flex gap-2 overflow-x-auto">
             {categories.map((category) => (
               <motion.button
@@ -176,26 +170,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
               </motion.button>
             ))}
           </div>
-          
-          {/* Availability Filters */}
-          <div className="flex gap-2 overflow-x-auto">
-            {filters.map((filter) => (
-              <motion.button
-                key={filter.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedFilter(filter.id)}
-                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 whitespace-nowrap text-sm ${
-                  selectedFilter === filter.id
-                    ? 'bg-white text-hero-primary shadow-lg'
-                    : 'bg-white/10 text-white/80 hover:bg-white/20'
-                }`}
-              >
-                <span className="text-xs">{filter.icon}</span>
-                {filter.label}
-              </motion.button>
-            ))}
-          </div>
         </div>
 
         {/* Rewards Grid */}
@@ -205,8 +179,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
               {filteredRewards.map((reward, index) => {
                 const redemption = getRedemptionStatus(reward.id);
                 const canRedeemReward = canRedeem(reward);
-                const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
-                const requiredLevel = reward.requiredLevel || 1;
                 
                 return (
                   <motion.div
@@ -214,82 +186,27 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`relative backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 ${
-                      isUnlocked 
-                        ? 'bg-white/20 border-white/30' 
-                        : 'bg-gray-500/20 border-gray-400/30 opacity-75'
-                    }`}
+                    className="relative bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30"
                   >
                     {getStatusBadge(reward)}
                     
-                    {/* Lock indicator for locked rewards */}
-                    {!isUnlocked && (
-                      <div className="absolute -top-2 -left-2 bg-gray-600 text-white rounded-full p-2">
-                        <Lock className="w-4 h-4" />
-                      </div>
-                    )}
-                    
-                    {/* New unlock indicator */}
-                    {isUnlocked && requiredLevel > 1 && currentLevel === requiredLevel && (
-                      <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="absolute -top-2 -left-2 bg-yellow-400 text-red-600 rounded-full p-2"
-                      >
-                        <Unlock className="w-4 h-4" />
-                      </motion.div>
-                    )}
-                    
                     <div className="text-center mb-4">
-                      <div className={`text-4xl mb-2 ${!isUnlocked ? 'grayscale opacity-50' : ''}`}>
-                        {reward.emoji}
-                      </div>
-                      <h3 className={`font-bold text-lg mb-1 ${
-                        isUnlocked ? 'text-white' : 'text-gray-300'
-                      }`}>
+                      <div className="text-4xl mb-2">{reward.icon}</div>
+                      <h3 className="font-bold text-white text-lg mb-1">
                         {reward.title}
                       </h3>
-                      <p className={`text-sm ${
-                        isUnlocked ? 'text-white/80' : 'text-gray-400'
-                      }`}>
+                      <p className="text-white/80 text-sm">
                         {reward.description}
                       </p>
-                      
-                      {/* Level requirement indicator */}
-                      {!isUnlocked && (
-                        <div className="mt-2 px-2 py-1 bg-gray-600/50 rounded-full text-xs text-gray-200">
-                          🔒 Desbloqueado no nível {requiredLevel}
-                        </div>
-                      )}
-                      
-                      {/* Just unlocked indicator */}
-                      {isUnlocked && requiredLevel > 1 && currentLevel === requiredLevel && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.3 }}
-                          className="mt-2 px-2 py-1 bg-yellow-400 text-red-600 rounded-full text-xs font-bold"
-                        >
-                          ✨ RECÉM DESBLOQUEADO!
-                        </motion.div>
-                      )}
                     </div>
                     
                     <div className="flex items-center justify-between mb-4">
-                      <div className={`flex items-center gap-1 font-bold ${
-                        isUnlocked ? 'text-hero-accent' : 'text-gray-400'
-                      }`}>
+                      <div className="flex items-center gap-1 text-hero-accent font-bold">
                         <Star className="w-4 h-4" />
                         {reward.costGold || 0} Gold
                       </div>
                       
-                      {!isUnlocked ? (
-                        <span className="text-gray-400 text-sm font-medium flex items-center gap-1">
-                          <Lock className="w-4 h-4" />
-                          Nível {requiredLevel}
-                        </span>
-                      ) : (progress.availableGold || 0) >= (reward.costGold || 0) ? (
+                      {(progress.availableGold || 0) >= (reward.costGold || 0) ? (
                         <span className="text-green-300 text-sm font-medium">
                           ✓ Disponível
                         </span>
@@ -307,19 +224,12 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                       onClick={() => handleRedeem(reward)}
                       disabled={!canRedeemReward}
                       className={`w-full py-3 rounded-xl font-bold transition-all duration-200 ${
-                        !isUnlocked
-                          ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
-                        : canRedeemReward
+                        canRedeemReward
                           ? 'bg-hero-accent text-hero-primary hover:bg-yellow-300 shadow-lg'
                           : 'bg-gray-500 text-gray-300 cursor-not-allowed'
                       }`}
                     >
-                      {!isUnlocked ? (
-                        <>
-                          <Lock className="w-4 h-4 inline mr-2" />
-                          Nível {requiredLevel} Necessário
-                        </>
-                      ) : redemption?.status === 'pending' ? (
+                      {redemption?.status === 'pending' ? (
                         <>
                           <Clock className="w-4 h-4 inline mr-2" />
                           Aguardando Aprovação
@@ -347,34 +257,12 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
           ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🎁</div>
-              {selectedFilter === 'locked' ? (
-                <>
-                  <p className="text-white/80 text-lg">
-                    Nenhuma recompensa bloqueada nesta categoria
-                  </p>
-                  <p className="text-hero-accent text-sm mt-2">
-                    Você já desbloqueou todas! 🎉
-                  </p>
-                </>
-              ) : selectedFilter === 'available' ? (
-                <>
-                  <p className="text-white/80 text-lg">
-                    Nenhuma recompensa disponível nesta categoria
-                  </p>
-                  <p className="text-hero-accent text-sm mt-2">
-                    Complete mais missões para ganhar Gold!
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-white/80 text-lg">
-                    Nenhuma recompensa nesta categoria
-                  </p>
-                  <p className="text-hero-accent text-sm mt-2">
-                    Peça para o papai adicionar algumas recompensas!
-                  </p>
-                </>
-              )}
+              <p className="text-white/80 text-lg">
+                Nenhuma recompensa disponível nesta categoria
+              </p>
+              <p className="text-hero-accent text-sm mt-2">
+                Complete mais missões para desbloquear recompensas!
+              </p>
             </div>
           )}
         </div>
