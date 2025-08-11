@@ -234,7 +234,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
               <input
                 type="number"
                 min="5"
-                max="1000"
+                max="10000"
                 step="5"
                 value={formData.goldCost}
                 onChange={(e) => handleInputChange('goldCost', parseInt(e.target.value) || 5)}
@@ -245,7 +245,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
               {errors.goldCost && (
                 <p className="mt-1 text-sm text-red-600">{errors.goldCost}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">Entre 5 e 1000 Gold</p>
+              <p className="mt-1 text-xs text-gray-500">Entre 5 e 10000 Gold</p>
             </div>
 
             {/* Required Level */}
