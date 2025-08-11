@@ -70,8 +70,8 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
       newErrors.description = 'Descrição deve ter no máximo 200 caracteres';
     }
 
-    if (formData.goldCost && (formData.goldCost < 5 || formData.goldCost > 1000)) {
-      newErrors.goldCost = 'Gold deve estar entre 5 e 1000';
+    if (formData.goldCost && (formData.goldCost < 5 || formData.goldCost > 10000)) {
+      newErrors.goldCost = 'Gold deve estar entre 5 e 10.000';
     }
 
     if (formData.requiredLevel < 1 || formData.requiredLevel > 100) {
@@ -234,7 +234,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
               <input
                 type="number"
                 min="5"
-                max="10000"
+                max="1000"
                 step="5"
                 value={formData.goldCost}
                 onChange={(e) => handleInputChange('goldCost', parseInt(e.target.value) || 5)}
@@ -245,7 +245,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
               {errors.goldCost && (
                 <p className="mt-1 text-sm text-red-600">{errors.goldCost}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">Entre 5 e 10.000 Gold</p>
+              <p className="mt-1 text-xs text-gray-500">Entre 5 e 1000 Gold</p>
             </div>
 
             {/* Required Level */}

@@ -257,7 +257,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     title: 'Viagem dos sonhos',
     description: 'Uma viagem incrível para onde você quiser',
     category: 'activity',
-    costGold: 2000,
+    costGold: 8000,
     emoji: '🏖️',
     requiredLevel: 91,
     levelRange: 'Flash Master'
@@ -266,7 +266,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     title: 'Festa de aniversário épica',
     description: 'Uma festa de aniversário inesquecível',
     category: 'activity',
-    costGold: 1800,
+    costGold: 6000,
     emoji: '🎉',
     requiredLevel: 95,
     levelRange: 'Flash Master'
@@ -275,7 +275,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     title: 'Presente especial dos sonhos',
     description: 'O presente que você sempre quis',
     category: 'custom',
-    costGold: 2500,
+    costGold: 10000,
     emoji: '🎁',
     requiredLevel: 100,
     levelRange: 'Flash Master'
