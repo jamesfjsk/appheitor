@@ -22,6 +22,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, User } from '../types';
+import { getLevelFromXP } from '../utils/levelSystem';
 
 // Utility function for server timestamp
 export const nowTs = () => serverTimestamp();
@@ -526,7 +527,7 @@ export class FirestoreService {
       const newTotalXP = (currentProgress.totalXP || 0) + xpReward;
       const newAvailableGold = (currentProgress.availableGold || 0) + goldReward;
       const newTotalGoldEarned = (currentProgress.totalGoldEarned || 0) + goldReward;
-      const newLevel = Math.floor(newTotalXP / 100) + 1;
+      const newLevel = getLevelFromXP(newTotalXP);
       const newTasksCompleted = (currentProgress.totalTasksCompleted || 0) + 1;
 
       // Create completion record

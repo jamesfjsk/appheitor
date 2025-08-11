@@ -4,6 +4,7 @@ import { Settings, RotateCcw, Plus, Minus, AlertTriangle, Zap, Coins, Save } fro
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
+import { calculateLevelSystem, getXPMilestones } from '../../utils/levelSystem';
 import toast from 'react-hot-toast';
 
 const AdminControls: React.FC = () => {
@@ -13,6 +14,10 @@ const AdminControls: React.FC = () => {
   const [xpInput, setXpInput] = useState('');
   const [goldInput, setGoldInput] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showXPMilestones, setShowXPMilestones] = useState(false);
+  
+  const levelSystem = calculateLevelSystem(progress.totalXP || 0);
+  const xpMilestones = getXPMilestones();
 
   const handleAdjustXP = (amount: number) => {
     playClick();
@@ -93,7 +98,7 @@ const AdminControls: React.FC = () => {
           <div 
             className="text-2xl font-bold text-blue-600"
           >
-            {progress.totalXP || 0}
+            {levelSystem.currentXP}
           </div>
           <div className="text-sm text-gray-600">XP Total</div>
         </div>
@@ -115,12 +120,78 @@ const AdminControls: React.FC = () => {
         </div>
         <div className="text-center">
           <div 
-            className="text-2xl font-bold text-purple-600"
+            className="text-2xl font-bold text-purple-600 flex items-center justify-center gap-1"
           >
-            {progress.level}
+            <span className="text-lg">{levelSystem.levelTitle.includes('Master') ? '👑' : levelSystem.levelTitle.includes('Disciplinado') ? '🏆' : levelSystem.levelTitle.includes('Responsável') ? '🥇' : levelSystem.levelTitle.includes('Júnior') ? '🥈' : levelSystem.levelTitle.includes('Aprendiz') ? '🥉' : '⭐'}</span>
+            <span>{levelSystem.currentLevel}</span>
           </div>
-          <div className="text-sm text-gray-600">Nível</div>
+          <div className="text-sm text-gray-600">{levelSystem.levelTitle}</div>
         </div>
+      </div>
+      
+      {/* Informações do Sistema de Níveis */}
+      <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h4 className="font-semibold text-purple-900 mb-1">📊 Sistema de Níveis Avançado</h4>
+            <p className="text-sm text-purple-700">
+              {!levelSystem.isMaxLevel 
+                ? `Faltam ${levelSystem.xpNeededForNext} XP para ${levelSystem.nextLevelTitle}`
+                : 'Nível máximo alcançado! 🎉'
+              }
+            </p>
+          </div>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowXPMilestones(!showXPMilestones)}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors text-sm"
+          >
+            {showXPMilestones ? 'Ocultar' : 'Ver'} Marcos XP
+          </motion.button>
+        </div>
+        
+        {/* Barra de progresso detalhada */}
+        {!levelSystem.isMaxLevel && (
+          <div className="mb-3">
+            <div className="flex justify-between text-xs text-purple-700 mb-1">
+              <span>Nível {levelSystem.currentLevel}</span>
+              <span>{Math.round(levelSystem.progressPercentage)}%</span>
+              <span>Nível {levelSystem.currentLevel + 1}</span>
+            </div>
+            <div className="w-full bg-purple-200 rounded-full h-2">
+              <div 
+                className="bg-purple-600 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${levelSystem.progressPercentage}%` }}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* XP Milestones */}
+        {showXPMilestones && (
+          <div className="mt-4 max-h-48 overflow-y-auto">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+              {xpMilestones.slice(0, 20).map((milestone) => (
+                <div 
+                  key={milestone.level}
+                  className={`p-2 rounded border ${
+                    milestone.level === levelSystem.currentLevel
+                      ? 'bg-purple-100 border-purple-300 font-bold'
+                      : milestone.level < levelSystem.currentLevel
+                      ? 'bg-green-50 border-green-200 text-green-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-600'
+                  }`}
+                >
+                  <div className="font-medium">Nível {milestone.level}</div>
+                  <div>{milestone.xp} XP</div>
+                  <div className="text-xs opacity-75">{milestone.title}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -378,11 +449,12 @@ const AdminControls: React.FC = () => {
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <h5 className="text-sm font-medium text-blue-900 mb-2">💡 Sistema XP vs Gold:</h5>
         <ul className="text-xs text-blue-700 space-y-1">
-          <li>• <strong>XP (Experiência):</strong> Valor fixo de 10 XP por tarefa completada</li>
+          <li>• <strong>XP (Experiência):</strong> Valor configurável por tarefa (determina nível)</li>
           <li>• <strong>Gold (Moedas):</strong> Valor configurável pelo pai em cada tarefa</li>
-          <li>• <strong>Nível:</strong> Baseado no XP total (100 XP = 1 nível)</li>
+          <li>• <strong>Nível:</strong> Sistema progressivo de 1-100 (Nível 1: 0-100 XP, Nível 2: 100-250 XP, etc.)</li>
           <li>• <strong>Recompensas:</strong> Custam Gold, não XP</li>
           <li>• <strong>Reset:</strong> Limpa tudo para começar do zero</li>
+          <li>• <strong>Títulos:</strong> Flash Iniciante → Aprendiz → Júnior → Responsável → Disciplinado → Master</li>
         </ul>
       </div>
     </motion.div>

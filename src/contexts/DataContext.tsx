@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { useAuth } from './AuthContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay } from '../types';
 import { FirestoreService } from '../services/firestoreService';
+import { checkLevelUp } from '../utils/levelSystem';
 import toast from 'react-hot-toast';
 
 interface DataContextType {
@@ -442,13 +443,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     try {
       await FirestoreService.ensureUserProgress(childUid);
       
+      const previousXP = progress.totalXP || 0;
       const newTotalXP = Math.max(0, (progress.totalXP || 0) + amount);
-      const newLevel = Math.floor(newTotalXP / 100) + 1;
+      
+      // Check for level up using new system
+      const levelUpCheck = checkLevelUp(previousXP, newTotalXP);
       
       await FirestoreService.updateUserProgress(childUid, {
         totalXP: newTotalXP,
-        level: newLevel
+        level: levelUpCheck.newLevel
       });
+      
+      if (levelUpCheck.leveledUp) {
+        toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
+          duration: 5000
+        });
+      }
       
       toast.success(`${amount > 0 ? '+' : ''}${amount} XP aplicado!`);
     } catch (error: any) {

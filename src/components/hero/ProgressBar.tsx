@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserProgress } from '../../types';
+import { UserProgress, LevelSystem } from '../../types';
 import { CloudLightning as Lightning } from 'lucide-react';
+import { calculateLevelSystem, checkLevelUp, getNextMilestone, getLevelColor, getLevelIcon } from '../../utils/levelSystem';
 
 interface ProgressBarProps {
   progress: UserProgress;
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
-  const totalXP = progress.totalXP || 0;
-  const currentLevelPoints = totalXP % 100;
-  const progressPercentage = (currentLevelPoints / 100) * 100;
-  const nextLevel = progress.level + 1;
+  const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [previousXP, setPreviousXP] = useState(progress.totalXP || 0);
   const [dailyXP, setDailyXP] = useState(0);
   
   // Simulate daily XP counter
@@ -32,12 +31,17 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
   
   // Check for level up
   useEffect(() => {
-    const previousLevel = Math.floor((totalXP - 10) / 100) + 1;
-    if (progress.level > previousLevel && totalXP > 0) {
+    const levelUpCheck = checkLevelUp(previousXP, progress.totalXP || 0);
+    
+    if (levelUpCheck.leveledUp && progress.totalXP > 0) {
       setShowLevelUp(true);
-      setTimeout(() => setShowLevelUp(false), 3000);
+      setTimeout(() => setShowLevelUp(false), 4000);
     }
-  }, [progress.level, totalXP]);
+    
+    setPreviousXP(progress.totalXP || 0);
+  }, [progress.totalXP]);
+
+  const nextMilestone = getNextMilestone(levelSystem.currentLevel);
 
   return (
     <>
@@ -69,7 +73,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             </h3>
             <div className="flex items-center gap-3">
               <div className="text-yellow-400 font-bold">
-                {currentLevelPoints}/100 XP
+                {Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel)}/{Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel)} XP
               </div>
               {dailyXP > 0 && (
                 <motion.div
@@ -88,9 +92,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             <div className="w-full bg-white/20 rounded-full h-4 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${progressPercentage}%` }}
+                animate={{ width: `${levelSystem.progressPercentage}%` }}
                 transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-                className="h-full bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full relative overflow-hidden"
+                className={`h-full bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} rounded-full relative overflow-hidden`}
               >
                 {/* Efeito de brilho */}
                 <motion.div
@@ -100,13 +104,13 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
                   transition={{
                     duration: 2,
                     repeat: Infinity,
-                    key: `total-xp-${totalXP}`,
+                    key: `total-xp-${levelSystem.currentXP}`,
                   }}
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                 />
                 
                 {/* Lightning effect when close to level up */}
-                {progressPercentage > 80 && (
+                {levelSystem.progressPercentage > 80 && !levelSystem.isMaxLevel && (
                   <motion.div
                     animate={{
                       opacity: [0.5, 1, 0.5],
@@ -117,7 +121,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-200"
+                    className={`absolute inset-0 bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)}`}
                   />
                 )}
               </motion.div>
@@ -125,8 +129,16 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             
             {/* Indicador de Nível */}
             <div className="flex justify-between mt-2 text-sm">
-              <span className="text-white/80">Nível {progress.level}</span>
-              <span className="text-white/80">Nível {nextLevel}</span>
+              <div className="text-white/80">
+                <span className="font-bold">{getLevelIcon(levelSystem.currentLevel)} Nível {levelSystem.currentLevel}</span>
+                <div className="text-xs text-yellow-200">{levelSystem.levelTitle}</div>
+              </div>
+              {!levelSystem.isMaxLevel && (
+                <div className="text-white/80 text-right">
+                  <span className="font-bold">{getLevelIcon(levelSystem.currentLevel + 1)} Nível {levelSystem.currentLevel + 1}</span>
+                  <div className="text-xs text-yellow-200">{levelSystem.nextLevelTitle}</div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -144,7 +156,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
                 }}
                 className="text-2xl font-bold text-yellow-400"
               >
-                {totalXP}
+                {levelSystem.currentXP}
               </motion.div>
               <div className="text-white/80 text-sm">Total de XP</div>
             </div>
@@ -176,13 +188,24 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             className="mt-4 p-3 bg-yellow-400/20 rounded-lg text-center"
           >
             <p className="text-yellow-100 text-sm font-medium">
-              {progress.level < 5 
-                ? `⚡ Mais ${100 - currentLevelPoints} XP para o nível ${nextLevel}!`
+              {!levelSystem.isMaxLevel
+                ? `⚡ Mais ${levelSystem.xpNeededForNext} XP para ${levelSystem.nextLevelTitle}!`
                 : progress.streak > 0
                 ? `🔥 Sequência incrível de ${progress.streak} dias!`
-                : '🔥 Você é um verdadeiro velocista!'
+                : '👑 Você alcançou o nível máximo! Parabéns, Flash Master!'
               }
             </p>
+            
+            {/* Próximo Marco */}
+            {!levelSystem.isMaxLevel && levelSystem.currentLevel < nextMilestone.level && (
+              <motion.div
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="mt-2 text-xs text-yellow-200"
+              >
+                🎯 Próximo marco: {nextMilestone.title} (Nível {nextMilestone.level})
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </motion.div>
@@ -197,7 +220,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
           >
-            <div className="bg-gradient-to-r from-yellow-400 to-yellow-300 text-red-600 text-4xl md:text-6xl font-bold px-8 py-4 rounded-3xl shadow-2xl border-4 border-white relative overflow-hidden">
+            <div className={`bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} text-white text-4xl md:text-6xl font-bold px-8 py-4 rounded-3xl shadow-2xl border-4 border-white relative overflow-hidden`}>
               {/* Lightning background */}
               <motion.div
                 animate={{
@@ -212,7 +235,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12"
               />
               <div className="relative z-10">
-                NÍVEL {progress.level}!
+                <div className="text-2xl md:text-3xl mb-2">{getLevelIcon(levelSystem.currentLevel)}</div>
+                <div>NÍVEL {levelSystem.currentLevel}!</div>
+                <div className="text-lg md:text-xl mt-2">{levelSystem.levelTitle}</div>
               </div>
             </div>
           </motion.div>

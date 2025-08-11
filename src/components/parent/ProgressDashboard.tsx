@@ -5,6 +5,7 @@ import { Task, UserProgress } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { calculateLevelSystem, getLevelTitle, getLevelIcon } from '../../utils/levelSystem';
 
 interface ProgressDashboardProps {
   tasks: Task[];
@@ -16,6 +17,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
   const today = new Date();
   const weekStart = startOfWeek(today, { locale: ptBR });
   const weekEnd = endOfWeek(today, { locale: ptBR });
+  const levelSystem = calculateLevelSystem(progress.totalXP || 0);
 
   const todayTasks = tasks.filter(task => task.active === true);
   const completedToday = todayTasks.filter(task => task.completed).length;
@@ -33,17 +35,17 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
   const stats = [
     {
       title: 'Pontos Totais',
-      value: progress.totalXP || progress.totalPoints || 0,
+      value: levelSystem.currentXP,
       icon: Award,
       color: 'bg-yellow-500',
-      change: '+12%'
+      change: `${levelSystem.levelTitle}`
     },
     {
       title: 'Nível Atual',
-      value: progress.level,
+      value: `${getLevelIcon(levelSystem.currentLevel)} ${levelSystem.currentLevel}`,
       icon: TrendingUp,
       color: 'bg-blue-500',
-      change: 'Nível ' + progress.level
+      change: levelSystem.levelTitle
     },
     {
       title: 'Taxa de Conclusão',
@@ -224,7 +226,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
             <div 
               className="text-2xl font-bold text-green-600"
             >
-              {progress.totalXP || 0}
+              {levelSystem.currentXP}
             </div>
             <div className="text-sm text-green-600">XP Total</div>
           </div>
@@ -245,6 +247,16 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
               {progress.streak}
             </div>
             <div className="text-sm text-orange-600">Dias Consecutivos</div>
+          </div>
+          
+          <div className="text-center p-4 bg-purple-50 rounded-lg">
+            <div 
+              className="text-2xl font-bold text-purple-600 flex items-center justify-center gap-2"
+            >
+              <span>{getLevelIcon(levelSystem.currentLevel)}</span>
+              <span>{levelSystem.currentLevel}</span>
+            </div>
+            <div className="text-sm text-purple-600">{levelSystem.levelTitle}</div>
           </div>
         </div>
       </motion.div>

@@ -4,6 +4,7 @@ import { CloudLightning as Lightning, LogOut, Gift, Calendar } from 'lucide-reac
 import { useAuth } from '../../contexts/AuthContext';
 import { UserProgress } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
+import { calculateLevelSystem, getLevelIcon } from '../../utils/levelSystem';
 
 interface HeroHeaderProps {
   progress: UserProgress;
@@ -15,6 +16,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
   const { logout } = useAuth();
   const { user: currentUser } = useAuth();
   const { playClick } = useSound();
+  const levelSystem = calculateLevelSystem(progress.totalXP || 0);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -107,10 +109,11 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
         {/* Nível */}
         <motion.div
           whileHover={{ scale: 1.05 }}
-          className="bg-yellow-400 text-red-600 px-3 py-2 rounded-full font-bold shadow-lg text-sm"
+          className="bg-yellow-400 text-red-600 px-3 py-2 rounded-full font-bold shadow-lg text-sm flex items-center gap-1"
         >
-          <Lightning className="w-4 h-4 inline mr-1" fill="currentColor" />
-          Nível {progress.level}
+          <span className="text-base">{getLevelIcon(levelSystem.currentLevel)}</span>
+          <Lightning className="w-4 h-4" fill="currentColor" />
+          Nível {levelSystem.currentLevel}
         </motion.div>
 
         {/* Botão Recompensas */}

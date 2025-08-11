@@ -108,3 +108,15 @@ export interface Achievement {
   isUnlocked: boolean;
   unlockedAt?: Date;
 }
+
+export interface LevelSystem {
+  currentLevel: number;
+  currentXP: number;
+  xpForCurrentLevel: number;
+  xpForNextLevel: number;
+  xpNeededForNext: number;
+  progressPercentage: number;
+  levelTitle: string;
+  nextLevelTitle: string;
+  isMaxLevel: boolean;
+}
