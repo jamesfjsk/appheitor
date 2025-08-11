@@ -155,7 +155,8 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Categories */}
-        <div className="p-6 border-b border-white/20">
+        <div className="p-6 border-b border-white/20 space-y-4">
+          {/* Category Filters */}
           <div className="flex gap-2 overflow-x-auto">
             {categories.map((category) => (
               <motion.button
@@ -171,6 +172,26 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
               >
                 <span>{category.icon}</span>
                 {category.label}
+              </motion.button>
+            ))}
+          </div>
+          
+          {/* Availability Filters */}
+          <div className="flex gap-2 overflow-x-auto">
+            {filters.map((filter) => (
+              <motion.button
+                key={filter.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedFilter(filter.id)}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 whitespace-nowrap text-sm ${
+                  selectedFilter === filter.id
+                    ? 'bg-white text-hero-primary shadow-lg'
+                    : 'bg-white/10 text-white/80 hover:bg-white/20'
+                }`}
+              >
+                <span className="text-xs">{filter.icon}</span>
+                {filter.label}
               </motion.button>
             ))}
           </div>
