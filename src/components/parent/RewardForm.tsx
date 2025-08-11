@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { X, Save, Gift, Star, Type, FileText } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { Reward } from '../../types';
+import { LEVEL_REWARD_TEMPLATES } from '../../utils/rewardLevels';
 import toast from 'react-hot-toast';
 
 interface RewardFormProps {
@@ -19,6 +20,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
     goldCost: 50,
     icon: '🎁',
     category: 'custom' as Reward['category'],
+    requiredLevel: 1,
     isActive: true,
   });
 
@@ -32,6 +34,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
         goldCost: reward.goldCost || 50,
         icon: reward.icon,
         category: reward.category,
+        requiredLevel: reward.requiredLevel || 1,
         isActive: reward.isActive,
       });
     } else {
@@ -41,6 +44,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
         goldCost: 50,
         icon: '🎁',
         category: 'custom',
+        requiredLevel: 1,
         isActive: true,
       });
     }
@@ -69,6 +73,11 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
     if (formData.goldCost && (formData.goldCost < 5 || formData.goldCost > 1000)) {
       newErrors.goldCost = 'Gold deve estar entre 5 e 1000';
     }
+
+    if (formData.requiredLevel < 1 || formData.requiredLevel > 100) {
+      newErrors.requiredLevel = 'Nível deve estar entre 1 e 100';
+    }
+
     if (!formData.icon.trim()) {
       newErrors.icon = 'Ícone é obrigatório';
     }
@@ -91,6 +100,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
       category: formData.category,
       costGold: formData.goldCost,
       emoji: formData.icon,
+      requiredLevel: formData.requiredLevel,
       active: formData.isActive === true
     };
 
@@ -214,7 +224,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
           </div>
 
           {/* Grid de configurações */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Gold Cost */}
             <div>
               <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
@@ -238,6 +248,27 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
               <p className="mt-1 text-xs text-gray-500">Entre 5 e 1000 Gold</p>
             </div>
 
+            {/* Required Level */}
+            <div>
+              <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
+                <span className="w-4 h-4 text-purple-500">🏆</span>
+                <span>Nível Necessário *</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={formData.requiredLevel}
+                onChange={(e) => handleInputChange('requiredLevel', parseInt(e.target.value) || 1)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors ${
+                  errors.requiredLevel ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              {errors.requiredLevel && (
+                <p className="mt-1 text-sm text-red-600">{errors.requiredLevel}</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">Nível 1-100 para desbloquear</p>
+            </div>
             {/* Categoria */}
             <div>
               <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
@@ -304,6 +335,28 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
           </div>
 
           {/* Status ativo */}
+          <div className="bg-blue-50 rounded-lg p-4">
+            <h4 className="font-semibold text-blue-900 mb-3">💡 Sugestões por Nível:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+              <div className="space-y-1">
+                <div className="font-medium text-blue-800">Níveis 1-10: Flash Iniciante</div>
+                <div className="text-blue-700">Guloseimas básicas (15-30 Gold)</div>
+                <div className="font-medium text-blue-800">Níveis 11-25: Flash Aprendiz</div>
+                <div className="text-blue-700">Tempo de tela, escolhas (40-75 Gold)</div>
+                <div className="font-medium text-blue-800">Níveis 26-50: Flash Júnior</div>
+                <div className="text-blue-700">Atividades, brinquedos pequenos (100-250 Gold)</div>
+              </div>
+              <div className="space-y-1">
+                <div className="font-medium text-blue-800">Níveis 51-75: Flash Responsável</div>
+                <div className="text-blue-700">Brinquedos médios, roupas (300-800 Gold)</div>
+                <div className="font-medium text-blue-800">Níveis 76-90: Flash Disciplinado</div>
+                <div className="text-blue-700">Eletrônicos, passeios (600-1500 Gold)</div>
+                <div className="font-medium text-blue-800">Níveis 91-100: Flash Master</div>
+                <div className="text-blue-700">Recompensas épicas (1800-2500 Gold)</div>
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center space-x-3">
             <input
               type="checkbox"

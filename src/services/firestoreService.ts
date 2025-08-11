@@ -275,6 +275,7 @@ export class FirestoreService {
       category: rewardData.category || 'custom',
       costGold: rewardData.costGold || 50,
       emoji: rewardData.emoji || '🎁',
+      requiredLevel: rewardData.requiredLevel || 1,
       active: rewardData.active !== false, // Default to true unless explicitly false
       createdAt: nowTs(),
       updatedAt: nowTs()
@@ -888,6 +889,7 @@ export class FirestoreService {
         category: reward.category,
         costGold: reward.costGold,
         emoji: reward.emoji,
+        requiredLevel: reward.requiredLevel || 1,
         active: reward.active,
         createdAt: nowTs(),
         updatedAt: nowTs()

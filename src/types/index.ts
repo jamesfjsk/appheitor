@@ -54,6 +54,7 @@ export interface Reward {
   costGold: number;
   emoji: string;
   active: boolean;
+  requiredLevel: number;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Gift, Star, Check, X, Clock } from 'lucide-react';
+import { Plus, Edit2, Trash2, Gift, Star, Check, X, Clock, Lock, Crown } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { Reward, RewardRedemption } from '../../types';
 import { RewardForm } from './RewardForm';
+import { LEVEL_REWARD_TEMPLATES } from '../../utils/rewardLevels';
 import toast from 'react-hot-toast';
 
 const RewardManager: React.FC = () => {
@@ -11,6 +12,7 @@ const RewardManager: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
   const [activeTab, setActiveTab] = useState<'rewards' | 'redemptions'>('rewards');
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const handleEdit = (reward: Reward) => {
     setEditingReward(reward);
@@ -82,6 +84,16 @@ const RewardManager: React.FC = () => {
         </div>
         
         <div className="flex gap-2">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowTemplates(!showTemplates)}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
+          >
+            <Crown className="w-4 h-4" />
+            {showTemplates ? 'Ocultar' : 'Ver'} Templates
+          </motion.button>
+          
           <button
             onClick={() => setActiveTab('rewards')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
@@ -112,6 +124,86 @@ const RewardManager: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Templates de Recompensas */}
+      <AnimatePresence>
+        {showTemplates && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-purple-50 border border-purple-200 rounded-2xl p-6 mb-6"
+          >
+            <h3 className="text-lg font-bold text-purple-900 mb-4 flex items-center gap-2">
+              <Crown className="w-5 h-5" />
+              Templates de Recompensas por Nível
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+              {LEVEL_REWARD_TEMPLATES.map((template, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white rounded-lg p-4 border border-purple-200 hover:border-purple-300 transition-colors"
+                >
+                          {reward.requiredLevel && reward.requiredLevel > 1 && (
+                            <div className="flex items-center gap-1 text-xs text-purple-600 mt-1">
+                              <Crown className="w-3 h-3" />
+                              Nível {reward.requiredLevel}+
+                            </div>
+                          )}
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{template.emoji}</span>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 text-sm">{template.title}</h4>
+                        <p className="text-xs text-gray-600">{template.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1 text-yellow-600">
+                      <Star className="w-3 h-3" />
+                      {template.costGold} Gold
+                    </div>
+                    <div className="flex items-center gap-1 text-purple-600">
+                      <Crown className="w-3 h-3" />
+                      Nível {template.requiredLevel}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-2 text-xs text-gray-500 text-center">
+                    {template.levelRange}
+                  </div>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setFormData({
+                        title: template.title,
+                        description: template.description,
+                        goldCost: template.costGold,
+                        icon: template.emoji,
+                        category: template.category,
+                        requiredLevel: template.requiredLevel,
+                        isActive: true,
+                      });
+                      setShowForm(true);
+                    }}
+                    className="w-full mt-3 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-medium transition-colors"
+                  >
+                    Usar Template
+                  </motion.button>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Tab Content */}
       <AnimatePresence mode="wait">
