@@ -458,6 +458,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
           duration: 5000
         });
+      
+      // Check for newly unlocked rewards
+      if (levelUpCheck.leveledUp) {
+        const newlyUnlockedRewards = getRewardsUnlockedAtLevel(levelUpCheck.newLevel);
+        if (newlyUnlockedRewards.length > 0) {
+          setTimeout(() => {
+            newlyUnlockedRewards.forEach(reward => {
+              showRewardAvailable(`🎁 Nova recompensa desbloqueada: ${reward.title}!`);
+            });
+          }, 2000); // Show after level up animation
+        }
+      }
       }
       
       toast.success(`${amount > 0 ? '+' : ''}${amount} XP aplicado!`);

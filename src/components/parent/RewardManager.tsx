@@ -255,6 +255,12 @@ const RewardManager: React.FC = () => {
                           <div>
                             <h4 className="font-semibold text-gray-900">{reward.title}</h4>
                             <p className="text-sm text-gray-600">{categoryLabels[reward.category]}</p>
+                            {reward.requiredLevel && reward.requiredLevel > 1 && (
+                              <div className="flex items-center gap-1 text-xs text-purple-600 mt-1">
+                                <Crown className="w-3 h-3" />
+                                Nível {reward.requiredLevel}+
+                              </div>
+                            )}
                           </div>
                         </div>
                         
