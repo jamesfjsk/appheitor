@@ -57,6 +57,23 @@ const RewardManager: React.FC = () => {
     setEditingReward(null);
   };
 
+  const handleUseTemplate = (template: any) => {
+    const templateReward: Reward = {
+      id: '', // Will be generated when saved
+      title: template.title,
+      description: template.description,
+      goldCost: template.costGold,
+      icon: template.emoji,
+      category: template.category,
+      requiredLevel: template.requiredLevel,
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    setEditingReward(templateReward);
+    setShowForm(true);
+  };
+
   const activeRewards = rewards.filter(reward => reward.active !== false);
   const inactiveRewards = rewards.filter(reward => reward.active === false);
   const pendingRedemptions = redemptions.filter(r => r.status === 'pending');
@@ -182,18 +199,7 @@ const RewardManager: React.FC = () => {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setFormData({
-                        title: template.title,
-                        description: template.description,
-                        goldCost: template.costGold,
-                        icon: template.emoji,
-                        category: template.category,
-                        requiredLevel: template.requiredLevel,
-                        isActive: true,
-                      });
-                      setShowForm(true);
-                    }}
+                    onClick={() => handleUseTemplate(template)}
                     className="w-full mt-3 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-medium transition-colors"
                   >
                     Usar Template
