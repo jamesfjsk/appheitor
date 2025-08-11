@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ---------- USERS ----------
+    match /users/{uid} {
+      // Admin pode ler todo mundo; usuário lê o próprio doc
+      allow read: if signedIn() && (isAdmin() || uid == request.auth.uid);
+
+      // Admin pode criar/atualizar qq usuário;
+      // usuário pode atualizar o próprio perfil básico
+      allow write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
+    // ---------- PROGRESS ----------
+    match /progress/{uid} {
+      // Admin e o próprio usuário leem
+      allow read: if signedIn() && (isAdmin() || uid == request.auth.uid);
+
+      // Admin pode atualizar o progresso de qq filho;
+      // o próprio usuário pode atualizar o seu (marcar tarefas como feitas, etc)
+      allow write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
+    // ---------- TASKS ----------
+    match /tasks/{taskId} {
+      // Admin lê tudo; filho só lê as suas
+      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+
+      // Só admin cria/edita/exclui tarefas (evita bagunça)
+      allow create, update, delete: if isAdmin();
+
+      // ---------- TASK COMPLETIONS (subcoleção) ----------
+      match /completions/{dateId} {
+        // Admin lê tudo; filho lê só as suas completions
+        allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+
+        // Filho pode criar completion em seu próprio nome; admin também pode
+        allow create: if signedIn() && (
+          isAdmin() || request.resource.data.userId == request.auth.uid
+        ) && request.resource.data.userId is string
+          && request.resource.data.userId.size() > 0
+          && request.resource.data.createdAt is timestamp;
+
+        // Update/delete só admin
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // ---------- REWARDS ----------
+    match /rewards/{rewardId} {
+      // Admin lê tudo; filho lê só as suas
+      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+
+      // Admin cria/edita/exclui recompensas (para um ownerId=uid do filho)
+      // Regras mínimas de integridade: ownerId (string), createdAt (timestamp)
+      allow create, update, delete: if isAdmin()
+        && request.resource.data.ownerId is string
+        && request.resource.data.ownerId.size() > 0
+        && request.resource.data.createdAt is timestamp;
+    }
+
+    // ---------- REDEMPTIONS (resgates) ----------
+    match /redemptions/{docId} {
+      // Admin lê tudo; filho lê só os seus resgates
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Filho pode criar resgate em seu próprio nome; admin também pode
+      allow create: if signedIn() && (
+        isAdmin() || request.resource.data.userId == request.auth.uid
+      );
+
+      // Update/delete só admin
+      allow update, delete: if isAdmin();
+    }
+
+    // ---------- NOTIFICATIONS (opcional) ----------
+    match /notifications/{id} {
+      // Admin lê tudo; filho lê o que é endereçado a ele
+      allow read: if signedIn() && (isAdmin() || resource.data.toUserId == request.auth.uid);
+
+      // Somente admin cria/edita/exclui notificações
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
