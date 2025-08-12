@@ -428,7 +428,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                       <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                       <p className="font-bold text-blue-900">Em Progresso</p>
                       <p className="text-sm text-blue-700 mt-1">
-                        Faltam {selectedAchievement.target - selectedAchievement.currentProgress} para completar
+                        Faltam {Math.max(0, selectedAchievement.target - selectedAchievement.currentProgress)} para completar
                       </p>
                     </div>
                   ) : (
