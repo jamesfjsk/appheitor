@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Lock, Star, Target, Zap, X, CheckCircle } from 'lucide-react';
 import { Achievement, UserAchievement } from '../../types';
 import { useData } from '../../contexts/DataContext';
+import { FirestoreService } from '../../services/firestoreService';
 
 interface AchievementsBadgesProps {}
 
