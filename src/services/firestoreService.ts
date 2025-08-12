@@ -193,30 +193,27 @@ export class FirestoreService {
       where('ownerId', '==', childUid)
     );
 
-    // Also subscribe to task completions to determine status
-    const completionsMap = new Map<string, boolean>();
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
     return onSnapshot(
       q,
       (snapshot: QuerySnapshot) => {
-        // First, get all tasks
         const tasksPromises = snapshot.docs
           .map(taskDoc => {
             const data = taskDoc.data();
             const task = {
               id: taskDoc.id,
-             ownerId: data.ownerId,
-             title: data.title,
-             description: data.description,
-             xp: data.xp,
-             gold: data.gold,
-             period: data.period,
-             time: data.time,
-             frequency: data.frequency,
-             active: data.active,
+              ownerId: data.ownerId,
+              title: data.title,
+              description: data.description,
+              xp: data.xp,
+              gold: data.gold,
+              period: data.period,
+              time: data.time,
+              frequency: data.frequency,
+              active: data.active,
               status: 'pending', // Will be updated based on completion
-             createdBy: data.createdBy,
+              createdBy: data.createdBy,
               createdAt: data.createdAt?.toDate() || new Date(),
               updatedAt: data.updatedAt?.toDate() || new Date()
             };
@@ -229,7 +226,6 @@ export class FirestoreService {
             }));
           })
         
-        // Wait for all completion checks to complete
         Promise.all(tasksPromises).then(tasks => {
           const sortedTasks = tasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
           
@@ -840,7 +836,7 @@ export class FirestoreService {
         status: task.status,
         xp: task.xp,
         gold: task.gold,
-        frequency: task.frequency,
+        frequency: task.frequency || 'daily',
         active: task.active,
         createdBy: task.createdBy,
         createdAt: nowTs(),
@@ -1230,6 +1226,59 @@ export class FirestoreService {
   // ========================================
   // 🔥 ADMIN UTILITIES
   // ========================================
+
+  static async getTaskCompletionHistory(childUid: string, startDate?: Date, endDate?: Date): Promise<Array<{
+    taskId: string;
+    taskTitle: string;
+    date: string;
+    xpEarned: number;
+    goldEarned: number;
+    completedAt: Date;
+  }>> {
+    try {
+      const tasksSnapshot = await getDocs(query(
+        collection(db, 'tasks'),
+        where('ownerId', '==', childUid)
+      ));
+      
+      const completions: Array<{
+        taskId: string;
+        taskTitle: string;
+        date: string;
+        xpEarned: number;
+        goldEarned: number;
+        completedAt: Date;
+      }> = [];
+      
+      for (const taskDoc of tasksSnapshot.docs) {
+        const taskData = taskDoc.data();
+        const completionsSnapshot = await getDocs(collection(db, 'tasks', taskDoc.id, 'completions'));
+        
+        for (const completionDoc of completionsSnapshot.docs) {
+          const completionData = completionDoc.data();
+          const completionDate = new Date(completionDoc.id); // dateId is YYYY-MM-DD
+          
+          // Filter by date range if provided
+          if (startDate && completionDate < startDate) continue;
+          if (endDate && completionDate > endDate) continue;
+          
+          completions.push({
+            taskId: taskDoc.id,
+            taskTitle: taskData.title,
+            date: completionDoc.id,
+            xpEarned: completionData.xpEarned || 0,
+            goldEarned: completionData.goldEarned || 0,
+            completedAt: completionData.completedAt?.toDate() || completionDate
+          });
+        }
+      }
+      
+      return completions.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+    } catch (error) {
+      console.error('❌ Error getting task completion history:', error);
+      return [];
+    }
+  }
 
   static async getChildUsers(): Promise<User[]> {
     const q = query(

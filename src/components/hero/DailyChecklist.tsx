@@ -5,6 +5,23 @@ import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import TaskItem from './TaskItem';
 
+// Helper function to check if task should be shown today based on frequency
+const isTaskAvailableToday = (task: Task): boolean => {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  
+  switch (task.frequency) {
+    case 'daily':
+      return true; // Always available
+    case 'weekday':
+      return dayOfWeek >= 1 && dayOfWeek <= 5; // Monday to Friday
+    case 'weekend':
+      return dayOfWeek === 0 || dayOfWeek === 6; // Saturday and Sunday
+    default:
+      return true;
+  }
+};
+
 interface DailyChecklistProps {
   tasks: Task[];
   selectedPeriod: 'morning' | 'afternoon' | 'evening';
@@ -45,7 +62,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   ] as const;
 
   const filteredTasks = tasks.filter(task => 
-    task.period === selectedPeriod && task.active === true
+    task.period === selectedPeriod && 
+    task.active === true &&
+    isTaskAvailableToday(task)
   );
 
   const completedTasks = filteredTasks.filter(task => task.status === 'done').length;
