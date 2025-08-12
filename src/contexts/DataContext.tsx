@@ -276,6 +276,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const task = tasks.find(t => t.id === taskId);
       if (!task) throw new Error('Tarefa não encontrada');
       
+      // Optimistic UI update - immediately mark task as done
+      setTasks(prevTasks => 
+        prevTasks.map(t => 
+          t.id === taskId 
+            ? { ...t, status: 'done', updatedAt: new Date() }
+            : t
+        )
+      );
+      
       console.log('🔥 DataContext: Completing task with subcollection approach:', {
         taskId,
         childUid,
@@ -302,11 +311,28 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           errorMessage: error.message
         });
         toast.error('❌ Permissão negada ao completar tarefa. Verifique as regras do Firestore.');
+        // Revert optimistic update on permission error
+        setTasks(prevTasks => 
+          prevTasks.map(t => 
+            t.id === taskId 
+              ? { ...t, status: 'pending' }
+              : t
+          )
+        );
       } else if (error.message === 'Task already completed today') {
+        // Task is already completed in database, keep UI state as 'done'
         toast('⚠️ Tarefa já foi completada hoje!');
       } else {
         console.error('❌ Erro ao completar tarefa:', error);
         toast.error('Erro ao completar tarefa');
+        // Revert optimistic update on other errors
+        setTasks(prevTasks => 
+          prevTasks.map(t => 
+            t.id === taskId 
+              ? { ...t, status: 'pending' }
+              : t
+          )
+        );
       }
       throw error;
     }
