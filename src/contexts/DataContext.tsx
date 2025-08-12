@@ -638,6 +638,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
   const claimAchievementReward = async (userAchievementId: string) => {
     if (!childUid) throw new Error('Child UID não definido');
+    if (!userAchievementId) throw new Error('User Achievement ID não definido');
     
     try {
       await FirestoreService.claimAchievementReward(userAchievementId, childUid);
