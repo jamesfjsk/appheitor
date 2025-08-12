@@ -396,7 +396,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         whileTap={{ scale: 0.98 }}
                         onClick={async () => {
                           try {
-                            await claimAchievementReward(selectedAchievement.id);
+                            await claimAchievementReward(selectedAchievement.userAchievementId);
                             setSelectedAchievement(null);
                           } catch (error) {
                             // Error already handled in context
@@ -435,7 +435,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         whileTap={{ scale: 0.98 }}
                         onClick={async () => {
                           try {
-                            await claimAchievementReward(selectedAchievement.userAchievementId || selectedAchievement.id);
+                            await claimAchievementReward(selectedAchievement.userAchievementId);
                             setSelectedAchievement(null);
                           } catch (error) {
                             // Error already handled in context
