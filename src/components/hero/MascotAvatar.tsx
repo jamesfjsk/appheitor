@@ -52,6 +52,13 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
           transition={{ duration: 1, repeat: isAnimating ? Infinity : 0 }}
           className={`w-32 h-32 mx-auto rounded-full bg-gradient-to-br ${getLevelColor(level)} flex items-center justify-center relative overflow-hidden ${borderStyle.borderClass} ${borderStyle.glowClass} ${borderStyle.ringClass}`}
         >
+          {/* Foto de perfil do Heitor */}
+          <img 
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+            alt="Avatar do Heitor"
+            className="w-full h-full object-cover rounded-full"
+          />
+          
           {/* Efeitos especiais para níveis altos */}
           {borderStyle.tier >= 10 && (
             <motion.div
@@ -101,12 +108,14 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
           )}
           
           {/* Raio do Flash */}
+          {/* Overlay do raio do Flash sobre a foto */}
           <motion.div
             animate={isAnimating ? { 
               scale: [1, 1.2, 1],
               rotate: [0, 360]
             } : {}}
             transition={{ duration: 0.5, repeat: isAnimating ? Infinity : 0 }}
+            className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full"
           >
             <Zap className="w-16 h-16 text-hero-accent drop-shadow-2xl relative z-10" />
           </motion.div>
