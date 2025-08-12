@@ -82,8 +82,8 @@ const mensagensHeitorFlash = [
 
     
     // Usar o dia do ano para selecionar uma mensagem consistente por dia
-    const messageIndex = dayOfYear % motivationalMessages.length;
-    return motivationalMessages[messageIndex];
+    const messageIndex = dayOfYear % mensagensHeitorFlash.length;
+    return mensagensHeitorFlash[messageIndex];
   };
 
   return (
