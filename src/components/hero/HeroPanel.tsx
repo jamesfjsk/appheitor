@@ -12,6 +12,7 @@ import AchievementsBadges from './AchievementsBadges';
 import MascotAvatar from './MascotAvatar';
 import RewardsPanel from './RewardsPanel';
 import CalendarModal from './CalendarModal';
+import FlashReminders from './FlashReminders';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const HeroPanel: React.FC = () => {
