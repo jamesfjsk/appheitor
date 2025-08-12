@@ -68,6 +68,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
     }
 
     if (formData.xpReward < 1 || formData.xpReward > 50) {
+    }
     if (formData.xp < 1 || formData.xp > 50) {
       newErrors.xp = 'XP deve estar entre 1 e 50';
     }
@@ -330,12 +331,12 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
           <div className="flex items-center space-x-3">
             <input
               type="checkbox"
-              id="active"
-              checked={formData.active}
-              onChange={(e) => handleInputChange('active', e.target.checked)}
+              id="isActive"
+              checked={formData.isActive}
+              onChange={(e) => handleInputChange('isActive', e.target.checked)}
               className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="active" className="text-sm font-medium text-gray-700">
+            <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
               Tarefa ativa (aparecerá no painel do Heitor)
             </label>
           </div>
