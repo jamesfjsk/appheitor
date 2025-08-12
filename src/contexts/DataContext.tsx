@@ -304,7 +304,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         });
         toast.error('❌ Permissão negada ao completar tarefa. Verifique as regras do Firestore.');
       } else if (error.message === 'Task already completed today') {
-        toast.warn('⚠️ Tarefa já foi completada hoje!');
+        toast('⚠️ Tarefa já foi completada hoje!');
       } else {
         toast.error('Erro ao completar tarefa');
       }
