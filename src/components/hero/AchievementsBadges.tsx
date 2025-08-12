@@ -46,7 +46,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
     
     const progressPercentage = Math.min(100, (currentProgress / achievement.target) * 100);
     const isCompleted = userAchievement?.isCompleted || false;
-    const isReadyToUnlock = !isCompleted && currentProgress >= achievement.target && !userAchievement?.rewardClaimed;
+    const isReadyToUnlock = !isCompleted && currentProgress >= achievement.target;
     const isNewlyUnlocked = userAchievement?.unlockedAt && 
       (new Date().getTime() - userAchievement.unlockedAt.getTime()) < 10000; // Last 10 seconds
     
@@ -426,13 +426,29 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         Resgatar Recompensa
                       </motion.button>
                     </div>
-                  ) : selectedAchievement.currentProgress >= selectedAchievement.target ? (
+                  ) : selectedAchievement.isReadyToUnlock ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                       <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                      <p className="font-bold text-yellow-900">Meta Atingida!</p>
+                      <p className="font-bold text-yellow-900">Conquista Desbloqueada!</p>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Aguardando processamento da conquista...
+                        Clique para resgatar sua recompensa!
                       </p>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={async () => {
+                          try {
+                            await claimAchievementReward(selectedAchievement.userAchievementId);
+                            setSelectedAchievement(null);
+                          } catch (error) {
+                            console.error('🏆 Error claiming achievement reward:', error);
+                          }
+                        }}
+                        className="w-full mt-3 py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
+                      >
+                        <Star className="w-4 h-4 inline mr-2" />
+                        Resgatar Recompensa
+                      </motion.button>
                     </div>
                   ) : selectedAchievement.progressPercentage > 0 ? (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
