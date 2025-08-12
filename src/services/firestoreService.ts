@@ -237,7 +237,7 @@ export class FirestoreService {
               ...task,
               status: completionDoc.exists() ? 'done' : 'pending'
             }));
-          })
+          });
         
         Promise.all(tasksPromises).then(tasks => {
           const sortedTasks = tasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -795,19 +795,23 @@ export class FirestoreService {
 
         if (existingUserAchievement) {
           // Update existing progress
-          if (existingUserAchievement.progress !== currentProgress || (isCompleted && !wasAlreadyCompleted)) {
+          // Clamp progress to target to avoid showing more than 100%
+          const clampedProgress = Math.min(currentProgress, achievement.target);
+          
+          if (existingUserAchievement.progress !== clampedProgress || 
+              (isCompleted && !existingUserAchievement.isCompleted)) {
             const userAchievementRef = doc(db, 'userAchievements', existingUserAchievement.id);
             const updates: any = {
-              progress: currentProgress,
+              progress: clampedProgress,
               updatedAt: nowTs()
             };
 
-            if (isCompleted && !wasAlreadyCompleted) {
+            if (isCompleted && !existingUserAchievement.isCompleted) {
               updates.isCompleted = true;
               updates.unlockedAt = nowTs();
               newlyUnlocked.push({
                 ...existingUserAchievement,
-                progress: currentProgress,
+                progress: clampedProgress,
                 isCompleted: true,
                 unlockedAt: new Date()
               });
@@ -818,10 +822,11 @@ export class FirestoreService {
         } else {
           // Create new user achievement
           const userAchievementRef = doc(collection(db, 'userAchievements'));
+          const clampedProgress = Math.min(currentProgress, achievement.target);
           const newUserAchievement: Omit<UserAchievement, 'id'> = {
             userId,
             achievementId: achievement.id,
-            progress: currentProgress,
+            progress: clampedProgress,
             isCompleted,
             unlockedAt: isCompleted ? new Date() : undefined,
             createdAt: new Date(),
@@ -1613,9 +1618,6 @@ export class FirestoreService {
           }
         }
         
-        // Clamp progress to target to avoid showing more than 100%
-        const clampedProgress = Math.min(progress, achievement.target);
-        const isCompleted = clampedProgress >= achievement.target;
         // Delete the task document
         batch.delete(taskDoc.ref);
         batchCount++;
@@ -1698,15 +1700,15 @@ export class FirestoreService {
       batchCount++;
 
       // Execute final batch
-          if (existingUserAchievement.progress !== clampedProgress || 
-              (isCompleted && !existingUserAchievement.isCompleted)) {
+      if (batchCount > 0) {
+        await batch.commit();
       }
 
-              progress: clampedProgress,
+      console.log('✅ FirestoreService: Complete reset finished successfully');
     } catch (error) {
       console.error('❌ FirestoreService: Error during complete reset:', error);
       throw error;
-            if (isCompleted && !existingUserAchievement.isCompleted) {
+    }
   }
 
   // ========================================
@@ -1731,13 +1733,13 @@ export class FirestoreService {
         taskId: string;
         taskTitle: string;
         date: string;
-            progress: clampedProgress,
-            isCompleted: isCompleted,
+        xpEarned: number;
+        goldEarned: number;
         completedAt: Date;
       }> = [];
       
       for (const taskDoc of tasksSnapshot.docs) {
-          if (isCompleted) {
+        const taskData = taskDoc.data();
         const completionsSnapshot = await getDocs(collection(db, 'tasks', taskDoc.id, 'completions'));
         
         for (const completionDoc of completionsSnapshot.docs) {
