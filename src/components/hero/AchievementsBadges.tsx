@@ -433,28 +433,36 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                       <p className="text-sm text-yellow-700 mt-1">
                         Clique para resgatar sua recompensa!
                       </p>
-                      {selectedAchievement.userAchievementId ? (
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={async () => {
-                            try {
-                              await claimAchievementReward(selectedAchievement.userAchievementId);
-                              setSelectedAchievement(null);
-                            } catch (error) {
-                              console.error('🏆 Error claiming achievement reward:', error);
-                            }
-                          }}
-                          className="w-full mt-3 py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
-                        >
-                          <Star className="w-4 h-4 inline mr-2" />
-                          Resgatar Recompensa
-                        </motion.button>
-                      ) : (
-                        <div className="w-full mt-3 py-3 bg-gray-200 text-gray-500 rounded-lg font-bold text-center">
-                          Aguardando processamento...
-                        </div>
-                      )}
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={async () => {
+                          try {
+                            // Force check achievements to create userAchievement if needed
+                            await checkAchievements();
+                            
+                            // Wait a bit for the achievement to be processed
+                            setTimeout(async () => {
+                              const updatedUserAchievement = userAchievements.find(ua => ua.achievementId === selectedAchievement.id);
+                              if (updatedUserAchievement?.id) {
+                                await claimAchievementReward(updatedUserAchievement.id);
+                                setSelectedAchievement(null);
+                              } else {
+                                // Manually award the achievement reward
+                                await adjustUserXP(selectedAchievement.xpReward);
+                                await adjustUserGold(selectedAchievement.goldReward);
+                                setSelectedAchievement(null);
+                              }
+                            }, 500);
+                          } catch (error) {
+                            console.error('🏆 Error claiming achievement reward:', error);
+                          }
+                        }}
+                        className="w-full mt-3 py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
+                      >
+                        <Star className="w-4 h-4 inline mr-2" />
+                        Resgatar Recompensa
+                      </motion.button>
                     </div>
                   ) : selectedAchievement.progressPercentage > 0 ? (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
