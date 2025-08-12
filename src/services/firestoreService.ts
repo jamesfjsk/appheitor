@@ -146,6 +146,19 @@ export class FirestoreService {
       throw new Error('ownerId is required and must be a non-empty string');
     }
     
+    // Validate required fields
+    if (!taskData.title || typeof taskData.title !== 'string' || taskData.title.trim() === '') {
+      throw new Error('title is required and must be a non-empty string');
+    }
+    
+    if (typeof taskData.xp !== 'number' || taskData.xp < 1 || taskData.xp > 50) {
+      throw new Error('xp must be a number between 1 and 50');
+    }
+    
+    if (typeof taskData.gold !== 'number' || taskData.gold < 1 || taskData.gold > 100) {
+      throw new Error('gold must be a number between 1 and 100');
+    }
+    
     // Ensure all required fields for Firestore rules and Data Doctor
     const completeTaskData = {
       ownerId: taskData.ownerId,
@@ -262,6 +275,23 @@ export class FirestoreService {
       throw new Error('ownerId is required and must be a non-empty string');
     }
     
+    // Validate required fields
+    if (!rewardData.title || typeof rewardData.title !== 'string' || rewardData.title.trim() === '') {
+      throw new Error('title is required and must be a non-empty string');
+    }
+    
+    if (!rewardData.description || typeof rewardData.description !== 'string' || rewardData.description.trim() === '') {
+      throw new Error('description is required and must be a non-empty string');
+    }
+    
+    if (typeof rewardData.costGold !== 'number' || rewardData.costGold < 5 || rewardData.costGold > 10000) {
+      throw new Error('costGold must be a number between 5 and 10000');
+    }
+    
+    if (!rewardData.emoji || typeof rewardData.emoji !== 'string' || rewardData.emoji.trim() === '') {
+      throw new Error('emoji is required and must be a non-empty string');
+    }
+    
     // Ensure all required fields for Firestore rules and Data Doctor
     const completeRewardData = {
       ownerId: rewardData.ownerId,
@@ -269,7 +299,7 @@ export class FirestoreService {
       title: rewardData.title,
       description: rewardData.description || '',
       category: rewardData.category || 'custom',
-      costGold: rewardData.costGold || 50,
+      costGold: rewardData.costGold,
       emoji: rewardData.emoji || '🎁',
       requiredLevel: rewardData.requiredLevel || 1,
       active: rewardData.active !== false, // Default to true unless explicitly false

@@ -407,7 +407,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="text-xl">{reward.icon}</div>
+                        <div className="text-xl">{reward.emoji}</div>
                         <div>
                           <h5 className="font-medium text-white">{reward.title}</h5>
                           <p className="text-xs text-white/70">

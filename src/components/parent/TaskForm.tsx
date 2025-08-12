@@ -15,12 +15,12 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    xpReward: 10,
-    goldReward: 5,
+    xp: 10,
+    gold: 5,
     period: 'morning' as 'morning' | 'afternoon' | 'evening',
-    dueTime: '',
+    time: '',
     frequency: 'daily' as 'daily' | 'weekday' | 'weekend',
-    isActive: true,
+    active: true,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -30,23 +30,23 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
       setFormData({
         title: task.title,
         description: task.description || '',
-        xpReward: task.xpReward || 10,
-        goldReward: task.goldReward || 5,
+        xp: task.xp || 10,
+        gold: task.gold || 5,
         period: task.period,
-        dueTime: task.dueTime || '',
+        time: task.time || '',
         frequency: task.frequency,
-        isActive: task.isActive,
+        active: task.active,
       });
     } else {
       setFormData({
         title: '',
         description: '',
-        xpReward: 10,
-        goldReward: 5,
+        xp: 10,
+        gold: 5,
         period: 'morning',
-        dueTime: '',
+        time: '',
         frequency: 'daily',
-        isActive: true,
+        active: true,
       });
     }
     setErrors({});
@@ -68,17 +68,18 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
     }
 
     if (formData.xpReward < 1 || formData.xpReward > 50) {
-      newErrors.xpReward = 'XP deve estar entre 1 e 50';
+    if (formData.xp < 1 || formData.xp > 50) {
+      newErrors.xp = 'XP deve estar entre 1 e 50';
     }
 
-    if (formData.goldReward < 1 || formData.goldReward > 100) {
-      newErrors.goldReward = 'Gold deve estar entre 1 e 100';
+    if (formData.gold < 1 || formData.gold > 100) {
+      newErrors.gold = 'Gold deve estar entre 1 e 100';
     }
 
-    if (formData.dueTime) {
+    if (formData.time) {
       const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-      if (!timeRegex.test(formData.dueTime)) {
-        newErrors.dueTime = 'Formato de horário inválido (HH:MM)';
+      if (!timeRegex.test(formData.time)) {
+        newErrors.time = 'Formato de horário inválido (HH:MM)';
       }
     }
 
@@ -98,8 +99,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
 
     const taskData = {
       ...formData,
-      xp: formData.xpReward,
-      gold: formData.goldReward,
       status: 'pending',
     };
 
@@ -331,12 +330,12 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
           <div className="flex items-center space-x-3">
             <input
               type="checkbox"
-              id="isActive"
-              checked={formData.isActive}
-              onChange={(e) => handleInputChange('isActive', e.target.checked)}
+              id="active"
+              checked={formData.active}
+              onChange={(e) => handleInputChange('active', e.target.checked)}
               className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+            <label htmlFor="active" className="text-sm font-medium text-gray-700">
               Tarefa ativa (aparecerá no painel do Heitor)
             </label>
           </div>

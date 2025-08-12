@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp } from '../utils/levelSystem';
+import { getRewardsUnlockedAtLevel } from '../utils/rewardLevels';
 import toast from 'react-hot-toast';
 
 interface DataContextType {
@@ -492,7 +493,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         if (newlyUnlockedRewards.length > 0) {
           setTimeout(() => {
             newlyUnlockedRewards.forEach(reward => {
-              showRewardAvailable(`🎁 Nova recompensa desbloqueada: ${reward.title}!`);
+              toast.success(`🎁 Nova recompensa desbloqueada: ${reward.title}!`);
             });
           }, 2000); // Show after level up animation
         }

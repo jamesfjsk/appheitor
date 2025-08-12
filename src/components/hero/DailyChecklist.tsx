@@ -5,8 +5,6 @@ import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import TaskItem from './TaskItem';
 
-import { FirestoreService } from '../../services/firestoreService';
-
 // Helper function to check if task should be shown today based on frequency
 const isTaskAvailableToday = (task: Task): boolean => {
   const today = new Date();

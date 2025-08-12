@@ -217,7 +217,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
             <div 
               className="text-2xl font-bold text-blue-600"
             >
-              {progress.totalTasksCompleted}
+              {progress.totalTasksCompleted || 0}
             </div>
             <div className="text-sm text-blue-600">Tarefas Completadas</div>
           </div>
@@ -226,7 +226,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
             <div 
               className="text-2xl font-bold text-green-600"
             >
-              {levelSystem.currentXP}
+              {levelSystem.currentXP || 0}
             </div>
             <div className="text-sm text-green-600">XP Total</div>
           </div>
@@ -244,7 +244,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
             <div 
               className="text-2xl font-bold text-orange-600"
             >
-              {progress.streak}
+              {progress.streak || 0}
             </div>
             <div className="text-sm text-orange-600">Dias Consecutivos</div>
           </div>

@@ -75,10 +75,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
   };
 
   const getTimeIcon = () => {
-    if (!task.dueTime) return null;
+    if (!task.time) return null;
     
     const now = new Date();
-    const [hours, minutes] = task.dueTime.split(':').map(Number);
+    const [hours, minutes] = task.time.split(':').map(Number);
     const dueTime = new Date();
     dueTime.setHours(hours, minutes, 0, 0);
     
@@ -89,7 +89,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
         isOverdue ? 'text-red-200' : 'text-white/70'
       }`}>
         <Clock className="w-3 h-3" />
-        <span>{task.dueTime}</span>
+        <span>{task.time}</span>
         {isOverdue && <span className="animate-pulse">⚠️</span>}
       </div>
     );
