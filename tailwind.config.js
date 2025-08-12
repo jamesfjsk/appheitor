@@ -7,59 +7,37 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Painel Infantil - Flash Theme
-        hero: {
-          primary: '#C8102E',    // Vermelho Flash original
-          secondary: '#FF3131',  // Vermelho Flash claro
-          accent: '#FFD93D',     // Amarelo dourado suave
-          light: '#FFFFFF',      // Branco puro
-          background: '#F8FAFC', // Fundo suave
+        // Flash Red - Cor Principal (usado com parcimônia)
+        flash: {
+          red: '#DC2626',        // Vermelho principal - apenas para acentos
+          'red-light': '#FEF2F2', // Vermelho muito claro - backgrounds sutis
+          'red-soft': '#FECACA',  // Vermelho suave - estados hover
+          'red-dark': '#B91C1C',  // Vermelho escuro - hover de botões
         },
-        // Painel Adulto - Clean Theme
-        parent: {
-          primary: '#2563EB',    // Azul principal
-          secondary: '#1E40AF',  // Azul mais escuro
-          accent: '#3B82F6',     // Azul claro
-          text: '#374151',       // Cinza escuro para texto
-          background: '#FFFFFF', // Fundo branco
-          muted: '#F3F4F6',      // Cinza claro
-        },
-        // Estados e feedback
+        // Acentos Mínimos
         success: {
           50: '#ECFDF5',
           500: '#10B981',
           600: '#059669',
         },
-        warning: {
-          50: '#FFFBEB',
+        gold: {
           500: '#F59E0B',
           600: '#D97706',
         },
-        error: {
-          50: '#FEF2F2',
-          500: '#EF4444',
-          600: '#DC2626',
-        },
-        info: {
-          50: '#EFF6FF',
-          500: '#3B82F6',
-          600: '#2563EB',
-        },
       },
       fontFamily: {
-        // Fonte infantil
-        comic: ['Comic Neue', 'cursive'],
-        // Fonte adulta
+        // Fonte principal
         inter: ['Inter', 'sans-serif'],
-        // Fonte de destaque
-        poppins: ['Poppins', 'sans-serif'],
       },
       fontSize: {
-        // Tamanhos otimizados para toque
-        'touch-sm': ['16px', '24px'],
-        'touch-base': ['18px', '28px'],
-        'touch-lg': ['20px', '32px'],
-        'touch-xl': ['24px', '36px'],
+        // Hierarquia tipográfica clara
+        'xs': ['0.75rem', '1rem'],
+        'sm': ['0.875rem', '1.25rem'],
+        'base': ['1rem', '1.5rem'],
+        'lg': ['1.125rem', '1.75rem'],
+        'xl': ['1.25rem', '1.75rem'],
+        '2xl': ['1.5rem', '2rem'],
+        '3xl': ['1.875rem', '2.25rem'],
       },
       spacing: {
         // Sistema de espaçamento 8px
@@ -69,19 +47,19 @@ export default {
         '30': '7.5rem',   // 120px
       },
       borderRadius: {
-        // Bordas arredondadas para elementos infantis
-        'hero': '1rem',
-        'parent': '0.5rem',
-        '4xl': '2rem',
+        // Bordas moderadas e elegantes
+        'sm': '4px',
+        'md': '6px',
+        'lg': '8px',
+        'xl': '12px',
+        '2xl': '16px',
       },
       boxShadow: {
-        // Sombras customizadas
-        'hero': '0 4px 12px rgba(0, 0, 0, 0.25)',
-        'hero-hover': '0 8px 24px rgba(0, 0, 0, 0.3)',
-        'parent': '0 2px 8px rgba(0, 0, 0, 0.1)',
-        'parent-hover': '0 4px 16px rgba(0, 0, 0, 0.15)',
-        'glow': '0 0 20px rgba(255, 215, 0, 0.5)',
-        'glow-intense': '0 0 40px rgba(255, 215, 0, 0.8)',
+        // Sombras sutis e elegantes
+        'subtle': '0 1px 2px rgba(0, 0, 0, 0.05)',
+        'normal': '0 1px 3px rgba(0, 0, 0, 0.1)',
+        'elevated': '0 4px 6px rgba(0, 0, 0, 0.05)',
+        'floating': '0 10px 15px rgba(0, 0, 0, 0.1)',
       },
       animation: {
         // Animações customizadas
