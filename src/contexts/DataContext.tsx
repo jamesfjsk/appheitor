@@ -12,6 +12,7 @@ interface DataContextType {
   progress: UserProgress;
   redemptions: RewardRedemption[];
   notifications: Notification[];
+  flashReminders: FlashReminder[];
   loading: boolean;
   
   // Task methods
@@ -32,6 +33,11 @@ interface DataContextType {
   // Notification methods
   sendNotification: (title: string, message: string, type?: Notification['type']) => Promise<void>;
   markNotificationAsRead: (notificationId: string) => Promise<void>;
+  
+  // Flash Reminder methods
+  addFlashReminder: (reminder: Omit<FlashReminder, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateFlashReminder: (reminderId: string, updates: Partial<FlashReminder>) => Promise<void>;
+  deleteFlashReminder: (reminderId: string) => Promise<void>;
   
   // Progress methods
   adjustUserXP: (amount: number) => Promise<void>;
@@ -77,6 +83,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   });
   const [redemptions, setRedemptions] = useState<RewardRedemption[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [flashReminders, setFlashReminders] = useState<FlashReminder[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Initialize listeners when childUid changes
@@ -86,6 +93,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       setRewards([]);
       setRedemptions([]);
       setNotifications([]);
+      setFlashReminders([]);
       setProgress({
         userId: '',
         level: 1,
@@ -187,6 +195,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           }
         );
 
+        const unsubscribeFlashReminders = FirestoreService.subscribeToUserFlashReminders(
+          childUid,
+          (flashReminders) => {
+            console.log('🔥 DataContext: Flash reminders received:', flashReminders.length);
+            setFlashReminders(flashReminders);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de flash reminders:', error);
+          }
+        );
+
         setLoading(false);
 
         // Cleanup function
@@ -196,6 +215,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           unsubscribeProgress();
           unsubscribeRedemptions();
           unsubscribeNotifications();
+          unsubscribeFlashReminders();
         };
       } catch (error: any) {
         console.error('❌ DataContext: Erro ao inicializar dados:', error);
@@ -464,6 +484,48 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   };
 
+  // Flash Reminder methods
+  const addFlashReminder = async (reminderData: Omit<FlashReminder, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
+    if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
+    
+    const completeReminderData = {
+      ...reminderData,
+      ownerId: childUid,
+      createdBy: user.userId
+    };
+    
+    try {
+      await FirestoreService.createFlashReminder(completeReminderData);
+      toast.success('Lembrete Flash criado com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao criar lembrete:', error);
+      toast.error('Erro ao criar lembrete');
+      throw error;
+    }
+  };
+
+  const updateFlashReminder = async (reminderId: string, updates: Partial<FlashReminder>) => {
+    try {
+      await FirestoreService.updateFlashReminder(reminderId, updates);
+      toast.success('Lembrete Flash atualizado com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar lembrete:', error);
+      toast.error('Erro ao atualizar lembrete');
+      throw error;
+    }
+  };
+
+  const deleteFlashReminder = async (reminderId: string) => {
+    try {
+      await FirestoreService.deleteFlashReminder(reminderId);
+      toast.success('Lembrete Flash excluído com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao excluir lembrete:', error);
+      toast.error('Erro ao excluir lembrete');
+      throw error;
+    }
+  };
+
   // Progress methods
   const adjustUserXP = async (amount: number) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -606,6 +668,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     redemptions,
     notifications,
     flashReminders,
+    flashReminders,
     loading,
     addTask,
     updateTask,
@@ -618,6 +681,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     approveRedemption,
     sendNotification,
     markNotificationAsRead,
+    addFlashReminder,
+    updateFlashReminder,
+    deleteFlashReminder,
     addFlashReminder,
     updateFlashReminder,
     deleteFlashReminder,
