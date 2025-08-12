@@ -683,11 +683,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           }
         } else {
           // Create new user achievement
-          // Check if achievement.id is defined and not empty before creating user achievement
-          if (achievement.id && String(achievement.id).trim() !== '') {
+          // Check if achievement.id is explicitly a string and not empty before creating user achievement
+          if (typeof achievement.id === 'string' && achievement.id.trim() !== '') {
             await FirestoreService.createUserAchievement({
               userId: childUid,
-              achievementId: String(achievement.id),
+              achievementId: achievement.id,
               progress: currentProgress,
               isCompleted: shouldComplete,
               rewardClaimed: false,
