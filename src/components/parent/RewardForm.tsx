@@ -313,10 +313,10 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
             <div className="flex items-center gap-4 mb-3">
               <input
                 type="text"
-                value={formData.icon}
-                onChange={(e) => handleInputChange('icon', e.target.value)}
+                value={formData.emoji}
+                onChange={(e) => handleInputChange('emoji', e.target.value)}
                 className={`w-20 px-3 py-2 border rounded-lg text-center text-2xl ${
-                  errors.icon ? 'border-red-500' : 'border-gray-300'
+                  errors.emoji ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="🎁"
                 maxLength={2}
@@ -326,8 +326,8 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
               </span>
             </div>
             
-            {errors.icon && (
-              <p className="mb-3 text-sm text-red-600">{errors.icon}</p>
+            {errors.emoji && (
+              <p className="mb-3 text-sm text-red-600">{errors.emoji}</p>
             )}
             
             <div className="grid grid-cols-10 gap-2">
@@ -335,9 +335,9 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
                 <button
                   key={icon}
                   type="button"
-                  onClick={() => handleInputChange('icon', icon)}
+                  onClick={() => handleInputChange('emoji', icon)}
                   className={`p-2 text-2xl rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-                    formData.icon === icon
+                    formData.emoji === icon
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}

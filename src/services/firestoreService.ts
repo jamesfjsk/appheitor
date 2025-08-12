@@ -532,6 +532,78 @@ export class FirestoreService {
   }
 
   // ========================================
+  // 🔥 FLASH REMINDER OPERATIONS
+  // ========================================
+
+  static async createFlashReminder(reminderData: Omit<FlashReminder, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    const reminderRef = doc(collection(db, 'flashReminders'));
+    
+    const completeReminderData = {
+      ownerId: reminderData.ownerId,
+      userId: reminderData.ownerId,
+      title: reminderData.title,
+      message: reminderData.message,
+      icon: reminderData.icon,
+      color: reminderData.color,
+      priority: reminderData.priority,
+      active: reminderData.active !== false,
+      showOnDashboard: reminderData.showOnDashboard !== false,
+      createdBy: reminderData.createdBy,
+      createdAt: nowTs(),
+      updatedAt: nowTs()
+    };
+    
+    await setDoc(reminderRef, completeReminderData);
+    return reminderRef.id;
+  }
+
+  static async updateFlashReminder(reminderId: string, updates: Partial<FlashReminder>): Promise<void> {
+    const reminderRef = doc(db, 'flashReminders', reminderId);
+    await updateDoc(reminderRef, {
+      ...updates,
+      updatedAt: nowTs()
+    });
+  }
+
+  static async deleteFlashReminder(reminderId: string): Promise<void> {
+    const reminderRef = doc(db, 'flashReminders', reminderId);
+    await deleteDoc(reminderRef);
+  }
+
+  static subscribeToUserFlashReminders(
+    childUid: string, 
+    callback: (flashReminders: FlashReminder[]) => void,
+    errorCallback?: (error: Error) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'flashReminders'),
+      where('ownerId', '==', childUid)
+    );
+
+    return onSnapshot(
+      q,
+      (snapshot: QuerySnapshot) => {
+        const flashReminders = snapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              createdAt: data.createdAt?.toDate() || new Date(),
+              updatedAt: data.updatedAt?.toDate() || new Date()
+            } as FlashReminder;
+          })
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        callback(flashReminders);
+      },
+      (error) => {
+        console.error('❌ Erro no listener de flash reminders:', error);
+        if (errorCallback) errorCallback(error);
+      }
+    );
+  }
+
+  // ========================================
   // 🔥 TRANSACTION OPERATIONS
   // ========================================
 

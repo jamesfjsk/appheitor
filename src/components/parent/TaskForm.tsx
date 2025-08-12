@@ -331,12 +331,12 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
           <div className="flex items-center space-x-3">
             <input
               type="checkbox"
-              id="isActive"
-              checked={formData.isActive}
-              onChange={(e) => handleInputChange('isActive', e.target.checked)}
+              id="active"
+              checked={formData.active}
+              onChange={(e) => handleInputChange('active', e.target.checked)}
               className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+            <label htmlFor="active" className="text-sm font-medium text-gray-700">
               Tarefa ativa (aparecerá no painel do Heitor)
             </label>
           </div>
