@@ -63,6 +63,11 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const tasksToShow = guidedMode && currentTask ? [currentTask] : filteredTasks;
 
   const handleCompleteTask = async (taskId: string, completed: boolean) => {
+    // Only allow completion, not un-completion
+    if (!completed) {
+      return;
+    }
+    
     try {
       await completeTask(taskId);
     } catch (error: any) {

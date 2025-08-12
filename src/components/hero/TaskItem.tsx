@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Clock, Star, Zap } from 'lucide-react';
 import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
+import toast from 'react-hot-toast';
 
 interface TaskItemProps {
   task: Task;
@@ -18,7 +19,20 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
   const { playTaskComplete, playClick } = useSound();
 
   const handleToggle = async () => {
-    if (isCompleting || task.status === 'done') return;
+    // Prevent any action if task is already completed or currently completing
+    if (isCompleting || task.status === 'done') {
+      if (task.status === 'done') {
+        playClick();
+        toast('✅ Tarefa já foi completada hoje! Disponível novamente amanhã.', {
+          duration: 3000,
+          style: {
+            background: '#10B981',
+            color: '#FFFFFF',
+          },
+        });
+      }
+      return;
+    }
 
     setIsCompleting(true);
 
@@ -149,17 +163,17 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
           {/* Botão de completar */}
           <motion.button
             onClick={handleToggle}
-            disabled={isCompleting || task.status === 'done'}
+            disabled={isCompleting}
             whileHover={{ scale: guidedMode ? 1.15 : 1.1 }}
             whileTap={{ scale: 0.9 }}
             className={`
               relative ${guidedMode ? 'w-16 h-16' : 'w-12 h-12'} rounded-full border-3 flex items-center justify-center
               transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50
               ${task.status === 'done'
-                ? 'bg-hero-accent border-hero-accent text-hero-primary shadow-lg'
+                ? 'bg-hero-accent border-hero-accent text-hero-primary shadow-lg cursor-pointer'
                 : 'bg-white/20 border-white/50 text-white hover:border-hero-accent hover:bg-hero-accent/20'
               }
-              ${isCompleting || task.status === 'done' ? 'cursor-not-allowed' : 'cursor-pointer'}
+              ${isCompleting ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
             <AnimatePresence mode="wait">
