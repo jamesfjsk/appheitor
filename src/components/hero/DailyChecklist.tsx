@@ -107,11 +107,11 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.4 }}
-      className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+      className="bg-gradient-to-br from-hero-primary to-hero-secondary rounded-2xl shadow-lg p-6"
     >
       {/* Header com Seletor de Período */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-white mb-4 sm:mb-0 flex items-center gap-2">
           <Clock className="w-6 h-6 text-yellow-400" />
           Missões Diárias
           {isCurrentPeriod && (
@@ -183,9 +183,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 p-3 bg-yellow-400/20 rounded-xl text-center"
+          className="mb-4 p-3 bg-white/20 backdrop-blur-sm rounded-xl text-center"
         >
-          <p className="text-yellow-100 font-medium">
+          <p className="text-hero-accent font-bold">
             {getTimeBasedMessage()}
           </p>
         </motion.div>
@@ -198,14 +198,14 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
             Progresso do período: {completedTasks}/{totalTasks}
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-yellow-400 font-bold">
+            <span className="text-hero-accent font-bold">
               {Math.round(completionPercentage)}%
             </span>
             {completionPercentage === 100 && totalTasks > 0 && (
               <motion.span
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="text-yellow-400"
+                className="text-hero-accent"
               >
                 ⚡
               </motion.span>
@@ -213,12 +213,12 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           </div>
         </div>
         
-        <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-white/30 rounded-full h-3 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full relative"
+            className="h-full bg-gradient-to-r from-hero-accent to-yellow-300 rounded-full relative"
           >
             {completionPercentage > 0 && (
               <motion.div
@@ -234,7 +234,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       {/* Guided Mode Navigation */}
       {guidedMode && currentTask && (
         <div className="mb-4 flex items-center justify-between bg-white/10 rounded-xl p-3">
-          <div className="flex items-center gap-2 text-white/80 text-sm">
+          <div className="flex items-center gap-2 text-hero-accent text-sm font-semibold">
             <Play className="w-4 h-4" />
             Missão {filteredTasks.findIndex(t => t.id === currentTask.id) + 1} de {totalTasks}
           </div>
@@ -246,7 +246,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   // Logic to show previous task would go here
                 }
               }}
-              className="p-1 text-white/60 hover:text-white transition-colors"
+              className="p-1 text-white/70 hover:text-hero-accent transition-colors"
               disabled={filteredTasks.findIndex(t => t.id === currentTask.id) === 0}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -258,7 +258,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   // Logic to show next task would go here
                 }
               }}
-              className="p-1 text-white/60 hover:text-white transition-colors"
+              className="p-1 text-white/70 hover:text-hero-accent transition-colors"
               disabled={filteredTasks.findIndex(t => t.id === currentTask.id) === filteredTasks.length - 1}
             >
               <ChevronRight className="w-4 h-4" />
@@ -301,14 +301,14 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               >
                 {isCurrentPeriod ? '⚡' : '😴'}
               </motion.div>
-              <p className="text-white/80 text-lg">
+              <p className="text-hero-accent text-lg font-semibold">
                 {isCurrentPeriod 
                   ? 'Todas as missões deste período foram completadas! 🎉'
                   : 'Nenhuma missão para este período ainda.'
                 }
               </p>
               {!isCurrentPeriod && (
-                <p className="text-yellow-400 text-sm mt-2">
+                <p className="text-hero-accent text-sm mt-2 font-medium">
                   Peça para o papai adicionar algumas missões!
                 </p>
               )}
@@ -328,12 +328,12 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           transition={{ 
             duration: 0.5,
           }}
-          className="mt-6 p-4 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-xl text-center"
+          className="mt-6 p-4 bg-gradient-to-r from-hero-accent to-yellow-300 rounded-xl text-center"
         >
-          <div className="relative text-red-600 font-bold text-lg mb-1">
+          <div className="relative text-hero-primary font-bold text-lg mb-1">
             🎉 Período Completo! 🎉
           </div>
-          <p className="text-red-600 text-sm">
+          <p className="text-hero-primary text-sm font-semibold">
             Você completou todas as missões! ⚡ Incrível!
           </p>
         </motion.div>

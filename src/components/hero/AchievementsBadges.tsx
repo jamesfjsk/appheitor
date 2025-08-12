@@ -16,13 +16,16 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = ({ achievements })
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.5 }}
       className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+      className="bg-gradient-to-br from-hero-primary to-hero-secondary rounded-2xl shadow-lg p-6"
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
+        <h3 className="text-white font-bold text-lg flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-400" />
           Conquistas
         </h3>
         <div className="bg-yellow-400 text-red-600 px-3 py-1 rounded-full font-bold text-sm">
+        <div className="bg-hero-accent text-hero-primary px-3 py-1 rounded-full font-bold text-sm">
           {unlockedAchievements.length}/{(achievements || []).length}
         </div>
       </div>
@@ -37,7 +40,9 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = ({ achievements })
             className={`p-3 rounded-xl transition-all duration-300 ${
               achievement.isUnlocked
                 ? 'bg-gradient-to-r from-yellow-400 to-yellow-300 text-red-600'
+                ? 'bg-gradient-to-r from-hero-accent to-yellow-300 text-hero-primary'
                 : 'bg-gray-50 text-gray-500 border border-gray-200'
+                : 'bg-white/20 text-white/60 border border-white/30'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -90,6 +95,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = ({ achievements })
         <div className="text-center py-6">
           <div className="text-4xl mb-2">🏆</div>
           <p className="text-gray-600 text-sm">
+          <p className="text-white/80 text-sm">
             Complete missões para desbloquear conquistas!
           </p>
         </div>
