@@ -4,6 +4,7 @@ import { Calendar, TrendingUp, BarChart3, Sun, Sunset, Moon, CheckCircle, Star, 
 import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { FirestoreService } from '../../services/firestoreService';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -12,7 +13,7 @@ interface TaskHistoryProps {
 }
 
 const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
-  const { redemptions } = useData();
+  const { redemptions, rewards } = useData();
   const { childUid } = useAuth();
   const [selectedWeek, setSelectedWeek] = useState(0); // 0 = semana atual, 1 = semana passada, etc.
   const [taskCompletions, setTaskCompletions] = useState<Array<{
