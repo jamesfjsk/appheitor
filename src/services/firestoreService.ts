@@ -193,14 +193,13 @@ export class FirestoreService {
       where('ownerId', '==', childUid)
     );
 
-    // Also subscribe to task completions to determine status
-    const completionsMap = new Map<string, boolean>();
+    // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0];
 
     return onSnapshot(
       q,
       (snapshot: QuerySnapshot) => {
-        // First, get all tasks
+        // Get all tasks and check completion status for today only
         const tasksPromises = snapshot.docs
           .map(taskDoc => {
             const data = taskDoc.data();
@@ -215,35 +214,36 @@ export class FirestoreService {
              time: data.time,
              frequency: data.frequency,
              active: data.active,
-              status: 'pending', // Will be updated based on completion
+              status: 'pending', // Will be updated based on today's completion
              createdBy: data.createdBy,
               createdAt: data.createdAt?.toDate() || new Date(),
               updatedAt: data.updatedAt?.toDate() || new Date()
             };
             
-            // Check if task was completed today
+            // Check if task was completed TODAY specifically
             const completionRef = doc(db, 'tasks', taskDoc.id, 'completions', today);
             return getDoc(completionRef).then(completionDoc => ({
               ...task,
-              status: completionDoc.exists() ? 'done' : 'pending'
+              status: completionDoc.exists() ? 'done' : 'pending' // Only today's completion matters
             }));
           })
         
-        // Wait for all completion checks to complete
+        // Wait for all today's completion checks to complete
         Promise.all(tasksPromises).then(tasks => {
           const sortedTasks = tasks.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
           
-          console.log('🔥 FirestoreService: Tasks with completion status:', sortedTasks.map(t => ({
+          console.log('🔥 FirestoreService: Tasks with TODAY completion status:', sortedTasks.map(t => ({
             id: t.id,
             title: t.title,
             active: t.active,
             ownerId: t.ownerId,
-            status: t.status
+            status: t.status,
+            checkDate: today
           })));
           
           callback(sortedTasks);
         }).catch(error => {
-          console.error('❌ Error checking task completions:', error);
+          console.error('❌ Error checking today task completions:', error);
           if (errorCallback) errorCallback(error);
         });
       },
@@ -513,6 +513,8 @@ export class FirestoreService {
     const today = new Date();
     const dateId = today.toISOString().split('T')[0]; // YYYY-MM-DD format
     
+    console.log('🔥 FirestoreService: Completing task for date:', { taskId, childUid, dateId, today: today.toDateString() });
+    
     await runTransaction(db, async (transaction) => {
       const completionRef = doc(db, 'tasks', taskId, 'completions', dateId);
       const progressRef = doc(db, 'progress', childUid);
@@ -522,9 +524,10 @@ export class FirestoreService {
         throw new Error('User progress not found');
       }
 
-      // Check if task was already completed today
+      // Check if task was already completed TODAY specifically
       const existingCompletion = await transaction.get(completionRef);
       if (existingCompletion.exists()) {
+        console.log('🔥 FirestoreService: Task already completed today:', { taskId, dateId });
         throw new Error('Task already completed today');
       }
 
@@ -535,14 +538,23 @@ export class FirestoreService {
       const newLevel = getLevelFromXP(newTotalXP);
       const newTasksCompleted = (currentProgress.totalTasksCompleted || 0) + 1;
 
-      // Create completion record
+      // Create completion record for TODAY
       transaction.set(completionRef, {
         userId: childUid,
         taskId: taskId,
         xpEarned: xpReward,
         goldEarned: goldReward,
+        completionDate: dateId,
         completedAt: nowTs(),
         createdAt: nowTs()
+      });
+
+      console.log('🔥 FirestoreService: Creating completion record:', { 
+        taskId, 
+        childUid, 
+        dateId, 
+        xpEarned: xpReward, 
+        goldEarned: goldReward 
       });
 
       // Update progress
