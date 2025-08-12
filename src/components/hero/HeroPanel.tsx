@@ -105,6 +105,7 @@ const HeroPanel: React.FC = () => {
       <div className="min-h-screen bg-white relative overflow-hidden">
         {/* Elementos decorativos de fundo */}
         <div className="absolute inset-0 opacity-5">
+        </div>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-20 h-20 bg-hero-accent rounded-full animate-pulse"></div>
           <div className="absolute top-32 right-16 w-16 h-16 bg-hero-primary rounded-full animate-bounce"></div>
@@ -151,6 +152,7 @@ const HeroPanel: React.FC = () => {
                 className="mb-8 text-center"
               >
                 <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border-2 border-hero-accent shadow-2xl">
+                </div>
                 <div className="bg-gradient-to-r from-hero-primary/90 to-hero-secondary/90 backdrop-blur-sm rounded-2xl p-6 border-2 border-hero-accent shadow-2xl">
                   <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
                     Bem-vindo de volta, Heitor! ⚡
@@ -204,6 +206,7 @@ const HeroPanel: React.FC = () => {
                 className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
               >
                 <div className="bg-gradient-to-r from-hero-accent to-yellow-400 text-hero-primary text-2xl md:text-3xl font-bold px-6 py-3 rounded-2xl shadow-xl border-2 border-white">
+                </div>
                 <div className="bg-gradient-to-r from-hero-accent to-yellow-300 text-hero-primary text-2xl md:text-3xl font-bold px-6 py-3 rounded-2xl shadow-xl border-2 border-white">
                   🎉 Período Completo! 🎉
                 </div>
