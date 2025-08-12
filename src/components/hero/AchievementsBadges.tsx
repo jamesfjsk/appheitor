@@ -420,21 +420,8 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                           });
                           
                           try {
-                            // Check if user achievement exists
-                            let userAchievementId = selectedAchievement.userAchievementId;
-                            
-                            if (!userAchievementId) {
-                              console.log('🏆 Creating user achievement first...');
-                              userAchievementId = await FirestoreService.unlockAchievement(
-                                childUid, 
-                                selectedAchievement.id, 
-                                selectedAchievement.currentProgress
-                              );
-                              console.log('🏆 User achievement created:', userAchievementId);
-                            }
-                            
                             // Now claim the reward
-                            await claimAchievementReward(userAchievementId);
+                            await claimAchievementReward(selectedAchievement.userAchievementId);
                             setSelectedAchievement(null);
                           } catch (error) {
                             console.error('🏆 Error claiming achievement reward:', error);
