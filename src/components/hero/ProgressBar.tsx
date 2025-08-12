@@ -99,29 +99,51 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
                 {/* Efeito de brilho */}
                 <motion.div
                   animate={{
-                    x: ['-100%', '100%']
+                    x: ['-100%', '100%'],
+                    opacity: [0.3, 0.8, 0.3]
                   }}
                   transition={{
-                    duration: 2,
+                    duration: 2.5,
                     repeat: Infinity,
                     key: `total-xp-${levelSystem.currentXP}`,
                   }}
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full"
                 />
+                
+                {/* Raios de energia na barra de progresso */}
+                {levelSystem.progressPercentage > 50 && (
+                  <motion.div
+                    animate={{
+                      opacity: [0.2, 0.5, 0.2],
+                      scale: [0.95, 1.05, 0.95]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-transparent to-yellow-400/20 rounded-full"
+                  />
+                )}
                 
                 {/* Lightning effect when close to level up */}
                 {levelSystem.progressPercentage > 80 && !levelSystem.isMaxLevel && (
                   <motion.div
                     animate={{
-                      opacity: [0.5, 1, 0.5],
-                      scale: [1, 1.05, 1]
+                      opacity: [0.6, 1, 0.6],
+                      scale: [1, 1.08, 1],
+                      boxShadow: [
+                        '0 0 5px rgba(255, 212, 0, 0.5)',
+                        '0 0 15px rgba(255, 212, 0, 0.8)',
+                        '0 0 5px rgba(255, 212, 0, 0.5)'
+                      ]
                     }}
                     transition={{
-                      duration: 1,
+                      duration: 0.8,
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className={`absolute inset-0 bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)}`}
+                    className={`absolute inset-0 bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} rounded-full`}
                   />
                 )}
               </motion.div>

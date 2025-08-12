@@ -157,13 +157,32 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
           relative overflow-hidden rounded-2xl p-4 border-2 transition-all duration-300
           ${task.status === 'done'
             ? 'bg-green-50 border-green-300 shadow-lg shadow-green-200 scale-95' 
-            : 'bg-white border-gray-200 hover:border-hero-accent/50 shadow-md'
+            : 'bg-white border-gray-200 hover:border-hero-accent/50 shadow-lg hover:shadow-xl'
           }
           ${isCompleting ? 'animate-pulse' : ''}
         `}
       >
-        {/* Efeito de fundo gradiente por período */}
-        <div className={`absolute inset-0 bg-gradient-to-r ${getPeriodColor()} opacity-10`} />
+        {/* Efeito de fundo gradiente por período - mais sutil */}
+        <div className={`absolute inset-0 bg-gradient-to-r ${getPeriodColor()} opacity-5`} />
+        
+        {/* Raios sutis de energia na tarefa */}
+        {task.status !== 'done' && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+            <motion.div
+              animate={{
+                x: ['-100%', '100%'],
+                opacity: [0, 0.1, 0]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear",
+                delay: Math.random() * 3
+              }}
+              className="absolute top-1/2 w-full h-px bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent transform -translate-y-1/2"
+            />
+          </div>
+        )}
         
         <div className="relative flex items-center space-x-4">
           {/* Botão de completar */}
