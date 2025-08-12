@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement } from '../types';
+import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp } from '../utils/levelSystem';
 import { getRewardsUnlockedAtLevel } from '../utils/rewardLevels';
@@ -922,7 +922,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     flashReminders,
     achievements,
     userAchievements,
-    flashReminders,
     loading,
     addTask,
     updateTask,
@@ -935,9 +934,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     approveRedemption,
     sendNotification,
     markNotificationAsRead,
-    addFlashReminder,
-    updateFlashReminder,
-    deleteFlashReminder,
     addFlashReminder,
     updateFlashReminder,
     deleteFlashReminder,
