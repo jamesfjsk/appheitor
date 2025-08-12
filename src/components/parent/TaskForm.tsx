@@ -330,7 +330,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
           </div>
 
           {/* Status ativo */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <input
               type="checkbox"
               id="isActive"

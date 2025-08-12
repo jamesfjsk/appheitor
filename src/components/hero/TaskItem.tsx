@@ -131,7 +131,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
           }}
           transition={{
             duration: 2,
-            repeat: Infinity,
+            repeat: Infinity,            repeatType: "reverse",
             ease: "easeInOut"
           }}
           className="absolute inset-0 bg-flash-red-light rounded-lg"
@@ -141,7 +141,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
       <motion.div
         whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}
-        className={`task-card ${task.status === 'done' ? 'completed' : ''} ${isCompleting ? 'opacity-75' : ''}`}
+        className={`task-card ${task.status === 'done' ? 'completed' : ''} ${isCompleting ? 'opacity-75' : ''} relative`}
       >
         <div className="relative flex items-center space-x-4">
           {/* Botão de completar */}
@@ -226,7 +226,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               <div className="task-points ml-4 bg-gray-100 rounded-lg p-3 text-center">
                 <Zap className="w-4 h-4 text-gold-500 mx-auto mb-1" />
                 <span className="text-gray-900 font-bold text-sm block">
-                  +{task.xp || 10} XP
+                  +{task.xp || 10} XP                </span>
                 </span>
                 <span className="text-gray-600 font-medium text-xs">
                   +{task.gold || 5} Gold
@@ -253,14 +253,14 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                     opacity: 0,
                     scale: 1,
                     x: `${50 + (Math.random() - 0.5) * 200}%`,
-                    y: `${50 + (Math.random() - 0.5) * 200}%`
+                    y: `${50 + (Math.random() - 0.5) * 200}%`                  }}
                   }}
                   transition={{ 
                     duration: 0.8,
                     delay: i * 0.1,
                     ease: "easeOut"
                   }}
-                  className={`absolute ${guidedMode ? 'w-3 h-3' : 'w-2 h-2'} bg-success rounded-full`}
+                  className="absolute inset-0 bg-flash-red rounded-full z-0"
                 />
               ))}
             </div>

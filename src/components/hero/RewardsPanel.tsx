@@ -220,7 +220,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     key={reward.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.05 }}
                     className={`relative backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 ${
                       isUnlocked 
                         ? 'bg-white/20 border-white/30' 

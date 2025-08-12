@@ -78,7 +78,7 @@ const LoginScreen: React.FC = () => {
           <div className="text-center mb-8">
             <motion.div
               className="flash-logo"
-            >
+              animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}            >
               <Lightning className="w-6 h-6" fill="currentColor" />
             </motion.div>
             <h1 className="text-3xl font-bold text-gray-900 mb-3">

@@ -55,7 +55,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
               <Lightning className="w-5 h-5 text-flash-red" fill="currentColor" />
-              Progresso Flash
+              Progresso do Flash
             </h3>
             <div className="flex items-center gap-3">
               <div className="text-gray-700 font-bold bg-gray-100 px-3 py-1 rounded-lg text-sm">
@@ -65,7 +65,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="bg-success text-white px-3 py-1 rounded-lg text-xs font-bold shadow-normal"
+                  className="bg-success text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm"
                 >
                   +{dailyXP} hoje
                 </motion.div>
@@ -75,11 +75,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
 
           {/* Barra de Progresso */}
           <div className="relative mb-4">
-            <div className="progress-bar progress-bar-thick">
+            <div className="progress-bar progress-bar-thick relative">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${levelSystem.progressPercentage}%` }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
+                transition={{ duration: 1, ease: "easeOut" }}
                 className="progress-fill"
               />
             </div>
@@ -114,7 +114,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
                   scale: progress.streak > 0 ? [1, 1.1, 1] : 1
                 }}
                 transition={{
-                  duration: 1.5,
+                  duration: 0.8,
                   repeat: progress.streak > 0 ? Infinity : 0,
                   ease: "easeInOut"
                 }}
@@ -132,7 +132,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="mt-6 p-4 bg-gray-100 rounded-xl text-center border border-gray-200"
+            className="mt-6 p-4 bg-gray-100 rounded-lg text-center border border-gray-200"
           >
             <p className="text-gray-700 text-sm font-semibold">
               {!levelSystem.isMaxLevel
@@ -147,7 +147,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             {!levelSystem.isMaxLevel && levelSystem.currentLevel < nextMilestone.level && (
               <motion.div
                 animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                transition={{ duration: 1.5, repeat: Infinity }}
                 className="mt-3 text-xs text-gray-500 bg-white rounded-lg p-2 border border-gray-200"
               >
                 Próximo marco: {nextMilestone.title} (Nível {nextMilestone.level})
@@ -164,7 +164,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             initial={{ opacity: 0, scale: 0, rotate: -180 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             exit={{ opacity: 0, scale: 0, rotate: 180 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
           >
             <div className={`bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} text-white text-4xl md:text-6xl font-bold px-8 py-4 rounded-3xl shadow-2xl border-4 border-white relative overflow-hidden`}>

@@ -35,7 +35,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
       animate={isAnimating ? { 
         scale: [1, 1.1, 1], 
         rotate: [0, 5, -5, 0],
-        y: [0, -10, 0]
+        y: [0, -10, 0]      } : {}}
       } : {}}
       transition={{ duration: 0.6, repeat: isAnimating ? 3 : 0 }}
       className="card-hero text-center"
@@ -47,7 +47,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
             scale: isAnimating ? [1, 1.1, 1] : 1
           }}
           transition={{ duration: 1, repeat: isAnimating ? Infinity : 0 }}
-          className="w-24 h-24 mx-auto bg-flash-red rounded-full flex items-center justify-center relative shadow-elevated"
+          className="w-24 h-24 mx-auto bg-flash-red rounded-full flex items-center justify-center relative shadow-lg"
         >
           {/* Raio do Flash */}
           <motion.div
@@ -65,7 +65,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
         <motion.div
           animate={isAnimating ? { rotate: [0, 360] } : {}}
           transition={{ duration: 1, repeat: isAnimating ? Infinity : 0 }}
-          className="absolute -top-2 -right-2 bg-gold-500 rounded-full p-2 shadow-normal border-2 border-white"
+          className="absolute -top-2 -right-2 bg-gold-500 rounded-full p-2 shadow-md border-2 border-white"
         >
           <span className="text-sm">{getLevelIconComponent()}</span>
         </motion.div>
@@ -92,7 +92,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
             <div className="progress-bar">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${levelSystem.progressPercentage}%` }}
+                animate={{ width: `${levelSystem.progressPercentage}%` }}                transition={{ duration: 1, ease: "easeOut" }}
                 transition={{ duration: 1, ease: "easeOut" }}
                 className="progress-fill"
               />

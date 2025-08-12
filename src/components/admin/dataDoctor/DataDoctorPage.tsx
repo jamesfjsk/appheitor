@@ -116,7 +116,7 @@ const DataDoctorPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-lg p-6"
+        className="card p-6"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -162,7 +162,7 @@ const DataDoctorPage: React.FC = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-blue-50 border border-blue-200 rounded-2xl p-6"
+            className="bg-gray-100 border border-gray-200 rounded-lg p-6"
           >
             <h3 className="text-lg font-bold text-blue-900 mb-4">📖 Como usar o Data Doctor:</h3>
             
@@ -203,7 +203,7 @@ const DataDoctorPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-lg p-6"
+          className="card p-6"
         >
           <div className="flex items-center gap-4">
             <Users className="w-6 h-6 text-purple-600" />
@@ -235,7 +235,7 @@ const DataDoctorPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="bg-white rounded-2xl shadow-lg p-8 text-center"
+          className="card p-8 text-center"
         >
           <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Analisando Coleções...</h3>
@@ -274,7 +274,7 @@ const DataDoctorPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`rounded-2xl shadow-lg p-6 ${
+          className={`card p-6 ${
             finalReport.allValid 
               ? 'bg-green-50 border border-green-200' 
               : 'bg-yellow-50 border border-yellow-200'
@@ -356,7 +356,7 @@ const DataDoctorPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-lg p-12 text-center"
+          className="card p-12 text-center"
         >
           <Database className="w-24 h-24 text-gray-400 mx-auto mb-6" />
           <h3 className="text-2xl font-bold text-gray-900 mb-4">
@@ -381,7 +381,7 @@ const DataDoctorPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-50 rounded-2xl p-6"
+        className="card p-6"
       >
         <h3 className="text-lg font-bold text-gray-900 mb-4">📋 Schema Esperado:</h3>
         

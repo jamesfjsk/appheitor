@@ -93,7 +93,7 @@ const HeroPanel: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-hero-primary to-hero-secondary flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <LoadingSpinner size="large" color="yellow" />
         </div>
       </div>
@@ -104,7 +104,7 @@ const HeroPanel: React.FC = () => {
     <>
       <div className="hero-dashboard">
 
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-6xl p-4">
           <HeroHeader 
             progress={progress}
             onOpenRewards={() => setShowRewards(true)}
@@ -122,7 +122,7 @@ const HeroPanel: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleSound}
-              className={`p-3 rounded-lg shadow-normal transition-all duration-300 ${
+              className={`p-3 rounded-full shadow-lg transition-all duration-300 ${
                 isSoundEnabled 
                   ? 'bg-flash-red text-white' 
                   : 'bg-white text-gray-400 border border-gray-300'
@@ -140,7 +140,7 @@ const HeroPanel: React.FC = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -50, scale: 0.9 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="mb-8 text-center"
+                className="mb-8 text-center p-4"
               >
                 <div className="card-hero">
                   <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">

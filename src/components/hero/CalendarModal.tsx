@@ -153,7 +153,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
                     ${isCurrentMonth ? 'cursor-pointer' : 'cursor-default'}
                     ${isToday ? 'border-yellow-400 ring-2 ring-yellow-400 ring-opacity-50' : 'border-transparent'}
                   `}
-                >
+                >                  <div className="flex items-center justify-between mb-3">
                   <span>{date.getDate()}</span>
                   
                   {/* Points indicator */}

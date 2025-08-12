@@ -151,7 +151,7 @@ const RewardManager: React.FC = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="bg-purple-50 border border-purple-200 rounded-2xl p-6 mb-6"
-          >
+          >            <h3 className="text-lg font-bold text-purple-900 mb-4 flex items-center gap-2">
             <h3 className="text-lg font-bold text-purple-900 mb-4 flex items-center gap-2">
               <Crown className="w-5 h-5" />
               Templates de Recompensas por Nível

@@ -46,7 +46,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
       {/* Avatar e Saudação */}
       <div className="flex items-center gap-4">
         <motion.div
-          className="hero-avatar"
+          className="hero-avatar"          animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.05, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
           <Lightning className="w-6 h-6" fill="currentColor" />
         </motion.div>
@@ -78,7 +78,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           whileHover={{ scale: 1.05 }}
           className="gold-display"
         >
-          🪙 {progress.availableGold || 0} Gold
+          <span className="text-gold-500">🪙</span> {progress.availableGold || 0} Gold
         </motion.div>
         
         {/* Nível */}
@@ -99,7 +99,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             onOpenRewards();
           }}
-          className="p-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white transition-all duration-300 shadow-normal"
+          className="p-3 bg-flash-red hover:bg-flash-red-dark rounded-full text-white transition-all duration-300 shadow-md"
           title="Loja de Recompensas"
         >
           <Gift className="w-5 h-5" />
@@ -113,7 +113,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             onOpenCalendar();
           }}
-          className="p-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white transition-all duration-300 shadow-normal"
+          className="p-3 bg-flash-red hover:bg-flash-red-dark rounded-full text-white transition-all duration-300 shadow-md"
           title="Calendário de Missões"
         >
           <Calendar className="w-5 h-5" />

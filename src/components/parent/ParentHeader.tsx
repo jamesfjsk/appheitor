@@ -15,7 +15,7 @@ const ParentHeader: React.FC<ParentHeaderProps> = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+      className="admin-header"
     >
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
         <div className="flex items-center gap-4 mb-4 md:mb-0">

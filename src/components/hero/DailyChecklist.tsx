@@ -119,7 +119,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
-      className="card-hero space-y-6"
+      className="card-hero space-y-6 p-6"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -135,7 +135,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
             onClick={onToggleGuidedMode}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
               guidedMode
-                ? 'bg-flash-red text-white shadow-normal'
+                ? 'bg-flash-red text-white shadow-md'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -169,7 +169,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       {/* Progress Summary */}
       {totalTasks > 0 && (
         <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-normal">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-gray-900 font-semibold">
               {currentPeriod.emoji} Progresso da {currentPeriod.label}
             </span>
@@ -181,7 +181,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           <div className="progress-bar">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${progressPercentage}%` }}
+              animate={{ width: `${progressPercentage}%` }}              transition={{ duration: 0.8, ease: "easeOut" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="progress-fill"
             />

@@ -35,9 +35,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = ({ achievements })
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 + index * 0.1 }}
             className={`p-4 rounded-lg border transition-all duration-300 ${
-              achievement.isUnlocked
-                ? 'bg-white border-gray-200 shadow-normal'
-                : 'bg-gray-50 border-gray-200 opacity-60'
+              achievement.isUnlocked ? 'bg-white border-gray-200 shadow-md' : 'bg-gray-50 border-gray-200 opacity-60'
             }`}
           >
             <div className="flex items-center gap-3">

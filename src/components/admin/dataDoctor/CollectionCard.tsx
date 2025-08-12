@@ -48,7 +48,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 
   if (!scanResult) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="card p-6">
         <div className="text-center py-8">
           <Database className="w-12 h-12 text-gray-400 mx-auto mb-3" />
           <h3 className="text-lg font-semibold text-gray-900 capitalize mb-2">
@@ -66,9 +66,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
   const currentIssues = stats.issues.slice(
     currentPage * ISSUES_PER_PAGE,
     (currentPage + 1) * ISSUES_PER_PAGE
-  );
-
-  const getCollectionIcon = () => {
+  );  const getCollectionIcon = () => {
     switch (collectionName) {
       case 'tasks': return FileText;
       case 'rewards': return Gift;
@@ -80,9 +78,9 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
   };
 
   const getCollectionColor = () => {
-    if (!hasIssues) return 'border-green-200 bg-green-50';
-    if (stats.valid > stats.issues.length) return 'border-yellow-200 bg-yellow-50';
-    return 'border-red-200 bg-red-50';
+    if (!hasIssues) return 'border-green-200';
+    if (stats.valid > stats.issues.length) return 'border-yellow-200';
+    return 'border-red-200';
   };
 
   const getStatusIcon = () => {
@@ -140,7 +138,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 
   return (
     <motion.div
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -2 }}      className={`bg-white rounded-xl shadow-sm border-2 transition-all duration-200 ${getCollectionColor()}`}
       className={`bg-white rounded-xl shadow-sm border-2 transition-all duration-200 ${getCollectionColor()}`}
     >
       {/* Header */}
@@ -257,7 +255,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 
       {/* Fix Result */}
       {fixResult && (
-        <div className="p-6 border-t border-gray-200 bg-green-50">
+        <div className="p-6 border-t border-gray-200 bg-green-50 rounded-b-xl">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="w-5 h-5 text-green-600" />
             <span className="font-semibold text-green-900">Correção Concluída</span>

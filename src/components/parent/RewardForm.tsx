@@ -349,7 +349,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
           </div>
 
           {/* Status ativo */}
-          <div className="bg-blue-50 rounded-lg p-4">
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h4 className="font-semibold text-blue-900 mb-3">💡 Sugestões de Níveis:</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="space-y-2">

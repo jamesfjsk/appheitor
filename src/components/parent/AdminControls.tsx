@@ -61,7 +61,7 @@ const AdminControls: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+      className="card p-6"
     >
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
@@ -93,7 +93,7 @@ const AdminControls: React.FC = () => {
       )}
 
       {/* Status Atual */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-100 rounded-lg">
         <div className="text-center">
           <div 
             className="text-2xl font-bold text-blue-600"
@@ -130,7 +130,7 @@ const AdminControls: React.FC = () => {
       </div>
       
       {/* Informações do Sistema de Níveis */}
-      <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+      <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h4 className="font-semibold text-purple-900 mb-1">📊 Sistema de Níveis Avançado</h4>
@@ -163,7 +163,7 @@ const AdminControls: React.FC = () => {
             <div className="w-full bg-purple-200 rounded-full h-2">
               <div 
                 className="bg-purple-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${levelSystem.progressPercentage}%` }}
+                style={{ width: `${levelSystem.progressPercentage}%` }}              />
               />
             </div>
           </div>
@@ -176,7 +176,7 @@ const AdminControls: React.FC = () => {
               {xpMilestones.slice(0, 20).map((milestone) => (
                 <div 
                   key={milestone.level}
-                  className={`p-2 rounded border ${
+                  className={`p-2 rounded-md border ${
                     milestone.level === levelSystem.currentLevel
                       ? 'bg-purple-100 border-purple-300 font-bold'
                       : milestone.level < levelSystem.currentLevel
@@ -337,7 +337,7 @@ const AdminControls: React.FC = () => {
       </div>
 
       {/* Botão Salvar & Sincronizar */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+      <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
         <div className="flex items-center justify-between">
           <div>
             <h4 className="font-semibold text-blue-900 mb-1">Sincronização Manual</h4>
@@ -362,7 +362,7 @@ const AdminControls: React.FC = () => {
       </div>
 
       {/* Botão Inicializar Dados de Teste */}
-      <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+      <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
         <div className="flex items-center justify-between">
           <div>
             <h4 className="font-semibold text-green-900 mb-1">Dados de Teste</h4>
@@ -446,7 +446,7 @@ const AdminControls: React.FC = () => {
       </div>
 
       {/* Explicação do Sistema */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+      <div className="mt-6 p-4 bg-gray-100 rounded-lg">
         <h5 className="text-sm font-medium text-blue-900 mb-2">💡 Sistema XP vs Gold:</h5>
         <ul className="text-xs text-blue-700 space-y-1">
           <li>• <strong>XP (Experiência):</strong> Valor configurável por tarefa (determina nível)</li>
