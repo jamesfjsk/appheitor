@@ -35,7 +35,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
       animate={isAnimating ? { 
         scale: [1, 1.1, 1], 
         rotate: [0, 5, -5, 0],
-        y: [0, -10, 0]      } : {}}
+        y: [0, -10, 0]
       } : {}}
       transition={{ duration: 0.6, repeat: isAnimating ? 3 : 0 }}
       className="card-hero text-center"
@@ -92,7 +92,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
             <div className="progress-bar">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${levelSystem.progressPercentage}%` }}                transition={{ duration: 1, ease: "easeOut" }}
+                animate={{ width: `${levelSystem.progressPercentage}%` }}
                 transition={{ duration: 1, ease: "easeOut" }}
                 className="progress-fill"
               />
