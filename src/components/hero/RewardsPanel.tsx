@@ -19,6 +19,10 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   const currentLevel = levelSystem.currentLevel;
 
+  const getRewardById = (rewardId: string) => {
+    return rewards.find(reward => reward.id === rewardId);
+  };
+
   const categories = [
     { id: 'all', label: 'Todas', icon: '🎁' },
     { id: 'treat', label: 'Guloseimas', icon: '🍭' },
