@@ -704,7 +704,7 @@ export class FirestoreService {
         xp: task.xp,
         gold: task.gold,
         time: task.time,
-        frequency: task.frequency,
+        frequency: 'daily',
         active: true,
         createdBy: adminUid,
         createdAt: nowTs(),
@@ -787,7 +787,7 @@ export class FirestoreService {
         status: 'pending' as const,
         xp: 10,
         gold: 5,
-        frequency: 'weekday' as const,
+        frequency: 'daily' as const,
         active: true,
         createdBy: adminUid
       },
@@ -799,7 +799,7 @@ export class FirestoreService {
         status: 'pending' as const,
         xp: 15,
         gold: 8,
-        frequency: 'weekday' as const,
+        frequency: 'daily' as const,
         active: true,
         createdBy: adminUid
       },
@@ -811,7 +811,7 @@ export class FirestoreService {
         status: 'pending' as const,
         xp: 25,
         gold: 15,
-        frequency: 'weekday' as const,
+        frequency: 'daily' as const,
         active: true,
         createdBy: adminUid
       },
@@ -823,7 +823,7 @@ export class FirestoreService {
         status: 'pending' as const,
         xp: 20,
         gold: 10,
-        frequency: 'weekend' as const,
+        frequency: 'daily' as const,
         active: true,
         createdBy: adminUid
       }

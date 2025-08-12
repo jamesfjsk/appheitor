@@ -37,7 +37,7 @@ export interface Task {
   gold: number;
   period: 'morning' | 'afternoon' | 'evening';
   time?: string;
-  frequency: 'daily' | 'weekday' | 'weekend';
+  frequency: 'daily' | 'weekly' | 'custom';
   active: boolean;
   status: 'pending' | 'done';
   createdAt: Date;

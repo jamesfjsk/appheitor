@@ -9,11 +9,10 @@ export default {
       colors: {
         // Painel Infantil - Flash Theme
         hero: {
-          primary: '#C8102E',    // Vermelho Flash original
-          secondary: '#FF3131',  // Vermelho Flash claro
-          accent: '#FFD93D',     // Amarelo dourado suave
+          primary: '#C8102E',    // Vermelho Flash
+          secondary: '#FF3131',  // Vermelho mais claro para gradiente
+          accent: '#FFD700',     // Amarelo dourado
           light: '#FFFFFF',      // Branco puro
-          background: '#F8FAFC', // Fundo suave
         },
         // Painel Adulto - Clean Theme
         parent: {
@@ -25,26 +24,10 @@ export default {
           muted: '#F3F4F6',      // Cinza claro
         },
         // Estados e feedback
-        success: {
-          50: '#ECFDF5',
-          500: '#10B981',
-          600: '#059669',
-        },
-        warning: {
-          50: '#FFFBEB',
-          500: '#F59E0B',
-          600: '#D97706',
-        },
-        error: {
-          50: '#FEF2F2',
-          500: '#EF4444',
-          600: '#DC2626',
-        },
-        info: {
-          50: '#EFF6FF',
-          500: '#3B82F6',
-          600: '#2563EB',
-        },
+        success: '#10B981',
+        warning: '#F59E0B',
+        error: '#EF4444',
+        info: '#3B82F6',
       },
       fontFamily: {
         // Fonte infantil

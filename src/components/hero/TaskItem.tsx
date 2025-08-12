@@ -120,7 +120,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
       transition={{ duration: 0.3, delay: index * 0.1 }}
       className={`
         relative
-        ${guidedMode ? 'ring-4 ring-hero-accent ring-opacity-60 glow-effect' : ''}
+        ${guidedMode ? 'ring-2 ring-yellow-400 ring-opacity-50' : ''}
       `}
     >
       {/* Lightning effects for guided mode */}
@@ -128,24 +128,24 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
         <>
           <motion.div
             animate={{
-              opacity: [0.2, 0.4, 0.2],
+              opacity: [0.3, 0.7, 0.3],
               scale: [1, 1.02, 1]
             }}
             transition={{
-              duration: 3,
+              duration: 2,
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="absolute inset-0 bg-gradient-to-r from-hero-accent/20 to-transparent rounded-2xl"
+            className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent rounded-2xl"
           />
           <motion.div
             animate={{ x: ['-100%', '100%'] }}
             transition={{
-              duration: 4,
+              duration: 3,
               repeat: Infinity,
               ease: "linear"
             }}
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent skew-x-12"
           />
         </>
       )}
@@ -154,14 +154,17 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
         whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}
         className={`
-          task-item relative p-5 transition-all duration-300
+          relative overflow-hidden rounded-2xl p-4 border-2 transition-all duration-300
           ${task.status === 'done'
-            ? 'completed shadow-lg' 
-            : 'border-white/30 hover:border-hero-accent/50'
+            ? 'bg-white/30 border-hero-accent shadow-lg shadow-hero-accent/20 scale-95' 
+            : 'bg-white/20 border-white/30 hover:border-hero-accent/50'
           }
           ${isCompleting ? 'animate-pulse' : ''}
         `}
       >
+        {/* Efeito de fundo gradiente por período */}
+        <div className={`absolute inset-0 bg-gradient-to-r ${getPeriodColor()} opacity-10`} />
+        
         <div className="relative flex items-center space-x-4">
           {/* Botão de completar */}
           <motion.button
@@ -170,11 +173,11 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
             whileHover={{ scale: guidedMode ? 1.15 : 1.1 }}
             whileTap={{ scale: 0.9 }}
             className={`
-              relative ${guidedMode ? 'w-16 h-16' : 'w-14 h-14'} rounded-full border-3 flex items-center justify-center
-              transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50 shadow-lg
+              relative ${guidedMode ? 'w-16 h-16' : 'w-12 h-12'} rounded-full border-3 flex items-center justify-center
+              transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50
               ${task.status === 'done'
-                ? 'bg-gradient-to-r from-success-500 to-success-600 border-success-500 text-white cursor-default'
-                : 'bg-white/30 border-white/60 text-white hover:border-hero-accent hover:bg-hero-accent/30 backdrop-blur-sm'
+                ? 'bg-hero-accent border-hero-accent text-hero-primary shadow-lg cursor-default'
+                : 'bg-white/20 border-white/50 text-white hover:border-hero-accent hover:bg-hero-accent/20'
               }
               ${isCompleting || task.status === 'done' ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
@@ -188,7 +191,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   exit={{ scale: 0, rotate: 180 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <Star className={`${guidedMode ? 'w-8 h-8' : 'w-7 h-7'} fill-current drop-shadow-md`} />
+                  <Star className={`${guidedMode ? 'w-8 h-8' : 'w-6 h-6'} fill-current`} />
                 </motion.div>
               ) : task.status === 'done' ? (
                 <motion.div
@@ -197,7 +200,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Check className={`${guidedMode ? 'w-8 h-8' : 'w-7 h-7'} drop-shadow-md`} />
+                  <Check className={`${guidedMode ? 'w-8 h-8' : 'w-6 h-6'}`} />
                 </motion.div>
               ) : (
                 <motion.div
@@ -206,7 +209,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className={`${guidedMode ? 'w-8 h-8' : 'w-6 h-6'} rounded-full border-3 border-current`} />
+                  <div className={`${guidedMode ? 'w-6 h-6' : 'w-4 h-4'} rounded-full border-2 border-current`} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -217,7 +220,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 initial={{ scale: 0, opacity: 1 }}
                 animate={{ scale: 3, opacity: 0 }}
                 transition={{ duration: 0.6 }}
-                className="absolute inset-0 bg-gradient-to-r from-hero-accent to-yellow-400 rounded-full"
+                className="absolute inset-0 bg-hero-accent rounded-full"
               />
             )}
           </motion.button>
@@ -229,8 +232,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <h3 className={`
                   ${guidedMode ? 'text-xl' : 'text-lg'} font-bold transition-all duration-300
                   ${task.status === 'done'
-                    ? 'text-hero-primary font-extrabold' 
-                    : 'bg-white/20 backdrop-blur-sm border-white/30 hover:border-hero-accent/50'
+                    ? 'text-hero-accent line-through' 
+                    : 'text-white'
                   }
                 `}>
                   {task.title}
@@ -240,8 +243,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   <p className={`
                     text-sm mt-1 transition-all duration-300
                     ${task.status === 'done'
-                      ? 'text-hero-primary/80' 
-                      : 'text-white/90'
+                      ? 'text-white/60 line-through' 
+                      : 'text-white/80'
                     }
                   `}>
                     {task.description}
@@ -251,7 +254,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getPeriodEmoji()}</span>
-                    <span className="text-xs text-white/80 font-medium capitalize bg-white/20 backdrop-blur-sm px-2 py-1 rounded-lg">
+                    <span className="text-xs text-white/70 font-medium capitalize">
                       {task.period === 'morning' && 'Manhã'}
                       {task.period === 'afternoon' && 'Tarde'}
                       {task.period === 'evening' && 'Noite'}
@@ -263,13 +266,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               </div>
 
               {/* Pontos da tarefa */}
-              <div className="flex flex-col items-center gap-1 ml-4 bg-white/20 backdrop-blur-sm rounded-xl p-3">
-                <Zap className="w-5 h-5 text-hero-accent drop-shadow-sm" />
-                <span className="text-white font-bold text-sm">
+              <div className="flex items-center space-x-1 ml-4">
+                <Zap className="w-4 h-4 text-hero-accent" />
+                <span className="text-hero-accent font-bold text-sm">
                   +{task.xp || 10} XP
-                </span>
-                <span className="text-white/80 font-medium text-xs">
-                  +{task.gold || 5} Gold
                 </span>
               </div>
             </div>
@@ -300,7 +300,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                     delay: i * 0.1,
                     ease: "easeOut"
                   }}
-                  className={`absolute ${guidedMode ? 'w-4 h-4' : 'w-3 h-3'} bg-gradient-to-r from-hero-accent to-white rounded-full shadow-sm`}
+                  className={`absolute ${guidedMode ? 'w-3 h-3' : 'w-2 h-2'} bg-hero-accent rounded-full`}
                 />
               ))}
             
@@ -327,7 +327,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   delay: i * 0.15,
                   ease: "easeOut"
                 }}
-                className="absolute text-hero-accent text-xl drop-shadow-md"
+                className="absolute text-yellow-400 text-lg"
               >
                 ⚡
               </motion.div>
@@ -350,7 +350,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               transition={{ duration: 2, ease: "easeOut" }}
               className="absolute -top-8 left-1/2 transform -translate-x-1/2 pointer-events-none z-20"
             >
-              <div className="bg-gradient-to-r from-success-500 to-hero-accent text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg border-2 border-white/30 backdrop-blur-sm">
+              <div className="bg-gradient-to-r from-blue-400 to-yellow-400 text-white px-3 py-1 rounded-full font-bold text-sm shadow-lg">
                 +{task.xp || 10} XP, +{task.gold || 5} Gold
               </div>
             </motion.div>

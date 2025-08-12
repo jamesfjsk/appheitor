@@ -35,7 +35,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
         period: task.period,
         dueTime: task.dueTime || '',
         frequency: task.frequency,
-        frequency: task.frequency || 'daily',
         isActive: task.isActive,
       });
     } else {
@@ -46,7 +45,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
         goldReward: 5,
         period: 'morning',
         dueTime: '',
-        frequency: 'daily',
         frequency: 'daily',
         isActive: true,
       });
@@ -143,8 +141,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
   const getFrequencyLabel = (frequency: string) => {
     switch (frequency) {
       case 'daily': return 'Diária';
-      case 'weekday': return 'Dias de Semana (Seg-Sex)';
-      case 'weekend': return 'Fim de Semana (Sáb-Dom)';
+      case 'weekly': return 'Semanal';
+      case 'monthly': return 'Mensal';
       default: return frequency;
     }
   };
@@ -323,8 +321,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 <option value="daily">{getFrequencyLabel('daily')}</option>
-                <option value="weekday">{getFrequencyLabel('weekday')}</option>
-                <option value="weekend">{getFrequencyLabel('weekend')}</option>
+                <option value="weekly">{getFrequencyLabel('weekly')}</option>
+                <option value="monthly">{getFrequencyLabel('monthly')}</option>
               </select>
             </div>
           </div>

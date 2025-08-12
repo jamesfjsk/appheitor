@@ -4,31 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========================================
-   🎨 NOVA PALETA FLASH SUAVE
-   ======================================== */
+/* Design Tokens */
 :root {
-  /* Flash Red - Suavizado */
-  --flash-red-primary: #FF6B6B;     /* Vermelho coral suave */
-  --flash-red-light: #FFE3E3;       /* Rosa muito claro */
-  --flash-red-dark: #E55555;        /* Vermelho mais escuro */
-  
-  /* Flash Yellow - Dourado */
-  --flash-yellow-primary: #FFD93D;  /* Amarelo dourado */
-  --flash-yellow-light: #FFF4CC;    /* Amarelo muito claro */
-  --flash-yellow-dark: #F4C430;     /* Dourado mais escuro */
-  
-  /* Neutros Modernos */
-  --background-primary: #F8FAFC;    /* Branco azulado suave */
-  --background-secondary: #F1F5F9;  /* Cinza muito claro */
-  --text-primary: #1E293B;          /* Cinza escuro */
-  --text-secondary: #64748B;        /* Cinza médio */
-  
-  /* Gradientes */
-  --gradient-flash: linear-gradient(135deg, #C8102E 0%, #FF3131 100%);
-  --gradient-hero-bg: linear-gradient(135deg, #C8102E 0%, #FF3131 50%, #FFD93D 100%);
-  --gradient-background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
-  --gradient-card: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  /* Flash Theme Colors */
+  --flash-red: #C8102E;
+  --flash-red-light: #FF3131;
+  --flash-yellow: #FFD700;
+  --flash-white: #FFFFFF;
   
   /* Parent Theme Colors */
   --parent-bg: #FFFFFF;
@@ -43,19 +25,17 @@
   --space-6: 3rem;     /* 48px */
   --space-8: 4rem;     /* 64px */
   
-  /* Border Radius Modernos */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
   
-  /* Shadows Suaves */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-hero: 0 8px 32px rgba(255, 107, 107, 0.2);
-  --shadow-glow: 0 0 20px rgba(255, 217, 61, 0.4);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-hero: 0 4px 12px rgba(0, 0, 0, 0.25);
   
   /* Typography */
   --font-hero: 'Comic Neue', 'Poppins', cursive;
@@ -66,18 +46,16 @@
   --font-weight-bold: 700;
   
   /* Line Heights */
-  --leading-body: 1.6;    /* 160% */
-  --leading-heading: 1.3; /* 130% */
+  --leading-body: 1.5;    /* 150% */
+  --leading-heading: 1.2; /* 120% */
   
-  /* Transitions Suaves */
-  --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
 }
 
-/* ========================================
-   🎯 BASE STYLES
-   ======================================== */
+/* Base Styles */
 * {
   box-sizing: border-box;
 }
@@ -91,231 +69,9 @@ body {
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--gradient-background);
 }
 
-/* ========================================
-   🎨 FLASH CARDS MODERNOS
-   ======================================== */
-.flash-card {
-  background: var(--gradient-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid rgba(255, 107, 107, 0.1);
-  transition: all var(--transition-normal);
-  backdrop-filter: blur(10px);
-}
-
-.flash-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(255, 107, 107, 0.2);
-}
-
-.flash-card-hero {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: var(--shadow-hero);
-}
-
-.flash-card-hero:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(255, 107, 107, 0.25);
-}
-
-/* ========================================
-   🔘 BOTÕES MODERNOS
-   ======================================== */
-.btn-hero {
-  font-family: var(--font-hero);
-  font-weight: var(--font-weight-bold);
-  background: var(--gradient-flash);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 12px 24px;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-  transition: all var(--transition-normal);
-  min-height: 48px;
-  min-width: 48px;
-  cursor: pointer;
-}
-
-.btn-hero:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-}
-
-.btn-hero:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
-}
-
-.btn-hero:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-hero-secondary {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-}
-
-.btn-hero-secondary:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.btn-parent {
-  font-family: var(--font-parent);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-normal);
-  min-height: 44px;
-}
-
-.btn-parent:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.btn-parent:focus {
-  outline: 2px solid var(--parent-primary);
-  outline-offset: 2px;
-}
-
-.btn-parent:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* ========================================
-   📊 BARRAS DE PROGRESSO ANIMADAS
-   ======================================== */
-.progress-bar {
-  background: var(--flash-yellow-light);
-  border-radius: 20px;
-  height: 12px;
-  overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.progress-fill {
-  background: var(--gradient-flash);
-  height: 100%;
-  border-radius: 20px;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.progress-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    transparent 100%);
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* ========================================
-   ✨ ANIMAÇÕES SUAVES
-   ======================================== */
-.fade-in-up {
-  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.bounce-gentle {
-  animation: bounce-gentle 4s ease-in-out infinite;
-}
-
-@keyframes bounce-gentle {
-  0%, 100% { 
-    transform: translateY(0px);
-  }
-  50% { 
-    transform: translateY(-8px);
-  }
-}
-
-.pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
-    transform: scale(1);
-  }
-  50% { 
-    box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
-    transform: scale(1.02);
-  }
-}
-
-.wiggle {
-  animation: wiggle 2s ease-in-out infinite;
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(2deg); }
-  75% { transform: rotate(-2deg); }
-}
-
-.float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-10px) rotate(1deg); }
-  66% { transform: translateY(-5px) rotate(-1deg); }
-}
-
-.success-pop {
-  animation: success-pop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes success-pop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-
-/* ========================================
-   🎯 HERO PANEL TYPOGRAPHY
-   ======================================== */
+/* Hero Panel Typography */
 .hero-panel {
   font-family: var(--font-hero);
 }
@@ -325,222 +81,119 @@ body {
 .hero-panel h3 {
   line-height: var(--leading-heading);
   font-weight: var(--font-weight-bold);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.hero-text-shadow {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* ========================================
-   🌟 ELEMENTOS DECORATIVOS
-   ======================================== */
-.decorative-blob {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 217, 61, 0.2) 0%, transparent 70%);
-  animation: float 8s ease-in-out infinite;
-}
-
-.decorative-star {
-  position: absolute;
-  color: var(--flash-yellow-primary);
-  animation: twinkle 3s ease-in-out infinite;
-}
-
-@keyframes twinkle {
-  0%, 100% { 
-    opacity: 0.6;
-    transform: scale(1) rotate(0deg);
-  }
-  50% { 
-    opacity: 1;
-    transform: scale(1.2) rotate(180deg);
-  }
-}
-
-.lightning-effect {
-  position: absolute;
-  background: linear-gradient(45deg, 
-    transparent 0%, 
-    rgba(255, 217, 61, 0.3) 50%, 
-    transparent 100%);
-  animation: lightning-flash 4s ease-in-out infinite;
-}
-
-@keyframes lightning-flash {
-  0%, 90%, 100% { opacity: 0; }
-  5%, 85% { opacity: 1; }
-}
-
-/* ========================================
-   🎮 TASK ITEMS MODERNOS
-   ======================================== */
-.task-item {
-  background: var(--gradient-card);
-  border-radius: var(--radius-lg);
-  border: 2px solid transparent;
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-}
-
-.task-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--gradient-flash);
-  opacity: 0;
-  transition: opacity var(--transition-normal);
-}
-
-.task-item:hover::before {
-  opacity: 1;
-}
-
-.task-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(255, 107, 107, 0.2);
-}
-
-.task-item.completed {
-  background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
-  border-color: #FFD93D;
-  transform: scale(0.98);
-}
-
-.task-item.completed::before {
-  background: linear-gradient(90deg, #FFFFFF 0%, #FFFBEB 100%);
-  opacity: 1;
-}
-
-/* ========================================
-   🏆 ACHIEVEMENT BADGES
-   ======================================== */
-.achievement-badge {
-  background: var(--gradient-flash);
-  border-radius: var(--radius-xl);
-  padding: 12px;
-  box-shadow: var(--shadow-md);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: all var(--transition-normal);
-}
-
-.achievement-badge:hover {
-  transform: scale(1.05) rotate(2deg);
-  box-shadow: var(--shadow-lg);
-}
-
-.achievement-badge.locked {
-  background: linear-gradient(135deg, #94A3B8 0%, #CBD5E1 100%);
-  opacity: 0.7;
-}
-
-/* ========================================
-   🎯 AVATAR E MASCOTE
-   ======================================== */
-.flash-avatar {
-  background: var(--gradient-flash);
-  border-radius: 50%;
-  border: 4px solid var(--flash-yellow-primary);
+/* Button Styles */
+.btn-hero {
+  font-family: var(--font-hero);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-hero);
-  animation: bounce-gentle 4s ease-in-out infinite;
-  position: relative;
-  overflow: hidden;
+  transition: all var(--transition-fast);
+  min-height: 48px; /* Accessibility touch target */
+  min-width: 48px;
 }
 
-.flash-avatar::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, 
-    transparent 30%, 
-    rgba(255, 255, 255, 0.2) 50%, 
-    transparent 70%);
-  animation: avatar-shine 3s ease-in-out infinite;
+.btn-hero:hover {
+  transform: scale(1.05);
 }
 
-@keyframes avatar-shine {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.btn-hero:active {
+  transform: scale(0.97);
 }
 
-/* ========================================
-   🌈 PERIOD INDICATORS
-   ======================================== */
-.period-morning {
-  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
-  color: #92400E;
+.btn-hero:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.period-afternoon {
-  background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
-  color: #1E40AF;
+.btn-parent {
+  font-family: var(--font-parent);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal);
 }
 
-.period-evening {
-  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
-  color: #5B21B6;
+.btn-parent:hover {
+  box-shadow: var(--shadow-md);
 }
 
-/* ========================================
-   💫 LOADING STATES
-   ======================================== */
+.btn-parent:focus {
+  outline: 2px solid var(--parent-primary);
+  outline-offset: 2px;
+}
+
+.btn-parent:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Animation Classes */
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 1.5s ease-in-out infinite;
+}
+
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-flash-glow {
+  animation: flash-glow 0.3s ease-out;
+}
+
+@keyframes flash-glow {
+  0% {
+    box-shadow: 0 0 0 0 var(--flash-yellow);
+    border-color: var(--flash-yellow);
+  }
+  100% {
+    box-shadow: 0 0 20px 5px transparent;
+    border-color: transparent;
+  }
+}
+
+.animate-star-twinkle {
+  animation: star-twinkle 0.2s ease-in-out;
+}
+
+@keyframes star-twinkle {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Loading States */
 .loading-skeleton {
-  background: linear-gradient(90deg, 
-    var(--background-secondary) 25%, 
-    var(--background-primary) 50%, 
-    var(--background-secondary) 75%);
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: loading-shimmer 1.5s infinite;
-  border-radius: var(--radius-md);
 }
 
 @keyframes loading-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
-.spinner-flash {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--flash-yellow-light);
-  border-top: 4px solid var(--flash-yellow-primary);
-  border-radius: 50%;
-  animation: spin-flash 1s linear infinite;
-}
-
-@keyframes spin-flash {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* ========================================
-   🎨 GLASS EFFECTS
-   ======================================== */
-.glass-effect {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-lg);
-}
-
-.glass-effect-strong {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-/* ========================================
-   🎯 ACCESSIBILITY
-   ======================================== */
+/* Accessibility */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -553,55 +206,27 @@ body {
   border: 0;
 }
 
+/* Focus Styles */
 .focus-ring:focus {
   outline: 2px solid var(--parent-primary);
   outline-offset: 2px;
 }
 
 .focus-ring-hero:focus {
-  outline: 2px solid var(--flash-yellow-primary);
+  outline: 2px solid var(--flash-yellow);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(255, 217, 61, 0.2);
 }
 
-/* ========================================
-   📱 RESPONSIVE DESIGN
-   ======================================== */
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
-  }
-  
-  .flash-card {
-    border-radius: var(--radius-md);
-  }
-  
-  .btn-hero {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-}
-
-@media (min-width: 1024px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-/* ========================================
-   🎨 HIGH CONTRAST MODE
-   ======================================== */
+/* High Contrast Mode Support */
 @media (prefers-contrast: high) {
   :root {
-    --flash-red-primary: #DC2626;
-    --flash-yellow-primary: #D97706;
+    --flash-red: #B91C1C;
+    --flash-yellow: #D97706;
     --parent-primary: #1D4ED8;
   }
 }
 
-/* ========================================
-   ⚡ REDUCED MOTION
-   ======================================== */
+/* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -612,9 +237,7 @@ body {
   }
 }
 
-/* ========================================
-   🖨️ PRINT STYLES
-   ======================================== */
+/* Print Styles */
 @media print {
   .no-print {
     display: none !important;
@@ -626,35 +249,42 @@ body {
   }
 }
 
-/* ========================================
-   📜 CUSTOM SCROLLBAR
-   ======================================== */
+/* Responsive Typography */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-secondary);
+  background: #f1f1f1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--flash-red-primary);
+  background: #c1c1c1;
   border-radius: 4px;
-  transition: background var(--transition-normal);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--flash-red-dark);
+  background: #a8a8a8;
 }
 
-/* ========================================
-   🍞 TOAST OVERRIDES
-   ======================================== */
+/* Toast Overrides */
 .Toastify__toast {
   font-family: var(--font-parent);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-sm);
 }
 
 .Toastify__toast--success {
@@ -669,22 +299,16 @@ body {
   background: linear-gradient(135deg, #3B82F6, #2563EB);
 }
 
-/* ========================================
-   📝 FORM STYLES
-   ======================================== */
+/* Form Styles */
 .form-input {
   transition: all var(--transition-normal);
   border-radius: var(--radius-sm);
-  border: 2px solid #E2E8F0;
-  background: white;
-  padding: 12px 16px;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: var(--flash-red-primary);
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
-  background: #FEFEFE;
+  border-color: var(--parent-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .form-input:invalid {
@@ -692,9 +316,27 @@ body {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-/* ========================================
-   🎯 UTILITY CLASSES
-   ======================================== */
+/* Card Styles */
+.card {
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #e5e7eb;
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-hero {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Utility Classes */
 .text-balance {
   text-wrap: balance;
 }
@@ -713,292 +355,7 @@ body {
   min-width: 48px;
 }
 
-.hero-gradient {
-  background: var(--gradient-flash);
-}
-
-.hero-text-shadow {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.glass-effect-custom {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* ========================================
-   🎨 SPECIAL EFFECTS
-   ======================================== */
-.glow-effect {
-  box-shadow: 0 0 20px rgba(255, 217, 61, 0.4);
-}
-
-.glow-effect:hover {
-  box-shadow: 0 0 30px rgba(255, 217, 61, 0.6);
-}
-
-.rainbow-border {
-  background: linear-gradient(45deg, #FF6B6B, #FFD93D, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7);
-  background-size: 400% 400%;
-  animation: rainbow-flow 4s ease infinite;
-  padding: 2px;
-  border-radius: var(--radius-lg);
-}
-
-@keyframes rainbow-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.rainbow-border > * {
-  background: white;
-  border-radius: calc(var(--radius-lg) - 2px);
-}
-
-/* ========================================
-   🎪 CELEBRATION EFFECTS
-   ======================================== */
-.celebration-burst {
-  position: relative;
-  overflow: hidden;
-}
-
-.celebration-burst::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: radial-gradient(circle, var(--flash-yellow-primary) 0%, transparent 70%);
-  animation: burst 0.6s ease-out;
-}
-
-@keyframes burst {
-  0% {
-    width: 0;
-    height: 0;
-    opacity: 1;
-  }
-  100% {
-    width: 200px;
-    height: 200px;
-    margin-left: -100px;
-    margin-top: -100px;
-    opacity: 0;
-  }
-}
-
-/* ========================================
-   🌙 DARK MODE PREPARATION
-   ======================================== */
+/* Dark Mode Preparation (não implementado ainda) */
 @media (prefers-color-scheme: dark) {
-  /* Manter tema claro por enquanto - Flash é vibrante! */
-}
-
-/* ========================================
-   🎯 COMPONENT-SPECIFIC STYLES
-   ======================================== */
-
-/* Login Screen */
-.login-container {
-  background: var(--gradient-hero-bg);
-  min-height: 100vh;
-}
-
-.login-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: var(--radius-2xl);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Hero Panel */
-.hero-background {
-  background: var(--gradient-hero-bg);
-  min-height: 100vh;
-  position: relative;
-}
-
-.hero-background::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(circle at 20% 80%, rgba(255, 217, 61, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.1) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-/* Parent Panel */
-.parent-background {
-  background: var(--gradient-background);
-  min-height: 100vh;
-}
-
-/* Notification Styles */
-.notification-flash {
-  background: var(--gradient-flash);
-  color: white;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  animation: notification-slide 0.5s ease-out;
-}
-
-@keyframes notification-slide {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* Modal Overlays */
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-}
-
-.modal-content {
-  background: white;
-  border-radius: var(--radius-2xl);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ========================================
-   🎮 INTERACTIVE ELEMENTS
-   ======================================== */
-.interactive-hover {
-  transition: all var(--transition-normal);
-  cursor: pointer;
-}
-
-.interactive-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.interactive-hover:active {
-  transform: translateY(0);
-  transition: all 100ms ease;
-}
-
-/* ========================================
-   🎨 STATUS COLORS SUAVES
-   ======================================== */
-.status-success {
-  background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
-  color: white;
-}
-
-.status-warning {
-  background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
-  color: #92400E;
-}
-
-.status-error {
-  background: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
-  color: white;
-}
-
-.status-info {
-  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
-  color: white;
-}
-
-/* ========================================
-   🎪 SPECIAL ANIMATIONS
-   ======================================== */
-.level-up-glow {
-  animation: level-up-glow 2s ease-in-out;
-}
-
-@keyframes level-up-glow {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(255, 217, 61, 0.3);
-  }
-  50% { 
-    box-shadow: 0 0 40px rgba(255, 217, 61, 0.8);
-  }
-}
-
-.task-complete-celebration {
-  animation: task-complete-celebration 0.8s ease-out;
-}
-
-@keyframes task-complete-celebration {
-  0% { 
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  50% { 
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-  }
-  100% { 
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
-}
-
-/* ========================================
-   🎯 COMPONENT STATES
-   ======================================== */
-.state-loading {
-  opacity: 0.7;
-  pointer-events: none;
-  filter: grayscale(20%);
-}
-
-.state-disabled {
-  opacity: 0.5;
-  pointer-events: none;
-  filter: grayscale(50%);
-}
-
-.state-active {
-  transform: scale(1.02);
-  box-shadow: var(--shadow-lg);
-}
-
-/* ========================================
-   🌟 MICRO-INTERACTIONS
-   ======================================== */
-.micro-bounce:active {
-  animation: micro-bounce 0.2s ease-out;
-}
-
-@keyframes micro-bounce {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.95); }
-  100% { transform: scale(1); }
-}
-
-.micro-wiggle:hover {
-  animation: micro-wiggle 0.5s ease-in-out;
-}
-
-@keyframes micro-wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(1deg); }
-  75% { transform: rotate(-1deg); }
-}
-
-.micro-pulse:hover {
-  animation: micro-pulse 1s ease-in-out infinite;
-}
-
-@keyframes micro-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+  /* Manter tema claro por enquanto */
 }
