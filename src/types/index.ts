@@ -143,7 +143,7 @@ export interface Achievement {
   title: string;
   description: string;
   icon: string; // emoji ou ícone
-  type: 'xp' | 'level' | 'tasks' | 'checkin' | 'streak' | 'custom';
+  type: 'xp' | 'level' | 'tasks' | 'checkin' | 'streak' | 'redemptions' | 'custom';
   target: number; // valor alvo (ex: 1000 para 1000 XP)
   xpReward: number;
   goldReward: number;
@@ -159,6 +159,8 @@ export interface UserAchievement {
   achievementId: string;
   progress: number; // progresso atual
   isCompleted: boolean;
+  rewardClaimed: boolean;
+  claimedAt?: Date;
   unlockedAt?: Date;
   createdAt: Date;
   updatedAt: Date;

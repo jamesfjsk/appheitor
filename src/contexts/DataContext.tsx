@@ -472,6 +472,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
       
       await FirestoreService.redeemReward(childUid, rewardId, reward.costGold || 0);
+      
+      // Check for redemption-based achievements
+      setTimeout(() => {
+        checkAchievements();
+      }, 1000);
+      
       toast.success('🎁 Recompensa solicitada! Aguarde aprovação.');
     } catch (error: any) {
       console.error('❌ Erro ao resgatar recompensa:', error);
@@ -797,6 +803,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     updateAchievement,
     deleteAchievement,
     checkAchievements,
+    claimAchievementReward,
     adjustUserXP,
     adjustUserGold,
     resetUserData,

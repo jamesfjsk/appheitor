@@ -162,6 +162,7 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
     { value: 'tasks', label: '📝 Tarefas', description: 'Baseado em tarefas completadas' },
     { value: 'streak', label: '🔥 Sequência', description: 'Baseado em dias consecutivos' },
     { value: 'checkin', label: '📅 Check-in', description: 'Baseado em check-ins diários' },
+    { value: 'redemptions', label: '🎁 Resgates', description: 'Baseado em recompensas resgatadas' },
     { value: 'custom', label: '⭐ Personalizado', description: 'Conquista manual' },
   ];
 
@@ -182,6 +183,8 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
         return [3, 7, 14, 30, 60, 100];
       case 'checkin':
         return [7, 14, 30, 60, 100, 365];
+      case 'redemptions':
+        return [1, 3, 5, 10, 25, 50];
       default:
         return [1, 5, 10, 25, 50, 100];
     }
@@ -475,6 +478,7 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
               <li>• <strong>Tarefas:</strong> Verifica total de tarefas completadas</li>
               <li>• <strong>Sequência:</strong> Verifica maior sequência de dias consecutivos</li>
               <li>• <strong>Check-in:</strong> Verifica dias consecutivos atuais</li>
+              <li>• <strong>Resgates:</strong> Verifica total de recompensas resgatadas</li>
               <li>• <strong>Personalizado:</strong> Deve ser desbloqueado manualmente</li>
             </ul>
           </div>

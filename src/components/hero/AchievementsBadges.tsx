@@ -7,7 +7,7 @@ import { useData } from '../../contexts/DataContext';
 interface AchievementsBadgesProps {}
 
 const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
-  const { achievements, userAchievements, progress } = useData();
+  const { achievements, userAchievements, progress, claimAchievementReward } = useData();
   const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
 
   // Combine achievements with user progress
@@ -374,7 +374,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                 {/* Status */}
                 <div className="text-center">
                   {selectedAchievement.isCompleted ? (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
                       <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
                       <p className="font-bold text-green-900">Conquista Desbloqueada!</p>
                       {selectedAchievement.unlockedAt && (
@@ -382,6 +382,38 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                           {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       )}
+                      
+                      {/* Botão de Resgate */}
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={async () => {
+                          try {
+                            await claimAchievementReward(selectedAchievement.id);
+                            setSelectedAchievement(null);
+                          } catch (error) {
+                            // Error already handled in context
+                          }
+                        }}
+                        disabled={selectedAchievement.rewardClaimed}
+                        className={`w-full py-3 rounded-lg font-bold transition-all duration-200 ${
+                          selectedAchievement.rewardClaimed
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-yellow-400 hover:bg-yellow-500 text-red-600 shadow-lg'
+                        }`}
+                      >
+                        {selectedAchievement.rewardClaimed ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 inline mr-2" />
+                            Recompensa Resgatada
+                          </>
+                        ) : (
+                          <>
+                            <Star className="w-4 h-4 inline mr-2" />
+                            Resgatar Recompensa
+                          </>
+                        )}
+                      </motion.button>
                     </div>
                   ) : selectedAchievement.currentProgress >= selectedAchievement.target ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">

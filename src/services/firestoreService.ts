@@ -785,6 +785,9 @@ export class FirestoreService {
           case 'checkin':
             // For now, use streak as check-in proxy
             currentProgress = progress.streak || 0;
+          case 'redemptions':
+            currentProgress = userProgress.rewardsRedeemed || 0;
+            break;
             break;
           default:
             continue; // Skip custom achievements for auto-check
@@ -1711,6 +1714,71 @@ export class FirestoreService {
     }
   }
 
+  static async claimAchievementReward(childUid: string, achievementId: string, xpReward: number, goldReward: number): Promise<void> {
+    try {
+      console.log('🎁 Claiming achievement reward:', { childUid, achievementId, xpReward, goldReward });
+      
+      // Get user achievement
+      const userAchievementsQuery = query(
+        collection(db, 'userAchievements'),
+        where('userId', '==', childUid),
+        where('achievementId', '==', achievementId)
+      );
+      
+      const userAchievementsSnapshot = await getDocs(userAchievementsQuery);
+      if (userAchievementsSnapshot.empty) {
+        throw new Error('User achievement not found');
+      }
+      
+      const userAchievementDoc = userAchievementsSnapshot.docs[0];
+      const userAchievementData = userAchievementDoc.data();
+      
+      if (!userAchievementData.isCompleted) {
+        throw new Error('Achievement not completed');
+      }
+      
+      if (userAchievementData.rewardClaimed) {
+        throw new Error('Reward already claimed');
+      }
+      
+      const batch = writeBatch(db);
+      
+      // Mark reward as claimed
+      batch.update(doc(db, 'userAchievements', userAchievementDoc.id), {
+        rewardClaimed: true,
+        claimedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      // Update user progress with rewards
+      const progressRef = doc(db, 'progress', childUid);
+      const progressDoc = await getDoc(progressRef);
+      
+      if (progressDoc.exists()) {
+        const currentProgress = progressDoc.data();
+        const newTotalXP = (currentProgress.totalXP || 0) + xpReward;
+        const newAvailableGold = (currentProgress.availableGold || 0) + goldReward;
+        const newTotalGoldEarned = (currentProgress.totalGoldEarned || 0) + goldReward;
+        
+        // Calculate new level
+        const newLevel = this.calculateLevelFromXP(newTotalXP);
+        
+        batch.update(progressRef, {
+          totalXP: newTotalXP,
+          level: newLevel,
+          availableGold: newAvailableGold,
+          totalGoldEarned: newTotalGoldEarned,
+          updatedAt: serverTimestamp()
+        });
+      }
+      
+      await batch.commit();
+      console.log('✅ Achievement reward claimed successfully');
+    } catch (error) {
+      console.error('❌ Error claiming achievement reward:', error);
+      throw error;
+    }
+  }
   // ========================================
   // 🔥 ADMIN UTILITIES
   // ========================================
