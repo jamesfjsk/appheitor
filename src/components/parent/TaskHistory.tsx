@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, BarChart3, Sun, Sunset, Moon, CheckCircle, Star, Gift } from 'lucide-react';
 import { Task } from '../../types';
