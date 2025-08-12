@@ -49,8 +49,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   });
 
   const getRedemptionStatus = (rewardId: string) => {
+    // Only check for pending redemptions - approved/rejected redemptions don't block new ones
     const redemption = redemptions
-      .filter(r => r.rewardId === rewardId)
+      .filter(r => r.rewardId === rewardId && r.status === 'pending')
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
     
     return redemption;
@@ -61,7 +62,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     const goldCost = reward.costGold || 0;
     const hasEnoughGold = (progress.availableGold || 0) >= goldCost;
     const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
-    const notPending = !redemption || (redemption.status !== 'pending' && redemption.status !== 'approved');
+    const notPending = !redemption; // Only check if there's no pending redemption
     
     console.log('🔥 Verificando se pode resgatar:', {
       reward: reward.title,
@@ -89,18 +90,18 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   };
 
   const getStatusBadge = (reward: Reward) => {
-    const redemption = getRedemptionStatus(reward.id);
+    // Show badge only for pending redemptions
+    const pendingRedemption = redemptions
+      .filter(r => r.rewardId === reward.id && r.status === 'pending')
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
     
-    if (!redemption) return null;
+    if (!pendingRedemption) return null;
     
     const statusConfig = {
       pending: { icon: Clock, color: 'bg-yellow-500', text: 'Aguardando' },
-      approved: { icon: CheckCircle, color: 'bg-green-500', text: 'Aprovado' },
-      delivered: { icon: Star, color: 'bg-blue-500', text: 'Entregue' },
-      rejected: { icon: X, color: 'bg-red-500', text: 'Rejeitado' }
     };
     
-    const config = statusConfig[redemption.status];
+    const config = statusConfig.pending;
     const Icon = config.icon;
     
     return (
@@ -206,6 +207,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 const canRedeemReward = canRedeem(reward);
                 const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
                 const requiredLevel = reward.requiredLevel || 1;
+                const pendingRedemption = redemptions
+                  .filter(r => r.rewardId === reward.id && r.status === 'pending')
+                  .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
                 
                 return (
                   <motion.div
@@ -318,20 +322,10 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           <Lock className="w-4 h-4 inline mr-2" />
                           Nível {requiredLevel} Necessário
                         </>
-                      ) : redemption?.status === 'pending' ? (
+                      ) : pendingRedemption ? (
                         <>
                           <Clock className="w-4 h-4 inline mr-2" />
                           Aguardando Aprovação
-                        </>
-                      ) : redemption?.status === 'approved' ? (
-                        <>
-                          <CheckCircle className="w-4 h-4 inline mr-2" />
-                          Aprovado!
-                        </>
-                      ) : redemption?.status === 'delivered' ? (
-                        <>
-                          <Star className="w-4 h-4 inline mr-2" />
-                          Já Resgatado
                         </>
                       ) : canRedeemReward ? (
                         'Resgatar Agora!'
@@ -377,6 +371,63 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
             </div>
           )}
         </div>
+        
+        {/* Histórico de Resgates do Usuário */}
+        {redemptions.length > 0 && (
+          <div className="p-6 border-t border-white/20">
+            <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-yellow-400" />
+              Meus Resgates ({redemptions.length})
+            </h3>
+            
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {redemptions.slice(0, 10).map((redemption, index) => {
+                const reward = getRewardById(redemption.rewardId);
+                if (!reward) return null;
+                
+                const statusConfig = {
+                  pending: { color: 'bg-yellow-400/20 border-yellow-400/30', textColor: 'text-yellow-200', label: '⏳ Aguardando', icon: '⏳' },
+                  approved: { color: 'bg-green-400/20 border-green-400/30', textColor: 'text-green-200', label: '✅ Aprovado', icon: '✅' },
+                  rejected: { color: 'bg-red-400/20 border-red-400/30', textColor: 'text-red-200', label: '❌ Rejeitado', icon: '❌' }
+                };
+                
+                const config = statusConfig[redemption.status] || statusConfig.pending;
+                
+                return (
+                  <motion.div
+                    key={redemption.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`border rounded-lg p-3 ${config.color}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-xl">{reward.icon}</div>
+                        <div>
+                          <h5 className="font-medium text-white">{reward.title}</h5>
+                          <p className="text-xs text-white/70">
+                            {redemption.createdAt.toLocaleDateString('pt-BR')} às {redemption.createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className={`text-sm font-medium ${config.textColor} flex items-center gap-1`}>
+                          <span>{config.icon}</span>
+                          <span>{config.label}</span>
+                        </div>
+                        <div className="text-xs text-white/60">
+                          -{redemption.costGold} Gold
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );

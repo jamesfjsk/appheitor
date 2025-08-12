@@ -609,7 +609,7 @@ export class FirestoreService {
       const redemption = redemptionDoc.data() as RewardRedemption;
 
       if (approved) {
-        // Approve redemption
+        // Approve redemption - reward becomes available again for future redemptions
         transaction.update(redemptionRef, {
           status: 'approved',
           approvedBy: adminUid,

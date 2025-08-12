@@ -387,24 +387,56 @@ const RewardManager: React.FC = () => {
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            {/* Resgates Pendentes */}
+            {/* Histórico Completo de Resgates */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
             >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-orange-500" />
-                Resgates Pendentes ({pendingRedemptions.length})
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-500" />
+                  Histórico de Resgates ({redemptions.length})
+                </h3>
+                {pendingRedemptions.length > 0 && (
+                  <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                    {pendingRedemptions.length} pendentes
+                  </span>
+                )}
+              </div>
               
-              {pendingRedemptions.length > 0 ? (
+              {redemptions.length > 0 ? (
                 <div className="space-y-4">
-                  {pendingRedemptions.map((redemption, index) => {
+                  {redemptions.map((redemption, index) => {
                     const reward = getRewardById(redemption.rewardId);
                     if (!reward) return null;
                     
-                    console.log('🔥 Renderizando resgate pendente:', redemption);
+                    const statusConfig = {
+                      pending: { 
+                        color: 'border-orange-200 bg-orange-50', 
+                        textColor: 'text-orange-600',
+                        label: 'Aguardando Aprovação',
+                        icon: Clock,
+                        showActions: true
+                      },
+                      approved: { 
+                        color: 'border-green-200 bg-green-50', 
+                        textColor: 'text-green-600',
+                        label: 'Aprovado',
+                        icon: Check,
+                        showActions: false
+                      },
+                      rejected: { 
+                        color: 'border-red-200 bg-red-50', 
+                        textColor: 'text-red-600',
+                        label: 'Rejeitado',
+                        icon: X,
+                        showActions: false
+                      }
+                    };
+                    
+                    const config = statusConfig[redemption.status] || statusConfig.pending;
+                    const StatusIcon = config.icon;
                     
                     return (
                       <motion.div
@@ -412,7 +444,7 @@ const RewardManager: React.FC = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="border border-orange-200 bg-orange-50 rounded-lg p-4"
+                        className={`border rounded-lg p-4 ${config.color}`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -423,39 +455,47 @@ const RewardManager: React.FC = () => {
                               <p className="text-xs text-gray-500 mt-1">
                                 Resgatado em {redemption.createdAt.toLocaleDateString('pt-BR')} às {redemption.createdAt.toLocaleTimeString('pt-BR')}
                               </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <StatusIcon className={`w-4 h-4 ${config.textColor}`} />
+                                <span className={`text-sm font-medium ${config.textColor}`}>
+                                  {config.label}
+                                </span>
+                              </div>
                             </div>
                           </div>
                           
                           <div className="flex items-center gap-3">
                             <div className="text-right">
-                              <div className="flex items-center gap-1 text-orange-600 font-bold">
+                              <div className={`flex items-center gap-1 font-bold ${config.textColor}`}>
                                 <Star className="w-4 h-4" />
-                                -{redemption.goldSpent || 0}
+                                -{redemption.costGold || 0}
                               </div>
                               <div className="text-xs text-gray-500">pontos gastos</div>
                             </div>
                             
-                            <div className="flex gap-2">
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => handleApproveRedemption(redemption.id, true)}
-                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all duration-200"
-                                title="Aprovar"
-                              >
-                                <Check className="w-4 h-4" />
-                              </motion.button>
-                              
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => handleApproveRedemption(redemption.id, false)}
-                                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200"
-                                title="Rejeitar"
-                              >
-                                <X className="w-4 h-4" />
-                              </motion.button>
-                            </div>
+                            {config.showActions && (
+                              <div className="flex gap-2">
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => handleApproveRedemption(redemption.id, true)}
+                                  className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all duration-200"
+                                  title="Aprovar"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </motion.button>
+                                
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => handleApproveRedemption(redemption.id, false)}
+                                  className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200"
+                                  title="Rejeitar"
+                                >
+                                  <X className="w-4 h-4" />
+                                </motion.button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </motion.div>
@@ -465,70 +505,10 @@ const RewardManager: React.FC = () => {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">✅</div>
-                  <p className="text-gray-500">Nenhum resgate pendente</p>
+                  <p className="text-gray-500">Nenhum resgate realizado ainda</p>
                 </div>
               )}
             </motion.div>
-
-            {/* Histórico de Resgates */}
-            {processedRedemptions.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Histórico de Resgates ({processedRedemptions.length})
-                </h3>
-                
-                <div className="space-y-3">
-                  {processedRedemptions.slice(0, 10).map((redemption, index) => {
-                    const reward = getRewardById(redemption.rewardId);
-                    if (!reward) return null;
-                    
-                    const statusConfig = {
-                      approved: { color: 'text-green-600', bg: 'bg-green-50', label: 'Aprovado' },
-                      delivered: { color: 'text-blue-600', bg: 'bg-blue-50', label: 'Entregue' },
-                      rejected: { color: 'text-red-600', bg: 'bg-red-50', label: 'Rejeitado' }
-                    };
-                    
-                    const config = statusConfig[redemption.status as keyof typeof statusConfig];
-                    
-                    return (
-                      <motion.div
-                        key={redemption.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className={`border rounded-lg p-3 ${config.bg}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="text-xl">{reward.icon}</div>
-                            <div>
-                              <h5 className="font-medium text-gray-900">{reward.title}</h5>
-                              <p className="text-xs text-gray-500">
-                                {redemption.createdAt.toLocaleDateString('pt-BR')}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <div className={`text-sm font-medium ${config.color}`}>
-                              {config.label}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              -{redemption.goldSpent} Gold
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
