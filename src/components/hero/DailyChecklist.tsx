@@ -194,7 +194,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       {/* Progress do Período */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-white/80 text-sm">
+          <span className="text-gray-600 text-sm">
             Progresso do período: {completedTasks}/{totalTasks}
           </span>
           <div className="flex items-center gap-2">
@@ -218,13 +218,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full relative"
+            className="h-full bg-gradient-to-r from-hero-primary to-hero-secondary rounded-full relative"
           >
             {completionPercentage > 0 && (
               <motion.div
                 animate={{ x: ['-100%', '100%'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                className="absolute inset-0 bg-white/30 rounded-full"
               />
             )}
           </motion.div>
