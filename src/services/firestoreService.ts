@@ -732,11 +732,33 @@ export class FirestoreService {
   }
 
   // ========================================
-  // 🏆 ACHIEVEMENT VERIFICATION
+  // 🏆 ACHIEVEMENT SYSTEM
   // ========================================
 
-  static async checkAndUnlockAchievements(userId: string, progress: UserProgress): Promise<UserAchievement[]> {
+  static async createUserAchievement(userId: string, achievementId: string, currentProgress: number = 0): Promise<void> {
     try {
+      const userAchievementData = {
+        userId,
+        achievementId,
+        progress: currentProgress,
+        isCompleted: false,
+        rewardClaimed: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'userAchievements'), userAchievementData);
+      console.log('✅ FirestoreService: User achievement created:', { userId, achievementId });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error creating user achievement:', error);
+      throw error;
+    }
+  }
+
+  static async checkAndUnlockAchievements(userId: string, userProgress: UserProgress): Promise<UserAchievement[]> {
+    try {
+      console.log('🔍 FirestoreService: Checking achievements for user:', userId);
+      
       // Get all active achievements for this user
       const achievementsSnapshot = await getDocs(query(
         collection(db, 'achievements'),
@@ -758,130 +780,194 @@ export class FirestoreService {
       );
 
       const newlyUnlocked: UserAchievement[] = [];
-      const batch = writeBatch(db);
 
       for (const achievementDoc of achievementsSnapshot.docs) {
         const achievement = achievementDoc.data() as Achievement;
         const existingUserAchievement = userAchievements.get(achievement.id);
 
-        // Skip if already completed
-        if (existingUserAchievement?.isCompleted) continue;
-
-        // Calculate current progress
+        // Calculate current progress based on achievement type
         let currentProgress = 0;
         switch (achievement.type) {
           case 'xp':
-            currentProgress = progress.totalXP || 0;
+            currentProgress = userProgress.totalXP || 0;
             break;
           case 'level':
-            currentProgress = progress.level || 1;
+            currentProgress = userProgress.level || 1;
             break;
           case 'tasks':
-            currentProgress = progress.totalTasksCompleted || 0;
+            currentProgress = userProgress.totalTasksCompleted || 0;
             break;
           case 'streak':
-            currentProgress = progress.longestStreak || 0;
+            currentProgress = userProgress.longestStreak || 0;
             break;
           case 'checkin':
-            // For now, use streak as check-in proxy
-            currentProgress = progress.streak || 0;
-          case 'redemptions':
-            currentProgress = userProgress.rewardsRedeemed || 0;
+            currentProgress = userProgress.streak || 0;
             break;
+          case 'redemptions':
+            // Count total redemptions (approved + pending)
+            const redemptionsQuery = query(
+              collection(db, 'redemptions'),
+              where('userId', '==', userId)
+            );
+            const redemptionsSnapshot = await getDocs(redemptionsQuery);
+            currentProgress = redemptionsSnapshot.size;
+            break;
+          case 'custom':
+            currentProgress = 0; // Custom achievements need manual unlock
             break;
           default:
-            continue; // Skip custom achievements for auto-check
+            continue; // Skip unknown achievement types
         }
 
-        const isCompleted = currentProgress >= achievement.target;
-        const wasAlreadyCompleted = existingUserAchievement?.isCompleted || false;
-
-        if (existingUserAchievement) {
-          // Update existing progress
-          // Clamp progress to target to avoid showing more than 100%
-          const clampedProgress = Math.min(currentProgress, achievement.target);
-          
-          if (existingUserAchievement.progress !== clampedProgress || 
-              (isCompleted && !existingUserAchievement.isCompleted)) {
-            const userAchievementRef = doc(db, 'userAchievements', existingUserAchievement.id);
-            const updates: any = {
-              progress: clampedProgress,
-              updatedAt: nowTs()
-            };
-
-            if (isCompleted && !existingUserAchievement.isCompleted) {
-              updates.isCompleted = true;
-              updates.unlockedAt = nowTs();
-              newlyUnlocked.push({
-                ...existingUserAchievement,
-                progress: clampedProgress,
-                isCompleted: true,
-                unlockedAt: new Date()
-              });
-            }
-
-            batch.update(userAchievementRef, updates);
-          }
-        } else {
+        // Check if achievement should be unlocked
+        const shouldUnlock = currentProgress >= achievement.target && !existingUserAchievement?.isCompleted;
+        
+        if (shouldUnlock && !existingUserAchievement) {
           // Create new user achievement
-          const userAchievementRef = doc(collection(db, 'userAchievements'));
-          const clampedProgress = Math.min(currentProgress, achievement.target);
-          const newUserAchievement: Omit<UserAchievement, 'id'> = {
+          const userAchievementData = {
             userId,
             achievementId: achievement.id,
-            progress: clampedProgress,
-            isCompleted,
-            unlockedAt: isCompleted ? new Date() : undefined,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            progress: currentProgress,
+            isCompleted: shouldUnlock,
+            rewardClaimed: false,
+            unlockedAt: shouldUnlock ? serverTimestamp() : null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
           };
 
-          batch.set(userAchievementRef, {
-            ...newUserAchievement,
-            unlockedAt: isCompleted ? nowTs() : null,
-            createdAt: nowTs(),
-            updatedAt: nowTs()
-          });
-
-          if (isCompleted) {
+          const docRef = await addDoc(collection(db, 'userAchievements'), userAchievementData);
+          
+          newlyUnlocked.push({
+            ...userAchievementData,
+            id: docRef.id,
+            unlockedAt: shouldUnlock ? new Date() : null
+          } as UserAchievement);
+          
+        } else if (existingUserAchievement && !existingUserAchievement.isCompleted) {
+          // Update existing user achievement
+          const updates: any = {
+            progress: currentProgress,
+            updatedAt: serverTimestamp()
+          };
+          
+          if (shouldUnlock) {
+            updates.isCompleted = true;
+            updates.unlockedAt = serverTimestamp();
+          }
+          
+          await updateDoc(doc(db, 'userAchievements', existingUserAchievement.id), updates);
+          
+          if (shouldUnlock) {
             newlyUnlocked.push({
-              id: userAchievementRef.id,
-              ...newUserAchievement,
+              ...existingUserAchievement,
+              progress: currentProgress,
+              isCompleted: true,
               unlockedAt: new Date()
             });
           }
-        }
-      }
-
-      // Award XP and Gold for newly unlocked achievements
-      if (newlyUnlocked.length > 0) {
-        const progressRef = doc(db, 'progress', userId);
-        const totalXPReward = newlyUnlocked.reduce((sum, ua) => {
-          const achievement = achievementsSnapshot.docs.find(doc => doc.id === ua.achievementId)?.data() as Achievement;
-          return sum + (achievement?.xpReward || 0);
-        }, 0);
-        
-        const totalGoldReward = newlyUnlocked.reduce((sum, ua) => {
-          const achievement = achievementsSnapshot.docs.find(doc => doc.id === ua.achievementId)?.data() as Achievement;
-          return sum + (achievement?.goldReward || 0);
-        }, 0);
-
-        if (totalXPReward > 0 || totalGoldReward > 0) {
-          batch.update(progressRef, {
-            totalXP: increment(totalXPReward),
-            availableGold: increment(totalGoldReward),
-            totalGoldEarned: increment(totalGoldReward),
-            level: getLevelFromXP((progress.totalXP || 0) + totalXPReward),
-            updatedAt: nowTs()
+        } else if (existingUserAchievement && existingUserAchievement.progress !== currentProgress) {
+          // Just update progress without unlocking
+          await updateDoc(doc(db, 'userAchievements', existingUserAchievement.id), {
+            progress: currentProgress,
+            updatedAt: serverTimestamp()
           });
         }
+        
+        // Create user achievement if it doesn't exist (for tracking progress)
+        if (!existingUserAchievement && !shouldUnlock) {
+          await this.createUserAchievement(userId, achievement.id, currentProgress);
+        }
       }
 
-      await batch.commit();
+      console.log('✅ FirestoreService: Achievement check completed:', {
+        totalAchievements: achievementsSnapshot.size,
+        newlyUnlocked: newlyUnlocked.length
+      });
+
       return newlyUnlocked;
     } catch (error) {
-      console.error('❌ Error checking achievements:', error);
+      console.error('❌ FirestoreService: Error checking achievements:', error);
       return [];
+    }
+  }
+
+  static async claimAchievementReward(userAchievementId: string, userId: string): Promise<void> {
+    try {
+      // Find user achievement by achievement ID if userAchievementId is actually achievementId
+      let userAchievementRef;
+      let userAchievementDoc;
+      
+      // Try to get by userAchievementId first
+      userAchievementRef = doc(db, 'userAchievements', userAchievementId);
+      userAchievementDoc = await getDoc(userAchievementRef);
+      
+      // If not found, search by achievementId
+      if (!userAchievementDoc.exists()) {
+        const userAchievementsQuery = query(
+          collection(db, 'userAchievements'),
+          where('userId', '==', userId),
+          where('achievementId', '==', userAchievementId),
+          where('isCompleted', '==', true)
+        );
+        const querySnapshot = await getDocs(userAchievementsQuery);
+        
+        if (!querySnapshot.empty) {
+          userAchievementDoc = querySnapshot.docs[0];
+          userAchievementRef = userAchievementDoc.ref;
+        }
+      }
+      
+      if (!userAchievementDoc.exists()) {
+        throw new Error('Conquista não encontrada ou não completada');
+      }
+      
+      const userAchievementData = userAchievementDoc.data();
+      
+      if (userAchievementData.rewardClaimed) {
+        throw new Error('Recompensa já foi resgatada');
+      }
+      
+      if (!userAchievementData.isCompleted) {
+        throw new Error('Conquista ainda não foi completada');
+      }
+      
+      // Get achievement details
+      const achievementRef = doc(db, 'achievements', userAchievementData.achievementId);
+      const achievementDoc = await getDoc(achievementRef);
+      
+      if (!achievementDoc.exists()) {
+        throw new Error('Conquista não encontrada');
+      }
+      
+      const achievementData = achievementDoc.data();
+      
+      // Update user progress with rewards
+      const progressRef = doc(db, 'progress', userId);
+      await updateDoc(progressRef, {
+        totalXP: increment(achievementData.xpReward || 0),
+        availableGold: increment(achievementData.goldReward || 0),
+        totalGoldEarned: increment(achievementData.goldReward || 0),
+        level: getLevelFromXP((userProgress.totalXP || 0) + (achievementData.xpReward || 0)),
+        updatedAt: serverTimestamp()
+      });
+      
+      // Update user achievement as claimed
+      await updateDoc(userAchievementRef, {
+        rewardClaimed: true,
+        claimedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log('✅ FirestoreService: Achievement reward claimed:', {
+        userAchievementId: userAchievementDoc.id,
+        userId,
+        achievementId: userAchievementData.achievementId,
+        xpReward: achievementData.xpReward,
+        goldReward: achievementData.goldReward
+      });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error claiming achievement reward:', error);
+      throw error;
     }
   }
 
