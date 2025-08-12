@@ -147,19 +147,6 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             ⭐
           </motion.div>
           
-          {/* Indicador de tier da borda */}
-          {borderStyle.tier > 1 && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.3 }}
-              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded-full text-xs font-bold text-gray-700 shadow-md border border-gray-200"
-              title={borderStyle.description}
-            >
-              T{borderStyle.tier}
-            </motion.div>
-          )}
-        </motion.div>
 
         <div>
           <motion.h1

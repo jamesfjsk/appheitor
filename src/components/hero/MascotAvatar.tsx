@@ -163,19 +163,6 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
           {getLevelIconComponent()}
         </motion.div>
         
-        {/* Indicador de tier da borda */}
-        {borderStyle.tier > 1 && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.3 }}
-            className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-white px-3 py-1 rounded-full text-xs font-bold text-gray-700 shadow-md border border-gray-200"
-            title={borderStyle.description}
-          >
-            {borderStyle.description}
-          </motion.div>
-        )}
-
         {/* Partículas flutuantes */}
         {isAnimating && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
