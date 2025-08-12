@@ -1613,6 +1613,9 @@ export class FirestoreService {
           }
         }
         
+        // Clamp progress to target to avoid showing more than 100%
+        const clampedProgress = Math.min(progress, achievement.target);
+        const isCompleted = clampedProgress >= achievement.target;
         // Delete the task document
         batch.delete(taskDoc.ref);
         batchCount++;
@@ -1695,15 +1698,15 @@ export class FirestoreService {
       batchCount++;
 
       // Execute final batch
-      if (batchCount > 0) {
-        await batch.commit();
+          if (existingUserAchievement.progress !== clampedProgress || 
+              (isCompleted && !existingUserAchievement.isCompleted)) {
       }
 
-      console.log('✅ FirestoreService: Complete reset finished for:', childUid);
+              progress: clampedProgress,
     } catch (error) {
       console.error('❌ FirestoreService: Error during complete reset:', error);
       throw error;
-    }
+            if (isCompleted && !existingUserAchievement.isCompleted) {
   }
 
   // ========================================
@@ -1728,13 +1731,13 @@ export class FirestoreService {
         taskId: string;
         taskTitle: string;
         date: string;
-        xpEarned: number;
-        goldEarned: number;
+            progress: clampedProgress,
+            isCompleted: isCompleted,
         completedAt: Date;
       }> = [];
       
       for (const taskDoc of tasksSnapshot.docs) {
-        const taskData = taskDoc.data();
+          if (isCompleted) {
         const completionsSnapshot = await getDocs(collection(db, 'tasks', taskDoc.id, 'completions'));
         
         for (const completionDoc of completionsSnapshot.docs) {

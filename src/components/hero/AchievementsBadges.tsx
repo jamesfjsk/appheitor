@@ -191,6 +191,20 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                       >
                         {achievement.icon}
                       </motion.span>
+                    ) : selectedAchievement.currentProgress >= selectedAchievement.target ? (
+                      <motion.span
+                        animate={{
+                          scale: [1, 1.1, 1],
+                          rotate: [0, 5, -5, 0]
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        {selectedAchievement.icon}
+                      </motion.span>
                     ) : achievement.progressPercentage > 0 ? (
                       achievement.icon
                     ) : (
