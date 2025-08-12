@@ -386,64 +386,66 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
 
                 {/* Status */}
                 <div className="text-center">
-                  {selectedAchievement.isCompleted && selectedAchievement.rewardClaimed ? (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
-                      <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                      <p className="font-bold text-green-900">Recompensa Resgatada!</p>
-                      {selectedAchievement.unlockedAt && (
-                        <p className="text-sm text-green-700 mt-1">
-                          {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      )}
-                      <div className="bg-gray-100 text-gray-600 py-3 rounded-lg font-bold">
-                        <CheckCircle className="w-4 h-4 inline mr-2" />
-                        Recompensa Já Resgatada
-                      </div>
-                    </div>
-                  ) : selectedAchievement.isCompleted ? (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
-                      <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                      <p className="font-bold text-yellow-900">Conquista Desbloqueada!</p>
-                      {selectedAchievement.unlockedAt && (
-                        <p className="text-sm text-yellow-700 mt-1">
-                          {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      )}
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={async () => {
-                          try {
-                            await claimAchievementReward(selectedAchievement.userAchievementId);
-                            setSelectedAchievement(null);
-                          } catch (error) {
-                            console.error('🏆 Error claiming achievement reward:', error);
-                          }
-                        }}
-                        className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
-                      >
-                        <Star className="w-4 h-4 inline mr-2" />
-                        Resgatar Recompensa
-                      </motion.button>
-                    </div>
-                  ) : selectedAchievement.progressPercentage > 0 ? (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                      <p className="font-bold text-blue-900">Em Progresso</p>
-                      <p className="text-sm text-blue-700 mt-1">
-                        Faltam {selectedAchievement.target - selectedAchievement.currentProgress} para completar
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                      <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="font-bold text-gray-700">Ainda Bloqueada</p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Continue progredindo para desbloquear!
-                      </p>
-                    </div>
-                  )}
-                </div>
+                  {selectedAchievement.isCompleted ? (
+                            selectedAchievement.rewardClaimed ? (
+                            <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
+                              <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                              <p className="font-bold text-green-900">Recompensa Resgatada!</p>
+                              {selectedAchievement.unlockedAt && (
+                                <p className="text-sm text-green-700 mt-1">
+                                  {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              )}
+                              <div className="bg-gray-100 text-gray-600 py-3 rounded-lg font-bold">
+                                <CheckCircle className="w-4 h-4 inline mr-2" />
+                                Recompensa Já Resgatada
+                              </div>
+                            </div>
+                            ) : (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
+                              <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                              <p className="font-bold text-yellow-900">Conquista Desbloqueada!</p>
+                              {selectedAchievement.unlockedAt && (
+                                <p className="text-sm text-yellow-700 mt-1">
+                                  {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              )}
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={async () => {
+                                  try {
+                                    await claimAchievementReward(selectedAchievement.userAchievementId);
+                                    setSelectedAchievement(null);
+                                  } catch (error) {
+                                    console.error('🏆 Error claiming achievement reward:', error);
+                                  }
+                                }}
+                                className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
+                              >
+                                <Star className="w-4 h-4 inline mr-2" />
+                                Resgatar Recompensa
+                              </motion.button>
+                            </div>
+                            )
+                          ) : selectedAchievement.progressPercentage > 0 ? (
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                              <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                              <p className="font-bold text-blue-900">Em Progresso</p>
+                              <p className="text-sm text-blue-700 mt-1">
+                                Faltam {selectedAchievement.target - selectedAchievement.currentProgress} para completar
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                              <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                              <p className="font-bold text-gray-700">Ainda Bloqueada</p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                Continue progredindo para desbloquear!
+                              </p>
+                            </div>
+                          )}
+                        </div>
               </div>
             </motion.div>
           </motion.div>
