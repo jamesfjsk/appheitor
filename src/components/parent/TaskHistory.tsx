@@ -5,7 +5,6 @@ import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { FirestoreService } from '../../services/firestoreService';
-import { FirestoreService } from '../../services/firestoreService';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
