@@ -13,6 +13,7 @@ interface RewardFormProps {
   isOpen: boolean;
 }
 
+const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, isOpen }) => {
   const { addReward, updateReward } = useData();
   const [formData, setFormData] = useState({
     title: '',
@@ -49,7 +50,7 @@ interface RewardFormProps {
       });
     }
     setErrors({});
-  }, [reward, initialData, isOpen]);
+  }, [reward, isOpen]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
