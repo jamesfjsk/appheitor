@@ -687,7 +687,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           if (achievement.id) {
             await FirestoreService.createUserAchievement({
               userId: childUid,
-              achievementId: achievement.id,
+             achievementId: String(achievement.id || ''),
               progress: currentProgress,
               isCompleted: shouldComplete,
               rewardClaimed: false,
