@@ -19,18 +19,21 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
   const { playTaskComplete, playClick } = useSound();
 
   const handleToggle = async () => {
-    // Prevent any action if task is already completed or currently completing
-    if (isCompleting || task.status === 'done') {
-      if (task.status === 'done') {
-        playClick();
-        toast('✅ Tarefa já foi completada hoje! Disponível novamente amanhã.', {
-          duration: 3000,
-          style: {
-            background: '#10B981',
-            color: '#FFFFFF',
-          },
-        });
-      }
+    // Prevent any action if task is already completed
+    if (task.status === 'done') {
+      playClick();
+      toast('✅ Tarefa já foi completada hoje! Disponível novamente amanhã.', {
+        duration: 3000,
+        style: {
+          background: '#10B981',
+          color: '#FFFFFF',
+        },
+      });
+      return;
+    }
+
+    // Prevent multiple clicks while completing
+    if (isCompleting) {
       return;
     }
 
@@ -59,12 +62,15 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
       
       setTimeout(() => {
         setShowSuccess(false);
-        setIsCompleting(false);
       }, 800);
     } catch (error) {
       console.error('Erro ao completar tarefa:', error);
       setShowSuccess(false);
-      setIsCompleting(false);
+    } finally {
+      // Always reset completing state after a delay
+      setTimeout(() => {
+        setIsCompleting(false);
+      }, 1000);
     }
   };
 
@@ -163,17 +169,17 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
           {/* Botão de completar */}
           <motion.button
             onClick={handleToggle}
-            disabled={isCompleting}
+            disabled={isCompleting || task.status === 'done'}
             whileHover={{ scale: guidedMode ? 1.15 : 1.1 }}
             whileTap={{ scale: 0.9 }}
             className={`
               relative ${guidedMode ? 'w-16 h-16' : 'w-12 h-12'} rounded-full border-3 flex items-center justify-center
               transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50
               ${task.status === 'done'
-                ? 'bg-hero-accent border-hero-accent text-hero-primary shadow-lg cursor-pointer'
+                ? 'bg-hero-accent border-hero-accent text-hero-primary shadow-lg cursor-default'
                 : 'bg-white/20 border-white/50 text-white hover:border-hero-accent hover:bg-hero-accent/20'
               }
-              ${isCompleting ? 'cursor-not-allowed' : 'cursor-pointer'}
+              ${isCompleting || task.status === 'done' ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
             <AnimatePresence mode="wait">
