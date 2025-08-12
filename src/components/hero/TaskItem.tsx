@@ -157,13 +157,13 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
           relative overflow-hidden rounded-2xl p-4 border-2 transition-all duration-300
           ${task.status === 'done'
             ? 'bg-white/30 border-hero-accent shadow-lg shadow-hero-accent/20 scale-95' 
-            : 'bg-white/10 border-white/30 hover:border-hero-accent/50'
+            : 'bg-white/20 border-white/30 hover:border-hero-accent/50'
           }
           ${isCompleting ? 'animate-pulse' : ''}
         `}
       >
         {/* Efeito de fundo gradiente por período */}
-        <div className={`absolute inset-0 bg-gradient-to-r ${getPeriodColor()} opacity-20`} />
+        <div className={`absolute inset-0 bg-gradient-to-r ${getPeriodColor()} opacity-10`} />
         
         <div className="relative flex items-center space-x-4">
           {/* Botão de completar */}
@@ -254,7 +254,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getPeriodEmoji()}</span>
-                    <span className="text-xs text-white/70 font-medium capitalize">
+                    <span className="text-xs text-gray-500 font-medium capitalize">
                       {task.period === 'morning' && 'Manhã'}
                       {task.period === 'afternoon' && 'Tarde'}
                       {task.period === 'evening' && 'Noite'}
@@ -268,7 +268,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               {/* Pontos da tarefa */}
               <div className="flex items-center space-x-1 ml-4">
                 <Zap className="w-4 h-4 text-hero-accent" />
-                <span className="text-hero-accent font-bold text-sm bg-white/20 px-2 py-1 rounded-full">
+                <span className="text-hero-accent font-bold text-sm">
                   +{task.xp || 10} XP
                 </span>
               </div>
