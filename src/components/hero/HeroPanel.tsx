@@ -93,7 +93,7 @@ const HeroPanel: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-hero-primary to-hero-secondary flex items-center justify-center">
-        <div className="text-center" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="text-center">
           <LoadingSpinner size="large" color="yellow" />
         </div>
       </div>
@@ -102,9 +102,21 @@ const HeroPanel: React.FC = () => {
 
   return (
     <>
-      <div className="hero-dashboard">
+      <div className="min-h-screen bg-gradient-to-br from-hero-primary via-hero-secondary to-hero-accent relative overflow-hidden">
+        {/* Elementos decorativos suaves */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="decorative-blob w-32 h-32 top-16 left-16"></div>
+          <div className="decorative-blob w-24 h-24 top-40 right-20" style={{ animationDelay: '2s' }}></div>
+          <div className="decorative-blob w-20 h-20 bottom-32 left-24" style={{ animationDelay: '4s' }}></div>
+          <div className="decorative-blob w-28 h-28 bottom-48 right-40" style={{ animationDelay: '6s' }}></div>
+          
+          <div className="decorative-star text-3xl top-20 right-1/4" style={{ animationDelay: '1s' }}>⭐</div>
+          <div className="decorative-star text-2xl bottom-40 right-16" style={{ animationDelay: '3s' }}>✨</div>
+          <div className="decorative-star text-xl top-1/2 left-16" style={{ animationDelay: '5s' }}>💫</div>
+          <div className="decorative-star text-lg bottom-20 left-1/3" style={{ animationDelay: '7s' }}>🌟</div>
+        </div>
 
-        <div className="container mx-auto max-w-6xl p-4">
+        <div className="relative z-10 container mx-auto px-4 py-6 max-w-6xl">
           <HeroHeader 
             progress={progress}
             onOpenRewards={() => setShowRewards(true)}
@@ -122,10 +134,10 @@ const HeroPanel: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleSound}
-              className={`p-3 rounded-full shadow-lg transition-all duration-300 ${
+              className={`p-4 rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm ${
                 isSoundEnabled 
-                  ? 'bg-flash-red text-white' 
-                  : 'bg-white text-gray-400 border border-gray-300'
+                  ? 'bg-hero-accent text-hero-primary border-2 border-white/30' 
+                  : 'bg-white/20 text-white/60 border-2 border-white/20'
               }`}
               title={isSoundEnabled ? 'Desativar sons' : 'Ativar sons'}
             >
@@ -140,13 +152,14 @@ const HeroPanel: React.FC = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -50, scale: 0.9 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="mb-8 text-center p-4"
+                className="mb-8 text-center"
               >
-                <div className="card-hero">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-                    Bem-vindo de volta, Heitor!
+                <div className="flash-card-hero p-8 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-50"></div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 hero-text-shadow relative z-10">
+                    Bem-vindo de volta, Heitor! ⚡
                   </h2>
-                  <p className="text-gray-600 text-lg">
+                  <p className="text-white text-lg font-semibold relative z-10">
                     {getMotivationalMessage()}
                   </p>
                 </div>
@@ -194,7 +207,7 @@ const HeroPanel: React.FC = () => {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
               >
-                <div className="bg-flash-red text-white text-2xl md:text-3xl font-bold px-6 py-3 rounded-xl shadow-floating">
+                <div className="bg-gradient-to-r from-hero-accent to-yellow-400 text-hero-primary text-2xl md:text-3xl font-bold px-6 py-3 rounded-2xl shadow-xl border-2 border-white">
                   🎉 Período Completo! 🎉
                 </div>
               </motion.div>

@@ -20,19 +20,19 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   const colorClasses = {
-    red: 'from-flash-red to-flash-red-dark',
-    blue: 'from-blue-600 to-blue-800',
+    red: 'from-red-500 to-red-600',
+    blue: 'from-blue-500 to-blue-600',
     yellow: 'from-yellow-500 to-yellow-600'
   };
 
   const textColorClasses = {
-    red: 'text-white',
+    red: 'text-yellow-400',
     blue: 'text-white',
-    yellow: 'text-white'
+    yellow: 'text-red-600'
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${colorClasses[color]} p-4`}>
+    <div className={`flex flex-col items-center justify-center min-h-screen bg-gradient-to-br ${colorClasses[color]}`}>
       <motion.div
         animate={{
           rotate: 360,

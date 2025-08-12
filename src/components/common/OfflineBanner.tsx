@@ -13,7 +13,8 @@ const OfflineBanner: React.FC = () => {
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
-          transition={{ duration: 0.3 }}          className="fixed top-0 left-0 right-0 z-50 bg-flash-red text-white px-4 py-3 shadow-lg"
+          transition={{ duration: 0.3 }}
+          className="fixed top-0 left-0 right-0 z-50 bg-red-600 text-white px-4 py-3 shadow-lg"
         >
           <div className="flex items-center justify-center gap-3 max-w-4xl mx-auto">
             <WifiOff className="w-5 h-5 flex-shrink-0" />

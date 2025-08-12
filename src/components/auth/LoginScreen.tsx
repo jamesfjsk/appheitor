@@ -65,41 +65,50 @@ const LoginScreen: React.FC = () => {
   }
 
   return (
-    <div className="login-container">
+    <div className="min-h-screen bg-gradient-to-br from-hero-primary via-hero-secondary to-hero-accent flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Elementos decorativos de fundo */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="decorative-blob w-64 h-64 top-10 -left-20 opacity-30"></div>
+        <div className="decorative-blob w-48 h-48 top-1/3 -right-16 opacity-20" style={{ animationDelay: '2s' }}></div>
+        <div className="decorative-blob w-32 h-32 bottom-20 left-1/4 opacity-25" style={{ animationDelay: '4s' }}></div>
+        <div className="decorative-star text-2xl top-20 right-1/4" style={{ animationDelay: '1s' }}>⭐</div>
+        <div className="decorative-star text-xl bottom-32 right-20" style={{ animationDelay: '3s' }}>✨</div>
+        <div className="decorative-star text-lg top-1/2 left-20" style={{ animationDelay: '5s' }}>💫</div>
+      </div>
       
       <div className="max-w-md w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="login-card"
+          className="login-card p-8 relative"
         >
           {/* Logo e Título */}
           <div className="text-center mb-8">
             <motion.div
-              className="flash-logo"
-              animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}            >
-              <Lightning className="w-6 h-6" fill="currentColor" />
+              className="inline-flex items-center justify-center w-24 h-24 flash-avatar mb-6 pulse-glow"
+            >
+              <Lightning className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" />
             </motion.div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-3">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-hero-primary to-hero-accent bg-clip-text text-transparent mb-3">
               Flash Missions
             </h1>
-            <p className="text-gray-600">Sistema de tarefas para o Heitor</p>
+            <p className="text-gray-600 font-medium">Aventuras diárias do super-herói Heitor ⚡</p>
           </div>
 
           {/* Status de Conexão */}
-          <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 transition-all duration-300 ${
-            isOffline ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-600 border border-green-200'
+          <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 transition-all duration-300 ${
+            isOffline ? 'bg-error-50 text-error-600 border border-error-200' : 'bg-success-50 text-success-600 border border-success-200'
           }`}>
             {isOffline ? (
               <>
                 <WifiOff className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium text-sm">Sem conexão - Login indisponível</span>
+                <span className="font-medium">Sem conexão - Login indisponível</span>
               </>
             ) : (
               <>
                 <Wifi className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium text-sm">Sistema online</span>
+                <span className="font-medium">Conectado - Sistema online ✨</span>
               </>
             )}
           </div>
@@ -115,19 +124,20 @@ const LoginScreen: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleHeitorLogin}
-                className="btn-primary w-full"
+                className="btn-hero w-full p-5 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg relative overflow-hidden"
               >
-                <Lightning className="w-5 h-5" fill="currentColor" />
+                <Lightning className="w-7 h-7 text-white drop-shadow-md wiggle" fill="currentColor" />
                 Entrar como Heitor (Filho)
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 lightning-effect"></div>
               </motion.button>
               
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setLoginMode('admin_form')}
-                className="btn-secondary w-full"
+                className="w-full p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold flex items-center justify-center gap-3 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg"
               >
-                <Shield className="w-5 h-5" />
+                <Shield className="w-6 h-6" />
                 Entrar como Pai
               </motion.button>
             </motion.div>
@@ -163,7 +173,7 @@ const LoginScreen: React.FC = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="form-input"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   placeholder="seu@email.com"
                 />
               </div>
@@ -179,7 +189,7 @@ const LoginScreen: React.FC = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="form-input"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   placeholder="••••••••"
                 />
               </div>
@@ -189,7 +199,9 @@ const LoginScreen: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={loading || isOffline}
-                className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ${
+                  'bg-blue-600 hover:bg-blue-700 text-white'
+                } disabled:opacity-50 disabled:cursor-not-allowed shadow-lg`}
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">
@@ -197,7 +209,7 @@ const LoginScreen: React.FC = () => {
                     {isRegistering ? 'Criando conta...' : 'Entrando...'}
                   </div>
                 ) : (
-                  'Entrar como Pai'
+                  'Entrar como Admin'
                 )}
               </motion.button>
             </motion.form>
@@ -206,12 +218,13 @@ const LoginScreen: React.FC = () => {
           {/* Mensagem quando offline */}
           {isOffline && (
             <div className="text-center py-8">
-              <WifiOff className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <WifiOff className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
                 Sem Conexão
               </h3>
               <p className="text-gray-600 text-sm">
-                Conecte-se à internet para fazer login.
+                Este aplicativo requer conexão com a internet para funcionar.
+                Conecte-se e recarregue a página.
               </p>
             </div>
           )}
