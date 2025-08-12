@@ -191,20 +191,6 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                       >
                         {achievement.icon}
                       </motion.span>
-                    ) : selectedAchievement.currentProgress >= selectedAchievement.target ? (
-                      <motion.span
-                        animate={{
-                          scale: [1, 1.1, 1],
-                          rotate: [0, 5, -5, 0]
-                        }}
-                        transition={{
-                          duration: 1.5,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        {selectedAchievement.icon}
-                      </motion.span>
                     ) : achievement.progressPercentage > 0 ? (
                       achievement.icon
                     ) : (
@@ -396,6 +382,14 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                           {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       )}
+                    </div>
+                  ) : selectedAchievement.currentProgress >= selectedAchievement.target ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                      <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                      <p className="font-bold text-yellow-900">Pronta para Desbloqueio!</p>
+                      <p className="text-sm text-yellow-700 mt-1">
+                        Meta alcançada! Aguardando processamento...
+                      </p>
                     </div>
                   ) : selectedAchievement.progressPercentage > 0 ? (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
