@@ -292,9 +292,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       );
       toast.success(`+${task.xp || 10} XP, +${task.gold || 5} Gold! Tarefa completada!`);
     } catch (error: any) {
-      console.error('❌ Erro ao completar tarefa:', error);
-      
       if (error.code === 'permission-denied') {
+        console.error('❌ Erro ao completar tarefa:', error);
         console.error('🚨 PERMISSION DENIED - Task Completion:', {
           taskId,
           childUid,
@@ -306,6 +305,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       } else if (error.message === 'Task already completed today') {
         toast('⚠️ Tarefa já foi completada hoje!');
       } else {
+        console.error('❌ Erro ao completar tarefa:', error);
         toast.error('Erro ao completar tarefa');
       }
       throw error;
