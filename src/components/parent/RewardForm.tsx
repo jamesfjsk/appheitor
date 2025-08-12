@@ -336,9 +336,8 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
                   key={icon}
                   type="button"
                   onClick={() => handleInputChange('icon', icon)}
-                  onClick={() => handleInputChange('emoji', icon)}
                   className={`p-2 text-2xl rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-                    formData.emoji === icon
+                    formData.icon === icon
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
