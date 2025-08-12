@@ -689,7 +689,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             progress: currentProgress,
             isCompleted: shouldComplete,
             rewardClaimed: false,
-            unlockedAt: shouldComplete ? new Date() : undefined
+            unlockedAt: shouldComplete ? new Date() : null
           });
           
           if (shouldComplete) {

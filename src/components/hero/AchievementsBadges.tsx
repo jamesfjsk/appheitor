@@ -9,7 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 interface AchievementsBadgesProps {}
 
 const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
-  const { achievements, userAchievements, progress, claimAchievementReward, checkAchievements } = useData();
+  const { achievements, userAchievements, progress, claimAchievementReward, checkAchievements, adjustUserXP, adjustUserGold } = useData();
   const { childUid } = useAuth();
   const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
 
