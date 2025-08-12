@@ -409,23 +409,32 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={async () => {
+                          console.log('🏆 Achievement reward claim clicked:', {
+                            achievementId: selectedAchievement.id,
+                            userAchievementId: selectedAchievement.userAchievementId,
+                            isCompleted: selectedAchievement.isCompleted,
+                            rewardClaimed: selectedAchievement.rewardClaimed
+                          });
+                          
                           try {
-                            if (!selectedAchievement.userAchievementId) {
-                              // Create user achievement if it doesn't exist
-                              await FirestoreService.unlockAchievement(childUid, selectedAchievement.id, selectedAchievement.currentProgress);
-                              // Wait a bit for the listener to update
-                              setTimeout(async () => {
-                                const updatedUserAchievement = userAchievements.find(ua => ua.achievementId === selectedAchievement.id);
-                                if (updatedUserAchievement?.id) {
-                                  await claimAchievementReward(updatedUserAchievement.id);
-                                }
-                              }, 500);
-                            } else {
-                              await claimAchievementReward(selectedAchievement.userAchievementId);
+                            // Check if user achievement exists
+                            let userAchievementId = selectedAchievement.userAchievementId;
+                            
+                            if (!userAchievementId) {
+                              console.log('🏆 Creating user achievement first...');
+                              userAchievementId = await FirestoreService.unlockAchievement(
+                                childUid, 
+                                selectedAchievement.id, 
+                                selectedAchievement.currentProgress
+                              );
+                              console.log('🏆 User achievement created:', userAchievementId);
                             }
+                            
+                            // Now claim the reward
+                            await claimAchievementReward(userAchievementId);
                             setSelectedAchievement(null);
                           } catch (error) {
-                            // Error already handled in context
+                            console.error('🏆 Error claiming achievement reward:', error);
                           }
                         }}
                         className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"

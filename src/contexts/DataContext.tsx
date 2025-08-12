@@ -641,8 +641,40 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!userAchievementId) throw new Error('User Achievement ID não definido');
     
     try {
-      await FirestoreService.claimAchievementReward(userAchievementId, childUid);
-      toast.success('🎁 Recompensa da conquista resgatada!');
+      console.log('🏆 Claiming achievement reward:', { userAchievementId, childUid });
+      
+      // Find the user achievement and corresponding achievement
+      const userAchievement = userAchievements.find(ua => ua.id === userAchievementId);
+      if (!userAchievement) {
+        throw new Error('User achievement not found');
+      }
+      
+      const achievement = achievements.find(a => a.id === userAchievement.achievementId);
+      if (!achievement) {
+        throw new Error('Achievement not found');
+      }
+      
+      // Update user achievement to mark reward as claimed
+      await FirestoreService.updateUserAchievement(userAchievementId, {
+        rewardClaimed: true,
+        claimedAt: new Date()
+      });
+      
+      // Add XP and Gold to user progress
+      const newTotalXP = (progress.totalXP || 0) + achievement.xpReward;
+      const newAvailableGold = (progress.availableGold || 0) + achievement.goldReward;
+      const newTotalGoldEarned = (progress.totalGoldEarned || 0) + achievement.goldReward;
+      
+      await FirestoreService.updateUserProgress(childUid, {
+        totalXP: newTotalXP,
+        availableGold: newAvailableGold,
+        totalGoldEarned: newTotalGoldEarned,
+        updatedAt: new Date()
+      });
+      
+      toast.success(`🏆 Conquista resgatada! +${achievement.xpReward} XP, +${achievement.goldReward} Gold!`, {
+        duration: 5000
+      });
     } catch (error: any) {
       console.error('❌ Erro ao resgatar recompensa da conquista:', error);
       if (error.message === 'Achievement reward already claimed') {
