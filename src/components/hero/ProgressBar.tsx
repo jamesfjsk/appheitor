@@ -76,8 +76,19 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
           {/* Barra de Progresso */}
           <div className="relative mb-4">
             <div className="progress-bar progress-bar-thick">
-              <div className="bg-flash-red text-white text-4xl md:text-6xl font-bold px-8 py-4 rounded-2xl shadow-floating">
-                <div>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${levelSystem.progressPercentage}%` }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="progress-fill"
+              />
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <div className="text-gray-600 text-left">
+                <span className="font-bold text-gray-900">{getLevelIcon(levelSystem.currentLevel)} Nível {levelSystem.currentLevel}</span>
+                <div className="text-xs text-gray-500">{levelSystem.levelTitle}</div>
+              </div>
+              {!levelSystem.isMaxLevel && (
                 <div className="text-gray-600 text-right">
                   <span className="font-bold text-gray-900">{getLevelIcon(levelSystem.currentLevel + 1)} Nível {levelSystem.currentLevel + 1}</span>
                   <div className="text-xs text-gray-500">{levelSystem.nextLevelTitle}</div>
