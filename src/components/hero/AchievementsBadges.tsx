@@ -423,12 +423,29 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                       </motion.button>
                     </div>
                   ) : selectedAchievement.currentProgress >= selectedAchievement.target ? (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                      <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                      <p className="font-bold text-yellow-900">Pronta para Desbloqueio!</p>
-                      <p className="text-sm text-yellow-700 mt-1">
-                        Meta alcançada! Aguardando processamento...
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
+                      <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                      <p className="font-bold text-green-900">Conquista Completa!</p>
+                      <p className="text-sm text-green-700 mt-1">
+                        Meta alcançada! Resgate sua recompensa.
                       </p>
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={async () => {
+                          try {
+                            await claimAchievementReward(selectedAchievement.userAchievementId || selectedAchievement.id);
+                            setSelectedAchievement(null);
+                          } catch (error) {
+                            // Error already handled in context
+                          }
+                        }}
+                        className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
+                      >
+                        <Star className="w-4 h-4 inline mr-2" />
+                        Resgatar Recompensa
+                      </motion.button>
                     </div>
                   ) : selectedAchievement.progressPercentage > 0 ? (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">

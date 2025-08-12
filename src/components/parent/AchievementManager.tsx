@@ -93,13 +93,40 @@ const AchievementManager: React.FC = () => {
       goldReward: 5
     },
     {
-      title: 'Primeira Recompensa',
-      description: 'Resgate sua primeira recompensa',
+      title: 'Primeiro Resgate',
+      description: 'Resgate sua primeira recompensa na loja',
       icon: '🎁',
       type: 'redemptions' as const,
       target: 1,
       xpReward: 15,
       goldReward: 10
+    },
+    {
+      title: 'Colecionador Iniciante',
+      description: 'Resgate 5 recompensas diferentes',
+      icon: '🛍️',
+      type: 'redemptions' as const,
+      target: 5,
+      xpReward: 50,
+      goldReward: 30
+    },
+    {
+      title: 'Colecionador Expert',
+      description: 'Resgate 10 recompensas',
+      icon: '🏪',
+      type: 'redemptions' as const,
+      target: 10,
+      xpReward: 100,
+      goldReward: 75
+    },
+    {
+      title: 'Comprador VIP',
+      description: 'Resgate 25 recompensas',
+      icon: '💎',
+      type: 'redemptions' as const,
+      target: 25,
+      xpReward: 200,
+      goldReward: 150
     },
     {
       title: 'Sequência Iniciante',
