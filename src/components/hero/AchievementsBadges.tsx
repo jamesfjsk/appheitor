@@ -4,11 +4,13 @@ import { Trophy, Lock, Star, Target, Zap, X, CheckCircle } from 'lucide-react';
 import { Achievement, UserAchievement } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { FirestoreService } from '../../services/firestoreService';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AchievementsBadgesProps {}
 
 const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
   const { achievements, userAchievements, progress, claimAchievementReward } = useData();
+  const { childUid } = useAuth();
   const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
 
   // Combine achievements with user progress
