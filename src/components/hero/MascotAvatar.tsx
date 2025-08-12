@@ -232,61 +232,6 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
         )}
       </div>
 
-      {/* Informações do nível */}
-      <div className="space-y-2">
-        <h3 className="text-xl font-bold text-gray-900">
-          {levelSystem.levelTitle}
-        </h3>
-        <div className="flex items-center justify-center space-x-2 text-hero-primary font-semibold">
-          <span>Nível {levelSystem.currentLevel}</span>
-          <span>•</span>
-          <span>{levelSystem.currentXP} XP</span>
-        </div>
-        
-        {/* Informação da borda */}
-        {borderStyle.tier > 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="text-xs text-center"
-          >
-            <div className="bg-gradient-to-r from-yellow-100 to-red-100 px-3 py-1 rounded-full border border-yellow-200">
-              <span className="font-bold text-gray-700">{borderStyle.description}</span>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Barra de progresso para próximo nível */}
-        {!levelSystem.isMaxLevel && (
-          <div className="mt-4">
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>Próximo nível</span>
-              <span>{Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel)}/{Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel)}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${levelSystem.progressPercentage}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className={`h-full bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} rounded-full`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Mensagem motivacional */}
-      <motion.div
-        animate={currentExpression === 'super' ? { scale: [1, 1.05, 1] } : {}}
-        transition={{ duration: 0.5, repeat: 2 }}
-        className="mt-4 text-gray-700 text-sm font-medium"
-      >
-        {currentExpression === 'super' && levelSystem.isMaxLevel && "👑 Flash Master Supremo!"}
-        {currentExpression === 'super' && !levelSystem.isMaxLevel && "🔥 Você é incrível!"}
-        {currentExpression === 'excited' && "⚡ Continue assim, velocista!"}
-        {currentExpression === 'happy' && "🌟 Pronto para a ação!"}
-      </motion.div>
     </motion.div>
   );
 };
