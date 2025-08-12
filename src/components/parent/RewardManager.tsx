@@ -11,6 +11,7 @@ const RewardManager: React.FC = () => {
   const { rewards, redemptions, progress, addReward, updateReward, deleteReward, approveRedemption } = useData();
   const [showForm, setShowForm] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
+  const [initialRewardData, setInitialRewardData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'rewards' | 'redemptions'>('rewards');
   const [showTemplates, setShowTemplates] = useState(false);
 
@@ -55,22 +56,20 @@ const RewardManager: React.FC = () => {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingReward(null);
+    setInitialRewardData(null);
   };
 
   const handleUseTemplate = (template: any) => {
-    const templateReward: Reward = {
-      id: '', // Will be generated when saved
+    setInitialRewardData({
       title: template.title,
       description: template.description,
       goldCost: template.costGold,
       icon: template.emoji,
       category: template.category,
       requiredLevel: template.requiredLevel,
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    setEditingReward(templateReward);
+      isActive: true
+    });
+    setEditingReward(null);
     setShowForm(true);
   };
 
@@ -539,6 +538,7 @@ const RewardManager: React.FC = () => {
         {showForm && (
           <RewardForm
             reward={editingReward}
+            initialData={initialRewardData}
             onClose={handleCloseForm}
             isOpen={showForm}
           />

@@ -8,11 +8,11 @@ import toast from 'react-hot-toast';
 
 interface RewardFormProps {
   reward?: Reward;
+  initialData?: any;
   onClose: () => void;
   isOpen: boolean;
 }
 
-const RewardForm: React.FC<RewardFormProps> = ({ reward, onClose, isOpen }) => {
   const { addReward, updateReward } = useData();
   const [formData, setFormData] = useState({
     title: '',
