@@ -43,6 +43,49 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
 
   const nextMilestone = getNextMilestone(levelSystem.currentLevel);
 
+  // Função para gerar mensagem motivacional diária
+  const getDailyMotivationalMessage = () => {
+    const today = new Date();
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    
+    const motivationalMessages = [
+      "⚡ Você é rápido como um raio! Continue assim, velocista!",
+      "🔥 Cada missão te deixa mais forte! Você é incrível!",
+      "🌟 Sua velocidade está aumentando a cada dia!",
+      "💪 Flash ficaria orgulhoso do seu progresso!",
+      "🚀 Você está voando rumo ao próximo nível!",
+      "⭐ Sua determinação é sua maior força!",
+      "🏃‍♂️ Correndo em direção à grandeza!",
+      "🎯 Foco total nas missões, super-herói!",
+      "🔋 Sua energia positiva é contagiante!",
+      "🌈 Você ilumina o dia com suas conquistas!",
+      "⚡ Velocidade + Disciplina = Sucesso garantido!",
+      "🏆 Cada XP te aproxima da vitória final!",
+      "🌟 Você é a prova de que heróis existem!",
+      "💫 Sua jornada heroica está apenas começando!",
+      "🔥 Queimando etapas rumo ao topo!",
+      "⚡ Flash Mode: ATIVADO! Você está imparável!",
+      "🎊 Celebre cada conquista, você merece!",
+      "🌪️ Como um tornado de produtividade!",
+      "⭐ Brilhando mais a cada missão completada!",
+      "🚀 Decolando para novos patamares de excelência!",
+      "💎 Você é uma joia rara, continue brilhando!",
+      "🔥 Sua paixão por crescer é inspiradora!",
+      "⚡ Energia infinita para conquistar tudo!",
+      "🌟 Transformando esforço em superpoderes!",
+      "🏃‍♂️ Correndo na velocidade da luz!",
+      "💪 Força, velocidade e inteligência em ação!",
+      "🎯 Mira certeira em todos os objetivos!",
+      "🔋 Bateria sempre carregada para a ação!",
+      "🌈 Pintando o mundo com suas conquistas!",
+      "⚡ O Flash teria inveja da sua dedicação!"
+    ];
+    
+    // Usar o dia do ano para selecionar uma mensagem consistente por dia
+    const messageIndex = dayOfYear % motivationalMessages.length;
+    return motivationalMessages[messageIndex];
+  };
+
   return (
     <>
       <motion.div
@@ -210,24 +253,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center"
           >
             <p className="text-yellow-800 text-sm font-medium">
-              {!levelSystem.isMaxLevel
-                ? `⚡ Mais ${levelSystem.xpNeededForNext} XP para ${levelSystem.nextLevelTitle}!`
-                : progress.streak > 0
-                ? `🔥 Sequência incrível de ${progress.streak} dias!`
-                : '👑 Você alcançou o nível máximo! Parabéns, Flash Master!'
-              }
+              {getDailyMotivationalMessage()}
             </p>
-            
-            {/* Próximo Marco */}
-            {!levelSystem.isMaxLevel && levelSystem.currentLevel < nextMilestone.level && (
-              <motion.div
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="mt-2 text-xs text-yellow-700"
-              >
-                🎯 Próximo marco: {nextMilestone.title} (Nível {nextMilestone.level})
-              </motion.div>
-            )}
           </motion.div>
         </div>
       </motion.div>
