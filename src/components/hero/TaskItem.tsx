@@ -156,8 +156,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
         className={`
           relative overflow-hidden rounded-2xl p-4 border-2 transition-all duration-300
           ${task.status === 'done'
-            ? 'bg-white/30 border-hero-accent shadow-lg shadow-hero-accent/20 scale-95' 
-            : 'bg-white/20 border-white/30 hover:border-hero-accent/50'
+            ? 'bg-green-50 border-green-300 shadow-lg shadow-green-200 scale-95' 
+            : 'bg-white border-gray-200 hover:border-hero-accent/50 shadow-md'
           }
           ${isCompleting ? 'animate-pulse' : ''}
         `}
@@ -232,8 +232,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <h3 className={`
                   ${guidedMode ? 'text-xl' : 'text-lg'} font-bold transition-all duration-300
                   ${task.status === 'done'
-                    ? 'text-hero-accent line-through' 
-                    : 'text-white'
+                    ? 'text-green-600 line-through' 
+                    : 'text-gray-900'
                   }
                 `}>
                   {task.title}
@@ -243,8 +243,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   <p className={`
                     text-sm mt-1 transition-all duration-300
                     ${task.status === 'done'
-                      ? 'text-white/60 line-through' 
-                      : 'text-white/80'
+                      ? 'text-green-500 line-through' 
+                      : 'text-gray-600'
                     }
                   `}>
                     {task.description}
@@ -254,7 +254,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getPeriodEmoji()}</span>
-                    <span className="text-xs text-gray-500 font-medium capitalize">
+                    <span className="text-xs text-gray-600 font-medium capitalize">
                       {task.period === 'morning' && 'Manhã'}
                       {task.period === 'afternoon' && 'Tarde'}
                       {task.period === 'evening' && 'Noite'}
@@ -344,8 +344,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               animate={{ 
                 opacity: [0, 1, 1, 0],
                 scale: [0.5, 1.2, 1.2, 0.8],
-                y: [0, -20, -40, -60]
-              }}
+                  ? 'bg-hero-accent border-hero-accent text-hero-primary shadow-lg cursor-default'
+                  : 'bg-white border-gray-300 text-gray-600 hover:border-hero-accent hover:bg-hero-accent/10'
               exit={{ opacity: 0 }}
               transition={{ duration: 2, ease: "easeOut" }}
               className="absolute -top-8 left-1/2 transform -translate-x-1/2 pointer-events-none z-20"

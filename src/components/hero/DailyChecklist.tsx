@@ -183,9 +183,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 p-3 bg-yellow-400/20 rounded-xl text-center"
+          className="mb-4 p-3 bg-yellow-100 border border-yellow-200 rounded-xl text-center"
         >
-          <p className="text-yellow-100 font-medium">
+          <p className="text-yellow-800 font-medium">
             {getTimeBasedMessage()}
           </p>
         </motion.div>
@@ -218,13 +218,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-hero-primary to-hero-secondary rounded-full relative"
+            className="h-full bg-gradient-to-r from-hero-primary to-hero-secondary rounded-full relative shadow-sm"
           >
             {completionPercentage > 0 && (
               <motion.div
                 animate={{ x: ['-100%', '100%'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-white/30 rounded-full"
+                className="absolute inset-0 bg-white/50 rounded-full"
               />
             )}
           </motion.div>
