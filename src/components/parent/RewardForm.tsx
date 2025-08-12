@@ -49,7 +49,7 @@ interface RewardFormProps {
       });
     }
     setErrors({});
-  }, [reward, isOpen]);
+  }, [reward, initialData, isOpen]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
