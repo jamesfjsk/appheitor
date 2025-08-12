@@ -88,18 +88,18 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.4 }}
-      className="bg-white/10 backdrop-blur-sm rounded-2xl p-6"
+      className="flash-card-hero p-8"
     >
       {/* Header com Seletor de Período */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white mb-4 sm:mb-0 flex items-center gap-2">
-          <Clock className="w-6 h-6 text-yellow-400" />
+          <Clock className="w-6 h-6 text-hero-accent drop-shadow-md" />
           Missões Diárias
           {isCurrentPeriod && (
             <motion.span
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="text-sm bg-yellow-400 text-red-600 px-2 py-1 rounded-full font-bold"
+              className="text-sm bg-hero-accent text-hero-primary px-3 py-1 rounded-full font-bold shadow-md"
             >
               AGORA
             </motion.span>
@@ -120,10 +120,10 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onPeriodChange(period.id)}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 relative ${
+                  className={`px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 relative backdrop-blur-sm border-2 ${
                     isSelected
-                      ? `bg-gradient-to-r ${period.color} text-white shadow-lg`
-                      : 'bg-white/20 text-white/80 hover:bg-white/30'
+                      ? `bg-gradient-to-r ${period.color} text-white shadow-lg border-white/30`
+                      : 'bg-white/20 text-white/80 hover:bg-white/30 border-white/20'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -132,7 +132,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                     <motion.div
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 1, repeat: Infinity }}
-                      className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full"
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-hero-accent rounded-full shadow-sm"
                     />
                   )}
                 </motion.button>
@@ -146,10 +146,10 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onToggleGuidedMode}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
+              className={`px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 backdrop-blur-sm border-2 ${
                 guidedMode
-                  ? 'bg-yellow-400 text-red-600 shadow-lg'
-                  : 'bg-white/20 text-white hover:bg-white/30'
+                  ? 'bg-hero-accent text-hero-primary shadow-lg border-white/30'
+                  : 'bg-white/20 text-white hover:bg-white/30 border-white/20'
               }`}
             >
               <Play className="w-4 h-4" />
@@ -164,9 +164,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 p-3 bg-yellow-400/20 rounded-xl text-center"
+          className="mb-6 p-4 glass-effect-strong rounded-xl text-center"
         >
-          <p className="text-yellow-100 font-medium">
+          <p className="text-white font-semibold">
             {getTimeBasedMessage()}
           </p>
         </motion.div>
@@ -175,18 +175,18 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       {/* Progress do Período */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-white/80 text-sm">
+          <span className="text-white/90 text-sm font-medium">
             Progresso do período: {completedTasks}/{totalTasks}
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-yellow-400 font-bold">
+            <span className="text-white font-bold bg-white/20 backdrop-blur-sm px-2 py-1 rounded-lg">
               {Math.round(completionPercentage)}%
             </span>
             {completionPercentage === 100 && totalTasks > 0 && (
               <motion.span
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="text-yellow-400"
+                className="text-hero-accent text-xl"
               >
                 ⚡
               </motion.span>
@@ -194,28 +194,21 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           </div>
         </div>
         
-        <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
+        <div className="progress-bar h-4">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full relative"
+            className="progress-fill"
           >
-            {completionPercentage > 0 && (
-              <motion.div
-                animate={{ x: ['-100%', '100%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              />
-            )}
           </motion.div>
         </div>
       </div>
       
       {/* Guided Mode Navigation */}
       {guidedMode && currentTask && (
-        <div className="mb-4 flex items-center justify-between bg-white/10 rounded-xl p-3">
-          <div className="flex items-center gap-2 text-white/80 text-sm">
+        <div className="mb-6 flex items-center justify-between glass-effect-strong rounded-xl p-4">
+          <div className="flex items-center gap-2 text-white text-sm font-medium">
             <Play className="w-4 h-4" />
             Missão {filteredTasks.findIndex(t => t.id === currentTask.id) + 1} de {totalTasks}
           </div>
@@ -227,7 +220,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   // Logic to show previous task would go here
                 }
               }}
-              className="p-1 text-white/60 hover:text-white transition-colors"
+              className="p-2 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/20"
               disabled={filteredTasks.findIndex(t => t.id === currentTask.id) === 0}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -239,7 +232,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   // Logic to show next task would go here
                 }
               }}
-              className="p-1 text-white/60 hover:text-white transition-colors"
+              className="p-2 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/20"
               disabled={filteredTasks.findIndex(t => t.id === currentTask.id) === filteredTasks.length - 1}
             >
               <ChevronRight className="w-4 h-4" />
@@ -274,22 +267,22 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   rotate: [0, 5, -5, 0]
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 3,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="text-6xl mb-4"
+                className="text-8xl mb-6"
               >
                 {isCurrentPeriod ? '⚡' : '😴'}
               </motion.div>
-              <p className="text-white/80 text-lg">
+              <p className="text-white text-xl font-semibold mb-2">
                 {isCurrentPeriod 
                   ? 'Todas as missões deste período foram completadas! 🎉'
                   : 'Nenhuma missão para este período ainda.'
                 }
               </p>
               {!isCurrentPeriod && (
-                <p className="text-yellow-400 text-sm mt-2">
+                <p className="text-white/80 text-sm">
                   Peça para o papai adicionar algumas missões!
                 </p>
               )}
@@ -309,12 +302,12 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           transition={{ 
             duration: 0.5,
           }}
-          className="mt-6 p-4 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-xl text-center"
+          className="mt-8 p-6 bg-gradient-to-r from-success-500 to-success-600 rounded-2xl text-center shadow-lg celebration-burst"
         >
-          <div className="relative text-red-600 font-bold text-lg mb-1">
+          <div className="relative text-white font-bold text-xl mb-2 hero-text-shadow">
             🎉 Período Completo! 🎉
           </div>
-          <p className="text-red-600 text-sm">
+          <p className="text-white/90 font-medium">
             Você completou todas as missões! ⚡ Incrível!
           </p>
         </motion.div>

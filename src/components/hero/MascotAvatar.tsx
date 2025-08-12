@@ -38,18 +38,18 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
         y: [0, -10, 0]
       } : {}}
       transition={{ duration: 0.6, repeat: isAnimating ? 3 : 0 }}
-      className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 text-center border-2 border-white/30 shadow-2xl"
+      className="flash-card-hero p-8 text-center relative overflow-hidden"
     >
       {/* Avatar Principal */}
       <div className="relative mb-4">
         <motion.div
           animate={{ 
             boxShadow: isAnimating 
-              ? ["0 0 0 0 rgba(255, 215, 0, 0.7)", "0 0 0 20px rgba(255, 215, 0, 0)", "0 0 0 0 rgba(255, 215, 0, 0)"]
-              : "0 0 20px rgba(255, 215, 0, 0.3)"
+              ? ["0 0 0 0 rgba(255, 217, 61, 0.7)", "0 0 0 30px rgba(255, 217, 61, 0)", "0 0 0 0 rgba(255, 217, 61, 0)"]
+              : "0 0 25px rgba(255, 217, 61, 0.4)"
           }}
           transition={{ duration: 1, repeat: isAnimating ? Infinity : 0 }}
-          className={`w-32 h-32 mx-auto rounded-full bg-gradient-to-br ${getLevelColor(level)} flex items-center justify-center relative overflow-hidden border-4 border-hero-accent`}
+          className="flash-avatar w-36 h-36 mx-auto flex items-center justify-center relative"
         >
           {/* Raio do Flash */}
           <motion.div
@@ -59,7 +59,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
             } : {}}
             transition={{ duration: 0.5, repeat: isAnimating ? Infinity : 0 }}
           >
-            <Zap className="w-16 h-16 text-hero-accent drop-shadow-lg" />
+            <Zap className="w-20 h-20 text-white drop-shadow-lg" />
           </motion.div>
 
           {/* Efeitos de velocidade */}
@@ -68,12 +68,12 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
               <motion.div
                 animate={{ x: [-100, 100], opacity: [0, 1, 0] }}
                 transition={{ duration: 0.3, repeat: Infinity, delay: 0.1 }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12"
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
               />
               <motion.div
                 animate={{ x: [-100, 100], opacity: [0, 1, 0] }}
                 transition={{ duration: 0.3, repeat: Infinity, delay: 0.3 }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-hero-accent/50 to-transparent skew-x-12"
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-hero-accent/40 to-transparent skew-x-12"
               />
             </>
           )}
@@ -83,9 +83,9 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
         <motion.div
           animate={isAnimating ? { rotate: [0, 360] } : {}}
           transition={{ duration: 1, repeat: isAnimating ? Infinity : 0 }}
-          className="absolute -top-2 -right-2 bg-white rounded-full p-2 shadow-lg border-2 border-hero-accent"
+          className="absolute -top-3 -right-3 bg-gradient-to-r from-hero-accent to-yellow-300 rounded-full p-3 shadow-lg border-2 border-white"
         >
-          {getLevelIconComponent()}
+          <span className="text-xl">{getLevelIconComponent()}</span>
         </motion.div>
 
         {/* Partículas flutuantes */}
@@ -106,7 +106,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
                   repeat: Infinity,
                   delay: i * 0.2
                 }}
-                className="absolute top-1/2 left-1/2 w-2 h-2 bg-hero-accent rounded-full"
+                className="absolute top-1/2 left-1/2 w-3 h-3 bg-gradient-to-r from-hero-accent to-white rounded-full shadow-sm"
               />
             ))}
           </div>
@@ -115,10 +115,10 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
 
       {/* Informações do nível */}
       <div className="space-y-2">
-        <h3 className="text-xl font-bold text-white">
+        <h3 className="text-xl font-bold text-white hero-text-shadow">
           {levelSystem.levelTitle}
         </h3>
-        <div className="flex items-center justify-center space-x-2 text-hero-accent font-semibold">
+        <div className="flex items-center justify-center space-x-2 text-white font-semibold bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1">
           <span>Nível {levelSystem.currentLevel}</span>
           <span>•</span>
           <span>{levelSystem.currentXP} XP</span>
@@ -127,16 +127,16 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
         {/* Barra de progresso para próximo nível */}
         {!levelSystem.isMaxLevel && (
           <div className="mt-4">
-            <div className="flex justify-between text-sm text-white/80 mb-1">
+            <div className="flex justify-between text-sm text-white/90 mb-2 font-medium">
               <span>Próximo nível</span>
               <span>{Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel)}/{Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel)}</span>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+            <div className="progress-bar h-3">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${levelSystem.progressPercentage}%` }}
                 transition={{ duration: 1, ease: "easeOut" }}
-                className={`h-full bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} rounded-full`}
+                className="progress-fill"
               />
             </div>
           </div>
@@ -147,7 +147,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
       <motion.div
         animate={currentExpression === 'super' ? { scale: [1, 1.05, 1] } : {}}
         transition={{ duration: 0.5, repeat: 2 }}
-        className="mt-4 text-white/90 text-sm font-medium"
+        className="mt-6 text-white text-sm font-semibold bg-white/20 backdrop-blur-sm rounded-lg p-3"
       >
         {currentExpression === 'super' && levelSystem.isMaxLevel && "👑 Flash Master Supremo!"}
         {currentExpression === 'super' && !levelSystem.isMaxLevel && "🔥 Você é incrível!"}
