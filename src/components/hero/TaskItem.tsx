@@ -254,7 +254,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getPeriodEmoji()}</span>
-                    <span className="text-xs text-gray-600 font-medium capitalize">
+                    <span className="text-xs text-gray-500 font-medium capitalize">
                       {task.period === 'morning' && 'Manhã'}
                       {task.period === 'afternoon' && 'Tarde'}
                       {task.period === 'evening' && 'Noite'}
@@ -344,8 +344,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               animate={{ 
                 opacity: [0, 1, 1, 0],
                 scale: [0.5, 1.2, 1.2, 0.8],
-                  ? 'bg-hero-accent border-hero-accent text-hero-primary shadow-lg cursor-default'
-                  : 'bg-white border-gray-300 text-gray-600 hover:border-hero-accent hover:bg-hero-accent/10'
+                y: [-20, -40, -40, -60]
+              }}
               exit={{ opacity: 0 }}
               transition={{ duration: 2, ease: "easeOut" }}
               className="absolute -top-8 left-1/2 transform -translate-x-1/2 pointer-events-none z-20"
