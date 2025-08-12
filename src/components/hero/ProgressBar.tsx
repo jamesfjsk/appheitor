@@ -48,38 +48,38 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
     
-    const motivationalMessages = [
-      "⚡ Você é rápido como um raio! Continue assim, velocista!",
-      "🔥 Cada missão te deixa mais forte! Você é incrível!",
-      "🌟 Sua velocidade está aumentando a cada dia!",
-      "💪 Flash ficaria orgulhoso do seu progresso!",
-      "🚀 Você está voando rumo ao próximo nível!",
-      "⭐ Sua determinação é sua maior força!",
-      "🏃‍♂️ Correndo em direção à grandeza!",
-      "🎯 Foco total nas missões, super-herói!",
-      "🔋 Sua energia positiva é contagiante!",
-      "🌈 Você ilumina o dia com suas conquistas!",
-      "⚡ Velocidade + Disciplina = Sucesso garantido!",
-      "🏆 Cada XP te aproxima da vitória final!",
-      "🌟 Você é a prova de que heróis existem!",
-      "💫 Sua jornada heroica está apenas começando!",
-      "🔥 Queimando etapas rumo ao topo!",
-      "⚡ Flash Mode: ATIVADO! Você está imparável!",
-      "🎊 Celebre cada conquista, você merece!",
-      "🌪️ Como um tornado de produtividade!",
-      "⭐ Brilhando mais a cada missão completada!",
-      "🚀 Decolando para novos patamares de excelência!",
-      "💎 Você é uma joia rara, continue brilhando!",
-      "🔥 Sua paixão por crescer é inspiradora!",
-      "⚡ Energia infinita para conquistar tudo!",
-      "🌟 Transformando esforço em superpoderes!",
-      "🏃‍♂️ Correndo na velocidade da luz!",
-      "💪 Força, velocidade e inteligência em ação!",
-      "🎯 Mira certeira em todos os objetivos!",
-      "🔋 Bateria sempre carregada para a ação!",
-      "🌈 Pintando o mundo com suas conquistas!",
-      "⚡ O Flash teria inveja da sua dedicação!"
-    ];
+const mensagensHeitorFlash = [
+  "⚡ Heitor, hoje você corre lado a lado com o Barry! Vamos completar essas missões no melhor estilo Team Flash!",
+  "🌪️ Cisco mandou avisar: seus resultados estão criando uma nova linha do tempo de produtividade!",
+  "🔥 Wells diria: 'Heitor, a única constante é sua evolução. Continue correndo!'",
+  "🎯 Você tem a precisão do Capitão Frio e a força do Gorila Grodd (do bem!). Nada te para hoje!",
+  "🌟 Iris West confiaria em você para salvar o dia — e terminar as tarefas!",
+  "💡 Cisco já criou um codinome pra você: *Heitor Turbo*. Modo missão ativado!",
+  "⚡ Você está mais rápido que um raio — o Savitar nem te alcança hoje!",
+  "💬 Joe West te observa com orgulho: 'É assim que se constrói um herói de verdade.'",
+  "🚀 Wally West mandou um salve: 'Heitor, você tá ultrapassando até mim!'",
+  "🌀 Você abriu uma brecha no multiverso da disciplina — e é o herói número 1!",
+  "⭐ Caitlin aprovou sua cura para a preguiça: foco, energia e boas escolhas!",
+  "🔥 Você está em Flashpoint máximo de conquistas! Continue mudando o seu futuro.",
+  "⚡ Barry deixou uma mensagem: 'Heitor, você é a nova esperança da Central City!'",
+  "🎮 Cisco hackeou o sistema só pra ver você desbloquear essa missão com estilo!",
+  "🏃‍♂️ Sua velocidade hoje está na força da Força de Aceleração Pura™.",
+  "🛡️ Ninguém segura o Guardião das Tarefas — sim, esse é você, Heitor!",
+  "💫 Savitar não entendeu como você se superou. Spoiler: você não para nunca.",
+  "🔔 O alarme da STAR Labs tocou: 'Alerta! Heitor ultrapassou todas as metas!'",
+  "🌈 Missão após missão, você está criando um arco-íris de vitórias!",
+  "🧠 Você tem a estratégia de Harrison Wells e a energia do Kid Flash!",
+  "💪 'Meu nome é Heitor, e eu sou o menino mais disciplinado que existe.'",
+  "🎊 O multiverso inteiro celebra: hoje você bateu todos os recordes!",
+  "🚨 ALERTA DE HEROÍSMO: Heitor está alcançando nível meta-humano!",
+  "🔋 Sua energia foi reconhecida na STAR Labs. Missões concluídas com estilo!",
+  "📡 Os satélites captaram: produtividade em nível Flash Supremo!",
+  "🧪 Mistura perfeita: foco de Barry + criatividade de Cisco + força do Heitor!",
+  "🕒 Você distorceu o tempo com tanta velocidade! Sobrou até tempo livre!",
+  "🌀 Parado no tempo? Nunca. Você é pura aceleração mental!",
+  "⚡ Heitor, a Central City está segura — e sua agenda, concluída com sucesso!"
+];
+
     
     // Usar o dia do ano para selecionar uma mensagem consistente por dia
     const messageIndex = dayOfYear % motivationalMessages.length;
