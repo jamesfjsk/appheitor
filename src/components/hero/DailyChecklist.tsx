@@ -114,15 +114,6 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
         <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0 flex items-center gap-2">
           <Clock className="w-6 h-6 text-yellow-400" />
           Missões Diárias
-          {isCurrentPeriod && (
-            <motion.span
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-sm bg-yellow-400 text-red-600 px-2 py-1 rounded-full font-bold"
-            >
-              AGORA
-            </motion.span>
-          )}
         </h2>
 
         <div className="flex flex-col gap-3">
