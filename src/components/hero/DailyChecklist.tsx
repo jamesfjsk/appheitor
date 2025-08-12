@@ -213,18 +213,18 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           </div>
         </div>
         
-        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-hero-primary to-hero-secondary rounded-full relative"
+            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full relative"
           >
             {completionPercentage > 0 && (
               <motion.div
                 animate={{ x: ['-100%', '100%'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            <p className="text-yellow-800 font-medium">
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
               />
             )}
           </motion.div>
@@ -301,14 +301,14 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               >
                 {isCurrentPeriod ? '⚡' : '😴'}
               </motion.div>
-              <p className="text-gray-600 text-lg">
+              <p className="text-white/80 text-lg">
                 {isCurrentPeriod 
                   ? 'Todas as missões deste período foram completadas! 🎉'
                   : 'Nenhuma missão para este período ainda.'
                 }
               </p>
               {!isCurrentPeriod && (
-                <p className="text-yellow-600 text-sm mt-2">
+                <p className="text-yellow-400 text-sm mt-2">
                   Peça para o papai adicionar algumas missões!
                 </p>
               )}
