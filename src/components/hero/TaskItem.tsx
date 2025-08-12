@@ -254,7 +254,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getPeriodEmoji()}</span>
-                    <span className="text-xs text-gray-500 font-medium capitalize">
+                    <span className="text-xs text-gray-600 font-medium capitalize">
                       {task.period === 'morning' && 'Manhã'}
                       {task.period === 'afternoon' && 'Tarde'}
                       {task.period === 'evening' && 'Noite'}
