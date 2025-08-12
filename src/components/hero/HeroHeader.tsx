@@ -42,6 +42,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       className="flex flex-col lg:flex-row items-center justify-between bg-white rounded-2xl shadow-lg border border-gray-100 p-6 gap-4"
+      className="flex flex-col lg:flex-row items-center justify-between bg-gradient-to-br from-hero-primary to-hero-secondary rounded-2xl shadow-lg p-6 gap-4"
     >
       {/* Avatar e Saudação */}
       <div className="flex items-center gap-4">
@@ -90,6 +91,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
             className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900"
+            className="text-xl md:text-2xl lg:text-3xl font-bold text-white"
           >
             {getGreeting()}, Heitor! ⚡
           </motion.h1>
@@ -98,6 +100,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
             className="text-gray-600 text-sm md:text-base lg:text-lg"
+            className="text-hero-accent text-sm md:text-base lg:text-lg font-semibold"
           >
             {getMotivationalMessage()}
           </motion.p>
