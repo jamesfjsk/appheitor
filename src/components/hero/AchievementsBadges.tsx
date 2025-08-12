@@ -28,7 +28,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
           currentProgress = progress.totalTasksCompleted || 0;
           break;
         case 'streak':
-          currentProgress = progress.longestStreak || 0;
+          currentProgress = progress.streak || 0;
           break;
         case 'checkin':
           currentProgress = progress.streak || 0;
@@ -40,6 +40,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
     
     const progressPercentage = Math.min(100, (currentProgress / achievement.target) * 100);
     const isCompleted = userAchievement?.isCompleted || false;
+    const isReadyToUnlock = !isCompleted && currentProgress >= achievement.target;
     const isNewlyUnlocked = userAchievement?.unlockedAt && 
       (new Date().getTime() - userAchievement.unlockedAt.getTime()) < 10000; // Last 10 seconds
     
@@ -49,12 +50,18 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
       progressPercentage,
       isCompleted,
       isNewlyUnlocked,
-      unlockedAt: userAchievement?.unlockedAt
+      isReadyToUnlock,
+      unlockedAt: userAchievement?.unlockedAt,
+      userAchievementId: userAchievement?.id,
+      rewardClaimed: userAchievement?.rewardClaimed || false
     };
   }).sort((a, b) => {
-    // Sort: completed first, then by progress percentage, then by creation date
+    // Sort: completed first, then ready to unlock, then by progress percentage desc
     if (a.isCompleted !== b.isCompleted) {
       return a.isCompleted ? -1 : 1;
+    }
+    if (a.isReadyToUnlock !== b.isReadyToUnlock) {
+      return a.isReadyToUnlock ? -1 : 1;
     }
     if (a.progressPercentage !== b.progressPercentage) {
       return b.progressPercentage - a.progressPercentage;
@@ -428,7 +435,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                       <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                       <p className="font-bold text-blue-900">Em Progresso</p>
                       <p className="text-sm text-blue-700 mt-1">
-                        Faltam {Math.max(0, selectedAchievement.target - selectedAchievement.currentProgress)} para completar
+                        Faltam {selectedAchievement.target - selectedAchievement.currentProgress} para completar
                       </p>
                     </div>
                   ) : (
