@@ -433,22 +433,28 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                       <p className="text-sm text-yellow-700 mt-1">
                         Clique para resgatar sua recompensa!
                       </p>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={async () => {
-                          try {
-                            await claimAchievementReward(selectedAchievement.userAchievementId);
-                            setSelectedAchievement(null);
-                          } catch (error) {
-                            console.error('🏆 Error claiming achievement reward:', error);
-                          }
-                        }}
-                        className="w-full mt-3 py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
-                      >
-                        <Star className="w-4 h-4 inline mr-2" />
-                        Resgatar Recompensa
-                      </motion.button>
+                      {selectedAchievement.userAchievementId ? (
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={async () => {
+                            try {
+                              await claimAchievementReward(selectedAchievement.userAchievementId);
+                              setSelectedAchievement(null);
+                            } catch (error) {
+                              console.error('🏆 Error claiming achievement reward:', error);
+                            }
+                          }}
+                          className="w-full mt-3 py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
+                        >
+                          <Star className="w-4 h-4 inline mr-2" />
+                          Resgatar Recompensa
+                        </motion.button>
+                      ) : (
+                        <div className="w-full mt-3 py-3 bg-gray-200 text-gray-500 rounded-lg font-bold text-center">
+                          Aguardando processamento...
+                        </div>
+                      )}
                     </div>
                   ) : selectedAchievement.progressPercentage > 0 ? (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
