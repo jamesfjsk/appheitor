@@ -400,7 +400,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         Recompensa Já Resgatada
                       </div>
                     </div>
-                  ) : selectedAchievement.isCompleted || selectedAchievement.currentProgress >= selectedAchievement.target ? (
+                  ) : selectedAchievement.isCompleted && !selectedAchievement.rewardClaimed ? (
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
                       <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
                       <p className="font-bold text-green-900">Conquista Desbloqueada!</p>
@@ -416,10 +416,6 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                             achievementId: selectedAchievement.id,
                             userAchievementId: selectedAchievement.userAchievementId,
                             isCompleted: selectedAchievement.isCompleted,
-                            rewardClaimed: selectedAchievement.rewardClaimed
-                          });
-                          
-                          try {
                             // Now claim the reward
                             await claimAchievementReward(selectedAchievement.userAchievementId);
                             setSelectedAchievement(null);
@@ -432,6 +428,14 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         <Star className="w-4 h-4 inline mr-2" />
                         Resgatar Recompensa
                       </motion.button>
+                    </div>
+                  ) : selectedAchievement.currentProgress >= selectedAchievement.target ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                      <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                      <p className="font-bold text-yellow-900">Meta Atingida!</p>
+                      <p className="text-sm text-yellow-700 mt-1">
+                        Aguardando processamento da conquista...
+                      </p>
                     </div>
                   ) : selectedAchievement.progressPercentage > 0 ? (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
