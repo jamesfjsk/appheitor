@@ -21,7 +21,7 @@ import {
   DocumentSnapshot
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Task, Reward, UserProgress, RewardRedemption, Notification, User } from '../types';
+import { Task, Reward, UserProgress, RewardRedemption, Notification, User, FlashReminder } from '../types';
 import { getLevelFromXP } from '../utils/levelSystem';
 
 // Utility function for server timestamp
@@ -923,6 +923,63 @@ export class FirestoreService {
         requiredLevel: reward.requiredLevel || 1,
         active: reward.active,
         requiredLevel: 1, // Default level for existing rewards
+        createdAt: nowTs(),
+        updatedAt: nowTs()
+      });
+    });
+
+    // Create default flash reminders
+    const defaultReminders = [
+      {
+        title: 'Hidratação Flash',
+        message: 'Beba água para manter sua energia de super-herói!',
+        icon: '💧',
+        color: 'blue' as const,
+        priority: 'medium' as const
+      },
+      {
+        title: 'Postura de Herói',
+        message: 'Sente-se direito como um verdadeiro velocista!',
+        icon: '🦸',
+        color: 'red' as const,
+        priority: 'low' as const
+      },
+      {
+        title: 'Respiração Flash',
+        message: 'Respire fundo e mantenha o foco nas missões!',
+        icon: '🌬️',
+        color: 'green' as const,
+        priority: 'medium' as const
+      },
+      {
+        title: 'Energia Positiva',
+        message: 'Sorria! Você está fazendo um trabalho incrível!',
+        icon: '😊',
+        color: 'yellow' as const,
+        priority: 'high' as const
+      },
+      {
+        title: 'Organização Flash',
+        message: 'Mantenha seu espaço organizado como a STAR Labs!',
+        icon: '🗂️',
+        color: 'purple' as const,
+        priority: 'low' as const
+      }
+    ];
+
+    defaultReminders.forEach(reminder => {
+      const reminderRef = doc(collection(db, 'flashReminders'));
+      batch.set(reminderRef, {
+        ownerId: childUid,
+        userId: childUid,
+        title: reminder.title,
+        message: reminder.message,
+        icon: reminder.icon,
+        color: reminder.color,
+        priority: reminder.priority,
+        active: true,
+        showOnDashboard: true,
+        createdBy: adminUid,
         createdAt: nowTs(),
         updatedAt: nowTs()
       });

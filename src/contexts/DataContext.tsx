@@ -605,6 +605,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     progress,
     redemptions,
     notifications,
+    flashReminders,
     loading,
     addTask,
     updateTask,
@@ -617,10 +618,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     approveRedemption,
     sendNotification,
     markNotificationAsRead,
+    addFlashReminder,
+    updateFlashReminder,
+    deleteFlashReminder,
     adjustUserXP,
     adjustUserGold,
     resetUserData,
-    createTestData,
     createTestData,
     getCalendarMonth
   };

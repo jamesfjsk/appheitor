@@ -121,3 +121,18 @@ export interface LevelSystem {
   nextLevelTitle: string;
   isMaxLevel: boolean;
 }
+
+export interface FlashReminder {
+  id: string;
+  ownerId: string; // Child UID
+  title: string;
+  message: string;
+  icon: string;
+  color: 'red' | 'yellow' | 'blue' | 'green' | 'purple' | 'orange';
+  priority: 'low' | 'medium' | 'high';
+  active: boolean;
+  showOnDashboard: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string; // Admin UID
+}

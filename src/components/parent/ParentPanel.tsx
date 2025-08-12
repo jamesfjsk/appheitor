@@ -11,8 +11,9 @@ import NotificationSender from './NotificationSender';
 import AdminControls from './AdminControls';
 import FirebaseDoctor from '../common/FirebaseDoctor';
 import DataDoctorPage from '../admin/dataDoctor/DataDoctorPage';
+import FlashReminderManager from './FlashReminderManager';
 
-type TabType = 'dashboard' | 'tasks' | 'rewards' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
+type TabType = 'dashboard' | 'tasks' | 'rewards' | 'reminders' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -32,6 +33,7 @@ const ParentPanel: React.FC = () => {
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
     { id: 'tasks', label: 'Gerenciar Tarefas', icon: '📝' },
     { id: 'rewards', label: 'Recompensas', icon: '🎁' },
+    { id: 'reminders', label: 'Lembretes Flash', icon: '⚡' },
     { id: 'notifications', label: 'Notificações', icon: '🔔' },
     { id: 'history', label: 'Histórico', icon: '📈' },
     { id: 'admin', label: 'Controles Admin', icon: '⚙️' },
@@ -82,6 +84,9 @@ const ParentPanel: React.FC = () => {
           )}
           {activeTab === 'rewards' && (
             <RewardManager />
+          )}
+          {activeTab === 'reminders' && (
+            <FlashReminderManager />
           )}
           {activeTab === 'notifications' && (
             <NotificationSender />
