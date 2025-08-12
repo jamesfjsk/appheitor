@@ -94,7 +94,6 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = ({ achievements })
       {(achievements || []).length === 0 && (
         <div className="text-center py-6">
           <div className="text-4xl mb-2">🏆</div>
-          <p className="text-gray-600 text-sm">
           <p className="text-white/80 text-sm">
             Complete missões para desbloquear conquistas!
           </p>
