@@ -412,10 +412,12 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={async () => {
-                          console.log('🏆 Achievement reward claim clicked:', {
-                            achievementId: selectedAchievement.id,
-                            userAchievementId: selectedAchievement.userAchievementId,
-                            isCompleted: selectedAchievement.isCompleted,
+                          try {
+                            console.log('🏆 Achievement reward claim clicked:', {
+                              achievementId: selectedAchievement.id,
+                              userAchievementId: selectedAchievement.userAchievementId,
+                              isCompleted: selectedAchievement.isCompleted,
+                            });
                             // Now claim the reward
                             await claimAchievementReward(selectedAchievement.userAchievementId);
                             setSelectedAchievement(null);
