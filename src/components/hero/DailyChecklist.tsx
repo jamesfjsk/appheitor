@@ -1,34 +1,62 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Clock, Sun, Sunset, Moon, Target } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { useSound } from '../../contexts/SoundContext';
-import { Task, TaskStatus } from '../../types';
+import { Task } from '../../types';
 import TaskItem from './TaskItem';
-import { Clock, Sun, Sunset, Moon } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 interface DailyChecklistProps {
+  tasks: Task[];
   selectedPeriod: 'morning' | 'afternoon' | 'evening';
   onPeriodChange: (period: 'morning' | 'afternoon' | 'evening') => void;
+  guidedMode?: boolean;
+  onToggleGuidedMode?: () => void;
 }
 
-const DailyChecklist: React.FC<DailyChecklistProps> = ({ selectedPeriod, onPeriodChange }) => {
-  const { tasks, completeTask } = useData();
-  const { user } = useAuth();
-  const { playSound } = useSound();
+const DailyChecklist: React.FC<DailyChecklistProps> = ({ 
+  tasks, 
+  selectedPeriod, 
+  onPeriodChange, 
+  guidedMode = false,
+  onToggleGuidedMode 
+}) => {
+  const { completeTask } = useData();
   const [completingTasks, setCompletingTasks] = useState<Set<string>>(new Set());
 
   const periods = [
-    { id: 'morning' as const, label: 'Manhã', icon: Sun, gradient: 'from-flash-yellow-light to-flash-yellow-primary' },
-    { id: 'afternoon' as const, label: 'Tarde', icon: Sun, gradient: 'from-flash-red-light to-flash-red-primary' },
-    { id: 'evening' as const, label: 'Noite', icon: Moon, gradient: 'from-purple-200 to-purple-400' }
+    { 
+      id: 'morning' as const, 
+      label: 'Manhã', 
+      icon: Sun, 
+      emoji: '🌅',
+      color: 'from-yellow-400 to-orange-400'
+    },
+    { 
+      id: 'afternoon' as const, 
+      label: 'Tarde', 
+      icon: Sunset, 
+      emoji: '☀️',
+      color: 'from-blue-400 to-indigo-400'
+    },
+    { 
+      id: 'evening' as const, 
+      label: 'Noite', 
+      icon: Moon, 
+      emoji: '🌙',
+      color: 'from-purple-400 to-pink-400'
+    }
   ];
 
-  const today = new Date().toISOString().split('T')[0];
-  const dayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+  // Filter tasks by period and frequency
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
   const filteredTasks = tasks.filter(task => {
+    // Filter by active status
+    if (task.active !== true) return false;
+    
     // Filter by period
     if (task.period !== selectedPeriod) return false;
     
@@ -39,78 +67,31 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({ selectedPeriod, onPerio
     return true;
   });
 
-  const handleCompleteTask = async (taskId: string) => {
-    if (!user) return;
-
-    // Check if task is already completed today
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    const todayCompletion = task.completions?.find(c => c.date === today);
-    if (todayCompletion?.status === 'done') {
-      toast.success('✅ Tarefa já foi completada hoje! Aparecerá novamente amanhã.', {
-        duration: 3000,
-        style: {
-          background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-          color: 'white',
-          borderRadius: '12px',
-          fontWeight: '600'
-        }
-      });
-      return;
-    }
-
+  const handleCompleteTask = async (taskId: string, completed: boolean) => {
+    if (!completed) return; // Only handle completion, not unchecking
+    
+    // Prevent multiple clicks
+    if (completingTasks.has(taskId)) return;
+    
     setCompletingTasks(prev => new Set(prev).add(taskId));
 
     try {
       await completeTask(taskId);
-      playSound('success');
+    } catch (error: any) {
+      console.error('❌ Erro ao completar tarefa:', error);
       
-      // Show celebration toast
-      toast.success('🎉 Missão completada! Parabéns, herói!', {
-        duration: 4000,
-        style: {
-          background: 'linear-gradient(135deg, #FF6B6B 0%, #FFD93D 100%)',
-          color: 'white',
-          borderRadius: '12px',
-          fontWeight: '600'
-        }
-      });
-    } catch (error) {
-      console.error('Erro ao completar tarefa:', error);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      
-      if (errorMessage.includes('Task already completed today')) {
-        toast.success('✅ Tarefa já foi completada hoje! Aparecerá novamente amanhã.', {
+      if (error.message === 'Task already completed today') {
+        toast('✅ Tarefa já foi completada hoje!', {
           duration: 3000,
           style: {
-            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-            color: 'white',
-            borderRadius: '12px',
-            fontWeight: '600'
-          }
+            background: '#10B981',
+            color: '#FFFFFF',
+          },
         });
-      } else if (errorMessage.includes('permission-denied')) {
-        toast.error('❌ Erro de permissão. Tente fazer login novamente.', {
-          duration: 4000,
-          style: {
-            background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-            color: 'white',
-            borderRadius: '12px',
-            fontWeight: '600'
-          }
-        });
+      } else if (error.code === 'permission-denied') {
+        toast.error('❌ Erro de permissão. Tente fazer login novamente.');
       } else {
-        toast.error(`❌ Erro ao completar tarefa: ${errorMessage}`, {
-          duration: 4000,
-          style: {
-            background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-            color: 'white',
-            borderRadius: '12px',
-            fontWeight: '600'
-          }
-        });
+        toast.error('❌ Erro ao completar tarefa');
       }
     } finally {
       setTimeout(() => {
@@ -123,13 +104,46 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({ selectedPeriod, onPerio
     }
   };
 
-  const getTaskStatus = (task: Task): TaskStatus => {
-    const todayCompletion = task.completions?.find(c => c.date === today);
-    return todayCompletion?.status || 'pending';
+  const completedTasks = filteredTasks.filter(task => task.status === 'done').length;
+  const totalTasks = filteredTasks.length;
+  const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+  const getCurrentPeriodInfo = () => {
+    return periods.find(p => p.id === selectedPeriod) || periods[0];
   };
 
+  const currentPeriod = getCurrentPeriodInfo();
+
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+      className="flash-card-hero p-6 space-y-6"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-white font-bold text-xl flex items-center gap-3">
+          <Target className="w-6 h-6 text-hero-accent drop-shadow-md" />
+          Missões de Hoje
+        </h3>
+        
+        {onToggleGuidedMode && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onToggleGuidedMode}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              guidedMode
+                ? 'bg-hero-accent text-hero-primary shadow-lg'
+                : 'bg-white/20 text-white hover:bg-white/30'
+            }`}
+          >
+            {guidedMode ? '🎯 Modo Guiado ON' : '🎯 Modo Guiado'}
+          </motion.button>
+        )}
+      </div>
+
       {/* Period Selector */}
       <div className="flex gap-2 p-1 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30">
         {periods.map((period) => {
@@ -137,82 +151,113 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({ selectedPeriod, onPerio
           const isSelected = selectedPeriod === period.id;
           
           return (
-            <button
+            <motion.button
               key={period.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onPeriodChange(period.id)}
               className={`
                 flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl
                 font-semibold text-sm transition-all duration-300 relative overflow-hidden
                 ${isSelected 
-                  ? `bg-gradient-to-r ${period.gradient} text-white shadow-lg transform scale-105` 
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/30'
+                  ? `bg-gradient-to-r ${period.color} text-white shadow-lg transform scale-105` 
+                  : 'text-white/80 hover:text-white hover:bg-white/20'
                 }
               `}
             >
-              <Icon size={18} />
+              <span className="text-lg">{period.emoji}</span>
+              <Icon className="w-4 h-4" />
               <span>{period.label}</span>
+              
               {isSelected && (
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent animate-shimmer" />
+                <motion.div
+                  animate={{
+                    x: ['-100%', '100%'],
+                    opacity: [0, 0.3, 0]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
+                />
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>
+
+      {/* Progress Summary */}
+      {totalTasks > 0 && (
+        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-white font-semibold">
+              {currentPeriod.emoji} Progresso da {currentPeriod.label}
+            </span>
+            <span className="text-hero-accent font-bold">
+              {completedTasks}/{totalTasks}
+            </span>
+          </div>
+          
+          <div className="progress-bar">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercentage}%` }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="progress-fill"
+            />
+          </div>
+          
+          {progressPercentage === 100 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-3 text-center text-hero-accent font-bold text-sm bg-white/20 rounded-lg py-2"
+            >
+              🎉 Período completo! Parabéns, herói!
+            </motion.div>
+          )}
+        </div>
+      )}
 
       {/* Tasks List */}
       <div className="space-y-3">
         {filteredTasks.length === 0 ? (
           <div className="text-center py-12">
-            <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg font-medium">
-              Nenhuma missão para este período
+            <div className="text-6xl mb-4">{currentPeriod.emoji}</div>
+            <p className="text-white/80 text-lg font-medium">
+              Nenhuma missão para a {currentPeriod.label.toLowerCase()}
             </p>
-            <p className="text-gray-400 text-sm mt-2">
-              Que tal descansar um pouco? 😊
+            <p className="text-white/60 text-sm mt-2">
+              {isWeekend 
+                ? 'Aproveite o fim de semana! 😊'
+                : 'Que tal descansar um pouco? 😊'
+              }
             </p>
           </div>
         ) : (
           filteredTasks.map((task, index) => (
-            <div
+            <TaskItem
               key={task.id}
-              className="animate-fade-in-up"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <TaskItem
-                task={task}
-                status={getTaskStatus(task)}
-                onToggle={() => handleCompleteTask(task.id)}
-                isCompleting={completingTasks.has(task.id)}
-              />
-            </div>
+              task={task}
+              onComplete={handleCompleteTask}
+              index={index}
+              guidedMode={guidedMode}
+            />
           ))
         )}
       </div>
 
-      {/* Progress Summary */}
-      {filteredTasks.length > 0 && (
-        <div className="mt-6 p-4 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600 font-medium">
-              Progresso do período
-            </span>
-            <span className="text-gray-800 font-bold">
-              {filteredTasks.filter(task => getTaskStatus(task) === 'done').length} / {filteredTasks.length}
-            </span>
-          </div>
-          <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-flash-red-primary to-flash-yellow-primary transition-all duration-500 relative"
-              style={{ 
-                width: `${(filteredTasks.filter(task => getTaskStatus(task) === 'done').length / filteredTasks.length) * 100}%` 
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent animate-shimmer" />
-            </div>
-          </div>
+      {/* Day Type Indicator */}
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white/80 text-sm font-medium">
+          <span>{isWeekend ? '🏖️' : '📚'}</span>
+          <span>{isWeekend ? 'Fim de Semana' : 'Dia de Semana'}</span>
         </div>
-      )}
-    </div>
+      </div>
+    </motion.div>
   );
 };
 
