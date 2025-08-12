@@ -636,6 +636,23 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   };
 
+  const claimAchievementReward = async (userAchievementId: string) => {
+    if (!childUid) throw new Error('Child UID não definido');
+    
+    try {
+      await FirestoreService.claimAchievementReward(userAchievementId, childUid);
+      toast.success('🎁 Recompensa da conquista resgatada!');
+    } catch (error: any) {
+      console.error('❌ Erro ao resgatar recompensa da conquista:', error);
+      if (error.message === 'Achievement reward already claimed') {
+        toast.error('Esta recompensa já foi resgatada!');
+      } else {
+        toast.error('Erro ao resgatar recompensa da conquista');
+      }
+      throw error;
+    }
+  };
+
   // Progress methods
   const adjustUserXP = async (amount: number) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -803,6 +820,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     updateAchievement,
     deleteAchievement,
     checkAchievements,
+    claimAchievementReward,
     claimAchievementReward,
     adjustUserXP,
     adjustUserGold,
