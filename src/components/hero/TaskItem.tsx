@@ -192,11 +192,11 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
             whileHover={{ scale: guidedMode ? 1.15 : 1.1 }}
             whileTap={{ scale: 0.9 }}
             className={`
-              relative ${guidedMode ? 'w-16 h-16' : 'w-12 h-12'} rounded-full border-3 flex items-center justify-center
+              relative ${guidedMode ? 'w-16 h-16' : 'w-14 h-14'} rounded-full border-4 flex items-center justify-center
               transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50
               ${task.status === 'done'
-                ? 'bg-hero-accent border-hero-accent text-hero-primary shadow-lg cursor-default'
-                : 'bg-white/20 border-white/50 text-white hover:border-hero-accent hover:bg-hero-accent/20'
+                ? 'bg-green-500 border-green-400 text-white shadow-xl cursor-default'
+                : 'bg-yellow-400 border-yellow-300 text-red-600 hover:bg-yellow-300 hover:border-yellow-200 shadow-lg hover:shadow-xl'
               }
               ${isCompleting || task.status === 'done' ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
