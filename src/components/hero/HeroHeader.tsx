@@ -146,7 +146,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           >
             ⭐
           </motion.div>
-          
+        </motion.div>
 
         <div>
           <motion.h1
