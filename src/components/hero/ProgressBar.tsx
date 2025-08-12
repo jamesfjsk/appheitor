@@ -195,12 +195,12 @@ const mensagensHeitorFlash = [
             {/* Indicador de Nível */}
             <div className="flex justify-between mt-2 text-sm">
               <div className="text-white/80">
-                <span className="font-bold">{getLevelIcon(levelSystem.currentLevel)} Nível {levelSystem.currentLevel}</span>
+                <span className="font-bold text-yellow-400">{getLevelIcon(levelSystem.currentLevel)} Nível {levelSystem.currentLevel}</span>
                 <div className="text-xs text-gray-600">{levelSystem.levelTitle}</div>
               </div>
               {!levelSystem.isMaxLevel && (
                 <div className="text-gray-600 text-right">
-                  <span className="font-bold">{getLevelIcon(levelSystem.currentLevel + 1)} Nível {levelSystem.currentLevel + 1}</span>
+                  <span className="font-bold text-yellow-400">{getLevelIcon(levelSystem.currentLevel + 1)} Nível {levelSystem.currentLevel + 1}</span>
                   <div className="text-xs text-gray-600">{levelSystem.nextLevelTitle}</div>
                 </div>
               )}
