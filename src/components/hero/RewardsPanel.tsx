@@ -172,7 +172,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
                   selectedCategory === category.id
                     ? 'bg-hero-accent text-hero-primary shadow-lg'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <span>{category.icon}</span>
@@ -192,7 +192,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 whitespace-nowrap text-sm ${
                   selectedFilter === filter.id
                     ? 'bg-white text-hero-primary shadow-lg'
-                    : 'bg-white/10 text-white/80 hover:bg-white/20'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 <span className="text-xs">{filter.icon}</span>
@@ -223,8 +223,8 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     transition={{ delay: index * 0.1 }}
                     className={`relative backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 ${
                       isUnlocked 
-                        ? 'bg-white/20 border-white/30' 
-                        : 'bg-gray-500/20 border-gray-400/30 opacity-75'
+                        ? 'bg-white border-gray-200 shadow-md' 
+                        : 'bg-gray-100 border-gray-300 opacity-75'
                     }`}
                   >
                     {getStatusBadge(reward)}
@@ -253,12 +253,12 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                         {reward.emoji}
                       </div>
                       <h3 className={`font-bold text-lg mb-1 ${
-                        isUnlocked ? 'text-white' : 'text-gray-300'
+                        isUnlocked ? 'text-gray-900' : 'text-gray-500'
                       }`}>
                         {reward.title}
                       </h3>
                       <p className={`text-sm ${
-                        isUnlocked ? 'text-white/80' : 'text-gray-400'
+                        isUnlocked ? 'text-gray-600' : 'text-gray-400'
                       }`}>
                         {reward.description}
                       </p>
@@ -297,11 +297,11 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           Nível {requiredLevel}
                         </span>
                       ) : (progress.availableGold || 0) >= (reward.costGold || 0) ? (
-                        <span className="text-green-300 text-sm font-medium">
+                        <span className="text-green-600 text-sm font-medium">
                           ✓ Disponível
                         </span>
                       ) : (
-                        <span className="text-red-300 text-sm font-medium">
+                        <span className="text-red-600 text-sm font-medium">
                           <Lock className="w-4 h-4 inline mr-1" />
                           Faltam {(reward.costGold || 0) - (progress.availableGold || 0)}
                         </span>
@@ -346,28 +346,28 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
               <div className="text-6xl mb-4">🎁</div>
               {selectedFilter === 'locked' ? (
                 <>
-                  <p className="text-white/80 text-lg">
+                  <p className="text-gray-600 text-lg">
                     Nenhuma recompensa bloqueada nesta categoria
                   </p>
-                  <p className="text-hero-accent text-sm mt-2">
+                  <p className="text-hero-primary text-sm mt-2">
                     Você já desbloqueou todas! 🎉
                   </p>
                 </>
               ) : selectedFilter === 'available' ? (
                 <>
-                  <p className="text-white/80 text-lg">
+                  <p className="text-gray-600 text-lg">
                     Nenhuma recompensa disponível nesta categoria
                   </p>
-                  <p className="text-hero-accent text-sm mt-2">
+                  <p className="text-hero-primary text-sm mt-2">
                     Complete mais missões para ganhar Gold!
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-white/80 text-lg">
+                  <p className="text-gray-600 text-lg">
                     Nenhuma recompensa nesta categoria
                   </p>
-                  <p className="text-hero-accent text-sm mt-2">
+                  <p className="text-hero-primary text-sm mt-2">
                     Peça para o papai adicionar algumas recompensas!
                   </p>
                 </>
@@ -379,7 +379,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
         {/* Histórico de Resgates do Usuário */}
         {redemptions.length > 0 && (
           <div className="p-6 border-t border-white/20">
-            <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
+            <h3 className="text-gray-900 font-bold text-lg mb-4 flex items-center gap-2">
               <Clock className="w-5 h-5 text-yellow-400" />
               Meus Resgates ({redemptions.length})
             </h3>
@@ -409,8 +409,8 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                       <div className="flex items-center gap-3">
                         <div className="text-xl">{reward.emoji}</div>
                         <div>
-                          <h5 className="font-medium text-white">{reward.title}</h5>
-                          <p className="text-xs text-white/70">
+                          <h5 className="font-medium text-gray-900">{reward.title}</h5>
+                          <p className="text-xs text-gray-600">
                             {redemption.createdAt.toLocaleDateString('pt-BR')} às {redemption.createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -421,7 +421,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           <span>{config.icon}</span>
                           <span>{config.label}</span>
                         </div>
-                        <div className="text-xs text-white/60">
+                        <div className="text-xs text-gray-500">
                           -{redemption.costGold} Gold
                         </div>
                       </div>

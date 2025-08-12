@@ -107,11 +107,11 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.4 }}
-      className="bg-white/10 backdrop-blur-sm rounded-2xl p-6"
+      className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
     >
       {/* Header com Seletor de Período */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white mb-4 sm:mb-0 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0 flex items-center gap-2">
           <Clock className="w-6 h-6 text-yellow-400" />
           Missões Diárias
           {isCurrentPeriod && (
@@ -142,7 +142,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 relative ${
                     isSelected
                       ? `bg-gradient-to-r ${period.color} text-white shadow-lg`
-                      : 'bg-white/20 text-white/80 hover:bg-white/30'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -168,7 +168,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
                 guidedMode
                   ? 'bg-yellow-400 text-red-600 shadow-lg'
-                  : 'bg-white/20 text-white hover:bg-white/30'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               <Play className="w-4 h-4" />
@@ -194,7 +194,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       {/* Progress do Período */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-white/80 text-sm">
+          <span className="text-gray-600 text-sm">
             Progresso do período: {completedTasks}/{totalTasks}
           </span>
           <div className="flex items-center gap-2">
@@ -213,18 +213,18 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           </div>
         </div>
         
-        <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full relative"
+            className="h-full bg-gradient-to-r from-hero-primary to-hero-secondary rounded-full relative"
           >
             {completionPercentage > 0 && (
               <motion.div
                 animate={{ x: ['-100%', '100%'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            <p className="text-yellow-800 font-medium">
               />
             )}
           </motion.div>
@@ -301,14 +301,14 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               >
                 {isCurrentPeriod ? '⚡' : '😴'}
               </motion.div>
-              <p className="text-white/80 text-lg">
+              <p className="text-gray-600 text-lg">
                 {isCurrentPeriod 
                   ? 'Todas as missões deste período foram completadas! 🎉'
                   : 'Nenhuma missão para este período ainda.'
                 }
               </p>
               {!isCurrentPeriod && (
-                <p className="text-yellow-400 text-sm mt-2">
+                <p className="text-yellow-600 text-sm mt-2">
                   Peça para o papai adicionar algumas missões!
                 </p>
               )}

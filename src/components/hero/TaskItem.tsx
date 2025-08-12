@@ -86,7 +86,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
     
     return (
       <div className={`flex items-center space-x-1 text-xs ${
-        isOverdue ? 'text-red-200' : 'text-white/70'
+        isOverdue ? 'text-red-500' : 'text-gray-500'
       }`}>
         <Clock className="w-3 h-3" />
         <span>{task.time}</span>
@@ -254,7 +254,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getPeriodEmoji()}</span>
-                    <span className="text-xs text-white/70 font-medium capitalize">
+                    <span className="text-xs text-gray-500 font-medium capitalize">
                       {task.period === 'morning' && 'Manhã'}
                       {task.period === 'afternoon' && 'Tarde'}
                       {task.period === 'evening' && 'Noite'}

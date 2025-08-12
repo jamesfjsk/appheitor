@@ -38,7 +38,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
         y: [0, -10, 0]
       } : {}}
       transition={{ duration: 0.6, repeat: isAnimating ? 3 : 0 }}
-      className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 text-center border-2 border-white/30 shadow-2xl"
+      className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 text-center"
     >
       {/* Avatar Principal */}
       <div className="relative mb-4">
@@ -115,10 +115,10 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
 
       {/* Informações do nível */}
       <div className="space-y-2">
-        <h3 className="text-xl font-bold text-white">
+        <h3 className="text-xl font-bold text-gray-900">
           {levelSystem.levelTitle}
         </h3>
-        <div className="flex items-center justify-center space-x-2 text-hero-accent font-semibold">
+        <div className="flex items-center justify-center space-x-2 text-hero-primary font-semibold">
           <span>Nível {levelSystem.currentLevel}</span>
           <span>•</span>
           <span>{levelSystem.currentXP} XP</span>
@@ -127,11 +127,11 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
         {/* Barra de progresso para próximo nível */}
         {!levelSystem.isMaxLevel && (
           <div className="mt-4">
-            <div className="flex justify-between text-sm text-white/80 mb-1">
+            <div className="flex justify-between text-sm text-gray-600 mb-1">
               <span>Próximo nível</span>
               <span>{Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel)}/{Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel)}</span>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${levelSystem.progressPercentage}%` }}
@@ -147,7 +147,7 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
       <motion.div
         animate={currentExpression === 'super' ? { scale: [1, 1.05, 1] } : {}}
         transition={{ duration: 0.5, repeat: 2 }}
-        className="mt-4 text-white/90 text-sm font-medium"
+        className="mt-4 text-gray-700 text-sm font-medium"
       >
         {currentExpression === 'super' && levelSystem.isMaxLevel && "👑 Flash Master Supremo!"}
         {currentExpression === 'super' && !levelSystem.isMaxLevel && "🔥 Você é incrível!"}

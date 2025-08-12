@@ -49,7 +49,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3 }}
-        className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 relative overflow-hidden"
+        className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 relative overflow-hidden"
       >
         {/* Lightning background animation */}
         <motion.div
@@ -62,12 +62,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent skew-x-12"
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent skew-x-12"
         />
         
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-bold text-lg flex items-center gap-2">
+            <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
               <Lightning className="w-5 h-5 text-yellow-400" fill="currentColor" />
               Progresso Flash
             </h3>
@@ -131,12 +131,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             <div className="flex justify-between mt-2 text-sm">
               <div className="text-white/80">
                 <span className="font-bold">{getLevelIcon(levelSystem.currentLevel)} Nível {levelSystem.currentLevel}</span>
-                <div className="text-xs text-yellow-200">{levelSystem.levelTitle}</div>
+                <div className="text-xs text-gray-600">{levelSystem.levelTitle}</div>
               </div>
               {!levelSystem.isMaxLevel && (
-                <div className="text-white/80 text-right">
+                <div className="text-gray-600 text-right">
                   <span className="font-bold">{getLevelIcon(levelSystem.currentLevel + 1)} Nível {levelSystem.currentLevel + 1}</span>
-                  <div className="text-xs text-yellow-200">{levelSystem.nextLevelTitle}</div>
+                  <div className="text-xs text-gray-600">{levelSystem.nextLevelTitle}</div>
                 </div>
               )}
             </div>
@@ -158,7 +158,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
               >
                 {levelSystem.currentXP}
               </motion.div>
-              <div className="text-white/80 text-sm">Total de XP</div>
+              <div className="text-gray-600 text-sm">Total de XP</div>
             </div>
             
             <div className="text-center">
@@ -176,7 +176,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
                 {progress.streak > 0 && <span className="text-orange-400">🔥</span>}
                 {progress.streak}
               </motion.div>
-              <div className="text-white/80 text-sm">Dias Seguidos</div>
+              <div className="text-gray-600 text-sm">Dias Seguidos</div>
             </div>
           </div>
 
@@ -185,9 +185,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="mt-4 p-3 bg-yellow-400/20 rounded-lg text-center"
+            className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center"
           >
-            <p className="text-yellow-100 text-sm font-medium">
+            <p className="text-yellow-800 text-sm font-medium">
               {!levelSystem.isMaxLevel
                 ? `⚡ Mais ${levelSystem.xpNeededForNext} XP para ${levelSystem.nextLevelTitle}!`
                 : progress.streak > 0
@@ -201,7 +201,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
               <motion.div
                 animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="mt-2 text-xs text-yellow-200"
+                className="mt-2 text-xs text-yellow-700"
               >
                 🎯 Próximo marco: {nextMilestone.title} (Nível {nextMilestone.level})
               </motion.div>
