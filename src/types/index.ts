@@ -136,3 +136,30 @@ export interface FlashReminder {
   updatedAt: Date;
   createdBy: string; // Admin UID
 }
+
+export interface Achievement {
+  id: string;
+  ownerId: string; // Child UID
+  title: string;
+  description: string;
+  icon: string; // emoji ou ícone
+  type: 'xp' | 'level' | 'tasks' | 'checkin' | 'streak' | 'custom';
+  target: number; // valor alvo (ex: 1000 para 1000 XP)
+  xpReward: number;
+  goldReward: number;
+  isActive: boolean;
+  createdBy: string; // admin que criou
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserAchievement {
+  id: string;
+  userId: string; // Child UID
+  achievementId: string;
+  progress: number; // progresso atual
+  isCompleted: boolean;
+  unlockedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}

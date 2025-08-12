@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay } from '../types';
+import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp } from '../utils/levelSystem';
 import { getRewardsUnlockedAtLevel } from '../utils/rewardLevels';
@@ -13,6 +13,8 @@ interface DataContextType {
   redemptions: RewardRedemption[];
   notifications: Notification[];
   flashReminders: FlashReminder[];
+  achievements: Achievement[];
+  userAchievements: UserAchievement[];
   loading: boolean;
   
   // Task methods
@@ -38,6 +40,12 @@ interface DataContextType {
   addFlashReminder: (reminder: Omit<FlashReminder, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateFlashReminder: (reminderId: string, updates: Partial<FlashReminder>) => Promise<void>;
   deleteFlashReminder: (reminderId: string) => Promise<void>;
+  
+  // Achievement methods
+  addAchievement: (achievement: Omit<Achievement, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateAchievement: (achievementId: string, updates: Partial<Achievement>) => Promise<void>;
+  deleteAchievement: (achievementId: string) => Promise<void>;
+  checkAchievements: () => Promise<void>;
   
   // Progress methods
   adjustUserXP: (amount: number) => Promise<void>;
@@ -84,6 +92,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [redemptions, setRedemptions] = useState<RewardRedemption[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [flashReminders, setFlashReminders] = useState<FlashReminder[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Initialize listeners when childUid changes
@@ -94,6 +104,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       setRedemptions([]);
       setNotifications([]);
       setFlashReminders([]);
+      setAchievements([]);
+      setUserAchievements([]);
       setProgress({
         userId: '',
         level: 1,
@@ -206,6 +218,28 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           }
         );
 
+        const unsubscribeAchievements = FirestoreService.subscribeToUserAchievements(
+          childUid,
+          (achievements) => {
+            console.log('🔥 DataContext: Achievements received:', achievements.length);
+            setAchievements(achievements);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de achievements:', error);
+          }
+        );
+
+        const unsubscribeUserAchievements = FirestoreService.subscribeToUserAchievementProgress(
+          childUid,
+          (userAchievements) => {
+            console.log('🔥 DataContext: User achievements received:', userAchievements.length);
+            setUserAchievements(userAchievements);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de user achievements:', error);
+          }
+        );
+
         setLoading(false);
 
         // Cleanup function
@@ -216,6 +250,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           unsubscribeRedemptions();
           unsubscribeNotifications();
           unsubscribeFlashReminders();
+          unsubscribeAchievements();
+          unsubscribeUserAchievements();
         };
       } catch (error: any) {
         console.error('❌ DataContext: Erro ao inicializar dados:', error);
@@ -320,6 +356,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         task.xp || 10, 
         task.gold || 5
       );
+      
+      // Check for achievements after task completion
+      setTimeout(() => {
+        checkAchievements();
+      }, 1000);
+      
       toast.success(`+${task.xp || 10} XP, +${task.gold || 5} Gold! Tarefa completada!`);
     } catch (error: any) {
       if (error.code === 'permission-denied') {
@@ -526,6 +568,68 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   };
 
+  // Achievement methods
+  const addAchievement = async (achievementData: Omit<Achievement, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
+    if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
+    
+    const completeAchievementData = {
+      ...achievementData,
+      ownerId: childUid,
+      createdBy: user.userId
+    };
+    
+    try {
+      await FirestoreService.createAchievement(completeAchievementData);
+      toast.success('Conquista criada com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao criar conquista:', error);
+      toast.error('Erro ao criar conquista');
+      throw error;
+    }
+  };
+
+  const updateAchievement = async (achievementId: string, updates: Partial<Achievement>) => {
+    try {
+      await FirestoreService.updateAchievement(achievementId, updates);
+      toast.success('Conquista atualizada com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar conquista:', error);
+      toast.error('Erro ao atualizar conquista');
+      throw error;
+    }
+  };
+
+  const deleteAchievement = async (achievementId: string) => {
+    try {
+      await FirestoreService.deleteAchievement(achievementId);
+      toast.success('Conquista excluída com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao excluir conquista:', error);
+      toast.error('Erro ao excluir conquista');
+      throw error;
+    }
+  };
+
+  const checkAchievements = async () => {
+    if (!childUid) return;
+    
+    try {
+      const newlyUnlocked = await FirestoreService.checkAndUnlockAchievements(childUid, progress);
+      
+      // Show notifications for newly unlocked achievements
+      newlyUnlocked.forEach(userAchievement => {
+        const achievement = achievements.find(a => a.id === userAchievement.achievementId);
+        if (achievement) {
+          toast.success(`🏆 Conquista desbloqueada: ${achievement.title}! +${achievement.xpReward} XP, +${achievement.goldReward} Gold`, {
+            duration: 6000
+          });
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Erro ao verificar conquistas:', error);
+    }
+  };
+
   // Progress methods
   const adjustUserXP = async (amount: number) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -668,6 +772,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     redemptions,
     notifications,
     flashReminders,
+    achievements,
+    userAchievements,
     flashReminders,
     loading,
     addTask,
@@ -687,6 +793,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     addFlashReminder,
     updateFlashReminder,
     deleteFlashReminder,
+    addAchievement,
+    updateAchievement,
+    deleteAchievement,
+    checkAchievements,
     adjustUserXP,
     adjustUserGold,
     resetUserData,

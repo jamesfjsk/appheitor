@@ -21,7 +21,7 @@ import {
   DocumentSnapshot
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { Task, Reward, UserProgress, RewardRedemption, Notification, User, FlashReminder } from '../types';
+import { Task, Reward, UserProgress, RewardRedemption, Notification, User, FlashReminder, Achievement, UserAchievement } from '../types';
 import { getLevelFromXP } from '../utils/levelSystem';
 
 // Utility function for server timestamp
@@ -601,6 +601,280 @@ export class FirestoreService {
         if (errorCallback) errorCallback(error);
       }
     );
+  }
+
+  // ========================================
+  // 🏆 ACHIEVEMENT OPERATIONS
+  // ========================================
+
+  static async createAchievement(achievementData: Omit<Achievement, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    const achievementRef = doc(collection(db, 'achievements'));
+    
+    const completeAchievementData = {
+      ownerId: achievementData.ownerId,
+      userId: achievementData.ownerId,
+      title: achievementData.title,
+      description: achievementData.description,
+      icon: achievementData.icon,
+      type: achievementData.type,
+      target: achievementData.target,
+      xpReward: achievementData.xpReward,
+      goldReward: achievementData.goldReward,
+      isActive: achievementData.isActive !== false,
+      createdBy: achievementData.createdBy,
+      createdAt: nowTs(),
+      updatedAt: nowTs()
+    };
+    
+    await setDoc(achievementRef, completeAchievementData);
+    return achievementRef.id;
+  }
+
+  static async updateAchievement(achievementId: string, updates: Partial<Achievement>): Promise<void> {
+    const achievementRef = doc(db, 'achievements', achievementId);
+    await updateDoc(achievementRef, {
+      ...updates,
+      updatedAt: nowTs()
+    });
+  }
+
+  static async deleteAchievement(achievementId: string): Promise<void> {
+    const achievementRef = doc(db, 'achievements', achievementId);
+    await deleteDoc(achievementRef);
+  }
+
+  static subscribeToUserAchievements(
+    childUid: string, 
+    callback: (achievements: Achievement[]) => void,
+    errorCallback?: (error: Error) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'achievements'),
+      where('ownerId', '==', childUid)
+    );
+
+    return onSnapshot(
+      q,
+      (snapshot: QuerySnapshot) => {
+        const achievements = snapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              createdAt: data.createdAt?.toDate() || new Date(),
+              updatedAt: data.updatedAt?.toDate() || new Date()
+            } as Achievement;
+          })
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        callback(achievements);
+      },
+      (error) => {
+        console.error('❌ Erro no listener de achievements:', error);
+        if (errorCallback) errorCallback(error);
+      }
+    );
+  }
+
+  // ========================================
+  // 🏆 USER ACHIEVEMENT OPERATIONS
+  // ========================================
+
+  static async createUserAchievement(userAchievementData: Omit<UserAchievement, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    const userAchievementRef = doc(collection(db, 'userAchievements'));
+    await setDoc(userAchievementRef, {
+      ...userAchievementData,
+      createdAt: nowTs(),
+      updatedAt: nowTs()
+    });
+    return userAchievementRef.id;
+  }
+
+  static async updateUserAchievement(userAchievementId: string, updates: Partial<UserAchievement>): Promise<void> {
+    const userAchievementRef = doc(db, 'userAchievements', userAchievementId);
+    await updateDoc(userAchievementRef, {
+      ...updates,
+      updatedAt: nowTs()
+    });
+  }
+
+  static subscribeToUserAchievementProgress(
+    userId: string, 
+    callback: (userAchievements: UserAchievement[]) => void,
+    errorCallback?: (error: Error) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'userAchievements'),
+      where('userId', '==', userId)
+    );
+
+    return onSnapshot(
+      q,
+      (snapshot: QuerySnapshot) => {
+        const userAchievements = snapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              unlockedAt: data.unlockedAt?.toDate(),
+              createdAt: data.createdAt?.toDate() || new Date(),
+              updatedAt: data.updatedAt?.toDate() || new Date()
+            } as UserAchievement;
+          });
+        callback(userAchievements);
+      },
+      (error) => {
+        console.error('❌ Erro no listener de user achievements:', error);
+        if (errorCallback) errorCallback(error);
+      }
+    );
+  }
+
+  // ========================================
+  // 🏆 ACHIEVEMENT VERIFICATION
+  // ========================================
+
+  static async checkAndUnlockAchievements(userId: string, progress: UserProgress): Promise<UserAchievement[]> {
+    try {
+      // Get all active achievements for this user
+      const achievementsSnapshot = await getDocs(query(
+        collection(db, 'achievements'),
+        where('ownerId', '==', userId),
+        where('isActive', '==', true)
+      ));
+
+      // Get current user achievement progress
+      const userAchievementsSnapshot = await getDocs(query(
+        collection(db, 'userAchievements'),
+        where('userId', '==', userId)
+      ));
+
+      const userAchievements = new Map(
+        userAchievementsSnapshot.docs.map(doc => [
+          doc.data().achievementId,
+          { id: doc.id, ...doc.data() } as UserAchievement
+        ])
+      );
+
+      const newlyUnlocked: UserAchievement[] = [];
+      const batch = writeBatch(db);
+
+      for (const achievementDoc of achievementsSnapshot.docs) {
+        const achievement = achievementDoc.data() as Achievement;
+        const existingUserAchievement = userAchievements.get(achievement.id);
+
+        // Skip if already completed
+        if (existingUserAchievement?.isCompleted) continue;
+
+        // Calculate current progress
+        let currentProgress = 0;
+        switch (achievement.type) {
+          case 'xp':
+            currentProgress = progress.totalXP || 0;
+            break;
+          case 'level':
+            currentProgress = progress.level || 1;
+            break;
+          case 'tasks':
+            currentProgress = progress.totalTasksCompleted || 0;
+            break;
+          case 'streak':
+            currentProgress = progress.longestStreak || 0;
+            break;
+          case 'checkin':
+            // For now, use streak as check-in proxy
+            currentProgress = progress.streak || 0;
+            break;
+          default:
+            continue; // Skip custom achievements for auto-check
+        }
+
+        const isCompleted = currentProgress >= achievement.target;
+        const wasAlreadyCompleted = existingUserAchievement?.isCompleted || false;
+
+        if (existingUserAchievement) {
+          // Update existing progress
+          if (existingUserAchievement.progress !== currentProgress || (isCompleted && !wasAlreadyCompleted)) {
+            const userAchievementRef = doc(db, 'userAchievements', existingUserAchievement.id);
+            const updates: any = {
+              progress: currentProgress,
+              updatedAt: nowTs()
+            };
+
+            if (isCompleted && !wasAlreadyCompleted) {
+              updates.isCompleted = true;
+              updates.unlockedAt = nowTs();
+              newlyUnlocked.push({
+                ...existingUserAchievement,
+                progress: currentProgress,
+                isCompleted: true,
+                unlockedAt: new Date()
+              });
+            }
+
+            batch.update(userAchievementRef, updates);
+          }
+        } else {
+          // Create new user achievement
+          const userAchievementRef = doc(collection(db, 'userAchievements'));
+          const newUserAchievement: Omit<UserAchievement, 'id'> = {
+            userId,
+            achievementId: achievement.id,
+            progress: currentProgress,
+            isCompleted,
+            unlockedAt: isCompleted ? new Date() : undefined,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+
+          batch.set(userAchievementRef, {
+            ...newUserAchievement,
+            unlockedAt: isCompleted ? nowTs() : null,
+            createdAt: nowTs(),
+            updatedAt: nowTs()
+          });
+
+          if (isCompleted) {
+            newlyUnlocked.push({
+              id: userAchievementRef.id,
+              ...newUserAchievement,
+              unlockedAt: new Date()
+            });
+          }
+        }
+      }
+
+      // Award XP and Gold for newly unlocked achievements
+      if (newlyUnlocked.length > 0) {
+        const progressRef = doc(db, 'progress', userId);
+        const totalXPReward = newlyUnlocked.reduce((sum, ua) => {
+          const achievement = achievementsSnapshot.docs.find(doc => doc.id === ua.achievementId)?.data() as Achievement;
+          return sum + (achievement?.xpReward || 0);
+        }, 0);
+        
+        const totalGoldReward = newlyUnlocked.reduce((sum, ua) => {
+          const achievement = achievementsSnapshot.docs.find(doc => doc.id === ua.achievementId)?.data() as Achievement;
+          return sum + (achievement?.goldReward || 0);
+        }, 0);
+
+        if (totalXPReward > 0 || totalGoldReward > 0) {
+          batch.update(progressRef, {
+            totalXP: increment(totalXPReward),
+            availableGold: increment(totalGoldReward),
+            totalGoldEarned: increment(totalGoldReward),
+            level: getLevelFromXP((progress.totalXP || 0) + totalXPReward),
+            updatedAt: nowTs()
+          });
+        }
+      }
+
+      await batch.commit();
+      return newlyUnlocked;
+    } catch (error) {
+      console.error('❌ Error checking achievements:', error);
+      return [];
+    }
   }
 
   // ========================================
