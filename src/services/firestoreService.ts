@@ -1331,6 +1331,56 @@ export class FirestoreService {
       });
     });
 
+    // Create default achievements
+    const defaultAchievements = [
+      {
+        title: 'Primeiro Passo',
+        description: 'Complete sua primeira tarefa',
+        icon: '🌟',
+        type: 'tasks' as const,
+        target: 1,
+        xpReward: 10,
+        goldReward: 5
+      },
+      {
+        title: 'Sequência Iniciante',
+        description: 'Complete tarefas por 3 dias consecutivos',
+        icon: '🔥',
+        type: 'streak' as const,
+        target: 3,
+        xpReward: 25,
+        goldReward: 15
+      },
+      {
+        title: 'Flash Nível 5',
+        description: 'Alcance o nível 5',
+        icon: '⚡',
+        type: 'level' as const,
+        target: 5,
+        xpReward: 50,
+        goldReward: 30
+      }
+    ];
+
+    defaultAchievements.forEach(achievement => {
+      const achievementRef = doc(collection(db, 'achievements'));
+      batch.set(achievementRef, {
+        ownerId: childUid,
+        userId: childUid,
+        title: achievement.title,
+        description: achievement.description,
+        icon: achievement.icon,
+        type: achievement.type,
+        target: achievement.target,
+        xpReward: achievement.xpReward,
+        goldReward: achievement.goldReward,
+        isActive: true,
+        createdBy: adminUid,
+        createdAt: nowTs(),
+        updatedAt: nowTs()
+      });
+    });
+
     await batch.commit();
     console.log('✅ FirestoreService: Default data created successfully');
   }
