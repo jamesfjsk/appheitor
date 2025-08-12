@@ -102,7 +102,7 @@ const HeroPanel: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-red-100 to-red-200 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-red-500 via-red-600 to-red-700 relative overflow-hidden">
         {/* Elementos decorativos de fundo */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-10 left-10 w-20 h-20 bg-hero-accent rounded-full animate-pulse"></div>
