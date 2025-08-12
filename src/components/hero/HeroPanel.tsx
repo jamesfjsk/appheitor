@@ -4,6 +4,7 @@ import { Zap as Lightning } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { useSound } from '../../contexts/SoundContext';
+import { calculateLevelSystem } from '../../utils/levelSystem';
 import HeroHeader from './HeroHeader';
 import ProgressBar from './ProgressBar';
 import DailyChecklist from './DailyChecklist';
@@ -17,6 +18,9 @@ const HeroPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
   const { requestPermission, permission } = useNotifications();
   const { isSoundEnabled, toggleSound } = useSound();
+  
+  // Calculate level system based on current XP
+  const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   
   // Estados locais com keys para forçar re-render
   const [showWelcome, setShowWelcome] = useState(true);
