@@ -298,6 +298,8 @@ ${report.messages.join('\n')}
             </div>
           )}
         </motion.div>
+      )}
+    </motion.div>
   );
 };
 
