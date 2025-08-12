@@ -4,7 +4,7 @@ import { CloudLightning as Lightning, LogOut, Gift, Calendar } from 'lucide-reac
 import { useAuth } from '../../contexts/AuthContext';
 import { UserProgress } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
-import { calculateLevelSystem, getLevelIcon } from '../../utils/levelSystem';
+import { calculateLevelSystem, getLevelIcon, getAvatarBorderStyle } from '../../utils/levelSystem';
 
 interface HeroHeaderProps {
   progress: UserProgress;
@@ -17,6 +17,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
   const { user: currentUser } = useAuth();
   const { playClick } = useSound();
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
+  const borderStyle = getAvatarBorderStyle(levelSystem.currentLevel);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -57,7 +58,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           }}
           className="relative"
         >
-          <div className="w-16 h-16 bg-gradient-to-br from-hero-primary to-hero-secondary rounded-full flex items-center justify-center text-2xl font-bold text-yellow-400 shadow-lg overflow-hidden border-3 border-hero-accent">
+          <div className={`w-16 h-16 bg-gradient-to-br from-hero-primary to-hero-secondary rounded-full flex items-center justify-center text-2xl font-bold text-yellow-400 overflow-hidden ${borderStyle.borderClass} ${borderStyle.glowClass} ${borderStyle.ringClass}`}>
             {currentUser?.photoURL ? (
               <img 
                 src="https://occ-0-8407-90.1.nflxso.net/dnm/api/v6/Z-WHgqd_TeJxSuha8aZ5WpyLcX8/AAAABQPkKiAa5lCM4j7C2w8eHPDrjhqCOVLRbwP00hlgmDmJUxH-Ww_HKIBi3M5_g7K2g2CzwtmJPVkQSTtsfqH8wgxK6L7b6GRKBrrU.jpg?r=92b"
@@ -68,6 +69,69 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
               '⚡'
             )}
           </div>
+          
+          {/* Efeitos especiais para níveis altos */}
+          {borderStyle.tier >= 15 && (
+            <motion.div
+              animate={{
+                rotate: [0, 360],
+                scale: [1, 1.1, 1],
+                opacity: [0.3, 0.7, 0.3]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute -inset-2 border-2 border-purple-400/30 rounded-full"
+            />
+          )}
+          
+          {borderStyle.tier >= 18 && (
+            <motion.div
+              animate={{
+                rotate: [360, 0],
+                scale: [1.1, 1.3, 1.1],
+                opacity: [0.2, 0.5, 0.2]
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute -inset-4 border border-pink-400/20 rounded-full"
+            />
+          )}
+          
+          {/* Partículas orbitais para níveis supremos */}
+          {borderStyle.tier >= 20 && (
+            <>
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    rotate: [0, 360],
+                    scale: [0.8, 1.2, 0.8],
+                    opacity: [0.4, 0.8, 0.4]
+                  }}
+                  transition={{
+                    duration: 2 + i * 0.3,
+                    repeat: Infinity,
+                    ease: "linear",
+                    delay: i * 0.5
+                  }}
+                  className="absolute w-2 h-2 bg-purple-400 rounded-full"
+                  style={{
+                    left: '50%',
+                    top: '50%',
+                    transformOrigin: '50% 50px',
+                    transform: `translate(-50%, -50%) rotate(${i * 60}deg)`
+                  }}
+                />
+              ))}
+            </>
+          )}
+          
           <motion.div
             animate={{
               scale: [1, 1.2, 1],
@@ -82,6 +146,19 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           >
             ⭐
           </motion.div>
+          
+          {/* Indicador de tier da borda */}
+          {borderStyle.tier > 1 && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded-full text-xs font-bold text-gray-700 shadow-md border border-gray-200"
+              title={borderStyle.description}
+            >
+              T{borderStyle.tier}
+            </motion.div>
+          )}
         </motion.div>
 
         <div>

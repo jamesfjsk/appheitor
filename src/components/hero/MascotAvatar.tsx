@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Star, Crown, Shield } from 'lucide-react';
-import { calculateLevelSystem, getLevelTitle, getLevelColor, getLevelIcon } from '../../utils/levelSystem';
+import { calculateLevelSystem, getLevelTitle, getLevelColor, getLevelIcon, getAvatarBorderStyle } from '../../utils/levelSystem';
 
 interface MascotAvatarProps {
   level: number;
@@ -12,6 +12,7 @@ interface MascotAvatarProps {
 const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating }) => {
   const [currentExpression, setCurrentExpression] = useState<'happy' | 'excited' | 'super'>('happy');
   const levelSystem = calculateLevelSystem(totalXP);
+  const borderStyle = getAvatarBorderStyle(level);
 
   useEffect(() => {
     if (isAnimating) {
@@ -49,8 +50,40 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
               : "0 0 30px rgba(255, 215, 0, 0.4)"
           }}
           transition={{ duration: 1, repeat: isAnimating ? Infinity : 0 }}
-          className={`w-32 h-32 mx-auto rounded-full bg-gradient-to-br ${getLevelColor(level)} flex items-center justify-center relative overflow-hidden border-4 border-hero-accent`}
+          className={`w-32 h-32 mx-auto rounded-full bg-gradient-to-br ${getLevelColor(level)} flex items-center justify-center relative overflow-hidden ${borderStyle.borderClass} ${borderStyle.glowClass} ${borderStyle.ringClass}`}
         >
+          {/* Efeitos especiais para níveis altos */}
+          {borderStyle.tier >= 10 && (
+            <motion.div
+              animate={{
+                rotate: [0, 360],
+                opacity: [0.1, 0.3, 0.1]
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute -inset-6 border border-yellow-400/20 rounded-full"
+            />
+          )}
+          
+          {borderStyle.tier >= 15 && (
+            <motion.div
+              animate={{
+                rotate: [360, 0],
+                opacity: [0.1, 0.4, 0.1],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute -inset-8 border border-purple-400/15 rounded-full"
+            />
+          )}
+          
           {/* Campo de energia ao redor do avatar */}
           {!isAnimating && (
             <motion.div
@@ -125,10 +158,23 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
         <motion.div
           animate={isAnimating ? { rotate: [0, 360] } : {}}
           transition={{ duration: 1, repeat: isAnimating ? Infinity : 0 }}
-          className="absolute -top-2 -right-2 bg-white rounded-full p-2 shadow-lg border-2 border-hero-accent"
+          className={`absolute -top-2 -right-2 bg-white rounded-full p-2 shadow-lg ${borderStyle.tier >= 5 ? 'border-3 border-yellow-400' : 'border-2 border-hero-accent'}`}
         >
           {getLevelIconComponent()}
         </motion.div>
+        
+        {/* Indicador de tier da borda */}
+        {borderStyle.tier > 1 && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.3 }}
+            className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-white px-3 py-1 rounded-full text-xs font-bold text-gray-700 shadow-md border border-gray-200"
+            title={borderStyle.description}
+          >
+            {borderStyle.description}
+          </motion.div>
+        )}
 
         {/* Partículas flutuantes */}
         {isAnimating && (
@@ -200,6 +246,20 @@ const MascotAvatar: React.FC<MascotAvatarProps> = ({ level, totalXP, isAnimating
           <span>•</span>
           <span>{levelSystem.currentXP} XP</span>
         </div>
+        
+        {/* Informação da borda */}
+        {borderStyle.tier > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="text-xs text-center"
+          >
+            <div className="bg-gradient-to-r from-yellow-100 to-red-100 px-3 py-1 rounded-full border border-yellow-200">
+              <span className="font-bold text-gray-700">{borderStyle.description}</span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Barra de progresso para próximo nível */}
         {!levelSystem.isMaxLevel && (

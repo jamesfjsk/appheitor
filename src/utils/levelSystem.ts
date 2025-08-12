@@ -198,3 +198,178 @@ export function getNextMilestone(currentLevel: number): {
     };
   }
 }
+
+/**
+ * Retorna o estilo de borda baseado no nível (evolui a cada 5 níveis)
+ */
+export function getAvatarBorderStyle(level: number): {
+  borderClass: string;
+  glowClass: string;
+  ringClass: string;
+  description: string;
+  tier: number;
+} {
+  const tier = Math.floor((level - 1) / 5) + 1; // Tier 1-20
+  
+  if (level >= 95) {
+    return {
+      borderClass: 'border-8 border-gradient-to-r from-purple-400 via-pink-400 via-yellow-400 via-blue-400 to-purple-400',
+      glowClass: 'shadow-2xl shadow-purple-500/50',
+      ringClass: 'ring-8 ring-purple-400/30 ring-offset-4 ring-offset-white',
+      description: 'Borda Lendária Suprema',
+      tier: 20
+    };
+  } else if (level >= 90) {
+    return {
+      borderClass: 'border-8 border-gradient-to-r from-purple-400 via-pink-400 to-purple-400',
+      glowClass: 'shadow-2xl shadow-purple-500/40',
+      ringClass: 'ring-6 ring-purple-400/25 ring-offset-4 ring-offset-white',
+      description: 'Borda Lendária',
+      tier: 19
+    };
+  } else if (level >= 85) {
+    return {
+      borderClass: 'border-6 border-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400',
+      glowClass: 'shadow-xl shadow-indigo-500/40',
+      ringClass: 'ring-6 ring-indigo-400/25 ring-offset-3 ring-offset-white',
+      description: 'Borda Épica Suprema',
+      tier: 18
+    };
+  } else if (level >= 80) {
+    return {
+      borderClass: 'border-6 border-gradient-to-r from-indigo-400 to-blue-400',
+      glowClass: 'shadow-xl shadow-indigo-500/30',
+      ringClass: 'ring-4 ring-indigo-400/20 ring-offset-3 ring-offset-white',
+      description: 'Borda Épica',
+      tier: 17
+    };
+  } else if (level >= 75) {
+    return {
+      borderClass: 'border-6 border-gradient-to-r from-blue-400 to-cyan-400',
+      glowClass: 'shadow-xl shadow-blue-500/30',
+      ringClass: 'ring-4 ring-blue-400/20 ring-offset-2 ring-offset-white',
+      description: 'Borda Rara Suprema',
+      tier: 16
+    };
+  } else if (level >= 70) {
+    return {
+      borderClass: 'border-5 border-gradient-to-r from-blue-400 to-teal-400',
+      glowClass: 'shadow-lg shadow-blue-500/25',
+      ringClass: 'ring-4 ring-blue-400/15 ring-offset-2 ring-offset-white',
+      description: 'Borda Rara',
+      tier: 15
+    };
+  } else if (level >= 65) {
+    return {
+      borderClass: 'border-5 border-gradient-to-r from-teal-400 to-green-400',
+      glowClass: 'shadow-lg shadow-teal-500/25',
+      ringClass: 'ring-3 ring-teal-400/15 ring-offset-2 ring-offset-white',
+      description: 'Borda Incomum Suprema',
+      tier: 14
+    };
+  } else if (level >= 60) {
+    return {
+      borderClass: 'border-5 border-gradient-to-r from-green-400 to-emerald-400',
+      glowClass: 'shadow-lg shadow-green-500/20',
+      ringClass: 'ring-3 ring-green-400/15 ring-offset-1 ring-offset-white',
+      description: 'Borda Incomum',
+      tier: 13
+    };
+  } else if (level >= 55) {
+    return {
+      borderClass: 'border-4 border-gradient-to-r from-emerald-400 to-lime-400',
+      glowClass: 'shadow-lg shadow-emerald-500/20',
+      ringClass: 'ring-3 ring-emerald-400/10 ring-offset-1 ring-offset-white',
+      description: 'Borda Superior Suprema',
+      tier: 12
+    };
+  } else if (level >= 50) {
+    return {
+      borderClass: 'border-4 border-gradient-to-r from-lime-400 to-yellow-400',
+      glowClass: 'shadow-md shadow-lime-500/20',
+      ringClass: 'ring-2 ring-lime-400/10 ring-offset-1 ring-offset-white',
+      description: 'Borda Superior',
+      tier: 11
+    };
+  } else if (level >= 45) {
+    return {
+      borderClass: 'border-4 border-gradient-to-r from-yellow-400 to-orange-400',
+      glowClass: 'shadow-md shadow-yellow-500/15',
+      ringClass: 'ring-2 ring-yellow-400/10',
+      description: 'Borda Avançada Suprema',
+      tier: 10
+    };
+  } else if (level >= 40) {
+    return {
+      borderClass: 'border-4 border-gradient-to-r from-orange-400 to-red-400',
+      glowClass: 'shadow-md shadow-orange-500/15',
+      ringClass: 'ring-2 ring-orange-400/10',
+      description: 'Borda Avançada',
+      tier: 9
+    };
+  } else if (level >= 35) {
+    return {
+      borderClass: 'border-4 border-gradient-to-r from-red-400 to-pink-400',
+      glowClass: 'shadow-md shadow-red-500/10',
+      ringClass: 'ring-1 ring-red-400/10',
+      description: 'Borda Experiente Suprema',
+      tier: 8
+    };
+  } else if (level >= 30) {
+    return {
+      borderClass: 'border-3 border-gradient-to-r from-pink-400 to-rose-400',
+      glowClass: 'shadow shadow-pink-500/10',
+      ringClass: 'ring-1 ring-pink-400/10',
+      description: 'Borda Experiente',
+      tier: 7
+    };
+  } else if (level >= 25) {
+    return {
+      borderClass: 'border-3 border-gradient-to-r from-rose-400 to-red-400',
+      glowClass: 'shadow shadow-rose-500/10',
+      ringClass: '',
+      description: 'Borda Competente Suprema',
+      tier: 6
+    };
+  } else if (level >= 20) {
+    return {
+      borderClass: 'border-3 border-red-400',
+      glowClass: 'shadow shadow-red-400/10',
+      ringClass: '',
+      description: 'Borda Competente',
+      tier: 5
+    };
+  } else if (level >= 15) {
+    return {
+      borderClass: 'border-3 border-orange-400',
+      glowClass: 'shadow-sm shadow-orange-400/10',
+      ringClass: '',
+      description: 'Borda Intermediária Suprema',
+      tier: 4
+    };
+  } else if (level >= 10) {
+    return {
+      borderClass: 'border-3 border-yellow-400',
+      glowClass: 'shadow-sm shadow-yellow-400/10',
+      ringClass: '',
+      description: 'Borda Intermediária',
+      tier: 3
+    };
+  } else if (level >= 5) {
+    return {
+      borderClass: 'border-2 border-yellow-300',
+      glowClass: '',
+      ringClass: '',
+      description: 'Borda Básica Suprema',
+      tier: 2
+    };
+  } else {
+    return {
+      borderClass: 'border-2 border-gray-300',
+      glowClass: '',
+      ringClass: '',
+      description: 'Borda Básica',
+      tier: 1
+    };
+  }
+}
