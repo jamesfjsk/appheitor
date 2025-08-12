@@ -9,8 +9,8 @@ export default {
       colors: {
         // Painel Infantil - Flash Theme
         hero: {
-          primary: '#FF6B6B',    // Vermelho coral suave
-          secondary: '#FF8E8E',  // Vermelho mais claro
+          primary: '#C8102E',    // Vermelho Flash original
+          secondary: '#FF3131',  // Vermelho Flash claro
           accent: '#FFD93D',     // Amarelo dourado suave
           light: '#FFFFFF',      // Branco puro
           background: '#F8FAFC', // Fundo suave

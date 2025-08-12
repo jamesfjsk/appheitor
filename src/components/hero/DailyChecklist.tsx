@@ -303,11 +303,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
             duration: 0.5,
           }}
           className="mt-8 p-6 bg-gradient-to-r from-success-500 to-success-600 rounded-2xl text-center shadow-lg celebration-burst"
+          className="mt-8 p-6 bg-gradient-to-r from-hero-accent to-yellow-400 rounded-2xl text-center shadow-lg celebration-burst"
         >
           <div className="relative text-white font-bold text-xl mb-2 hero-text-shadow">
+          <div className="relative text-hero-primary font-bold text-xl mb-2 hero-text-shadow">
             🎉 Período Completo! 🎉
           </div>
-          <p className="text-white/90 font-medium">
+          <p className="text-hero-primary/90 font-medium">
             Você completou todas as missões! ⚡ Incrível!
           </p>
         </motion.div>

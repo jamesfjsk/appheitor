@@ -65,7 +65,7 @@ const LoginScreen: React.FC = () => {
   }
 
   return (
-    <div className="login-container flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-hero-primary via-hero-secondary to-hero-accent flex items-center justify-center p-4 relative overflow-hidden">
       {/* Elementos decorativos de fundo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="decorative-blob w-64 h-64 top-10 -left-20 opacity-30"></div>

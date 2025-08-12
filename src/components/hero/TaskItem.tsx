@@ -217,7 +217,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 initial={{ scale: 0, opacity: 1 }}
                 animate={{ scale: 3, opacity: 0 }}
                 transition={{ duration: 0.6 }}
-                className="absolute inset-0 bg-gradient-to-r from-success-500 to-hero-accent rounded-full"
+                className="absolute inset-0 bg-gradient-to-r from-hero-accent to-yellow-400 rounded-full"
               />
             )}
           </motion.button>
@@ -229,8 +229,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <h3 className={`
                   ${guidedMode ? 'text-xl' : 'text-lg'} font-bold transition-all duration-300
                   ${task.status === 'done'
-                    ? 'text-white line-through' 
-                    : 'text-white'
+                    ? 'text-hero-primary font-extrabold' 
+                    : 'bg-white/20 backdrop-blur-sm border-white/30 hover:border-hero-accent/50'
                   }
                 `}>
                   {task.title}
@@ -240,7 +240,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   <p className={`
                     text-sm mt-1 transition-all duration-300
                     ${task.status === 'done'
-                      ? 'text-white/70 line-through' 
+                      ? 'text-hero-primary/80' 
                       : 'text-white/90'
                     }
                   `}>
