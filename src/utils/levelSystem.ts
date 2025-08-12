@@ -216,7 +216,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-8 border-gradient-to-r from-purple-400 via-pink-400 via-yellow-400 via-blue-400 to-purple-400',
       glowClass: 'shadow-2xl shadow-purple-500/50',
       ringClass: 'ring-8 ring-purple-400/30 ring-offset-4 ring-offset-white',
-      description: 'Borda Lendária Suprema',
+      description: 'Velocista Dimensional',
       tier: 20
     };
   } else if (level >= 90) {
@@ -224,7 +224,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-8 border-gradient-to-r from-purple-400 via-pink-400 to-purple-400',
       glowClass: 'shadow-2xl shadow-purple-500/40',
       ringClass: 'ring-6 ring-purple-400/25 ring-offset-4 ring-offset-white',
-      description: 'Borda Lendária',
+      description: 'Velocista Cósmico',
       tier: 19
     };
   } else if (level >= 85) {
@@ -232,7 +232,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-6 border-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400',
       glowClass: 'shadow-xl shadow-indigo-500/40',
       ringClass: 'ring-6 ring-indigo-400/25 ring-offset-3 ring-offset-white',
-      description: 'Borda Épica Suprema',
+      description: 'Velocista Supremo',
       tier: 18
     };
   } else if (level >= 80) {
@@ -240,7 +240,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-6 border-gradient-to-r from-indigo-400 to-blue-400',
       glowClass: 'shadow-xl shadow-indigo-500/30',
       ringClass: 'ring-4 ring-indigo-400/20 ring-offset-3 ring-offset-white',
-      description: 'Borda Épica',
+      description: 'Velocista Lendário',
       tier: 17
     };
   } else if (level >= 75) {
@@ -248,7 +248,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-6 border-gradient-to-r from-blue-400 to-cyan-400',
       glowClass: 'shadow-xl shadow-blue-500/30',
       ringClass: 'ring-4 ring-blue-400/20 ring-offset-2 ring-offset-white',
-      description: 'Borda Rara Suprema',
+      description: 'Velocista Épico',
       tier: 16
     };
   } else if (level >= 70) {
@@ -256,7 +256,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-5 border-gradient-to-r from-blue-400 to-teal-400',
       glowClass: 'shadow-lg shadow-blue-500/25',
       ringClass: 'ring-4 ring-blue-400/15 ring-offset-2 ring-offset-white',
-      description: 'Borda Rara',
+      description: 'Velocista Heroico',
       tier: 15
     };
   } else if (level >= 65) {
@@ -264,7 +264,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-5 border-gradient-to-r from-teal-400 to-green-400',
       glowClass: 'shadow-lg shadow-teal-500/25',
       ringClass: 'ring-3 ring-teal-400/15 ring-offset-2 ring-offset-white',
-      description: 'Borda Incomum Suprema',
+      description: 'Velocista Mestre',
       tier: 14
     };
   } else if (level >= 60) {
@@ -272,7 +272,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-5 border-gradient-to-r from-green-400 to-emerald-400',
       glowClass: 'shadow-lg shadow-green-500/20',
       ringClass: 'ring-3 ring-green-400/15 ring-offset-1 ring-offset-white',
-      description: 'Borda Incomum',
+      description: 'Velocista Experiente',
       tier: 13
     };
   } else if (level >= 55) {
@@ -280,7 +280,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-4 border-gradient-to-r from-emerald-400 to-lime-400',
       glowClass: 'shadow-lg shadow-emerald-500/20',
       ringClass: 'ring-3 ring-emerald-400/10 ring-offset-1 ring-offset-white',
-      description: 'Borda Superior Suprema',
+      description: 'Velocista Avançado',
       tier: 12
     };
   } else if (level >= 50) {
@@ -288,7 +288,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-4 border-gradient-to-r from-lime-400 to-yellow-400',
       glowClass: 'shadow-md shadow-lime-500/20',
       ringClass: 'ring-2 ring-lime-400/10 ring-offset-1 ring-offset-white',
-      description: 'Borda Superior',
+      description: 'Velocista Competente',
       tier: 11
     };
   } else if (level >= 45) {
@@ -296,7 +296,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-4 border-gradient-to-r from-yellow-400 to-orange-400',
       glowClass: 'shadow-md shadow-yellow-500/15',
       ringClass: 'ring-2 ring-yellow-400/10',
-      description: 'Borda Avançada Suprema',
+      description: 'Velocista Habilidoso',
       tier: 10
     };
   } else if (level >= 40) {
@@ -304,7 +304,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-4 border-gradient-to-r from-orange-400 to-red-400',
       glowClass: 'shadow-md shadow-orange-500/15',
       ringClass: 'ring-2 ring-orange-400/10',
-      description: 'Borda Avançada',
+      description: 'Velocista Dedicado',
       tier: 9
     };
   } else if (level >= 35) {
@@ -312,7 +312,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-4 border-gradient-to-r from-red-400 to-pink-400',
       glowClass: 'shadow-md shadow-red-500/10',
       ringClass: 'ring-1 ring-red-400/10',
-      description: 'Borda Experiente Suprema',
+      description: 'Velocista Determinado',
       tier: 8
     };
   } else if (level >= 30) {
@@ -320,7 +320,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-3 border-gradient-to-r from-pink-400 to-rose-400',
       glowClass: 'shadow shadow-pink-500/10',
       ringClass: 'ring-1 ring-pink-400/10',
-      description: 'Borda Experiente',
+      description: 'Velocista Persistente',
       tier: 7
     };
   } else if (level >= 25) {
@@ -328,7 +328,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-3 border-gradient-to-r from-rose-400 to-red-400',
       glowClass: 'shadow shadow-rose-500/10',
       ringClass: '',
-      description: 'Borda Competente Suprema',
+      description: 'Velocista Focado',
       tier: 6
     };
   } else if (level >= 20) {
@@ -336,7 +336,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-3 border-red-400',
       glowClass: 'shadow shadow-red-400/10',
       ringClass: '',
-      description: 'Borda Competente',
+      description: 'Velocista Disciplinado',
       tier: 5
     };
   } else if (level >= 15) {
@@ -344,7 +344,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-3 border-orange-400',
       glowClass: 'shadow-sm shadow-orange-400/10',
       ringClass: '',
-      description: 'Borda Intermediária Suprema',
+      description: 'Velocista Empenhado',
       tier: 4
     };
   } else if (level >= 10) {
@@ -352,7 +352,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-3 border-yellow-400',
       glowClass: 'shadow-sm shadow-yellow-400/10',
       ringClass: '',
-      description: 'Borda Intermediária',
+      description: 'Velocista Aprendiz',
       tier: 3
     };
   } else if (level >= 5) {
@@ -360,7 +360,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-2 border-yellow-300',
       glowClass: '',
       ringClass: '',
-      description: 'Borda Básica Suprema',
+      description: 'Velocista Amador',
       tier: 2
     };
   } else {
@@ -368,7 +368,7 @@ export function getAvatarBorderStyle(level: number): {
       borderClass: 'border-2 border-gray-300',
       glowClass: '',
       ringClass: '',
-      description: 'Borda Básica',
+      description: 'Velocista Iniciante',
       tier: 1
     };
   }
