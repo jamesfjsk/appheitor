@@ -131,7 +131,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
           }}
           transition={{
             duration: 2,
-            repeat: Infinity,            repeatType: "reverse",
+            repeat: Infinity,
+            repeatType: "reverse",
             ease: "easeInOut"
           }}
           className="absolute inset-0 bg-flash-red-light rounded-lg"
@@ -226,7 +227,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               <div className="task-points ml-4 bg-gray-100 rounded-lg p-3 text-center">
                 <Zap className="w-4 h-4 text-gold-500 mx-auto mb-1" />
                 <span className="text-gray-900 font-bold text-sm block">
-                  +{task.xp || 10} XP                </span>
+                  +{task.xp || 10} XP
                 </span>
                 <span className="text-gray-600 font-medium text-xs">
                   +{task.gold || 5} Gold
@@ -253,7 +254,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                     opacity: 0,
                     scale: 1,
                     x: `${50 + (Math.random() - 0.5) * 200}%`,
-                    y: `${50 + (Math.random() - 0.5) * 200}%`                  }}
+                    y: `${50 + (Math.random() - 0.5) * 200}%`
                   }}
                   transition={{ 
                     duration: 0.8,
