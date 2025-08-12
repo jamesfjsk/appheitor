@@ -46,6 +46,7 @@ interface DataContextType {
   updateAchievement: (achievementId: string, updates: Partial<Achievement>) => Promise<void>;
   deleteAchievement: (achievementId: string) => Promise<void>;
   checkAchievements: () => Promise<void>;
+  claimAchievementReward: (userAchievementId: string) => Promise<void>;
   
   // Progress methods
   adjustUserXP: (amount: number) => Promise<void>;
@@ -620,19 +621,154 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) return;
     
     try {
-      const newlyUnlocked = await FirestoreService.checkAndUnlockAchievements(childUid, progress);
+      console.log('🏆 Checking achievements for user:', childUid);
+      console.log('🏆 Current progress:', progress);
+      console.log('🏆 Available achievements:', achievements.length);
       
-      // Show notifications for newly unlocked achievements
-      newlyUnlocked.forEach(userAchievement => {
-        const achievement = achievements.find(a => a.id === userAchievement.achievementId);
-        if (achievement) {
-          toast.success(`🏆 Conquista desbloqueada: ${achievement.title}! +${achievement.xpReward} XP, +${achievement.goldReward} Gold`, {
-            duration: 6000
-          });
+      // Check each active achievement
+      for (const achievement of achievements.filter(a => a.isActive)) {
+        const existingUserAchievement = userAchievements.find(ua => ua.achievementId === achievement.id);
+        
+        // Skip if already completed
+        if (existingUserAchievement?.isCompleted) {
+          continue;
         }
-      });
+        
+        // Calculate current progress
+        let currentProgress = 0;
+        switch (achievement.type) {
+          case 'xp':
+            currentProgress = progress.totalXP || 0;
+            break;
+          case 'level':
+            currentProgress = progress.level || 1;
+            break;
+          case 'tasks':
+            currentProgress = progress.totalTasksCompleted || 0;
+            break;
+          case 'streak':
+            currentProgress = progress.longestStreak || 0;
+            break;
+          case 'checkin':
+            currentProgress = progress.streak || 0;
+            break;
+          case 'redemptions':
+            currentProgress = progress.rewardsRedeemed || 0;
+            break;
+          default:
+            currentProgress = 0;
+        }
+        
+        console.log(`🏆 Achievement "${achievement.title}": ${currentProgress}/${achievement.target}`);
+        
+        // Check if achievement should be completed
+        const shouldComplete = currentProgress >= achievement.target;
+        
+        if (existingUserAchievement) {
+          // Update existing progress
+          if (existingUserAchievement.progress !== currentProgress || (shouldComplete && !existingUserAchievement.isCompleted)) {
+            await FirestoreService.updateUserAchievement(existingUserAchievement.id, {
+              progress: currentProgress,
+              isCompleted: shouldComplete,
+              unlockedAt: shouldComplete && !existingUserAchievement.isCompleted ? new Date() : existingUserAchievement.unlockedAt,
+              updatedAt: new Date()
+            });
+            
+            if (shouldComplete && !existingUserAchievement.isCompleted) {
+              console.log(`🏆 Achievement completed: ${achievement.title}`);
+              toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
+                duration: 6000
+              });
+            }
+          }
+        } else {
+          // Create new user achievement
+          await FirestoreService.createUserAchievement({
+            userId: childUid,
+            achievementId: achievement.id,
+            progress: currentProgress,
+            isCompleted: shouldComplete,
+            rewardClaimed: false,
+            unlockedAt: shouldComplete ? new Date() : undefined
+          });
+          
+          if (shouldComplete) {
+            console.log(`🏆 New achievement completed: ${achievement.title}`);
+            toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
+              duration: 6000
+            });
+          }
+        }
+      }
     } catch (error: any) {
       console.error('❌ Erro ao verificar conquistas:', error);
+    }
+  };
+
+  const claimAchievementReward = async (userAchievementId: string) => {
+    if (!childUid) throw new Error('Child UID não definido');
+    if (!userAchievementId) throw new Error('User Achievement ID não definido');
+    
+    try {
+      console.log('🏆 Claiming achievement reward:', { userAchievementId, childUid });
+      
+      // Find the user achievement and corresponding achievement
+      const userAchievement = userAchievements.find(ua => ua.id === userAchievementId);
+      if (!userAchievement) {
+        throw new Error('User achievement not found');
+      }
+      
+      const achievement = achievements.find(a => a.id === userAchievement.achievementId);
+      if (!achievement) {
+        throw new Error('Achievement not found');
+      }
+      
+      if (userAchievement.rewardClaimed) {
+        throw new Error('Achievement reward already claimed');
+      }
+      
+      if (!userAchievement.isCompleted) {
+        throw new Error('Achievement not completed yet');
+      }
+      
+      // Update user achievement to mark reward as claimed
+      await FirestoreService.updateUserAchievement(userAchievementId, {
+        rewardClaimed: true,
+        claimedAt: new Date(),
+        updatedAt: new Date()
+      });
+      
+      // Add XP and Gold to user progress
+      const newTotalXP = (progress.totalXP || 0) + achievement.xpReward;
+      const newAvailableGold = (progress.availableGold || 0) + achievement.goldReward;
+      const newTotalGoldEarned = (progress.totalGoldEarned || 0) + achievement.goldReward;
+      
+      await FirestoreService.updateUserProgress(childUid, {
+        totalXP: newTotalXP,
+        availableGold: newAvailableGold,
+        totalGoldEarned: newTotalGoldEarned,
+        updatedAt: new Date()
+      });
+      
+      console.log('🏆 Achievement reward claimed successfully:', {
+        achievement: achievement.title,
+        xpReward: achievement.xpReward,
+        goldReward: achievement.goldReward,
+        newTotalXP,
+        newAvailableGold
+      });
+      
+      toast.success(`🏆 Conquista resgatada! +${achievement.xpReward} XP, +${achievement.goldReward} Gold!`, {
+        duration: 5000
+      });
+    } catch (error: any) {
+      console.error('❌ Erro ao resgatar recompensa da conquista:', error);
+      if (error.message === 'Achievement reward already claimed') {
+        toast.error('Esta recompensa já foi resgatada!');
+      } else {
+        toast.error('Erro ao resgatar recompensa da conquista');
+      }
+      throw error;
     }
   };
 
@@ -853,7 +989,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     updateAchievement,
     deleteAchievement,
     checkAchievements,
-    claimAchievementReward,
     claimAchievementReward,
     adjustUserXP,
     adjustUserGold,

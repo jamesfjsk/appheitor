@@ -400,25 +400,6 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         Recompensa Já Resgatada
                       </div>
                     </div>
-                  ) : selectedAchievement.isCompleted && !selectedAchievement.rewardClaimed ? (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
-                      <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                      <p className="font-bold text-green-900">Conquista Desbloqueada!</p>
-                      <p className="text-sm text-green-700 mt-1">
-                        Clique para resgatar sua recompensa!
-                      </p>
-                      
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={async () => {
-                          try {
-                            console.log('🏆 Achievement reward claim clicked:', {
-                              achievementId: selectedAchievement.id,
-                              userAchievementId: selectedAchievement.userAchievementId,
-                              isCompleted: selectedAchievement.isCompleted,
-                            });
-                            // Now claim the reward
                             await claimAchievementReward(selectedAchievement.userAchievementId);
                             setSelectedAchievement(null);
                           } catch (error) {
