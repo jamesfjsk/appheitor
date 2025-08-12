@@ -60,6 +60,7 @@ const RewardManager: React.FC = () => {
   };
 
   const handleUseTemplate = (template: any) => {
+    console.log('🎁 Using template:', template);
     setInitialRewardData({
       title: template.title,
       description: template.description,
@@ -70,6 +71,7 @@ const RewardManager: React.FC = () => {
       isActive: true
     });
     setEditingReward(null);
+    setShowTemplates(false); // Close templates section
     setShowForm(true);
   };
 

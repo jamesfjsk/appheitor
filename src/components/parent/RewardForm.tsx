@@ -28,7 +28,19 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (reward) {
+    if (initialData) {
+      // Use template data
+      setFormData({
+        title: initialData.title || '',
+        description: initialData.description || '',
+        goldCost: initialData.goldCost || 50,
+        icon: initialData.icon || '🎁',
+        category: initialData.category || 'custom',
+        requiredLevel: initialData.requiredLevel || 1,
+        isActive: initialData.isActive !== false,
+      });
+    } else if (reward) {
+      // Use existing reward data for editing
       setFormData({
         title: reward.title,
         description: reward.description,
@@ -39,6 +51,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
         isActive: reward.isActive,
       });
     } else {
+      // Default empty form
       setFormData({
         title: '',
         description: '',
@@ -50,7 +63,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
       });
     }
     setErrors({});
-  }, [reward, isOpen]);
+  }, [reward, initialData, isOpen]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
