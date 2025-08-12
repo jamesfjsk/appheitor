@@ -33,6 +33,9 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
         case 'checkin':
           currentProgress = progress.streak || 0;
           break;
+        case 'redemptions':
+          currentProgress = progress.rewardsRedeemed || 0;
+          break;
         default:
           currentProgress = 0;
       }
@@ -40,7 +43,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
     
     const progressPercentage = Math.min(100, (currentProgress / achievement.target) * 100);
     const isCompleted = userAchievement?.isCompleted || false;
-    const isReadyToUnlock = !isCompleted && currentProgress >= achievement.target;
+    const isReadyToUnlock = !isCompleted && currentProgress >= achievement.target && !userAchievement?.rewardClaimed;
     const isNewlyUnlocked = userAchievement?.unlockedAt && 
       (new Date().getTime() - userAchievement.unlockedAt.getTime()) < 10000; // Last 10 seconds
     
@@ -380,54 +383,26 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
 
                 {/* Status */}
                 <div className="text-center">
-                  {selectedAchievement.isCompleted ? (
+                  {selectedAchievement.isCompleted && selectedAchievement.rewardClaimed ? (
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
                       <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                      <p className="font-bold text-green-900">Conquista Desbloqueada!</p>
+                      <p className="font-bold text-green-900">Recompensa Resgatada!</p>
                       {selectedAchievement.unlockedAt && (
                         <p className="text-sm text-green-700 mt-1">
                           {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       )}
-                      
-                      {/* Botão de Resgate */}
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={async () => {
-                          try {
-                            await claimAchievementReward(selectedAchievement.userAchievementId);
-                            setSelectedAchievement(null);
-                          } catch (error) {
-                            // Error already handled in context
-                          }
-                        }}
-                        disabled={selectedAchievement.rewardClaimed}
-                        className={`w-full py-3 rounded-lg font-bold transition-all duration-200 ${
-                          selectedAchievement.rewardClaimed
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-yellow-400 hover:bg-yellow-500 text-red-600 shadow-lg'
-                        }`}
-                      >
-                        {selectedAchievement.rewardClaimed ? (
-                          <>
-                            <CheckCircle className="w-4 h-4 inline mr-2" />
-                            Recompensa Resgatada
-                          </>
-                        ) : (
-                          <>
-                            <Star className="w-4 h-4 inline mr-2" />
-                            Resgatar Recompensa
-                          </>
-                        )}
-                      </motion.button>
+                      <div className="bg-gray-100 text-gray-600 py-3 rounded-lg font-bold">
+                        <CheckCircle className="w-4 h-4 inline mr-2" />
+                        Recompensa Já Resgatada
+                      </div>
                     </div>
-                  ) : selectedAchievement.currentProgress >= selectedAchievement.target ? (
+                  ) : selectedAchievement.isCompleted || selectedAchievement.currentProgress >= selectedAchievement.target ? (
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
-                      <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                      <p className="font-bold text-green-900">Conquista Completa!</p>
+                      <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                      <p className="font-bold text-green-900">Conquista Desbloqueada!</p>
                       <p className="text-sm text-green-700 mt-1">
-                        Meta alcançada! Resgate sua recompensa.
+                        Clique para resgatar sua recompensa!
                       </p>
                       
                       <motion.button
@@ -435,7 +410,19 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         whileTap={{ scale: 0.98 }}
                         onClick={async () => {
                           try {
-                            await claimAchievementReward(selectedAchievement.userAchievementId);
+                            if (!selectedAchievement.userAchievementId) {
+                              // Create user achievement if it doesn't exist
+                              await FirestoreService.unlockAchievement(childUid, selectedAchievement.id, selectedAchievement.currentProgress);
+                              // Wait a bit for the listener to update
+                              setTimeout(async () => {
+                                const updatedUserAchievement = userAchievements.find(ua => ua.achievementId === selectedAchievement.id);
+                                if (updatedUserAchievement?.id) {
+                                  await claimAchievementReward(updatedUserAchievement.id);
+                                }
+                              }, 500);
+                            } else {
+                              await claimAchievementReward(selectedAchievement.userAchievementId);
+                            }
                             setSelectedAchievement(null);
                           } catch (error) {
                             // Error already handled in context
