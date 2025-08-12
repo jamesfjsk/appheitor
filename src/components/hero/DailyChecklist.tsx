@@ -194,7 +194,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       {/* Progress do Período */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-600 text-sm">
+          <span className="text-white/80 text-sm">
             Progresso do período: {completedTasks}/{totalTasks}
           </span>
           <div className="flex items-center gap-2">
