@@ -48,37 +48,38 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
     
-const mensagensHeitorFlash = [
-  "⚡ Heitor, hoje você corre lado a lado com o Barry! Vamos completar essas missões no melhor estilo Team Flash!",
-  "🌪️ Cisco mandou avisar: seus resultados estão criando uma nova linha do tempo de produtividade!",
-  "🔥 Wells diria: 'Heitor, a única constante é sua evolução. Continue correndo!'",
-  "🎯 Você tem a precisão do Capitão Frio e a força do Gorila Grodd (do bem!). Nada te para hoje!",
-  "🌟 Iris West confiaria em você para salvar o dia — e terminar as tarefas!",
-  "💡 Cisco já criou um codinome pra você: *Heitor Turbo*. Modo missão ativado!",
-  "⚡ Você está mais rápido que um raio — o Savitar nem te alcança hoje!",
-  "💬 Joe West te observa com orgulho: 'É assim que se constrói um herói de verdade.'",
-  "🚀 Wally West mandou um salve: 'Heitor, você tá ultrapassando até mim!'",
-  "🌀 Você abriu uma brecha no multiverso da disciplina — e é o herói número 1!",
-  "⭐ Caitlin aprovou sua cura para a preguiça: foco, energia e boas escolhas!",
-  "🔥 Você está em Flashpoint máximo de conquistas! Continue mudando o seu futuro.",
-  "⚡ Barry deixou uma mensagem: 'Heitor, você é a nova esperança da Central City!'",
-  "🎮 Cisco hackeou o sistema só pra ver você desbloquear essa missão com estilo!",
-  "🏃‍♂️ Sua velocidade hoje está na força da Força de Aceleração Pura™.",
-  "🛡️ Ninguém segura o Guardião das Tarefas — sim, esse é você, Heitor!",
-  "💫 Savitar não entendeu como você se superou. Spoiler: você não para nunca.",
-  "🔔 O alarme da STAR Labs tocou: 'Alerta! Heitor ultrapassou todas as metas!'",
-  "🌈 Missão após missão, você está criando um arco-íris de vitórias!",
-  "🧠 Você tem a estratégia de Harrison Wells e a energia do Kid Flash!",
-  "💪 'Meu nome é Heitor, e eu sou o menino mais disciplinado que existe.'",
-  "🎊 O multiverso inteiro celebra: hoje você bateu todos os recordes!",
-  "🚨 ALERTA DE HEROÍSMO: Heitor está alcançando nível meta-humano!",
-  "🔋 Sua energia foi reconhecida na STAR Labs. Missões concluídas com estilo!",
-  "📡 Os satélites captaram: produtividade em nível Flash Supremo!",
-  "🧪 Mistura perfeita: foco de Barry + criatividade de Cisco + força do Heitor!",
-  "🕒 Você distorceu o tempo com tanta velocidade! Sobrou até tempo livre!",
-  "🌀 Parado no tempo? Nunca. Você é pura aceleração mental!",
-  "⚡ Heitor, a Central City está segura — e sua agenda, concluída com sucesso!"
+const mensagensSabiasDoHeitor = [
+  "🧠 Quem consegue se controlar é mais forte do que qualquer herói.",
+  "🕊️ Coragem é seguir em frente mesmo quando dá vontade de parar.",
+  "💬 A maior vitória é vencer a si mesmo todos os dias.",
+  "🌱 Cada dia é uma nova chance de crescer e melhorar.",
+  "🛡️ A força verdadeira aparece quando você faz o certo mesmo sozinho.",
+  "🔥 Grandes poderes nascem da paciência e do treino constante.",
+  "🌟 O que você planta hoje, você colhe amanhã. Escolha bem.",
+  "📖 Ser confiável nas pequenas coisas mostra que você está pronto para as grandes.",
+  "🚶‍♂️ Caminhos bons são feitos de passos firmes, mesmo que pequenos.",
+  "💎 Ser herói é fazer boas escolhas, mesmo quando ninguém vê.",
+  "🔧 Treinar sua mente te leva mais longe do que qualquer corrida.",
+  "🌈 Uma mente tranquila corre mais rápido do que qualquer raio.",
+  "⏳ O tempo é seu aliado. Use com calma e sabedoria.",
+  "🌻 Primeiro a gente cresce por dentro, depois por fora.",
+  "🏆 As conquistas de hoje nascem do esforço de agora.",
+  "🗺️ Correr não é só chegar no fim — é aprender no caminho.",
+  "🎯 O mais importante não é vencer, é se tornar alguém melhor.",
+  "🌤️ Dias difíceis treinam sua força. Não fuja deles.",
+  "🌊 Tudo começa pequeno. Até o mar começou com gotas.",
+  "📜 A bondade vale mais que qualquer superpoder.",
+  "💡 Você não escolhe tudo, mas escolhe como vai agir.",
+  "👣 O caminho certo quase nunca é o mais fácil.",
+  "🌳 Quem tem raízes firmes não cai com o vento.",
+  "🔥 Você foi feito para brilhar — não para ser perfeito.",
+  "🌟 Cada esforço é uma semente que um dia vira vitória.",
+  "💫 Ser calmo no meio da pressa é um superpoder de verdade.",
+  "🚀 Subir devagar também é subir. O importante é não parar.",
+  "🌈 A beleza do herói está em como ele trata os outros.",
+  "🔋 O que te move não é a pressa — é o propósito."
 ];
+
 
     
     // Usar o dia do ano para selecionar uma mensagem consistente por dia
