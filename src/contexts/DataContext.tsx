@@ -684,17 +684,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         } else {
           // Create new user achievement
           // Check if achievement.id is explicitly a string and not empty before creating user achievement
-          if (typeof achievement.id === 'string' && achievement.id.trim() !== '') {
+          const achievementId = achievement.id;
+          if (typeof achievementId === 'string' && achievementId.trim() !== '') {
             await FirestoreService.createUserAchievement({
               userId: childUid,
-              achievementId: achievement.id,
+              achievementId: achievementId,
               progress: currentProgress,
               isCompleted: shouldComplete,
               rewardClaimed: false,
               unlockedAt: shouldComplete ? new Date() : null
             });
           } else {
-            console.error('❌ Achievement ID is undefined, skipping user achievement creation:', achievement);
+            console.error('❌ Achievement ID is undefined or invalid, skipping user achievement creation:', { achievement, achievementId });
             continue;
           }
           
