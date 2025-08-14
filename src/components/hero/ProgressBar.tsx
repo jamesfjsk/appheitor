@@ -52,7 +52,7 @@ const mensagensHeitorFlash = [
 "🧠 Quem consegue se controlar é mais forte do que qualquer herói.",
   "🕊️ Coragem é seguir em frente mesmo quando dá vontade de parar.",
   "💬 A maior vitória é vencer a si mesmo todos os dias.",
-  "🌱 Cada dia é uma nova chance de crescer e melhorars.",
+  "🌱 Cada dia é uma nova chance de crescer e melhorar.",
   "🛡️ A força verdadeira aparece quando você faz o certo mesmo sozinho.",
   "🔥 Grandes poderes nascem da paciência e do treino constante.",
   "🌟 O que você planta hoje, você colhe amanhã. Escolha bem.",
