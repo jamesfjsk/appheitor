@@ -48,8 +48,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
     
-const mensagensSabiasDoHeitor = [
-  "🧠 Quem consegue se controlar é mais forte do que qualquer herói.",
+const mensagensHeitorFlash = [
+"🧠 Quem consegue se controlar é mais forte do que qualquer herói.",
   "🕊️ Coragem é seguir em frente mesmo quando dá vontade de parar.",
   "💬 A maior vitória é vencer a si mesmo todos os dias.",
   "🌱 Cada dia é uma nova chance de crescer e melhorar.",
@@ -79,7 +79,6 @@ const mensagensSabiasDoHeitor = [
   "🌈 A beleza do herói está em como ele trata os outros.",
   "🔋 O que te move não é a pressa — é o propósito."
 ];
-
 
     
     // Usar o dia do ano para selecionar uma mensagem consistente por dia
