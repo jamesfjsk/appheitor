@@ -72,7 +72,6 @@ const mensagensHeitorFlash = [
   "💡 Você não escolhe tudo, mas escolhe como vai agir.",
   "👣 O caminho certo quase nunca é o mais fácil.",
   "🌳 Quem tem raízes firmes não cai com o vento.",
-  "🔥 Você foi feito para brilhar — não para ser perfeito.",
   "🌟 Cada esforço é uma semente que um dia vira vitória.",
   "💫 Ser calmo no meio da pressa é um superpoder de verdade.",
   "🚀 Subir devagar também é subir. O importante é não parar.",
