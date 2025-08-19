@@ -7,7 +7,9 @@ import {
   writeBatch, 
   query, 
   where,
-  serverTimestamp 
+  serverTimestamp,
+  orderBy,
+  limit
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { User } from '../types';
@@ -94,13 +96,19 @@ export const useDataDoctor = () => {
 
   const scanCollection = async (collectionName: 'tasks' | 'rewards' | 'progress' | 'redemptions' | 'notifications'): Promise<ScanResult> => {
     const startTime = Date.now();
-    console.log(`🔍 DataDoctor: Starting scan of ${collectionName}...`);
+    console.log(`🔍 DataDoctor: Starting comprehensive scan of ${collectionName}...`);
     
     try {
-      const snapshot = await getDocs(collection(db, collectionName));
+      // Use ordered query to get consistent results
+      const q = query(
+        collection(db, collectionName),
+        orderBy('createdAt', 'desc'),
+        limit(1000) // Limit to prevent timeout on large collections
+      );
+      const snapshot = await getDocs(q);
       const docs = snapshot.docs;
       
-      console.log(`📊 DataDoctor: Found ${docs.length} documents in ${collectionName}`);
+      console.log(`📊 DataDoctor: Found ${docs.length} documents in ${collectionName} (limited to 1000)`);
       
       const stats: CollectionStats = {
         total: docs.length,
@@ -118,6 +126,8 @@ export const useDataDoctor = () => {
       const usersSnapshot = await getDocs(collection(db, 'users'));
       const validUserIds = new Set(usersSnapshot.docs.map(doc => doc.id));
       
+      console.log(`👥 DataDoctor: Found ${validUserIds.size} valid user IDs for validation`);
+      
       for (const docSnapshot of docs) {
         const data = docSnapshot.data();
         const docId = docSnapshot.id;
@@ -131,7 +141,10 @@ export const useDataDoctor = () => {
           
           // Check 1: Missing field
           if (!fieldValue) {
-            stats[`missing${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof CollectionStats]++;
+            const statKey = `missing${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof CollectionStats;
+            if (typeof stats[statKey] === 'number') {
+              (stats[statKey] as number)++;
+            }
             stats.issues.push({
               docId,
               issue: `missing_${field}` as CollectionIssue['issue'],
@@ -176,7 +189,9 @@ export const useDataDoctor = () => {
         }
         
         // Check 4: userId vs ownerId mismatch (if both exist)
-        if (!hasIssue && data.userId && data.ownerId && data.userId !== data.ownerId) {
+        if (!hasIssue && data.userId && data.ownerId && 
+            typeof data.userId === 'string' && typeof data.ownerId === 'string' && 
+            data.userId !== data.ownerId) {
           stats.mismatch++;
           stats.issues.push({
             docId,
@@ -221,8 +236,11 @@ export const useDataDoctor = () => {
     switch (collectionName) {
       case 'tasks':
       case 'rewards':
+      case 'achievements':
+      case 'flashReminders':
         return ['ownerId'];
       case 'progress':
+      case 'userAchievements':
         return ['userId'];
       case 'redemptions':
         return ['userId'];
@@ -237,19 +255,62 @@ export const useDataDoctor = () => {
     setIsScanning(true);
     
     try {
+      console.log('🔍 DataDoctor: Starting comprehensive scan of all collections...');
       await loadAvailableChildren();
       
-      const collections: ('tasks' | 'rewards' | 'progress' | 'redemptions' | 'notifications')[] = 
-        ['tasks', 'rewards', 'progress', 'redemptions', 'notifications'];
+      const collections: ('tasks' | 'rewards' | 'progress' | 'redemptions' | 'notifications')[] = [
+        'tasks', 
+        'rewards', 
+        'progress', 
+        'redemptions', 
+        'notifications'
+      ];
       const results: Record<string, ScanResult> = {};
       
       for (const collectionName of collections) {
-        const result = await scanCollection(collectionName);
-        results[collectionName] = result;
+        try {
+          console.log(`🔍 DataDoctor: Scanning ${collectionName}...`);
+          const result = await scanCollection(collectionName);
+          results[collectionName] = result;
+          console.log(`✅ DataDoctor: ${collectionName} scan completed - ${result.stats.total} docs, ${result.stats.issues.length} issues`);
+        } catch (error: any) {
+          console.error(`❌ DataDoctor: Error scanning ${collectionName}:`, error);
+          // Continue with other collections even if one fails
+          results[collectionName] = {
+            collectionName,
+            stats: {
+              total: 0,
+              valid: 0,
+              missingOwnerId: 0,
+              missingUserId: 0,
+              missingToUserId: 0,
+              invalidType: 0,
+              orphaned: 0,
+              mismatch: 0,
+              issues: [{
+                docId: 'scan-error',
+                issue: 'orphaned',
+                details: `Scan failed: ${error.message}`
+              }]
+            },
+            scannedAt: new Date(),
+            duration: 0
+          };
+        }
       }
       
       setScanResults(results);
-      console.log('🎯 DataDoctor: All scans completed:', results);
+      
+      const totalIssues = Object.values(results).reduce((sum, result) => sum + result.stats.issues.length, 0);
+      const totalDocs = Object.values(results).reduce((sum, result) => sum + result.stats.total, 0);
+      
+      console.log('🎯 DataDoctor: All scans completed:', {
+        collections: Object.keys(results).length,
+        totalDocuments: totalDocs,
+        totalIssues: totalIssues,
+        results
+      });
+      
     } catch (error: any) {
       console.error('❌ DataDoctor: Error during scan:', error);
       throw error;

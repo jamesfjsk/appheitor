@@ -218,6 +218,38 @@ ${report.messages.join('\n')}
             </div>
           </div>
 
+          {/* Collections Data */}
+          {report.collectionsFound && report.collectionsFound.length > 0 && (
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <h5 className="font-medium text-blue-900 mb-2">📊 Dados Encontrados:</h5>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                <div className="bg-white p-2 rounded border">
+                  <div className="font-bold text-gray-900">{report.usersFound}</div>
+                  <div className="text-gray-600">Usuários</div>
+                </div>
+                <div className="bg-white p-2 rounded border">
+                  <div className="font-bold text-gray-900">{report.tasksFound}</div>
+                  <div className="text-gray-600">Tarefas</div>
+                </div>
+                <div className="bg-white p-2 rounded border">
+                  <div className="font-bold text-gray-900">{report.rewardsFound}</div>
+                  <div className="text-gray-600">Recompensas</div>
+                </div>
+                <div className="bg-white p-2 rounded border">
+                  <div className="font-bold text-gray-900">{report.progressFound}</div>
+                  <div className="text-gray-600">Progresso</div>
+                </div>
+                <div className="bg-white p-2 rounded border">
+                  <div className="font-bold text-gray-900">{report.achievementsFound}</div>
+                  <div className="text-gray-600">Conquistas</div>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-blue-700">
+                Coleções ativas: {report.collectionsFound.join(', ')}
+              </div>
+            </div>
+          )}
+
           {/* Sign-in Methods */}
           {report.signInMethods && (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">

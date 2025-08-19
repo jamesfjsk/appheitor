@@ -1,6 +1,6 @@
 import { getApp } from 'firebase/app';
 import { getAuth, fetchSignInMethodsForEmail, signInWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, query, where } from 'firebase/firestore';
 
 type DoctorReport = {
   projectId?: string;
@@ -11,11 +11,24 @@ type DoctorReport = {
   signInMethods?: string[];
   firestoreReadOK?: boolean;
   firestoreWriteOK?: boolean;
+  collectionsFound?: string[];
+  usersFound?: number;
+  tasksFound?: number;
+  rewardsFound?: number;
+  progressFound?: number;
+  achievementsFound?: number;
   messages: string[];
 };
 
 export async function runFirebaseDoctor(emailToCheck?: string, testLogin?: {email: string; password: string}): Promise<DoctorReport> {
   const messages: string[] = [];
+  let collectionsFound: string[] = [];
+  let usersFound = 0;
+  let tasksFound = 0;
+  let rewardsFound = 0;
+  let progressFound = 0;
+  let achievementsFound = 0;
+
   try {
     const app = getApp();
     const projectId = app.options.projectId as string | undefined;
@@ -83,7 +96,39 @@ export async function runFirebaseDoctor(emailToCheck?: string, testLogin?: {emai
 
     try { await deleteDoc(pingRef); } catch { /* opcional */ }
 
-    // 4) (Opcional) Teste de login real
+    // 5) Check collections and count documents
+    try {
+      const collections = ['users', 'tasks', 'rewards', 'progress', 'achievements', 'redemptions', 'notifications', 'flashReminders'];
+      
+      for (const collectionName of collections) {
+        try {
+          const snapshot = await getDocs(collection(db, collectionName));
+          const count = snapshot.size;
+          
+          if (count > 0) {
+            collectionsFound.push(collectionName);
+            
+            switch (collectionName) {
+              case 'users': usersFound = count; break;
+              case 'tasks': tasksFound = count; break;
+              case 'rewards': rewardsFound = count; break;
+              case 'progress': progressFound = count; break;
+              case 'achievements': achievementsFound = count; break;
+            }
+          }
+          
+          messages.push(`Collection ${collectionName}: ${count} documents`);
+        } catch (e: any) {
+          messages.push(`Collection ${collectionName}: ERROR - ${e?.code ?? e?.message ?? e}`);
+        }
+      }
+      
+      messages.push(`Collections with data: ${collectionsFound.join(', ')}`);
+    } catch (e: any) {
+      messages.push(`Collections check ERRO: ${e?.code ?? e?.message ?? e}`);
+    }
+
+    // 6) (Opcional) Teste de login real
     if (testLogin) {
       try {
         const cred = await signInWithEmailAndPassword(auth, testLogin.email, testLogin.password);
@@ -102,6 +147,12 @@ export async function runFirebaseDoctor(emailToCheck?: string, testLogin?: {emai
       signInMethods,
       firestoreReadOK,
       firestoreWriteOK,
+      collectionsFound,
+      usersFound,
+      tasksFound,
+      rewardsFound,
+      progressFound,
+      achievementsFound,
       messages,
     };
 
@@ -109,6 +160,12 @@ export async function runFirebaseDoctor(emailToCheck?: string, testLogin?: {emai
     return {
       identityToolkitReachable: false,
       identityToolkitStatus: 'doctor failed',
+      collectionsFound: [],
+      usersFound: 0,
+      tasksFound: 0,
+      rewardsFound: 0,
+      progressFound: 0,
+      achievementsFound: 0,
       messages: [`Doctor exception: ${e?.message ?? e}`],
     };
   }

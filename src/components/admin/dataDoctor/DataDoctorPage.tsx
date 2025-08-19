@@ -40,7 +40,14 @@ const DataDoctorPage: React.FC = () => {
   // Load children on mount
   useEffect(() => {
     if (user?.role === 'admin') {
-      loadAvailableChildren().catch(console.error);
+      loadAvailableChildren()
+        .then(() => {
+          console.log('✅ DataDoctor: Children loaded successfully');
+        })
+        .catch((error) => {
+          console.error('❌ DataDoctor: Error loading children:', error);
+          toast.error('Erro ao carregar lista de filhos');
+        });
     }
   }, [user]);
 
@@ -53,9 +60,20 @@ const DataDoctorPage: React.FC = () => {
 
   const handleScanAll = async () => {
     try {
+      console.log('🔍 DataDoctor: Starting comprehensive scan...');
       await scanAllCollections();
-      toast.success('🔍 Análise completa realizada!');
+      
+      // Show detailed results
+      const totalIssues = Object.values(scanResults).reduce((sum, result) => sum + result.stats.issues.length, 0);
+      const totalDocs = Object.values(scanResults).reduce((sum, result) => sum + result.stats.total, 0);
+      
+      if (totalIssues === 0) {
+        toast.success(`✅ Análise completa! ${totalDocs} documentos verificados, nenhum problema encontrado.`);
+      } else {
+        toast.error(`⚠️ Análise completa! ${totalIssues} problemas encontrados em ${totalDocs} documentos.`);
+      }
     } catch (error: any) {
+      console.error('❌ DataDoctor: Scan failed:', error);
       toast.error(`Erro na análise: ${error.message}`);
     }
   };
@@ -86,9 +104,11 @@ const DataDoctorPage: React.FC = () => {
       toast.success(`✅ ${result.totalFixed} documentos corrigidos em ${collectionName}!`);
       
       if (result.errors.length > 0) {
-        toast.error(`⚠️ ${result.errors.length} erros durante a correção`);
+        console.warn('⚠️ DataDoctor: Errors during fix:', result.errors);
+        toast.error(`⚠️ ${result.errors.length} erros durante a correção - verifique o console`);
       }
     } catch (error: any) {
+      console.error(`❌ DataDoctor: Fix failed for ${collectionName}:`, error);
       toast.error(`Erro ao corrigir ${collectionName}: ${error.message}`);
     }
   };
@@ -126,8 +146,13 @@ const DataDoctorPage: React.FC = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Data Doctor</h1>
               <p className="text-gray-600 text-lg">
-                Validação e correção de integridade dos dados Firestore
+                Validação e correção de integridade dos dados - Heitor Missions
               </p>
+              {user && (
+                <p className="text-sm text-purple-600 mt-1">
+                  Admin: {user.displayName} | Filho: {childUid || 'Não definido'}
+                </p>
+              )}
             </div>
           </div>
           
@@ -280,10 +305,11 @@ const DataDoctorPage: React.FC = () => {
               : 'bg-yellow-50 border border-yellow-200'
           }`}
         >
-          <div className="flex items-center gap-4 mb-4">
-            {finalReport.allValid ? (
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            ) : (
+                <li>• <strong>Clique "Analisar"</strong> para escanear todas as coleções</li>
+                <li>• <strong>Verifica campos obrigatórios:</strong> ownerId, userId, toUserId</li>
+                <li>• <strong>Identifica problemas:</strong> usuários órfãos, tipos incorretos, divergências</li>
+                <li>• <strong>Mostra estatísticas:</strong> total, válidos, problemas por tipo</li>
+                <li>• <strong>Limitado a 1000 docs</strong> por coleção para performance</li>
               <AlertTriangle className="w-8 h-8 text-yellow-600" />
             )}
             
@@ -334,18 +360,20 @@ const DataDoctorPage: React.FC = () => {
                 ))}
               </tbody>
             </table>
-          </div>
-
-          {/* Recommendations */}
-          <div>
+                <li>• <strong>Usar userId:</strong> Define ownerId = userId existente</li>
+                <li>• <strong>Atribuir ao filho:</strong> Define ownerId = filho selecionado</li>
+                <li>• <strong>Processamento em lotes:</strong> 400 documentos por vez</li>
+                <li>• <strong>Backup automático:</strong> dados originais preservados</li>
+                <li>• <strong>Rollback seguro:</strong> em caso de erro</li>
             <h4 className="font-semibold text-gray-900 mb-2">📋 Recomendações:</h4>
             <ul className="space-y-1">
               {finalReport.recommendations.map((rec, index) => (
                 <li key={index} className="text-sm text-gray-700 flex items-center gap-2">
                   <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
                   {rec}
-                </li>
-              ))}
+              <strong>💡 Dica:</strong> Execute a análise primeiro para identificar problemas. 
+              Use <strong>"Usar userId"</strong> quando o documento já tem userId válido, 
+              <strong>"Atribuir ao filho"</strong> para documentos órfãos sem referência.
             </ul>
           </div>
         </motion.div>

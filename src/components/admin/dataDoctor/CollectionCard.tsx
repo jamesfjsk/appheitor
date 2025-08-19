@@ -151,6 +151,11 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             <h3 className="text-xl font-bold text-gray-900 capitalize">
               {collectionName}
             </h3>
+            {scanResult.stats.total > 1000 && (
+              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">
+                Limitado a 1000
+              </span>
+            )}
           </div>
           {getStatusIcon()}
         </div>
@@ -171,32 +176,32 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
           <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
             {stats.missingOwnerId > 0 && (
               <div className="bg-red-100 text-red-800 px-2 py-1 rounded">
-                {stats.missingOwnerId} sem ownerId
+                🚫 {stats.missingOwnerId} sem ownerId
               </div>
             )}
             {stats.missingUserId > 0 && (
               <div className="bg-red-100 text-red-800 px-2 py-1 rounded">
-                {stats.missingUserId} sem userId
+                🚫 {stats.missingUserId} sem userId
               </div>
             )}
             {stats.missingToUserId > 0 && (
               <div className="bg-red-100 text-red-800 px-2 py-1 rounded">
-                {stats.missingToUserId} sem toUserId
+                🚫 {stats.missingToUserId} sem toUserId
               </div>
             )}
             {stats.invalidType > 0 && (
               <div className="bg-orange-100 text-orange-800 px-2 py-1 rounded">
-                {stats.invalidType} tipo inválido
+                ⚠️ {stats.invalidType} tipo inválido
               </div>
             )}
             {stats.orphaned > 0 && (
               <div className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                {stats.orphaned} órfãos
+                👻 {stats.orphaned} órfãos
               </div>
             )}
             {stats.mismatch > 0 && (
               <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {stats.mismatch} divergentes
+                🔄 {stats.mismatch} divergentes
               </div>
             )}
           </div>
@@ -424,12 +429,19 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
       <div className="p-4 border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
         <div className="flex items-center justify-between">
           <span>
-            Analisado em {scanResult.scannedAt.toLocaleTimeString('pt-BR')}
+            📅 {scanResult.scannedAt.toLocaleDateString('pt-BR')} às {scanResult.scannedAt.toLocaleTimeString('pt-BR')}
           </span>
           <span>
-            {scanResult.duration}ms
+            ⏱️ {scanResult.duration}ms
           </span>
         </div>
+        {scanResult.stats.total > 0 && (
+          <div className="mt-1 text-center">
+            <span className="font-medium">
+              Taxa de integridade: {Math.round((scanResult.stats.valid / scanResult.stats.total) * 100)}%
+            </span>
+          </div>
+        )}
       </div>
     </motion.div>
   );

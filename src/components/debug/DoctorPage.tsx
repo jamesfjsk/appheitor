@@ -261,7 +261,7 @@ ${report.messages.join('\n')}
               {/* Informações do Projeto */}
               <div className="bg-gray-50 rounded-xl p-6">
                 <h4 className="text-lg font-bold text-gray-900 mb-4">📋 Informações do Projeto</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="font-medium text-gray-700">Projeto ID:</span>
                     <span className="ml-2 text-gray-900">{report.projectId}</span>
@@ -279,6 +279,32 @@ ${report.messages.join('\n')}
                     <span className="ml-2 text-gray-900">
                       {report.signInMethods ? report.signInMethods.join(', ') : 'N/A'}
                     </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Coleções Ativas:</span>
+                    <span className="ml-2 text-gray-900">
+                      {report.collectionsFound ? report.collectionsFound.length : 0}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Total Usuários:</span>
+                    <span className="ml-2 text-gray-900">{report.usersFound || 0}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Total Tarefas:</span>
+                    <span className="ml-2 text-gray-900">{report.tasksFound || 0}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Total Recompensas:</span>
+                    <span className="ml-2 text-gray-900">{report.rewardsFound || 0}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Progresso:</span>
+                    <span className="ml-2 text-gray-900">{report.progressFound || 0}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Conquistas:</span>
+                    <span className="ml-2 text-gray-900">{report.achievementsFound || 0}</span>
                   </div>
                 </div>
               </div>
@@ -370,17 +396,78 @@ ${report.messages.join('\n')}
                 <div className="bg-red-50 border border-red-200 rounded-xl p-6">
                   <h4 className="text-lg font-bold text-red-900 mb-4">🚨 REGRAS FIRESTORE CORRETAS:</h4>
                   <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
-                    <pre>{`rules_version = '2';
+                    <pre className="whitespace-pre-wrap">{`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Users
+    match /users/{uid} {
+      allow read: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
+    // Progress
+    match /progress/{uid} {
+      allow read: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
+    // Tasks
+    match /tasks/{taskId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Rewards
+    match /rewards/{rewardId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Achievements
+    match /achievements/{achievementId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // User Achievements
+    match /userAchievements/{userAchievementId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Redemptions
+    match /redemptions/{docId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{id} {
+      allow read: if signedIn() && (isAdmin() || resource.data.toUserId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Flash Reminders
+    match /flashReminders/{id} {
+      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
     }
   }
 }`}</pre>
                   </div>
                   <p className="text-red-700 text-sm mt-3">
-                    ⚠️ Copie EXATAMENTE este código para Firebase Console &gt; Firestore Database &gt; Regras
+                    ⚠️ Copie EXATAMENTE este código para Firebase Console > Firestore Database > Regras (versão de produção com segurança)
                   </p>
                 </div>
               )}
