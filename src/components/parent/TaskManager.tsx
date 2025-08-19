@@ -128,7 +128,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks }) => {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-gray-700">
-                          {task.xpReward || 10} XP, {task.goldReward || 5} Gold
+                          {task.xp || 10} XP, {task.gold || 1} Gold
                         </span>
                         
                         {task.status === 'done' && (

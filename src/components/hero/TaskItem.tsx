@@ -295,7 +295,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 <div className="flex items-center space-x-1">
                   <span className={`${guidedMode ? 'text-lg' : 'text-sm'}`}>🪙</span>
                   <span className={`text-yellow-600 font-bold ${guidedMode ? 'text-lg' : 'text-base'}`}>
-                    +{task.gold || 5} Gold
+                    +{task.gold || 1} Gold
                   </span>
                 </div>
               </div>

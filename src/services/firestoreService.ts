@@ -581,7 +581,7 @@ export class FirestoreService {
               title: data.title,
               description: data.description,
               xp: data.xp || 10,
-              gold: data.gold || 5,
+              gold: data.gold || 1,
               period: data.period,
               time: data.time,
               frequency: data.frequency || 'daily',

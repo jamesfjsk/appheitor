@@ -16,7 +16,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
     title: '',
     description: '',
     xp: 10,
-    gold: 5,
+    gold: 1,
     period: 'morning' as 'morning' | 'afternoon' | 'evening',
     time: '',
     frequency: 'daily' as 'daily' | 'weekday' | 'weekend',
@@ -31,7 +31,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
         title: task.title,
         description: task.description || '',
         xp: task.xp || 10,
-        gold: task.gold || 5,
+        gold: task.gold || 1,
         period: task.period,
         time: task.time || '',
         frequency: task.frequency,
@@ -42,7 +42,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
         title: '',
         description: '',
         xp: 10,
-        gold: 5,
+        gold: 1,
         period: 'morning',
         time: '',
         frequency: 'daily',
@@ -239,14 +239,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
                 type="number"
                 min="1"
                 max="50"
-                value={formData.xpReward}
-                onChange={(e) => handleInputChange('xpReward', parseInt(e.target.value) || 10)}
+                value={formData.xp}
+                onChange={(e) => handleInputChange('xp', parseInt(e.target.value) || 1)}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                  errors.xpReward ? 'border-red-500' : 'border-gray-300'
+                  errors.xp ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.xpReward && (
-                <p className="mt-1 text-sm text-red-600">{errors.xpReward}</p>
+              {errors.xp && (
+                <p className="mt-1 text-sm text-red-600">{errors.xp}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">XP fixo por completar (1-50)</p>
             </div>
@@ -261,14 +261,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
                 type="number"
                 min="1"
                 max="100"
-                value={formData.goldReward}
-                onChange={(e) => handleInputChange('goldReward', parseInt(e.target.value) || 5)}
+                value={formData.gold}
+                onChange={(e) => handleInputChange('gold', parseInt(e.target.value) || 1)}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors ${
-                  errors.goldReward ? 'border-red-500' : 'border-gray-300'
+                  errors.gold ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.goldReward && (
-                <p className="mt-1 text-sm text-red-600">{errors.goldReward}</p>
+              {errors.gold && (
+                <p className="mt-1 text-sm text-red-600">{errors.gold}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">Gold para comprar recompensas (1-100)</p>
             </div>
