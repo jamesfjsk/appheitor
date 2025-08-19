@@ -216,7 +216,7 @@ const DataDoctorPage: React.FC = () => {
             <div className="mt-4 p-3 bg-blue-100 rounded-lg">
               <p className="text-sm text-blue-800">
                 <strong>💡 Dica:</strong> Execute a análise primeiro para ver os problemas. 
-                Use "Usar userId" quando possível, "Atribuir ao filho" para documentos órfãos.
+                Use "Usar userId\" quando possível, "Atribuir ao filho\" para documentos órfãos.
               </p>
             </div>
           </motion.div>
