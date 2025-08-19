@@ -150,7 +150,7 @@ const DataDoctorPage: React.FC = () => {
               </p>
               {user && (
                 <p className="text-sm text-purple-600 mt-1">
-                  Admin: {user.displayName} | Filho: {childUid || 'Não definido'}
+                  Admin: {user.displayName} | Filho: {user.managedChildId || 'Não definido'}
                 </p>
               )}
             </div>
@@ -216,7 +216,7 @@ const DataDoctorPage: React.FC = () => {
             <div className="mt-4 p-3 bg-blue-100 rounded-lg">
               <p className="text-sm text-blue-800">
                 <strong>💡 Dica:</strong> Execute a análise primeiro para ver os problemas. 
-                Use "Usar userId\" quando possível, \"Atribuir ao filho\" para documentos órfãos.
+                Use "Usar userId" quando possível, "Atribuir ao filho" para documentos órfãos.
               </p>
             </div>
           </motion.div>
@@ -305,11 +305,10 @@ const DataDoctorPage: React.FC = () => {
               : 'bg-yellow-50 border border-yellow-200'
           }`}
         >
-                <li>• <strong>Clique "Analisar"</strong> para escanear todas as coleções</li>
-                <li>• <strong>Verifica campos obrigatórios:</strong> ownerId, userId, toUserId</li>
-                <li>• <strong>Identifica problemas:</strong> usuários órfãos, tipos incorretos, divergências</li>
-                <li>• <strong>Mostra estatísticas:</strong> total, válidos, problemas por tipo</li>
-                <li>• <strong>Limitado a 1000 docs</strong> por coleção para performance</li>
+          <div className="flex items-center gap-4 mb-6">
+            {finalReport.allValid ? (
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            ) : (
               <AlertTriangle className="w-8 h-8 text-yellow-600" />
             )}
             
@@ -360,20 +359,17 @@ const DataDoctorPage: React.FC = () => {
                 ))}
               </tbody>
             </table>
-                <li>• <strong>Usar userId:</strong> Define ownerId = userId existente</li>
-                <li>• <strong>Atribuir ao filho:</strong> Define ownerId = filho selecionado</li>
-                <li>• <strong>Processamento em lotes:</strong> 400 documentos por vez</li>
-                <li>• <strong>Backup automático:</strong> dados originais preservados</li>
-                <li>• <strong>Rollback seguro:</strong> em caso de erro</li>
+          </div>
+
+          <div>
             <h4 className="font-semibold text-gray-900 mb-2">📋 Recomendações:</h4>
             <ul className="space-y-1">
               {finalReport.recommendations.map((rec, index) => (
                 <li key={index} className="text-sm text-gray-700 flex items-center gap-2">
                   <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
                   {rec}
-              <strong>💡 Dica:</strong> Execute a análise primeiro para identificar problemas. 
-              Use <strong>"Usar userId"</strong> quando o documento já tem userId válido, 
-              <strong>"Atribuir ao filho"</strong> para documentos órfãos sem referência.
+                </li>
+              ))}
             </ul>
           </div>
         </motion.div>
