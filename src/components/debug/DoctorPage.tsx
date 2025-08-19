@@ -467,7 +467,7 @@ service cloud.firestore {
 }`}</pre>
                   </div>
                   <p className="text-red-700 text-sm mt-3">
-                    ⚠️ Copie EXATAMENTE este código para Firebase Console > Firestore Database > Regras (versão de produção com segurança)
+                    ⚠️ Copie EXATAMENTE este código para Firebase Console &gt; Firestore Database &gt; Regras (versão de produção com segurança)
                   </p>
                 </div>
               )}
