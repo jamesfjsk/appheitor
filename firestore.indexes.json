@@ -19,6 +19,20 @@
       ]
     },
     {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ownerId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "redemptions",
       "queryScope": "COLLECTION",
       "fields": [
@@ -58,6 +72,7 @@
           "fieldPath": "createdAt",
           "order": "DESCENDING"
         }
+      ]
     },
     {
       "collectionGroup": "tasks",
@@ -87,24 +102,6 @@
       "fields": [
         {
           "fieldPath": "ownerId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "active",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "redemptions",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "userId",
           "order": "ASCENDING"
         },
         {
