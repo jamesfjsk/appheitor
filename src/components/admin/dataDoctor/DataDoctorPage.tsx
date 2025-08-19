@@ -231,14 +231,27 @@ const DataDoctorPage: React.FC = () => {
           className="bg-white rounded-2xl shadow-lg p-6"
         >
           <div className="flex items-center gap-4">
-            <Users className="w-6 h-6 text-purple-600" />
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">Filho para Atribuição</h3>
-              <p className="text-gray-600 text-sm">
-                Selecione o filho que receberá os documentos órfãos
-              </p>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl flex items-center justify-center">
+                <Database className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Data Doctor</h1>
+                <p className="text-gray-600 text-lg">
+                  Validação e correção de integridade dos dados
+                </p>
+                {user && (
+                  <p className="text-sm text-purple-600 mt-1">
+                    Admin: {user.displayName} | Filho: {user.managedChildId || 'Não definido'}
+                  </p>
+                )}
+              </div>
             </div>
             
+                  Os índices compostos necessários foram criados. O Data Doctor deve funcionar sem erros agora.
+                </p>
+              </p>
+            </div>
             <select
               value={selectedChild}
               onChange={(e) => setSelectedChild(e.target.value)}

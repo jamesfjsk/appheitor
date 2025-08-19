@@ -189,18 +189,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         const unsubscribeRedemptions = FirestoreService.subscribeToUserRedemptions(
           childUid,
           (redemptions) => {
-            console.log('🔥 DataContext: Redemptions received:', redemptions.length);
+            console.log('✅ DataContext: Redemptions received:', redemptions.length);
             setRedemptions(redemptions);
           },
           (error) => {
             console.error('❌ DataContext: Erro no listener de redemptions:', error);
+            // Don't throw error for index issues - they should be resolved now
+            if (error.message?.includes('index')) {
+              console.warn('⚠️ Index ainda sendo criado para redemptions. Aguarde alguns minutos.');
+            }
           }
         );
 
         const unsubscribeNotifications = FirestoreService.subscribeToUserNotifications(
           childUid,
           (notifications) => {
-            console.log('🔥 DataContext: Notifications received:', notifications.length);
+            console.log('✅ DataContext: Notifications received:', notifications.length);
             setNotifications(notifications);
           },
           (error) => {
@@ -211,18 +215,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         const unsubscribeFlashReminders = FirestoreService.subscribeToUserFlashReminders(
           childUid,
           (flashReminders) => {
-            console.log('🔥 DataContext: Flash reminders received:', flashReminders.length);
+            console.log('✅ DataContext: Flash reminders received:', flashReminders.length);
             setFlashReminders(flashReminders);
           },
           (error) => {
             console.error('❌ DataContext: Erro no listener de flash reminders:', error);
+            // Don't throw error for index issues - they should be resolved now
+            if (error.message?.includes('index')) {
+              console.warn('⚠️ Index ainda sendo criado para flashReminders. Aguarde alguns minutos.');
+            }
           }
         );
 
         const unsubscribeAchievements = FirestoreService.subscribeToUserAchievements(
           childUid,
           (achievements) => {
-            console.log('🔥 DataContext: Achievements received:', achievements.length);
+            console.log('✅ DataContext: Achievements received:', achievements.length);
             setAchievements(achievements);
           },
           (error) => {
@@ -233,11 +241,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         const unsubscribeUserAchievements = FirestoreService.subscribeToUserAchievementProgress(
           childUid,
           (userAchievements) => {
-            console.log('🔥 DataContext: User achievements received:', userAchievements.length);
+            console.log('✅ DataContext: User achievements received:', userAchievements.length);
             setUserAchievements(userAchievements);
           },
           (error) => {
             console.error('❌ DataContext: Erro no listener de user achievements:', error);
+            // Don't throw error for index issues - they should be resolved now
+            if (error.message?.includes('index')) {
+              console.warn('⚠️ Index ainda sendo criado para userAchievements. Aguarde alguns minutos.');
+            }
           }
         );
 

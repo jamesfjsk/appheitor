@@ -538,6 +538,28 @@ service cloud.firestore {
         >
           <h3 className="text-xl font-bold text-gray-900 mb-4">📖 Como Interpretar os Resultados:</h3>
           
+          {/* Quick Test Button */}
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-blue-900">🚀 Teste Rápido</h4>
+                <p className="text-sm text-blue-700">
+                  Execute um diagnóstico completo agora para verificar se os índices foram criados corretamente
+                </p>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={runDiagnosis}
+                disabled={isRunning}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <Play className="w-4 h-4" />
+                Testar Agora
+              </motion.button>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
