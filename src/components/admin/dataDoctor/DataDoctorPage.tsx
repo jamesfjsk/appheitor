@@ -247,11 +247,12 @@ const DataDoctorPage: React.FC = () => {
                 )}
               </div>
             </div>
-            
-                  Os índices compostos necessários foram criados. O Data Doctor deve funcionar sem erros agora.
-                </p>
-              </p>
-            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+              ✅ Os índices compostos necessários foram criados. O Data Doctor deve funcionar sem erros agora.
+            </p>
             <select
               value={selectedChild}
               onChange={(e) => setSelectedChild(e.target.value)}
