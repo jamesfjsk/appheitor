@@ -125,5 +125,19 @@
       ]
     }
   ],
+  {
+    "collectionGroup": "achievements",
+    "queryScope": "COLLECTION",
+    "fields": [
+      {
+        "fieldPath": "ownerId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      }
+    ]
+  },
   "fieldOverrides": []
 }
