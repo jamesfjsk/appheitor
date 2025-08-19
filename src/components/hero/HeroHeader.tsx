@@ -149,7 +149,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900"
+            className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900"
           >
             {getGreeting()}, Heitor! ⚡
           </motion.h1>
@@ -157,7 +157,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-gray-600 text-sm md:text-base lg:text-lg"
+            className="text-gray-600 text-base md:text-lg lg:text-xl font-medium"
           >
             {getMotivationalMessage()}
           </motion.p>

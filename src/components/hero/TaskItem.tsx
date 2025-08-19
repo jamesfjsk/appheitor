@@ -192,11 +192,11 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
             whileHover={{ scale: guidedMode ? 1.15 : 1.1 }}
             whileTap={{ scale: 0.9 }}
             className={`
-              relative ${guidedMode ? 'w-16 h-16' : 'w-14 h-14'} rounded-full border-4 flex items-center justify-center
+              relative ${guidedMode ? 'w-20 h-20' : 'w-16 h-16'} rounded-full border-4 flex items-center justify-center
               transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50
               ${task.status === 'done'
-                ? 'bg-green-500 border-green-400 text-white shadow-xl cursor-default'
-                : 'bg-yellow-400 border-yellow-300 text-red-600 hover:bg-yellow-300 hover:border-yellow-200 shadow-lg hover:shadow-xl'
+                ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 text-white shadow-2xl cursor-default'
+                : 'bg-gradient-to-br from-yellow-400 to-yellow-500 border-yellow-300 text-red-600 hover:from-yellow-300 hover:to-yellow-400 hover:border-yellow-200 shadow-xl hover:shadow-2xl'
               }
               ${isCompleting || task.status === 'done' ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
@@ -210,7 +210,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   exit={{ scale: 0, rotate: 180 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <Star className={`${guidedMode ? 'w-8 h-8' : 'w-6 h-6'} fill-current`} />
+                  <Star className={`${guidedMode ? 'w-10 h-10' : 'w-8 h-8'} fill-current drop-shadow-lg`} />
                 </motion.div>
               ) : task.status === 'done' ? (
                 <motion.div
@@ -219,7 +219,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Check className={`${guidedMode ? 'w-8 h-8' : 'w-6 h-6'}`} />
+                  <Check className={`${guidedMode ? 'w-10 h-10' : 'w-8 h-8'} drop-shadow-lg`} />
                 </motion.div>
               ) : (
                 <motion.div
@@ -228,7 +228,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className={`${guidedMode ? 'w-6 h-6' : 'w-4 h-4'} rounded-full border-2 border-current`} />
+                  <div className={`${guidedMode ? 'w-8 h-8 border-4' : 'w-6 h-6 border-3'} rounded-full border-current shadow-inner`} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -249,7 +249,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h3 className={`
-                  ${guidedMode ? 'text-xl' : 'text-lg'} font-bold transition-all duration-300
+                  ${guidedMode ? 'text-2xl' : 'text-xl'} font-bold transition-all duration-300
                   ${task.status === 'done'
                     ? 'text-green-600 line-through' 
                     : 'text-gray-900'
@@ -260,7 +260,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 
                 {task.description && (
                   <p className={`
-                    text-sm mt-1 transition-all duration-300
+                    ${guidedMode ? 'text-base' : 'text-sm'} mt-1 transition-all duration-300
                     ${task.status === 'done'
                       ? 'text-green-500 line-through' 
                       : 'text-gray-600'
@@ -285,11 +285,19 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               </div>
 
               {/* Pontos da tarefa */}
-              <div className="flex items-center space-x-1 ml-4">
-                <Zap className="w-4 h-4 text-hero-accent" />
-                <span className="text-hero-accent font-bold text-sm">
+              <div className={`flex items-center space-x-2 ml-4 ${guidedMode ? 'flex-col space-x-0 space-y-1' : ''}`}>
+                <div className="flex items-center space-x-1">
+                  <Zap className={`${guidedMode ? 'w-6 h-6' : 'w-5 h-5'} text-blue-500`} />
+                  <span className={`text-blue-600 font-bold ${guidedMode ? 'text-lg' : 'text-base'}`}>
                   +{task.xp || 10} XP
-                </span>
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className={`${guidedMode ? 'text-lg' : 'text-sm'}`}>🪙</span>
+                  <span className={`text-yellow-600 font-bold ${guidedMode ? 'text-lg' : 'text-base'}`}>
+                    +{task.gold || 5} Gold
+                  </span>
+                </div>
               </div>
             </div>
           </div>

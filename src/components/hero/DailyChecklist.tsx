@@ -111,8 +111,21 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     >
       {/* Header com Seletor de Período */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0 flex items-center gap-2">
-          <Clock className="w-6 h-6 text-yellow-400" />
+        <h2 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0 flex items-center gap-3">
+          <motion.div
+            animate={{
+              rotate: [0, 360],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center"
+          >
+            <Clock className="w-5 h-5 text-red-600" />
+          </motion.div>
           Missões Diárias
         </h2>
 
@@ -130,19 +143,19 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onPeriodChange(period.id)}
-                  className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 relative ${
+                  className={`px-6 py-3 rounded-2xl font-bold text-lg transition-all duration-200 flex items-center gap-3 relative shadow-lg ${
                     isSelected
-                      ? `bg-gradient-to-r ${period.color} text-white shadow-lg`
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? `bg-gradient-to-r ${period.color} text-white shadow-xl border-2 border-white`
+                      : 'bg-white/80 text-gray-700 hover:bg-white border-2 border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-6 h-6" />
                   {period.label}
                   {isCurrent && !isSelected && (
                     <motion.div
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 1, repeat: Infinity }}
-                      className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full"
+                      className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white shadow-lg"
                     />
                   )}
                 </motion.button>
@@ -156,13 +169,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onToggleGuidedMode}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
+              className={`px-6 py-3 rounded-2xl font-bold text-lg transition-all duration-200 flex items-center gap-3 shadow-lg ${
                 guidedMode
-                  ? 'bg-yellow-400 text-red-600 shadow-lg'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-red-600 shadow-xl border-2 border-white'
+                  : 'bg-white/80 text-gray-700 hover:bg-white border-2 border-gray-200 hover:border-gray-300'
               }`}
             >
-              <Play className="w-4 h-4" />
+              <Play className="w-6 h-6" />
               {guidedMode ? 'Modo Guiado ON' : 'Iniciar Missões'}
             </motion.button>
           )}
@@ -174,9 +187,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 p-3 bg-yellow-100 border border-yellow-200 rounded-xl text-center"
+          className="mb-6 p-4 bg-gradient-to-r from-yellow-100 to-yellow-50 border-2 border-yellow-300 rounded-2xl text-center shadow-lg"
         >
-          <p className="text-yellow-800 font-medium">
+          <p className="text-yellow-900 font-bold text-lg">
             {getTimeBasedMessage()}
           </p>
         </motion.div>
@@ -185,18 +198,18 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       {/* Progress do Período */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-600 text-sm">
+          <span className="text-gray-700 text-base font-medium">
             Progresso do período: {completedTasks}/{totalTasks}
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-yellow-400 font-bold">
+            <span className="text-yellow-500 font-bold text-lg">
               {Math.round(completionPercentage)}%
             </span>
             {completionPercentage === 100 && totalTasks > 0 && (
               <motion.span
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="text-yellow-400"
+                className="text-yellow-400 text-xl"
               >
                 ⚡
               </motion.span>
@@ -204,18 +217,18 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           </div>
         </div>
         
-        <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-hero-primary to-hero-secondary rounded-full relative shadow-sm"
+            className="h-full bg-gradient-to-r from-green-500 via-yellow-400 to-green-500 rounded-full relative shadow-lg"
           >
             {completionPercentage > 0 && (
               <motion.div
                 animate={{ x: ['-100%', '100%'] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-white/50 rounded-full"
+                className="absolute inset-0 bg-white/60 rounded-full"
               />
             )}
           </motion.div>
@@ -319,12 +332,25 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           transition={{ 
             duration: 0.5,
           }}
-          className="mt-6 p-4 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-xl text-center"
+          className="mt-6 p-6 bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 rounded-2xl text-center shadow-2xl border-4 border-white relative overflow-hidden"
         >
-          <div className="relative text-red-600 font-bold text-lg mb-1">
+          {/* Efeito de celebração de fundo */}
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.6, 0.3]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20"
+          />
+          <div className="relative z-10 text-red-600 font-bold text-2xl mb-2">
             🎉 Período Completo! 🎉
           </div>
-          <p className="text-red-600 text-sm">
+          <p className="relative z-10 text-red-600 text-lg font-semibold">
             Você completou todas as missões! ⚡ Incrível!
           </p>
         </motion.div>

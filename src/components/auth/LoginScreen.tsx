@@ -85,12 +85,16 @@ const LoginScreen: React.FC = () => {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4"
+              className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-2xl border-4 border-yellow-400"
             >
-              <Lightning className="w-10 h-10 text-yellow-400" fill="currentColor" />
+              <img 
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+                alt="Avatar do Heitor"
+                className="w-full h-full object-cover rounded-full"
+              />
             </motion.div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Flash Missions</h1>
-            <p className="text-gray-600">Sistema 100% online com Firebase</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Heitor Missions</h1>
+            <p className="text-gray-600">Sistema de missões personalizado para o Heitor</p>
           </div>
 
           {/* Status de Conexão */}
@@ -121,20 +125,34 @@ const LoginScreen: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleHeitorLogin}
-                className="w-full p-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+                className="w-full p-6 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl font-bold text-xl flex items-center justify-center gap-4 hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
               >
-                <Lightning className="w-6 h-6 text-yellow-400" fill="currentColor" />
-                Entrar como Heitor (Filho)
+                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                  <img 
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+                    alt="Avatar do Heitor"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </div>
+                <div className="text-left">
+                  <div className="text-xl font-bold">Entrar como Heitor</div>
+                  <div className="text-yellow-300 text-sm font-medium">Painel de Missões</div>
+                </div>
               </motion.button>
               
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setLoginMode('admin_form')}
-                className="w-full p-4 bg-blue-600 text-white rounded-xl font-semibold flex items-center justify-center gap-3 hover:bg-blue-700 transition-all duration-200 shadow-lg"
+                className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-4 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
               >
-                <Shield className="w-6 h-6" />
-                Entrar como Pai
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-left">
+                  <div className="text-lg font-bold">Entrar como Pai</div>
+                  <div className="text-blue-200 text-sm font-medium">Painel Administrativo</div>
+                </div>
               </motion.button>
             </motion.div>
           )}
@@ -147,19 +165,28 @@ const LoginScreen: React.FC = () => {
               onSubmit={handleSubmit}
               className="space-y-6"
             >
-              <div className="flex items-center gap-3 p-3 bg-gray-100 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-blue-900">Painel Administrativo</div>
+                    <div className="text-sm text-blue-700">Acesso para pais e responsáveis</div>
+                  </div>
+                </div>
                 <button
                   type="button"
                   onClick={() => setLoginMode('initial')}
-                  className="ml-auto text-sm text-gray-500 hover:text-gray-700"
+                  className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 bg-white/50 hover:bg-white/80 rounded-lg transition-colors font-medium"
                 >
-                  Trocar
+                  ← Voltar
                 </button>
-              </div>
                       Entrando...
               {/* Nome (apenas para registro) */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
                   Email
                 </label>
                 <input
@@ -169,13 +196,14 @@ const LoginScreen: React.FC = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
                   placeholder="seu@email.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
                   Senha
                 </label>
                 <input
@@ -185,7 +213,7 @@ const LoginScreen: React.FC = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
                   placeholder="••••••••"
                 />
               </div>
@@ -195,17 +223,18 @@ const LoginScreen: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={loading || isOffline}
-                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 ${
-                  'bg-blue-600 hover:bg-blue-700 text-white'
-                } disabled:opacity-50 disabled:cursor-not-allowed shadow-lg`}
+                className="w-full py-4 px-4 rounded-xl font-bold text-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200"
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    {isRegistering ? 'Criando conta...' : 'Entrando...'}
+                    Entrando...
                   </div>
                 ) : (
-                  'Entrar como Admin'
+                  <div className="flex items-center justify-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    Entrar como Admin
+                  </div>
                 )}
               </motion.button>
             </motion.form>

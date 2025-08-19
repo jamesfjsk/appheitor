@@ -249,15 +249,18 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     )}
                     
                     <div className="text-center mb-4">
-                      <div className={`text-4xl mb-2 ${!isUnlocked ? 'grayscale opacity-50' : ''}`}>
+                      <motion.div 
+                        whileHover={isUnlocked ? { scale: 1.1, rotate: 5 } : {}}
+                        className={`text-5xl mb-3 ${!isUnlocked ? 'grayscale opacity-50' : ''}`}
+                      >
                         {reward.emoji}
-                      </div>
-                      <h3 className={`font-bold text-lg mb-1 ${
+                      </motion.div>
+                      <h3 className={`font-bold text-xl mb-2 ${
                         isUnlocked ? 'text-gray-900' : 'text-gray-500'
                       }`}>
                         {reward.title}
                       </h3>
-                      <p className={`text-sm ${
+                      <p className={`text-base leading-relaxed ${
                         isUnlocked ? 'text-gray-600' : 'text-gray-400'
                       }`}>
                         {reward.description}
@@ -273,12 +276,20 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                       {/* Just unlocked indicator */}
                       {isUnlocked && requiredLevel > 1 && currentLevel === requiredLevel && (
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.3 }}
-                          className="mt-2 px-2 py-1 bg-yellow-400 text-red-600 rounded-full text-xs font-bold"
+                          initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                          animate={{ 
+                            opacity: 1, 
+                            scale: [1, 1.1, 1], 
+                            rotate: [0, 5, -5, 0] 
+                          }}
+                          transition={{ 
+                            delay: 0.3,
+                            scale: { duration: 2, repeat: Infinity },
+                            rotate: { duration: 1, repeat: Infinity }
+                          }}
+                          className="mt-3 px-3 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-red-600 rounded-full text-sm font-bold shadow-lg border-2 border-white"
                         >
-                          ✨ RECÉM DESBLOQUEADO!
+                          ⚡ NOVO! DESBLOQUEADO! ⚡
                         </motion.div>
                       )}
                     </div>
@@ -313,28 +324,34 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                       whileTap={canRedeemReward ? { scale: 0.98 } : {}}
                       onClick={() => handleRedeem(reward)}
                       disabled={!canRedeemReward}
-                      className={`w-full py-3 rounded-xl font-bold transition-all duration-200 ${
+                      className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg ${
                         !isUnlocked
-                          ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                          ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
                         : canRedeemReward
-                          ? 'bg-hero-accent text-hero-primary hover:bg-yellow-300 shadow-lg'
-                          : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                          ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-red-600 hover:from-yellow-300 hover:to-yellow-400 shadow-xl hover:shadow-2xl transform hover:-translate-y-1'
+                          : 'bg-gray-400 text-gray-600 cursor-not-allowed'
                       }`}
                     >
                       {!isUnlocked ? (
                         <>
-                          <Lock className="w-4 h-4 inline mr-2" />
+                          <Lock className="w-5 h-5 inline mr-2" />
                           Nível {requiredLevel} Necessário
                         </>
                       ) : pendingRedemption ? (
                         <>
-                          <Clock className="w-4 h-4 inline mr-2" />
+                          <Clock className="w-5 h-5 inline mr-2" />
                           Aguardando Aprovação
                         </>
                       ) : canRedeemReward ? (
-                        'Resgatar Agora!'
+                        <>
+                          <Star className="w-5 h-5 inline mr-2" />
+                          Resgatar Agora!
+                        </>
                       ) : (
-                        'Gold Insuficiente'
+                        <>
+                          <Lock className="w-5 h-5 inline mr-2" />
+                          Gold Insuficiente
+                        </>
                       )}
                     </motion.button>
                   </motion.div>

@@ -455,13 +455,46 @@ const HeroPanel: React.FC = () => {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="mb-8 text-center"
               >
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border-2 border-hero-accent shadow-2xl">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                <div className="bg-white/25 backdrop-blur-md rounded-3xl p-8 border-2 border-yellow-400 shadow-2xl relative overflow-hidden">
+                  {/* Efeito de brilho de fundo */}
+                  <motion.div
+                    animate={{
+                      opacity: [0.3, 0.6, 0.3],
+                      scale: [1, 1.05, 1]
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-white/30 to-yellow-400/20 rounded-3xl"
+                  />
+                  <div className="relative z-10">
+                    <motion.div
+                      animate={{
+                        rotate: [0, 5, -5, 0],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="w-16 h-16 mx-auto mb-4 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-white shadow-xl"
+                    >
+                      <img 
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+                        alt="Avatar do Heitor"
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    </motion.div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-lg">
                     Bem-vindo de volta, Heitor! ⚡
-                  </h2>
-                  <p className="text-hero-accent text-lg font-semibold">
+                    </h2>
+                    <p className="text-yellow-300 text-xl font-bold drop-shadow-md">
                     {getMotivationalMessage()}
-                  </p>
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             )}
