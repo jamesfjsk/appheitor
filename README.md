@@ -1,6 +1,6 @@
-# 🚀 Flash Missions - Sistema Gamificado para Crianças
+# 🚀 Heitor Missions - Sistema Gamificado Personalizado
 
-Sistema completo de gamificação de tarefas para crianças com tema super-heróico do Flash, desenvolvido com React, TypeScript, Tailwind CSS e Firebase.
+Sistema completo de gamificação de missões personalizado para o Heitor com tema super-heróico do Flash, desenvolvido com React, TypeScript, Tailwind CSS e Firebase.
 
 ## ✨ Funcionalidades
 
@@ -44,8 +44,8 @@ Sistema completo de gamificação de tarefas para crianças com tema super-heró
 
 ### 1. **Clone o repositório**
 ```bash
-git clone https://github.com/seu-usuario/flash-missions.git
-cd flash-missions
+git clone https://github.com/seu-usuario/heitor-missions.git
+cd heitor-missions
 ```
 
 ### 2. **Instale as dependências**
@@ -58,7 +58,7 @@ npm install
 #### 3.1 Criar projeto Firebase
 1. Acesse [Firebase Console](https://console.firebase.google.com/)
 2. Clique em "Adicionar projeto"
-3. Nome: `flash-missions-heitor`
+3. Nome: `heitor-missions`
 4. Desabilite Google Analytics (opcional)
 
 #### 3.2 Configurar Authentication
@@ -77,7 +77,7 @@ npm install
 
 #### 3.4 Configurar Web App
 1. No painel principal, clique no ícone **</>** (Web)
-2. Nome do app: `Flash Missions Web`
+2. Nome do app: `Heitor Missions Web`
 3. ✅ Marque "Configurar Firebase Hosting"
 4. **COPIE as configurações** que aparecem
 
@@ -238,4 +238,4 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 
 ---
 
-**Desenvolvido com ❤️ para tornar as tarefas diárias uma aventura emocionante!** ⚡
+**Desenvolvido com ❤️ especialmente para o Heitor tornar suas missões diárias uma aventura emocionante!** ⚡
