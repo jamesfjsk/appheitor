@@ -246,9 +246,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           },
           (error) => {
             console.error('❌ DataContext: Erro no listener de user achievements:', error);
-            // Don't throw error for index issues - they should be resolved now
-            if (error.message?.includes('index')) {
-              console.warn('⚠️ Index ainda sendo criado para userAchievements. Aguarde alguns minutos.');
+            // Handle index building errors gracefully
+            if (error.message?.includes('index') || error.code === 'failed-precondition') {
+              console.warn('⚠️ Index para userAchievements ainda sendo construído. Aguarde alguns minutos.');
+              // Set empty array while index is building
+              setUserAchievements([]);
+            } else {
+              console.error('❌ Erro crítico no listener de user achievements:', error);
             }
           }
         );
