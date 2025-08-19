@@ -182,7 +182,8 @@ const LoginScreen: React.FC = () => {
                 >
                   ← Voltar
                 </button>
-                      Entrando...
+              </div>
+
               {/* Nome (apenas para registro) */}
               <div>
                 <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
