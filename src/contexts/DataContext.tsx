@@ -291,7 +291,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   // Task methods
   const addTask = async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
-    
+          toast('⚠️ Tarefa já foi completada hoje! Será renovada amanhã.', {
+            duration: 4000,
+            style: {
+              background: '#10B981',
+              color: '#FFFFFF',
+            },
+          });
     const completeTaskData = {
       ...taskData,
       ownerId: childUid,
