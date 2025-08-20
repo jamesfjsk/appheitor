@@ -398,5 +398,3 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
 };
 
 export default TaskItem;
-  )
-}
