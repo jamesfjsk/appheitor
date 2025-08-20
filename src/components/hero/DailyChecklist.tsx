@@ -22,6 +22,12 @@ const isTaskAvailableToday = (task: Task): boolean => {
   }
 };
 
+// Helper function to check if task is completed today
+const isTaskCompletedToday = (task: Task): boolean => {
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  return task.status === 'done' && task.lastCompletedDate === today;
+};
+
 interface DailyChecklistProps {
   tasks: Task[];
   selectedPeriod: 'morning' | 'afternoon' | 'evening';
@@ -67,7 +73,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     isTaskAvailableToday(task)
   );
 
-  const completedTasks = filteredTasks.filter(task => task.status === 'done').length;
+  const completedTasks = filteredTasks.filter(task => isTaskCompletedToday(task)).length;
   const totalTasks = filteredTasks.length;
   const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
   
@@ -76,7 +82,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   
   // Guided mode: show only current incomplete task
   const currentTask = guidedMode 
-    ? filteredTasks.find(task => task.status !== 'done') 
+    ? filteredTasks.find(task => !isTaskCompletedToday(task)) 
     : null;
   
   const tasksToShow = guidedMode && currentTask ? [currentTask] : filteredTasks;

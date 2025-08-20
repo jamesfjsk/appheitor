@@ -246,12 +246,28 @@ export class FirestoreService {
 
   static async completeTaskWithRewards(taskId: string, userId: string, xpReward: number, goldReward: number): Promise<void> {
     try {
+      // Check if task was already completed today
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      const taskRef = doc(db, 'tasks', taskId);
+      const taskDoc = await getDoc(taskRef);
+      
+      if (!taskDoc.exists()) {
+        throw new Error('Task not found');
+      }
+      
+      const taskData = taskDoc.data();
+      const lastCompletedDate = taskData.lastCompletedDate;
+      
+      if (lastCompletedDate === today) {
+        throw new Error('Task already completed today');
+      }
+      
       const batch = writeBatch(db);
       
       // Update task status
-      const taskRef = doc(db, 'tasks', taskId);
       batch.update(taskRef, {
         status: 'done',
+        lastCompletedDate: today,
         updatedAt: serverTimestamp()
       });
       
@@ -573,8 +589,15 @@ export class FirestoreService {
       
       return onSnapshot(q, 
         (snapshot) => {
+          const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+          
           const tasks = snapshot.docs.map(doc => {
             const data = doc.data();
+            
+            // Reset task status if it's a new day
+            const lastCompletedDate = data.lastCompletedDate;
+            const shouldReset = data.status === 'done' && lastCompletedDate !== today;
+            
             return {
               id: doc.id,
               ownerId: data.ownerId,
@@ -586,12 +609,41 @@ export class FirestoreService {
               time: data.time,
               frequency: data.frequency || 'daily',
               active: data.active !== false,
-              status: data.status || 'pending',
+              status: shouldReset ? 'pending' : (data.status || 'pending'),
+              lastCompletedDate: data.lastCompletedDate,
               createdAt: data.createdAt?.toDate() || new Date(),
               updatedAt: data.updatedAt?.toDate() || new Date(),
               createdBy: data.createdBy
             } as Task;
           });
+          
+          // Auto-reset tasks that need to be reset
+          const tasksToReset = tasks.filter(task => 
+            task.status === 'done' && 
+            task.lastCompletedDate && 
+            task.lastCompletedDate !== today
+          );
+          
+          if (tasksToReset.length > 0) {
+            console.log(`🔄 Auto-resetting ${tasksToReset.length} tasks for new day`);
+            
+            // Reset tasks in background
+            const resetTasks = async () => {
+              const batch = writeBatch(db);
+              tasksToReset.forEach(task => {
+                batch.update(doc(db, 'tasks', task.id), {
+                  status: 'pending',
+                  updatedAt: serverTimestamp()
+                });
+              });
+              await batch.commit();
+            };
+            
+            resetTasks().catch(error => {
+              console.error('❌ Error auto-resetting tasks:', error);
+            });
+          }
+          
           onUpdate(tasks);
         },
         onError

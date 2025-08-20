@@ -40,6 +40,7 @@ export interface Task {
   frequency: 'daily' | 'weekday' | 'weekend';
   active: boolean;
   status: 'pending' | 'done';
+  lastCompletedDate?: string; // YYYY-MM-DD format
   createdAt: Date;
   updatedAt: Date;
   createdBy: string; // Admin UID

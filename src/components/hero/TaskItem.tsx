@@ -5,6 +5,12 @@ import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import toast from 'react-hot-toast';
 
+// Helper function to check if task is completed today
+const isTaskCompletedToday = (task: Task): boolean => {
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  return task.status === 'done' && task.lastCompletedDate === today;
+};
+
 interface TaskItemProps {
   task: Task;
   onComplete: (taskId: string, completed: boolean) => void;
@@ -20,7 +26,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
 
   const handleToggle = async () => {
     // Prevent any action if task is already completed
-    if (task.status === 'done') {
+    if (isTaskCompletedToday(task)) {
       playClick();
       toast('✅ Tarefa já foi completada hoje! Disponível novamente amanhã.', {
         duration: 3000,
@@ -83,14 +89,16 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
     dueTime.setHours(hours, minutes, 0, 0);
     
     const isOverdue = now > dueTime && task.status !== 'done';
+    const isCompletedToday = isTaskCompletedToday(task);
     
     return (
       <div className={`flex items-center space-x-1 text-xs ${
-        isOverdue ? 'text-red-500' : 'text-gray-500'
+        isCompletedToday ? 'text-green-500' : isOverdue ? 'text-red-500' : 'text-gray-500'
       }`}>
         <Clock className="w-3 h-3" />
         <span>{task.time}</span>
-        {isOverdue && <span className="animate-pulse">⚠️</span>}
+        {isCompletedToday && <span>✅</span>}
+        {!isCompletedToday && isOverdue && <span className="animate-pulse">⚠️</span>}
       </div>
     );
   };
@@ -120,7 +128,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
       transition={{ duration: 0.3, delay: index * 0.1 }}
       className={`
         relative
-        ${guidedMode ? 'ring-2 ring-yellow-400 ring-opacity-50' : ''}
+        ${isTaskCompletedToday(task)
       `}
     >
       {/* Lightning effects for guided mode */}
@@ -166,7 +174,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
         <div className={`absolute inset-0 bg-gradient-to-r ${getPeriodColor()} opacity-5`} />
         
         {/* Raios sutis de energia na tarefa */}
-        {task.status !== 'done' && (
+        {!isTaskCompletedToday(task) && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
             <motion.div
               animate={{
@@ -188,17 +196,17 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
           {/* Botão de completar */}
           <motion.button
             onClick={handleToggle}
-            disabled={isCompleting || task.status === 'done'}
+            disabled={isCompleting || isTaskCompletedToday(task)}
             whileHover={{ scale: guidedMode ? 1.15 : 1.1 }}
             whileTap={{ scale: 0.9 }}
             className={`
               relative ${guidedMode ? 'w-20 h-20' : 'w-16 h-16'} rounded-full border-4 flex items-center justify-center
               transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50
-              ${task.status === 'done'
+              ${isTaskCompletedToday(task)
                 ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 text-white shadow-2xl cursor-default'
                 : 'bg-gradient-to-br from-yellow-400 to-yellow-500 border-yellow-300 text-red-600 hover:from-yellow-300 hover:to-yellow-400 hover:border-yellow-200 shadow-xl hover:shadow-2xl'
               }
-              ${isCompleting || task.status === 'done' ? 'cursor-not-allowed' : 'cursor-pointer'}
+              ${isCompleting || isTaskCompletedToday(task) ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
             <AnimatePresence mode="wait">
@@ -213,6 +221,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   <Star className={`${guidedMode ? 'w-10 h-10' : 'w-8 h-8'} fill-current drop-shadow-lg`} />
                 </motion.div>
               ) : task.status === 'done' ? (
+              ) : isTaskCompletedToday(task) ? (
                 <motion.div
                   key="completed"
                   initial={{ scale: 0 }}
@@ -250,7 +259,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               <div className="flex-1">
                 <h3 className={`
                   ${guidedMode ? 'text-2xl' : 'text-xl'} font-bold transition-all duration-300
-                  ${task.status === 'done'
+                  ${isTaskCompletedToday(task)
                     ? 'text-green-600 line-through' 
                     : 'text-gray-900'
                   }
@@ -261,7 +270,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 {task.description && (
                   <p className={`
                     ${guidedMode ? 'text-base' : 'text-sm'} mt-1 transition-all duration-300
-                    ${task.status === 'done'
+                    ${isTaskCompletedToday(task)
                       ? 'text-green-500 line-through' 
                       : 'text-gray-600'
                     }
