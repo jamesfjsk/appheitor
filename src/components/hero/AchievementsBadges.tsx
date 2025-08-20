@@ -157,13 +157,10 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                     animate={{
                       opacity: [0.5, 1, 0.5],
                       scale: [1, 1.05, 1]
-                    } : selectedAchievement.isReadyToUnlock ? {
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0]
-                    } : {}}
+                    }}
                     transition={{
                       duration: 1.5,
-                      repeat: (selectedAchievement.isCompleted || selectedAchievement.isReadyToUnlock) ? Infinity : 0,
+                      repeat: Infinity,
                       ease: "easeInOut"
                     }}
                     className="absolute inset-0 bg-gradient-to-br from-green-400/50 to-green-300/50 rounded-xl"
