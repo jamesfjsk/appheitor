@@ -68,19 +68,19 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.title.trim()) {
+    if (!formData.title?.trim()) {
       newErrors.title = 'Título é obrigatório';
-    } else if (formData.title.length < 3) {
+    } else if (formData.title?.length < 3) {
       newErrors.title = 'Título deve ter pelo menos 3 caracteres';
-    } else if (formData.title.length > 50) {
+    } else if (formData.title?.length > 50) {
       newErrors.title = 'Título deve ter no máximo 50 caracteres';
     }
 
-    if (!formData.description.trim()) {
+    if (!formData.description?.trim()) {
       newErrors.description = 'Descrição é obrigatória';
-    } else if (formData.description.length < 10) {
+    } else if (formData.description?.length < 10) {
       newErrors.description = 'Descrição deve ter pelo menos 10 caracteres';
-    } else if (formData.description.length > 200) {
+    } else if (formData.description?.length > 200) {
       newErrors.description = 'Descrição deve ter no máximo 200 caracteres';
     }
 
@@ -92,7 +92,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
       newErrors.requiredLevel = 'Nível deve estar entre 1 e 100';
     }
 
-    if (!formData.icon.trim()) {
+    if (!formData.icon?.trim()) {
       newErrors.icon = 'Ícone é obrigatório';
     }
 
