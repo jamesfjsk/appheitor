@@ -44,10 +44,14 @@ const AchievementManager: React.FC = () => {
 
   const handleCheckAchievements = async () => {
     try {
+      console.log('🏆 Manual achievement check triggered');
       await checkAchievements();
       toast.success('Verificação de conquistas executada!');
     } catch (error) {
-      toast.error('Erro ao verificar conquistas');
+      console.error('❌ Error in manual achievement check:', error);
+      if (!error.message?.includes('index')) {
+        toast.error('Erro ao verificar conquistas');
+      }
     }
   };
 
