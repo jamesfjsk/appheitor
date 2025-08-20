@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Lock, Star, Target, Zap, X, CheckCircle } from 'lucide-react';
-import { Achievement, UserAchievement } from '../../types';
+import { Achievement, UserAchievement, UserProgress } from '../../types';
 import { useData } from '../../contexts/DataContext';
-import { FirestoreService } from '../../services/firestoreService';
 import { useAuth } from '../../contexts/AuthContext';
+import { calculateLevelSystem } from '../../utils/levelSystem';
 
 interface AchievementsBadgesProps {}
 
 const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
-  const { achievements, userAchievements, progress, claimAchievementReward, checkAchievements, adjustUserXP, adjustUserGold } = useData();
-  const { childUid } = useAuth();
+  const { achievements, userAchievements, progress, claimAchievementReward } = useData();
   const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
+
+  const levelSystem = calculateLevelSystem(progress.totalXP || 0);
 
   // Combine achievements with user progress
   const achievementsWithProgress = achievements.map(achievement => {
@@ -25,13 +26,13 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
           currentProgress = progress.totalXP || 0;
           break;
         case 'level':
-          currentProgress = progress.level || 1;
+          currentProgress = levelSystem.currentLevel;
           break;
         case 'tasks':
           currentProgress = progress.totalTasksCompleted || 0;
           break;
         case 'streak':
-          currentProgress = progress.streak || 0;
+          currentProgress = progress.longestStreak || 0;
           break;
         case 'checkin':
           currentProgress = progress.streak || 0;
@@ -46,28 +47,25 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
     
     const progressPercentage = Math.min(100, (currentProgress / achievement.target) * 100);
     const isCompleted = userAchievement?.isCompleted || false;
-    const isReadyToUnlock = !isCompleted && currentProgress >= achievement.target;
-    const isNewlyUnlocked = userAchievement?.unlockedAt && 
-      (new Date().getTime() - userAchievement.unlockedAt.getTime()) < 10000; // Last 10 seconds
+    const isReadyToUnlock = !isCompleted && currentProgress >= achievement.target && achievement.isActive;
     
     return {
       ...achievement,
       currentProgress,
       progressPercentage,
       isCompleted,
-      isNewlyUnlocked,
       isReadyToUnlock,
       unlockedAt: userAchievement?.unlockedAt,
       userAchievementId: userAchievement?.id,
       rewardClaimed: userAchievement?.rewardClaimed || false
     };
   }).sort((a, b) => {
-    // Sort: completed first, then ready to unlock, then by progress percentage desc
-    if (a.isCompleted !== b.isCompleted) {
-      return a.isCompleted ? -1 : 1;
-    }
+    // Sort: ready to unlock first, then completed, then by progress percentage desc
     if (a.isReadyToUnlock !== b.isReadyToUnlock) {
       return a.isReadyToUnlock ? -1 : 1;
+    }
+    if (a.isCompleted !== b.isCompleted) {
+      return a.isCompleted ? -1 : 1;
     }
     if (a.progressPercentage !== b.progressPercentage) {
       return b.progressPercentage - a.progressPercentage;
@@ -76,6 +74,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
   });
 
   const completedCount = achievementsWithProgress.filter(a => a.isCompleted).length;
+  const readyToUnlockCount = achievementsWithProgress.filter(a => a.isReadyToUnlock).length;
   const totalCount = achievementsWithProgress.length;
 
   const getTypeLabel = (type: Achievement['type']) => {
@@ -115,8 +114,19 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
             <Trophy className="w-5 h-5 text-yellow-400" />
             Conquistas Flash
           </h3>
-          <div className="bg-yellow-400 text-red-600 px-3 py-1 rounded-full font-bold text-sm">
-            {completedCount}/{totalCount}
+          <div className="flex items-center gap-2">
+            {readyToUnlockCount > 0 && (
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="bg-green-500 text-white px-2 py-1 rounded-full font-bold text-xs"
+              >
+                {readyToUnlockCount} PRONTAS!
+              </motion.div>
+            )}
+            <div className="bg-yellow-400 text-red-600 px-3 py-1 rounded-full font-bold text-sm">
+              {completedCount}/{totalCount}
+            </div>
           </div>
         </div>
 
@@ -134,24 +144,29 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                 className={`relative aspect-square rounded-xl p-3 transition-all duration-300 border-2 ${
                   achievement.isCompleted
                     ? 'bg-gradient-to-br from-yellow-400 to-yellow-300 border-yellow-500 shadow-lg'
+                    : achievement.isReadyToUnlock
+                    ? 'bg-gradient-to-br from-green-400 to-green-300 border-green-500 shadow-lg animate-pulse'
                     : achievement.progressPercentage > 0
                     ? 'bg-blue-50 border-blue-200 hover:border-blue-300'
                     : 'bg-gray-50 border-gray-200 hover:border-gray-300'
                 }`}
               >
-                {/* Newly unlocked glow effect */}
-                {achievement.isNewlyUnlocked && (
+                {/* Ready to unlock glow effect */}
+                {achievement.isReadyToUnlock && (
                   <motion.div
                     animate={{
-                      opacity: [0.3, 0.8, 0.3],
+                      opacity: [0.5, 1, 0.5],
                       scale: [1, 1.05, 1]
-                    }}
+                    } : selectedAchievement.isReadyToUnlock ? {
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 10, -10, 0]
+                    } : {}}
                     transition={{
-                      duration: 2,
-                      repeat: Infinity,
+                      duration: 1.5,
+                      repeat: (selectedAchievement.isCompleted || selectedAchievement.isReadyToUnlock) ? Infinity : 0,
                       ease: "easeInOut"
                     }}
-                    className="absolute inset-0 bg-gradient-to-br from-yellow-400/50 to-yellow-300/50 rounded-xl"
+                    className="absolute inset-0 bg-gradient-to-br from-green-400/50 to-green-300/50 rounded-xl"
                   />
                 )}
 
@@ -192,15 +207,30 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                   }`}>
                     {achievement.isCompleted ? (
                       <motion.span
-                        animate={achievement.isNewlyUnlocked ? {
+                        animate={{
                           scale: [1, 1.3, 1],
                           rotate: [0, 15, -15, 0]
-                        } : {}}
+                        }}
                         transition={{
                           duration: 1,
-                          repeat: achievement.isNewlyUnlocked ? 3 : 0,
+                          repeat: 2,
                           ease: "easeInOut"
                         }}
+                      >
+                        {achievement.icon}
+                      </motion.span>
+                    ) : achievement.isReadyToUnlock ? (
+                      <motion.span
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          rotate: [0, 10, -10, 0]
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                        className="text-green-600"
                       >
                         {achievement.icon}
                       </motion.span>
@@ -229,15 +259,15 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                     </motion.div>
                   )}
 
-                  {/* New badge */}
-                  {achievement.isNewlyUnlocked && (
+                  {/* Ready to unlock badge */}
+                  {achievement.isReadyToUnlock && (
                     <motion.div
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ type: "spring", stiffness: 300 }}
-                      className="absolute -top-2 -left-2 bg-red-600 text-yellow-400 px-2 py-1 rounded-full text-xs font-bold"
+                      className="absolute -top-2 -left-2 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-bold"
                     >
-                      NOVO!
+                      PRONTA!
                     </motion.div>
                   )}
                 </div>
@@ -308,6 +338,10 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                 <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
                   selectedAchievement.isCompleted
                     ? 'bg-red-600/20 text-red-800'
+                    : selectedAchievement.isReadyToUnlock
+                    ? 'bg-white/20 text-white'
+                    : selectedAchievement.isReadyToUnlock
+                    ? 'bg-gradient-to-br from-green-400 to-green-300 text-white'
                     : 'bg-white/20 text-white'
                 }`}>
                   <span className={`px-2 py-1 rounded-full text-xs font-bold ${getTypeColor(selectedAchievement.type)}`}>
@@ -387,65 +421,91 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                 {/* Status */}
                 <div className="text-center">
                   {selectedAchievement.isCompleted ? (
-                            selectedAchievement.rewardClaimed ? (
-                            <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
-                              <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                              <p className="font-bold text-green-900">Recompensa Resgatada!</p>
-                              {selectedAchievement.unlockedAt && (
-                                <p className="text-sm text-green-700 mt-1">
-                                  {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                              )}
-                              <div className="bg-gray-100 text-gray-600 py-3 rounded-lg font-bold">
-                                <CheckCircle className="w-4 h-4 inline mr-2" />
-                                Recompensa Já Resgatada
-                              </div>
-                            </div>
-                            ) : (
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
-                              <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                              <p className="font-bold text-yellow-900">Conquista Desbloqueada!</p>
-                              {selectedAchievement.unlockedAt && (
-                                <p className="text-sm text-yellow-700 mt-1">
-                                  {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                              )}
-                              <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={async () => {
-                                  try {
-                                    await claimAchievementReward(selectedAchievement.userAchievementId);
-                                    setSelectedAchievement(null);
-                                  } catch (error) {
-                                    console.error('🏆 Error claiming achievement reward:', error);
-                                  }
-                                }}
-                                className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
-                              >
-                                <Star className="w-4 h-4 inline mr-2" />
-                                Resgatar Recompensa
-                              </motion.button>
-                            </div>
-                            )
-                          ) : selectedAchievement.progressPercentage > 0 ? (
-                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                              <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                              <p className="font-bold text-blue-900">Em Progresso</p>
-                              <p className="text-sm text-blue-700 mt-1">
-                                Faltam {selectedAchievement.target - selectedAchievement.currentProgress} para completar
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                              <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                              <p className="font-bold text-gray-700">Ainda Bloqueada</p>
-                              <p className="text-sm text-gray-600 mt-1">
-                                Continue progredindo para desbloquear!
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                    selectedAchievement.rewardClaimed ? (
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
+                        <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                        <p className="font-bold text-green-900">Recompensa Resgatada!</p>
+                        {selectedAchievement.unlockedAt && (
+                          <p className="text-sm text-green-700 mt-1">
+                            {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
+                        <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                        <p className="font-bold text-yellow-900">Conquista Desbloqueada!</p>
+                        {selectedAchievement.unlockedAt && (
+                          <p className="text-sm text-yellow-700 mt-1">
+                            {selectedAchievement.unlockedAt.toLocaleDateString('pt-BR')} às {selectedAchievement.unlockedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        )}
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={async () => {
+                            try {
+                              await claimAchievementReward(selectedAchievement.userAchievementId);
+                              setSelectedAchievement(null);
+                            } catch (error) {
+                              console.error('🏆 Error claiming achievement reward:', error);
+                            }
+                          }}
+                          className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
+                        >
+                          <Star className="w-4 h-4 inline mr-2" />
+                          Resgatar Recompensa
+                        </motion.button>
+                      </div>
+                    )
+                  ) : selectedAchievement.isReadyToUnlock ? (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
+                      <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        <Star className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                      </motion.div>
+                      <p className="font-bold text-green-900">Pronta para Desbloquear!</p>
+                      <p className="text-sm text-green-700">
+                        Você atingiu a meta de {selectedAchievement.target}!
+                      </p>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={async () => {
+                          try {
+                            // This will trigger the achievement check and unlock
+                            await claimAchievementReward(selectedAchievement.userAchievementId);
+                            setSelectedAchievement(null);
+                          } catch (error) {
+                            console.error('🏆 Error unlocking achievement:', error);
+                          }
+                        }}
+                        className="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold transition-all duration-200 shadow-lg"
+                      >
+                        <Star className="w-4 h-4 inline mr-2" />
+                        Desbloquear Agora!
+                      </motion.button>
+                    </div>
+                  ) : selectedAchievement.progressPercentage > 0 ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                      <p className="font-bold text-blue-900">Em Progresso</p>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Faltam {selectedAchievement.target - selectedAchievement.currentProgress} para completar
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                      <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="font-bold text-gray-700">Ainda Bloqueada</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Continue progredindo para desbloquear!
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
           </motion.div>

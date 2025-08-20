@@ -663,13 +663,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             currentProgress = progress.totalXP || 0;
             break;
           case 'level':
-            currentProgress = progress.level || 1;
+            const levelSystem = checkLevelUp(0, progress.totalXP || 0);
+            currentProgress = levelSystem.newLevel;
             break;
           case 'tasks':
             currentProgress = progress.totalTasksCompleted || 0;
             break;
           case 'streak':
-            currentProgress = progress.longestStreak || 0;
+            currentProgress = Math.max(progress.streak || 0, progress.longestStreak || 0);
             break;
           case 'checkin':
             currentProgress = progress.streak || 0;
@@ -704,22 +705,20 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             }
           }
         } else {
-          // Create new user achievement
-          // Check if achievement.id is explicitly a string and not empty before creating user achievement
-          const achievementId = achievement.id;
-          if (typeof achievementId === 'string' && achievementId.trim() !== '') {
-            await FirestoreService.createUserAchievement({
-              userId: childUid,
-             achievementId: String(achievementId),
-              progress: currentProgress,
-              isCompleted: shouldComplete,
-              rewardClaimed: false,
-              unlockedAt: shouldComplete ? new Date() : null
-            });
-          } else {
-            console.error('❌ Achievement ID is undefined or invalid, skipping user achievement creation:', { achievement, achievementId });
+          // Create new user achievement if achievement ID is valid
+          if (!achievement.id || typeof achievement.id !== 'string') {
+            console.error('❌ Invalid achievement ID:', achievement);
             continue;
           }
+          
+          await FirestoreService.createUserAchievement({
+            userId: childUid,
+            achievementId: achievement.id,
+            progress: currentProgress,
+            isCompleted: shouldComplete,
+            rewardClaimed: false,
+            unlockedAt: shouldComplete ? new Date() : undefined
+          });
           
           if (shouldComplete) {
             console.log(`🏆 New achievement completed: ${achievement.title}`);
@@ -731,6 +730,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
     } catch (error: any) {
       console.error('❌ Erro ao verificar conquistas:', error);
+      // Don't show error toast for index building issues
+      if (!error.message?.includes('index')) {
+        toast.error('Erro ao verificar conquistas');
+      }
     }
   };
 
