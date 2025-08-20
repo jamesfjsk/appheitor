@@ -129,6 +129,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
       className={`
         relative
         ${isTaskCompletedToday(task)
+      }
       `}
     >
       {/* Lightning effects for guided mode */}
@@ -196,17 +197,17 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
           {/* Botão de completar */}
           <motion.button
             onClick={handleToggle}
-            disabled={isCompleting || isTaskCompletedToday(task)}
+            disabled={isCompleting || task.status === 'done'}
             whileHover={{ scale: guidedMode ? 1.15 : 1.1 }}
             whileTap={{ scale: 0.9 }}
             className={`
               relative ${guidedMode ? 'w-20 h-20' : 'w-16 h-16'} rounded-full border-4 flex items-center justify-center
               transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50
-              ${isTaskCompletedToday(task)
+              ${task.status === 'done'
                 ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 text-white shadow-2xl cursor-default'
                 : 'bg-gradient-to-br from-yellow-400 to-yellow-500 border-yellow-300 text-red-600 hover:from-yellow-300 hover:to-yellow-400 hover:border-yellow-200 shadow-xl hover:shadow-2xl'
               }
-              ${isCompleting || isTaskCompletedToday(task) ? 'cursor-not-allowed' : 'cursor-pointer'}
+              ${isCompleting || task.status === 'done' ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
             <AnimatePresence mode="wait">
@@ -220,7 +221,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 >
                   <Star className={`${guidedMode ? 'w-10 h-10' : 'w-8 h-8'} fill-current drop-shadow-lg`} />
                 </motion.div>
-              ) : isTaskCompletedToday(task) ? (
+              ) : task.status === 'done' ? (
                 <motion.div
                   key="completed"
                   initial={{ scale: 0 }}
@@ -258,7 +259,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               <div className="flex-1">
                 <h3 className={`
                   ${guidedMode ? 'text-2xl' : 'text-xl'} font-bold transition-all duration-300
-                  ${isTaskCompletedToday(task)
+                  ${task.status === 'done'
                     ? 'text-green-600 line-through' 
                     : 'text-gray-900'
                   }
@@ -269,7 +270,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                 {task.description && (
                   <p className={`
                     ${guidedMode ? 'text-base' : 'text-sm'} mt-1 transition-all duration-300
-                    ${isTaskCompletedToday(task)
+                    ${task.status === 'done'
                       ? 'text-green-500 line-through' 
                       : 'text-gray-600'
                     }
@@ -397,3 +398,5 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
 };
 
 export default TaskItem;
+  )
+}
