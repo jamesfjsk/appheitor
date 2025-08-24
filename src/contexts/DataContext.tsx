@@ -703,7 +703,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             await FirestoreService.updateUserAchievement(existingUserAchievement.id, {
               progress: currentProgress,
               isCompleted: shouldComplete,
-              unlockedAt: shouldComplete && !existingUserAchievement.isCompleted ? new Date() : existingUserAchievement.unlockedAt,
+              unlockedAt: shouldComplete && !existingUserAchievement.isCompleted ? new Date() : existingUserAchievement.unlockedAt || null,
               updatedAt: new Date()
             });
             
