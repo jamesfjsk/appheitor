@@ -230,26 +230,17 @@ IMPORTANTE:
       setScore(correctAnswers);
       setShowResults(true);
       
-      // Award XP and Gold based on configuration
-      const xpReward = surpriseMissionConfig.xpReward;
-      const goldReward = surpriseMissionConfig.goldReward;
+      // Nova lógica: Recompensa por acerto + base de participação
+      const baseXP = surpriseMissionConfig.xpReward;
+      const baseGold = surpriseMissionConfig.goldReward;
       
-      // Bonus for high performance
-      let bonusMultiplier = 1;
-      const percentage = (correctAnswers / 30) * 100;
+      // XP: valor integral (sempre ganha o valor total configurado)
+      const finalXP = baseXP;
       
-      if (percentage >= 90) {
-        bonusMultiplier = 1.5; // 50% bonus for 90%+
-      } else if (percentage >= 80) {
-        bonusMultiplier = 1.3; // 30% bonus for 80%+
-      } else if (percentage >= 70) {
-        bonusMultiplier = 1.2; // 20% bonus for 70%+
-      } else if (percentage >= 60) {
-        bonusMultiplier = 1.1; // 10% bonus for 60%+
-      }
-      
-      const finalXP = Math.round(xpReward * bonusMultiplier);
-      const finalGold = Math.round(goldReward * bonusMultiplier);
+      // Gold: 10% base de participação + 90% por mérito baseado em acertos
+      const participationGold = Math.round(baseGold * 0.1); // 10% por participar
+      const meritGold = Math.round((baseGold * 0.9) * (correctAnswers / 30)); // 90% por acertos
+      const finalGold = participationGold + meritGold;
       
       await completeSurpriseMission(correctAnswers, 30, finalXP, finalGold);
       
@@ -286,11 +277,8 @@ IMPORTANTE:
   };
 
   const getBonusMultiplier = (score: number) => {
-    const percentage = (score / 30) * 100;
-    if (percentage >= 90) return 1.5;
-    if (percentage >= 80) return 1.3;
-    if (percentage >= 70) return 1.2;
-    if (percentage >= 60) return 1.1;
+    // Nova lógica: sempre retorna 1 para XP (valor integral)
+    // Gold é calculado separadamente por mérito
     return 1;
   };
 
@@ -508,27 +496,23 @@ IMPORTANTE:
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-2 text-2xl font-bold text-blue-600 mb-2">
                         <Zap className="w-6 h-6" />
-                        <span>+{Math.round(surpriseMissionConfig.xpReward * getBonusMultiplier(score))}</span>
+                        <span>+{surpriseMissionConfig.xpReward}</span>
                       </div>
                       <div className="text-sm text-blue-600">XP Ganho</div>
-                      {getBonusMultiplier(score) > 1 && (
-                        <div className="text-xs text-green-600 font-bold mt-1">
-                          Bônus: {Math.round((getBonusMultiplier(score) - 1) * 100)}%
-                        </div>
-                      )}
+                      <div className="text-xs text-blue-600 font-bold mt-1">
+                        Valor Integral
+                      </div>
                     </div>
                     
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-2 text-2xl font-bold text-yellow-600 mb-2">
                         <Star className="w-6 h-6" />
-                        <span>+{Math.round(surpriseMissionConfig.goldReward * getBonusMultiplier(score))}</span>
+                        <span>+{Math.round(surpriseMissionConfig.goldReward * 0.1) + Math.round((surpriseMissionConfig.goldReward * 0.9) * (score / 30))}</span>
                       </div>
                       <div className="text-sm text-yellow-600">Gold Ganho</div>
-                      {getBonusMultiplier(score) > 1 && (
-                        <div className="text-xs text-green-600 font-bold mt-1">
-                          Bônus: {Math.round((getBonusMultiplier(score) - 1) * 100)}%
-                        </div>
-                      )}
+                      <div className="text-xs text-yellow-600 font-bold mt-1">
+                        {Math.round(surpriseMissionConfig.goldReward * 0.1)} base + {Math.round((surpriseMissionConfig.goldReward * 0.9) * (score / 30))} mérito
+                      </div>
                     </div>
                   </div>
                   
