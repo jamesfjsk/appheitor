@@ -726,7 +726,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             achievementId: achievement.id,
             progress: currentProgress,
             isCompleted: shouldComplete,
-            unlockedAt: shouldComplete && !existingUserAchievement.isCompleted ? new Date() : (existingUserAchievement.unlockedAt || null),
             unlockedAt: shouldComplete ? new Date() : null
           });
           
