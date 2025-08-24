@@ -311,7 +311,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     return () => {
       cleanup.then(cleanupFn => cleanupFn && cleanupFn());
     };
-  }, [childUid, user?.userId, user?.role]);
+  }, [childUid, user?.userId, user?.role, loadSurpriseMissionConfig, checkSurpriseMissionStatus]);
 
   // Task methods
   const addTask = async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
