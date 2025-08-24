@@ -668,8 +668,7 @@ export class FirestoreService {
   }
 
   static async updateSurpriseMissionConfig(
-    configData: Omit<SurpriseMissionConfig, 'id' | 'createdAt' | 'updatedAt'>,
-    adminUid: string
+    configData: Omit<SurpriseMissionConfig, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<void> {
     try {
       const configRef = doc(db, 'surpriseMissionConfig', 'default');
@@ -677,7 +676,7 @@ export class FirestoreService {
       
       const updateData = {
         ...configData,
-        lastUpdatedBy: adminUid,
+        lastUpdatedBy: configData.lastUpdatedBy || 'admin',
         updatedAt: serverTimestamp()
       };
       
@@ -710,8 +709,8 @@ export class FirestoreService {
 
   static async markSurpriseMissionCompletedToday(
     userId: string, 
-    date: string, 
     missionData: {
+      date: string;
       score: number;
       totalQuestions: number;
       xpEarned: number;
@@ -720,19 +719,18 @@ export class FirestoreService {
     }
   ): Promise<void> {
     try {
-      const statusRef = doc(db, 'dailySurpriseMissionStatus', `${userId}_${date}`);
+      const statusRef = doc(db, 'dailySurpriseMissionStatus', `${userId}_${missionData.date}`);
       await setDoc(statusRef, {
         userId,
-        date,
-        completed: true,
         ...missionData,
+        completed: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
       
       console.log('✅ FirestoreService: Surprise mission marked as completed:', {
         userId,
-        date,
+        date: missionData.date,
         score: missionData.score,
         xpEarned: missionData.xpEarned,
         goldEarned: missionData.goldEarned
