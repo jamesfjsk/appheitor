@@ -51,7 +51,7 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
         english: 'vocabulário em inglês, gramática básica, animais, cores, números, família, comida e objetos do cotidiano',
         math: 'matemática básica incluindo adição, subtração, multiplicação, divisão, formas geométricas, frações simples e problemas práticos',
         general: 'conhecimentos gerais incluindo ciências básicas, geografia do Brasil, história, animais, corpo humano, planetas e curiosidades educativas',
-        mixed: 'uma mistura equilibrada de inglês básico, matemática, ciências, geografia, história e conhecimentos gerais'
+        mixed: 'uma mistura equilibrada de inglês, matemática(logica), ciências, geografia, história e conhecimentos gerais'
       };
       
       const difficultyPrompts = {
