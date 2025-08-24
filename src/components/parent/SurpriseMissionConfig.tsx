@@ -485,12 +485,12 @@ const SurpriseMissionConfigComponent: React.FC = () => {
             <h4 className="font-bold text-yellow-900 mb-3">💡 Como Funciona a Missão Surpresa:</h4>
             <ul className="text-sm text-yellow-800 space-y-2">
               <li>• <strong>Ativação:</strong> Quando ativa, aparece um botão especial no painel do Heitor</li>
-              <li>• <strong>Frequência:</strong> Uma vez por dia (reseta à meia-noite)</li>
-              <li>• <strong>IA Personalizada:</strong> Cada prova é única, gerada pela OpenAI baseada no tema e dificuldade</li>
-              <li>• <strong>30 Questões:</strong> Quiz completo com 4 alternativas cada, apenas 1 correta</li>
-              <li>• <strong>Explicações:</strong> Ao final, mostra todas as respostas com explicações educativas</li>
-              <li>• <strong>Recompensas:</strong> XP e Gold configuráveis baseados na dificuldade</li>
-              <li>• <strong>Histórico:</strong> Acompanhe o desempenho do Heitor ao longo do tempo</li>
+              <li>• <strong>XP:</strong> Valor integral sempre (estimula participação)</li>
+              <li>• <strong>Gold:</strong> 10% base + 90% proporcional aos acertos</li>
+              <li>• <strong>Exemplo:</strong> 50 Gold configurado = 5 base + até 45 por mérito</li>
+              <li>• <strong>0 acertos:</strong> Ganha 5 Gold (10% de 50)</li>
+              <li>• <strong>15 acertos (50%):</strong> Ganha 27 Gold (5 + 22)</li>
+              <li>• <strong>30 acertos (100%):</strong> Ganha 50 Gold completo</li>
             </ul>
           </div>
         </div>
