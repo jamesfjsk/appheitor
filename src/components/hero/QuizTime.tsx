@@ -152,7 +152,7 @@ REGRAS:
         console.warn('⚠️ QuizTime: OpenAI failed, using local questions:', openaiError.message);
         
         // Fallback to local questions
-        const response = await fetch('/src/data/quizData.json');
+        const response = await fetch('/data/quizData.json');
         if (!response.ok) {
           throw new Error('Failed to load local quiz data');
         }

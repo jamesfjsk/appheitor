@@ -1,0 +1,152 @@
+[
+  {
+    "question": "Como se diz 'gato' em inglês?",
+    "options": ["Dog", "Cat", "Bird", "Fish"],
+    "answer": "Cat",
+    "explanation": "Cat é como dizemos 'gato' em inglês. É um dos primeiros animais que aprendemos!"
+  },
+  {
+    "question": "Qual é a cor do sol?",
+    "options": ["Azul", "Verde", "Amarelo", "Roxo"],
+    "answer": "Amarelo",
+    "explanation": "O sol é amarelo! Ele nos dá luz e calor todos os dias."
+  },
+  {
+    "question": "Quanto é 5 + 3?",
+    "options": ["6", "7", "8", "9"],
+    "answer": "8",
+    "explanation": "5 + 3 = 8. Uma ótima soma para praticar matemática!"
+  },
+  {
+    "question": "Quantos dedos temos em uma mão?",
+    "options": ["4", "5", "6", "7"],
+    "answer": "5",
+    "explanation": "Temos 5 dedos em cada mão: polegar, indicador, médio, anelar e mindinho!"
+  },
+  {
+    "question": "Qual animal faz 'miau'?",
+    "options": ["Cachorro", "Gato", "Pássaro", "Vaca"],
+    "answer": "Gato",
+    "explanation": "O gato faz 'miau'! É o som característico que eles fazem para se comunicar."
+  },
+  {
+    "question": "Como se diz 'cachorro' em inglês?",
+    "options": ["Cat", "Dog", "Bird", "Mouse"],
+    "answer": "Dog",
+    "explanation": "Dog é como dizemos 'cachorro' em inglês. Dogs são os melhores amigos dos humanos!"
+  },
+  {
+    "question": "Qual é a forma que tem 3 lados?",
+    "options": ["Círculo", "Quadrado", "Triângulo", "Retângulo"],
+    "answer": "Triângulo",
+    "explanation": "O triângulo tem exatamente 3 lados e 3 pontas. É uma forma geométrica básica!"
+  },
+  {
+    "question": "Quantos planetas existem no nosso sistema solar?",
+    "options": ["7", "8", "9", "10"],
+    "answer": "8",
+    "explanation": "Nosso sistema solar tem 8 planetas: Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno!"
+  },
+  {
+    "question": "Qual profissão cuida dos nossos dentes?",
+    "options": ["Médico", "Dentista", "Professor", "Bombeiro"],
+    "answer": "Dentista",
+    "explanation": "O dentista é o profissional que cuida da saúde dos nossos dentes e boca!"
+  },
+  {
+    "question": "Como se diz 'vermelho' em inglês?",
+    "options": ["Blue", "Green", "Red", "Yellow"],
+    "answer": "Red",
+    "explanation": "Red é como dizemos 'vermelho' em inglês. É a cor do morango e do tomate!"
+  },
+  {
+    "question": "Quanto é 10 - 4?",
+    "options": ["5", "6", "7", "8"],
+    "answer": "6",
+    "explanation": "10 - 4 = 6. Subtração é tirar uma quantidade de outra!"
+  },
+  {
+    "question": "Qual animal voa e faz 'piu piu'?",
+    "options": ["Gato", "Cachorro", "Pássaro", "Peixe"],
+    "answer": "Pássaro",
+    "explanation": "Os pássaros voam e fazem sons como 'piu piu'. Eles têm asas e penas!"
+  },
+  {
+    "question": "Quantas pernas tem uma aranha?",
+    "options": ["6", "8", "10", "12"],
+    "answer": "8",
+    "explanation": "As aranhas têm 8 pernas! Isso as ajuda a se mover rapidamente e tecer suas teias."
+  },
+  {
+    "question": "Como se diz 'azul' em inglês?",
+    "options": ["Red", "Blue", "Green", "Yellow"],
+    "answer": "Blue",
+    "explanation": "Blue é como dizemos 'azul' em inglês. É a cor do céu e do mar!"
+  },
+  {
+    "question": "Qual órgão do corpo humano bombeia o sangue?",
+    "options": ["Pulmão", "Estômago", "Coração", "Cérebro"],
+    "answer": "Coração",
+    "explanation": "O coração é como uma bomba que envia sangue para todo o nosso corpo!"
+  },
+  {
+    "question": "Quanto é 2 x 4?",
+    "options": ["6", "7", "8", "9"],
+    "answer": "8",
+    "explanation": "2 x 4 = 8. Multiplicação é somar o mesmo número várias vezes: 2+2+2+2 = 8!"
+  },
+  {
+    "question": "Qual esporte usa uma bola redonda e os pés?",
+    "options": ["Basquete", "Futebol", "Tênis", "Vôlei"],
+    "answer": "Futebol",
+    "explanation": "No futebol usamos principalmente os pés para chutar a bola redonda!"
+  },
+  {
+    "question": "Como se diz 'verde' em inglês?",
+    "options": ["Red", "Blue", "Green", "Purple"],
+    "answer": "Green",
+    "explanation": "Green é como dizemos 'verde' em inglês. É a cor das plantas e da grama!"
+  },
+  {
+    "question": "Quantos minutos tem uma hora?",
+    "options": ["50", "60", "70", "80"],
+    "answer": "60",
+    "explanation": "Uma hora tem 60 minutos. É assim que medimos o tempo!"
+  },
+  {
+    "question": "Qual animal é conhecido como o rei da selva?",
+    "options": ["Tigre", "Elefante", "Leão", "Girafa"],
+    "answer": "Leão",
+    "explanation": "O leão é chamado de 'rei da selva' por ser um animal forte e corajoso!"
+  },
+  {
+    "question": "Como se diz 'casa' em inglês?",
+    "options": ["Car", "House", "Tree", "Book"],
+    "answer": "House",
+    "explanation": "House é como dizemos 'casa' em inglês. É onde moramos com nossa família!"
+  },
+  {
+    "question": "Qual é o maior planeta do sistema solar?",
+    "options": ["Terra", "Marte", "Júpiter", "Saturno"],
+    "answer": "Júpiter",
+    "explanation": "Júpiter é o maior planeta do nosso sistema solar. É gigante comparado à Terra!"
+  },
+  {
+    "question": "Quanto é 15 ÷ 3?",
+    "options": ["4", "5", "6", "7"],
+    "answer": "5",
+    "explanation": "15 ÷ 3 = 5. Divisão é repartir igualmente: 15 dividido em 3 grupos iguais dá 5 em cada!"
+  },
+  {
+    "question": "Qual hábito é importante para manter os dentes limpos?",
+    "options": ["Comer doces", "Escovar os dentes", "Dormir tarde", "Assistir TV"],
+    "answer": "Escovar os dentes",
+    "explanation": "Escovar os dentes todos os dias mantém nossa boca saudável e nosso sorriso bonito!"
+  },
+  {
+    "question": "Como se diz 'livro' em inglês?",
+    "options": ["Book", "Pen", "Paper", "Table"],
+    "answer": "Book",
+    "explanation": "Book é como dizemos 'livro' em inglês. Os livros nos ajudam a aprender coisas novas!"
+  }
+]
