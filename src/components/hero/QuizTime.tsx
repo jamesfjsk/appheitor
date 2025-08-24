@@ -14,6 +14,9 @@ const QuizTime: React.FC<QuizTimeProps> = ({ onComplete }) => {
   const { childUid } = useAuth();
   const { playTaskComplete, playLevelUp } = useSound();
   
+  // OpenAI API Key from environment variables
+  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+  
   const [showPrompt, setShowPrompt] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);

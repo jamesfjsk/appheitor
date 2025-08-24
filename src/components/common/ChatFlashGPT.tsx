@@ -22,8 +22,8 @@ const ChatFlashGPT: React.FC = () => {
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
   const lastFocusableRef = useRef<HTMLButtonElement>(null);
 
-  // OpenAI API Key - Em produção, isso deveria vir de variáveis de ambiente
-  const OPENAI_API_KEY = 'sk-proj-YOUR_API_KEY_HERE'; // Substitua pela sua chave real
+  // OpenAI API Key from environment variables
+  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
   const SYSTEM_MESSAGE = `Você é o FlashGPT, um mentor super-herói baseado no Flash! Você está conversando com o Heitor, uma criança que usa um sistema gamificado de tarefas.
 
