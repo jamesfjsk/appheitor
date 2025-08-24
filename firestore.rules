@@ -91,5 +91,19 @@ service cloud.firestore {
       // Somente admin cria/edita/exclui notificações
       allow create, update, delete: if isAdmin();
     }
+
+    // Daily Quizzes
+    match /dailyQuizzes/{quizId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Daily Progress
+    match /dailyProgress/{progressId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
   }
 }

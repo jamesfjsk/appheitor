@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UserProgress, LevelSystem } from '../../types';
 import { CloudLightning as Lightning } from 'lucide-react';
 import { calculateLevelSystem, checkLevelUp, getNextMilestone, getLevelColor, getLevelIcon } from '../../utils/levelSystem';
+import { FirestoreService } from '../../services/firestoreService';
 
 interface ProgressBarProps {
   progress: UserProgress;
@@ -14,20 +15,45 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
   const [previousXP, setPreviousXP] = useState(progress.totalXP || 0);
   const [dailyXP, setDailyXP] = useState(0);
   
-  // Simulate daily XP counter
+  // Load daily XP from Firebase instead of localStorage
   useEffect(() => {
-    const today = new Date().toDateString();
-    const savedDate = localStorage.getItem('lastXPDate');
-    const savedXP = localStorage.getItem('dailyXP');
+    const loadDailyXP = async () => {
+      if (!progress.userId) return;
+      
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const dailyProgress = await FirestoreService.getDailyProgress(progress.userId, today);
+        setDailyXP(dailyProgress?.xpEarned || 0);
+      } catch (error) {
+        console.error('❌ Error loading daily XP:', error);
+        setDailyXP(0);
+      }
+    };
     
-    if (savedDate === today && savedXP) {
-      setDailyXP(parseInt(savedXP));
-    } else {
-      setDailyXP(0);
-      localStorage.setItem('lastXPDate', today);
-      localStorage.setItem('dailyXP', '0');
+    loadDailyXP();
+  }, [progress.userId]);
+
+  // Update daily XP when total XP changes
+  useEffect(() => {
+    const updateDailyXP = async () => {
+      if (!progress.userId || previousXP === 0) return;
+      
+      const xpGained = (progress.totalXP || 0) - previousXP;
+      if (xpGained > 0) {
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          await FirestoreService.updateDailyProgress(progress.userId, today, xpGained, 0);
+          setDailyXP(prev => prev + xpGained);
+        } catch (error) {
+          console.error('❌ Error updating daily XP:', error);
+        }
+      }
+    };
+    
+    if (previousXP > 0) {
+      updateDailyXP();
     }
-  }, []);
+  }, [progress.totalXP, progress.userId]);
   
   // Check for level up
   useEffect(() => {

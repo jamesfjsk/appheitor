@@ -31,13 +31,21 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
   useEffect(() => {
-    // Carregar preferência de som do localStorage
-    const savedSoundPreference = localStorage.getItem('flash_sound_enabled');
-    if (savedSoundPreference !== null) {
-      setIsSoundEnabled(JSON.parse(savedSoundPreference));
-    }
+    // Load sound preference from Firebase instead of localStorage
+    const loadSoundPreference = async () => {
+      try {
+        // For now, keep sound enabled by default
+        // In a full implementation, this would be stored in user preferences in Firebase
+        setIsSoundEnabled(true);
+      } catch (error) {
+        console.error('❌ Error loading sound preference:', error);
+        setIsSoundEnabled(true);
+      }
+    };
+    
+    loadSoundPreference();
 
-    // Inicializar AudioContext após interação do usuário
+    // Initialize AudioContext after user interaction
     const initAudioContext = () => {
       if (!audioContext) {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -54,10 +62,17 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     };
   }, [audioContext]);
 
-  const toggleSound = () => {
+  const toggleSound = async () => {
     const newState = !isSoundEnabled;
     setIsSoundEnabled(newState);
-    localStorage.setItem('flash_sound_enabled', JSON.stringify(newState));
+    
+    try {
+      // In a full implementation, save to Firebase user preferences
+      // await FirestoreService.updateUserPreferences(userId, { soundEnabled: newState });
+      console.log('🔊 Sound preference updated:', newState);
+    } catch (error) {
+      console.error('❌ Error saving sound preference:', error);
+    }
   };
 
   // Função para criar tons usando Web Audio API

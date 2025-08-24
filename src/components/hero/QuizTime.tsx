@@ -4,6 +4,7 @@ import { X, ChevronRight, Trophy, Star, Zap, Brain, CheckCircle, XCircle, Clock,
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
+import { FirestoreService } from '../../services/firestoreService';
 
 interface QuizTimeProps {
   onComplete: () => void;
@@ -33,22 +34,31 @@ const QuizTime: React.FC<QuizTimeProps> = ({ onComplete }) => {
     const checkQuizStatus = () => {
       if (!childUid) return;
       
+      // Check quiz completion status from Firebase instead of localStorage
+      checkQuizCompletionFromFirebase();
+    };
+    
+    checkQuizStatus();
+  }, [childUid]);
+
+  const checkQuizCompletionFromFirebase = async () => {
+    if (!childUid) return;
+    
+    try {
       const today = new Date().toISOString().split('T')[0];
-      const quizKey = `quiz_completed_${childUid}_${today}`;
-      const quizCompleted = localStorage.getItem(quizKey);
+      const quizCompleted = await FirestoreService.checkQuizCompletedToday(childUid, today);
       
       if (!quizCompleted) {
         // Show prompt after 3 seconds
         const timer = setTimeout(() => {
           setShowPrompt(true);
         }, 3000);
-        
-        return () => clearTimeout(timer);
       }
-    };
-    
-    checkQuizStatus();
-  }, [childUid]);
+    } catch (error) {
+      console.error('❌ Error checking quiz status:', error);
+      // If error, don't show quiz to avoid issues
+    }
+  };
 
   const handleStartQuiz = () => {
     setShowPrompt(false);
@@ -246,9 +256,16 @@ REGRAS:
       }
       
       // Mark quiz as completed for today
-      const today = new Date().toISOString().split('T')[0];
-      const quizKey = `quiz_completed_${childUid}_${today}`;
-      localStorage.setItem(quizKey, 'true');
+      if (childUid) {
+        const today = new Date().toISOString().split('T')[0];
+        await FirestoreService.markQuizCompletedToday(childUid, today, {
+          score: correctAnswers,
+          totalQuestions: questions.length,
+          xpEarned: xpReward,
+          goldEarned: goldReward,
+          completedAt: new Date()
+        });
+      }
       
       // Don't close immediately, let user see results
       onComplete();

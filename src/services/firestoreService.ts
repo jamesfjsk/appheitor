@@ -924,6 +924,97 @@ export class FirestoreService {
   }
 
   // ========================================
+  // 🔥 QUIZ MANAGEMENT
+  // ========================================
+
+  static async checkQuizCompletedToday(userId: string, date: string): Promise<boolean> {
+    try {
+      const quizRef = doc(db, 'dailyQuizzes', `${userId}_${date}`);
+      const quizDoc = await getDoc(quizRef);
+      return quizDoc.exists();
+    } catch (error) {
+      console.error('❌ FirestoreService: Error checking quiz completion:', error);
+      return false;
+    }
+  }
+
+  static async markQuizCompletedToday(userId: string, date: string, quizData: {
+    score: number;
+    totalQuestions: number;
+    xpEarned: number;
+    goldEarned: number;
+    completedAt: Date;
+  }): Promise<void> {
+    try {
+      const quizRef = doc(db, 'dailyQuizzes', `${userId}_${date}`);
+      await setDoc(quizRef, {
+        userId,
+        date,
+        ...quizData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error marking quiz as completed:', error);
+      throw error;
+    }
+  }
+
+  static async getDailyProgress(userId: string, date: string): Promise<{
+    xpEarned: number;
+    goldEarned: number;
+    tasksCompleted: number;
+  } | null> {
+    try {
+      const progressRef = doc(db, 'dailyProgress', `${userId}_${date}`);
+      const progressDoc = await getDoc(progressRef);
+      
+      if (progressDoc.exists()) {
+        const data = progressDoc.data();
+        return {
+          xpEarned: data.xpEarned || 0,
+          goldEarned: data.goldEarned || 0,
+          tasksCompleted: data.tasksCompleted || 0
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error getting daily progress:', error);
+      return null;
+    }
+  }
+
+  static async updateDailyProgress(userId: string, date: string, xpGained: number, goldGained: number): Promise<void> {
+    try {
+      const progressRef = doc(db, 'dailyProgress', `${userId}_${date}`);
+      const progressDoc = await getDoc(progressRef);
+      
+      if (progressDoc.exists()) {
+        const currentData = progressDoc.data();
+        await updateDoc(progressRef, {
+          xpEarned: (currentData.xpEarned || 0) + xpGained,
+          goldEarned: (currentData.goldEarned || 0) + goldGained,
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        await setDoc(progressRef, {
+          userId,
+          date,
+          xpEarned: xpGained,
+          goldEarned: goldGained,
+          tasksCompleted: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error('❌ FirestoreService: Error updating daily progress:', error);
+      throw error;
+    }
+  }
+
+  // ========================================
   // 🔥 DATA MANAGEMENT
   // ========================================
 
