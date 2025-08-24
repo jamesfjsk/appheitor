@@ -46,6 +46,11 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
     try {
       console.log('🎯 SurpriseMissionQuiz: Generating questions with config:', surpriseMissionConfig);
       
+     // Check if OpenAI API key is available
+     if (!OPENAI_API_KEY || OPENAI_API_KEY.trim() === '') {
+       throw new Error('OpenAI API key not configured');
+     }
+     
       // Build dynamic prompt based on configuration
       const themePrompts = {
         english: 'vocabulário em inglês, gramática básica, animais, cores, números, família, comida e objetos do cotidiano',
@@ -63,19 +68,20 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
       const themeDescription = themePrompts[surpriseMissionConfig.theme];
       const difficultyDescription = difficultyPrompts[surpriseMissionConfig.difficulty];
       
-      try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o',
-            messages: [
-              {
-                role: 'system',
-                content: `Você é um gerador de quiz educativo especializado em criar provas personalizadas para crianças do terceiro ano do fundamental(9 anos).
+     console.log('🤖 SurpriseMissionQuiz: Using OpenAI API to generate questions...');
+     
+     const response = await fetch('https://api.openai.com/v1/chat/completions', {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json',
+         'Authorization': `Bearer ${OPENAI_API_KEY}`
+       },
+       body: JSON.stringify({
+         model: 'gpt-4o',
+         messages: [
+           {
+             role: 'system',
+             content: `Você é um gerador de quiz educativo especializado em criar provas personalizadas para crianças do terceiro ano do fundamental(9 anos).
 
 MISSÃO: Criar EXATAMENTE 30 perguntas de múltipla escolha em português brasileiro.
 
@@ -105,10 +111,10 @@ IMPORTANTE:
 - Certifique-se de que a resposta correta está EXATAMENTE igual a uma das opções
 - Explicações devem ser educativas mas simples
 - Varie o tipo de pergunta dentro do tema`
-              },
-              {
-                role: 'user',
-                content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (9 anos). 
+           },
+           {
+             role: 'user',
+             content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (9 anos). 
 
 IMPORTANTE: Para dificuldade "${surpriseMissionConfig.difficulty}", as perguntas devem ser ${difficultyDescription}.
 
@@ -127,77 +133,86 @@ Exemplo de pergunta HARD: "Se a Terra gira 360° em 24 horas, quantos graus ela 
 ` : ''}
 
 Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafiem e eduquem!`
-              }
-            ],
-            temperature: 0.8,
-            max_tokens: 4000
-          })
-        });
+           }
+         ],
+         temperature: 0.8,
+         max_tokens: 4000
+       })
+     });
 
-        if (!response.ok) {
-          throw new Error(`OpenAI API Error: ${response.status}`);
-        }
+     if (!response.ok) {
+       const errorText = await response.text();
+       console.error('❌ OpenAI API Error:', response.status, errorText);
+       throw new Error(`OpenAI API Error: ${response.status} - ${errorText}`);
+     }
 
-        const data = await response.json();
-        const content = data.choices[0]?.message?.content;
-        
-        if (!content) {
-          throw new Error('No content received from OpenAI');
-        }
+     const data = await response.json();
+     const content = data.choices[0]?.message?.content;
+     
+     if (!content) {
+       throw new Error('No content received from OpenAI');
+     }
 
-        // Parse JSON response
-        const generatedQuestions = JSON.parse(content);
-        
-        if (!Array.isArray(generatedQuestions) || generatedQuestions.length !== 30) {
-          throw new Error(`Expected 30 questions, got ${generatedQuestions.length}`);
-        }
+     console.log('🤖 OpenAI Response received, parsing JSON...');
+     
+     // Clean the content to ensure it's valid JSON
+     let cleanContent = content.trim();
+     if (cleanContent.startsWith('```json')) {
+       cleanContent = cleanContent.replace(/```json\s*/, '').replace(/```\s*$/, '');
+     }
+     if (cleanContent.startsWith('```')) {
+       cleanContent = cleanContent.replace(/```\s*/, '').replace(/```\s*$/, '');
+     }
+     
+     // Parse JSON response
+     const generatedQuestions = JSON.parse(cleanContent);
+     
+     if (!Array.isArray(generatedQuestions)) {
+       throw new Error('Response is not an array');
+     }
+     
+     if (generatedQuestions.length !== 30) {
+       console.warn(`⚠️ Expected 30 questions, got ${generatedQuestions.length}. Using available questions.`);
+     }
 
-        // Validate question structure
-        const validQuestions = generatedQuestions.every(q => 
-          q.question && 
-          Array.isArray(q.options) && 
-          q.options.length === 4 && 
-          q.answer && 
-          q.explanation &&
-          q.options.includes(q.answer) // Ensure answer is one of the options
-        );
+     // Validate question structure
+     const validQuestions = generatedQuestions.every((q, index) => {
+       const isValid = q.question && 
+         Array.isArray(q.options) && 
+         q.options.length === 4 && 
+         q.answer && 
+         q.explanation &&
+         q.options.includes(q.answer);
+       
+       if (!isValid) {
+         console.error(`❌ Invalid question at index ${index}:`, q);
+       }
+       
+       return isValid;
+     });
 
-        if (!validQuestions) {
-          throw new Error('Invalid question structure from OpenAI');
-        }
+     if (!validQuestions) {
+       throw new Error('Some questions have invalid structure from OpenAI');
+     }
 
-        console.log('✅ SurpriseMissionQuiz: 30 questions generated successfully with OpenAI');
-        setQuestions(generatedQuestions);
-        
-      } catch (openaiError: any) {
-        console.warn('⚠️ SurpriseMissionQuiz: OpenAI failed, using fallback:', openaiError.message);
-        
-        // Fallback to local questions (adapt existing quiz data)
-        const response = await fetch('/data/quizData.json');
-        if (!response.ok) {
-          throw new Error('Failed to load fallback quiz data');
-        }
-        
-        const localQuestions = await response.json();
-        
-        // Duplicate and shuffle to get 30 questions
-        const extendedQuestions = [];
-        while (extendedQuestions.length < 30) {
-          const remainingNeeded = 30 - extendedQuestions.length;
-          const questionsToAdd = localQuestions.slice(0, Math.min(remainingNeeded, localQuestions.length));
-          extendedQuestions.push(...questionsToAdd);
-        }
-        
-        // Shuffle the final array
-        const shuffledQuestions = extendedQuestions.sort(() => Math.random() - 0.5);
-        
-        console.log('✅ SurpriseMissionQuiz: Using extended local questions as fallback');
-        setQuestions(shuffledQuestions);
-      }
+     console.log('✅ SurpriseMissionQuiz: Questions generated successfully with OpenAI');
+     console.log('📊 Generated questions preview:', generatedQuestions.slice(0, 3).map(q => q.question));
+     
+     setQuestions(generatedQuestions.slice(0, 30)); // Ensure exactly 30 questions
       
     } catch (error: any) {
-      console.error('❌ SurpriseMissionQuiz: Error generating questions:', error);
-      setError('Erro ao carregar perguntas da missão surpresa. Tente novamente.');
+      console.error('❌ SurpriseMissionQuiz: Error generating questions with OpenAI:', error);
+      
+      // Show specific error message
+      if (error.message.includes('API key')) {
+        setError('❌ Chave da OpenAI não configurada. Configure VITE_OPENAI_API_KEY no arquivo .env para usar a IA.');
+      } else if (error.message.includes('quota') || error.message.includes('billing')) {
+        setError('❌ Limite da API OpenAI atingido. Verifique sua conta OpenAI.');
+      } else if (error.message.includes('JSON')) {
+        setError('❌ Erro ao processar resposta da IA. Tente novamente.');
+      } else {
+        setError(`❌ Erro ao gerar perguntas: ${error.message}`);
+      }
     } finally {
       setIsGenerating(false);
     }
