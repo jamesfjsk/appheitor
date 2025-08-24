@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus } from '../types';
 import { FirestoreService } from '../services/firestoreService';
@@ -136,6 +136,157 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       console.error('❌ Erro ao verificar status da missão surpresa:', error);
     }
   }, [childUid]);
+
+  const updateSurpriseMissionSettings = useCallback(async (settings: Omit<SurpriseMissionConfig, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      await FirestoreService.updateSurpriseMissionConfig(settings);
+      await loadSurpriseMissionConfig(); // Reload config
+      toast.success('Configurações da Missão Surpresa atualizadas!');
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar configurações da missão surpresa:', error);
+      toast.error('Erro ao atualizar configurações');
+      throw error;
+    }
+  }, [loadSurpriseMissionConfig]);
+
+  const completeSurpriseMission = useCallback(async (score: number, totalQuestions: number, xpEarned: number, goldEarned: number) => {
+    if (!childUid) throw new Error('Child UID não definido');
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Record the completion
+      await FirestoreService.recordSurpriseMissionCompletion(childUid, {
+        date: today,
+        score,
+        totalQuestions,
+        xpEarned,
+        goldEarned,
+        completedAt: new Date()
+      });
+      
+      // Update user progress
+      const newTotalXP = (progress.totalXP || 0) + xpEarned;
+      const newAvailableGold = (progress.availableGold || 0) + goldEarned;
+      const newTotalGoldEarned = (progress.totalGoldEarned || 0) + goldEarned;
+      
+      await FirestoreService.updateUserProgress(childUid, {
+        totalXP: newTotalXP,
+        availableGold: newAvailableGold,
+        totalGoldEarned: newTotalGoldEarned,
+        updatedAt: new Date()
+      });
+      
+      // Update local state
+      setIsSurpriseMissionCompletedToday(true);
+      
+      // Refresh history
+      await checkSurpriseMissionStatus();
+      
+      toast.success(`🎯 Missão Surpresa completada! +${xpEarned} XP, +${goldEarned} Gold!`);
+    } catch (error: any) {
+      console.error('❌ Erro ao completar missão surpresa:', error);
+      toast.error('Erro ao completar missão surpresa');
+      throw error;
+    }
+  }, [childUid, progress.totalXP, progress.availableGold, progress.totalGoldEarned, checkSurpriseMissionStatus]);
+
+  const checkAchievements = useCallback(async () => {
+    if (!childUid) return;
+    
+    try {
+      console.log('🏆 Checking achievements for user:', childUid);
+      console.log('🏆 Current progress:', progress);
+      console.log('🏆 Available achievements:', achievements.length);
+      
+      // Check each active achievement
+      for (const achievement of achievements.filter(a => a.isActive)) {
+        const existingUserAchievement = userAchievements.find(ua => ua.achievementId === achievement.id);
+        
+        // Skip if already completed
+        if (existingUserAchievement?.isCompleted) {
+          continue;
+        }
+        
+        // Calculate current progress
+        let currentProgress = 0;
+        switch (achievement.type) {
+          case 'xp':
+            currentProgress = progress.totalXP || 0;
+            break;
+          case 'level':
+            const levelSystem = calculateLevelSystem(progress.totalXP || 0);
+            currentProgress = levelSystem.currentLevel;
+            break;
+          case 'tasks':
+            currentProgress = progress.totalTasksCompleted || 0;
+            break;
+          case 'streak':
+            currentProgress = Math.max(progress.streak || 0, progress.longestStreak || 0);
+            break;
+          case 'checkin':
+            currentProgress = progress.streak || 0;
+            break;
+          case 'redemptions':
+            currentProgress = progress.rewardsRedeemed || 0;
+            break;
+          default:
+            currentProgress = 0;
+        }
+        
+        console.log(`🏆 Achievement "${achievement.title}": ${currentProgress}/${achievement.target}`);
+        
+        // Check if achievement should be completed
+        const shouldComplete = currentProgress >= achievement.target;
+        
+        if (existingUserAchievement) {
+          // Update existing progress
+          if (existingUserAchievement.progress !== currentProgress || (shouldComplete && !existingUserAchievement.isCompleted)) {
+            await FirestoreService.updateUserAchievement(existingUserAchievement.id, {
+              progress: currentProgress,
+              isCompleted: shouldComplete,
+              unlockedAt: shouldComplete && !existingUserAchievement.isCompleted ? new Date() : existingUserAchievement.unlockedAt || null,
+              updatedAt: new Date()
+            });
+            
+            if (shouldComplete && !existingUserAchievement.isCompleted) {
+              console.log(`🏆 Achievement completed: ${achievement.title}`);
+              toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
+                duration: 6000
+              });
+            }
+          }
+        } else {
+          // Create new user achievement if achievement ID is valid
+          if (!achievement.id || typeof achievement.id !== 'string') {
+            console.error('❌ Invalid achievement ID:', achievement);
+            continue;
+          }
+          
+          await FirestoreService.createUserAchievement({
+            userId: childUid,
+            achievementId: achievement.id,
+            progress: currentProgress,
+            isCompleted: shouldComplete,
+            unlockedAt: shouldComplete ? new Date() : null
+          });
+          
+          if (shouldComplete) {
+            console.log(`🏆 New achievement completed: ${achievement.title}`);
+            toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
+              duration: 6000
+            });
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error('❌ Erro ao verificar conquistas:', error);
+      // Don't show error toast for index building issues
+      if (!error.message?.includes('index')) {
+        toast.error('Erro ao verificar conquistas');
+      }
+    }
+  }, [childUid, progress, achievements, userAchievements]);
 
   // Initialize listeners when childUid changes
   useEffect(() => {
@@ -340,7 +491,38 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     return () => {
       cleanup.then(cleanupFn => cleanupFn && cleanupFn());
     };
-  }, [childUid, user?.userId, user?.role, loadSurpriseMissionConfig, checkSurpriseMissionStatus]);
+  }, [childUid, user?.userId, user?.role, loadSurpriseMissionConfig, checkSurpriseMissionStatus, checkAchievements]);
+
+  // Task methods
+  const addTask = async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
+    if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
+    
+    const completeTaskData = {
+      title: taskData.title,
+      description: taskData.description || '',
+      category: taskData.category || 'custom',
+      xp: taskData.xp || 10,
+      gold: taskData.gold || 5,
+      emoji: taskData.emoji || '📝',
+      difficulty: taskData.difficulty || 'medium',
+      estimatedTime: taskData.estimatedTime || 30,
+      active: taskData.active !== false, // Default to true
+      status: taskData.status || 'pending',
+      ownerId: childUid,
+      createdBy: user.userId
+    };
+    
+    console.log('🔥 DataContext: Creating task with data:', completeTaskData);
+    
+    try {
+      await FirestoreService.createTask(completeTaskData);
+      toast.success('Tarefa criada com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao criar tarefa:', error);
+      if (error.code === 'permission-denied') {
+        console.error('🚨 PERMISSION DENIED - Task Creation:', {
+          childUid,
+          adminUid: user.userId,
           userRole: user.role,
           taskData: { ...taskData, ownerId: childUid, createdBy: user.userId }
         });
@@ -664,103 +846,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   };
 
-  const checkAchievements = async () => {
-    if (!childUid) return;
-    
-    try {
-      console.log('🏆 Checking achievements for user:', childUid);
-      console.log('🏆 Current progress:', progress);
-      console.log('🏆 Available achievements:', achievements.length);
-      
-      // Check each active achievement
-      for (const achievement of achievements.filter(a => a.isActive)) {
-        const existingUserAchievement = userAchievements.find(ua => ua.achievementId === achievement.id);
-        
-        // Skip if already completed
-        if (existingUserAchievement?.isCompleted) {
-          continue;
-        }
-        
-        // Calculate current progress
-        let currentProgress = 0;
-        switch (achievement.type) {
-          case 'xp':
-            currentProgress = progress.totalXP || 0;
-            break;
-          case 'level':
-            const levelSystem = calculateLevelSystem(progress.totalXP || 0);
-            currentProgress = levelSystem.currentLevel;
-            break;
-          case 'tasks':
-            currentProgress = progress.totalTasksCompleted || 0;
-            break;
-          case 'streak':
-            currentProgress = Math.max(progress.streak || 0, progress.longestStreak || 0);
-            break;
-          case 'checkin':
-            currentProgress = progress.streak || 0;
-            break;
-          case 'redemptions':
-            currentProgress = progress.rewardsRedeemed || 0;
-            break;
-          default:
-            currentProgress = 0;
-        }
-        
-        console.log(`🏆 Achievement "${achievement.title}": ${currentProgress}/${achievement.target}`);
-        
-        // Check if achievement should be completed
-        const shouldComplete = currentProgress >= achievement.target;
-        
-        if (existingUserAchievement) {
-          // Update existing progress
-          if (existingUserAchievement.progress !== currentProgress || (shouldComplete && !existingUserAchievement.isCompleted)) {
-            await FirestoreService.updateUserAchievement(existingUserAchievement.id, {
-              progress: currentProgress,
-              isCompleted: shouldComplete,
-              unlockedAt: shouldComplete && !existingUserAchievement.isCompleted ? new Date() : existingUserAchievement.unlockedAt || null,
-              updatedAt: new Date()
-            });
-            
-            if (shouldComplete && !existingUserAchievement.isCompleted) {
-              console.log(`🏆 Achievement completed: ${achievement.title}`);
-              toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
-                duration: 6000
-              });
-            }
-          }
-        } else {
-          // Create new user achievement if achievement ID is valid
-          if (!achievement.id || typeof achievement.id !== 'string') {
-            console.error('❌ Invalid achievement ID:', achievement);
-            continue;
-          }
-          
-          await FirestoreService.createUserAchievement({
-            userId: childUid,
-            achievementId: achievement.id,
-            progress: currentProgress,
-            isCompleted: shouldComplete,
-            unlockedAt: shouldComplete ? new Date() : null
-          });
-          
-          if (shouldComplete) {
-            console.log(`🏆 New achievement completed: ${achievement.title}`);
-            toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
-              duration: 6000
-            });
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error('❌ Erro ao verificar conquistas:', error);
-      // Don't show error toast for index building issues
-      if (!error.message?.includes('index')) {
-        toast.error('Erro ao verificar conquistas');
-      }
-    }
-  };
-
   const claimAchievementReward = async (userAchievementId: string) => {
     if (!childUid) throw new Error('Child UID não definido');
     if (!userAchievementId) throw new Error('User Achievement ID não definido');
@@ -851,17 +936,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           duration: 5000
         });
       
-      // Check for newly unlocked rewards
-      if (levelUpCheck.leveledUp) {
-        const newlyUnlockedRewards = getRewardsUnlockedAtLevel(levelUpCheck.newLevel);
-        if (newlyUnlockedRewards.length > 0) {
-          setTimeout(() => {
-            newlyUnlockedRewards.forEach(reward => {
-              toast.success(`🎁 Nova recompensa desbloqueada: ${reward.title}!`);
-            });
-          }, 2000); // Show after level up animation
+        // Check for newly unlocked rewards
+        if (levelUpCheck.leveledUp) {
+          const newlyUnlockedRewards = getRewardsUnlockedAtLevel(levelUpCheck.newLevel);
+          if (newlyUnlockedRewards.length > 0) {
+            setTimeout(() => {
+              newlyUnlockedRewards.forEach(reward => {
+                toast.success(`🎁 Nova recompensa desbloqueada: ${reward.title}!`);
+              });
+            }, 2000); // Show after level up animation
+          }
         }
-      }
       }
       
       toast.success(`${amount > 0 ? '+' : ''}${amount} XP aplicado!`);
