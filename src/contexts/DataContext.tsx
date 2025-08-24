@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { useAuth } from './AuthContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder } from '../types';
 import { FirestoreService } from '../services/firestoreService';
-import { checkLevelUp } from '../utils/levelSystem';
+import { checkLevelUp, calculateLevelSystem } from '../utils/levelSystem';
 import { getRewardsUnlockedAtLevel } from '../utils/rewardLevels';
 import toast from 'react-hot-toast';
 
