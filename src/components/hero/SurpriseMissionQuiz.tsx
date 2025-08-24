@@ -55,9 +55,9 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
       };
       
       const difficultyPrompts = {
-        easy: 'nível fácil para 9 anos - perguntas diretas e básicas',
-        medium: 'nível médio para 9 anos - perguntas que exigem raciocínio e conexão de ideias, mas ainda acessíveis',
-        hard: 'nível avançado para 9 anos - perguntas complexas que exigem pensamento crítico, análise, dedução lógica e conhecimento mais profundo. Inclua problemas de múltiplas etapas, interpretação de texto, raciocínio matemático avançado, ciências mais detalhadas, geografia e história com contexto, e situações que exijam aplicação prática do conhecimento'
+        easy: 'nível fácil',
+        medium: 'nível médio, com algum desafio mas ainda apropriado para a idade, estimulando o raciocínio',
+        hard: 'nível mais desafiador, que estimule o aprendizado avançado'
       };
       
       const themeDescription = themePrompts[surpriseMissionConfig.theme];
@@ -108,7 +108,25 @@ IMPORTANTE:
               },
               {
                 role: 'user',
-                content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (9 anos). Siga exatamente o formato JSON especificado.`
+                content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (9 anos). 
+
+IMPORTANTE: Para dificuldade "${surpriseMissionConfig.difficulty}", as perguntas devem ser ${difficultyDescription}.
+
+${surpriseMissionConfig.difficulty === 'hard' ? `
+ESPECIAL PARA NÍVEL DIFÍCIL - Inclua perguntas como:
+- Problemas matemáticos de múltiplas etapas
+- Interpretação de situações complexas
+- Dedução lógica e raciocínio crítico
+- Ciências com experimentos mentais
+- Geografia com análise de causa e efeito
+- História com conexões temporais
+- Inglês com gramática avançada e interpretação
+- Situações práticas que exijam aplicação de conhecimento
+
+Exemplo de pergunta HARD: "Se a Terra gira 360° em 24 horas, quantos graus ela gira em 3 horas? E por que isso afeta os fusos horários?"
+` : ''}
+
+Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafiem e eduquem!`
               }
             ],
             temperature: 0.8,
