@@ -92,6 +92,19 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Surprise Mission Config
+    match /surpriseMissionConfig/{configId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Daily Surprise Mission Status
+    match /dailySurpriseMissionStatus/{statusId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
     // Daily Quizzes
     match /dailyQuizzes/{quizId} {
       allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);

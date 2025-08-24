@@ -636,6 +636,146 @@ export class FirestoreService {
   }
 
   // ========================================
+  // 🔥 SURPRISE MISSION MANAGEMENT
+  // ========================================
+
+  static async getSurpriseMissionConfig(): Promise<SurpriseMissionConfig | null> {
+    try {
+      const configRef = doc(db, 'surpriseMissionConfig', 'default');
+      const configDoc = await getDoc(configRef);
+      
+      if (configDoc.exists()) {
+        const data = configDoc.data();
+        return {
+          id: configDoc.id,
+          isEnabled: data.isEnabled || false,
+          theme: data.theme || 'mixed',
+          difficulty: data.difficulty || 'medium',
+          xpReward: data.xpReward || 50,
+          goldReward: data.goldReward || 25,
+          questionsCount: data.questionsCount || 30,
+          lastUpdatedBy: data.lastUpdatedBy || '',
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date()
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error getting surprise mission config:', error);
+      return null;
+    }
+  }
+
+  static async updateSurpriseMissionConfig(
+    configData: Omit<SurpriseMissionConfig, 'id' | 'createdAt' | 'updatedAt'>,
+    adminUid: string
+  ): Promise<void> {
+    try {
+      const configRef = doc(db, 'surpriseMissionConfig', 'default');
+      const existingConfig = await getDoc(configRef);
+      
+      const updateData = {
+        ...configData,
+        lastUpdatedBy: adminUid,
+        updatedAt: serverTimestamp()
+      };
+      
+      if (existingConfig.exists()) {
+        await updateDoc(configRef, updateData);
+      } else {
+        await setDoc(configRef, {
+          ...updateData,
+          createdAt: serverTimestamp()
+        });
+      }
+      
+      console.log('✅ FirestoreService: Surprise mission config updated:', configData);
+    } catch (error) {
+      console.error('❌ FirestoreService: Error updating surprise mission config:', error);
+      throw error;
+    }
+  }
+
+  static async checkSurpriseMissionCompletedToday(userId: string, date: string): Promise<boolean> {
+    try {
+      const statusRef = doc(db, 'dailySurpriseMissionStatus', `${userId}_${date}`);
+      const statusDoc = await getDoc(statusRef);
+      return statusDoc.exists() && statusDoc.data()?.completed === true;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error checking surprise mission completion:', error);
+      return false;
+    }
+  }
+
+  static async markSurpriseMissionCompletedToday(
+    userId: string, 
+    date: string, 
+    missionData: {
+      score: number;
+      totalQuestions: number;
+      xpEarned: number;
+      goldEarned: number;
+      completedAt: Date;
+    }
+  ): Promise<void> {
+    try {
+      const statusRef = doc(db, 'dailySurpriseMissionStatus', `${userId}_${date}`);
+      await setDoc(statusRef, {
+        userId,
+        date,
+        completed: true,
+        ...missionData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log('✅ FirestoreService: Surprise mission marked as completed:', {
+        userId,
+        date,
+        score: missionData.score,
+        xpEarned: missionData.xpEarned,
+        goldEarned: missionData.goldEarned
+      });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error marking surprise mission as completed:', error);
+      throw error;
+    }
+  }
+
+  static async getSurpriseMissionHistory(userId: string, limit: number = 10): Promise<DailySurpriseMissionStatus[]> {
+    try {
+      const q = query(
+        collection(db, 'dailySurpriseMissionStatus'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc'),
+        limit(limit)
+      );
+      
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          userId: data.userId,
+          date: data.date,
+          completed: data.completed || false,
+          score: data.score || 0,
+          totalQuestions: data.totalQuestions || 30,
+          xpEarned: data.xpEarned || 0,
+          goldEarned: data.goldEarned || 0,
+          completedAt: data.completedAt?.toDate() || new Date(),
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date()
+        } as DailySurpriseMissionStatus;
+      });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error getting surprise mission history:', error);
+      return [];
+    }
+  }
+
+  // ========================================
   // 🔥 REAL-TIME LISTENERS
   // ========================================
 

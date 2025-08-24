@@ -1,0 +1,743 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, ChevronRight, Trophy, Star, Zap, Brain, CheckCircle, XCircle, Target, Play, ChevronLeft } from 'lucide-react';
+import { useData } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useSound } from '../../contexts/SoundContext';
+import { SurpriseMissionQuestion } from '../../types';
+
+interface SurpriseMissionQuizProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onComplete: () => void;
+}
+
+const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClose, onComplete }) => {
+  const { surpriseMissionConfig, completeSurpriseMission } = useData();
+  const { childUid } = useAuth();
+  const { playTaskComplete, playLevelUp } = useSound();
+  
+  // OpenAI API Key from environment variables
+  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+  
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [userAnswers, setUserAnswers] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<SurpriseMissionQuestion[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showResults, setShowResults] = useState(false);
+  const [score, setScore] = useState(0);
+  const [timeStarted, setTimeStarted] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (isOpen && surpriseMissionConfig) {
+      generateQuestions();
+      setTimeStarted(new Date());
+    }
+  }, [isOpen, surpriseMissionConfig]);
+
+  const generateQuestions = async () => {
+    if (!surpriseMissionConfig) return;
+    
+    setIsGenerating(true);
+    setError(null);
+    
+    try {
+      console.log('🎯 SurpriseMissionQuiz: Generating questions with config:', surpriseMissionConfig);
+      
+      // Build dynamic prompt based on configuration
+      const themePrompts = {
+        english: 'vocabulário em inglês, gramática básica, animais, cores, números, família, comida e objetos do cotidiano',
+        math: 'matemática básica incluindo adição, subtração, multiplicação, divisão, formas geométricas, frações simples e problemas práticos',
+        general: 'conhecimentos gerais incluindo ciências básicas, geografia do Brasil, história, animais, corpo humano, planetas e curiosidades educativas',
+        mixed: 'uma mistura equilibrada de inglês básico, matemática, ciências, geografia, história e conhecimentos gerais'
+      };
+      
+      const difficultyPrompts = {
+        easy: 'nível fácil, adequado para crianças de 8-9 anos, com conceitos básicos e linguagem simples',
+        medium: 'nível médio, com algum desafio mas ainda apropriado para a idade, estimulando o raciocínio',
+        hard: 'nível mais desafiador, que estimule o aprendizado avançado mas sem ser frustrante'
+      };
+      
+      const themeDescription = themePrompts[surpriseMissionConfig.theme];
+      const difficultyDescription = difficultyPrompts[surpriseMissionConfig.difficulty];
+      
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'system',
+                content: `Você é um gerador de quiz educativo especializado em criar provas personalizadas para crianças de 8-9 anos.
+
+MISSÃO: Criar EXATAMENTE 30 perguntas de múltipla escolha em português brasileiro.
+
+TEMA: ${themeDescription}
+DIFICULDADE: ${difficultyDescription}
+
+REGRAS OBRIGATÓRIAS:
+- EXATAMENTE 30 perguntas (nem mais, nem menos)
+- 4 opções por pergunta, apenas 1 correta
+- Perguntas claras e adequadas para idade 8-9 anos
+- Explicações educativas e motivadoras
+- Linguagem simples e divertida
+- Evitar perguntas muito abstratas ou complexas
+- Incluir variedade dentro do tema escolhido
+
+FORMATO OBRIGATÓRIO - Responda APENAS com JSON válido:
+[
+  {
+    "question": "Pergunta aqui?",
+    "options": ["Opção A", "Opção B", "Opção C", "Opção D"],
+    "answer": "Opção correta exata",
+    "explanation": "Explicação educativa e motivadora"
+  }
+]
+
+IMPORTANTE: 
+- Não inclua numeração nas perguntas
+- Certifique-se de que a resposta correta está EXATAMENTE igual a uma das opções
+- Explicações devem ser educativas mas simples
+- Varie o tipo de pergunta dentro do tema`
+              },
+              {
+                role: 'user',
+                content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (8-9 anos). Siga exatamente o formato JSON especificado.`
+              }
+            ],
+            temperature: 0.8,
+            max_tokens: 4000
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`OpenAI API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices[0]?.message?.content;
+        
+        if (!content) {
+          throw new Error('No content received from OpenAI');
+        }
+
+        // Parse JSON response
+        const generatedQuestions = JSON.parse(content);
+        
+        if (!Array.isArray(generatedQuestions) || generatedQuestions.length !== 30) {
+          throw new Error(`Expected 30 questions, got ${generatedQuestions.length}`);
+        }
+
+        // Validate question structure
+        const validQuestions = generatedQuestions.every(q => 
+          q.question && 
+          Array.isArray(q.options) && 
+          q.options.length === 4 && 
+          q.answer && 
+          q.explanation &&
+          q.options.includes(q.answer) // Ensure answer is one of the options
+        );
+
+        if (!validQuestions) {
+          throw new Error('Invalid question structure from OpenAI');
+        }
+
+        console.log('✅ SurpriseMissionQuiz: 30 questions generated successfully with OpenAI');
+        setQuestions(generatedQuestions);
+        
+      } catch (openaiError: any) {
+        console.warn('⚠️ SurpriseMissionQuiz: OpenAI failed, using fallback:', openaiError.message);
+        
+        // Fallback to local questions (adapt existing quiz data)
+        const response = await fetch('/data/quizData.json');
+        if (!response.ok) {
+          throw new Error('Failed to load fallback quiz data');
+        }
+        
+        const localQuestions = await response.json();
+        
+        // Duplicate and shuffle to get 30 questions
+        const extendedQuestions = [];
+        while (extendedQuestions.length < 30) {
+          const remainingNeeded = 30 - extendedQuestions.length;
+          const questionsToAdd = localQuestions.slice(0, Math.min(remainingNeeded, localQuestions.length));
+          extendedQuestions.push(...questionsToAdd);
+        }
+        
+        // Shuffle the final array
+        const shuffledQuestions = extendedQuestions.sort(() => Math.random() - 0.5);
+        
+        console.log('✅ SurpriseMissionQuiz: Using extended local questions as fallback');
+        setQuestions(shuffledQuestions);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ SurpriseMissionQuiz: Error generating questions:', error);
+      setError('Erro ao carregar perguntas da missão surpresa. Tente novamente.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleAnswerSelect = (answer: string) => {
+    setSelectedAnswer(answer);
+  };
+
+  const handleNextQuestion = () => {
+    if (selectedAnswer) {
+      const newAnswers = [...userAnswers, selectedAnswer];
+      setUserAnswers(newAnswers);
+      
+      if (currentQuestion < questions.length - 1) {
+        setCurrentQuestion(currentQuestion + 1);
+        setSelectedAnswer(null);
+      } else {
+        // Quiz completed
+        calculateResults(newAnswers);
+      }
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+      setSelectedAnswer(userAnswers[currentQuestion - 1] || null);
+      // Remove the last answer from userAnswers
+      setUserAnswers(prev => prev.slice(0, -1));
+    }
+  };
+
+  const calculateResults = async (answers: string[]) => {
+    if (!surpriseMissionConfig) return;
+    
+    try {
+      let correctAnswers = 0;
+      
+      // Calculate score based on correct answers
+      answers.forEach((answer, index) => {
+        if (questions[index] && answer === questions[index].answer) {
+          correctAnswers++;
+        }
+      });
+      
+      setScore(correctAnswers);
+      setShowResults(true);
+      
+      // Award XP and Gold based on configuration
+      const xpReward = surpriseMissionConfig.xpReward;
+      const goldReward = surpriseMissionConfig.goldReward;
+      
+      // Bonus for high performance
+      let bonusMultiplier = 1;
+      const percentage = (correctAnswers / 30) * 100;
+      
+      if (percentage >= 90) {
+        bonusMultiplier = 1.5; // 50% bonus for 90%+
+      } else if (percentage >= 80) {
+        bonusMultiplier = 1.3; // 30% bonus for 80%+
+      } else if (percentage >= 70) {
+        bonusMultiplier = 1.2; // 20% bonus for 70%+
+      } else if (percentage >= 60) {
+        bonusMultiplier = 1.1; // 10% bonus for 60%+
+      }
+      
+      const finalXP = Math.round(xpReward * bonusMultiplier);
+      const finalGold = Math.round(goldReward * bonusMultiplier);
+      
+      await completeSurpriseMission(correctAnswers, 30, finalXP, finalGold);
+      
+      if (correctAnswers >= 25) {
+        playLevelUp(); // Special sound for excellent performance
+      } else {
+        playTaskComplete();
+      }
+      
+      onComplete();
+    } catch (error: any) {
+      console.error('❌ SurpriseMissionQuiz: Error saving results:', error);
+      setError('Erro ao salvar resultados da missão');
+    }
+  };
+
+  const getPerformanceMessage = (score: number) => {
+    const percentage = (score / 30) * 100;
+    
+    if (percentage >= 90) return "🏆 EXCEPCIONAL! Você é um verdadeiro gênio, velocista!";
+    if (percentage >= 80) return "⚡ EXCELENTE! Performance digna do Flash!";
+    if (percentage >= 70) return "🌟 MUITO BOM! Você está evoluindo rapidamente!";
+    if (percentage >= 60) return "💪 BOM TRABALHO! Continue treinando, herói!";
+    if (percentage >= 50) return "🎯 LEGAL! Todo herói tem seus desafios!";
+    return "🌈 PARABÉNS! Você enfrentou o desafio com coragem!";
+  };
+
+  const getScoreColor = (score: number) => {
+    const percentage = (score / 30) * 100;
+    if (percentage >= 80) return 'text-green-600';
+    if (percentage >= 60) return 'text-yellow-600';
+    if (percentage >= 40) return 'text-orange-600';
+    return 'text-blue-600';
+  };
+
+  const getBonusMultiplier = (score: number) => {
+    const percentage = (score / 30) * 100;
+    if (percentage >= 90) return 1.5;
+    if (percentage >= 80) return 1.3;
+    if (percentage >= 70) return 1.2;
+    if (percentage >= 60) return 1.1;
+    return 1;
+  };
+
+  const resetQuiz = () => {
+    setCurrentQuestion(0);
+    setSelectedAnswer(null);
+    setUserAnswers([]);
+    setQuestions([]);
+    setIsGenerating(false);
+    setShowResults(false);
+    setScore(0);
+    setError(null);
+    setTimeStarted(null);
+    onClose();
+  };
+
+  if (!isOpen || !surpriseMissionConfig) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+    >
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0, rotateY: -90 }}
+        animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+        exit={{ scale: 0.8, opacity: 0, rotateY: 90 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden"
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 text-white relative overflow-hidden">
+          <motion.div
+            animate={{
+              x: ['-100%', '100%'],
+              opacity: [0, 0.3, 0]
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent skew-x-12"
+          />
+          
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-white shadow-2xl"
+              >
+                <Target className="w-8 h-8 text-purple-600" />
+              </motion.div>
+              <div>
+                <h2 className="text-3xl font-bold" style={{ fontFamily: 'Comic Neue, cursive' }}>
+                  🎯 Missão Surpresa! ⚡
+                </h2>
+                {questions.length > 0 && !showResults && (
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="text-yellow-300 font-medium">
+                      Pergunta {currentQuestion + 1} de {questions.length}
+                    </p>
+                    <div className="w-32 bg-white/20 rounded-full h-3">
+                      <div 
+                        className="bg-yellow-400 h-3 rounded-full transition-all duration-300"
+                        style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {showResults && (
+                  <p className="text-yellow-300 font-medium">
+                    Resultados da Missão Surpresa
+                  </p>
+                )}
+                {isGenerating && (
+                  <p className="text-yellow-300 font-medium">
+                    Gerando prova personalizada...
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <button
+              onClick={resetQuiz}
+              className="p-2 hover:bg-white/20 rounded-full transition-colors text-white"
+              title="Fechar missão"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          
+          {/* Mission Info */}
+          <div className="relative z-10 mt-4 flex items-center justify-center gap-6 text-sm">
+            <div className="bg-white/20 px-3 py-1 rounded-full">
+              📚 {surpriseMissionConfig.theme === 'english' ? 'Inglês' : 
+                   surpriseMissionConfig.theme === 'math' ? 'Matemática' : 
+                   surpriseMissionConfig.theme === 'general' ? 'Conhecimentos Gerais' : 
+                   'Tudo Misturado'}
+            </div>
+            <div className="bg-white/20 px-3 py-1 rounded-full">
+              🎯 {surpriseMissionConfig.difficulty === 'easy' ? 'Fácil' : 
+                   surpriseMissionConfig.difficulty === 'medium' ? 'Médio' : 
+                   'Difícil'}
+            </div>
+            <div className="bg-white/20 px-3 py-1 rounded-full">
+              🏆 +{surpriseMissionConfig.xpReward} XP, +{surpriseMissionConfig.goldReward} Gold
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-200px)]">
+          {isGenerating && (
+            <div className="text-center py-16">
+              <motion.div
+                animate={{ 
+                  rotate: 360,
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+                  scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+                }}
+                className="w-20 h-20 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-yellow-400"
+              >
+                <Brain className="w-10 h-10 text-white" />
+              </motion.div>
+              <p className="text-gray-600 text-xl mb-4" style={{ fontFamily: 'Comic Neue, cursive' }}>
+                🎯 Gerando sua missão surpresa personalizada...
+              </p>
+              <p className="text-gray-500 text-base">
+                A IA está criando 30 perguntas únicas baseadas nas suas configurações!
+              </p>
+              <div className="mt-6 space-y-2 text-sm text-gray-500">
+                <p>• Analisando tema: {surpriseMissionConfig.theme}</p>
+                <p>• Ajustando dificuldade: {surpriseMissionConfig.difficulty}</p>
+                <p>• Criando 30 questões personalizadas...</p>
+                <p>• Preparando explicações educativas...</p>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <XCircle className="w-8 h-8 text-red-500" />
+              </div>
+              <p className="text-red-600 text-lg mb-4" style={{ fontFamily: 'Comic Neue, cursive' }}>
+                {error}
+              </p>
+              <button
+                onClick={generateQuestions}
+                className="px-6 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors"
+              >
+                Tentar Novamente
+              </button>
+            </div>
+          )}
+
+          {showResults && (
+            <div className="text-center py-8">
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="w-32 h-32 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-yellow-400"
+              >
+                <Trophy className="w-16 h-16 text-white" />
+              </motion.div>
+              
+              <h3 className="text-4xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Comic Neue, cursive' }}>
+                Missão Surpresa Concluída! 🎉
+              </h3>
+              
+              <div className="bg-gradient-to-r from-purple-600/10 to-purple-700/10 rounded-2xl p-8 mb-6">
+                <p className={`text-3xl font-bold mb-4 ${getScoreColor(score)}`}>
+                  {score} de {questions.length} acertos
+                </p>
+                <p className="text-xl font-bold text-purple-600 mb-6">
+                  {getPerformanceMessage(score)}
+                </p>
+                
+                <div className="flex justify-center gap-1 mb-6">
+                  {Array.from({ length: 30 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ duration: 0.2, delay: i * 0.02 }}
+                    >
+                      <Star
+                        className={`w-4 h-4 ${
+                          i < score ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                        }`}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+                
+                <div className="bg-white rounded-xl p-6 border border-purple-200">
+                  <p className="text-purple-600 font-bold mb-4 text-lg">🎁 Recompensas Ganhas:</p>
+                  
+                  <div className="grid grid-cols-2 gap-6 mb-4">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-2 text-2xl font-bold text-blue-600 mb-2">
+                        <Zap className="w-6 h-6" />
+                        <span>+{Math.round(surpriseMissionConfig.xpReward * getBonusMultiplier(score))}</span>
+                      </div>
+                      <div className="text-sm text-blue-600">XP Ganho</div>
+                      {getBonusMultiplier(score) > 1 && (
+                        <div className="text-xs text-green-600 font-bold mt-1">
+                          Bônus: {Math.round((getBonusMultiplier(score) - 1) * 100)}%
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-2 text-2xl font-bold text-yellow-600 mb-2">
+                        <Star className="w-6 h-6" />
+                        <span>+{Math.round(surpriseMissionConfig.goldReward * getBonusMultiplier(score))}</span>
+                      </div>
+                      <div className="text-sm text-yellow-600">Gold Ganho</div>
+                      {getBonusMultiplier(score) > 1 && (
+                        <div className="text-xs text-green-600 font-bold mt-1">
+                          Bônus: {Math.round((getBonusMultiplier(score) - 1) * 100)}%
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-purple-600">
+                      {Math.round((score / 30) * 100)}% de Aproveitamento
+                    </div>
+                    {timeStarted && (
+                      <div className="text-sm text-gray-600 mt-1">
+                        Tempo: {Math.round((new Date().getTime() - timeStarted.getTime()) / 60000)} minutos
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Review Table */}
+              <div className="bg-gray-50 rounded-2xl p-6 mb-6 text-left max-h-96 overflow-y-auto">
+                <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">
+                  📚 Revisão Completa das 30 Questões
+                </h4>
+                
+                <div className="space-y-4">
+                  {questions.map((question, index) => {
+                    const userAnswer = userAnswers[index];
+                    const isCorrect = userAnswer === question.answer;
+                    
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.02 }}
+                        className={`p-4 rounded-lg border-2 ${
+                          isCorrect 
+                            ? 'border-green-200 bg-green-50' 
+                            : 'border-red-200 bg-red-50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                            isCorrect ? 'bg-green-500' : 'bg-red-500'
+                          }`}>
+                            {index + 1}
+                          </div>
+                          
+                          <div className="flex-1">
+                            <h5 className="font-semibold text-gray-900 mb-2">
+                              {question.question}
+                            </h5>
+                            
+                            <div className="text-sm space-y-2">
+                              <div>
+                                <span className="font-medium">Sua resposta: </span>
+                                <span className={isCorrect ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>
+                                  {userAnswer}
+                                </span>
+                                {isCorrect && <span className="ml-2">✅</span>}
+                                {!isCorrect && <span className="ml-2">❌</span>}
+                              </div>
+                              
+                              {!isCorrect && (
+                                <div>
+                                  <span className="font-medium">Resposta correta: </span>
+                                  <span className="text-green-600 font-bold">{question.answer}</span>
+                                </div>
+                              )}
+                              
+                              <div className="mt-3 p-3 bg-white rounded border">
+                                <span className="font-medium text-blue-600">💡 Explicação: </span>
+                                <span className="text-gray-700">{question.explanation}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              <button
+                onClick={resetQuiz}
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold text-lg hover:shadow-lg transition-all duration-200"
+                style={{ fontFamily: 'Comic Neue, cursive' }}
+              >
+                Finalizar Missão! 🚀
+              </button>
+            </div>
+          )}
+
+          {questions.length > 0 && !showResults && !isGenerating && (
+            <div>
+              {/* Question */}
+              <div className="mb-8">
+                <div className="bg-gradient-to-r from-purple-600/10 to-purple-700/10 rounded-2xl p-8 mb-6 relative overflow-hidden">
+                  {/* Question number indicator */}
+                  <div className="absolute top-6 right-6 bg-yellow-400 text-purple-600 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg">
+                    {currentQuestion + 1}
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4 pr-16" style={{ fontFamily: 'Comic Neue, cursive' }}>
+                    {questions[currentQuestion]?.question}
+                  </h3>
+                </div>
+                
+                {/* Answers */}
+                <div className="space-y-4">
+                  {questions[currentQuestion]?.options?.map((option: string, index: number) => (
+                    <motion.button
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ scale: 1.02, x: 5 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleAnswerSelect(option)}
+                      className={`w-full p-6 rounded-xl text-left transition-all duration-200 border-2 ${
+                        selectedAnswer === option
+                          ? 'border-purple-600 bg-purple-600/10 text-purple-600 shadow-lg'
+                          : 'border-gray-200 hover:border-purple-600/50 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                          selectedAnswer === option
+                            ? 'border-purple-600 bg-purple-600'
+                            : 'border-gray-300'
+                        }`}>
+                          {selectedAnswer === option && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <CheckCircle className="w-5 h-5 text-white" />
+                            </motion.div>
+                          )}
+                        </div>
+                        <span className="font-medium text-lg" style={{ fontFamily: 'Comic Neue, cursive' }}>
+                          {String.fromCharCode(65 + index)}) {option}
+                        </span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Navigation */}
+              <div className="flex justify-between items-center">
+                <motion.button
+                  whileHover={{ scale: currentQuestion > 0 ? 1.05 : 1 }}
+                  whileTap={{ scale: currentQuestion > 0 ? 0.95 : 1 }}
+                  onClick={handlePreviousQuestion}
+                  disabled={currentQuestion === 0}
+                  className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all duration-200 ${
+                    currentQuestion > 0
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                  }`}
+                  style={{ fontFamily: 'Comic Neue, cursive' }}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                  Anterior
+                </motion.button>
+                
+                <div className="text-center">
+                  <div className="text-sm text-gray-600 mb-1">
+                    Questão {currentQuestion + 1} de {questions.length}
+                  </div>
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                
+                <motion.button
+                  whileHover={{ scale: selectedAnswer ? 1.05 : 1 }}
+                  whileTap={{ scale: selectedAnswer ? 0.95 : 1 }}
+                  onClick={handleNextQuestion}
+                  disabled={!selectedAnswer}
+                  className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all duration-200 ${
+                    selectedAnswer
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:shadow-lg'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                  style={{ fontFamily: 'Comic Neue, cursive' }}
+                >
+                  {currentQuestion < questions.length - 1 ? (
+                    <>
+                      Próxima
+                      <ChevronRight className="w-5 h-5" />
+                    </>
+                  ) : (
+                    <>
+                      Finalizar
+                      <Trophy className="w-5 h-5" />
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default SurpriseMissionQuiz;

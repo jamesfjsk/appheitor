@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder } from '../types';
+import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp, calculateLevelSystem } from '../utils/levelSystem';
 import { getRewardsUnlockedAtLevel } from '../utils/rewardLevels';
@@ -15,6 +15,9 @@ interface DataContextType {
   flashReminders: FlashReminder[];
   achievements: Achievement[];
   userAchievements: UserAchievement[];
+  surpriseMissionConfig: SurpriseMissionConfig | null;
+  isSurpriseMissionCompletedToday: boolean;
+  surpriseMissionHistory: DailySurpriseMissionStatus[];
   loading: boolean;
   
   // Task methods
@@ -47,6 +50,11 @@ interface DataContextType {
   deleteAchievement: (achievementId: string) => Promise<void>;
   checkAchievements: () => Promise<void>;
   claimAchievementReward: (userAchievementId: string) => Promise<void>;
+  
+  // Surprise Mission methods
+  loadSurpriseMissionConfig: () => Promise<void>;
+  updateSurpriseMissionSettings: (settings: Omit<SurpriseMissionConfig, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  completeSurpriseMission: (score: number, totalQuestions: number, xpEarned: number, goldEarned: number) => Promise<void>;
   
   // Progress methods
   adjustUserXP: (amount: number) => Promise<void>;
@@ -95,6 +103,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [flashReminders, setFlashReminders] = useState<FlashReminder[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
+  const [surpriseMissionConfig, setSurpriseMissionConfig] = useState<SurpriseMissionConfig | null>(null);
+  const [isSurpriseMissionCompletedToday, setIsSurpriseMissionCompletedToday] = useState(false);
+  const [surpriseMissionHistory, setSurpriseMissionHistory] = useState<DailySurpriseMissionStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Initialize listeners when childUid changes
@@ -268,6 +279,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         );
 
         setLoading(false);
+
+        // Load surprise mission config and status
+        loadSurpriseMissionConfig();
+        checkSurpriseMissionStatus();
 
         // Cleanup function
         return () => {
@@ -957,6 +972,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     flashReminders,
     achievements,
     userAchievements,
+    surpriseMissionConfig,
+    isSurpriseMissionCompletedToday,
+    surpriseMissionHistory,
     loading,
     addTask,
     updateTask,
@@ -977,6 +995,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     deleteAchievement,
     checkAchievements,
     claimAchievementReward,
+    loadSurpriseMissionConfig,
+    updateSurpriseMissionSettings,
+    completeSurpriseMission,
     adjustUserXP,
     adjustUserGold,
     resetUserData,

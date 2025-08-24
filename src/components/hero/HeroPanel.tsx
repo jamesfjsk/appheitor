@@ -13,10 +13,11 @@ import RewardsPanel from './RewardsPanel';
 import CalendarModal from './CalendarModal';
 import FlashReminders from './FlashReminders';
 import QuizTime from './QuizTime';
+import SurpriseMissionQuiz from './SurpriseMissionQuiz';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const HeroPanel: React.FC = () => {
-  const { tasks, progress, loading } = useData();
+  const { tasks, progress, loading, surpriseMissionConfig, isSurpriseMissionCompletedToday } = useData();
   const { requestPermission, permission } = useNotifications();
   const { isSoundEnabled, toggleSound } = useSound();
   
@@ -30,6 +31,7 @@ const HeroPanel: React.FC = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [guidedMode, setGuidedMode] = useState(false);
   const [showMissionComplete, setShowMissionComplete] = useState(false);
+  const [showSurpriseMission, setShowSurpriseMission] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   
   // Auto-detect current period on mount
@@ -85,6 +87,9 @@ const HeroPanel: React.FC = () => {
   const completedTasks = tasks.filter(task => task.status === 'done').length;
   const totalTasks = tasks.length;
   const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  
+  // Check if surprise mission should be shown
+  const shouldShowSurpriseMission = surpriseMissionConfig?.isEnabled && !isSurpriseMissionCompletedToday;
   
   // Controlar animação de missão completa
   useEffect(() => {
@@ -534,6 +539,121 @@ const HeroPanel: React.FC = () => {
 
             {/* Coluna Lateral - Avatar e Conquistas */}
             <div className="space-y-6">
+              {/* Missão Surpresa */}
+              {shouldShowSurpriseMission && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, x: 50 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  transition={{ delay: 0.8, duration: 0.6 }}
+                  className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 relative overflow-hidden"
+                >
+                  {/* Animated background */}
+                  <motion.div
+                    animate={{
+                      opacity: [0.1, 0.3, 0.1],
+                      scale: [1, 1.05, 1]
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-yellow-400/20 rounded-2xl"
+                  />
+                  
+                  <div className="relative z-10">
+                    <div className="text-center mb-4">
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          rotate: [0, 10, -10, 0]
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                        className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-yellow-400 shadow-2xl"
+                      >
+                        <Target className="w-8 h-8 text-white" />
+                      </motion.div>
+                      
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        🎯 Missão Surpresa Disponível!
+                      </h3>
+                      
+                      <p className="text-gray-600 text-sm mb-3">
+                        Uma prova especial criada só para você!
+                      </p>
+                      
+                      <div className="flex items-center justify-center gap-2 text-sm mb-4">
+                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full font-medium">
+                          📚 {surpriseMissionConfig.theme === 'english' ? 'Inglês' : 
+                               surpriseMissionConfig.theme === 'math' ? 'Matemática' : 
+                               surpriseMissionConfig.theme === 'general' ? 'Conhecimentos Gerais' : 
+                               'Tudo Misturado'}
+                        </span>
+                        <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full font-medium">
+                          🎯 {surpriseMissionConfig.difficulty === 'easy' ? 'Fácil' : 
+                               surpriseMissionConfig.difficulty === 'medium' ? 'Médio' : 
+                               'Difícil'}
+                        </span>
+                      </div>
+                      
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                        <div className="flex items-center justify-center gap-4 text-lg font-bold">
+                          <div className="flex items-center gap-1 text-blue-600">
+                            <Zap className="w-5 h-5" />
+                            +{surpriseMissionConfig.xpReward} XP
+                          </div>
+                          <div className="flex items-center gap-1 text-yellow-600">
+                            <Star className="w-5 h-5" />
+                            +{surpriseMissionConfig.goldReward} Gold
+                          </div>
+                        </div>
+                        <p className="text-center text-yellow-800 text-xs mt-1">
+                          30 questões + bônus por performance!
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowSurpriseMission(true)}
+                      className="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                      style={{ fontFamily: 'Comic Neue, cursive' }}
+                    >
+                      <Play className="w-6 h-6" />
+                      Iniciar Missão Surpresa!
+                    </motion.button>
+                  </div>
+                  
+                  {/* Sparkle effects */}
+                  {[...Array(8)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{
+                        opacity: [0, 0.8, 0],
+                        scale: [0.5, 1, 0.5],
+                        rotate: [0, 360]
+                      }}
+                      transition={{
+                        duration: 2 + i * 0.2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: i * 0.3
+                      }}
+                      className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+                      style={{
+                        left: `${20 + (i % 4) * 20}%`,
+                        top: `${20 + Math.floor(i / 4) * 20}%`
+                      }}
+                    />
+                  ))}
+                </motion.div>
+              )}
+              
               <FlashReminders />
               
               <AchievementsBadges 
@@ -579,6 +699,19 @@ const HeroPanel: React.FC = () => {
           <CalendarModal 
             isOpen={showCalendar}
             onClose={() => setShowCalendar(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSurpriseMission && (
+          <SurpriseMissionQuiz 
+            isOpen={showSurpriseMission}
+            onClose={() => setShowSurpriseMission(false)}
+            onComplete={() => {
+              setShowSurpriseMission(false);
+              // Refresh surprise mission status will be handled by DataContext
+            }}
           />
         )}
       </AnimatePresence>

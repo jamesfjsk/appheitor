@@ -13,8 +13,9 @@ import FirebaseDoctor from '../common/FirebaseDoctor';
 import DataDoctorPage from '../admin/dataDoctor/DataDoctorPage';
 import FlashReminderManager from './FlashReminderManager';
 import AchievementManager from './AchievementManager';
+import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 
-type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
+type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -36,6 +37,7 @@ const ParentPanel: React.FC = () => {
     { id: 'rewards', label: 'Recompensas', icon: '🎁' },
     { id: 'achievements', label: 'Conquistas', icon: '🏆' },
     { id: 'reminders', label: 'Lembretes Flash', icon: '⚡' },
+    { id: 'surprise', label: 'Missão Surpresa', icon: '🎯' },
     { id: 'notifications', label: 'Notificações', icon: '🔔' },
     { id: 'history', label: 'Histórico', icon: '📈' },
     { id: 'admin', label: 'Controles Admin', icon: '⚙️' },
@@ -92,6 +94,9 @@ const ParentPanel: React.FC = () => {
           )}
           {activeTab === 'reminders' && (
             <FlashReminderManager />
+          )}
+          {activeTab === 'surprise' && (
+            <SurpriseMissionConfigComponent />
           )}
           {activeTab === 'notifications' && (
             <NotificationSender />

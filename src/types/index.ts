@@ -82,6 +82,40 @@ export interface Notification {
   readAt?: Date;
 }
 
+export interface SurpriseMissionConfig {
+  id: string;
+  isEnabled: boolean;
+  theme: 'english' | 'math' | 'general' | 'mixed';
+  difficulty: 'easy' | 'medium' | 'hard';
+  xpReward: number;
+  goldReward: number;
+  questionsCount: number; // Always 30 for now
+  lastUpdatedBy: string; // Admin UID
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DailySurpriseMissionStatus {
+  id: string;
+  userId: string; // Child UID
+  date: string; // YYYY-MM-DD format
+  completed: boolean;
+  score: number; // Number of correct answers
+  totalQuestions: number; // Should be 30
+  xpEarned: number;
+  goldEarned: number;
+  completedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SurpriseMissionQuestion {
+  question: string;
+  options: string[];
+  answer: string;
+  explanation: string;
+}
+
 // Tipos auxiliares
 export interface CalendarDay {
   date: Date;
