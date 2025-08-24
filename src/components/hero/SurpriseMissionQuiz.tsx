@@ -75,7 +75,7 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
             messages: [
               {
                 role: 'system',
-                content: `Você é um gerador de quiz educativo especializado em criar provas personalizadas para crianças de 8-9 anos.
+                content: `Você é um gerador de quiz educativo especializado em criar provas personalizadas para crianças do terceiro ano do fundamental(9 anos).
 
 MISSÃO: Criar EXATAMENTE 30 perguntas de múltipla escolha em português brasileiro.
 
@@ -85,10 +85,8 @@ DIFICULDADE: ${difficultyDescription}
 REGRAS OBRIGATÓRIAS:
 - EXATAMENTE 30 perguntas (nem mais, nem menos)
 - 4 opções por pergunta, apenas 1 correta
-- Perguntas claras e adequadas para idade 8-9 anos
+- Perguntas claras e adequadas para idade 9 anos
 - Explicações educativas e motivadoras
-- Linguagem simples e divertida
-- Evitar perguntas muito abstratas ou complexas
 - Incluir variedade dentro do tema escolhido
 
 FORMATO OBRIGATÓRIO - Responda APENAS com JSON válido:
@@ -102,6 +100,7 @@ FORMATO OBRIGATÓRIO - Responda APENAS com JSON válido:
 ]
 
 IMPORTANTE: 
+- NAO REPETIR PERGUNTA
 - Não inclua numeração nas perguntas
 - Certifique-se de que a resposta correta está EXATAMENTE igual a uma das opções
 - Explicações devem ser educativas mas simples
@@ -109,7 +108,7 @@ IMPORTANTE:
               },
               {
                 role: 'user',
-                content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (8-9 anos). Siga exatamente o formato JSON especificado.`
+                content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (9 anos). Siga exatamente o formato JSON especificado.`
               }
             ],
             temperature: 0.8,
