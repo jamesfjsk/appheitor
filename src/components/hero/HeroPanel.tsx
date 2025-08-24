@@ -12,6 +12,7 @@ import AchievementsBadges from './AchievementsBadges';
 import RewardsPanel from './RewardsPanel';
 import CalendarModal from './CalendarModal';
 import FlashReminders from './FlashReminders';
+import QuizTime from './QuizTime';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const HeroPanel: React.FC = () => {
@@ -29,6 +30,7 @@ const HeroPanel: React.FC = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [guidedMode, setGuidedMode] = useState(false);
   const [showMissionComplete, setShowMissionComplete] = useState(false);
+  const [quizCompleted, setQuizCompleted] = useState(false);
   
   // Auto-detect current period on mount
   useEffect(() => {
@@ -41,6 +43,20 @@ const HeroPanel: React.FC = () => {
     
     setSelectedPeriod(getCurrentPeriod());
   }, []);
+
+  // Check quiz completion status
+  useEffect(() => {
+    const checkQuizCompletion = () => {
+      if (!progress.userId) return;
+      
+      const today = new Date().toISOString().split('T')[0];
+      const quizKey = `quiz_completed_${progress.userId}_${today}`;
+      const completed = localStorage.getItem(quizKey);
+      setQuizCompleted(!!completed);
+    };
+    
+    checkQuizCompletion();
+  }, [progress.userId]);
 
   useEffect(() => {
     // Solicitar permissão de notificação após 3 segundos
@@ -544,6 +560,9 @@ const HeroPanel: React.FC = () => {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Quiz Time */}
+      <QuizTime onComplete={() => setQuizCompleted(true)} />
 
       {/* Modals */}
       <AnimatePresence>
