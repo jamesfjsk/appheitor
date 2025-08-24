@@ -32,7 +32,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
           currentProgress = progress.totalTasksCompleted || 0;
           break;
         case 'streak':
-          currentProgress = progress.longestStreak || 0;
+          currentProgress = Math.max(progress.streak || 0, progress.longestStreak || 0);
           break;
         case 'checkin':
           currentProgress = progress.streak || 0;

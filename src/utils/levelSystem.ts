@@ -128,6 +128,24 @@ export function checkLevelUp(previousXP: number, currentXP: number): {
 }
 
 /**
+ * Força verificação de conquistas baseadas em progresso atual
+ */
+export function shouldTriggerAchievementCheck(
+  previousProgress: UserProgress, 
+  currentProgress: UserProgress
+): boolean {
+  // Check if any achievement-relevant metric changed
+  return (
+    previousProgress.totalXP !== currentProgress.totalXP ||
+    previousProgress.totalTasksCompleted !== currentProgress.totalTasksCompleted ||
+    previousProgress.streak !== currentProgress.streak ||
+    previousProgress.longestStreak !== currentProgress.longestStreak ||
+    previousProgress.rewardsRedeemed !== currentProgress.rewardsRedeemed ||
+    getLevelFromXP(previousProgress.totalXP || 0) !== getLevelFromXP(currentProgress.totalXP || 0)
+  );
+}
+
+/**
  * Gera lista de marcos de XP para referência
  */
 export function getXPMilestones(): Array<{ level: number; xp: number; title: string }> {

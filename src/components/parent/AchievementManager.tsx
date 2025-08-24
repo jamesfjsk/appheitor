@@ -339,9 +339,36 @@ const AchievementManager: React.FC = () => {
                 <div className="space-y-4">
                   {activeAchievements.map((achievement, index) => {
                     const userProgress = getUserAchievementProgress(achievement.id);
-                    const progressPercentage = userProgress 
-                      ? Math.min(100, (userProgress.progress / achievement.target) * 100)
-                      : 0;
+                    
+                    // Calculate real-time progress even if no userAchievement exists yet
+                    let currentProgress = userProgress?.progress || 0;
+                    if (!userProgress) {
+                      switch (achievement.type) {
+                        case 'xp':
+                          currentProgress = progress.totalXP || 0;
+                          break;
+                        case 'level':
+                          const levelSystem = calculateLevelSystem(progress.totalXP || 0);
+                          currentProgress = levelSystem.currentLevel;
+                          break;
+                        case 'tasks':
+                          currentProgress = progress.totalTasksCompleted || 0;
+                          break;
+                        case 'streak':
+                          currentProgress = Math.max(progress.streak || 0, progress.longestStreak || 0);
+                          break;
+                        case 'checkin':
+                          currentProgress = progress.streak || 0;
+                          break;
+                        case 'redemptions':
+                          currentProgress = progress.rewardsRedeemed || 0;
+                          break;
+                        default:
+                          currentProgress = 0;
+                      }
+                    }
+                    
+                    const progressPercentage = Math.min(100, (currentProgress / achievement.target) * 100);
                     
                     return (
                       <motion.div
@@ -366,6 +393,11 @@ const AchievementManager: React.FC = () => {
                                     ✓ COMPLETA
                                   </span>
                                 )}
+                                {!userProgress?.isCompleted && currentProgress >= achievement.target && (
+                                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold animate-pulse">
+                                    🎯 PRONTA!
+                                  </span>
+                                )}
                               </div>
                               
                               <p className="text-sm text-gray-600 mb-2">{achievement.description}</p>
@@ -382,21 +414,53 @@ const AchievementManager: React.FC = () => {
                                 <div className="text-gray-500">
                                   Meta: {achievement.target}
                                 </div>
+                                <div className="text-purple-600 font-medium">
+                                  Atual: {currentProgress}
+                                </div>
                               </div>
                               
                               {/* Progress Bar */}
                               {userProgress && !userProgress.isCompleted && (
                                 <div className="mt-3">
                                   <div className="flex justify-between text-xs text-gray-600 mb-1">
-                                    <span>Progresso: {userProgress.progress}/{achievement.target}</span>
+                                    <span>Progresso: {currentProgress}/{achievement.target}</span>
                                     <span>{Math.round(progressPercentage)}%</span>
                                   </div>
                                   <div className="w-full bg-gray-200 rounded-full h-2">
                                     <div 
-                                      className="bg-gradient-to-r from-yellow-500 to-yellow-600 h-2 rounded-full transition-all duration-500"
+                                      className={`h-2 rounded-full transition-all duration-500 ${
+                                        currentProgress >= achievement.target
+                                          ? 'bg-gradient-to-r from-green-500 to-green-600 animate-pulse'
+                                          : 'bg-gradient-to-r from-yellow-500 to-yellow-600'
+                                      }`}
                                       style={{ width: `${progressPercentage}%` }}
                                     />
                                   </div>
+                                </div>
+                              )}
+                              
+                              {/* Show progress even if no userAchievement exists yet */}
+                              {!userProgress && currentProgress > 0 && (
+                                <div className="mt-3">
+                                  <div className="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>Progresso: {currentProgress}/{achievement.target}</span>
+                                    <span>{Math.round(progressPercentage)}%</span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className={`h-2 rounded-full transition-all duration-500 ${
+                                        currentProgress >= achievement.target
+                                          ? 'bg-gradient-to-r from-green-500 to-green-600 animate-pulse'
+                                          : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                                      }`}
+                                      style={{ width: `${progressPercentage}%` }}
+                                    />
+                                  </div>
+                                  {currentProgress >= achievement.target && (
+                                    <p className="text-xs text-green-600 font-bold mt-1 animate-pulse">
+                                      🎯 Meta atingida! Aguardando verificação automática...
+                                    </p>
+                                  )}
                                 </div>
                               )}
                             </div>

@@ -277,17 +277,53 @@ export class FirestoreService {
       
       if (progressDoc.exists()) {
         const currentProgress = progressDoc.data();
+        
+        // Calculate new streak
+        const lastActivityDate = currentProgress.lastActivityDate?.toDate();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        let newStreak = 1;
+        if (lastActivityDate) {
+          const lastActivityDateString = lastActivityDate.toISOString().split('T')[0];
+          const yesterdayString = yesterday.toISOString().split('T')[0];
+          const todayString = today;
+          
+          if (lastActivityDateString === yesterdayString) {
+            // Consecutive day
+            newStreak = (currentProgress.streak || 0) + 1;
+          } else if (lastActivityDateString === todayString) {
+            // Same day, keep current streak
+            newStreak = currentProgress.streak || 1;
+          } else {
+            // Streak broken, start new
+            newStreak = 1;
+          }
+        }
+        
+        const newLongestStreak = Math.max(newStreak, currentProgress.longestStreak || 0);
+        
         batch.update(progressRef, {
           totalXP: (currentProgress.totalXP || 0) + xpReward,
           availableGold: (currentProgress.availableGold || 0) + goldReward,
           totalGoldEarned: (currentProgress.totalGoldEarned || 0) + goldReward,
           totalTasksCompleted: (currentProgress.totalTasksCompleted || 0) + 1,
+          streak: newStreak,
+          longestStreak: newLongestStreak,
           lastActivityDate: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
       }
       
       await batch.commit();
+      
+      console.log('✅ Task completed with rewards:', {
+        taskId,
+        userId,
+        xpReward,
+        goldReward,
+        newTotalTasks: (progressDoc.exists() ? progressDoc.data().totalTasksCompleted || 0 : 0) + 1
+      });
     } catch (error) {
       console.error('❌ FirestoreService: Error completing task:', error);
       throw error;
@@ -361,12 +397,18 @@ export class FirestoreService {
         batch.update(progressRef, {
           availableGold: (currentProgress.availableGold || 0) - goldCost,
           totalGoldSpent: (currentProgress.totalGoldSpent || 0) + goldCost,
-          rewardsRedeemed: (currentProgress.rewardsRedeemed || 0) + 1,
           updatedAt: serverTimestamp()
         });
       }
       
       await batch.commit();
+      
+      console.log('✅ Reward redeemed (pending approval):', {
+        userId,
+        rewardId,
+        goldCost,
+        status: 'pending'
+      });
     } catch (error) {
       console.error('❌ FirestoreService: Error redeeming reward:', error);
       throw error;
@@ -379,33 +421,51 @@ export class FirestoreService {
       
       // Update redemption status
       const redemptionRef = doc(db, 'redemptions', redemptionId);
+      const redemptionDoc = await getDoc(redemptionRef);
+      
+      if (!redemptionDoc.exists()) {
+        throw new Error('Redemption not found');
+      }
+      
+      const redemptionData = redemptionDoc.data();
+      
       batch.update(redemptionRef, {
         status: approved ? 'approved' : 'rejected',
         approvedBy,
         updatedAt: serverTimestamp()
       });
       
-      // If rejected, refund gold to user
-      if (!approved) {
-        const redemptionDoc = await getDoc(redemptionRef);
-        if (redemptionDoc.exists()) {
-          const redemptionData = redemptionDoc.data();
-          const progressRef = doc(db, 'progress', redemptionData.userId);
-          const progressDoc = await getDoc(progressRef);
-          
-          if (progressDoc.exists()) {
-            const currentProgress = progressDoc.data();
-            batch.update(progressRef, {
-              availableGold: (currentProgress.availableGold || 0) + redemptionData.costGold,
-              totalGoldSpent: Math.max(0, (currentProgress.totalGoldSpent || 0) - redemptionData.costGold),
-              rewardsRedeemed: Math.max(0, (currentProgress.rewardsRedeemed || 0) - 1),
-              updatedAt: serverTimestamp()
-            });
-          }
+      const progressRef = doc(db, 'progress', redemptionData.userId);
+      const progressDoc = await getDoc(progressRef);
+      
+      if (progressDoc.exists()) {
+        const currentProgress = progressDoc.data();
+        
+        if (approved) {
+          // If approved, increment rewardsRedeemed counter
+          batch.update(progressRef, {
+            rewardsRedeemed: (currentProgress.rewardsRedeemed || 0) + 1,
+            updatedAt: serverTimestamp()
+          });
+        } else {
+          // If rejected, refund gold to user
+          batch.update(progressRef, {
+            availableGold: (currentProgress.availableGold || 0) + redemptionData.costGold,
+            totalGoldSpent: Math.max(0, (currentProgress.totalGoldSpent || 0) - redemptionData.costGold),
+            updatedAt: serverTimestamp()
+          });
         }
       }
       
       await batch.commit();
+      
+      console.log('✅ Redemption processed:', {
+        redemptionId,
+        approved,
+        userId: redemptionData.userId,
+        rewardId: redemptionData.rewardId,
+        costGold: redemptionData.costGold
+      });
     } catch (error) {
       console.error('❌ FirestoreService: Error approving redemption:', error);
       throw error;
@@ -714,6 +774,17 @@ export class FirestoreService {
               lastActivityDate: data.lastActivityDate?.toDate() || new Date(),
               updatedAt: data.updatedAt?.toDate() || new Date()
             };
+            
+            console.log('🔥 Progress updated:', {
+              userId,
+              totalXP: progress.totalXP,
+              totalTasksCompleted: progress.totalTasksCompleted,
+              streak: progress.streak,
+              longestStreak: progress.longestStreak,
+              rewardsRedeemed: progress.rewardsRedeemed,
+              level: progress.level
+            });
+            
             onUpdate(progress);
           } else {
             onUpdate(null);

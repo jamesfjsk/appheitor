@@ -178,7 +178,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           (progress) => {
             if (progress) {
               console.log('🔥 DataContext: Progress received:', progress);
+              
+              // Store previous progress for achievement checking
+              const previousProgress = { ...progress };
+              
               setProgress(progress);
+              
+              // Trigger achievement check after progress update
+              setTimeout(() => {
+                console.log('🏆 Auto-triggering achievement check after progress update');
+                checkAchievements();
+              }, 1000);
             }
           },
           (error) => {
@@ -663,8 +673,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             currentProgress = progress.totalXP || 0;
             break;
           case 'level':
-            const levelSystem = checkLevelUp(0, progress.totalXP || 0);
-            currentProgress = levelSystem.newLevel;
+            const levelSystem = calculateLevelSystem(progress.totalXP || 0);
+            currentProgress = levelSystem.currentLevel;
             break;
           case 'tasks':
             currentProgress = progress.totalTasksCompleted || 0;
