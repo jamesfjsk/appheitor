@@ -138,6 +138,36 @@
         "order": "DESCENDING"
       }
     ]
+  },
+  {
+    "collectionGroup": "dailySurpriseMissionStatus",
+    "queryScope": "COLLECTION",
+    "fields": [
+      {
+        "fieldPath": "userId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      }
+    ]
+  }
+  ],
+  "fieldOverrides": []
+}
+    "collectionGroup": "achievements",
+    "queryScope": "COLLECTION",
+    "fields": [
+      {
+        "fieldPath": "ownerId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      }
+    ]
   }
   ],
   {
