@@ -55,9 +55,9 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
       };
       
       const difficultyPrompts = {
-        easy: 'nível fácil',
-        medium: 'nível médio, com algum desafio mas ainda apropriado para a idade, estimulando o raciocínio',
-        hard: 'nível mais desafiador, que estimule o aprendizado avançado'
+        easy: 'nível fácil para 9 anos - perguntas diretas e básicas',
+        medium: 'nível médio para 9 anos - perguntas que exigem raciocínio e conexão de ideias, mas ainda acessíveis',
+        hard: 'nível avançado para 9 anos - perguntas complexas que exigem pensamento crítico, análise, dedução lógica e conhecimento mais profundo. Inclua problemas de múltiplas etapas, interpretação de texto, raciocínio matemático avançado, ciências mais detalhadas, geografia e história com contexto, e situações que exijam aplicação prática do conhecimento'
       };
       
       const themeDescription = themePrompts[surpriseMissionConfig.theme];
