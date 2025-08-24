@@ -603,7 +603,7 @@ const HeroPanel: React.FC = () => {
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
                         <div className="flex items-center justify-center gap-4 text-lg font-bold">
                           <div className="flex items-center gap-1 text-blue-600">
-                            <Zap className="w-5 h-5" />
+                            <Lightning className="w-5 h-5" />
                             +{surpriseMissionConfig.xpReward} XP
                           </div>
                           <div className="flex items-center gap-1 text-yellow-600">
