@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Zap } from 'lucide-react';
+import { MessageCircle, X, Send, Zap, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -11,16 +11,15 @@ interface Message {
 
 const ChatFlashGPT: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const modalRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const firstFocusableRef = useRef<HTMLButtonElement>(null);
-  const lastFocusableRef = useRef<HTMLButtonElement>(null);
 
   // OpenAI API Key from environment variables
   const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
@@ -31,8 +30,8 @@ PERSONALIDADE:
 - Seja sempre positivo, motivador e encorajador
 - Use linguagem simples e divertida, apropriada para crianças
 - Inclua emojis relacionados ao Flash (⚡🏃‍♂️💨🔥) nas suas respostas
-- Seja breve mas caloroso - máximo 2-3 frases por resposta
-- Chame o Heitor de "pequeno velocista", "herói" ou "campeão"
+- Seja detalhado mas caloroso - pode usar várias frases e parágrafos
+- Chame o Heitor de "pequeno velocista", "herói", "campeão" ou "jovem Flash"
 
 CONTEXTO:
 - O Heitor tem um sistema de missões diárias (tarefas)
@@ -48,48 +47,33 @@ TÓPICOS QUE VOCÊ PODE AJUDAR:
 - Explicar a importância de bons hábitos
 - Contar curiosidades sobre velocidade e ciência (de forma simples)
 - Dar conselhos sobre persistência e disciplina
+- Histórias motivacionais do Flash
+- Dicas de estudo e concentração
+- Importância da família e amizade
 
 ESTILO DE RESPOSTA:
 - Sempre comece com uma saudação energética
 - Use metáforas relacionadas à velocidade e heroísmo
+- Pode ser mais detalhado e explicativo agora
+- Conte histórias curtas quando apropriado
 - Termine com uma frase motivacional
 - Mantenha o tom alegre e inspirador
 
-Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim como eu preciso treinar minha velocidade todos os dias, você precisa praticar seus bons hábitos! Continue correndo em direção aos seus objetivos! 🏃‍♂️💨"`;
+Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Sabe, quando eu era jovem como você, também precisava aprender sobre responsabilidade. Lembre-se: assim como eu preciso treinar minha velocidade todos os dias para proteger Central City, você precisa praticar seus bons hábitos para se tornar o herói da sua própria vida! Cada tarefa que você completa é como um treino que te deixa mais forte e mais preparado para os desafios. Continue correndo em direção aos seus objetivos, campeão! 🏃‍♂️💨"`;
 
-  // Focus trap
+  // Focus management
   useEffect(() => {
     if (isOpen) {
-      // Focus no input quando abrir
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
 
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
-          setIsOpen(false);
-        }
-
-        if (e.key === 'Tab') {
-          const focusableElements = modalRef.current?.querySelectorAll(
-            'button, input, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-          
-          if (focusableElements && focusableElements.length > 0) {
-            const firstElement = focusableElements[0] as HTMLElement;
-            const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-            if (e.shiftKey) {
-              if (document.activeElement === firstElement) {
-                e.preventDefault();
-                lastElement.focus();
-              }
-            } else {
-              if (document.activeElement === lastElement) {
-                e.preventDefault();
-                firstElement.focus();
-              }
-            }
+          if (isFullscreen) {
+            setIsFullscreen(false);
+          } else {
+            setIsOpen(false);
           }
         }
       };
@@ -97,7 +81,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen]);
+  }, [isOpen, isFullscreen]);
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
@@ -134,7 +118,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
             { role: 'user', content: userMessage.content }
           ],
           temperature: 0.8,
-          max_tokens: 200
+          max_tokens: 1000 // Increased from 200 to 1000 for more detailed responses
         })
       });
 
@@ -178,6 +162,10 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
   const clearChat = () => {
     setMessages([]);
     setError(null);
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
   };
 
   return (
@@ -230,19 +218,28 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={(e) => e.target === e.currentTarget && setIsOpen(false)}
+            className={`fixed z-50 ${
+              isFullscreen 
+                ? 'inset-0' 
+                : 'inset-0 flex items-center justify-center p-4'
+            }`}
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+            onClick={(e) => e.target === e.currentTarget && !isFullscreen && setIsOpen(false)}
           >
             <motion.div
               ref={modalRef}
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={isFullscreen ? { scale: 1 } : { scale: 0.9, opacity: 0, y: 20 }}
+              animate={isFullscreen ? { scale: 1 } : { scale: 1, opacity: 1, y: 0 }}
+              exit={isFullscreen ? { scale: 1 } : { scale: 0.9, opacity: 0, y: 20 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               role="dialog"
               aria-labelledby="chat-title"
               aria-describedby="chat-description"
-              className="w-full max-w-md h-[600px] rounded-2xl shadow-2xl overflow-hidden"
+              className={`${
+                isFullscreen 
+                  ? 'w-full h-full' 
+                  : 'w-full max-w-2xl h-[700px]'
+              } rounded-2xl shadow-2xl overflow-hidden flex flex-col`}
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.98)',
                 backdropFilter: 'blur(10px)',
@@ -250,7 +247,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
               }}
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-red-600 to-red-500 p-4 text-white relative overflow-hidden">
+              <div className="bg-gradient-to-r from-red-600 to-red-500 p-4 text-white relative overflow-hidden flex-shrink-0">
                 {/* Lightning background effect */}
                 <motion.div
                   animate={{
@@ -283,27 +280,70 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
                     </motion.div>
                     <div>
                       <h2 id="chat-title" className="text-xl font-bold" style={{ fontFamily: 'Comic Neue, cursive' }}>
-                        Converse com o FlashGPT!
+                        FlashGPT - Seu Mentor Super-Herói!
                       </h2>
                       <p id="chat-description" className="text-yellow-300 text-sm">
-                        Seu mentor super-herói pessoal ⚡
+                        Respostas detalhadas e motivação infinita ⚡
                       </p>
                     </div>
                   </div>
                   
-                  <button
-                    ref={firstFocusableRef}
-                    onClick={() => setIsOpen(false)}
-                    className="p-2 hover:bg-white/20 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                    aria-label="Fechar chat"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* Fullscreen Toggle */}
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={toggleFullscreen}
+                      className="p-2 hover:bg-white/20 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                      aria-label={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
+                      title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
+                    >
+                      {isFullscreen ? (
+                        <Minimize2 className="w-5 h-5" />
+                      ) : (
+                        <Maximize2 className="w-5 h-5" />
+                      )}
+                    </motion.button>
+
+                    {/* Clear Chat */}
+                    {messages.length > 0 && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={clearChat}
+                        className="p-2 hover:bg-white/20 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        aria-label="Limpar conversa"
+                        title="Limpar conversa"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </motion.button>
+                    )}
+                    
+                    {/* Close Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setIsOpen(false);
+                        setIsFullscreen(false);
+                      }}
+                      className="p-2 hover:bg-white/20 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                      aria-label="Fechar chat"
+                      title="Fechar chat"
+                    >
+                      <X className="w-6 h-6" />
+                    </motion.button>
+                  </div>
                 </div>
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 p-4 overflow-y-auto max-h-96 space-y-4" style={{ fontFamily: 'Comic Neue, cursive' }}>
+              <div 
+                className={`flex-1 p-4 overflow-y-auto space-y-4 ${
+                  isFullscreen ? 'max-h-none' : 'max-h-96'
+                }`} 
+                style={{ fontFamily: 'Comic Neue, cursive' }}
+              >
                 {messages.length === 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -320,16 +360,40 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
                         repeat: Infinity,
                         ease: "easeInOut"
                       }}
-                      className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-600 shadow-lg"
+                      className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-600 shadow-lg"
                     >
-                      <Zap className="w-8 h-8 text-red-600" fill="currentColor" />
+                      <Zap className="w-10 h-10 text-red-600" fill="currentColor" />
                     </motion.div>
-                    <p className="text-gray-600 text-lg font-bold">
+                    <p className="text-gray-600 text-xl font-bold mb-2">
                       ⚡ Olá, Heitor! Sou o FlashGPT! ⚡
                     </p>
-                    <p className="text-gray-500 text-sm mt-2">
-                      Estou aqui para te ajudar com suas missões e responder suas perguntas!
+                    <p className="text-gray-500 text-base mt-2 max-w-md mx-auto leading-relaxed">
+                      Estou aqui para te ajudar com suas missões, responder suas perguntas e te dar dicas de super-herói! 
+                      Pode me perguntar qualquer coisa sobre estudos, responsabilidade, ou até curiosidades sobre velocidade! 🏃‍♂️💨
                     </p>
+                    
+                    {/* Suggested questions */}
+                    <div className="mt-6 space-y-2">
+                      <p className="text-sm font-semibold text-gray-700 mb-3">💡 Perguntas que você pode fazer:</p>
+                      <div className="grid grid-cols-1 gap-2 max-w-lg mx-auto">
+                        {[
+                          "Como posso me motivar para fazer as tarefas?",
+                          "Me conte uma curiosidade sobre velocidade!",
+                          "Dicas para me concentrar nos estudos?",
+                          "Como ser mais organizado?"
+                        ].map((suggestion, index) => (
+                          <motion.button
+                            key={index}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setInputValue(suggestion)}
+                            className="text-left p-3 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 text-sm text-blue-700 transition-colors"
+                          >
+                            {suggestion}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
                   </motion.div>
                 )}
 
@@ -353,13 +417,13 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
                           repeat: Infinity,
                           ease: "easeInOut"
                         }}
-                        className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-red-600 shadow-md flex-shrink-0"
+                        className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-red-600 shadow-md flex-shrink-0 mt-1"
                       >
-                        <Zap className="w-5 h-5 text-red-600" fill="currentColor" />
+                        <Zap className="w-6 h-6 text-red-600" fill="currentColor" />
                       </motion.div>
                     )}
                     
-                    <div className={`max-w-[80%] ${message.role === 'user' ? 'order-first' : ''}`}>
+                    <div className={`max-w-[85%] ${message.role === 'user' ? 'order-first' : ''}`}>
                       <div
                         className={`px-4 py-3 rounded-2xl shadow-sm ${
                           message.role === 'user'
@@ -385,8 +449,12 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
 
                     {/* Avatar do usuário */}
                     {message.role === 'user' && (
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                        H
+                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 mt-1 border-2 border-white shadow-md">
+                        <img 
+                          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+                          alt="Avatar do Heitor"
+                          className="w-full h-full object-cover rounded-full"
+                        />
                       </div>
                     )}
                   </motion.div>
@@ -399,11 +467,16 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
                     animate={{ opacity: 1, y: 0 }}
                     className="flex gap-3 justify-start"
                   >
-                    <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-red-600 shadow-md">
-                      <Zap className="w-5 h-5 text-red-600" fill="currentColor" />
+                    <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-red-600 shadow-md mt-1">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Zap className="w-6 h-6 text-red-600" fill="currentColor" />
+                      </motion.div>
                     </div>
-                    <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm">
-                      <div className="flex gap-1">
+                    <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm max-w-[85%]">
+                      <div className="flex gap-1 mb-2">
                         <motion.div
                           animate={{ scale: [1, 1.2, 1] }}
                           transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
@@ -420,6 +493,9 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
                           className="w-2 h-2 bg-gray-400 rounded-full"
                         />
                       </div>
+                      <p className="text-xs text-gray-600">
+                        FlashGPT está pensando em uma resposta incrível...
+                      </p>
                     </div>
                   </motion.div>
                 )}
@@ -439,34 +515,70 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
               </div>
 
               {/* Input Area */}
-              <div className="p-4 border-t border-gray-200 bg-white">
+              <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
                 <div className="flex gap-3 items-end">
                   <div className="flex-1">
-                    <input
+                    <textarea
                       ref={inputRef}
-                      type="text"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      placeholder="Digite sua pergunta aqui..."
+                      placeholder="Digite sua pergunta aqui... (pode ser bem detalhada!)"
                       disabled={isLoading}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      rows={isFullscreen ? 3 : 2}
+                      className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed resize-none ${
+                        isFullscreen ? 'text-base' : 'text-sm'
+                      }`}
                       style={{ fontFamily: 'Comic Neue, cursive' }}
-                      maxLength={500}
+                      maxLength={2000} // Increased from 500 to 2000
                       aria-label="Digite sua mensagem para o FlashGPT"
                     />
-                    <p className="text-xs text-gray-500 mt-1 px-2">
-                      {inputValue.length}/500 caracteres
-                    </p>
+                    
+                    {/* Character counter */}
+                    <div className="flex justify-between items-center mt-2 px-2">
+                      <p className="text-xs text-gray-500">
+                        {inputValue.length}/2000 caracteres
+                      </p>
+                      
+                      {/* Character count indicator */}
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          inputValue.length < 1600 ? 'bg-green-400' :
+                          inputValue.length < 1800 ? 'bg-yellow-400' :
+                          'bg-red-400'
+                        }`} />
+                        <span className={`text-xs font-medium ${
+                          inputValue.length < 1600 ? 'text-green-600' :
+                          inputValue.length < 1800 ? 'text-yellow-600' :
+                          'text-red-600'
+                        }`}>
+                          {inputValue.length < 1600 ? 'Ótimo' :
+                           inputValue.length < 1800 ? 'Quase no limite' :
+                           'Muito longo'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Tip for longer messages */}
+                    {inputValue.length > 100 && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="text-xs text-blue-600 mt-1 px-2"
+                      >
+                        💡 Ótimo! Perguntas detalhadas me ajudam a dar respostas ainda melhores!
+                      </motion.p>
+                    )}
                   </div>
                   
                   <motion.button
-                    ref={lastFocusableRef}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={sendMessage}
                     disabled={!inputValue.trim() || isLoading}
-                    className="w-12 h-12 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    className={`${
+                      isFullscreen ? 'w-16 h-16' : 'w-12 h-12'
+                    } bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-500`}
                     aria-label="Enviar mensagem"
                   >
                     {isLoading ? (
@@ -474,23 +586,47 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Lembre-se: assim 
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                       >
-                        <Zap className="w-6 h-6 text-red-600" />
+                        <Zap className={`${isFullscreen ? 'w-8 h-8' : 'w-6 h-6'} text-red-600`} />
                       </motion.div>
                     ) : (
-                      <Send className="w-6 h-6 text-red-600" />
+                      <Send className={`${isFullscreen ? 'w-8 h-8' : 'w-6 h-6'} text-red-600`} />
                     )}
                   </motion.button>
                 </div>
 
-                {/* Clear chat button */}
-                {messages.length > 0 && (
-                  <div className="mt-3 text-center">
-                    <button
-                      onClick={clearChat}
-                      className="text-xs text-gray-500 hover:text-gray-700 underline transition-colors"
-                    >
-                      Limpar conversa
-                    </button>
+                {/* Enhanced tips for fullscreen mode */}
+                {isFullscreen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Zap className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                          💡 Dicas para conversar com o FlashGPT:
+                        </h4>
+                        <ul className="text-xs text-blue-700 space-y-1">
+                          <li>• Faça perguntas detalhadas - agora posso dar respostas muito completas!</li>
+                          <li>• Pergunte sobre estudos, organização, motivação ou curiosidades</li>
+                          <li>• Use Shift+Enter para quebrar linha, Enter para enviar</li>
+                          <li>• Posso te ajudar com dever de casa, dicas de concentração e muito mais!</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* API Key warning */}
+                {!OPENAI_API_KEY && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-yellow-600" />
+                      <p className="text-xs text-yellow-700">
+                        <strong>Aviso:</strong> API Key do OpenAI não configurada. Configure VITE_OPENAI_API_KEY no arquivo .env para ativar o chat.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
