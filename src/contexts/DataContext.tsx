@@ -108,6 +108,35 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [surpriseMissionHistory, setSurpriseMissionHistory] = useState<DailySurpriseMissionStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Define surprise mission functions with useCallback before useEffect
+  const loadSurpriseMissionConfig = useCallback(async () => {
+    if (!childUid) return;
+    
+    try {
+      const config = await FirestoreService.getSurpriseMissionConfig();
+      setSurpriseMissionConfig(config);
+    } catch (error: any) {
+      console.error('❌ Erro ao carregar configuração da missão surpresa:', error);
+      // Don't show error toast for missing config - it's optional
+    }
+  }, [childUid]);
+
+  const checkSurpriseMissionStatus = useCallback(async () => {
+    if (!childUid) return;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const isCompleted = await FirestoreService.checkSurpriseMissionCompletedToday(childUid, today);
+      setIsSurpriseMissionCompletedToday(isCompleted);
+      
+      // Load history
+      const history = await FirestoreService.getSurpriseMissionHistory(childUid, 30);
+      setSurpriseMissionHistory(history);
+    } catch (error: any) {
+      console.error('❌ Erro ao verificar status da missão surpresa:', error);
+    }
+  }, [childUid]);
+
   // Initialize listeners when childUid changes
   useEffect(() => {
     if (!childUid) {
@@ -312,35 +341,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       cleanup.then(cleanupFn => cleanupFn && cleanupFn());
     };
   }, [childUid, user?.userId, user?.role, loadSurpriseMissionConfig, checkSurpriseMissionStatus]);
-
-  // Task methods
-  const addTask = async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
-    if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
-          toast('⚠️ Tarefa já foi completada hoje! Será renovada amanhã.', {
-            duration: 4000,
-            style: {
-              background: '#10B981',
-              color: '#FFFFFF',
-            },
-          });
-    const completeTaskData = {
-      ...taskData,
-      ownerId: childUid,
-      createdBy: user.userId,
-      status: 'pending'
-    };
-    
-    console.log('🔥 DataContext: Creating task with data:', completeTaskData);
-    
-    try {
-      await FirestoreService.createTask(completeTaskData);
-      toast.success('Tarefa criada com sucesso!');
-    } catch (error: any) {
-      console.error('❌ Erro ao criar tarefa:', error);
-      if (error.code === 'permission-denied') {
-        console.error('🚨 PERMISSION DENIED - Task Creation:', {
-          childUid,
-          adminUid: user.userId,
           userRole: user.role,
           taskData: { ...taskData, ownerId: childUid, createdBy: user.userId }
         });
