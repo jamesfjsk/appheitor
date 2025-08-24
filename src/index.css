@@ -17,6 +17,13 @@
   --parent-text: #374151;
   --parent-primary: #2563EB;
   
+  /* ChatFlashGPT Colors */
+  --chat-button-bg: #FFD700;
+  --chat-button-hover: #FFC300;
+  --chat-text-flash: #C8102E;
+  --chat-modal-bg: rgba(255, 255, 255, 0.98);
+  --chat-modal-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  
   /* Spacing System (8px base) */
   --space-1: 0.5rem;   /* 8px */
   --space-2: 1rem;     /* 16px */

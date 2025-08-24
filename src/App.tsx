@@ -13,6 +13,7 @@ import ParentPanel from './components/parent/ParentPanel';
 import OfflineBanner from './components/common/OfflineBanner';
 import DoctorPage from './components/debug/DoctorPage';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import ChatFlashGPT from './components/common/ChatFlashGPT';
 import './index.css';
 
 // Component to handle role-based redirect for root path
@@ -75,6 +76,7 @@ function App() {
                       },
                     }}
                   />
+                  <ChatFlashGPT />
                 </Router>
               </DataProvider>
             </NotificationProvider>
