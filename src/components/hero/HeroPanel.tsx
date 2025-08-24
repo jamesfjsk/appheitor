@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap as Lightning, Target } from 'lucide-react';
+import { Zap as Lightning, Target, Star } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { useSound } from '../../contexts/SoundContext';
