@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
+import { useSound } from './SoundContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp, calculateLevelSystem } from '../utils/levelSystem';
@@ -82,6 +83,7 @@ interface DataProviderProps {
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const { user, childUid } = useAuth();
+  const { playLevelUp, playAchievement } = useSound();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [progress, setProgress] = useState<UserProgress>({
@@ -139,10 +141,23 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) return;
     
     try {
+      console.log('🏆 DataContext: Checking achievements for user:', childUid);
+      console.log('🏆 Current progress:', {
+        totalXP: progress.totalXP,
+        level: calculateLevelSystem(progress.totalXP || 0).currentLevel,
+        totalTasksCompleted: progress.totalTasksCompleted,
+        streak: progress.streak,
+        longestStreak: progress.longestStreak,
+        rewardsRedeemed: progress.rewardsRedeemed
+      });
+      
+      let achievementsUnlocked = 0;
+      
       for (const achievement of achievements.filter(a => a.isActive)) {
         const existingUserAchievement = userAchievements.find(ua => ua.achievementId === achievement.id);
         
         if (existingUserAchievement?.isCompleted) {
+          console.log(`🏆 Achievement ${achievement.title} already completed, skipping`);
           continue;
         }
         
@@ -171,10 +186,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             currentProgress = 0;
         }
         
+        console.log(`🏆 Achievement ${achievement.title}: current=${currentProgress}, target=${achievement.target}, type=${achievement.type}`);
+        
         const shouldComplete = currentProgress >= achievement.target;
         
         if (existingUserAchievement) {
+          // Update existing user achievement
           if (existingUserAchievement.progress !== currentProgress || (shouldComplete && !existingUserAchievement.isCompleted)) {
+            console.log(`🏆 Updating existing achievement ${achievement.title}: shouldComplete=${shouldComplete}`);
+            
             await FirestoreService.updateUserAchievement(existingUserAchievement.id, {
               progress: currentProgress,
               isCompleted: shouldComplete,
@@ -183,16 +203,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             });
             
             if (shouldComplete && !existingUserAchievement.isCompleted) {
+              achievementsUnlocked++;
+              playAchievement();
               toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
                 duration: 6000
               });
+              console.log(`✅ Achievement unlocked: ${achievement.title}`);
             }
           }
         } else {
+          // Create new user achievement
           if (!achievement.id || typeof achievement.id !== 'string') {
             console.error('❌ Invalid achievement ID:', achievement);
             continue;
           }
+          
+          console.log(`🏆 Creating new user achievement for ${achievement.title}: shouldComplete=${shouldComplete}`);
           
           await FirestoreService.createUserAchievement({
             userId: childUid,
@@ -203,19 +229,24 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           });
           
           if (shouldComplete) {
+            achievementsUnlocked++;
+            playAchievement();
             toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
               duration: 6000
             });
+            console.log(`✅ New achievement unlocked: ${achievement.title}`);
           }
         }
       }
+      
+      console.log(`🏆 Achievement check completed. ${achievementsUnlocked} new achievements unlocked.`);
     } catch (error: any) {
       console.error('❌ Erro ao verificar conquistas:', error);
       if (!error.message?.includes('index')) {
         toast.error('Erro ao verificar conquistas');
       }
     }
-  }, [childUid, progress, achievements, userAchievements]);
+  }, [childUid, progress, achievements, userAchievements, playAchievement]);
 
   // Initialize listeners when childUid changes
   useEffect(() => {
@@ -366,6 +397,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         );
         unsubscribeFunctions.push(unsubscribeUserAchievements);
 
+        // Initial achievement check after all data is loaded
+        setTimeout(() => {
+          if (achievements.length > 0) {
+            checkAchievements();
+          }
+        }, 2000);
+        
         setLoading(false);
 
         // Load surprise mission config and status once
@@ -390,7 +428,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     return () => {
       unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
     };
-  }, [childUid, user?.userId, user?.role, loadSurpriseMissionConfig, checkSurpriseMissionStatus]);
+  }, [childUid, user?.userId, user?.role, loadSurpriseMissionConfig, checkSurpriseMissionStatus, checkAchievements]);
 
   // Memoize all methods to prevent re-renders
   const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
@@ -449,10 +487,19 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const task = tasks.find(t => t.id === taskId);
       if (!task) throw new Error('Tarefa não encontrada');
       
+      // Check if task is already completed today
+      const today = new Date().toISOString().split('T')[0];
+      if (task.status === 'done' && task.lastCompletedDate === today) {
+        throw new Error('Task already completed today');
+      }
+      
+      // Store previous progress for level up check
+      const previousXP = progress.totalXP || 0;
+      
       setTasks(prevTasks => 
         prevTasks.map(t => 
           t.id === taskId 
-            ? { ...t, status: 'done', updatedAt: new Date() }
+            ? { ...t, status: 'done', lastCompletedDate: today, updatedAt: new Date() }
             : t
         )
       );
@@ -464,6 +511,32 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         task.gold || 5
       );
       
+      // Check for level up
+      const newXP = previousXP + (task.xp || 10);
+      const levelUpCheck = checkLevelUp(previousXP, newXP);
+      
+      if (levelUpCheck.leveledUp) {
+        playLevelUp();
+        toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
+          duration: 5000
+        });
+        
+        // Check for newly unlocked rewards
+        const newlyUnlockedRewards = getRewardsUnlockedAtLevel(levelUpCheck.newLevel);
+        if (newlyUnlockedRewards.length > 0) {
+          setTimeout(() => {
+            newlyUnlockedRewards.forEach(reward => {
+              toast.success(`🎁 Nova recompensa desbloqueada: ${reward.title}!`);
+            });
+          }, 2000);
+        }
+      }
+      
+      // Trigger achievement check after task completion
+      setTimeout(() => {
+        checkAchievements();
+      }, 1000);
+      
       toast.success(`+${task.xp || 10} XP, +${task.gold || 5} Gold! Tarefa completada!`);
     } catch (error: any) {
       console.error('❌ Erro ao completar tarefa:', error);
@@ -471,17 +544,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         toast('⚠️ Tarefa já foi completada hoje!');
       } else {
         toast.error('Erro ao completar tarefa');
+        // Revert optimistic update
         setTasks(prevTasks => 
           prevTasks.map(t => 
             t.id === taskId 
-              ? { ...t, status: 'pending' }
+              ? { ...t, status: 'pending', lastCompletedDate: undefined }
               : t
           )
         );
       }
       throw error;
     }
-  }, [childUid, tasks]);
+  }, [childUid, tasks, progress.totalXP, playLevelUp, checkAchievements]);
 
   const addReward = useCallback(async (rewardData: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -701,6 +775,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         completedAt: new Date()
       });
       
+      // Store previous XP for level up check
+      const previousXP = progress.totalXP || 0;
       const newTotalXP = (progress.totalXP || 0) + xpEarned;
       const newAvailableGold = (progress.availableGold || 0) + goldEarned;
       const newTotalGoldEarned = (progress.totalGoldEarned || 0) + goldEarned;
@@ -712,8 +788,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         updatedAt: new Date()
       });
       
+      // Check for level up
+      const levelUpCheck = checkLevelUp(previousXP, newTotalXP);
+      if (levelUpCheck.leveledUp) {
+        playLevelUp();
+        toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
+          duration: 5000
+        });
+      }
+      
       setIsSurpriseMissionCompletedToday(true);
       await checkSurpriseMissionStatus();
+      
+      // Trigger achievement check
+      setTimeout(() => {
+        checkAchievements();
+      }, 1000);
       
       toast.success(`🎯 Missão Surpresa completada! +${xpEarned} XP, +${goldEarned} Gold!`);
     } catch (error: any) {
@@ -721,7 +811,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       toast.error('Erro ao completar missão surpresa');
       throw error;
     }
-  }, [childUid, progress.totalXP, progress.availableGold, progress.totalGoldEarned, checkSurpriseMissionStatus]);
+  }, [childUid, progress.totalXP, progress.availableGold, progress.totalGoldEarned, checkSurpriseMissionStatus, playLevelUp, checkAchievements]);
 
   const claimAchievementReward = useCallback(async (userAchievementId: string) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -730,7 +820,60 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     try {
       const userAchievement = userAchievements.find(ua => ua.id === userAchievementId);
       if (!userAchievement) {
-        throw new Error('User achievement not found');
+        // If not found in local state, try to unlock the achievement first
+        console.log('🏆 User achievement not found in local state, checking if it should be unlocked...');
+        await checkAchievements();
+        
+        // Try again after checking achievements
+        const updatedUserAchievement = userAchievements.find(ua => ua.id === userAchievementId);
+        if (!updatedUserAchievement) {
+          throw new Error('User achievement not found');
+        }
+        
+        // If it's not completed yet, try to complete it
+        if (!updatedUserAchievement.isCompleted) {
+          const achievement = achievements.find(a => a.id === updatedUserAchievement.achievementId);
+          if (achievement) {
+            let currentProgress = 0;
+            switch (achievement.type) {
+              case 'xp':
+                currentProgress = progress.totalXP || 0;
+                break;
+              case 'level':
+                currentProgress = calculateLevelSystem(progress.totalXP || 0).currentLevel;
+                break;
+              case 'tasks':
+                currentProgress = progress.totalTasksCompleted || 0;
+                break;
+              case 'streak':
+                currentProgress = Math.max(progress.streak || 0, progress.longestStreak || 0);
+                break;
+              case 'checkin':
+                currentProgress = progress.streak || 0;
+                break;
+              case 'redemptions':
+                currentProgress = progress.rewardsRedeemed || 0;
+                break;
+            }
+            
+            if (currentProgress >= achievement.target) {
+              // Complete the achievement
+              await FirestoreService.updateUserAchievement(userAchievementId, {
+                progress: currentProgress,
+                isCompleted: true,
+                unlockedAt: new Date(),
+                updatedAt: new Date()
+              });
+              
+              playAchievement();
+              toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
+                duration: 6000
+              });
+            } else {
+              throw new Error('Achievement requirements not met yet');
+            }
+          }
+        }
       }
       
       const achievement = achievements.find(a => a.id === userAchievement.achievementId);
@@ -775,7 +918,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
       throw error;
     }
-  }, [childUid, userAchievements, achievements, progress.totalXP, progress.availableGold, progress.totalGoldEarned]);
+  }, [childUid, userAchievements, achievements, progress, playAchievement, checkAchievements]);
 
   const adjustUserXP = useCallback(async (amount: number) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -790,10 +933,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       
       await FirestoreService.updateUserProgress(childUid, {
         totalXP: newTotalXP,
-        level: levelUpCheck.newLevel
+        level: calculateLevelSystem(newTotalXP).currentLevel
       });
       
       if (levelUpCheck.leveledUp) {
+        playLevelUp();
         toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
           duration: 5000
         });
@@ -810,13 +954,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         }
       }
       
+      // Trigger achievement check after XP adjustment
+      setTimeout(() => {
+        checkAchievements();
+      }, 500);
+      
       toast.success(`${amount > 0 ? '+' : ''}${amount} XP aplicado!`);
     } catch (error: any) {
       console.error('❌ Erro ao ajustar XP:', error);
       toast.error('Erro ao ajustar XP');
       throw error;
     }
-  }, [childUid, progress.totalXP]);
+  }, [childUid, progress.totalXP, playLevelUp, checkAchievements]);
 
   const adjustUserGold = useCallback(async (amount: number) => {
     if (!childUid) throw new Error('Child UID não definido');
