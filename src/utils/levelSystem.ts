@@ -128,19 +128,19 @@ export function checkLevelUp(previousXP: number, currentXP: number): {
 }
 
 /**
- * Força verificação de conquistas baseadas em progresso atual
+ * Verifica se deve disparar verificação de conquistas baseado em mudanças no progresso
  */
 export function shouldTriggerAchievementCheck(
-  previousProgress: UserProgress, 
+  previousProgress: Partial<UserProgress>, 
   currentProgress: UserProgress
 ): boolean {
   // Check if any achievement-relevant metric changed
   return (
-    previousProgress.totalXP !== currentProgress.totalXP ||
-    previousProgress.totalTasksCompleted !== currentProgress.totalTasksCompleted ||
-    previousProgress.streak !== currentProgress.streak ||
-    previousProgress.longestStreak !== currentProgress.longestStreak ||
-    previousProgress.rewardsRedeemed !== currentProgress.rewardsRedeemed ||
+    (previousProgress.totalXP || 0) !== (currentProgress.totalXP || 0) ||
+    (previousProgress.totalTasksCompleted || 0) !== (currentProgress.totalTasksCompleted || 0) ||
+    (previousProgress.streak || 0) !== (currentProgress.streak || 0) ||
+    (previousProgress.longestStreak || 0) !== (currentProgress.longestStreak || 0) ||
+    (previousProgress.rewardsRedeemed || 0) !== (currentProgress.rewardsRedeemed || 0) ||
     getLevelFromXP(previousProgress.totalXP || 0) !== getLevelFromXP(currentProgress.totalXP || 0)
   );
 }

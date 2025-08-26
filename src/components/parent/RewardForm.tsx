@@ -33,8 +33,8 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
       setFormData({
         title: initialData.title || '',
         description: initialData.description || '',
-        goldCost: initialData.goldCost || 50,
-        icon: initialData.icon || '🎁',
+        goldCost: initialData.costGold || 50,
+        icon: initialData.emoji || '🎁',
         category: initialData.category || 'custom',
         requiredLevel: initialData.requiredLevel || 1,
         isActive: initialData.isActive !== false,
@@ -44,11 +44,11 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
       setFormData({
         title: reward.title,
         description: reward.description,
-        goldCost: reward.goldCost || 50,
-        icon: reward.icon,
+        goldCost: reward.costGold || 50,
+        icon: reward.emoji,
         category: reward.category,
         requiredLevel: reward.requiredLevel || 1,
-        isActive: reward.isActive,
+        isActive: reward.active,
       });
     } else {
       // Default empty form

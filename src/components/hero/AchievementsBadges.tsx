@@ -43,6 +43,30 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
         default:
           currentProgress = 0;
       }
+    } else {
+      // Even if userAchievement exists, recalculate current progress for real-time updates
+      switch (achievement.type) {
+        case 'xp':
+          currentProgress = Math.max(userAchievement.progress, progress.totalXP || 0);
+          break;
+        case 'level':
+          currentProgress = Math.max(userAchievement.progress, levelSystem.currentLevel);
+          break;
+        case 'tasks':
+          currentProgress = Math.max(userAchievement.progress, progress.totalTasksCompleted || 0);
+          break;
+        case 'streak':
+          currentProgress = Math.max(userAchievement.progress, Math.max(progress.streak || 0, progress.longestStreak || 0));
+          break;
+        case 'checkin':
+          currentProgress = Math.max(userAchievement.progress, progress.streak || 0);
+          break;
+        case 'redemptions':
+          currentProgress = Math.max(userAchievement.progress, progress.rewardsRedeemed || 0);
+          break;
+        default:
+          currentProgress = userAchievement.progress;
+      }
     }
     
     const progressPercentage = Math.min(100, (currentProgress / achievement.target) * 100);
@@ -442,7 +466,19 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                           whileTap={{ scale: 0.98 }}
                           onClick={async () => {
                             try {
-                              await claimAchievementReward(selectedAchievement.userAchievementId);
+                              if (selectedAchievement.userAchievementId) {
+                                await claimAchievementReward(selectedAchievement.userAchievementId);
+                              } else {
+                                // Create user achievement first if it doesn't exist
+                                const newUserAchievementId = await FirestoreService.createUserAchievement({
+                                  userId: childUid!,
+                                  achievementId: selectedAchievement.id,
+                                  progress: selectedAchievement.currentProgress,
+                                  isCompleted: true,
+                                  unlockedAt: new Date()
+                                });
+                                await claimAchievementReward(newUserAchievementId);
+                              }
                               setSelectedAchievement(null);
                             } catch (error) {
                               console.error('🏆 Error claiming achievement reward:', error);
@@ -472,11 +508,29 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         whileTap={{ scale: 0.98 }}
                         onClick={async () => {
                           try {
-                            // This will trigger the achievement check and unlock
-                            await claimAchievementReward(selectedAchievement.userAchievementId);
+                            if (selectedAchievement.userAchievementId) {
+                              // Update existing user achievement to completed
+                              await FirestoreService.updateUserAchievement(selectedAchievement.userAchievementId, {
+                                progress: selectedAchievement.currentProgress,
+                                isCompleted: true,
+                                unlockedAt: new Date(),
+                                updatedAt: new Date()
+                              });
+                            } else {
+                              // Create new user achievement
+                              await FirestoreService.createUserAchievement({
+                                userId: childUid!,
+                                achievementId: selectedAchievement.id,
+                                progress: selectedAchievement.currentProgress,
+                                isCompleted: true,
+                                unlockedAt: new Date()
+                              });
+                            }
                             setSelectedAchievement(null);
+                            toast.success(`🏆 Conquista desbloqueada: ${selectedAchievement.title}!`);
                           } catch (error) {
                             console.error('🏆 Error unlocking achievement:', error);
+                            toast.error('Erro ao desbloquear conquista');
                           }
                         }}
                         className="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold transition-all duration-200 shadow-lg"

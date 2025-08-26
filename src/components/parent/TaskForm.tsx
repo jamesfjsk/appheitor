@@ -281,14 +281,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
               </label>
               <input
                 type="time"
-                value={formData.dueTime}
-                onChange={(e) => handleInputChange('dueTime', e.target.value)}
+                value={formData.time}
+                onChange={(e) => handleInputChange('time', e.target.value)}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                  errors.dueTime ? 'border-red-500' : 'border-gray-300'
+                  errors.time ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.dueTime && (
-                <p className="mt-1 text-sm text-red-600">{errors.dueTime}</p>
+              {errors.time && (
+                <p className="mt-1 text-sm text-red-600">{errors.time}</p>
               )}
             </div>
 

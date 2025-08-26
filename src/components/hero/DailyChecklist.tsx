@@ -93,6 +93,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       return;
     }
     
+    // Check if task is already completed today before proceeding
+    const task = tasks.find(t => t.id === taskId);
+    if (task && isTaskCompletedToday(task)) {
+      console.log('⚠️ Task already completed today, skipping');
+      return;
+    }
+    
     try {
       await completeTask(taskId);
     } catch (error: any) {

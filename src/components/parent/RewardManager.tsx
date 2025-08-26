@@ -273,7 +273,7 @@ const RewardManager: React.FC = () => {
                         
                         <div className="flex items-center gap-1 text-yellow-600 font-bold">
                           <Star className="w-4 h-4" />
-                          {reward.goldCost || 0}
+                          {reward.costGold || 0}
                         </div>
                       </div>
                       
@@ -351,7 +351,7 @@ const RewardManager: React.FC = () => {
                         
                         <div className="flex items-center gap-1 text-gray-500 font-bold">
                           <Star className="w-4 h-4" />
-                          {reward.goldCost || 0}
+                          {reward.costGold || 0}
                         </div>
                       </div>
                       

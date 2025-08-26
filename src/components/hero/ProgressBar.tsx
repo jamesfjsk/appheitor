@@ -57,6 +57,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
   
   // Check for level up
   useEffect(() => {
+    if (previousXP === 0) {
+      setPreviousXP(progress.totalXP || 0);
+      return;
+    }
+    
     const levelUpCheck = checkLevelUp(previousXP, progress.totalXP || 0);
     
     if (levelUpCheck.leveledUp && progress.totalXP > 0) {

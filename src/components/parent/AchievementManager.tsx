@@ -348,8 +348,7 @@ const AchievementManager: React.FC = () => {
                           currentProgress = progress.totalXP || 0;
                           break;
                         case 'level':
-                          const levelSystem = calculateLevelSystem(progress.totalXP || 0);
-                          currentProgress = levelSystem.currentLevel;
+                          currentProgress = calculateLevelSystem(progress.totalXP || 0).currentLevel;
                           break;
                         case 'tasks':
                           currentProgress = progress.totalTasksCompleted || 0;
@@ -365,6 +364,30 @@ const AchievementManager: React.FC = () => {
                           break;
                         default:
                           currentProgress = 0;
+                      }
+                    } else {
+                      // Even if userProgress exists, use the most current data
+                      switch (achievement.type) {
+                        case 'xp':
+                          currentProgress = Math.max(userProgress.progress, progress.totalXP || 0);
+                          break;
+                        case 'level':
+                          currentProgress = Math.max(userProgress.progress, calculateLevelSystem(progress.totalXP || 0).currentLevel);
+                          break;
+                        case 'tasks':
+                          currentProgress = Math.max(userProgress.progress, progress.totalTasksCompleted || 0);
+                          break;
+                        case 'streak':
+                          currentProgress = Math.max(userProgress.progress, Math.max(progress.streak || 0, progress.longestStreak || 0));
+                          break;
+                        case 'checkin':
+                          currentProgress = Math.max(userProgress.progress, progress.streak || 0);
+                          break;
+                        case 'redemptions':
+                          currentProgress = Math.max(userProgress.progress, progress.rewardsRedeemed || 0);
+                          break;
+                        default:
+                          currentProgress = userProgress.progress;
                       }
                     }
                     
