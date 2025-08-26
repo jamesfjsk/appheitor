@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Target, Award, Calendar, Gift, Clock } from 'lucide-react';
+import { TrendingUp, Target, Award, Calendar, Gift, Clock, CheckCircle } from 'lucide-react';
 import { Task, UserProgress } from '../../types';
 import { useData } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { calculateLevelSystem, getLevelTitle, getLevelIcon } from '../../utils/levelSystem';
+import { FirestoreService } from '../../services/FirestoreService';
 
 interface ProgressDashboardProps {
   tasks: Task[];
@@ -341,58 +343,6 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
             </div>
           </div>
         )}
-      </motion.div>
-    </div>
-  );
-};
-
-export default ProgressDashboard;
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div 
-              className="text-2xl font-bold text-blue-600"
-            >
-              {progress.totalTasksCompleted || 0}
-            </div>
-            <div className="text-sm text-blue-600">Tarefas Completadas</div>
-          </div>
-          
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div 
-              className="text-2xl font-bold text-green-600"
-            >
-              {levelSystem.currentXP || 0}
-            </div>
-            <div className="text-sm text-green-600">XP Total</div>
-          </div>
-          
-          <div className="text-center p-4 bg-yellow-50 rounded-lg">
-            <div 
-              className="text-2xl font-bold text-yellow-600"
-            >
-              {progress.availableGold || 0}
-            </div>
-            <div className="text-sm text-yellow-600">Gold Disponível</div>
-          </div>
-          
-          <div className="text-center p-4 bg-orange-50 rounded-lg">
-            <div 
-              className="text-2xl font-bold text-orange-600"
-            >
-              {progress.streak || 0}
-            </div>
-            <div className="text-sm text-orange-600">Dias Consecutivos</div>
-          </div>
-          
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <div 
-              className="text-2xl font-bold text-purple-600 flex items-center justify-center gap-2"
-            >
-              <span>{getLevelIcon(levelSystem.currentLevel)}</span>
-              <span>{levelSystem.currentLevel}</span>
-            </div>
-            <div className="text-sm text-purple-600">{levelSystem.levelTitle}</div>
-          </div>
-        </div>
       </motion.div>
     </div>
   );
