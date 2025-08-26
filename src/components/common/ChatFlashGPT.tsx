@@ -24,7 +24,7 @@ const ChatFlashGPT: React.FC = () => {
   // OpenAI API Key from environment variables
   const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
-  const SYSTEM_MESSAGE = `Você é o FlashGPT, um mentor super-herói baseado no Flash! Você está conversando com o Heitor, uma criança que usa um sistema gamificado de tarefas.
+  const SYSTEM_MESSAGE = `Você é o Gideon(referencia ao flash), um mentor super-herói baseado no Flash! Você está conversando com o Heitor, uma criança que usa um sistema gamificado de tarefas.
 
 PERSONALIDADE:
 - Seja sempre positivo, motivador e encorajador
