@@ -53,7 +53,7 @@ export function getLevelTitle(level: number): string {
   if (level >= 30)  return " Treinamento com STAR Labs";
   if (level >= 20)  return " Iniciado na Força de Aceleração";
   if (level >= 10)  return " Novato do Laboratório STAR";
-  return "⚡ Recruta da Liga da Velocidade";
+  return " Recruta da Liga da Velocidade";
 }
 
 /**
