@@ -1017,12 +1017,11 @@ export class FirestoreService {
       const historyQuery = query(
         collection(db, 'dailySurpriseMissionStatus'),
         where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
         limit(maxResults)
       );
       
       const snapshot = await getDocs(historyQuery);
-      return snapshot.docs.map(doc => {
+      const results = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -1038,6 +1037,9 @@ export class FirestoreService {
           updatedAt: data.updatedAt?.toDate() || new Date()
         };
       });
+      
+      // Sort by createdAt descending in memory since we can't use orderBy without composite index
+      return results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error('❌ FirestoreService: Error getting surprise mission history:', error);
       return [];
