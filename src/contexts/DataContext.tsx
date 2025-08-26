@@ -213,6 +213,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             console.log(`✅ New achievement unlocked: ${achievement.title}`);
           }
         }
+      }
+      
+      if (achievementsUnlocked > 0) {
+        console.log(`🏆 Total achievements unlocked: ${achievementsUnlocked}`);
+      }
+    } catch (error: any) {
+      console.error('❌ DataContext: Erro ao verificar conquistas:', error);
+    }
+  }, [childUid, achievements, userAchievements, progress, playAchievement]);
+
   // Define all callback methods (must be defined before useMemo)
   const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
