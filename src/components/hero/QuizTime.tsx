@@ -237,22 +237,22 @@ Gere EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro.
       let goldReward = 0;
       
       if (correctAnswers >= 5) {
-        xpReward = 30;
-        goldReward = 15;
-      } else if (correctAnswers >= 4) {
         xpReward = 25;
         goldReward = 12;
-      } else if (correctAnswers >= 3) {
+      } else if (correctAnswers >= 4) {
         xpReward = 20;
+        goldReward = 10;
+      } else if (correctAnswers >= 3) {
+        xpReward = 15;
         goldReward = 8;
       } else if (correctAnswers >= 2) {
-        xpReward = 15;
+        xpReward = 10;
         goldReward = 5;
       } else if (correctAnswers >= 1) {
-        xpReward = 10;
+        xpReward = 5;
         goldReward = 3;
       } else {
-        xpReward = 5;
+        xpReward = 2;
         goldReward = 2; // Participation reward
       }
       
@@ -396,10 +396,10 @@ Gere EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro.
                     <span>Recompensas por acertos:</span>
                   </div>
                   <div className="text-sm text-yellow-700 mt-2 space-y-1">
-                    <div>🏆 5 acertos: +25 XP, +15 Gold</div>
-                    <div>🥇 4 acertos: +20 XP, +12 Gold</div>
+                    <div>🏆 5 acertos: +25 XP, +12 Gold</div>
+                    <div>🥇 4 acertos: +20 XP, +10 Gold</div>
                     <div>🥈 3 acertos: +15 XP, +8 Gold</div>
-                    <div>🥉 Participação: +5 XP, +2 Gold</div>
+                    <div>🥉 Participação: +2 XP, +2 Gold</div>
                   </div>
                 </div>
                 
@@ -596,11 +596,11 @@ Gere EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro.
                           <div className="flex justify-center gap-4 text-lg font-bold">
                             <div className="flex items-center gap-1 text-blue-600">
                               <Zap className="w-5 h-5" />
-                              <span>+{score >= 5 ? 30 : score >= 4 ? 25 : score >= 3 ? 20 : score >= 2 ? 15 : score >= 1 ? 10 : 5} XP</span>
+                              <span>+{score >= 5 ? 25 : score >= 4 ? 20 : score >= 3 ? 15 : score >= 2 ? 10 : score >= 1 ? 5 : 2} XP</span>
                             </div>
                             <div className="flex items-center gap-1 text-yellow-600">
                               <span className="text-xl">🪙</span>
-                              <span>+{score >= 5 ? 15 : score >= 4 ? 12 : score >= 3 ? 8 : score >= 2 ? 5 : score >= 1 ? 3 : 2} Gold</span>
+                              <span>+{score >= 5 ? 12 : score >= 4 ? 10 : score >= 3 ? 8 : score >= 2 ? 5 : score >= 1 ? 3 : 2} Gold</span>
                             </div>
                           </div>
                         </div>
