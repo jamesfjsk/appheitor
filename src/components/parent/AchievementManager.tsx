@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Trophy, Star, Zap, Target, Calendar, User, Settings } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { Achievement, UserAchievement } from '../../types';
+import { calculateLevelSystem } from '../../utils/levelSystem';
 import AchievementForm from './AchievementForm';
 import toast from 'react-hot-toast';
 
