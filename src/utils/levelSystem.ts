@@ -40,7 +40,6 @@ export function getLevelFromXP(totalXP: number): number {
 }
 
 /**
-/**
  * Retorna o título do nível baseado no número
  */
 export function getLevelTitle(level: number): string {
