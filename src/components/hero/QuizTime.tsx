@@ -130,7 +130,7 @@ Gere EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro.
 },
               {
                 role: 'user',
-                content: 'Gere 5 perguntas de quiz educativo para o Heitor (8-9 anos) seguindo exatamente o formato JSON especificado.'
+                content: 'Gere 5 perguntas de quiz educativo para o Heitor seguindo exatamente o formato JSON especificado.'
               }
             ],
             temperature: 0.8,
