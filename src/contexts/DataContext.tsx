@@ -869,42 +869,101 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   }, [childUid, user?.userId]);
 
   const getCalendarMonth = useCallback((year: number, month: number): CalendarDay[] => {
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const calendarDays: CalendarDay[] = [];
-    
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dayTasks = tasks.filter(task => 
-        task.status === 'done' && 
-        task.updatedAt.toDateString() === date.toDateString()
-      );
-      
-      const tasksCompleted = dayTasks.length;
-      const totalTasks = tasks.filter(task => task.active).length;
-      const pointsEarned = dayTasks.reduce((sum, task) => sum + (task.xp || 0), 0);
-      
-      let status: CalendarDay['status'] = 'future';
-      if (date < new Date()) {
-        if (tasksCompleted === totalTasks && totalTasks > 0) {
-          status = 'completed';
-        } else if (tasksCompleted > 0) {
-          status = 'partial';
-        } else {
-          status = 'missed';
-        }
+    return new Promise(async (resolve) => {
+      if (!childUid) {
+        resolve([]);
+        return;
       }
       
-      calendarDays.push({
-        date,
-        tasksCompleted,
-        totalTasks,
-        pointsEarned,
-        status,
-        tasks: dayTasks
-      });
-    }
-    
-    return calendarDays;
+      try {
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const calendarDays: CalendarDay[] = [];
+        
+        // Get completion data for the entire month
+        const monthStart = new Date(year, month, 1);
+        const monthEnd = new Date(year, month + 1, 0);
+        const completionHistory = await FirestoreService.getTaskCompletionHistory(childUid, monthStart, monthEnd);
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = new Date(year, month, day);
+          const dateString = date.toISOString().split('T')[0];
+          
+          // Get completions for this specific day
+          const dayCompletions = completionHistory.filter(completion => completion.date === dateString);
+          
+          // Get tasks that were completed on this day from current tasks list
+          const dayTasksFromCurrent = tasks.filter(task => 
+            task.status === 'done' && 
+            task.lastCompletedDate === dateString
+          );
+          
+          // Combine both sources for comprehensive data
+          const allDayTasks = [...dayCompletions.map(completion => ({
+            id: completion.taskId,
+            title: completion.taskTitle,
+            xp: completion.xpEarned,
+            gold: completion.goldEarned,
+            completedAt: completion.completedAt
+          })), ...dayTasksFromCurrent.map(task => ({
+            id: task.id,
+            title: task.title,
+            xp: task.xp || 10,
+            gold: task.gold || 5,
+            completedAt: date
+          }))];
+          
+          // Remove duplicates based on task ID
+          const uniqueTasks = allDayTasks.filter((task, index, self) => 
+            index === self.findIndex(t => t.id === task.id)
+          );
+          
+          const tasksCompleted = uniqueTasks.length;
+          const totalTasks = tasks.filter(task => task.active).length;
+          const pointsEarned = uniqueTasks.reduce((sum, task) => sum + (task.xp || 0), 0);
+          
+          let status: CalendarDay['status'] = 'future';
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          date.setHours(0, 0, 0, 0);
+          
+          if (date < today) {
+            if (tasksCompleted >= totalTasks && totalTasks > 0) {
+              status = 'completed';
+            } else if (tasksCompleted > 0) {
+              status = 'partial';
+            } else {
+              status = 'missed';
+            }
+          } else if (date.getTime() === today.getTime()) {
+            if (tasksCompleted >= totalTasks && totalTasks > 0) {
+              status = 'completed';
+            } else if (tasksCompleted > 0) {
+              status = 'partial';
+            } else {
+              status = 'future';
+            }
+          }
+          
+          calendarDays.push({
+            date: new Date(year, month, day),
+            tasksCompleted,
+            totalTasks,
+            pointsEarned,
+            status,
+            tasks: uniqueTasks.map(task => ({
+              id: task.id,
+              title: task.title,
+              points: task.xp || 0
+            })) as any[]
+          });
+        }
+        
+        resolve(calendarDays);
+      } catch (error) {
+        console.error('❌ Error generating calendar month:', error);
+        resolve([]);
+      }
+    });
   }, [tasks]);
 
   // Memoize the context value to prevent unnecessary re-renders
@@ -947,7 +1006,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     adjustUserGold,
     resetUserData,
     createTestData,
-    getCalendarMonth
+    getCalendarMonth,
+    getCalendarMonthAsync
   }), [
     tasks,
     rewards,
@@ -987,7 +1047,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     adjustUserGold,
     resetUserData,
     createTestData,
-    getCalendarMonth
+    getCalendarMonth,
+    getCalendarMonthAsync
   ]);
 
   return (

@@ -14,17 +14,54 @@ interface ProgressDashboardProps {
 
 const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }) => {
   const { redemptions } = useData();
+  const { childUid } = useAuth();
+  const [weeklyCompletions, setWeeklyCompletions] = useState<any[]>([]);
+  const [loadingWeekly, setLoadingWeekly] = useState(false);
+  
   const today = new Date();
   const weekStart = startOfWeek(today, { locale: ptBR });
   const weekEnd = endOfWeek(today, { locale: ptBR });
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
 
+  // Load weekly completion data
+  useEffect(() => {
+    const loadWeeklyData = async () => {
+      if (!childUid) return;
+      
+      setLoadingWeekly(true);
+      try {
+        const completions = await FirestoreService.getTaskCompletionHistory(childUid, weekStart, weekEnd);
+        setWeeklyCompletions(completions);
+        
+        console.log('📊 ProgressDashboard: Weekly completions loaded:', {
+          weekStart: weekStart.toISOString().split('T')[0],
+          weekEnd: weekEnd.toISOString().split('T')[0],
+          completions: completions.length,
+          totalXP: completions.reduce((sum, c) => sum + c.xpEarned, 0),
+          totalGold: completions.reduce((sum, c) => sum + c.goldEarned, 0)
+        });
+      } catch (error) {
+        console.error('❌ Error loading weekly data:', error);
+      } finally {
+        setLoadingWeekly(false);
+      }
+    };
+    
+    loadWeeklyData();
+  }, [childUid, weekStart, weekEnd]);
+
   const todayTasks = tasks.filter(task => task.active === true);
-  const completedToday = todayTasks.filter(task => task.completed).length;
+  const todayString = today.toISOString().split('T')[0];
+  const completedToday = weeklyCompletions.filter(completion => completion.date === todayString).length;
   const completionRate = todayTasks.length > 0 ? (completedToday / todayTasks.length) * 100 : 0;
   
   const pendingRedemptions = redemptions.filter(r => r.status === 'pending').length;
   const totalRedemptions = redemptions.length;
+  
+  // Calculate weekly stats from real completion data
+  const weeklyXP = weeklyCompletions.reduce((sum, completion) => sum + completion.xpEarned, 0);
+  const weeklyGold = weeklyCompletions.reduce((sum, completion) => sum + completion.goldEarned, 0);
+  const weeklyTasksCompleted = weeklyCompletions.length;
   
   console.log('🔥 ProgressDashboard - Resgates:', { 
     total: redemptions.length, 
@@ -212,7 +249,104 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
           Resumo da Semana ({format(weekStart, 'dd/MM')} - {format(weekEnd, 'dd/MM')})
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {loadingWeekly ? (
+          <div className="text-center py-8">
+            <div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-gray-600 text-sm">Carregando dados da semana...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">
+                {weeklyTasksCompleted}
+              </div>
+              <div className="text-sm text-blue-600">Tarefas Completadas</div>
+              <div className="text-xs text-gray-500 mt-1">Esta semana</div>
+            </div>
+            
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">
+                {weeklyXP}
+              </div>
+              <div className="text-sm text-green-600">XP Semanal</div>
+              <div className="text-xs text-gray-500 mt-1">Ganho esta semana</div>
+            </div>
+            
+            <div className="text-center p-4 bg-yellow-50 rounded-lg">
+              <div className="text-2xl font-bold text-yellow-600">
+                {weeklyGold}
+              </div>
+              <div className="text-sm text-yellow-600">Gold Semanal</div>
+              <div className="text-xs text-gray-500 mt-1">Ganho esta semana</div>
+            </div>
+            
+            <div className="text-center p-4 bg-orange-50 rounded-lg">
+              <div className="text-2xl font-bold text-orange-600">
+                {progress.streak || 0}
+              </div>
+              <div className="text-sm text-orange-600">Dias Consecutivos</div>
+              <div className="text-xs text-gray-500 mt-1">Sequência atual</div>
+            </div>
+            
+            <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600 flex items-center justify-center gap-2">
+                <span>{getLevelIcon(levelSystem.currentLevel)}</span>
+                <span>{levelSystem.currentLevel}</span>
+              </div>
+              <div className="text-sm text-purple-600">{levelSystem.levelTitle}</div>
+              <div className="text-xs text-gray-500 mt-1">Nível atual</div>
+            </div>
+          </div>
+        )}
+        
+        {/* Weekly Activity Chart */}
+        {!loadingWeekly && weeklyCompletions.length > 0 && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold text-gray-900 mb-3">📈 Atividade Semanal Detalhada</h4>
+            
+            <div className="space-y-2">
+              {Array.from({ length: 7 }).map((_, dayIndex) => {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + dayIndex);
+                const dateString = date.toISOString().split('T')[0];
+                const dayCompletions = weeklyCompletions.filter(c => c.date === dateString);
+                const dayXP = dayCompletions.reduce((sum, c) => sum + c.xpEarned, 0);
+                const dayGold = dayCompletions.reduce((sum, c) => sum + c.goldEarned, 0);
+                const isToday = dateString === today.toISOString().split('T')[0];
+                
+                return (
+                  <div key={dateString} className={`flex items-center justify-between p-2 rounded ${isToday ? 'bg-blue-100 border border-blue-200' : 'bg-white'}`}>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-sm font-medium ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>
+                        {format(date, 'EEE dd/MM', { locale: ptBR })}
+                        {isToday && <span className="ml-1 text-xs bg-blue-500 text-white px-1 rounded">HOJE</span>}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {dayCompletions.length > 0 ? (
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full border-2 border-gray-300"></div>
+                        )}
+                        <span className="text-sm text-gray-600">{dayCompletions.length} tarefas</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-blue-600">+{dayXP} XP</span>
+                      <span className="text-yellow-600">+{dayGold} Gold</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
+export default ProgressDashboard;
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <div 
               className="text-2xl font-bold text-blue-600"

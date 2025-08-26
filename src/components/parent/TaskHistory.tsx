@@ -221,13 +221,14 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
                     {format(day.date, 'EEEE, dd/MM', { locale: ptBR })}
                   </span>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>{day.completed} tarefas</span>
+              Progresso Diário - {format(weekStart, 'dd/MM')} a {format(weekEnd, 'dd/MM')}
                     <span>•</span>
                     <span>{day.xpEarned} XP</span>
                     <span>•</span>
                     <span>{day.goldEarned} Gold</span>
                   </div>
                 </div>
+                const isToday = day.date.toDateString() === new Date().toDateString();
                 
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <motion.div
@@ -270,8 +271,9 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200"
+                      <span className={`text-sm font-medium ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>
                   >
+                        {isToday && <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">HOJE</span>}
                     <div className="flex items-center gap-3">
                       <CheckCircle className="w-4 h-4 text-green-600" />
                       <div>
@@ -282,9 +284,34 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
                       </div>
                     </div>
                     <div className="text-right text-sm">
-                      <div className="text-blue-600 font-semibold">+{completion.xpEarned} XP</div>
+                        className={`h-3 rounded-full ${
+                          day.completed === 0 ? 'bg-gray-300' :
+                          day.completed >= 3 ? 'bg-gradient-to-r from-green-500 to-green-600' :
+                          'bg-gradient-to-r from-yellow-500 to-yellow-600'
+                        }`}
                       <div className="text-yellow-600 font-semibold">+{completion.goldEarned} Gold</div>
                     </div>
+                    
+                    {/* Show completed tasks for this day */}
+                    {day.completions.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {day.completions.map((completion, compIndex) => (
+                          <div key={`${completion.taskId}-${completion.date}`} className="flex items-center justify-between text-xs bg-white p-2 rounded border">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="w-3 h-3 text-green-500" />
+                              <span className="text-gray-700">{completion.taskTitle}</span>
+                              <span className="text-gray-500">
+                                {completion.completedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-blue-600">+{completion.xpEarned}</span>
+                              <span className="text-yellow-600">+{completion.goldEarned}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 ))}
               </div>

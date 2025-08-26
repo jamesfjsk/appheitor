@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, ChevronLeft, ChevronRight, X, Star, Target } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, X, Star, Target, Clock, CheckCircle } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { CalendarDay, Task } from '../../types';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from 'date-fns';
@@ -12,13 +13,95 @@ interface CalendarModalProps {
 }
 
 const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
-  const { getCalendarMonth, progress } = useData();
+  const { progress } = useData();
+  const { childUid } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
+  const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Load calendar data when month changes
+  useEffect(() => {
+    const loadCalendarData = async () => {
+      if (!childUid) return;
+      
+      setLoading(true);
+      try {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        // Get completion history for the month
+        const monthStart = new Date(year, month, 1);
+        const monthEnd = new Date(year, month + 1, 0);
+        const completionHistory = await FirestoreService.getTaskCompletionHistory(childUid, monthStart, monthEnd);
+        
+        // Generate calendar days with real data
+        const daysInMonth = monthEnd.getDate();
+        const days: CalendarDay[] = [];
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = new Date(year, month, day);
+          const dateString = date.toISOString().split('T')[0];
+          
+          // Get completions for this day
+          const dayCompletions = completionHistory.filter(completion => completion.date === dateString);
+          
+          const tasksCompleted = dayCompletions.length;
+          const pointsEarned = dayCompletions.reduce((sum, completion) => sum + completion.xpEarned, 0);
+          
+          // Estimate total tasks (this could be improved by storing daily task counts)
+          const totalTasks = 5; // Average estimate, could be made more accurate
+          
+          let status: CalendarDay['status'] = 'future';
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          date.setHours(0, 0, 0, 0);
+          
+          if (date < today) {
+            if (tasksCompleted >= 3) { // Consider 3+ tasks as "completed" day
+              status = 'completed';
+            } else if (tasksCompleted > 0) {
+              status = 'partial';
+            } else {
+              status = 'missed';
+            }
+          } else if (date.getTime() === today.getTime()) {
+            if (tasksCompleted >= 3) {
+              status = 'completed';
+            } else if (tasksCompleted > 0) {
+              status = 'partial';
+            } else {
+              status = 'future';
+            }
+          }
+          
+          days.push({
+            date,
+            tasksCompleted,
+            totalTasks,
+            pointsEarned,
+            status,
+            tasks: dayCompletions.map(completion => ({
+              id: completion.taskId,
+              title: completion.taskTitle,
+              points: completion.xpEarned
+            })) as any[]
+          });
+        }
+        
+        setCalendarDays(days);
+      } catch (error) {
+        console.error('❌ Error loading calendar data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadCalendarData();
+  }, [currentDate, childUid]);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const calendarDays = getCalendarMonth(currentDate.getFullYear(), currentDate.getMonth());
   
   // Preencher dias do calendário incluindo espaços vazios
   const startDate = new Date(monthStart);

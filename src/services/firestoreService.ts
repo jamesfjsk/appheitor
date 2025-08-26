@@ -271,6 +271,19 @@ export class FirestoreService {
         updatedAt: serverTimestamp()
       });
       
+      // Create completion record in subcollection for detailed tracking
+      const completionRef = doc(db, 'tasks', taskId, 'completions', today);
+      batch.set(completionRef, {
+        userId,
+        taskId,
+        taskTitle: taskData.title || 'Tarefa sem título',
+        xpEarned: xpReward,
+        goldEarned: goldReward,
+        date: today,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
       // Update user progress
       const progressRef = doc(db, 'progress', userId);
       const progressDoc = await getDoc(progressRef);
@@ -278,38 +291,16 @@ export class FirestoreService {
       if (progressDoc.exists()) {
         const currentProgress = progressDoc.data();
         
-        // Calculate new streak
-        const lastActivityDate = currentProgress.lastActivityDate?.toDate();
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        
-        let newStreak = 1;
-        if (lastActivityDate) {
-          const lastActivityDateString = lastActivityDate.toISOString().split('T')[0];
-          const yesterdayString = yesterday.toISOString().split('T')[0];
-          const todayString = today;
-          
-          if (lastActivityDateString === yesterdayString) {
-            // Consecutive day
-            newStreak = (currentProgress.streak || 0) + 1;
-          } else if (lastActivityDateString === todayString) {
-            // Same day, keep current streak
-            newStreak = currentProgress.streak || 1;
-          } else {
-            // Streak broken, start new
-            newStreak = 1;
-          }
-        }
-        
-        const newLongestStreak = Math.max(newStreak, currentProgress.longestStreak || 0);
+        // Calculate accurate streak from completion history
+        const streakData = await this.calculateStreakFromHistory(userId);
         
         batch.update(progressRef, {
           totalXP: (currentProgress.totalXP || 0) + xpReward,
           availableGold: (currentProgress.availableGold || 0) + goldReward,
           totalGoldEarned: (currentProgress.totalGoldEarned || 0) + goldReward,
           totalTasksCompleted: (currentProgress.totalTasksCompleted || 0) + 1,
-          streak: newStreak,
-          longestStreak: newLongestStreak,
+          streak: streakData.currentStreak,
+          longestStreak: streakData.longestStreak,
           lastActivityDate: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
@@ -322,6 +313,7 @@ export class FirestoreService {
         userId,
         xpReward,
         goldReward,
+        date: today,
         newTotalTasks: (progressDoc.exists() ? progressDoc.data().totalTasksCompleted || 0 : 0) + 1
       });
     } catch (error) {
@@ -1230,6 +1222,272 @@ export class FirestoreService {
   // ========================================
   // 🔥 DATA MANAGEMENT
   // ========================================
+
+  static async getTaskCompletionHistory(userId: string, startDate: Date, endDate: Date): Promise<Array<{
+    taskId: string;
+    taskTitle: string;
+    date: string;
+    xpEarned: number;
+    goldEarned: number;
+    completedAt: Date;
+  }>> {
+    try {
+      // Query tasks completed in the date range
+      const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('ownerId', '==', userId)
+      );
+      
+      const tasksSnapshot = await getDocs(tasksQuery);
+      const completions: Array<{
+        taskId: string;
+        taskTitle: string;
+        date: string;
+        xpEarned: number;
+        goldEarned: number;
+        completedAt: Date;
+      }> = [];
+      
+      // Check each task for completions in the date range
+      for (const taskDoc of tasksSnapshot.docs) {
+        const taskData = taskDoc.data();
+        
+        // Get completions subcollection for this task
+        const completionsQuery = query(
+          collection(db, 'tasks', taskDoc.id, 'completions'),
+          where('userId', '==', userId)
+        );
+        
+        try {
+          const completionsSnapshot = await getDocs(completionsQuery);
+          
+          completionsSnapshot.docs.forEach(completionDoc => {
+            const completionData = completionDoc.data();
+            const completionDate = completionData.createdAt?.toDate() || new Date();
+            
+            // Check if completion is in date range
+            if (completionDate >= startDate && completionDate <= endDate) {
+              completions.push({
+                taskId: taskDoc.id,
+                taskTitle: taskData.title || 'Tarefa sem título',
+                date: completionDate.toISOString().split('T')[0],
+                xpEarned: completionData.xpEarned || taskData.xp || 10,
+                goldEarned: completionData.goldEarned || taskData.gold || 5,
+                completedAt: completionDate
+              });
+            }
+          });
+        } catch (error) {
+          // If subcollection doesn't exist or has issues, check lastCompletedDate
+          const lastCompletedDate = taskData.lastCompletedDate;
+          if (lastCompletedDate && taskData.status === 'done') {
+            const completionDate = new Date(lastCompletedDate + 'T12:00:00');
+            
+            if (completionDate >= startDate && completionDate <= endDate) {
+              completions.push({
+                taskId: taskDoc.id,
+                taskTitle: taskData.title || 'Tarefa sem título',
+                date: lastCompletedDate,
+                xpEarned: taskData.xp || 10,
+                goldEarned: taskData.gold || 5,
+                completedAt: completionDate
+              });
+            }
+          }
+        }
+      }
+      
+      // Sort by completion date (most recent first)
+      return completions.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+    } catch (error) {
+      console.error('❌ FirestoreService: Error getting task completion history:', error);
+      return [];
+    }
+  }
+
+  static async getDailyTaskCompletions(userId: string, date: string): Promise<Array<{
+    taskId: string;
+    taskTitle: string;
+    xpEarned: number;
+    goldEarned: number;
+    completedAt: Date;
+  }>> {
+    try {
+      const completions: Array<{
+        taskId: string;
+        taskTitle: string;
+        xpEarned: number;
+        goldEarned: number;
+        completedAt: Date;
+      }> = [];
+      
+      // Get all user tasks
+      const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('ownerId', '==', userId)
+      );
+      
+      const tasksSnapshot = await getDocs(tasksQuery);
+      
+      for (const taskDoc of tasksSnapshot.docs) {
+        const taskData = taskDoc.data();
+        
+        // Check if task was completed on this specific date
+        if (taskData.lastCompletedDate === date && taskData.status === 'done') {
+          completions.push({
+            taskId: taskDoc.id,
+            taskTitle: taskData.title || 'Tarefa sem título',
+            xpEarned: taskData.xp || 10,
+            goldEarned: taskData.gold || 5,
+            completedAt: new Date(date + 'T12:00:00') // Default to noon
+          });
+        }
+        
+        // Also check completions subcollection for more detailed data
+        try {
+          const completionDoc = await getDoc(doc(db, 'tasks', taskDoc.id, 'completions', date));
+          if (completionDoc.exists()) {
+            const completionData = completionDoc.data();
+            
+            // Update or add completion with more accurate data
+            const existingIndex = completions.findIndex(c => c.taskId === taskDoc.id);
+            const completionInfo = {
+              taskId: taskDoc.id,
+              taskTitle: taskData.title || 'Tarefa sem título',
+              xpEarned: completionData.xpEarned || taskData.xp || 10,
+              goldEarned: completionData.goldEarned || taskData.gold || 5,
+              completedAt: completionData.createdAt?.toDate() || new Date(date + 'T12:00:00')
+            };
+            
+            if (existingIndex >= 0) {
+              completions[existingIndex] = completionInfo;
+            } else {
+              completions.push(completionInfo);
+            }
+          }
+        } catch (error) {
+          // Subcollection might not exist, that's ok
+        }
+      }
+      
+      return completions.sort((a, b) => a.completedAt.getTime() - b.completedAt.getTime());
+    } catch (error) {
+      console.error('❌ FirestoreService: Error getting daily task completions:', error);
+      return [];
+    }
+  }
+
+  static async calculateStreakFromHistory(userId: string): Promise<{
+    currentStreak: number;
+    longestStreak: number;
+    lastActivityDate: Date | null;
+  }> {
+    try {
+      // Get all tasks for the user
+      const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('ownerId', '==', userId)
+      );
+      
+      const tasksSnapshot = await getDocs(tasksQuery);
+      const completionDates = new Set<string>();
+      
+      // Collect all completion dates
+      for (const taskDoc of tasksSnapshot.docs) {
+        const taskData = taskDoc.data();
+        
+        if (taskData.lastCompletedDate && taskData.status === 'done') {
+          completionDates.add(taskData.lastCompletedDate);
+        }
+        
+        // Also check completions subcollection
+        try {
+          const completionsQuery = query(
+            collection(db, 'tasks', taskDoc.id, 'completions'),
+            where('userId', '==', userId)
+          );
+          
+          const completionsSnapshot = await getDocs(completionsQuery);
+          completionsSnapshot.docs.forEach(completionDoc => {
+            const completionData = completionDoc.data();
+            const completionDate = completionData.createdAt?.toDate();
+            if (completionDate) {
+              const dateString = completionDate.toISOString().split('T')[0];
+              completionDates.add(dateString);
+            }
+          });
+        } catch (error) {
+          // Subcollection might not exist
+        }
+      }
+      
+      // Convert to sorted array of dates
+      const sortedDates = Array.from(completionDates)
+        .map(dateStr => new Date(dateStr))
+        .sort((a, b) => b.getTime() - a.getTime()); // Most recent first
+      
+      if (sortedDates.length === 0) {
+        return { currentStreak: 0, longestStreak: 0, lastActivityDate: null };
+      }
+      
+      const today = new Date();
+      const todayString = today.toISOString().split('T')[0];
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = yesterday.toISOString().split('T')[0];
+      
+      // Calculate current streak
+      let currentStreak = 0;
+      const mostRecentDate = sortedDates[0];
+      const mostRecentDateString = mostRecentDate.toISOString().split('T')[0];
+      
+      // Start counting from today or yesterday
+      if (mostRecentDateString === todayString || mostRecentDateString === yesterdayString) {
+        currentStreak = 1;
+        
+        // Count consecutive days backwards
+        for (let i = 1; i < sortedDates.length; i++) {
+          const currentDateString = sortedDates[i].toISOString().split('T')[0];
+          const expectedDate = new Date(sortedDates[i - 1]);
+          expectedDate.setDate(expectedDate.getDate() - 1);
+          const expectedDateString = expectedDate.toISOString().split('T')[0];
+          
+          if (currentDateString === expectedDateString) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+      
+      // Calculate longest streak
+      let longestStreak = 0;
+      let tempStreak = 1;
+      
+      for (let i = 1; i < sortedDates.length; i++) {
+        const currentDate = sortedDates[i];
+        const previousDate = sortedDates[i - 1];
+        const daysDiff = Math.round((previousDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff === 1) {
+          tempStreak++;
+        } else {
+          longestStreak = Math.max(longestStreak, tempStreak);
+          tempStreak = 1;
+        }
+      }
+      longestStreak = Math.max(longestStreak, tempStreak);
+      
+      return {
+        currentStreak,
+        longestStreak,
+        lastActivityDate: mostRecentDate
+      };
+    } catch (error) {
+      console.error('❌ FirestoreService: Error calculating streak:', error);
+      return { currentStreak: 0, longestStreak: 0, lastActivityDate: null };
+    }
+  }
 
   static async createDefaultData(childUid: string, adminUid: string): Promise<void> {
     try {
