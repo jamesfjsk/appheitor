@@ -1169,13 +1169,11 @@ export class FirestoreService {
         collection(db, 'taskCompletions'),
         where('userId', '==', userId),
         where('date', '>=', startDateString),
-        where('date', '<=', endDateString),
-        orderBy('date', 'desc'),
-        orderBy('completedAt', 'desc')
+        where('date', '<=', endDateString)
       );
       
       const snapshot = await getDocs(completionsQuery);
-      return snapshot.docs.map(doc => {
+      const results = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
           taskId: data.taskId,
@@ -1185,6 +1183,16 @@ export class FirestoreService {
           goldEarned: data.goldEarned || 0,
           completedAt: data.completedAt?.toDate() || new Date()
         };
+      });
+      
+      // Sort in memory to avoid composite index requirement
+      return results.sort((a, b) => {
+        // First sort by date (descending)
+        const dateComparison = b.date.localeCompare(a.date);
+        if (dateComparison !== 0) return dateComparison;
+        
+        // Then by completedAt (descending)
+        return b.completedAt.getTime() - a.completedAt.getTime();
       });
     } catch (error) {
       console.error('❌ FirestoreService: Error getting task completion history:', error);
