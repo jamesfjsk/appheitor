@@ -84,6 +84,8 @@ interface DataProviderProps {
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const { user, childUid } = useAuth();
   const { playLevelUp, playAchievement } = useSound();
+  
+  // Initialize all state hooks first (before any conditional logic)
   const [tasks, setTasks] = useState<Task[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [progress, setProgress] = useState<UserProgress>({
@@ -110,33 +112,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [surpriseMissionHistory, setSurpriseMissionHistory] = useState<DailySurpriseMissionStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load surprise mission config
-  const loadSurpriseMissionConfig = async () => {
-    if (!childUid) return;
-    
-    try {
-      const config = await FirestoreService.getSurpriseMissionConfig();
-      setSurpriseMissionConfig(config);
-    } catch (error: any) {
-      console.error('❌ Erro ao carregar configuração da missão surpresa:', error);
-    }
-  };
-
-  const checkSurpriseMissionStatus = async () => {
-    if (!childUid) return;
-    
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const isCompleted = await FirestoreService.checkSurpriseMissionCompletedToday(childUid, today);
-      setIsSurpriseMissionCompletedToday(isCompleted);
-      
-      const history = await FirestoreService.getSurpriseMissionHistory(childUid, 30);
-      setSurpriseMissionHistory(history);
-    } catch (error: any) {
-      console.error('❌ Erro ao verificar status da missão surpresa:', error);
-    }
-  };
-
+  // Define all callback hooks before any conditional logic
   const checkAchievements = useCallback(async () => {
     if (!childUid) return;
     
@@ -237,202 +213,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             console.log(`✅ New achievement unlocked: ${achievement.title}`);
           }
         }
-      }
-      
-      console.log(`🏆 Achievement check completed. ${achievementsUnlocked} new achievements unlocked.`);
-    } catch (error: any) {
-      console.error('❌ Erro ao verificar conquistas:', error);
-      if (!error.message?.includes('index')) {
-        toast.error('Erro ao verificar conquistas');
-      }
-    }
-  }, [childUid, progress, achievements, userAchievements, playAchievement]);
-
-  // Initialize listeners when childUid changes
-  useEffect(() => {
-    if (!childUid) {
-      setTasks([]);
-      setRewards([]);
-      setRedemptions([]);
-      setNotifications([]);
-      setFlashReminders([]);
-      setAchievements([]);
-      setUserAchievements([]);
-      setProgress({
-        userId: '',
-        level: 1,
-        totalXP: 0,
-        availableGold: 0,
-        totalGoldEarned: 0,
-        totalGoldSpent: 0,
-        streak: 0,
-        longestStreak: 0,
-        rewardsRedeemed: 0,
-        totalTasksCompleted: 0,
-        lastActivityDate: new Date(),
-        updatedAt: new Date()
-      });
-      setLoading(false);
-      return;
-    }
-
-    console.log('🔥 DataContext: Setting up listeners for childUid:', childUid);
-    setLoading(true);
-
-    let unsubscribeFunctions: (() => void)[] = [];
-
-    const initializeData = async () => {
-      try {
-        // Check if child has data, create defaults if needed
-        const hasProgress = await new Promise<boolean>((resolve) => {
-          const unsubscribe = FirestoreService.subscribeToUserProgress(
-            childUid,
-            (progress) => {
-              unsubscribe();
-              resolve(!!progress);
-            },
-            () => {
-              unsubscribe();
-              resolve(false);
-            }
-          );
-        });
-
-        if (!hasProgress && user?.role === 'admin') {
-          console.log('🔄 DataContext: Creating default data for child:', childUid);
-          await FirestoreService.createDefaultData(childUid, user.userId);
-        }
-
-        // Set up real-time listeners
-        const unsubscribeTasks = FirestoreService.subscribeToUserTasks(
-          childUid,
-          (tasks) => {
-            setTasks(tasks);
-          },
-          (error) => {
-            console.error('❌ DataContext: Erro no listener de tasks:', error);
-          }
-        );
-        unsubscribeFunctions.push(unsubscribeTasks);
-
-        const unsubscribeRewards = FirestoreService.subscribeToUserRewards(
-          childUid,
-          (rewards) => {
-            setRewards(rewards);
-          },
-          (error) => {
-            console.error('❌ DataContext: Erro no listener de rewards:', error);
-          }
-        );
-        unsubscribeFunctions.push(unsubscribeRewards);
-
-        const unsubscribeProgress = FirestoreService.subscribeToUserProgress(
-          childUid,
-          (progress) => {
-            if (progress) {
-              setProgress(progress);
-            }
-          },
-          (error) => {
-            console.error('❌ DataContext: Erro no listener de progress:', error);
-          }
-        );
-        unsubscribeFunctions.push(unsubscribeProgress);
-
-        const unsubscribeRedemptions = FirestoreService.subscribeToUserRedemptions(
-          childUid,
-          (redemptions) => {
-            setRedemptions(redemptions);
-          },
-          (error) => {
-            console.error('❌ DataContext: Erro no listener de redemptions:', error);
-          }
-        );
-        unsubscribeFunctions.push(unsubscribeRedemptions);
-
-        const unsubscribeNotifications = FirestoreService.subscribeToUserNotifications(
-          childUid,
-          (notifications) => {
-            setNotifications(notifications);
-          },
-          (error) => {
-            console.error('❌ DataContext: Erro no listener de notifications:', error);
-          }
-        );
-        unsubscribeFunctions.push(unsubscribeNotifications);
-
-        const unsubscribeFlashReminders = FirestoreService.subscribeToUserFlashReminders(
-          childUid,
-          (flashReminders) => {
-            setFlashReminders(flashReminders);
-          },
-          (error) => {
-            console.error('❌ DataContext: Erro no listener de flash reminders:', error);
-          }
-        );
-        unsubscribeFunctions.push(unsubscribeFlashReminders);
-
-        const unsubscribeAchievements = FirestoreService.subscribeToUserAchievements(
-          childUid,
-          (achievements) => {
-            setAchievements(achievements);
-          },
-          (error) => {
-            console.error('❌ DataContext: Erro no listener de achievements:', error);
-          }
-        );
-        unsubscribeFunctions.push(unsubscribeAchievements);
-
-        const unsubscribeUserAchievements = FirestoreService.subscribeToUserAchievementProgress(
-          childUid,
-          (userAchievements) => {
-            setUserAchievements(userAchievements);
-          },
-          (error) => {
-            console.error('❌ DataContext: Erro no listener de user achievements:', error);
-            if (error.message?.includes('index') || error.code === 'failed-precondition') {
-              setUserAchievements([]);
-            }
-          }
-        );
-        unsubscribeFunctions.push(unsubscribeUserAchievements);
-
-        // Initial achievement check after all data is loaded
-        setTimeout(() => {
-          if (achievements.length > 0) {
-            checkAchievements();
-          }
-        }, 2000);
-        
-        setLoading(false);
-
-        // Load surprise mission config and status once (without dependencies)
-        if (childUid) {
-          loadSurpriseMissionConfig();
-          checkSurpriseMissionStatus();
-        }
-
-      } catch (error: any) {
-        console.error('❌ DataContext: Erro ao inicializar dados:', error);
-        setLoading(false);
-        
-        if (error.code === 'permission-denied') {
-          toast.error('❌ Acesso negado. Verifique as regras do Firestore.');
-        } else if (error.code === 'failed-precondition') {
-          toast.error('❌ Banco Firestore não configurado.');
-        }
-      }
-    };
-
-    initializeData();
-
-    // Cleanup function
-    return () => {
-      unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
-    };
-  }, [childUid, user?.userId, user?.role, checkAchievements]);
-
-  // Memoize all methods to prevent re-renders
+  // Define all callback methods (must be defined before useMemo)
   const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
     
@@ -1117,6 +898,217 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     });
   }, [tasks]);
 
+  // Load surprise mission config
+  const loadSurpriseMissionConfig = useCallback(async () => {
+    if (!childUid) return;
+    
+    try {
+      const config = await FirestoreService.getSurpriseMissionConfig();
+      setSurpriseMissionConfig(config);
+    } catch (error: any) {
+      console.error('❌ Erro ao carregar configuração da missão surpresa:', error);
+    }
+  }, [childUid]);
+
+  const checkSurpriseMissionStatus = useCallback(async () => {
+    if (!childUid) return;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const isCompleted = await FirestoreService.checkSurpriseMissionCompletedToday(childUid, today);
+      setIsSurpriseMissionCompletedToday(isCompleted);
+      
+      const history = await FirestoreService.getSurpriseMissionHistory(childUid, 30);
+      setSurpriseMissionHistory(history);
+    } catch (error: any) {
+      console.error('❌ Erro ao verificar status da missão surpresa:', error);
+    }
+  }, [childUid]);
+
+  // Initialize listeners when childUid changes
+  useEffect(() => {
+    if (!childUid) {
+      setTasks([]);
+      setRewards([]);
+      setRedemptions([]);
+      setNotifications([]);
+      setFlashReminders([]);
+      setAchievements([]);
+      setUserAchievements([]);
+      setProgress({
+        userId: '',
+        level: 1,
+        totalXP: 0,
+        availableGold: 0,
+        totalGoldEarned: 0,
+        totalGoldSpent: 0,
+        streak: 0,
+        longestStreak: 0,
+        rewardsRedeemed: 0,
+        totalTasksCompleted: 0,
+        lastActivityDate: new Date(),
+        updatedAt: new Date()
+      });
+      setLoading(false);
+      return;
+    }
+
+    console.log('🔥 DataContext: Setting up listeners for childUid:', childUid);
+    setLoading(true);
+
+    let unsubscribeFunctions: (() => void)[] = [];
+
+    const initializeData = async () => {
+      try {
+        // Check if child has data, create defaults if needed
+        const hasProgress = await new Promise<boolean>((resolve) => {
+          const unsubscribe = FirestoreService.subscribeToUserProgress(
+            childUid,
+            (progress) => {
+              unsubscribe();
+              resolve(!!progress);
+            },
+            () => {
+              unsubscribe();
+              resolve(false);
+            }
+          );
+        });
+
+        if (!hasProgress && user?.role === 'admin') {
+          console.log('🔄 DataContext: Creating default data for child:', childUid);
+          await FirestoreService.createDefaultData(childUid, user.userId);
+        }
+
+        // Set up real-time listeners
+        const unsubscribeTasks = FirestoreService.subscribeToUserTasks(
+          childUid,
+          (tasks) => {
+            setTasks(tasks);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de tasks:', error);
+          }
+        );
+        unsubscribeFunctions.push(unsubscribeTasks);
+
+        const unsubscribeRewards = FirestoreService.subscribeToUserRewards(
+          childUid,
+          (rewards) => {
+            setRewards(rewards);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de rewards:', error);
+          }
+        );
+        unsubscribeFunctions.push(unsubscribeRewards);
+
+        const unsubscribeProgress = FirestoreService.subscribeToUserProgress(
+          childUid,
+          (progress) => {
+            if (progress) {
+              setProgress(progress);
+            }
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de progress:', error);
+          }
+        );
+        unsubscribeFunctions.push(unsubscribeProgress);
+
+        const unsubscribeRedemptions = FirestoreService.subscribeToUserRedemptions(
+          childUid,
+          (redemptions) => {
+            setRedemptions(redemptions);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de redemptions:', error);
+          }
+        );
+        unsubscribeFunctions.push(unsubscribeRedemptions);
+
+        const unsubscribeNotifications = FirestoreService.subscribeToUserNotifications(
+          childUid,
+          (notifications) => {
+            setNotifications(notifications);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de notifications:', error);
+          }
+        );
+        unsubscribeFunctions.push(unsubscribeNotifications);
+
+        const unsubscribeFlashReminders = FirestoreService.subscribeToUserFlashReminders(
+          childUid,
+          (flashReminders) => {
+            setFlashReminders(flashReminders);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de flash reminders:', error);
+          }
+        );
+        unsubscribeFunctions.push(unsubscribeFlashReminders);
+
+        const unsubscribeAchievements = FirestoreService.subscribeToUserAchievements(
+          childUid,
+          (achievements) => {
+            setAchievements(achievements);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de achievements:', error);
+          }
+        );
+        unsubscribeFunctions.push(unsubscribeAchievements);
+
+        const unsubscribeUserAchievements = FirestoreService.subscribeToUserAchievementProgress(
+          childUid,
+          (userAchievements) => {
+            setUserAchievements(userAchievements);
+          },
+          (error) => {
+            console.error('❌ DataContext: Erro no listener de user achievements:', error);
+            if (error.message?.includes('index') || error.code === 'failed-precondition') {
+              setUserAchievements([]);
+            }
+          }
+        );
+        unsubscribeFunctions.push(unsubscribeUserAchievements);
+
+        // Initial achievement check after all data is loaded
+        setTimeout(() => {
+          if (achievements.length > 0) {
+            checkAchievements();
+          }
+        }, 2000);
+        
+        setLoading(false);
+
+        // Load surprise mission config and status once
+        if (childUid) {
+          await loadSurpriseMissionConfig();
+          await checkSurpriseMissionStatus();
+        }
+
+      } catch (error: any) {
+        console.error('❌ DataContext: Erro ao inicializar dados:', error);
+        setLoading(false);
+        
+        if (error.code === 'permission-denied') {
+          toast.error('❌ Acesso negado. Verifique as regras do Firestore.');
+        } else if (error.code === 'failed-precondition') {
+          toast.error('❌ Banco Firestore não configurado.');
+        }
+      }
+    };
+
+    initializeData();
+
+    // Cleanup function
+    return () => {
+      unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
+    };
+  }, [childUid, user?.userId, user?.role, loadSurpriseMissionConfig, checkSurpriseMissionStatus]);
+
   // Memoize the context value to prevent unnecessary re-renders
   const value = useMemo<DataContextType>(() => ({
     tasks,
@@ -1150,7 +1142,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     deleteAchievement,
     checkAchievements,
     claimAchievementReward,
-    loadSurpriseMissionConfig: useCallback(loadSurpriseMissionConfig, [childUid]),
+    loadSurpriseMissionConfig,
     updateSurpriseMissionSettings,
     completeSurpriseMission,
     adjustUserXP,
