@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { calculateLevelSystem, getLevelTitle, getLevelIcon } from '../../utils/levelSystem';
-import { FirestoreService } from '../../services/FirestoreService';
+import { FirestoreService } from '../../services/firestoreService';
 
 interface ProgressDashboardProps {
   tasks: Task[];
