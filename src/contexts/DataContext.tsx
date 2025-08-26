@@ -1007,7 +1007,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     resetUserData,
     createTestData,
     getCalendarMonth,
-    getCalendarMonthAsync
   }), [
     tasks,
     rewards,
@@ -1048,7 +1047,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     resetUserData,
     createTestData,
     getCalendarMonth,
-    getCalendarMonthAsync
   ]);
 
   return (
