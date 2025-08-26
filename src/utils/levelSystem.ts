@@ -40,40 +40,57 @@ export function getLevelFromXP(totalXP: number): number {
 }
 
 /**
+/**
  * Retorna o título do nível baseado no número
  */
 export function getLevelTitle(level: number): string {
-  if (level >= 91) return "Flash Master";
-  if (level >= 76) return "Flash Disciplinado";
-  if (level >= 51) return "Flash Responsável";
-  if (level >= 26) return "Flash Júnior";
-  if (level >= 11) return "Flash Aprendiz";
-  return "Flash Iniciante";
+  if (level >= 100) return "⚡ Lenda da Força de Aceleração";
+  if (level >= 90)  return "⚡ Mestre do Tempo";
+  if (level >= 80)  return "⚡ Guardião Multiversal";
+  if (level >= 70)  return "⚡ Velocista Elite de Central City";
+  if (level >= 60)  return "⚡ Barry Allen Ascendido";
+  if (level >= 50)  return "⚡ Discípulo do Flash Reverso";
+  if (level >= 40)  return "⚡ Wally West em Ação";
+  if (level >= 30)  return "⚡ Treinamento com STAR Labs";
+  if (level >= 20)  return "⚡ Iniciado na Força de Aceleração";
+  if (level >= 10)  return "⚡ Novato do Laboratório STAR";
+  return "⚡ Recruta da Liga da Velocidade";
 }
 
 /**
  * Retorna a cor do nível baseado no título
  */
 export function getLevelColor(level: number): string {
-  if (level >= 91) return "from-purple-500 to-purple-600"; // Master
-  if (level >= 76) return "from-indigo-500 to-indigo-600"; // Disciplinado
-  if (level >= 51) return "from-blue-500 to-blue-600";     // Responsável
-  if (level >= 26) return "from-green-500 to-green-600";   // Júnior
-  if (level >= 11) return "from-yellow-500 to-yellow-600"; // Aprendiz
-  return "from-red-500 to-red-600";                        // Iniciante
+  if (level >= 100) return "from-yellow-400 to-red-600";       // Lenda da Força
+  if (level >= 90)  return "from-purple-700 to-indigo-800";     // Mestre do Tempo
+  if (level >= 80)  return "from-pink-500 to-violet-600";       // Guardião Multiversal
+  if (level >= 70)  return "from-blue-600 to-blue-800";         // Elite Central City
+  if (level >= 60)  return "from-red-500 to-yellow-400";        // Barry Ascendido
+  if (level >= 50)  return "from-amber-500 to-yellow-500";      // Discípulo do Reverso
+  if (level >= 40)  return "from-orange-500 to-red-500";        // Wally West
+  if (level >= 30)  return "from-teal-500 to-cyan-600";         // STAR Labs
+  if (level >= 20)  return "from-green-500 to-lime-500";        // Iniciado
+  if (level >= 10)  return "from-yellow-400 to-yellow-500";     // Novato
+  return "from-red-500 to-orange-600";                          // Recruta
 }
 
 /**
- * Retorna o ícone do nível
+ * Retorna o ícone do nível baseado na progressão
  */
 export function getLevelIcon(level: number): string {
-  if (level >= 91) return "👑"; // Master
-  if (level >= 76) return "🏆"; // Disciplinado
-  if (level >= 51) return "🥇"; // Responsável
-  if (level >= 26) return "🥈"; // Júnior
-  if (level >= 11) return "🥉"; // Aprendiz
-  return "⭐";                  // Iniciante
+  if (level >= 100) return "⚡👑"; // Lenda da Força
+  if (level >= 90)  return "🌀";   // Mestre do Tempo
+  if (level >= 80)  return "🌌";   // Guardião Multiversal
+  if (level >= 70)  return "🏙️";   // Elite Central City
+  if (level >= 60)  return "🟥⚡";  // Barry Allen Ascendido
+  if (level >= 50)  return "🟡🌀";  // Discípulo do Flash Reverso
+  if (level >= 40)  return "🧤";   // Wally West em Ação
+  if (level >= 30)  return "🔬";   // STAR Labs Training
+  if (level >= 20)  return "🔺";   // Iniciado na Força
+  if (level >= 10)  return "🧪";   // Novato
+  return "👟";                     // Recruta
 }
+
 
 /**
  * Calcula todas as informações do sistema de níveis
