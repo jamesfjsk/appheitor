@@ -110,8 +110,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [surpriseMissionHistory, setSurpriseMissionHistory] = useState<DailySurpriseMissionStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Memoize stable functions to prevent re-renders
-  const loadSurpriseMissionConfig = useCallback(async () => {
+  // Load surprise mission config
+  const loadSurpriseMissionConfig = async () => {
     if (!childUid) return;
     
     try {
@@ -120,9 +120,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('❌ Erro ao carregar configuração da missão surpresa:', error);
     }
-  }, [childUid]);
+  };
 
-  const checkSurpriseMissionStatus = useCallback(async () => {
+  const checkSurpriseMissionStatus = async () => {
     if (!childUid) return;
     
     try {
@@ -135,7 +135,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('❌ Erro ao verificar status da missão surpresa:', error);
     }
-  }, [childUid]);
+  };
 
   const checkAchievements = useCallback(async () => {
     if (!childUid) return;
@@ -406,9 +406,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         
         setLoading(false);
 
-        // Load surprise mission config and status once
-        loadSurpriseMissionConfig();
-        checkSurpriseMissionStatus();
+        // Load surprise mission config and status once (without dependencies)
+        if (childUid) {
+          loadSurpriseMissionConfig();
+          checkSurpriseMissionStatus();
+        }
 
       } catch (error: any) {
         console.error('❌ DataContext: Erro ao inicializar dados:', error);
@@ -428,7 +430,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     return () => {
       unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
     };
-  }, [childUid, user?.userId, user?.role, loadSurpriseMissionConfig, checkSurpriseMissionStatus, checkAchievements]);
+  }, [childUid, user?.userId, user?.role, checkAchievements]);
 
   // Memoize all methods to prevent re-renders
   const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
@@ -759,7 +761,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       toast.error('Erro ao atualizar configurações');
       throw error;
     }
-  }, [loadSurpriseMissionConfig, user?.userId]);
+  }, [user?.userId]);
 
   const completeSurpriseMission = useCallback(async (score: number, totalQuestions: number, xpEarned: number, goldEarned: number) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -811,7 +813,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       toast.error('Erro ao completar missão surpresa');
       throw error;
     }
-  }, [childUid, progress.totalXP, progress.availableGold, progress.totalGoldEarned, checkSurpriseMissionStatus, playLevelUp, checkAchievements]);
+  }, [childUid, progress.totalXP, progress.availableGold, progress.totalGoldEarned, playLevelUp, checkAchievements]);
 
   const claimAchievementReward = useCallback(async (userAchievementId: string) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -1148,7 +1150,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     deleteAchievement,
     checkAchievements,
     claimAchievementReward,
-    loadSurpriseMissionConfig,
+    loadSurpriseMissionConfig: useCallback(loadSurpriseMissionConfig, [childUid]),
     updateSurpriseMissionSettings,
     completeSurpriseMission,
     adjustUserXP,
@@ -1169,33 +1171,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     isSurpriseMissionCompletedToday,
     surpriseMissionHistory,
     loading,
-    addTask,
-    updateTask,
-    deleteTask,
-    completeTask,
-    addReward,
-    updateReward,
-    deleteReward,
-    redeemReward,
-    approveRedemption,
-    sendNotification,
-    markNotificationAsRead,
-    addFlashReminder,
-    updateFlashReminder,
-    deleteFlashReminder,
-    addAchievement,
-    updateAchievement,
-    deleteAchievement,
-    checkAchievements,
-    claimAchievementReward,
-    loadSurpriseMissionConfig,
-    updateSurpriseMissionSettings,
-    completeSurpriseMission,
-    adjustUserXP,
-    adjustUserGold,
-    resetUserData,
-    createTestData,
-    getCalendarMonth,
+    childUid
   ]);
 
   return (
