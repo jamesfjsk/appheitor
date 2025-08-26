@@ -365,7 +365,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Sabe, quando eu e
                       <Zap className="w-10 h-10 text-red-600" fill="currentColor" />
                     </motion.div>
                     <p className="text-gray-600 text-xl font-bold mb-2">
-                      ⚡ Olá, Heitor! Sou o FlashGPT! ⚡
+                      ⚡ Olá, Heitor! Sou o Gideon! ⚡
                     </p>
                     <p className="text-gray-500 text-base mt-2 max-w-md mx-auto leading-relaxed">
                       Estou aqui para te ajudar com suas missões, responder suas perguntas e te dar dicas de super-herói! 
