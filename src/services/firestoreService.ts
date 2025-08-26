@@ -1162,18 +1162,20 @@ export class FirestoreService {
     completedAt: Date;
   }>> {
     try {
-      const startDateString = startDate.toISOString().split('T')[0];
-      const endDateString = endDate.toISOString().split('T')[0];
-      
+      // Use a simpler query that only filters by userId to avoid composite index requirement
       const completionsQuery = query(
         collection(db, 'taskCompletions'),
-        where('userId', '==', userId),
-        where('date', '>=', startDateString),
-        where('date', '<=', endDateString)
+        where('userId', '==', userId)
       );
       
       const snapshot = await getDocs(completionsQuery);
-      const results = snapshot.docs.map(doc => {
+      
+      // Filter by date range in memory after fetching
+      const startDateString = startDate.toISOString().split('T')[0];
+      const endDateString = endDate.toISOString().split('T')[0];
+      
+      const results = snapshot.docs
+        .map(doc => {
         const data = doc.data();
         return {
           taskId: data.taskId,
@@ -1183,7 +1185,11 @@ export class FirestoreService {
           goldEarned: data.goldEarned || 0,
           completedAt: data.completedAt?.toDate() || new Date()
         };
-      });
+      })
+        .filter(completion => 
+          completion.date >= startDateString && 
+          completion.date <= endDateString
+        );
       
       // Sort in memory to avoid composite index requirement
       return results.sort((a, b) => {
