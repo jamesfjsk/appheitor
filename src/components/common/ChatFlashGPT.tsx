@@ -280,7 +280,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Sabe, quando eu e
                     </motion.div>
                     <div>
                       <h2 id="chat-title" className="text-xl font-bold" style={{ fontFamily: 'Comic Neue, cursive' }}>
-                        FlashGPT - Seu Mentor Super-Herói!
+                        Giedon -Cofre do Tempo!
                       </h2>
                       <p id="chat-description" className="text-yellow-300 text-sm">
                         Respostas detalhadas e motivação infinita ⚡
@@ -494,7 +494,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Sabe, quando eu e
                         />
                       </div>
                       <p className="text-xs text-gray-600">
-                        FlashGPT está pensando em uma resposta incrível...
+                        Gideon está pensando em uma resposta incrível...
                       </p>
                     </div>
                   </motion.div>
@@ -605,7 +605,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Sabe, quando eu e
                       <Zap className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                       <div>
                         <h4 className="text-sm font-semibold text-blue-900 mb-1">
-                          💡 Dicas para conversar com o FlashGPT:
+                          💡 Dicas para conversar com o Gideon:
                         </h4>
                         <ul className="text-xs text-blue-700 space-y-1">
                           <li>• Faça perguntas detalhadas - agora posso dar respostas muito completas!</li>
