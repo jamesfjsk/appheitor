@@ -43,16 +43,16 @@ export function getLevelFromXP(totalXP: number): number {
  * Retorna o título do nível baseado no número
  */
 export function getLevelTitle(level: number): string {
-  if (level >= 100) return "⚡ Lenda da Força de Aceleração";
-  if (level >= 90)  return "⚡ Mestre do Tempo";
-  if (level >= 80)  return "⚡ Guardião Multiversal";
-  if (level >= 70)  return "⚡ Velocista Elite de Central City";
-  if (level >= 60)  return "⚡ Barry Allen Ascendido";
-  if (level >= 50)  return "⚡ Discípulo do Flash Reverso";
-  if (level >= 40)  return "⚡ Wally West em Ação";
-  if (level >= 30)  return "⚡ Treinamento com STAR Labs";
-  if (level >= 20)  return "⚡ Iniciado na Força de Aceleração";
-  if (level >= 10)  return "⚡ Novato do Laboratório STAR";
+  if (level >= 100) return " Lenda da Força de Aceleração";
+  if (level >= 90)  return " Mestre do Tempo";
+  if (level >= 80)  return " Guardião Multiversal";
+  if (level >= 70)  return " Velocista Elite de Central City";
+  if (level >= 60)  return " Barry Allen Ascendido";
+  if (level >= 50)  return " Discípulo do Flash Reverso";
+  if (level >= 40)  return " Wally West em Ação";
+  if (level >= 30)  return " Treinamento com STAR Labs";
+  if (level >= 20)  return " Iniciado na Força de Aceleração";
+  if (level >= 10)  return " Novato do Laboratório STAR";
   return "⚡ Recruta da Liga da Velocidade";
 }
 
