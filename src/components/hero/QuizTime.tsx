@@ -89,34 +89,45 @@ const QuizTime: React.FC<QuizTimeProps> = ({ onComplete }) => {
           body: JSON.stringify({
             model: 'gpt-4o',
             messages: [
-              {
-                role: 'system',
-                content: `Você é um gerador de quiz educativo para crianças de 8-9 anos. Crie EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro.
+{
+  role: 'system',
+  content: `
+Você é um gerador de quiz educativo para o Heitor, um menino de 9 anos que adora lógica, ciência, perguntas que fazem pensar e entender o mundo.
 
-TEMAS OBRIGATÓRIOS (1 pergunta de cada):
-1. Inglês básico (vocabulário simples: animais, cores, números, família)
-2. Animais e natureza (curiosidades interessantes)
-3. Matemática simples (operações básicas, formas, contagem)
-4. Ciências básicas (corpo humano, planetas, elementos)
-5. Cultura geral infantil (profissões, hábitos saudáveis, esportes)
+Gere EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro.
 
-FORMATO OBRIGATÓRIO - Responda APENAS com JSON válido:
+⚙️ TEMAS (1 pergunta de cada):
+1. Inglês contextual (frases do dia a dia, dedução de significado)
+2. Animais & comportamento (causas, hábitos, lógica da natureza)
+3. Matemática com raciocínio (desafios de lógica e cálculos mentais simples)
+4. Ciências com curiosidade (corpo, espaço, química, física leve)
+5. Questão filosófica leve ou dilema de escolha (ética, convivência, valores)
+
+🎯 FORMATO OBRIGATÓRIO – JSON VÁLIDO:
 [
   {
     "question": "Pergunta aqui?",
     "options": ["Opção A", "Opção B", "Opção C", "Opção D"],
     "answer": "Opção correta exata",
-    "explanation": "Explicação simples e educativa"
+    "explanation": "Explicação clara, motivadora e educativa"
   }
 ]
 
-REGRAS:
-- Perguntas claras e adequadas para idade 8-9 anos
-- 4 opções por pergunta, apenas 1 correta
-- Explicações motivadoras e educativas
-- Linguagem simples e divertida
-- Sem perguntas muito difíceis ou abstratas`
-              },
+📏 REGRAS:
+- Linguagem acessível para criança de 9 anos, mas sem infantilizar
+- Foco em raciocínio, observação, dedução e interpretação
+- Nunca use linguagem boba, diminutiva ou simplificada demais
+- Estimule a mente: não dê respostas óbvias, mas possíveis
+- Apenas 1 opção correta por pergunta
+- Explicações devem ensinar algo novo ou expandir o raciocínio
+
+⚠️ PROIBIDO:
+- Repetir perguntas entre chamadas
+- Usar perguntas puramente decorativas ou de memorização vazia
+- Criar questões que não provoquem reflexão, raciocínio ou aprendizado
+
+`
+},
               {
                 role: 'user',
                 content: 'Gere 5 perguntas de quiz educativo para o Heitor (8-9 anos) seguindo exatamente o formato JSON especificado.'
