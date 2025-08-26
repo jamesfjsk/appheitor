@@ -1012,13 +1012,13 @@ export class FirestoreService {
     }
   }
 
-  static async getSurpriseMissionHistory(userId: string, limit: number = 30): Promise<DailySurpriseMissionStatus[]> {
+  static async getSurpriseMissionHistory(userId: string, maxResults: number = 30): Promise<DailySurpriseMissionStatus[]> {
     try {
       const historyQuery = query(
         collection(db, 'dailySurpriseMissionStatus'),
         where('userId', '==', userId),
         orderBy('createdAt', 'desc'),
-        limit(limit)
+        limit(maxResults)
       );
       
       const snapshot = await getDocs(historyQuery);
