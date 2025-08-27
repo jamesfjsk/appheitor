@@ -100,7 +100,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
     const notPending = !redemption; // Only check if there's no pending redemption
     const hasCompletedEnoughTasks = dailyTasksCompleted >= 4;
-    const hasCompletedEnoughTasks = dailyTasksCompleted >= 4;
     
     console.log('🔥 Verificando se pode resgatar:', {
       reward: reward.title,
