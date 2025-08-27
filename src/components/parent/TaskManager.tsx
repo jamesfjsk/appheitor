@@ -14,6 +14,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks }) => {
   const { updateTask, deleteTask } = useData();
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<any | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const periodIcons = {
     morning: Sun,
@@ -28,44 +29,75 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks }) => {
   };
 
   const handleEdit = (task: Task) => {
+    if (isProcessing) return;
     setEditingTask(task);
     setShowForm(true);
   };
 
   const handleDelete = async (taskId: string) => {
+    if (isProcessing) return;
+    
     if (window.confirm('Tem certeza que deseja excluir esta tarefa?')) {
+      setIsProcessing(true);
       try {
         await deleteTask(taskId);
         toast.success('Tarefa excluída com sucesso!');
       } catch (error) {
+        console.error('❌ TaskManager: Error deleting task:', error);
         toast.error('Erro ao excluir tarefa');
+      } finally {
+        setIsProcessing(false);
       }
     }
   };
 
   const handleToggleActive = async (task: any) => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
     try {
       await updateTask(task.id, { active: !task.active });
       toast.success(task.active ? 'Tarefa desativada' : 'Tarefa ativada');
     } catch (error) {
+      console.error('❌ TaskManager: Error toggling task:', error);
       toast.error('Erro ao atualizar tarefa');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleCloseForm = () => {
+    if (isProcessing) return;
     setShowForm(false);
     setEditingTask(null);
   };
 
-  const activeTasks = tasks.filter(task => task.active === true);
-  const inactiveTasks = tasks.filter(task => task.active === false);
+  // Memoize filtered tasks to prevent unnecessary recalculations
+  const { activeTasks, inactiveTasks } = useMemo(() => {
+    const active = tasks.filter(task => task.active === true);
+    const inactive = tasks.filter(task => task.active === false);
+    
+    return { activeTasks: active, inactiveTasks: inactive };
+  }, [tasks]);
   
   console.log('🔥 TaskManager: Tasks filtering:', {
     totalTasks: tasks.length,
     activeTasks: activeTasks.length,
     inactiveTasks: inactiveTasks.length,
-    tasksData: tasks.map(t => ({ id: t.id, title: t.title, active: t.active }))
+    isProcessing
   });
+
+  // Show processing indicator
+  if (isProcessing) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-blue-700 font-medium">Processando operação...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

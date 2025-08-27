@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Gift, Star, Check, X, Clock, Lock, Crown } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
@@ -14,33 +14,50 @@ const RewardManager: React.FC = () => {
   const [initialRewardData, setInitialRewardData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'rewards' | 'redemptions'>('rewards');
   const [showTemplates, setShowTemplates] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleEdit = (reward: Reward) => {
+    if (isProcessing) return;
     setEditingReward(reward);
     setShowForm(true);
   };
 
   const handleDelete = async (rewardId: string) => {
+    if (isProcessing) return;
+    
     if (window.confirm('Tem certeza que deseja excluir esta recompensa?')) {
+      setIsProcessing(true);
       try {
         await deleteReward(rewardId);
         toast.success('Recompensa excluída com sucesso!');
       } catch (error) {
+        console.error('❌ RewardManager: Error deleting reward:', error);
         toast.error('Erro ao excluir recompensa');
+      } finally {
+        setIsProcessing(false);
       }
     }
   };
 
   const handleToggleActive = async (reward: Reward) => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
     try {
       await updateReward(reward.id, { active: !reward.active });
       toast.success(reward.active ? 'Recompensa desativada' : 'Recompensa ativada');
     } catch (error) {
+      console.error('❌ RewardManager: Error toggling reward:', error);
       toast.error('Erro ao atualizar recompensa');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleApproveRedemption = async (redemptionId: string, approved: boolean) => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
     try {
       await approveRedemption(redemptionId, approved);
       if (approved) {
@@ -49,17 +66,22 @@ const RewardManager: React.FC = () => {
         toast.success('❌ Resgate rejeitado. Pontos devolvidos para o Heitor.');
       }
     } catch (error) {
+      console.error('❌ RewardManager: Error approving redemption:', error);
       toast.error('Erro ao processar resgate');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleCloseForm = () => {
+    if (isProcessing) return;
     setShowForm(false);
     setEditingReward(null);
     setInitialRewardData(null);
   };
 
   const handleUseTemplate = (template: any) => {
+    if (isProcessing) return;
     console.log('🎁 Using template:', template);
     setInitialRewardData({
       title: template.title,
@@ -75,10 +97,18 @@ const RewardManager: React.FC = () => {
     setShowForm(true);
   };
 
-  const activeRewards = rewards.filter(reward => reward.active !== false);
-  const inactiveRewards = rewards.filter(reward => reward.active === false);
-  const pendingRedemptions = redemptions.filter(r => r.status === 'pending');
-  const processedRedemptions = redemptions.filter(r => r.status !== 'pending');
+  // Memoize filtered data to prevent unnecessary recalculations
+  const { activeRewards, inactiveRewards, pendingRedemptions } = useMemo(() => {
+    const active = rewards.filter(reward => reward.active !== false);
+    const inactive = rewards.filter(reward => reward.active === false);
+    const pending = redemptions.filter(r => r.status === 'pending');
+    
+    return {
+      activeRewards: active,
+      inactiveRewards: inactive,
+      pendingRedemptions: pending
+    };
+  }, [rewards, redemptions]);
 
   const categoryLabels = {
     toy: 'Brinquedos',
@@ -88,9 +118,23 @@ const RewardManager: React.FC = () => {
     custom: 'Personalizado'
   };
 
-  const getRewardById = (rewardId: string) => {
-    return rewards.find(r => r.id === rewardId);
-  };
+  // Memoize reward lookup to prevent recalculation
+  const getRewardById = useMemo(() => {
+    const rewardMap = new Map(rewards.map(r => [r.id, r]));
+    return (rewardId: string) => rewardMap.get(rewardId);
+  }, [rewards]);
+
+  // Show processing indicator
+  if (isProcessing) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-blue-700 font-medium">Processando operação...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

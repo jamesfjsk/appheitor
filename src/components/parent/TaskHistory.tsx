@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, BarChart3, Sun, Sunset, Moon, CheckCircle, Star, Gift } from 'lucide-react';
 import { Task } from '../../types';
@@ -15,7 +15,7 @@ interface TaskHistoryProps {
 const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
   const { redemptions, rewards } = useData();
   const { childUid } = useAuth();
-  const [selectedWeek, setSelectedWeek] = useState(0); // 0 = semana atual, 1 = semana passada, etc.
+  const [selectedWeek, setSelectedWeek] = useState(0);
   const [taskCompletions, setTaskCompletions] = useState<Array<{
     taskId: string;
     taskTitle: string;
@@ -24,56 +24,58 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
     goldEarned: number;
     completedAt: Date;
   }>>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [lastLoadedWeek, setLastLoadedWeek] = useState<string>('');
 
-  // Load real completion history
-  useEffect(() => {
-    const loadCompletionHistory = async () => {
-      if (!childUid) return;
+  // Memoize week calculation to prevent unnecessary re-renders
+  const weekData = useMemo(() => {
+    const today = new Date();
+    const weekStart = startOfWeek(subWeeks(today, selectedWeek), { locale: ptBR });
+    const weekEnd = endOfWeek(subWeeks(today, selectedWeek), { locale: ptBR });
+    const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+    const weekKey = `${selectedWeek}_${weekStart.toISOString().split('T')[0]}`;
+    
+    return { weekStart, weekEnd, weekDays, weekKey };
+  }, [selectedWeek]);
+
+  // Load completion history only when week changes
+  const loadCompletionHistory = useCallback(async () => {
+    if (!childUid || weekData.weekKey === lastLoadedWeek) return;
+    
+    setLoading(true);
+    try {
+      console.log('📈 TaskHistory: Loading completion history for week:', weekData.weekKey);
+      const history = await FirestoreService.getTaskCompletionHistory(childUid, weekData.weekStart, weekData.weekEnd);
+      setTaskCompletions(history);
+      setLastLoadedWeek(weekData.weekKey);
       
-      setLoading(true);
-      try {
-        const weekStart = startOfWeek(subWeeks(new Date(), selectedWeek), { locale: ptBR });
-        const weekEnd = endOfWeek(subWeeks(new Date(), selectedWeek), { locale: ptBR });
-        
-        const history = await FirestoreService.getTaskCompletionHistory(childUid, weekStart, weekEnd);
-        setTaskCompletions(history);
-      } catch (error) {
-        console.error('❌ Error loading completion history:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      console.log('✅ TaskHistory: History loaded successfully:', {
+        weekKey: weekData.weekKey,
+        completions: history.length
+      });
+    } catch (error) {
+      console.error('❌ TaskHistory: Error loading completion history:', error);
+      setTaskCompletions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [childUid, weekData.weekKey, lastLoadedWeek]);
 
+  useEffect(() => {
     loadCompletionHistory();
-  }, [childUid, selectedWeek]);
+  }, [loadCompletionHistory]);
 
-  const today = new Date();
-  const weekStart = startOfWeek(subWeeks(today, selectedWeek), { locale: ptBR });
-  const weekEnd = endOfWeek(subWeeks(today, selectedWeek), { locale: ptBR });
-  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
-  
-  // Filter redemptions for selected week
-  const weekRedemptions = redemptions.filter(redemption => {
-    const redemptionDate = redemption.createdAt;
-    return redemptionDate >= weekStart && redemptionDate <= weekEnd;
-  });
+  // Memoize week redemptions to prevent recalculation
+  const weekRedemptions = useMemo(() => {
+    return redemptions.filter(redemption => {
+      const redemptionDate = redemption.createdAt;
+      return redemptionDate >= weekData.weekStart && redemptionDate <= weekData.weekEnd;
+    });
+  }, [redemptions, weekData.weekStart, weekData.weekEnd]);
 
-  const periodIcons = {
-    morning: Sun,
-    afternoon: Sunset,
-    evening: Moon
-  };
-
-  const periodLabels = {
-    morning: 'Manhã',
-    afternoon: 'Tarde',
-    evening: 'Noite'
-  };
-
-  // Get real completion data for the week
-  const getWeekCompletionData = () => {
-    return weekDays.map(day => {
+  // Memoize week completion data
+  const weekCompletionData = useMemo(() => {
+    return weekData.weekDays.map(day => {
       const dayString = day.toISOString().split('T')[0];
       const dayCompletions = taskCompletions.filter(completion => completion.date === dayString);
       
@@ -89,13 +91,17 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
         completions: dayCompletions
       };
     });
-  };
+  }, [weekData.weekDays, taskCompletions]);
 
-  const weekData = getWeekCompletionData();
-  const totalWeekXP = weekData.reduce((sum, day) => sum + day.xpEarned, 0);
-  const totalWeekGold = weekData.reduce((sum, day) => sum + day.goldEarned, 0);
-  const totalWeekTasks = weekData.reduce((sum, day) => sum + day.completed, 0);
-  const avgDailyCompletion = totalWeekTasks / 7;
+  // Memoize totals
+  const weekTotals = useMemo(() => {
+    const totalWeekXP = weekCompletionData.reduce((sum, day) => sum + day.xpEarned, 0);
+    const totalWeekGold = weekCompletionData.reduce((sum, day) => sum + day.goldEarned, 0);
+    const totalWeekTasks = weekCompletionData.reduce((sum, day) => sum + day.completed, 0);
+    const avgDailyCompletion = totalWeekTasks / 7;
+
+    return { totalWeekXP, totalWeekGold, totalWeekTasks, avgDailyCompletion };
+  }, [weekCompletionData]);
 
   const weeks = [
     { value: 0, label: 'Esta Semana' },
@@ -104,16 +110,17 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
     { value: 3, label: 'Há 3 Semanas' }
   ];
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando histórico...</p>
-        </div>
-      </div>
-    );
-  }
+  const periodIcons = {
+    morning: Sun,
+    afternoon: Sunset,
+    evening: Moon
+  };
+
+  const periodLabels = {
+    morning: 'Manhã',
+    afternoon: 'Tarde',
+    evening: 'Noite'
+  };
 
   return (
     <div className="space-y-6">
@@ -122,7 +129,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Histórico de Tarefas</h2>
           <p className="text-gray-600">
-            {format(weekStart, 'dd/MM')} - {format(weekEnd, 'dd/MM/yyyy')}
+            {format(weekData.weekStart, 'dd/MM')} - {format(weekData.weekEnd, 'dd/MM/yyyy')}
           </p>
         </div>
 
@@ -139,6 +146,20 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
         </select>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-blue-700 font-medium">Carregando histórico da semana...</span>
+          </div>
+        </motion.div>
+      )}
+
       {/* Resumo da Semana */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div
@@ -149,7 +170,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total de XP</p>
-              <p className="text-2xl font-bold text-gray-900">{totalWeekXP}</p>
+              <p className="text-2xl font-bold text-gray-900">{weekTotals.totalWeekXP}</p>
             </div>
             <div className="bg-yellow-500 p-3 rounded-lg">
               <TrendingUp className="w-6 h-6 text-white" />
@@ -166,7 +187,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Tarefas Completadas</p>
-              <p className="text-2xl font-bold text-gray-900">{totalWeekTasks}</p>
+              <p className="text-2xl font-bold text-gray-900">{weekTotals.totalWeekTasks}</p>
             </div>
             <div className="bg-green-500 p-3 rounded-lg">
               <BarChart3 className="w-6 h-6 text-white" />
@@ -183,7 +204,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total de Gold</p>
-              <p className="text-2xl font-bold text-gray-900">{totalWeekGold}</p>
+              <p className="text-2xl font-bold text-gray-900">{weekTotals.totalWeekGold}</p>
             </div>
             <div className="bg-yellow-600 p-3 rounded-lg">
               <Star className="w-6 h-6 text-white" />
@@ -193,84 +214,86 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
       </div>
 
       {/* Gráfico de Barras Diário */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-      >
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Progresso Diário
-        </h3>
+      {!loading && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        >
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">
+            Progresso Diário
+          </h3>
 
-        <div className="space-y-4">
-          {weekData.map((day, index) => {
-            const maxTasks = Math.max(...weekData.map(d => d.completed));
-            const barWidth = maxTasks > 0 ? (day.completed / maxTasks) * 100 : 0;
-            const isToday = day.date.toDateString() === new Date().toDateString();
-            
-            return (
-              <motion.div
-                key={day.date.toISOString()}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-                className="space-y-2"
-              >
-                <div className="flex justify-between items-center">
-                  <span className={`text-sm font-medium ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>
-                    {format(day.date, 'EEEE, dd/MM', { locale: ptBR })}
-                    {isToday && <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">HOJE</span>}
-                  </span>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>{day.completed} tarefas</span>
-                    <span>•</span>
-                    <span>{day.xpEarned} XP</span>
-                    <span>•</span>
-                    <span>{day.goldEarned} Gold</span>
+          <div className="space-y-4">
+            {weekCompletionData.map((day, index) => {
+              const maxTasks = Math.max(...weekCompletionData.map(d => d.completed));
+              const barWidth = maxTasks > 0 ? (day.completed / maxTasks) * 100 : 0;
+              const isToday = day.date.toDateString() === new Date().toDateString();
+              
+              return (
+                <motion.div
+                  key={day.date.toISOString()}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + index * 0.1 }}
+                  className="space-y-2"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm font-medium ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>
+                      {format(day.date, 'EEEE, dd/MM', { locale: ptBR })}
+                      {isToday && <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">HOJE</span>}
+                    </span>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <span>{day.completed} tarefas</span>
+                      <span>•</span>
+                      <span>{day.xpEarned} XP</span>
+                      <span>•</span>
+                      <span>{day.goldEarned} Gold</span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${barWidth}%` }}
-                    transition={{ duration: 0.8, delay: 0.5 + index * 0.1 }}
-                    className={`h-3 rounded-full ${
-                      day.completed === 0 ? 'bg-gray-300' :
-                      day.completed >= 3 ? 'bg-gradient-to-r from-green-500 to-green-600' :
-                      'bg-gradient-to-r from-yellow-500 to-yellow-600'
-                    }`}
-                  />
-                </div>
-                
-                {/* Show completed tasks for this day */}
-                {day.completions.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {day.completions.map((completion, compIndex) => (
-                      <div key={`${completion.taskId}-${completion.date}`} className="flex items-center justify-between text-xs bg-white p-2 rounded border">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span className="text-gray-700">{completion.taskTitle}</span>
-                          <span className="text-gray-500">
-                            {completion.completedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-blue-600">+{completion.xpEarned}</span>
-                          <span className="text-yellow-600">+{completion.goldEarned}</span>
-                        </div>
-                      </div>
-                    ))}
+                  
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${barWidth}%` }}
+                      transition={{ duration: 0.8, delay: 0.5 + index * 0.1 }}
+                      className={`h-3 rounded-full ${
+                        day.completed === 0 ? 'bg-gray-300' :
+                        day.completed >= 3 ? 'bg-gradient-to-r from-green-500 to-green-600' :
+                        'bg-gradient-to-r from-yellow-500 to-yellow-600'
+                      }`}
+                    />
                   </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.div>
+                  
+                  {/* Show completed tasks for this day */}
+                  {day.completions.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {day.completions.map((completion) => (
+                        <div key={`${completion.taskId}-${completion.date}`} className="flex items-center justify-between text-xs bg-white p-2 rounded border">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                            <span className="text-gray-700">{completion.taskTitle}</span>
+                            <span className="text-gray-500">
+                              {completion.completedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-blue-600">+{completion.xpEarned}</span>
+                            <span className="text-yellow-600">+{completion.goldEarned}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
-      {/* Distribuição por Período */}
+      {/* Histórico Detalhado da Semana */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -396,17 +419,17 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{avgDailyCompletion.toFixed(1)}</div>
+            <div className="text-2xl font-bold text-blue-600">{weekTotals.avgDailyCompletion.toFixed(1)}</div>
             <div className="text-sm text-blue-600">Média Diária</div>
           </div>
           
           <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{totalWeekTasks}</div>
+            <div className="text-2xl font-bold text-green-600">{weekTotals.totalWeekTasks}</div>
             <div className="text-sm text-green-600">Total Completadas</div>
           </div>
           
           <div className="text-center p-4 bg-yellow-50 rounded-lg">
-            <div className="text-2xl font-bold text-yellow-600">{totalWeekXP}</div>
+            <div className="text-2xl font-bold text-yellow-600">{weekTotals.totalWeekXP}</div>
             <div className="text-sm text-yellow-600">XP Ganho</div>
           </div>
           
