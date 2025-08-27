@@ -375,6 +375,8 @@ export class FirestoreService {
     onUpdate: (tasks: Task[]) => void,
     onError: (error: Error) => void
   ): () => void {
+    console.log('🔥 FirestoreService: Creating tasks listener for:', userId);
+    
     const tasksQuery = query(
       collection(db, 'tasks'),
       where('ownerId', '==', userId),
@@ -383,6 +385,7 @@ export class FirestoreService {
     
     return onSnapshot(tasksQuery,
       (snapshot) => {
+        console.log('📝 FirestoreService: Tasks snapshot received:', snapshot.size, 'documents');
         const tasks: Task[] = snapshot.docs.map(doc => {
           const data = doc.data();
           return {
@@ -405,7 +408,10 @@ export class FirestoreService {
         });
         onUpdate(tasks);
       },
-      onError
+      (error) => {
+        console.error('❌ FirestoreService: Tasks listener error:', error);
+        onError(error);
+      }
     );
   }
 
@@ -458,6 +464,8 @@ export class FirestoreService {
     onUpdate: (rewards: Reward[]) => void,
     onError: (error: Error) => void
   ): () => void {
+    console.log('🔥 FirestoreService: Creating rewards listener for:', userId);
+    
     const rewardsQuery = query(
       collection(db, 'rewards'),
       where('ownerId', '==', userId),
@@ -466,6 +474,7 @@ export class FirestoreService {
     
     return onSnapshot(rewardsQuery,
       (snapshot) => {
+        console.log('🎁 FirestoreService: Rewards snapshot received:', snapshot.size, 'documents');
         const rewards: Reward[] = snapshot.docs.map(doc => {
           const data = doc.data();
           return {
@@ -484,7 +493,10 @@ export class FirestoreService {
         });
         onUpdate(rewards);
       },
-      onError
+      (error) => {
+        console.error('❌ FirestoreService: Rewards listener error:', error);
+        onError(error);
+      }
     );
   }
 
@@ -593,6 +605,8 @@ export class FirestoreService {
     onUpdate: (redemptions: RewardRedemption[]) => void,
     onError: (error: Error) => void
   ): () => void {
+    console.log('🔥 FirestoreService: Creating redemptions listener for:', userId);
+    
     const redemptionsQuery = query(
       collection(db, 'redemptions'),
       where('userId', '==', userId),
@@ -601,6 +615,7 @@ export class FirestoreService {
     
     return onSnapshot(redemptionsQuery,
       (snapshot) => {
+        console.log('💰 FirestoreService: Redemptions snapshot received:', snapshot.size, 'documents');
         const redemptions: RewardRedemption[] = snapshot.docs.map(doc => {
           const data = doc.data();
           return {
@@ -616,7 +631,10 @@ export class FirestoreService {
         });
         onUpdate(redemptions);
       },
-      onError
+      (error) => {
+        console.error('❌ FirestoreService: Redemptions listener error:', error);
+        onError(error);
+      }
     );
   }
 

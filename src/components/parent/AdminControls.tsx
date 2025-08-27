@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, RotateCcw, Plus, Minus, AlertTriangle, Zap, Coins, Save } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
@@ -15,23 +15,51 @@ const AdminControls: React.FC = () => {
   const [goldInput, setGoldInput] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showXPMilestones, setShowXPMilestones] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   
-  const levelSystem = calculateLevelSystem(progress.totalXP || 0);
-  const xpMilestones = getXPMilestones();
+  // Memoize expensive calculations
+  const levelSystem = useMemo(() => calculateLevelSystem(progress.totalXP || 0), [progress.totalXP]);
+  const xpMilestones = useMemo(() => getXPMilestones(), []);
 
   const handleAdjustXP = (amount: number) => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
     playClick();
-    adjustUserXP(amount);
-    setXpInput('');
+    adjustUserXP(amount)
+      .then(() => {
+        setXpInput('');
+      })
+      .catch((error) => {
+        console.error('❌ AdminControls: Error adjusting XP:', error);
+        playError();
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      });
   };
 
   const handleAdjustGold = (amount: number) => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
     playClick();
-    adjustUserGold(amount);
-    setGoldInput('');
+    adjustUserGold(amount)
+      .then(() => {
+        setGoldInput('');
+      })
+      .catch((error) => {
+        console.error('❌ AdminControls: Error adjusting Gold:', error);
+        playError();
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      });
   };
 
   const handleCustomXP = () => {
+    if (isProcessing) return;
+    
     const amount = parseInt(xpInput);
     if (isNaN(amount) || amount === 0) {
       playError();
@@ -42,6 +70,8 @@ const AdminControls: React.FC = () => {
   };
 
   const handleCustomGold = () => {
+    if (isProcessing) return;
+    
     const amount = parseInt(goldInput);
     if (isNaN(amount) || amount === 0) {
       playError();
@@ -52,9 +82,51 @@ const AdminControls: React.FC = () => {
   };
 
   const handleReset = () => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
     playClick();
-    resetUserData();
-    setShowResetConfirm(false);
+    resetUserData()
+      .then(() => {
+        setShowResetConfirm(false);
+      })
+      .catch((error) => {
+        console.error('❌ AdminControls: Error resetting data:', error);
+        playError();
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      });
+  };
+
+  const handleCreateTestData = () => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    playClick();
+    createTestData()
+      .catch((error) => {
+        console.error('❌ AdminControls: Error creating test data:', error);
+        playError();
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      });
+  };
+
+  const handleSyncData = () => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    playClick();
+    syncData()
+      .catch((error) => {
+        console.error('❌ AdminControls: Error syncing data:', error);
+        playError();
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      });
   };
 
   return (
@@ -63,6 +135,16 @@ const AdminControls: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
     >
+      {/* Processing Indicator */}
+      {isProcessing && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-blue-700 font-medium">Processando operação...</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
           <Settings className="w-5 h-5 text-white" />
@@ -208,6 +290,7 @@ const AdminControls: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleAdjustXP(10)}
+              disabled={isProcessing}
               className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <Plus className="w-4 h-4" />
@@ -218,6 +301,7 @@ const AdminControls: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleAdjustXP(50)}
+              disabled={isProcessing}
               className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <Plus className="w-4 h-4" />
@@ -228,6 +312,7 @@ const AdminControls: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleAdjustXP(100)}
+              disabled={isProcessing}
               className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <Plus className="w-4 h-4" />
@@ -238,6 +323,7 @@ const AdminControls: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleAdjustXP(-50)}
+              disabled={isProcessing}
               className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <Minus className="w-4 h-4" />
@@ -252,15 +338,17 @@ const AdminControls: React.FC = () => {
               value={xpInput}
               onChange={(e) => setXpInput(e.target.value)}
               placeholder="Ex: +25 ou -15"
+              disabled={isProcessing}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCustomXP}
+              disabled={isProcessing}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
-              Aplicar XP
+              {isProcessing ? 'Aplicando...' : 'Aplicar XP'}
             </motion.button>
           </div>
         </div>
@@ -278,6 +366,7 @@ const AdminControls: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleAdjustGold(5)}
+              disabled={isProcessing}
               className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <Plus className="w-4 h-4" />
@@ -288,6 +377,7 @@ const AdminControls: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleAdjustGold(25)}
+              disabled={isProcessing}
               className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <Plus className="w-4 h-4" />
@@ -298,6 +388,7 @@ const AdminControls: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleAdjustGold(50)}
+              disabled={isProcessing}
               className="px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <Plus className="w-4 h-4" />
@@ -308,6 +399,7 @@ const AdminControls: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleAdjustGold(-25)}
+              disabled={isProcessing}
               className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors flex items-center gap-1"
             >
               <Minus className="w-4 h-4" />
@@ -322,15 +414,17 @@ const AdminControls: React.FC = () => {
               value={goldInput}
               onChange={(e) => setGoldInput(e.target.value)}
               placeholder="Ex: +10 ou -5"
+              disabled={isProcessing}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
             />
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCustomGold}
+              disabled={isProcessing}
               className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors"
             >
-              Aplicar Gold
+              {isProcessing ? 'Aplicando...' : 'Aplicar Gold'}
             </motion.button>
           </div>
         </div>
@@ -349,14 +443,12 @@ const AdminControls: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              playClick();
-              syncData();
-            }}
+            onClick={handleSyncData}
+            disabled={isProcessing}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg"
           >
             <Save className="w-5 h-5" />
-            Salvar & Sincronizar
+            {isProcessing ? 'Sincronizando...' : 'Salvar & Sincronizar'}
           </motion.button>
         </div>
       </div>
@@ -374,14 +466,12 @@ const AdminControls: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              playClick();
-              createTestData();
-            }}
+            onClick={handleCreateTestData}
+            disabled={isProcessing}
             className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg"
           >
             <Plus className="w-5 h-5" />
-            Criar Dados de Teste
+            {isProcessing ? 'Criando...' : 'Criar Dados de Teste'}
           </motion.button>
         </div>
       </div>
@@ -428,14 +518,16 @@ const AdminControls: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleReset}
+                disabled={isProcessing}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
               >
-                SIM, APAGAR TUDO
+                {isProcessing ? 'Apagando...' : 'SIM, APAGAR TUDO'}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowResetConfirm(false)}
+                disabled={isProcessing}
                 className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
               >
                 Cancelar
