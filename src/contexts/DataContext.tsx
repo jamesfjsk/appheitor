@@ -400,6 +400,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) throw new Error('Child UID não definido');
     
     try {
+      // Check if user has completed at least 4 tasks today
+      const today = new Date().toISOString().split('T')[0];
+      const todayCompletions = await FirestoreService.getTaskCompletionHistory(
+        childUid, 
+        new Date(today), 
+        new Date(today + 'T23:59:59')
+      );
+      
+      if (todayCompletions.length < 4) {
+        throw new Error(`Você precisa completar pelo menos 4 missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/4`);
+      }
+      
       const reward = rewards.find(r => r.id === rewardId);
       if (!reward) throw new Error('Recompensa não encontrada');
       
@@ -411,7 +423,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       toast.success('🎁 Recompensa solicitada! Aguarde aprovação.');
     } catch (error: any) {
       console.error('❌ Erro ao resgatar recompensa:', error);
-      if (error.message === 'Gold insuficiente') {
+      if (error.message.includes('4 missões hoje')) {
+        toast.error(error.message);
+      } else if (error.message === 'Gold insuficiente') {
         toast.error('Você não tem Gold suficiente para esta recompensa');
       } else {
         toast.error('Erro ao resgatar recompensa');

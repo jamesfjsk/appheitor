@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Star, Lock, CheckCircle, Clock, X, Filter, Unlock } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { FirestoreService } from '../../services/firestoreService';
 import { Reward, RewardRedemption } from '../../types';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 import { isRewardUnlocked } from '../../utils/rewardLevels';
@@ -13,11 +15,41 @@ interface RewardsPanelProps {
 
 const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   const { rewards, redemptions, progress, redeemReward } = useData();
+  const { childUid } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'available' | 'locked'>('all');
+  const [dailyTasksCompleted, setDailyTasksCompleted] = useState<number>(0);
+  const [loadingDailyTasks, setLoadingDailyTasks] = useState(true);
   
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   const currentLevel = levelSystem.currentLevel;
+
+  // Load daily tasks completed count
+  React.useEffect(() => {
+    const loadDailyTasksCount = async () => {
+      if (!childUid) return;
+      
+      setLoadingDailyTasks(true);
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const completions = await FirestoreService.getTaskCompletionHistory(
+          childUid, 
+          new Date(today), 
+          new Date(today + 'T23:59:59')
+        );
+        setDailyTasksCompleted(completions.length);
+      } catch (error) {
+        console.error('❌ Error loading daily tasks count:', error);
+        setDailyTasksCompleted(0);
+      } finally {
+        setLoadingDailyTasks(false);
+      }
+    };
+
+    if (isOpen) {
+      loadDailyTasksCount();
+    }
+  }, [childUid, isOpen]);
 
   const getRewardById = (rewardId: string) => {
     return rewards.find(reward => reward.id === rewardId);
@@ -67,6 +99,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     const hasEnoughGold = (progress.availableGold || 0) >= goldCost;
     const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
     const notPending = !redemption; // Only check if there's no pending redemption
+    const hasCompletedEnoughTasks = dailyTasksCompleted >= 4;
     
     console.log('🔥 Verificando se pode resgatar:', {
       reward: reward.title,
@@ -77,10 +110,12 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
       requiredLevel: reward.requiredLevel,
       currentLevel,
       notPending,
-      canRedeem: hasEnoughGold && notPending && isUnlocked
+      dailyTasksCompleted,
+      hasCompletedEnoughTasks,
+      canRedeem: hasEnoughGold && notPending && isUnlocked && hasCompletedEnoughTasks
     });
     
-    return hasEnoughGold && notPending && isUnlocked;
+    return hasEnoughGold && notPending && isUnlocked && hasCompletedEnoughTasks;
   };
 
   const handleRedeem = async (reward: Reward) => {
@@ -203,6 +238,96 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Rewards Grid */}
+        {/* Daily Tasks Requirement Banner */}
+        <div className="p-6 border-b border-white/20">
+          <div className={`p-4 rounded-xl border-2 ${
+            loadingDailyTasks 
+              ? 'bg-gray-100 border-gray-300' 
+              : dailyTasksCompleted >= 4 
+              ? 'bg-green-400/20 border-green-400/30' 
+              : 'bg-red-400/20 border-red-400/30'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  loadingDailyTasks 
+                    ? 'bg-gray-300' 
+                    : dailyTasksCompleted >= 4 
+                    ? 'bg-green-500' 
+                    : 'bg-red-500'
+                }`}>
+                  {loadingDailyTasks ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : dailyTasksCompleted >= 4 ? (
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  ) : (
+                    <Lock className="w-6 h-6 text-white" />
+                  )}
+                </div>
+                <div>
+                  <h3 className={`font-bold text-lg ${
+                    loadingDailyTasks 
+                      ? 'text-gray-600' 
+                      : dailyTasksCompleted >= 4 
+                      ? 'text-green-200' 
+                      : 'text-red-200'
+                  }`}>
+                    {loadingDailyTasks 
+                      ? 'Verificando missões de hoje...' 
+                      : dailyTasksCompleted >= 4 
+                      ? '✅ Resgates Liberados!' 
+                      : '🔒 Resgates Bloqueados'
+                    }
+                  </h3>
+                  <p className={`text-sm ${
+                    loadingDailyTasks 
+                      ? 'text-gray-500' 
+                      : dailyTasksCompleted >= 4 
+                      ? 'text-green-300' 
+                      : 'text-red-300'
+                  }`}>
+                    {loadingDailyTasks 
+                      ? 'Carregando...' 
+                      : `${dailyTasksCompleted}/4 missões completadas hoje`
+                    }
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-right">
+                <div className={`text-2xl font-bold ${
+                  loadingDailyTasks 
+                    ? 'text-gray-600' 
+                    : dailyTasksCompleted >= 4 
+                    ? 'text-green-200' 
+                    : 'text-red-200'
+                }`}>
+                  {dailyTasksCompleted}/4
+                </div>
+                <div className={`text-xs ${
+                  loadingDailyTasks 
+                    ? 'text-gray-500' 
+                    : dailyTasksCompleted >= 4 
+                    ? 'text-green-300' 
+                    : 'text-red-300'
+                }`}>
+                  missões hoje
+                </div>
+              </div>
+            </div>
+            
+            {!loadingDailyTasks && dailyTasksCompleted < 4 && (
+              <div className="mt-3 p-3 bg-red-500/20 rounded-lg">
+                <p className="text-red-200 text-sm font-medium text-center">
+                  🚫 Complete pelo menos 4 missões hoje para desbloquear os resgates!
+                  <br />
+                  <span className="text-xs">Faltam {4 - dailyTasksCompleted} missões para liberar a loja.</span>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="p-6 overflow-y-auto max-h-96">
           {filteredRewards.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -347,6 +472,11 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           <Star className="w-5 h-5 inline mr-2" />
                           Resgatar Agora!
                         </>
+                      ) : !hasCompletedEnoughTasks ? (
+                        <>
+                          <Lock className="w-5 h-5 inline mr-2" />
+                          Complete 4 Missões Hoje
+                        </>
                       ) : (
                         <>
                           <Lock className="w-5 h-5 inline mr-2" />
@@ -375,9 +505,15 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                   <p className="text-gray-600 text-lg">
                     Nenhuma recompensa disponível nesta categoria
                   </p>
-                  <p className="text-hero-primary text-sm mt-2">
-                    Complete mais missões para ganhar Gold!
-                  </p>
+                  {dailyTasksCompleted < 4 ? (
+                    <p className="text-red-400 text-sm mt-2">
+                      Complete {4 - dailyTasksCompleted} missões hoje para liberar os resgates!
+                    </p>
+                  ) : (
+                    <p className="text-hero-primary text-sm mt-2">
+                      Complete mais missões para ganhar Gold!
+                    </p>
+                  )}
                 </>
               ) : (
                 <>
