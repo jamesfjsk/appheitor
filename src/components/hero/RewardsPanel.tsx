@@ -472,7 +472,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           <Star className="w-5 h-5 inline mr-2" />
                           Resgatar Agora!
                         </>
-                      ) : !hasCompletedEnoughTasks ? (
+                      ) : dailyTasksCompleted < 4 ? (
                         <>
                           <Lock className="w-5 h-5 inline mr-2" />
                           Complete 4 Missões Hoje
