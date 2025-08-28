@@ -164,7 +164,7 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
           <div className="text-sm text-blue-800 space-y-1">
             <div className="flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-red-500" />
-              <span><strong>Penalidade:</strong> Você perde <span className="text-red-600 font-bold">-1 Gold</span> para cada tarefa não feita </span>
+              <span><strong>Penalidade:</strong> Você perde <span className="text-red-600 font-bold">-1 Gold</span> para cada tarefa não concluida no dia </span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-500" />
