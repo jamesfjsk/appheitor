@@ -168,7 +168,7 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-500" />
-              <span><strong>Bônus:</strong> +10 Gold se completar TODAS as tarefas do dia</span>
+              <span><strong>Bônus:</strong> <span className="text-green-600 font-bold">+10 Gold</span> se completar TODAS as tarefas do dia</span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-blue-500" />
