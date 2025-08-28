@@ -172,7 +172,7 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-blue-500" />
-              <span><strong>Quando:</strong> A Gideon Verifica automáticamente no final de cada dia</span>
+              <span><strong>Quando:</strong> A Gideon verifica automáticamente no final de cada dia</span>
             </div>
           </div>
         </div>
