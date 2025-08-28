@@ -14,7 +14,7 @@ interface RewardsPanelProps {
 }
 
 const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
-  const { rewards, redemptions, progress, redeemReward } = useData();
+  const { rewards, redemptions, progress, redeemReward, tasks } = useData();
   const { childUid } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'available' | 'locked'>('all');
