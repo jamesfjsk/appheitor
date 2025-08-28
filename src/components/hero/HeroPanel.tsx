@@ -8,6 +8,7 @@ import { calculateLevelSystem } from '../../utils/levelSystem';
 import HeroHeader from './HeroHeader';
 import ProgressBar from './ProgressBar';
 import DailyChecklist from './DailyChecklist';
+import DailySummaryCard from './DailySummaryCard';
 import AchievementsBadges from './AchievementsBadges';
 import RewardsPanel from './RewardsPanel';
 import CalendarModal from './CalendarModal';
