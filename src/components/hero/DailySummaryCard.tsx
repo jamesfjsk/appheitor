@@ -4,11 +4,36 @@ import { AlertTriangle, Star, TrendingDown, TrendingUp, Calendar, Info, X } from
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { FirestoreService } from '../../services/firestoreService';
+import { Task } from '../../types';
+
+// Helper function to check if task should be shown today based on frequency
+const isTaskAvailableToday = (task: Task): boolean => {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  
+  switch (task.frequency) {
+    case 'daily':
+      return true; // Always available
+    case 'weekday':
+      return dayOfWeek >= 1 && dayOfWeek <= 5; // Monday to Friday
+    case 'weekend':
+      return dayOfWeek === 0 || dayOfWeek === 6; // Saturday and Sunday
+    default:
+      return true;
+  }
+};
+
+// Helper function to check if task is completed today
+const isTaskCompletedToday = (task: Task): boolean => {
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  return task.status === 'done' && task.lastCompletedDate === today;
+};
 
 interface DailySummaryCardProps {}
 
 const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
   const { childUid } = useAuth();
+  const { tasks } = useData();
   const [yesterdayData, setYesterdayData] = useState<any>(null);
   const [todayTasksCount, setTodayTasksCount] = useState({ completed: 0, total: 0 });
   const [loading, setLoading] = useState(true);
@@ -28,19 +53,7 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
         const yesterdayProgress = await FirestoreService.getDailyProgress(childUid, yesterdayString);
         setYesterdayData(yesterdayProgress);
         
-        // Get today's task completion count
-        const today = new Date().toISOString().split('T')[0];
-        const todayCompletions = await FirestoreService.getTaskCompletionHistory(
-          childUid, 
-          new Date(today), 
-          new Date(today + 'T23:59:59')
-        );
-        
-        // This is a simplified count - in a real implementation, you'd want to get the actual active tasks for today
-        setTodayTasksCount({
-          completed: todayCompletions.length,
-          total: 5 // This should be calculated from actual active tasks for today
-        });
+        console.log('📊 DailySummaryCard: Yesterday data loaded:', yesterdayProgress);
         
       } catch (error) {
         console.error('❌ Error loading daily summary data:', error);
@@ -51,6 +64,41 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
     
     loadDailySummaryData();
   }, [childUid]);
+
+  // Calculate today's task counts from actual tasks data
+  useEffect(() => {
+    if (!tasks || tasks.length === 0) {
+      console.log('📊 DailySummaryCard: No tasks available yet');
+      return;
+    }
+
+    // Filter tasks that should be available today
+    const todayTasks = tasks.filter(task => 
+      task.active === true && isTaskAvailableToday(task)
+    );
+
+    // Count completed tasks today
+    const completedToday = todayTasks.filter(task => isTaskCompletedToday(task)).length;
+
+    const newTasksCount = {
+      completed: completedToday,
+      total: todayTasks.length
+    };
+
+    console.log('📊 DailySummaryCard: Task count updated:', {
+      totalTasks: tasks.length,
+      activeTasks: tasks.filter(t => t.active === true).length,
+      todayTasks: todayTasks.length,
+      completedToday,
+      taskBreakdown: {
+        morning: todayTasks.filter(t => t.period === 'morning').length,
+        afternoon: todayTasks.filter(t => t.period === 'afternoon').length,
+        evening: todayTasks.filter(t => t.period === 'evening').length
+      }
+    });
+
+    setTodayTasksCount(newTasksCount);
+  }, [tasks]); // This will update whenever tasks change
 
   if (loading) {
     return (
