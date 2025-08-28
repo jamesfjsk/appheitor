@@ -528,6 +528,8 @@ const HeroPanel: React.FC = () => {
                 progress={progress}
               />
               
+              <DailySummaryCard />
+              
               <DailyChecklist 
                 tasks={tasks}
                 selectedPeriod={selectedPeriod}
