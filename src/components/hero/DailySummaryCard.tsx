@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Star, TrendingDown, TrendingUp, Calendar, Info, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import { FirestoreService } from '../../services/firestoreService';
 
 interface DailySummaryCardProps {}
