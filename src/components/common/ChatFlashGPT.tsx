@@ -280,7 +280,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Sabe, quando eu e
                     </motion.div>
                     <div>
                       <h2 id="chat-title" className="text-xl font-bold" style={{ fontFamily: 'Comic Neue, cursive' }}>
-                        Giedon -Cofre do Tempo!
+                        Giedon - Cofre do Tempo!
                       </h2>
                       <p id="chat-description" className="text-yellow-300 text-sm">
                         Respostas detalhadas e motivação infinita ⚡
