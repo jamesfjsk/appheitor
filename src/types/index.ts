@@ -26,6 +26,7 @@ export interface UserProgress {
   totalTasksCompleted: number;
   lastActivityDate: Date;
   updatedAt: Date;
+  lastDailySummaryProcessedDate?: Date;
 }
 
 export interface Task {

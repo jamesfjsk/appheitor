@@ -149,7 +149,8 @@ export class FirestoreService {
           rewardsRedeemed: data.rewardsRedeemed || 0,
           totalTasksCompleted: data.totalTasksCompleted || 0,
           lastActivityDate: data.lastActivityDate?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          lastDailySummaryProcessedDate: data.lastDailySummaryProcessedDate?.toDate()
         };
       }
 
@@ -166,6 +167,7 @@ export class FirestoreService {
         rewardsRedeemed: 0,
         totalTasksCompleted: 0,
         lastActivityDate: serverTimestamp(),
+        lastDailySummaryProcessedDate: serverTimestamp(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -184,7 +186,8 @@ export class FirestoreService {
         rewardsRedeemed: 0,
         totalTasksCompleted: 0,
         lastActivityDate: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        lastDailySummaryProcessedDate: new Date()
       };
     } catch (error) {
       console.error('❌ FirestoreService: Error ensuring user progress:', error);
@@ -195,6 +198,12 @@ export class FirestoreService {
   static async updateUserProgress(userId: string, updates: Partial<UserProgress>): Promise<void> {
     try {
       const progressRef = doc(db, 'progress', userId);
+      
+      // Ensure availableGold never goes negative
+      if (updates.availableGold !== undefined) {
+        updates.availableGold = Math.max(0, updates.availableGold);
+      }
+      
       await updateDoc(progressRef, {
         ...updates,
         updatedAt: serverTimestamp()
@@ -1115,6 +1124,9 @@ export class FirestoreService {
     xpEarned: number;
     goldEarned: number;
     tasksCompleted: number;
+    goldPenalty?: number;
+    allTasksBonusGold?: number;
+    summaryProcessed?: boolean;
   } | null> {
     try {
       const progressRef = doc(db, 'dailyProgress', `${userId}_${date}`);
@@ -1125,7 +1137,10 @@ export class FirestoreService {
         return {
           xpEarned: data.xpEarned || 0,
           goldEarned: data.goldEarned || 0,
-          tasksCompleted: data.tasksCompleted || 0
+          tasksCompleted: data.tasksCompleted || 0,
+          goldPenalty: data.goldPenalty || 0,
+          allTasksBonusGold: data.allTasksBonusGold || 0,
+          summaryProcessed: data.summaryProcessed || false
         };
       }
       
@@ -1136,7 +1151,7 @@ export class FirestoreService {
     }
   }
 
-  static async updateDailyProgress(userId: string, date: string, xpGained: number, goldGained: number): Promise<void> {
+  static async incrementDailyTaskCompletion(userId: string, date: string, xpGained: number, goldGained: number): Promise<void> {
     try {
       const progressRef = doc(db, 'dailyProgress', `${userId}_${date}`);
       const progressDoc = await getDoc(progressRef);
@@ -1162,7 +1177,7 @@ export class FirestoreService {
         });
       }
     } catch (error) {
-      console.error('❌ FirestoreService: Error updating daily progress:', error);
+      console.error('❌ FirestoreService: Error incrementing daily task completion:', error);
       throw error;
     }
   }
