@@ -1182,6 +1182,34 @@ export class FirestoreService {
     }
   }
 
+  static async setDailySummary(userId: string, date: string, summary: {
+    goldPenalty: number;
+    allTasksBonusGold: number;
+    summaryProcessed: boolean;
+    totalTasksAvailable: number;
+    totalTasksCompleted: number;
+  }): Promise<void> {
+    try {
+      const progressRef = doc(db, 'dailyProgress', `${userId}_${date}`);
+      
+      // Use merge to preserve existing task completion data
+      await setDoc(progressRef, {
+        id: `${userId}_${date}`,
+        userId,
+        date,
+        goldPenalty: summary.goldPenalty,
+        allTasksBonusGold: summary.allTasksBonusGold,
+        summaryProcessed: summary.summaryProcessed,
+        totalTasksAvailable: summary.totalTasksAvailable,
+        totalTasksCompleted: summary.totalTasksCompleted,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error setting daily summary:', error);
+      throw error;
+    }
+  }
+
   // ========================================
   // 🔥 TASK COMPLETION HISTORY
   // ========================================
