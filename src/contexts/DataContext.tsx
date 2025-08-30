@@ -1154,6 +1154,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             await loadSurpriseMissionConfig();
             await checkSurpriseMissionStatus();
             
+            // Process unprocessed days for daily penalties/bonuses
+            if (childUid) {
+              try {
+                console.log('🔄 DataContext: Processing unprocessed days for daily penalties...');
+                await FirestoreService.processUnprocessedDays(childUid);
+                console.log('✅ DataContext: Daily processing completed');
+              } catch (error) {
+                console.error('❌ DataContext: Error in daily processing:', error);
+              }
+            }
+            
             // Initial achievement check after all data is loaded
             if (achievements.length > 0) {
               setTimeout(() => {

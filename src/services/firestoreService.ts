@@ -1120,6 +1120,237 @@ export class FirestoreService {
   // 🔥 DAILY PROGRESS TRACKING
   // ========================================
 
+  static async processDailySummary(userId: string, date: string): Promise<{
+    goldPenalty: number;
+    allTasksBonusGold: number;
+    tasksAvailable: number;
+    tasksCompleted: number;
+  }> {
+    try {
+      console.log('📊 FirestoreService: Processing daily summary for:', { userId, date });
+      
+      // Get all active tasks for the user
+      const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('ownerId', '==', userId),
+        where('active', '==', true)
+      );
+      
+      const tasksSnapshot = await getDocs(tasksQuery);
+      const allTasks = tasksSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          frequency: data.frequency || 'daily',
+          lastCompletedDate: data.lastCompletedDate
+        };
+      });
+      
+      // Filter tasks that should be available on this specific date
+      const targetDate = new Date(date);
+      const dayOfWeek = targetDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      
+      const availableTasks = allTasks.filter(task => {
+        switch (task.frequency) {
+          case 'daily':
+            return true;
+          case 'weekday':
+            return dayOfWeek >= 1 && dayOfWeek <= 5; // Monday to Friday
+          case 'weekend':
+            return dayOfWeek === 0 || dayOfWeek === 6; // Saturday and Sunday
+          default:
+            return true;
+        }
+      });
+      
+      // Count completed tasks for this specific date
+      const completedTasks = availableTasks.filter(task => 
+        task.lastCompletedDate === date
+      );
+      
+      const tasksAvailable = availableTasks.length;
+      const tasksCompleted = completedTasks.length;
+      const tasksNotCompleted = tasksAvailable - tasksCompleted;
+      
+      console.log('📊 Daily summary calculation:', {
+        date,
+        dayOfWeek,
+        totalTasks: allTasks.length,
+        tasksAvailable,
+        tasksCompleted,
+        tasksNotCompleted
+      });
+      
+      // Calculate penalties and bonuses
+      let goldPenalty = 0;
+      let allTasksBonusGold = 0;
+      
+      if (tasksAvailable > 0) {
+        if (tasksCompleted === tasksAvailable) {
+          // All tasks completed - bonus!
+          allTasksBonusGold = 10;
+          console.log('🎉 All tasks completed! Bonus: +10 Gold');
+        } else {
+          // Some tasks not completed - penalty
+          goldPenalty = tasksNotCompleted;
+          console.log(`❌ ${tasksNotCompleted} tasks not completed. Penalty: -${goldPenalty} Gold`);
+        }
+      } else {
+        console.log('📝 No tasks available for this date - no penalty or bonus');
+      }
+      
+      return {
+        goldPenalty,
+        allTasksBonusGold,
+        tasksAvailable,
+        tasksCompleted
+      };
+    } catch (error) {
+      console.error('❌ FirestoreService: Error processing daily summary:', error);
+      throw error;
+    }
+  }
+
+  static async applyDailySummary(userId: string, date: string): Promise<void> {
+    try {
+      console.log('💰 FirestoreService: Applying daily summary for:', { userId, date });
+      
+      // Check if already processed
+      const dailyProgress = await this.getDailyProgress(userId, date);
+      if (dailyProgress?.summaryProcessed) {
+        console.log('✅ Daily summary already processed for:', date);
+        return;
+      }
+      
+      // Calculate summary
+      const summary = await this.processDailySummary(userId, date);
+      
+      // Apply gold changes if there are penalties or bonuses
+      if (summary.goldPenalty > 0 || summary.allTasksBonusGold > 0) {
+        const progressRef = doc(db, 'progress', userId);
+        const progressDoc = await getDoc(progressRef);
+        
+        if (progressDoc.exists()) {
+          const currentProgress = progressDoc.data();
+          const currentGold = currentProgress.availableGold || 0;
+          
+          let newGold = currentGold;
+          
+          // Apply penalty (subtract gold, but never go below 0)
+          if (summary.goldPenalty > 0) {
+            newGold = Math.max(0, newGold - summary.goldPenalty);
+            console.log(`💸 Applying penalty: ${currentGold} - ${summary.goldPenalty} = ${newGold}`);
+          }
+          
+          // Apply bonus (add gold)
+          if (summary.allTasksBonusGold > 0) {
+            newGold = newGold + summary.allTasksBonusGold;
+            console.log(`💰 Applying bonus: ${newGold - summary.allTasksBonusGold} + ${summary.allTasksBonusGold} = ${newGold}`);
+          }
+          
+          // Update user progress
+          await updateDoc(progressRef, {
+            availableGold: newGold,
+            totalGoldSpent: summary.goldPenalty > 0 
+              ? (currentProgress.totalGoldSpent || 0) + summary.goldPenalty 
+              : (currentProgress.totalGoldSpent || 0),
+            totalGoldEarned: summary.allTasksBonusGold > 0
+              ? (currentProgress.totalGoldEarned || 0) + summary.allTasksBonusGold
+              : (currentProgress.totalGoldEarned || 0),
+            updatedAt: serverTimestamp()
+          });
+          
+          console.log('✅ User progress updated with daily summary');
+        }
+      }
+      
+      // Mark as processed
+      await this.setDailySummary(userId, date, {
+        goldPenalty: summary.goldPenalty,
+        allTasksBonusGold: summary.allTasksBonusGold,
+        summaryProcessed: true,
+        totalTasksAvailable: summary.tasksAvailable,
+        totalTasksCompleted: summary.tasksCompleted
+      });
+      
+      console.log('✅ Daily summary applied and marked as processed');
+    } catch (error) {
+      console.error('❌ FirestoreService: Error applying daily summary:', error);
+      throw error;
+    }
+  }
+
+  static async processUnprocessedDays(userId: string): Promise<void> {
+    try {
+      console.log('🔄 FirestoreService: Processing unprocessed days for user:', userId);
+      
+      // Get user progress to find last processed date
+      const progressRef = doc(db, 'progress', userId);
+      const progressDoc = await getDoc(progressRef);
+      
+      if (!progressDoc.exists()) {
+        console.log('❌ User progress not found, skipping daily processing');
+        return;
+      }
+      
+      const progressData = progressDoc.data();
+      const lastProcessedDate = progressData.lastDailySummaryProcessedDate?.toDate();
+      
+      // Calculate date range to process
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      let startDate = lastProcessedDate || new Date('2024-01-01'); // Default start date
+      
+      // Don't process today (only completed days)
+      const endDate = yesterday;
+      
+      console.log('📅 Date range for processing:', {
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+        lastProcessedDate: lastProcessedDate?.toISOString().split('T')[0] || 'never'
+      });
+      
+      // Process each day between start and end
+      const currentDate = new Date(startDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Start from day after last processed
+      
+      let daysProcessed = 0;
+      const maxDaysToProcess = 30; // Safety limit
+      
+      while (currentDate <= endDate && daysProcessed < maxDaysToProcess) {
+        const dateString = currentDate.toISOString().split('T')[0];
+        
+        try {
+          console.log(`📊 Processing day: ${dateString}`);
+          await this.applyDailySummary(userId, dateString);
+          daysProcessed++;
+        } catch (error) {
+          console.error(`❌ Error processing day ${dateString}:`, error);
+          // Continue with next day even if one fails
+        }
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      // Update last processed date
+      await updateDoc(progressRef, {
+        lastDailySummaryProcessedDate: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log(`✅ Processed ${daysProcessed} unprocessed days`);
+      
+      if (daysProcessed > 0) {
+        // Show notification about processed days
+        console.log(`🔔 Daily summary: Processed ${daysProcessed} days with penalties/bonuses`);
+      }
+    } catch (error) {
+      console.error('❌ FirestoreService: Error processing unprocessed days:', error);
+      throw error;
+    }
+  }
   static async getDailyProgress(userId: string, date: string): Promise<{
     xpEarned: number;
     goldEarned: number;

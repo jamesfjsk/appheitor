@@ -453,6 +453,40 @@ const AdminControls: React.FC = () => {
         </div>
       </div>
 
+      {/* Botão Forçar Processamento Diário */}
+      <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="font-semibold text-orange-900 mb-1">Processamento de Penalidades</h4>
+            <p className="text-sm text-orange-700">
+              Force o processamento manual das penalidades/bônus diários para testar o sistema
+            </p>
+          </div>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={async () => {
+              if (!childUid) return;
+              setIsProcessing(true);
+              try {
+                await FirestoreService.processUnprocessedDays(childUid);
+                toast.success('🔄 Processamento diário executado com sucesso!');
+              } catch (error: any) {
+                console.error('❌ Erro no processamento diário:', error);
+                toast.error('Erro no processamento diário');
+              } finally {
+                setIsProcessing(false);
+              }
+            }}
+            disabled={isProcessing}
+            className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg"
+          >
+            <RotateCcw className="w-5 h-5" />
+            {isProcessing ? 'Processando...' : 'Forçar Processamento Diário'}
+          </motion.button>
+        </div>
+      </div>
       {/* Botão Inicializar Dados de Teste */}
       <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
         <div className="flex items-center justify-between">

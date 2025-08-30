@@ -38,6 +38,7 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
   const [todayTasksCount, setTodayTasksCount] = useState({ completed: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
+  const [processingDays, setProcessingDays] = useState(false);
 
   useEffect(() => {
     const loadDailySummaryData = async () => {
@@ -45,6 +46,12 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
       
       setLoading(true);
       try {
+        // Force process unprocessed days when component loads
+        setProcessingDays(true);
+        console.log('🔄 DailySummaryCard: Forcing daily processing...');
+        await FirestoreService.processUnprocessedDays(childUid);
+        setProcessingDays(false);
+        
         // Get yesterday's data
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
@@ -57,6 +64,7 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
         
       } catch (error) {
         console.error('❌ Error loading daily summary data:', error);
+        setProcessingDays(false);
       } finally {
         setLoading(false);
       }
@@ -104,7 +112,9 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
       >
         <div className="text-center py-4">
           <div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-          <p className="text-gray-600 text-sm">Carregando resumo diário...</p>
+          <p className="text-gray-600 text-sm">
+            {processingDays ? 'Processando penalidades diárias...' : 'Carregando resumo diário...'}
+          </p>
         </div>
       </motion.div>
     );
