@@ -67,11 +67,6 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
 
   // Calculate today's task counts from actual tasks data
   useEffect(() => {
-    if (!tasks || tasks.length === 0) {
-      console.log('📊 DailySummaryCard: No tasks available yet');
-      return;
-    }
-
     // Filter tasks that should be available today
     const todayTasks = tasks.filter(task => 
       task.active === true && isTaskAvailableToday(task)
