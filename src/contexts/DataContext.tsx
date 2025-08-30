@@ -67,7 +67,7 @@ interface DataContextType {
   getCalendarMonth: (year: number, month: number) => CalendarDay[];
 }
 
-const DataContext = createContext<DataContextType | undefined>(undefined);
+export const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const useData = () => {
   const context = useContext(DataContext);
