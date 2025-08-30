@@ -1021,13 +1021,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           await FirestoreService.createDefaultData(childUid, user.userId);
         }
 
-        // Check and process missed days for daily summary
-        try {
-          await FirestoreService.checkAndProcessMissedDays(childUid);
-        } catch (error) {
-          console.error('❌ DataContext: Error processing missed days:', error);
-        }
-
         // Set up real-time listeners with error handling
         const unsubscribeTasks = FirestoreService.subscribeToUserTasks(
           childUid,
