@@ -67,11 +67,34 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     { id: 'evening', label: 'Noite', icon: Moon, color: 'from-purple-400 to-purple-500' }
   ] as const;
 
-  const filteredTasks = tasks.filter(task => 
-    task.period === selectedPeriod && 
-    task.active === true &&
-    isTaskAvailableToday(task)
-  );
+  const filteredTasks = tasks.filter(task => {
+    console.log('🔍 Filtering task:', {
+      taskId: task.id,
+      title: task.title,
+      period: task.period,
+      selectedPeriod,
+      active: task.active,
+      frequency: task.frequency,
+      isAvailableToday: isTaskAvailableToday(task),
+      shouldShow: task.period === selectedPeriod && task.active === true && isTaskAvailableToday(task)
+    });
+    
+    return task.period === selectedPeriod && 
+           task.active === true &&
+           isTaskAvailableToday(task);
+  });
+
+  console.log('📝 DailyChecklist: Task filtering results:', {
+    totalTasks: tasks.length,
+    selectedPeriod,
+    filteredTasks: filteredTasks.length,
+    tasksByPeriod: {
+      morning: tasks.filter(t => t.period === 'morning' && t.active === true).length,
+      afternoon: tasks.filter(t => t.period === 'afternoon' && t.active === true).length,
+      evening: tasks.filter(t => t.period === 'evening' && t.active === true).length
+    },
+    allActiveTasks: tasks.filter(t => t.active === true).length
+  });
 
   const completedTasks = filteredTasks.filter(task => isTaskCompletedToday(task)).length;
   const totalTasks = filteredTasks.length;

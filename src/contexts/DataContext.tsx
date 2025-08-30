@@ -1032,7 +1032,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         const unsubscribeTasks = FirestoreService.subscribeToUserTasks(
           childUid,
           (tasks) => {
-            console.log('📝 DataContext: Tasks updated:', tasks.length);
+            console.log('📝 DataContext: Tasks updated:', {
+              total: tasks.length,
+              active: tasks.filter(t => t.active === true).length,
+              byPeriod: {
+                morning: tasks.filter(t => t.period === 'morning' && t.active === true).length,
+                afternoon: tasks.filter(t => t.period === 'afternoon' && t.active === true).length,
+                evening: tasks.filter(t => t.period === 'evening' && t.active === true).length
+              },
+              tasks: tasks.map(t => ({ id: t.id, title: t.title, period: t.period, active: t.active }))
+            });
             setTasks(tasks);
           },
           (error) => {

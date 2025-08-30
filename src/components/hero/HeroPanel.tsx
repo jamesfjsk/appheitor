@@ -122,11 +122,22 @@ const HeroPanel: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-hero-primary to-hero-secondary flex items-center justify-center">
         <div className="text-center">
           <LoadingSpinner size="large" color="yellow" />
+          <div className="mt-4 text-white text-sm">
+            Carregando missões do Heitor...
+          </div>
         </div>
       </div>
     );
   }
 
+  console.log('⚡ HeroPanel: Rendering with data:', {
+    tasksTotal: tasks.length,
+    tasksActive: tasks.filter(t => t.active === true).length,
+    loading,
+    childUid: !!childUid,
+    progressLevel: progress.level,
+    progressXP: progress.totalXP
+  });
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-red-600 via-red-500 to-red-700 relative overflow-hidden">
