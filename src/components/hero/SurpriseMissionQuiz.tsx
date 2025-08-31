@@ -214,7 +214,7 @@ IMPORTANTE:
 - Não inclua numeração nas perguntas
 - Certifique-se de que a resposta correta está EXATAMENTE igual a uma das opções
 - Explicações devem ser educativas mas simples
-- Varie o tipo de pergunta dentro do tema`
+- Varie o tipo de pergunta dentro do tema
            },
            {
              role: 'user',
