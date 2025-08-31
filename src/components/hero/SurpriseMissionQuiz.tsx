@@ -214,12 +214,11 @@ IMPORTANTE:
 - Não inclua numeração nas perguntas
 - Certifique-se de que a resposta correta está EXATAMENTE igual a uma das opções
 - Explicações devem ser educativas mas simples
-- Varie o tipo de pergunta dentro do tema
+- Varie o tipo de pergunta dentro do tema`
            },
            {
              role: 'user',
              content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (9 anos). 
-
 IMPORTANTE: Para dificuldade "${surpriseMissionConfig.difficulty}", as perguntas devem ser ${difficultyDescription}.
 
 ${surpriseMissionConfig.difficulty === 'hard' ? `
