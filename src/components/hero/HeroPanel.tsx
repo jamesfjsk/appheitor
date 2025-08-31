@@ -15,6 +15,7 @@ import CalendarModal from './CalendarModal';
 import FlashReminders from './FlashReminders';
 import QuizTime from './QuizTime';
 import SurpriseMissionQuiz from './SurpriseMissionQuiz';
+import FlashTimer from './FlashTimer';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const HeroPanel: React.FC = () => {
@@ -30,6 +31,7 @@ const HeroPanel: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'morning' | 'afternoon' | 'evening'>('morning');
   const [showRewards, setShowRewards] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
   const [guidedMode, setGuidedMode] = useState(false);
   const [showMissionComplete, setShowMissionComplete] = useState(false);
   const [showSurpriseMission, setShowSurpriseMission] = useState(false);
@@ -444,6 +446,7 @@ const HeroPanel: React.FC = () => {
             progress={progress}
             onOpenRewards={() => setShowRewards(true)}
             onOpenCalendar={() => setShowCalendar(true)}
+            onOpenTimer={() => setShowTimer(true)}
           />
           
           {/* Controle de Som */}
@@ -715,6 +718,15 @@ const HeroPanel: React.FC = () => {
               setShowSurpriseMission(false);
               // Refresh surprise mission status will be handled by DataContext
             }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showTimer && (
+          <FlashTimer 
+            isOpen={showTimer}
+            onClose={() => setShowTimer(false)}
           />
         )}
       </AnimatePresence>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CloudLightning as Lightning, LogOut, Gift, Calendar } from 'lucide-react';
+import { CloudLightning as Lightning, LogOut, Gift, Calendar, Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserProgress } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
@@ -10,9 +10,10 @@ interface HeroHeaderProps {
   progress: UserProgress;
   onOpenRewards: () => void;
   onOpenCalendar: () => void;
+  onOpenTimer: () => void;
 }
 
-const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar }) => {
+const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer }) => {
   const { logout } = useAuth();
   const { user: currentUser } = useAuth();
   const { playClick } = useSound();
@@ -210,6 +211,20 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           title="Calendário de Missões"
         >
           <Calendar className="w-5 h-5" />
+        </motion.button>
+
+        {/* Botão Timer */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            playClick();
+            onOpenTimer();
+          }}
+          className="p-2 bg-gradient-to-r from-hero-primary to-hero-secondary hover:from-hero-secondary hover:to-hero-primary rounded-full text-white transition-all duration-200 shadow-lg"
+          title="Flash Timer"
+        >
+          <Clock className="w-5 h-5" />
         </motion.button>
 
         {/* Botão Logout */}
