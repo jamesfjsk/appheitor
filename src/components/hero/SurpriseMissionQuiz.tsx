@@ -28,6 +28,15 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
   const [error, setError] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'correct' | 'wrong'>('all');
+  const [detailedResults, setDetailedResults] = useState<Array<{
+    question: string;
+    userAnswer: string;
+    correctAnswer: string;
+    isCorrect: boolean;
+    explanation: string;
+    category?: string;
+  }>>([]);
   const [timeStarted, setTimeStarted] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -36,6 +45,101 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
       setTimeStarted(new Date());
     }
   }, [isOpen, surpriseMissionConfig]);
+
+  // Helper function to categorize questions for improvement suggestions
+  const getQuestionCategory = (question: string): string => {
+    const questionLower = question.toLowerCase();
+    
+    if (questionLower.includes('inglês') || questionLower.includes('english') || 
+        questionLower.includes('como se diz') || questionLower.includes('cat') || 
+        questionLower.includes('dog') || questionLower.includes('house')) {
+      return 'inglês';
+    }
+    
+    if (questionLower.includes('+') || questionLower.includes('-') || 
+        questionLower.includes('×') || questionLower.includes('÷') || 
+        questionLower.includes('quanto é') || questionLower.includes('matemática')) {
+      return 'matemática';
+    }
+    
+    if (questionLower.includes('planeta') || questionLower.includes('animal') || 
+        questionLower.includes('corpo') || questionLower.includes('ciência')) {
+      return 'ciências';
+    }
+    
+    if (questionLower.includes('brasil') || questionLower.includes('geografia') || 
+        questionLower.includes('história') || questionLower.includes('país')) {
+      return 'geografia/história';
+    }
+    
+    return 'conhecimentos gerais';
+  };
+
+  // Generate improvement suggestions based on wrong answers
+  const generateImprovementSuggestions = () => {
+    const wrongAnswers = detailedResults.filter(result => !result.isCorrect);
+    const categoryCounts: Record<string, number> = {};
+    
+    wrongAnswers.forEach(result => {
+      const category = result.category || 'geral';
+      categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+    });
+    
+    const suggestions = [];
+    const totalWrong = wrongAnswers.length;
+    
+    if (totalWrong === 0) {
+      return ['🏆 Perfeito! Você domina todos os assuntos! Continue assim, campeão!'];
+    }
+    
+    // Sort categories by most errors
+    const sortedCategories = Object.entries(categoryCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3); // Top 3 categories with most errors
+    
+    sortedCategories.forEach(([category, count]) => {
+      const percentage = Math.round((count / totalWrong) * 100);
+      
+      switch (category) {
+        case 'inglês':
+          suggestions.push(`📚 Inglês (${count} erros): Pratique vocabulário básico com jogos e desenhos em inglês!`);
+          break;
+        case 'matemática':
+          suggestions.push(`🔢 Matemática (${count} erros): Treine cálculos mentais e tabuada brincando!`);
+          break;
+        case 'ciências':
+          suggestions.push(`🔬 Ciências (${count} erros): Explore curiosidades sobre animais e o corpo humano!`);
+          break;
+        case 'geografia/história':
+          suggestions.push(`🌍 Geografia/História (${count} erros): Descubra mais sobre o Brasil e o mundo!`);
+          break;
+        default:
+          suggestions.push(`🧠 ${category} (${count} erros): Continue estudando e fazendo perguntas!`);
+      }
+    });
+    
+    // Add motivational message
+    if (totalWrong <= 5) {
+      suggestions.push('💪 Você está quase lá! Poucos erros mostram que está aprendendo rápido!');
+    } else if (totalWrong <= 10) {
+      suggestions.push('🌟 Bom trabalho! Com mais prática você vai dominar tudo!');
+    } else {
+      suggestions.push('🚀 Todo herói começa assim! Continue praticando que você vai longe!');
+    }
+    
+    return suggestions;
+  };
+
+  const getPerformanceLevel = (score: number) => {
+    const percentage = (score / 30) * 100;
+    
+    if (percentage >= 90) return { level: 'Excepcional', color: 'text-purple-600', emoji: '🏆' };
+    if (percentage >= 80) return { level: 'Excelente', color: 'text-green-600', emoji: '⚡' };
+    if (percentage >= 70) return { level: 'Muito Bom', color: 'text-blue-600', emoji: '🌟' };
+    if (percentage >= 60) return { level: 'Bom', color: 'text-yellow-600', emoji: '💪' };
+    if (percentage >= 50) return { level: 'Regular', color: 'text-orange-600', emoji: '🎯' };
+    return { level: 'Precisa Melhorar', color: 'text-red-600', emoji: '🌈' };
+  };
 
   const generateQuestions = async () => {
     if (!surpriseMissionConfig) return;
@@ -251,15 +355,36 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
     
     try {
       let correctAnswers = 0;
+      const detailedResults: Array<{
+        question: string;
+        userAnswer: string;
+        correctAnswer: string;
+        isCorrect: boolean;
+        explanation: string;
+        category?: string;
+      }> = [];
       
       // Calculate score based on correct answers
       answers.forEach((answer, index) => {
         if (questions[index] && answer === questions[index].answer) {
           correctAnswers++;
         }
+        
+        // Store detailed results for review
+        if (questions[index]) {
+          detailedResults.push({
+            question: questions[index].question,
+            userAnswer: answer,
+            correctAnswer: questions[index].answer,
+            isCorrect: answer === questions[index].answer,
+            explanation: questions[index].explanation,
+            category: getQuestionCategory(questions[index].question)
+          });
+        }
       });
       
       setScore(correctAnswers);
+      setDetailedResults(detailedResults);
       setShowResults(true);
       
       // Nova lógica: Recompensa por acerto + base de participação
@@ -322,6 +447,8 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
     setIsGenerating(false);
     setShowResults(false);
     setScore(0);
+    setDetailedResults([]);
+    setReviewFilter('all');
     setError(null);
     setTimeStarted(null);
     onClose();
@@ -496,15 +623,22 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                 Missão Surpresa Concluída! 🎉
               </h3>
               
-              <div className="bg-gradient-to-r from-purple-600/10 to-purple-700/10 rounded-2xl p-8 mb-6">
+              {/* Performance Summary */}
+              <div className="bg-gradient-to-r from-purple-600/10 to-purple-700/10 rounded-2xl p-8 mb-8">
                 <p className={`text-3xl font-bold mb-4 ${getScoreColor(score)}`}>
                   {score} de {questions.length} acertos
                 </p>
+                
+                <div className={`text-2xl font-bold mb-4 ${getPerformanceLevel(score).color}`}>
+                  {getPerformanceLevel(score).emoji} {getPerformanceLevel(score).level}
+                </div>
+                
                 <p className="text-xl font-bold text-purple-600 mb-6">
                   {getPerformanceMessage(score)}
                 </p>
                 
-                <div className="flex justify-center gap-1 mb-6">
+                {/* Star Rating Visual */}
+                <div className="flex justify-center gap-1 mb-8">
                   {Array.from({ length: 30 }).map((_, i) => (
                     <motion.div
                       key={i}
@@ -513,7 +647,7 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                       transition={{ duration: 0.2, delay: i * 0.02 }}
                     >
                       <Star
-                        className={`w-4 h-4 ${
+                        className={`w-3 h-3 ${
                           i < score ? 'text-yellow-400 fill-current' : 'text-gray-300'
                         }`}
                       />
@@ -521,7 +655,8 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                   ))}
                 </div>
                 
-                <div className="bg-white rounded-xl p-6 border border-purple-200">
+                {/* Rewards Section */}
+                <div className="bg-white rounded-xl p-6 border border-purple-200 mb-6">
                   <p className="text-purple-600 font-bold mb-4 text-lg">🎁 Recompensas Ganhas:</p>
                   
                   <div className="grid grid-cols-2 gap-6 mb-4">
@@ -559,18 +694,167 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                     )}
                   </div>
                 </div>
+                
+                {/* Performance Analysis */}
+                <div className="bg-blue-50 rounded-xl p-6 border border-blue-200 mb-6">
+                  <h4 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                    📊 Análise de Performance
+                  </h4>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="text-xl font-bold text-green-600">{score}</div>
+                      <div className="text-xs text-green-600">Acertos</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="text-xl font-bold text-red-600">{30 - score}</div>
+                      <div className="text-xs text-red-600">Erros</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="text-xl font-bold text-blue-600">{Math.round((score / 30) * 100)}%</div>
+                      <div className="text-xs text-blue-600">Aproveitamento</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <div className="text-xl font-bold text-purple-600">
+                        {timeStarted ? Math.round((new Date().getTime() - timeStarted.getTime()) / 60000) : 0}min
+                      </div>
+                      <div className="text-xs text-purple-600">Duração</div>
+                    </div>
+                  </div>
+                  
+                  {/* Category Performance */}
+                  {(() => {
+                    const categoryStats: Record<string, { correct: number; total: number }> = {};
+                    
+                    detailedResults.forEach(result => {
+                      const category = result.category || 'geral';
+                      if (!categoryStats[category]) {
+                        categoryStats[category] = { correct: 0, total: 0 };
+                      }
+                      categoryStats[category].total++;
+                      if (result.isCorrect) {
+                        categoryStats[category].correct++;
+                      }
+                    });
+                    
+                    return Object.keys(categoryStats).length > 1 && (
+                      <div>
+                        <h5 className="font-semibold text-blue-900 mb-3">📈 Performance por Área:</h5>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {Object.entries(categoryStats).map(([category, stats]) => {
+                            const percentage = Math.round((stats.correct / stats.total) * 100);
+                            return (
+                              <div key={category} className="bg-white p-3 rounded-lg">
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="font-medium text-gray-900 capitalize">{category}</span>
+                                  <span className={`font-bold ${
+                                    percentage >= 80 ? 'text-green-600' :
+                                    percentage >= 60 ? 'text-yellow-600' : 'text-red-600'
+                                  }`}>
+                                    {percentage}%
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div 
+                                    className={`h-2 rounded-full transition-all duration-500 ${
+                                      percentage >= 80 ? 'bg-green-500' :
+                                      percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                                    }`}
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                </div>
+                                <div className="text-xs text-gray-600 mt-1">
+                                  {stats.correct}/{stats.total} acertos
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+                
+                {/* Improvement Suggestions */}
+                <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200 mb-6">
+                  <h4 className="text-lg font-bold text-yellow-900 mb-4 flex items-center gap-2">
+                    💡 Dicas para Melhorar
+                  </h4>
+                  
+                  <div className="space-y-3">
+                    {generateImprovementSuggestions().map((suggestion, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.2 }}
+                        className="flex items-start gap-3 p-3 bg-white rounded-lg border border-yellow-200"
+                      >
+                        <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <p className="text-yellow-800 font-medium">{suggestion}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-4 p-4 bg-yellow-100 rounded-lg">
+                    <p className="text-yellow-800 text-sm font-medium text-center">
+                      🎯 Lembre-se: Cada erro é uma oportunidade de aprender algo novo! 
+                      Continue praticando e você se tornará um verdadeiro gênio velocista! ⚡
+                    </p>
+                  </div>
+                </div>
               </div>
               
-              {/* Review Table */}
-              <div className="bg-gray-50 rounded-2xl p-6 mb-6 text-left max-h-96 overflow-y-auto">
+              {/* Detailed Review */}
+              <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-left">
                 <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">
                   📚 Revisão Completa das 30 Questões
                 </h4>
                 
-                <div className="space-y-4">
+                {/* Filter buttons */}
+                <div className="flex justify-center gap-2 mb-6">
+                  <button
+                    onClick={() => setReviewFilter('all')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      reviewFilter === 'all' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    Todas ({questions.length})
+                  </button>
+                  <button
+                    onClick={() => setReviewFilter('correct')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      reviewFilter === 'correct' 
+                        ? 'bg-green-600 text-white' 
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    Acertos ({score})
+                  </button>
+                  <button
+                    onClick={() => setReviewFilter('wrong')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      reviewFilter === 'wrong' 
+                        ? 'bg-red-600 text-white' 
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    Erros ({30 - score})
+                  </button>
+                </div>
+                
+                <div className="space-y-4 max-h-96 overflow-y-auto">
                   {questions.map((question, index) => {
                     const userAnswer = userAnswers[index];
                     const isCorrect = userAnswer === question.answer;
+                    
+                    // Filter logic
+                    if (reviewFilter === 'correct' && !isCorrect) return null;
+                    if (reviewFilter === 'wrong' && isCorrect) return null;
                     
                     return (
                       <motion.div
@@ -624,6 +908,26 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                     );
                   })}
                 </div>
+              </div>
+              
+              {/* Motivational Message */}
+              <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-2xl p-6 mb-6 text-center">
+                <h4 className="text-2xl font-bold text-red-600 mb-3">
+                  ⚡ Mensagem do Flash ⚡
+                </h4>
+                <p className="text-red-600 text-lg font-bold leading-relaxed">
+                  {score >= 25 ? (
+                    "Incrível, velocista! Você mostrou que tem o conhecimento de um verdadeiro herói! Continue estudando e você se tornará imbatível! 🏆⚡"
+                  ) : score >= 20 ? (
+                    "Excelente trabalho, jovem Flash! Você está no caminho certo. Com mais treino, você dominará todos os assuntos! 🌟💪"
+                  ) : score >= 15 ? (
+                    "Bom trabalho, herói! Você mostrou determinação. Continue praticando as áreas que precisa melhorar e logo estará voando! 🚀📚"
+                  ) : score >= 10 ? (
+                    "Todo grande herói começa assim! Você teve coragem de tentar. Agora é hora de treinar mais e voltar ainda mais forte! 💪🎯"
+                  ) : (
+                    "Ei, campeão! Mesmo o Flash precisou treinar muito para ser rápido. Use essas dicas para estudar e na próxima você vai arrasar! 🌈⚡"
+                  )}
+                </p>
               </div>
               
               <button
