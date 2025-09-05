@@ -238,7 +238,7 @@ Gere EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro.
       
       if (correctAnswers >= 5) {
         xpReward = 25;
-        goldReward = 12;
+        goldReward = 15;
       } else if (correctAnswers >= 4) {
         xpReward = 20;
         goldReward = 10;
@@ -396,7 +396,7 @@ Gere EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro.
                     <span>Recompensas por acertos:</span>
                   </div>
                   <div className="text-sm text-yellow-700 mt-2 space-y-1">
-                    <div>🏆 5 acertos: +25 XP, +12 Gold</div>
+                    <div>🏆 5 acertos: +25 XP, +15 Gold</div>
                     <div>🥇 4 acertos: +20 XP, +10 Gold</div>
                     <div>🥈 3 acertos: +15 XP, +8 Gold</div>
                     <div>🥉 Participação: +2 XP, +2 Gold</div>
