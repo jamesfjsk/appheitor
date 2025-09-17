@@ -141,40 +141,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     return true;
   });
 
-  const getRedemptionStatus = (rewardId: string) => {
-    // Only check for pending redemptions - approved/rejected redemptions don't block new ones
-    const redemption = redemptions
-      .filter(r => r.rewardId === rewardId && r.status === 'pending')
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-    
-    return redemption;
-  };
-
-  const canRedeem = (reward: Reward) => {
-    const redemption = getRedemptionStatus(reward.id);
-    const goldCost = reward.costGold || 0;
-    const hasEnoughGold = (progress.availableGold || 0) >= goldCost;
-    const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
-    const notPending = !redemption; // Only check if there's no pending redemption
-    const hasCompletedEnoughTasks = dailyTasksCompleted >= 4;
-    
-    console.log('🔥 Verificando se pode resgatar:', {
-      reward: reward.title,
-      goldCost,
-      availableGold: progress.availableGold,
-      hasEnoughGold,
-      isUnlocked,
-      requiredLevel: reward.requiredLevel,
-      currentLevel,
-      notPending,
-      dailyTasksCompleted,
-      hasCompletedEnoughTasks,
-      canRedeem: hasEnoughGold && notPending && isUnlocked && hasCompletedEnoughTasks
-    });
-    
-    return hasEnoughGold && notPending && isUnlocked && hasCompletedEnoughTasks;
-  };
-
   const handleRedeem = async (reward: Reward) => {
     if (!canRedeem(reward)) return;
     
