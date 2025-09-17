@@ -339,9 +339,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 const pendingRedemption = redemptions
                   .filter(r => r.rewardId === reward.id && r.status === 'pending')
                   .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-                const pendingRedemption = redemptions
-                  .filter(r => r.rewardId === reward.id && r.status === 'pending')
-                  .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
                 
                 return (
                   <motion.div
