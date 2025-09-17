@@ -55,6 +55,63 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     return rewards.find(reward => reward.id === rewardId);
   };
 
+  const getRedemptionStatus = (rewardId: string) => {
+    // Only check for pending redemptions - approved/rejected redemptions don't block new ones
+    const redemption = redemptions
+      .filter(r => r.rewardId === rewardId && r.status === 'pending')
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    
+    return redemption;
+  };
+
+  const canRedeem = (reward: Reward) => {
+    const redemption = getRedemptionStatus(reward.id);
+    const goldCost = reward.costGold || 0;
+    const hasEnoughGold = (progress.availableGold || 0) >= goldCost;
+    const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
+    const notPending = !redemption; // Only check if there's no pending redemption
+    const hasCompletedEnoughTasks = dailyTasksCompleted >= 4;
+    
+    console.log('🔥 Verificando se pode resgatar:', {
+      reward: reward.title,
+      goldCost,
+      availableGold: progress.availableGold,
+      hasEnoughGold,
+      isUnlocked,
+      requiredLevel: reward.requiredLevel,
+      currentLevel,
+      notPending,
+      dailyTasksCompleted,
+      hasCompletedEnoughTasks,
+      canRedeem: hasEnoughGold && notPending && isUnlocked && hasCompletedEnoughTasks
+    });
+    
+    return hasEnoughGold && notPending && isUnlocked && hasCompletedEnoughTasks;
+  };
+
+  const getStatusBadge = (reward: Reward) => {
+    // Show badge only for pending redemptions
+    const pendingRedemption = redemptions
+      .filter(r => r.rewardId === reward.id && r.status === 'pending')
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    
+    if (!pendingRedemption) return null;
+    
+    const statusConfig = {
+      pending: { icon: Clock, color: 'bg-yellow-500', text: 'Aguardando' },
+    };
+    
+    const config = statusConfig.pending;
+    const Icon = config.icon;
+    
+    return (
+      <div className={`absolute -top-2 -right-2 ${config.color} text-white rounded-full p-1 text-xs font-bold flex items-center gap-1`}>
+        <Icon className="w-3 h-3" />
+        <span className="hidden sm:inline">{config.text}</span>
+      </div>
+    );
+  };
+
   const categories = [
     { id: 'all', label: 'Todas', icon: '🎁' },
     { id: 'treat', label: 'Guloseimas', icon: '🍭' },
@@ -336,6 +393,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 const canRedeemReward = canRedeem(reward);
                 const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
                 const requiredLevel = reward.requiredLevel || 1;
+                const pendingRedemption = redemptions
+                  .filter(r => r.rewardId === reward.id && r.status === 'pending')
+                  .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
                 const pendingRedemption = redemptions
                   .filter(r => r.rewardId === reward.id && r.status === 'pending')
                   .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];

@@ -40,9 +40,11 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
 
     // Prevent multiple clicks while completing
     if (isCompleting) {
+      console.log('⚠️ Task completion already in progress, ignoring click');
       return;
     }
 
+    console.log('🎯 Starting task completion:', { taskId: task.id, title: task.title });
     setIsCompleting(true);
 
     try {
@@ -66,12 +68,15 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
       // Complete the task immediately
       await onComplete(task.id, true);
       
+      console.log('✅ Task completed successfully:', task.id);
+      
       setTimeout(() => {
         setShowSuccess(false);
       }, 800);
     } catch (error) {
       console.error('Erro ao completar tarefa:', error);
       setShowSuccess(false);
+      setShowXPGain(false);
     } finally {
       // Always reset completing state after a delay
       setTimeout(() => {

@@ -63,6 +63,10 @@ const RewardManager: React.FC = () => {
       if (approved) {
         toast.success('✅ Resgate aprovado! Recompensa liberada para o Heitor.');
       } else {
+        toast.success('❌ Resgate rejeitado. Gold devolvido para o Heitor.');
+      }
+        toast.success('✅ Resgate aprovado! Recompensa liberada para o Heitor.');
+      } else {
         toast.success('❌ Resgate rejeitado. Pontos devolvidos para o Heitor.');
       }
     } catch (error) {

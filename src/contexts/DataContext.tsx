@@ -419,6 +419,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const reward = rewards.find(r => r.id === rewardId);
       if (!reward) throw new Error('Recompensa não encontrada');
       
+      // Check if there's already a pending redemption for this reward
+      const existingPendingRedemption = redemptions.find(r => 
+        r.rewardId === rewardId && 
+        r.status === 'pending'
+      );
+      
+      if (existingPendingRedemption) {
+        throw new Error('Você já tem um resgate pendente para esta recompensa');
+      }
+      
       if ((progress.availableGold || 0) < (reward.costGold || 0)) {
         throw new Error('Gold insuficiente');
       }
@@ -429,6 +439,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       console.error('❌ Erro ao resgatar recompensa:', error);
       if (error.message.includes('4 missões hoje')) {
         toast.error(error.message);
+      } else if (error.message.includes('resgate pendente')) {
+        toast.error('Você já tem um resgate pendente para esta recompensa!');
       } else if (error.message === 'Gold insuficiente') {
         toast.error('Você não tem Gold suficiente para esta recompensa');
       } else {

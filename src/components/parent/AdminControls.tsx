@@ -24,11 +24,13 @@ const AdminControls: React.FC = () => {
   const handleAdjustXP = (amount: number) => {
     if (isProcessing) return;
     
+    console.log('🔧 AdminControls: Adjusting XP:', { amount, currentXP: progress.totalXP });
     setIsProcessing(true);
     playClick();
     adjustUserXP(amount)
       .then(() => {
         setXpInput('');
+        console.log('✅ AdminControls: XP adjusted successfully');
       })
       .catch((error) => {
         console.error('❌ AdminControls: Error adjusting XP:', error);
@@ -42,11 +44,13 @@ const AdminControls: React.FC = () => {
   const handleAdjustGold = (amount: number) => {
     if (isProcessing) return;
     
+    console.log('🔧 AdminControls: Adjusting Gold:', { amount, currentGold: progress.availableGold });
     setIsProcessing(true);
     playClick();
     adjustUserGold(amount)
       .then(() => {
         setGoldInput('');
+        console.log('✅ AdminControls: Gold adjusted successfully');
       })
       .catch((error) => {
         console.error('❌ AdminControls: Error adjusting Gold:', error);
