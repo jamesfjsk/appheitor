@@ -89,29 +89,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     return hasEnoughGold && notPending && isUnlocked && hasCompletedEnoughTasks;
   };
 
-  const getStatusBadge = (reward: Reward) => {
-    // Show badge only for pending redemptions
-    const pendingRedemption = redemptions
-      .filter(r => r.rewardId === reward.id && r.status === 'pending')
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-    
-    if (!pendingRedemption) return null;
-    
-    const statusConfig = {
-      pending: { icon: Clock, color: 'bg-yellow-500', text: 'Aguardando' },
-    };
-    
-    const config = statusConfig.pending;
-    const Icon = config.icon;
-    
-    return (
-      <div className={`absolute -top-2 -right-2 ${config.color} text-white rounded-full p-1 text-xs font-bold flex items-center gap-1`}>
-        <Icon className="w-3 h-3" />
-        <span className="hidden sm:inline">{config.text}</span>
-      </div>
-    );
-  };
-
   const categories = [
     { id: 'all', label: 'Todas', icon: '🎁' },
     { id: 'treat', label: 'Guloseimas', icon: '🍭' },
