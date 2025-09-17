@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Lock, Star, Target, Zap, X, CheckCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Achievement, UserAchievement, UserProgress } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { FirestoreService } from '../../services/firestoreService';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 
 interface AchievementsBadgesProps {}
