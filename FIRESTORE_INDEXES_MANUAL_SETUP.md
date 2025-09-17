@@ -34,6 +34,14 @@ https://console.firebase.google.com/v1/r/project/app-heitor/firestore/indexes?cr
 https://console.firebase.google.com/v1/r/project/app-heitor/firestore/indexes?create_composite=ClBwcm9qZWN0cy9hcHAtaGVpdG9yL2RhdGFiYXNlcy8oZGVmYXVsdCkvY29sbGVjdGlvbkdyb3Vwcy9ub3RpZmljYXRpb25zL2luZGV4ZXMvXxABGgwKCHRvVXNlcklkEAEaCgoGc2VudEF0EAIaDAoIX19uYW1lX18QAg
 ```
 
+### 4. **Task Completions Collection Index**
+**Fields:** `userId` (Ascending) → `date` (Ascending) → `completedAt` (Descending)
+
+**Direct Link:**
+```
+https://console.firebase.google.com/v1/r/project/app-heitor/firestore/indexes?create_composite=ClJwcm9qZWN0cy9hcHAtaGVpdG9yL2RhdGFiYXNlcy8oZGVmYXVsdCkvY29sbGVjdGlvbkdyb3Vwcy90YXNrQ29tcGxldGlvbnMvaW5kZXhlcy9fEAEaCgoGdXNlcklkEAEaCAoEZGF0ZRACGg8KC2NvbXBsZXRlZEF0EAIaDAoIX19uYW1lX18QAg
+```
+
 ## 📋 Step-by-Step Instructions
 
 ### **Step 1: Open Firebase Console**
@@ -52,6 +60,7 @@ After creating all indexes, you should see them listed in your Firestore Indexes
 - ✅ **tasks**: `active` ASC, `ownerId` ASC, `createdAt` DESC
 - ✅ **redemptions**: `userId` ASC, `createdAt` DESC  
 - ✅ **notifications**: `toUserId` ASC, `sentAt` DESC
+- ✅ **taskCompletions**: `userId` ASC, `date` ASC, `completedAt` DESC
 
 ## 🔄 Alternative: Manual Index Creation
 
@@ -78,6 +87,14 @@ If the direct links don't work, create them manually:
 2. Add fields:
    - `toUserId` → **Ascending**
    - `sentAt` → **Descending**
+3. Click **Create**
+
+### **Task Completions Index:**
+1. Collection ID: `taskCompletions`
+2. Add fields:
+   - `userId` → **Ascending**
+   - `date` → **Ascending**
+   - `completedAt` → **Descending**
 3. Click **Create**
 
 ## ⏱️ Build Time
