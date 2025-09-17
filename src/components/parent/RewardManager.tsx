@@ -63,10 +63,6 @@ const RewardManager: React.FC = () => {
       if (approved) {
         toast.success('✅ Resgate aprovado! Recompensa liberada para o Heitor.');
       } else {
-        toast.success('❌ Resgate rejeitado. Gold devolvido para o Heitor.');
-      }
-        toast.success('✅ Resgate aprovado! Recompensa liberada para o Heitor.');
-      } else {
         toast.success('❌ Resgate rejeitado. Pontos devolvidos para o Heitor.');
       }
     } catch (error) {
@@ -214,18 +210,18 @@ const RewardManager: React.FC = () => {
                   transition={{ delay: index * 0.05 }}
                   className="bg-white rounded-lg p-4 border border-purple-200 hover:border-purple-300 transition-colors"
                 >
-                          {template.requiredLevel && template.requiredLevel > 1 && (
-                            <div className="flex items-center gap-1 text-xs text-purple-600 mt-1">
-                              <Crown className="w-3 h-3" />
-                              Nível {template.requiredLevel}+
-                            </div>
-                          )}
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{template.emoji}</span>
                       <div>
                         <h4 className="font-semibold text-gray-900 text-sm">{template.title}</h4>
                         <p className="text-xs text-gray-600">{template.description}</p>
+                        {template.requiredLevel && template.requiredLevel > 1 && (
+                          <div className="flex items-center gap-1 text-xs text-purple-600 mt-1">
+                            <Crown className="w-3 h-3" />
+                            Nível {template.requiredLevel}+
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
