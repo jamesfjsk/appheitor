@@ -39,7 +39,12 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
         );
         setDailyTasksCompleted(completions.length);
       } catch (error) {
-        console.error('❌ Error loading daily tasks count:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('index') || errorMessage.includes('Index')) {
+          console.log('📋 Firestore index is building for taskCompletions. Using default value.');
+        } else {
+          console.error('❌ Error loading daily tasks count:', error);
+        }
         setDailyTasksCompleted(0);
       } finally {
         setLoadingDailyTasks(false);
