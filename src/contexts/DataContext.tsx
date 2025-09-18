@@ -961,17 +961,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const history = await FirestoreService.getSurpriseMissionHistory(childUid, 30);
       setSurpriseMissionHistory(history);
     } catch (error: any) {
-      console.error('❌ Erro ao verificar status da missão surpresa:', error);
-      
       // Handle index building error gracefully
       if (error.message?.includes('index is currently building') || 
           error.message?.includes('cannot be used yet') ||
+          error.message?.includes('That index is currently building') ||
           error.code === 'failed-precondition') {
         console.log('⏳ Firestore index is still building, using default values...');
         setIsSurpriseMissionCompletedToday(false);
         setSurpriseMissionHistory([]);
         return;
       }
+      
+      console.error('❌ Erro ao verificar status da missão surpresa:', error);
     }
   }, [childUid]);
 
