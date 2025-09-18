@@ -31,7 +31,7 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
         const todayString = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         
         // Check if today is December 18th (Heitor's birthday)
-        if (todayString === '12-18') {
+        if (todayString === '09-18') {
           const currentYear = today.getFullYear();
           const age = currentYear - 2015; // Heitor nasceu em 2015
           
