@@ -691,7 +691,7 @@ const HeroPanel: React.FC = () => {
           {(() => {
             const today = new Date();
             const todayString = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-            const isBirthday = todayString === '12-18';
+            const isBirthday = todayString === '09-18';
             
             return isBirthday && (
               <motion.div

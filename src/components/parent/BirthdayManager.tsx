@@ -284,7 +284,7 @@ const BirthdayManager: React.FC = () => {
             <div>
               <h4 className="font-bold text-yellow-900 mb-2">💝 Como Funciona o Sistema de Aniversário:</h4>
               <ul className="text-yellow-800 text-sm space-y-1">
-                <li>• <strong>Detecção Automática:</strong> O sistema verifica todo dia 18 de dezembro</li>
+                <li>• <strong>Detecção Automática:</strong> O sistema verifica todo dia 18 de setembro</li>
                 <li>• <strong>Celebração Única:</strong> Cada ano tem uma celebração especial diferente</li>
                 <li>• <strong>Recompensas Crescentes:</strong> Quanto mais velho, maiores as recompensas</li>
                 <li>• <strong>Memória Permanente:</strong> Todas as celebrações ficam registradas para sempre</li>
