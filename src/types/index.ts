@@ -117,6 +117,32 @@ export interface SurpriseMissionQuestion {
   explanation: string;
 }
 
+export interface BirthdayEvent {
+  id: string;
+  userId: string; // Child UID
+  birthdayDate: string; // MM-DD format (month-day)
+  year: number; // Year of this specific birthday
+  age: number; // Age reached
+  specialRewards: string[]; // Array of reward IDs given as birthday gifts
+  celebrationCompleted: boolean;
+  celebrationCompletedAt?: Date;
+  specialMessage: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BirthdayConfig {
+  id: string;
+  userId: string; // Child UID
+  birthdayDate: string; // MM-DD format (12-18 for December 18th)
+  birthdayYear: number; // Birth year
+  isEnabled: boolean;
+  specialXPBonus: number; // Extra XP on birthday
+  specialGoldBonus: number; // Extra Gold on birthday
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Tipos auxiliares
 export interface CalendarDay {
   date: Date;

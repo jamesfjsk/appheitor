@@ -118,5 +118,18 @@ service cloud.firestore {
       allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
       allow delete: if isAdmin();
     }
+
+    // Birthday Events
+    match /birthdayEvents/{eventId} {
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Birthday Config
+    match /birthdayConfig/{configId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
   }
 }

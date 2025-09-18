@@ -14,8 +14,10 @@ import DataDoctorPage from '../admin/dataDoctor/DataDoctorPage';
 import FlashReminderManager from './FlashReminderManager';
 import AchievementManager from './AchievementManager';
 import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
+import BirthdayManager from './BirthdayManager';
 
 type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
+type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -38,6 +40,7 @@ const ParentPanel: React.FC = () => {
     { id: 'achievements', label: 'Conquistas', icon: '🏆' },
     { id: 'reminders', label: 'Lembretes Flash', icon: '⚡' },
     { id: 'surprise', label: 'Missão Surpresa', icon: '🎯' },
+    { id: 'birthday', label: 'Aniversário', icon: '🎂' },
     { id: 'notifications', label: 'Notificações', icon: '🔔' },
     { id: 'history', label: 'Histórico', icon: '📈' },
     { id: 'admin', label: 'Controles Admin', icon: '⚙️' },
@@ -97,6 +100,9 @@ const ParentPanel: React.FC = () => {
           )}
           {activeTab === 'surprise' && (
             <SurpriseMissionConfigComponent />
+          )}
+          {activeTab === 'birthday' && (
+            <BirthdayManager />
           )}
           {activeTab === 'notifications' && (
             <NotificationSender />

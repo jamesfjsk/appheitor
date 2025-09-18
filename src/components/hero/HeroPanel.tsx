@@ -16,6 +16,7 @@ import FlashReminders from './FlashReminders';
 import QuizTime from './QuizTime';
 import SurpriseMissionQuiz from './SurpriseMissionQuiz';
 import FlashTimer from './FlashTimer';
+import BirthdayCelebration from './BirthdayCelebration';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const HeroPanel: React.FC = () => {
@@ -36,6 +37,7 @@ const HeroPanel: React.FC = () => {
   const [showMissionComplete, setShowMissionComplete] = useState(false);
   const [showSurpriseMission, setShowSurpriseMission] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const [birthdayCelebrationCompleted, setBirthdayCelebrationCompleted] = useState(false);
   
   // Auto-detect current period on mount
   useEffect(() => {
@@ -684,11 +686,75 @@ const HeroPanel: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Special Birthday Message */}
+          {(() => {
+            const today = new Date();
+            const todayString = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const isBirthday = todayString === '12-18';
+            
+            return isBirthday && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none"
+              >
+                <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xl font-bold px-8 py-4 rounded-2xl shadow-2xl border-4 border-yellow-400 relative overflow-hidden">
+                  <motion.div
+                    animate={{
+                      x: ['-100%', '100%'],
+                      opacity: [0, 0.5, 0]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent skew-x-12"
+                  />
+                  <div className="relative z-10 flex items-center gap-3">
+                    <motion.span
+                      animate={{
+                        scale: [1, 1.3, 1],
+                        rotate: [0, 10, -10, 0]
+                      }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      🎂
+                    </motion.span>
+                    <span>FELIZ ANIVERSÁRIO, HEITOR!</span>
+                    <motion.span
+                      animate={{
+                        scale: [1, 1.3, 1],
+                        rotate: [0, -10, 10, 0]
+                      }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 0.5
+                      }}
+                    >
+                      🎉
+                    </motion.span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })()}
         </div>
       </div>
 
       {/* Quiz Time */}
       <QuizTime onComplete={() => setQuizCompleted(true)} />
+
+      {/* Birthday Celebration */}
+      <BirthdayCelebration onComplete={() => setBirthdayCelebrationCompleted(true)} />
 
       {/* Modals */}
       <AnimatePresence>
