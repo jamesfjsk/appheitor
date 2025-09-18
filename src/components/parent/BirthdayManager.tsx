@@ -263,7 +263,7 @@ const BirthdayManager: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-blue-50 rounded-lg p-4">
             <h4 className="font-bold text-blue-900 mb-2">📅 Data de Aniversário</h4>
-            <p className="text-blue-700 text-lg font-bold">18 de Dezembro</p>
+            <p className="text-blue-700 text-lg font-bold">18 de Setembro</p>
             <p className="text-blue-600 text-sm">Data fixa configurada no sistema</p>
           </div>
           
