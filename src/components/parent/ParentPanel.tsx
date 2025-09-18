@@ -16,7 +16,6 @@ import AchievementManager from './AchievementManager';
 import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 import BirthdayManager from './BirthdayManager';
 
-type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
 type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
 
 const ParentPanel: React.FC = () => {
