@@ -931,8 +931,14 @@ export class FirestoreService {
         };
       });
     } catch (error) {
-      console.error('❌ FirestoreService: Error getting task completion history:', error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('index') || errorMessage.includes('Index')) {
+        console.log('📋 Firestore index is building for taskCompletions. Returning empty array.');
+        return [];
+      } else {
+        console.error('❌ FirestoreService: Error getting task completion history:', error);
+        throw error;
+      }
     }
      // Handle index building or missing index errors gracefully
      if (error.message?.includes('index is currently building') || 
