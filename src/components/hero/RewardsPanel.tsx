@@ -31,21 +31,69 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
       
       setLoadingDailyTasks(true);
       try {
+        // Count completed tasks from current tasks data instead of relying on completion history
         const today = new Date().toISOString().split('T')[0];
-        const completions = await FirestoreService.getTaskCompletionHistory(
-          childUid, 
-          new Date(today), 
-          new Date(today + 'T23:59:59')
+        
+        // Filter tasks that should be available today based on frequency
+        const todayTasks = tasks.filter(task => {
+          if (!task.active) return false;
+          
+          const dayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+          
+          switch (task.frequency) {
+            case 'daily':
+              return true;
+            case 'weekday':
+              return dayOfWeek >= 1 && dayOfWeek <= 5;
+            case 'weekend':
+              return dayOfWeek === 0 || dayOfWeek === 6;
+            default:
+              return true;
+          }
+        });
+        
+        // Count how many of today's tasks are completed
+        const completedTodayTasks = todayTasks.filter(task => 
+          task.status === 'done' && task.lastCompletedDate === today
         );
-        setDailyTasksCompleted(completions.length);
+        
+        console.log('🔍 RewardsPanel: Daily tasks verification:', {
+          today,
+          totalActiveTasks: tasks.filter(t => t.active).length,
+          todayTasks: todayTasks.length,
+          completedToday: completedTodayTasks.length,
+          completedTasks: completedTodayTasks.map(t => ({ id: t.id, title: t.title, period: t.period }))
+        });
+        
+        setDailyTasksCompleted(completedTodayTasks.length);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         if (errorMessage.includes('index') || errorMessage.includes('Index')) {
           console.log('📋 Firestore index is building for taskCompletions. Using default value.');
+          
+          // Fallback: use current tasks data directly
+          const today = new Date().toISOString().split('T')[0];
+          const todayTasks = tasks.filter(task => {
+            if (!task.active) return false;
+            
+            const dayOfWeek = new Date().getDay();
+            switch (task.frequency) {
+              case 'daily': return true;
+              case 'weekday': return dayOfWeek >= 1 && dayOfWeek <= 5;
+              case 'weekend': return dayOfWeek === 0 || dayOfWeek === 6;
+              default: return true;
+            }
+          });
+          
+          const completedTodayTasks = todayTasks.filter(task => 
+            task.status === 'done' && task.lastCompletedDate === today
+          );
+          
+          setDailyTasksCompleted(completedTodayTasks.length);
         } else {
           console.error('❌ Error loading daily tasks count:', error);
+          setDailyTasksCompleted(0);
         }
-        setDailyTasksCompleted(0);
       } finally {
         setLoadingDailyTasks(false);
       }
@@ -54,7 +102,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     if (isOpen) {
       loadDailyTasksCount();
     }
-  }, [childUid, isOpen]);
+  }, [childUid, isOpen, tasks]); // Added tasks dependency to update when tasks change
 
   const getRewardById = (rewardId: string) => {
     return rewards.find(reward => reward.id === rewardId);
