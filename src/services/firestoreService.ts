@@ -934,6 +934,16 @@ export class FirestoreService {
       console.error('❌ FirestoreService: Error getting task completion history:', error);
       throw error;
     }
+     // Handle index building or missing index errors gracefully
+     if (error.message?.includes('index is currently building') || 
+         error.message?.includes('cannot be used yet') ||
+         error.message?.includes('That index is currently building') ||
+         error.message?.includes('requires an index') ||
+         error.code === 'failed-precondition') {
+       console.log('⏳ FirestoreService: Firestore index for taskCompletions is building or missing, returning empty array...');
+       return [];
+     }
+     
   }
 
   // ========================================
