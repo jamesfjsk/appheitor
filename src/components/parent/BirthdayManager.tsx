@@ -23,7 +23,7 @@ const BirthdayManager: React.FC = () => {
         // Calculate next birthday
         const today = new Date();
         const currentYear = today.getFullYear();
-        const birthdayThisYear = new Date(currentYear, 11, 18); // December 18th
+        const birthdayThisYear = new Date(currentYear, 8, 18); // September 18th (month is 0-indexed)
         
         let nextBirthdayDate: Date;
         let nextAge: number;
@@ -31,11 +31,11 @@ const BirthdayManager: React.FC = () => {
         if (today <= birthdayThisYear) {
           // Birthday hasn't happened this year
           nextBirthdayDate = birthdayThisYear;
-          nextAge = currentYear - 2015; // Heitor born in 2015
+          nextAge = 9; // Heitor is turning 9
         } else {
           // Birthday already happened this year, next is next year
-          nextBirthdayDate = new Date(currentYear + 1, 11, 18);
-          nextAge = (currentYear + 1) - 2015;
+          nextBirthdayDate = new Date(currentYear + 1, 8, 18);
+          nextAge = 10; // Next year he'll be 10
         }
         
         const daysUntil = Math.ceil((nextBirthdayDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));

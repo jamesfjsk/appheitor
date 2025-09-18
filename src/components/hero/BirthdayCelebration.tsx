@@ -33,7 +33,7 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
         // Check if today is December 18th (Heitor's birthday)
         if (todayString === '09-18') {
           const currentYear = today.getFullYear();
-          const age = currentYear - 2015; // Heitor nasceu em 2015
+          const age = 9; // Heitor está fazendo 9 anos hoje!
           
           // Check if birthday celebration was already completed this year
           const birthdayCompleted = await FirestoreService.checkBirthdayCompletedThisYear(childUid, currentYear);
