@@ -404,13 +404,40 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) throw new Error('Child UID não definido');
     
     try {
-      // Check if user has completed at least 4 tasks today
+      // Check if user has completed at least 4 tasks today using current tasks data
       const today = new Date().toISOString().split('T')[0];
-      const todayCompletions = await FirestoreService.getTaskCompletionHistory(
-        childUid, 
-        new Date(today), 
-        new Date(today + 'T23:59:59')
+      
+      // Count completed tasks from current tasks data instead of relying on completion history
+      const dayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      
+      // Filter tasks that should be available today based on frequency
+      const todayTasks = tasks.filter(task => {
+        if (!task.active) return false;
+        
+        switch (task.frequency) {
+          case 'daily':
+            return true;
+          case 'weekday':
+            return dayOfWeek >= 1 && dayOfWeek <= 5;
+          case 'weekend':
+            return dayOfWeek === 0 || dayOfWeek === 6;
+          default:
+            return true;
+        }
+      });
+      
+      // Count how many of today's tasks are completed
+      const todayCompletions = todayTasks.filter(task => 
+        task.status === 'done' && task.lastCompletedDate === today
       );
+      
+      console.log('🔍 DataContext: Daily tasks verification for redemption:', {
+        today,
+        totalActiveTasks: tasks.filter(t => t.active).length,
+        todayTasks: todayTasks.length,
+        completedToday: todayCompletions.length,
+        completedTasks: todayCompletions.map(t => ({ id: t.id, title: t.title }))
+      });
       
       if (todayCompletions.length < 4) {
         throw new Error(`Você precisa completar pelo menos 4 missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/4`);
