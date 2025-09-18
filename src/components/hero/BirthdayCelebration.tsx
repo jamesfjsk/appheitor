@@ -495,8 +495,8 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
               </button>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 };
