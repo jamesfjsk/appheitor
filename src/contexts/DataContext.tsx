@@ -602,14 +602,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const updateSurpriseMissionSettings = useCallback(async (settings: Omit<SurpriseMissionConfig, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       await FirestoreService.updateSurpriseMissionConfig(settings, user?.userId || '');
-      await loadSurpriseMissionConfig();
+      // Reload config inline to avoid circular dependency
+      const config = await FirestoreService.getSurpriseMissionConfig();
+      setSurpriseMissionConfig(config);
       toast.success('Configurações da Missão Surpresa atualizadas!');
     } catch (error: any) {
       console.error('❌ Erro ao atualizar configurações da missão surpresa:', error);
       toast.error('Erro ao atualizar configurações');
       throw error;
     }
-  }, [user?.userId, loadSurpriseMissionConfig]);
+  }, [user?.userId]);
 
   const completeSurpriseMission = useCallback(async (score: number, totalQuestions: number, xpEarned: number, goldEarned: number) => {
     if (!childUid) throw new Error('Child UID não definido');
