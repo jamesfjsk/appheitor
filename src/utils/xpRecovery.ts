@@ -112,19 +112,19 @@ export async function investigateXPLoss(userId: string): Promise<RecoveryReport>
     console.log('🏆 Step 4: Checking achievement history...');
     const achievementsQuery = query(
       collection(db, 'userAchievements'),
-      where('userId', '==', userId),
-      where('unlockedAt', '!=', null)
+      where('userId', '==', userId)
     );
 
     const achievementsSnap = await getDocs(achievementsQuery);
-    console.log(`🏆 Found ${achievementsSnap.size} unlocked achievements`);
+    console.log(`🏆 Found ${achievementsSnap.size} achievements for user`);
 
     let totalXPFromAchievements = 0;
     let totalGoldFromAchievements = 0;
 
     achievementsSnap.forEach(achDoc => {
       const achievement = achDoc.data();
-      if (achievement.claimed) {
+      // Only count unlocked and claimed achievements
+      if (achievement.unlockedAt && achievement.claimed) {
         totalXPFromAchievements += achievement.xpReward || 0;
         totalGoldFromAchievements += achievement.goldReward || 0;
       }
