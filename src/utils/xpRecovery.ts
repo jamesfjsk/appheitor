@@ -5,11 +5,9 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   updateDoc,
   setDoc,
-  serverTimestamp,
-  Timestamp
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
@@ -62,8 +60,7 @@ export async function investigateXPLoss(userId: string): Promise<RecoveryReport>
     console.log('📋 Step 2: Analyzing task completion history...');
     const tasksQuery = query(
       collection(db, 'tasks'),
-      where('ownerId', '==', userId),
-      orderBy('updatedAt', 'desc')
+      where('ownerId', '==', userId)
     );
 
     const tasksSnap = await getDocs(tasksQuery);
@@ -97,8 +94,7 @@ export async function investigateXPLoss(userId: string): Promise<RecoveryReport>
     console.log('🎁 Step 3: Checking redemption history...');
     const redemptionsQuery = query(
       collection(db, 'redemptions'),
-      where('userId', '==', userId),
-      orderBy('redeemedAt', 'desc')
+      where('userId', '==', userId)
     );
 
     const redemptionsSnap = await getDocs(redemptionsQuery);
