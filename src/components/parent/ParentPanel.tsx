@@ -9,15 +9,13 @@ import RewardManager from './RewardManager';
 import LoadingSpinner from '../common/LoadingSpinner';
 import NotificationSender from './NotificationSender';
 import AdminControls from './AdminControls';
-import FirebaseDoctor from '../common/FirebaseDoctor';
-import DataDoctorPage from '../admin/dataDoctor/DataDoctorPage';
+import SystemTools from './SystemTools';
 import FlashReminderManager from './FlashReminderManager';
 import AchievementManager from './AchievementManager';
 import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 import BirthdayManager from './BirthdayManager';
-import { XPRecoveryPage } from '../debug/XPRecoveryPage';
 
-type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor' | 'xp-recovery';
+type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'system';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -43,10 +41,7 @@ const ParentPanel: React.FC = () => {
     { id: 'birthday', label: 'Aniversário', icon: '🎂' },
     { id: 'notifications', label: 'Notificações', icon: '🔔' },
     { id: 'history', label: 'Histórico', icon: '📈' },
-    { id: 'admin', label: 'Controles Admin', icon: '⚙️' },
-    { id: 'xp-recovery', label: 'Recuperar XP', icon: '🔧' },
-    { id: 'doctor', label: 'Firebase Doctor', icon: '🔬' },
-    { id: 'data-doctor', label: 'Data Doctor', icon: '🗄️' }
+    { id: 'system', label: 'Ferramentas de Sistema', icon: '🔧' }
   ] as const;
 
   return (
@@ -111,17 +106,8 @@ const ParentPanel: React.FC = () => {
           {activeTab === 'history' && (
             <TaskHistory tasks={tasks} />
           )}
-          {activeTab === 'admin' && (
-            <AdminControls />
-          )}
-          {activeTab === 'doctor' && (
-            <FirebaseDoctor />
-          )}
-          {activeTab === 'data-doctor' && (
-            <DataDoctorPage />
-          )}
-          {activeTab === 'xp-recovery' && (
-            <XPRecoveryPage />
+          {activeTab === 'system' && (
+            <SystemTools />
           )}
         </motion.div>
       </div>

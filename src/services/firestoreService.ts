@@ -1,28 +1,28 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   limit,
-  onSnapshot, 
+  onSnapshot,
   serverTimestamp,
   writeBatch,
   Timestamp,
   addDoc
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { 
-  User, 
-  Task, 
-  Reward, 
-  UserProgress, 
-  RewardRedemption, 
+import {
+  User,
+  Task,
+  Reward,
+  UserProgress,
+  RewardRedemption,
   Notification,
   Achievement,
   UserAchievement,
@@ -32,6 +32,7 @@ import {
   BirthdayEvent,
   BirthdayConfig
 } from '../types';
+import { validateProgressUpdate, createProgressSnapshot } from '../utils/progressMonitor';
 
 export class FirestoreService {
   // ========================================
@@ -258,6 +259,47 @@ export class FirestoreService {
 
   static async completeTaskWithRewards(taskId: string, userId: string, xpReward: number, goldReward: number): Promise<void> {
     try {
+      // Get current progress first
+      const progressRef = doc(db, 'progress', userId);
+      const progressDoc = await getDoc(progressRef);
+
+      if (!progressDoc.exists()) {
+        throw new Error('Progress document not found');
+      }
+
+      const currentProgress = progressDoc.data();
+      const newXP = (currentProgress.totalXP || 0) + xpReward;
+      const newGold = (currentProgress.availableGold || 0) + goldReward;
+      const newTotalGold = (currentProgress.totalGoldEarned || 0) + goldReward;
+
+      // Validate progress update
+      const validation = await validateProgressUpdate(
+        userId,
+        {
+          totalXP: newXP,
+          availableGold: newGold,
+          totalGoldEarned: newTotalGold
+        },
+        `Task completion: ${taskId}`
+      );
+
+      // Log warnings
+      if (validation.warnings.length > 0) {
+        console.warn('⚠️ Progress update warnings:', validation.warnings);
+      }
+
+      // Reject if validation failed
+      if (!validation.isValid) {
+        console.error('❌ Progress update rejected:', validation.errors);
+        throw new Error(`Progress validation failed: ${validation.errors.join(', ')}`);
+      }
+
+      // Create snapshot before update
+      if (validation.snapshot) {
+        await createProgressSnapshot(validation.snapshot);
+      }
+
+      // Proceed with batch update
       const batch = writeBatch(db);
       const today = new Date().toISOString().split('T')[0];
 
@@ -281,23 +323,18 @@ export class FirestoreService {
         createdAt: serverTimestamp()
       });
 
-      // Update user progress
-      const progressRef = doc(db, 'progress', userId);
-      const progressDoc = await getDoc(progressRef);
-      
-      if (progressDoc.exists()) {
-        const currentProgress = progressDoc.data();
-        batch.update(progressRef, {
-          totalXP: (currentProgress.totalXP || 0) + xpReward,
-          availableGold: (currentProgress.availableGold || 0) + goldReward,
-          totalGoldEarned: (currentProgress.totalGoldEarned || 0) + goldReward,
-          totalTasksCompleted: (currentProgress.totalTasksCompleted || 0) + 1,
-          lastActivityDate: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-      }
+      // Update user progress with validated values
+      batch.update(progressRef, {
+        totalXP: newXP,
+        availableGold: newGold,
+        totalGoldEarned: newTotalGold,
+        totalTasksCompleted: (currentProgress.totalTasksCompleted || 0) + 1,
+        lastActivityDate: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
 
       await batch.commit();
+      console.log('✅ Task completed with validated rewards:', { taskId, xpReward, goldReward });
     } catch (error) {
       console.error('❌ FirestoreService: Error completing task with rewards:', error);
       throw error;
