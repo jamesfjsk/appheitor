@@ -112,7 +112,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       
       {/* Spinner principal com efeitos */}
       <motion.div
-        className="relative z-10"
+        className={`relative z-10 ${sizeClasses[size]} ${textColorClasses[color]} mb-6`}
         animate={{
           rotate: 360,
           scale: [1, 1.1, 1],
@@ -121,7 +121,6 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           rotate: { duration: 1, repeat: Infinity, ease: "linear" },
           scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
         }}
-        className={`${sizeClasses[size]} ${textColorClasses[color]} mb-6 relative`}
       >
         {/* Glow effect atrás do ícone */}
         <motion.div

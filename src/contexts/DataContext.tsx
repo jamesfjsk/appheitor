@@ -609,7 +609,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       toast.error('Erro ao atualizar configurações');
       throw error;
     }
-  }, [user?.userId]);
+  }, [user?.userId, loadSurpriseMissionConfig]);
 
   const completeSurpriseMission = useCallback(async (score: number, totalQuestions: number, xpEarned: number, goldEarned: number) => {
     if (!childUid) throw new Error('Child UID não definido');

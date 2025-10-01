@@ -163,15 +163,6 @@ export interface NotificationPayload {
   requireInteraction?: boolean;
 }
 
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  isUnlocked: boolean;
-  unlockedAt?: Date;
-}
-
 export interface LevelSystem {
   currentLevel: number;
   currentXP: number;
