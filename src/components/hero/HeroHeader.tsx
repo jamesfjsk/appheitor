@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { UserProgress } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import { calculateLevelSystem, getLevelIcon, getAvatarBorderStyle } from '../../utils/levelSystem';
+import SpeedForce from './SpeedForce';
 
 interface HeroHeaderProps {
   progress: UserProgress;
@@ -43,8 +44,9 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="flex flex-col lg:flex-row items-center justify-between bg-white rounded-2xl shadow-lg border border-gray-100 p-6 gap-4"
+      className="flex flex-col lg:flex-row items-center justify-between glass-card particles-bg rounded-2xl shadow-lg p-6 gap-4 relative overflow-hidden"
     >
+      <SpeedForce intensity="low" />
       {/* Avatar e Saudação */}
       <div className="flex items-center gap-4">
         <motion.div
@@ -59,7 +61,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           }}
           className="relative"
         >
-          <div className={`w-16 h-16 bg-gradient-to-br from-hero-primary to-hero-secondary rounded-full flex items-center justify-center text-2xl font-bold text-yellow-400 overflow-hidden ${borderStyle.borderClass} ${borderStyle.glowClass} ${borderStyle.ringClass}`}>
+          <div className={`w-16 h-16 bg-gradient-to-br from-hero-primary to-hero-secondary rounded-full flex items-center justify-center text-2xl font-bold text-yellow-400 overflow-hidden energy-glow ${borderStyle.borderClass} ${borderStyle.glowClass} ${borderStyle.ringClass}`}>
             <img 
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
               alt="Avatar do Heitor"
@@ -145,12 +147,12 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           </motion.div>
         </motion.div>
 
-        <div>
+        <div className="relative z-10">
           <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900"
+            className="hero-title text-2xl md:text-3xl lg:text-4xl text-gray-900"
           >
             {getGreeting()}, Heitor! ⚡
           </motion.h1>
@@ -158,7 +160,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-gray-600 text-base md:text-lg lg:text-xl font-medium"
+            className="hero-subtitle text-gray-600 text-base md:text-lg lg:text-xl"
           >
             {getMotivationalMessage()}
           </motion.p>
@@ -193,7 +195,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             onOpenRewards();
           }}
-          className="p-2 bg-purple-500 hover:bg-purple-600 rounded-full text-white transition-all duration-200 shadow-lg"
+          className="p-2 bg-purple-500 hover:bg-purple-600 rounded-full text-white transition-all duration-200 shadow-lg btn-glow"
           title="Loja de Recompensas"
         >
           <Gift className="w-5 h-5" />
@@ -207,7 +209,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             onOpenCalendar();
           }}
-          className="p-2 bg-blue-500 hover:bg-blue-600 rounded-full text-white transition-all duration-200 shadow-lg"
+          className="p-2 bg-blue-500 hover:bg-blue-600 rounded-full text-white transition-all duration-200 shadow-lg btn-glow"
           title="Calendário de Missões"
         >
           <Calendar className="w-5 h-5" />
@@ -221,7 +223,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             onOpenTimer();
           }}
-          className="p-2 bg-gradient-to-r from-hero-primary to-hero-secondary hover:from-hero-secondary hover:to-hero-primary rounded-full text-white transition-all duration-200 shadow-lg"
+          className="p-2 bg-gradient-to-r from-hero-primary to-hero-secondary hover:from-hero-secondary hover:to-hero-primary rounded-full text-white transition-all duration-200 shadow-lg btn-glow lightning-bolt"
           title="Flash Timer"
         >
           <Clock className="w-5 h-5" />

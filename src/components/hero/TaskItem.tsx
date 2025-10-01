@@ -4,6 +4,7 @@ import { Check, Clock, Star, Zap } from 'lucide-react';
 import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import toast from 'react-hot-toast';
+import SpeedForce from './SpeedForce';
 
 // Helper function to check if task is completed today
 const isTaskCompletedToday = (task: Task): boolean => {
@@ -168,14 +169,19 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
         whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}
         className={`
-          relative overflow-hidden rounded-2xl p-4 border-2 transition-all duration-300
+          relative overflow-hidden rounded-2xl p-4 border-2 transition-all duration-300 card-lift
           ${task.status === 'done'
-            ? 'bg-green-50 border-green-300 shadow-lg shadow-green-200 scale-95' 
-            : 'bg-white border-gray-200 hover:border-hero-accent/50 shadow-lg hover:shadow-xl'
+            ? 'bg-green-50 border-green-300 shadow-lg shadow-green-200 scale-95 success-ripple'
+            : 'glass-card border-gray-200 hover:border-hero-accent/50 shadow-lg hover:shadow-xl'
           }
           ${isCompleting ? 'animate-pulse' : ''}
         `}
       >
+        {/* SpeedForce effect for active tasks */}
+        {!isTaskCompletedToday(task) && guidedMode && (
+          <SpeedForce intensity="medium" />
+        )}
+
         {/* Efeito de fundo gradiente por período - mais sutil */}
         <div className={`absolute inset-0 bg-gradient-to-r ${getPeriodColor()} opacity-5`} />
         
@@ -207,10 +213,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
             whileTap={{ scale: 0.9 }}
             className={`
               relative ${guidedMode ? 'w-20 h-20' : 'w-16 h-16'} rounded-full border-4 flex items-center justify-center
-              transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50
+              transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-hero-accent/50 btn-glow
               ${isTaskCompletedToday(task)
-                ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 text-white shadow-2xl cursor-default'
-                : 'bg-gradient-to-br from-yellow-400 to-yellow-500 border-yellow-300 text-red-600 hover:from-yellow-300 hover:to-yellow-400 hover:border-yellow-200 shadow-xl hover:shadow-2xl'
+                ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-400 text-white shadow-2xl cursor-default energy-glow'
+                : 'bg-gradient-to-br from-yellow-400 to-yellow-500 border-yellow-300 text-red-600 hover:from-yellow-300 hover:to-yellow-400 hover:border-yellow-200 shadow-xl hover:shadow-2xl lightning-bolt'
               }
               ${isCompleting || isTaskCompletedToday(task) ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
