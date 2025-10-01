@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&family=Righteous&family=Fredoka:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -45,7 +45,8 @@
   --shadow-hero: 0 4px 12px rgba(0, 0, 0, 0.25);
   
   /* Typography */
-  --font-hero: 'Comic Neue', 'Poppins', cursive;
+  --font-hero: 'Fredoka', 'Comic Neue', 'Poppins', cursive;
+  --font-hero-display: 'Righteous', 'Fredoka', cursive;
   --font-parent: 'Inter', system-ui, sans-serif;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -365,4 +366,336 @@ body {
 /* Dark Mode Preparation (não implementado ainda) */
 @media (prefers-color-scheme: dark) {
   /* Manter tema claro por enquanto */
+}
+
+/* ========================================
+   MELHORIAS VISUAIS MODERNAS
+   ======================================== */
+
+/* Glassmorphism Effects */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 8px 32px 0 rgba(31, 38, 135, 0.07),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+}
+
+.glass-card-hero {
+  background: rgba(255, 215, 0, 0.1);
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  box-shadow:
+    0 8px 32px 0 rgba(255, 215, 0, 0.1),
+    0 0 0 1px rgba(200, 16, 46, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Hero Display Typography */
+.hero-title {
+  font-family: var(--font-hero-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(255, 215, 0, 0.2);
+}
+
+.hero-subtitle {
+  font-family: var(--font-hero);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Flash Speed Effects */
+.flash-speed-lines {
+  position: relative;
+  overflow: hidden;
+}
+
+.flash-speed-lines::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.3) 20%,
+    rgba(255, 215, 0, 0.5) 50%,
+    rgba(255, 215, 0, 0.3) 80%,
+    transparent 100%
+  );
+  animation: speed-lines 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes speed-lines {
+  0% {
+    transform: translateX(0) skewX(-15deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) skewX(-15deg);
+    opacity: 0;
+  }
+}
+
+/* Lightning Bolt Animation */
+.lightning-bolt {
+  position: relative;
+}
+
+.lightning-bolt::after {
+  content: '⚡';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 1.5rem;
+  animation: bolt-spark 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+@keyframes bolt-spark {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+/* Energy Glow Effect */
+.energy-glow {
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.2),
+    inset 0 0 20px rgba(255, 215, 0, 0.1);
+  animation: energy-pulse 2s ease-in-out infinite;
+}
+
+@keyframes energy-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(255, 215, 0, 0.3),
+      0 0 40px rgba(255, 215, 0, 0.2),
+      inset 0 0 20px rgba(255, 215, 0, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(255, 215, 0, 0.5),
+      0 0 60px rgba(255, 215, 0, 0.3),
+      inset 0 0 30px rgba(255, 215, 0, 0.2);
+  }
+}
+
+/* Gradient Text */
+.gradient-text-flash {
+  background: linear-gradient(135deg, #FFD700 0%, #FF3131 50%, #C8102E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 3s ease infinite;
+  background-size: 200% auto;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Card Hover Lift Effect */
+.card-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-lift:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 0 0 2px rgba(255, 215, 0, 0.1);
+}
+
+.card-lift:active {
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* Shimmer Loading Effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Particle Effect */
+.particles-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.particles-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 60% 80%, rgba(200, 16, 46, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 1px, transparent 1px);
+  background-size: 100px 100px, 150px 150px, 120px 120px;
+  background-position: 0 0, 40px 60px, 80px 20px;
+  animation: particles-float 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes particles-float {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(50px, 50px);
+  }
+}
+
+/* Neon Glow Text */
+.neon-text {
+  text-shadow:
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.6),
+    0 0 30px rgba(255, 215, 0, 0.4),
+    0 0 40px rgba(200, 16, 46, 0.3);
+  animation: neon-flicker 3s ease-in-out infinite;
+}
+
+@keyframes neon-flicker {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(255, 215, 0, 0.8),
+      0 0 20px rgba(255, 215, 0, 0.6),
+      0 0 30px rgba(255, 215, 0, 0.4),
+      0 0 40px rgba(200, 16, 46, 0.3);
+  }
+  50% {
+    text-shadow:
+      0 0 15px rgba(255, 215, 0, 1),
+      0 0 30px rgba(255, 215, 0, 0.8),
+      0 0 45px rgba(255, 215, 0, 0.6),
+      0 0 60px rgba(200, 16, 46, 0.5);
+  }
+}
+
+/* Button Glow on Hover */
+.btn-glow {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(45deg, #FFD700, #FF3131, #FFD700);
+  background-size: 200% 200%;
+  opacity: 0;
+  z-index: -1;
+  animation: gradient-rotate 3s linear infinite;
+  transition: opacity 0.3s ease;
+}
+
+.btn-glow:hover::before {
+  opacity: 1;
+}
+
+@keyframes gradient-rotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Floating Animation */
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Success Ripple Effect */
+.success-ripple {
+  animation: success-ripple 0.6s ease-out;
+}
+
+@keyframes success-ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
+  }
+}
+
+/* Responsive Improvements */
+@media (max-width: 640px) {
+  .glass-card,
+  .glass-card-hero {
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+  }
+}
+
+/* Performance Optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .flash-speed-lines::before,
+  .lightning-bolt::after,
+  .shimmer,
+  .particles-bg::before,
+  .float {
+    animation: none !important;
+  }
+
+  .energy-glow,
+  .neon-text {
+    animation: none !important;
+  }
 }
