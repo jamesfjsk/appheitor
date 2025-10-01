@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, RefreshCw, CheckCircle, XCircle, Database, Shield } from 'lucide-react';
+import { AlertTriangle, RefreshCw, CheckCircle, XCircle, Database, Shield, Users } from 'lucide-react';
 import { investigateXPLoss, restoreXP, RecoveryReport } from '../../utils/xpRecovery';
 import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import toast from 'react-hot-toast';
 
 export const XPRecoveryPage: React.FC = () => {
   const { user } = useAuth();
+  const { users } = useData();
   const [report, setReport] = useState<RecoveryReport | null>(null);
   const [isInvestigating, setIsInvestigating] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [targetUserId, setTargetUserId] = useState('');
+  const [selectedUserName, setSelectedUserName] = useState('');
 
   const handleInvestigate = async () => {
     const userId = targetUserId || user?.userId;
@@ -85,36 +88,63 @@ export const XPRecoveryPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-xl p-8"
-        >
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <Shield className="w-8 h-8 text-red-600" />
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">
-                🔧 XP Recovery Tool
-              </h1>
-              <p className="text-gray-600">Ferramenta de Recuperação de Progresso</p>
-            </div>
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl shadow-lg p-8"
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <Shield className="w-8 h-8 text-red-600" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">
+              🔧 Recuperação de XP
+            </h1>
+            <p className="text-gray-600">Ferramenta para investigar e restaurar progresso perdido</p>
           </div>
+        </div>
 
-          {/* User Input */}
+          {/* User Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              User ID (deixe vazio para usar o usuário atual)
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Selecione o Usuário
             </label>
-            <input
-              type="text"
-              value={targetUserId}
-              onChange={(e) => setTargetUserId(e.target.value)}
-              placeholder={user?.userId || 'Digite o User ID'}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            />
+
+            {users && users.length > 0 ? (
+              <select
+                value={targetUserId}
+                onChange={(e) => {
+                  setTargetUserId(e.target.value);
+                  const selectedUser = users.find(u => u.userId === e.target.value);
+                  setSelectedUserName(selectedUser?.displayName || '');
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white"
+              >
+                <option value="">Selecione um usuário...</option>
+                {users.map((u) => (
+                  <option key={u.userId} value={u.userId}>
+                    {u.displayName} ({u.role === 'child' ? '👶 Herói' : '👨 Admin'}) - {u.email}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={targetUserId}
+                onChange={(e) => setTargetUserId(e.target.value)}
+                placeholder={user?.userId || 'Digite o User ID'}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              />
+            )}
+
+            {selectedUserName && (
+              <p className="mt-2 text-sm text-green-600 flex items-center gap-1">
+                <CheckCircle className="w-4 h-4" />
+                Usuário selecionado: <strong>{selectedUserName}</strong>
+              </p>
+            )}
           </div>
 
           {/* Investigate Button */}
@@ -361,7 +391,6 @@ export const XPRecoveryPage: React.FC = () => {
             </div>
           </div>
         </motion.div>
-      </div>
     </div>
   );
 };

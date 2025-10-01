@@ -12,7 +12,6 @@ import HeroPanel from './components/hero/HeroPanel';
 import ParentPanel from './components/parent/ParentPanel';
 import OfflineBanner from './components/common/OfflineBanner';
 import DoctorPage from './components/debug/DoctorPage';
-import { XPRecoveryPage } from './components/debug/XPRecoveryPage';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ChatFlashGPT from './components/common/ChatFlashGPT';
 import './index.css';
@@ -64,7 +63,6 @@ function App() {
                         } 
                       />
                       <Route path="/doctor" element={<DoctorPage />} />
-                      <Route path="/xp-recovery" element={<XPRecoveryPage />} />
                       <Route path="/" element={<RoleBasedRedirect />} />
                     </Routes>
                   </div>

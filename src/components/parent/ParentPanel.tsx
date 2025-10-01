@@ -15,8 +15,9 @@ import FlashReminderManager from './FlashReminderManager';
 import AchievementManager from './AchievementManager';
 import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 import BirthdayManager from './BirthdayManager';
+import { XPRecoveryPage } from '../debug/XPRecoveryPage';
 
-type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor';
+type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'admin' | 'doctor' | 'data-doctor' | 'xp-recovery';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -43,6 +44,7 @@ const ParentPanel: React.FC = () => {
     { id: 'notifications', label: 'Notificações', icon: '🔔' },
     { id: 'history', label: 'Histórico', icon: '📈' },
     { id: 'admin', label: 'Controles Admin', icon: '⚙️' },
+    { id: 'xp-recovery', label: 'Recuperar XP', icon: '🔧' },
     { id: 'doctor', label: 'Firebase Doctor', icon: '🔬' },
     { id: 'data-doctor', label: 'Data Doctor', icon: '🗄️' }
   ] as const;
@@ -117,6 +119,9 @@ const ParentPanel: React.FC = () => {
           )}
           {activeTab === 'data-doctor' && (
             <DataDoctorPage />
+          )}
+          {activeTab === 'xp-recovery' && (
+            <XPRecoveryPage />
           )}
         </motion.div>
       </div>
