@@ -299,23 +299,34 @@ export class FirestoreService {
         await createProgressSnapshot(validation.snapshot);
       }
 
+      // Get task details for history
+      const taskRef = doc(db, 'tasks', taskId);
+      const taskDoc = await getDoc(taskRef);
+
+      if (!taskDoc.exists()) {
+        throw new Error('Task not found');
+      }
+
+      const taskData = taskDoc.data();
+      const taskTitle = taskData.title || 'Tarefa Sem Título';
+
       // Proceed with batch update
       const batch = writeBatch(db);
       const today = new Date().toISOString().split('T')[0];
 
       // Update task status
-      const taskRef = doc(db, 'tasks', taskId);
       batch.update(taskRef, {
         status: 'done',
         lastCompletedDate: today,
         updatedAt: serverTimestamp()
       });
 
-      // Create task completion record
+      // Create task completion record WITH TASK TITLE
       const completionRef = doc(collection(db, 'taskCompletions'));
       batch.set(completionRef, {
         taskId,
         userId,
+        taskTitle,
         date: today,
         xpEarned: xpReward,
         goldEarned: goldReward,
