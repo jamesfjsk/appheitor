@@ -5,10 +5,11 @@ import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
 import { calculateLevelSystem, getXPMilestones } from '../../utils/levelSystem';
+import { FirestoreService } from '../../services/firestoreService';
 import toast from 'react-hot-toast';
 
 const AdminControls: React.FC = () => {
-  const { progress, resetUserData, adjustUserXP, adjustUserGold, createTestData } = useData();
+  const { progress, resetUserData, adjustUserXP, adjustUserGold, createTestData, resetAllTasks } = useData();
   const { user, childUid, syncData } = useAuth();
   const { playClick, playError } = useSound();
   const [xpInput, setXpInput] = useState('');
@@ -120,12 +121,27 @@ const AdminControls: React.FC = () => {
 
   const handleSyncData = () => {
     if (isProcessing) return;
-    
+
     setIsProcessing(true);
     playClick();
     syncData()
       .catch((error) => {
         console.error('❌ AdminControls: Error syncing data:', error);
+        playError();
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      });
+  };
+
+  const handleResetAllTasks = () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    playClick();
+    resetAllTasks()
+      .catch((error) => {
+        console.error('❌ AdminControls: Error resetting tasks:', error);
         playError();
       })
       .finally(() => {
@@ -466,7 +482,7 @@ const AdminControls: React.FC = () => {
               Force o processamento manual das penalidades/bônus diários para testar o sistema
             </p>
           </div>
-          
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -491,6 +507,30 @@ const AdminControls: React.FC = () => {
           </motion.button>
         </div>
       </div>
+
+      {/* Botão Reset Manual de Tarefas */}
+      <div className="mb-6 p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="font-semibold text-cyan-900 mb-1">Reset Manual de Tarefas</h4>
+            <p className="text-sm text-cyan-700">
+              Resetar manualmente todas as tarefas marcadas como concluídas para ficarem pendentes
+            </p>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleResetAllTasks}
+            disabled={isProcessing}
+            className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg"
+          >
+            <RotateCcw className="w-5 h-5" />
+            {isProcessing ? 'Resetando...' : 'Resetar Todas as Tarefas'}
+          </motion.button>
+        </div>
+      </div>
+
       {/* Botão Inicializar Dados de Teste */}
       <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
         <div className="flex items-center justify-between">

@@ -62,6 +62,7 @@ interface DataContextType {
   adjustUserGold: (amount: number) => Promise<void>;
   resetUserData: () => Promise<void>;
   createTestData: () => Promise<void>;
+  resetAllTasks: () => Promise<void>;
   
   // Utility methods
   getCalendarMonth: (year: number, month: number) => CalendarDay[];
@@ -858,7 +859,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
   const createTestData = useCallback(async () => {
     if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
-    
+
     try {
       await FirestoreService.createTestData(childUid, user.userId);
       toast.success('🎯 Dados de teste criados com sucesso!');
@@ -868,6 +869,19 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       throw error;
     }
   }, [childUid, user?.userId]);
+
+  const resetAllTasks = useCallback(async () => {
+    if (!childUid) throw new Error('Child UID não definido');
+
+    try {
+      const resetCount = await FirestoreService.resetOutdatedTasks(childUid);
+      toast.success(`🔄 Reset de tarefas concluído! ${resetCount} tarefa(s) resetada(s).`);
+    } catch (error: any) {
+      console.error('❌ Erro ao resetar tarefas:', error);
+      toast.error('Erro ao resetar tarefas');
+      throw error;
+    }
+  }, [childUid]);
 
   const getCalendarMonth = useCallback((year: number, month: number): CalendarDay[] => {
     return new Promise(async (resolve) => {
@@ -1384,6 +1398,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     adjustUserGold,
     resetUserData,
     createTestData,
+    resetAllTasks,
     getCalendarMonth
   ]);
 
