@@ -1073,12 +1073,32 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           await FirestoreService.createDefaultData(childUid, user.userId);
         }
 
+        // ⚡ DAILY RESET: Reset outdated tasks in Firestore on first load
+        FirestoreService.resetOutdatedTasks(childUid).catch(error => {
+          console.error('❌ Error resetting outdated tasks:', error);
+        });
+
         // Set up real-time listeners with error handling
         const unsubscribeTasks = FirestoreService.subscribeToUserTasks(
           childUid,
           (tasks) => {
             console.log('📝 DataContext: Tasks updated:', tasks.length);
-            setTasks(tasks);
+
+            // ⚡ CLIENT-SIDE SAFETY: Reset task status locally if lastCompletedDate is not today
+            // This is a fallback in case the Firestore reset didn't run
+            const today = new Date().toISOString().split('T')[0];
+            const resetTasks = tasks.map(task => {
+              if (task.status === 'done' && task.lastCompletedDate !== today) {
+                console.log(`🔄 Client-side reset: "${task.title}" - last completed: ${task.lastCompletedDate}`);
+                return {
+                  ...task,
+                  status: 'pending' as const,
+                };
+              }
+              return task;
+            });
+
+            setTasks(resetTasks);
           },
           (error) => {
             console.error('❌ DataContext: Erro no listener de tasks:', error);

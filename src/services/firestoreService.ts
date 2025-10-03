@@ -248,6 +248,48 @@ export class FirestoreService {
     }
   }
 
+  // ⚡ DAILY RESET: Reset tasks that were completed on previous days
+  static async resetOutdatedTasks(userId: string): Promise<number> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      // Query for tasks that are done but not completed today
+      const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('ownerId', '==', userId),
+        where('status', '==', 'done')
+      );
+
+      const tasksSnapshot = await getDocs(tasksQuery);
+      const batch = writeBatch(db);
+      let resetCount = 0;
+
+      tasksSnapshot.docs.forEach(taskDoc => {
+        const task = taskDoc.data() as Task;
+
+        // If lastCompletedDate is not today, reset the task
+        if (task.lastCompletedDate && task.lastCompletedDate !== today) {
+          console.log(`🔄 Resetting task "${task.title}" - last completed: ${task.lastCompletedDate}`);
+          batch.update(taskDoc.ref, {
+            status: 'pending',
+            updatedAt: serverTimestamp()
+          });
+          resetCount++;
+        }
+      });
+
+      if (resetCount > 0) {
+        await batch.commit();
+        console.log(`✅ Reset ${resetCount} outdated tasks for user ${userId}`);
+      }
+
+      return resetCount;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error resetting outdated tasks:', error);
+      throw error;
+    }
+  }
+
   static async deleteTask(taskId: string): Promise<void> {
     try {
       await deleteDoc(doc(db, 'tasks', taskId));
