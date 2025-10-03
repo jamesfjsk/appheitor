@@ -1358,6 +1358,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     adjustUserGold,
     resetUserData,
     createTestData,
+    resetAllTasks,
     getCalendarMonth,
   }), [
     tasks,
