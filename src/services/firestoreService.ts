@@ -267,9 +267,11 @@ export class FirestoreService {
       tasksSnapshot.docs.forEach(taskDoc => {
         const task = taskDoc.data() as Task;
 
-        // If lastCompletedDate is not today, reset the task
-        if (task.lastCompletedDate && task.lastCompletedDate !== today) {
-          console.log(`🔄 Resetting task "${task.title}" - last completed: ${task.lastCompletedDate}`);
+        // If lastCompletedDate is not today OR undefined, reset the task
+        const needsReset = !task.lastCompletedDate || task.lastCompletedDate !== today;
+
+        if (needsReset) {
+          console.log(`🔄 Resetting task "${task.title}" - last completed: ${task.lastCompletedDate || 'UNDEFINED'}, today: ${today}`);
           batch.update(taskDoc.ref, {
             status: 'pending',
             updatedAt: serverTimestamp()

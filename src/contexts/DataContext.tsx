@@ -1100,8 +1100,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             });
 
             const resetTasks = tasks.map(task => {
-              if (task.status === 'done' && task.lastCompletedDate !== today) {
-                console.log(`🔄 CLIENT-SIDE RESET: "${task.title}" - last completed: ${task.lastCompletedDate}, today: ${today}`);
+              // Reset if task is done AND (no lastCompletedDate OR lastCompletedDate is not today)
+              const needsReset = task.status === 'done' && (!task.lastCompletedDate || task.lastCompletedDate !== today);
+
+              if (needsReset) {
+                console.log(`🔄 CLIENT-SIDE RESET: "${task.title}" - last completed: ${task.lastCompletedDate || 'UNDEFINED'}, today: ${today}`);
 
                 // CRITICAL FIX: Also update Firestore to ensure persistence
                 FirestoreService.updateTask(task.id, {
