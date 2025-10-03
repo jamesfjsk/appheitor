@@ -253,7 +253,6 @@ export class FirestoreService {
     try {
       const today = new Date().toISOString().split('T')[0];
 
-      // Query for tasks that are done but not completed today
       const tasksQuery = query(
         collection(db, 'tasks'),
         where('ownerId', '==', userId),
@@ -266,8 +265,6 @@ export class FirestoreService {
 
       tasksSnapshot.docs.forEach(taskDoc => {
         const task = taskDoc.data() as Task;
-
-        // If lastCompletedDate is not today OR undefined, reset the task
         const needsReset = !task.lastCompletedDate || task.lastCompletedDate !== today;
 
         if (needsReset) {
@@ -288,6 +285,38 @@ export class FirestoreService {
       return resetCount;
     } catch (error) {
       console.error('❌ FirestoreService: Error resetting outdated tasks:', error);
+      throw error;
+    }
+  }
+
+  static async forceResetAllCompletedTasks(userId: string): Promise<number> {
+    try {
+      const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('ownerId', '==', userId),
+        where('status', '==', 'done')
+      );
+
+      const tasksSnapshot = await getDocs(tasksQuery);
+      const batch = writeBatch(db);
+
+      tasksSnapshot.docs.forEach(taskDoc => {
+        const task = taskDoc.data() as Task;
+        console.log(`🔄 Force resetting task "${task.title}"`);
+        batch.update(taskDoc.ref, {
+          status: 'pending',
+          updatedAt: serverTimestamp()
+        });
+      });
+
+      if (tasksSnapshot.size > 0) {
+        await batch.commit();
+        console.log(`✅ Force reset ${tasksSnapshot.size} completed tasks for user ${userId}`);
+      }
+
+      return tasksSnapshot.size;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error force resetting tasks:', error);
       throw error;
     }
   }

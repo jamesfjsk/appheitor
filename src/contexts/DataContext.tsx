@@ -874,7 +874,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) throw new Error('Child UID não definido');
 
     try {
-      const resetCount = await FirestoreService.resetOutdatedTasks(childUid);
+      const resetCount = await FirestoreService.forceResetAllCompletedTasks(childUid);
       toast.success(`🔄 Reset de tarefas concluído! ${resetCount} tarefa(s) resetada(s).`);
     } catch (error: any) {
       console.error('❌ Erro ao resetar tarefas:', error);
