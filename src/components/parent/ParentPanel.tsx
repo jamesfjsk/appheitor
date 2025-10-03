@@ -107,7 +107,10 @@ const ParentPanel: React.FC = () => {
             <TaskHistory tasks={tasks} />
           )}
           {activeTab === 'system' && (
-            <SystemTools />
+            <div className="space-y-6">
+              <AdminControls />
+              <SystemTools />
+            </div>
           )}
         </motion.div>
       </div>
