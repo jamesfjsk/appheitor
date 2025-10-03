@@ -1102,6 +1102,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             const resetTasks = tasks.map(task => {
               if (task.status === 'done' && task.lastCompletedDate !== today) {
                 console.log(`🔄 CLIENT-SIDE RESET: "${task.title}" - last completed: ${task.lastCompletedDate}, today: ${today}`);
+
+                // CRITICAL FIX: Also update Firestore to ensure persistence
+                FirestoreService.updateTask(task.id, {
+                  status: 'pending'
+                }).catch(err => {
+                  console.error(`❌ Failed to update task ${task.id} in Firestore:`, err);
+                });
+
                 return {
                   ...task,
                   status: 'pending' as const,
@@ -1112,7 +1120,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
             const resetCount = resetTasks.filter((t, i) => t.status !== tasks[i].status).length;
             if (resetCount > 0) {
-              console.log(`✅ Client-side reset applied to ${resetCount} tasks`);
+              console.log(`✅ Client-side reset applied to ${resetCount} tasks (also updating Firestore)`);
             } else {
               console.log('✓ No tasks needed client-side reset');
             }
