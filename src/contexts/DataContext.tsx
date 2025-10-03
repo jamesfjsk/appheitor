@@ -1074,8 +1074,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         }
 
         // ⚡ DAILY RESET: Reset outdated tasks in Firestore on first load
-        FirestoreService.resetOutdatedTasks(childUid).catch(error => {
-          console.error('❌ Error resetting outdated tasks:', error);
+        console.log('🔄 DataContext: Initiating daily task reset...');
+        FirestoreService.resetOutdatedTasks(childUid).then(resetCount => {
+          console.log(`✅ DataContext: Reset completed - ${resetCount} tasks were reset`);
+        }).catch(error => {
+          console.error('❌ DataContext: Error resetting outdated tasks:', error);
         });
 
         // Set up real-time listeners with error handling
@@ -1087,9 +1090,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             // ⚡ CLIENT-SIDE SAFETY: Reset task status locally if lastCompletedDate is not today
             // This is a fallback in case the Firestore reset didn't run
             const today = new Date().toISOString().split('T')[0];
+            console.log(`📅 Today's date: ${today}`);
+
+            // Log current task statuses
+            tasks.forEach(task => {
+              if (task.status === 'done') {
+                console.log(`📋 Task "${task.title}": status=${task.status}, lastCompleted=${task.lastCompletedDate}, needsReset=${task.lastCompletedDate !== today}`);
+              }
+            });
+
             const resetTasks = tasks.map(task => {
               if (task.status === 'done' && task.lastCompletedDate !== today) {
-                console.log(`🔄 Client-side reset: "${task.title}" - last completed: ${task.lastCompletedDate}`);
+                console.log(`🔄 CLIENT-SIDE RESET: "${task.title}" - last completed: ${task.lastCompletedDate}, today: ${today}`);
                 return {
                   ...task,
                   status: 'pending' as const,
@@ -1097,6 +1109,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               }
               return task;
             });
+
+            const resetCount = resetTasks.filter((t, i) => t.status !== tasks[i].status).length;
+            if (resetCount > 0) {
+              console.log(`✅ Client-side reset applied to ${resetCount} tasks`);
+            } else {
+              console.log('✓ No tasks needed client-side reset');
+            }
 
             setTasks(resetTasks);
           },
