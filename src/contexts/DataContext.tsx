@@ -116,6 +116,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   // Prevent duplicate listeners and optimize re-renders
   const [listenersInitialized, setListenersInitialized] = useState(false);
   const [lastChildUid, setLastChildUid] = useState<string | null>(null);
+  const [lastResetDate, setLastResetDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
   // Define all callback hooks before any conditional logic
   const checkAchievements = useCallback(async () => {
@@ -1314,6 +1315,48 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       setListenersInitialized(false);
     };
   }, [childUid, user?.userId, user?.role]);
+
+  // ⚡ AUTOMATIC DAY CHANGE MONITOR
+  // This useEffect checks every minute if the date has changed
+  // and automatically resets tasks when a new day begins
+  useEffect(() => {
+    if (!childUid) return;
+
+    console.log('🕐 DataContext: Starting day change monitor...');
+
+    // Check every minute if the date has changed
+    const intervalId = setInterval(() => {
+      const currentDate = new Date().toISOString().split('T')[0];
+
+      if (currentDate !== lastResetDate) {
+        console.log(`📅 DAY CHANGE DETECTED! Was: ${lastResetDate}, Now: ${currentDate}`);
+        console.log('🔄 Triggering automatic task reset...');
+
+        // Reset tasks in Firestore
+        FirestoreService.resetOutdatedTasks(childUid)
+          .then(resetCount => {
+            console.log(`✅ AUTO-RESET: ${resetCount} tasks reset for new day`);
+            toast.success(`🌅 Novo dia! ${resetCount} tarefas resetadas automaticamente.`);
+            setLastResetDate(currentDate);
+          })
+          .catch(error => {
+            console.error('❌ AUTO-RESET ERROR:', error);
+          });
+      }
+    }, 60000); // Check every 60 seconds
+
+    // Also check immediately on mount
+    const currentDate = new Date().toISOString().split('T')[0];
+    if (currentDate !== lastResetDate) {
+      console.log(`📅 Initial date check - resetting from ${lastResetDate} to ${currentDate}`);
+      setLastResetDate(currentDate);
+    }
+
+    return () => {
+      console.log('🧹 DataContext: Cleaning up day change monitor');
+      clearInterval(intervalId);
+    };
+  }, [childUid, lastResetDate]);
 
   // Remove the old useEffect that was causing duplicate listeners
   // The old useEffect has been replaced with the optimized version above
