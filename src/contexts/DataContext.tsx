@@ -1088,13 +1088,23 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           await FirestoreService.createDefaultData(childUid, user.userId);
         }
 
-        // ⚡ DAILY RESET: Reset outdated tasks in Firestore on first load
-        console.log('🔄 DataContext: Initiating daily task reset...');
-        FirestoreService.resetOutdatedTasks(childUid).then(resetCount => {
-          console.log(`✅ DataContext: Reset completed - ${resetCount} tasks were reset`);
-        }).catch(error => {
-          console.error('❌ DataContext: Error resetting outdated tasks:', error);
-        });
+        // ⚡ DAILY PROCESSING: Process penalties/bonuses and reset tasks on first load
+        console.log('🔄 DataContext: Initiating daily processing...');
+
+        // First, process any unprocessed daily summaries (penalties/bonuses)
+        FirestoreService.processUnprocessedDays(childUid)
+          .then(() => {
+            console.log('✅ DataContext: Daily summaries processed');
+
+            // Then reset outdated tasks
+            return FirestoreService.resetOutdatedTasks(childUid);
+          })
+          .then(resetCount => {
+            console.log(`✅ DataContext: Daily processing complete - ${resetCount} tasks reset`);
+          })
+          .catch(error => {
+            console.error('❌ DataContext: Error in daily processing:', error);
+          });
 
         // Set up real-time listeners with error handling
         const unsubscribeTasks = FirestoreService.subscribeToUserTasks(
@@ -1330,17 +1340,24 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       if (currentDate !== lastResetDate) {
         console.log(`📅 DAY CHANGE DETECTED! Was: ${lastResetDate}, Now: ${currentDate}`);
-        console.log('🔄 Triggering automatic task reset...');
+        console.log('🔄 Triggering automatic daily processing...');
 
-        // Reset tasks in Firestore
-        FirestoreService.resetOutdatedTasks(childUid)
+        // Process daily summaries (penalties/bonuses) FIRST
+        FirestoreService.processUnprocessedDays(childUid)
+          .then(() => {
+            console.log('✅ Daily summaries processed (penalties/bonuses applied)');
+
+            // Then reset tasks for the new day
+            return FirestoreService.resetOutdatedTasks(childUid);
+          })
           .then(resetCount => {
             console.log(`✅ AUTO-RESET: ${resetCount} tasks reset for new day`);
-            toast.success(`🌅 Novo dia! ${resetCount} tarefas resetadas automaticamente.`);
+            toast.success(`🌅 Novo dia! Penalidades/bônus processados e ${resetCount} tarefas resetadas.`);
             setLastResetDate(currentDate);
           })
           .catch(error => {
             console.error('❌ AUTO-RESET ERROR:', error);
+            toast.error('Erro ao processar novo dia');
           });
       }
     }, 60000); // Check every 60 seconds
