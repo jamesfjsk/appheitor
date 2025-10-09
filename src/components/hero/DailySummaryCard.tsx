@@ -224,9 +224,14 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
               )}
               
               {hadPenalty && (
-                <p className="text-red-700 font-medium">
-                  ❌ Você perdeu <strong>{yesterdayData.goldPenalty} Gold</strong> por {yesterdayData.goldPenalty} tarefa(s) não concluída(s).
-                </p>
+                <div className="space-y-1">
+                  <p className="text-red-700 font-medium">
+                    ❌ Você perdeu <strong>{yesterdayData.goldPenalty} Gold</strong> de penalidade
+                  </p>
+                  <p className="text-sm text-red-600">
+                    📊 Completou {yesterdayData.tasksCompleted || 0} de {yesterdayData.totalTasksAvailable || 0} tarefas ({yesterdayData.goldPenalty} incompletas)
+                  </p>
+                </div>
               )}
               
               {!hadBonus && !hadPenalty && (
