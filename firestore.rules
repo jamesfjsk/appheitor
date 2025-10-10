@@ -164,5 +164,12 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.userId is string;
       allow update, delete: if isAdmin();
     }
+
+    // Notes (admin only)
+    match /notes/{noteId} {
+      allow read: if signedIn() && isAdmin() && resource.data.ownerId == request.auth.uid;
+      allow create: if signedIn() && isAdmin() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if signedIn() && isAdmin() && resource.data.ownerId == request.auth.uid;
+    }
   }
 }
