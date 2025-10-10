@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useSound } from './SoundContext';
-import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus } from '../types';
+import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus, Note } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp, calculateLevelSystem } from '../utils/levelSystem';
 import { getRewardsUnlockedAtLevel } from '../utils/rewardLevels';
@@ -19,51 +19,57 @@ interface DataContextType {
   surpriseMissionConfig: SurpriseMissionConfig | null;
   isSurpriseMissionCompletedToday: boolean;
   surpriseMissionHistory: DailySurpriseMissionStatus[];
+  notes: Note[];
   loading: boolean;
-  
+
   // Task methods
   addTask: (task: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateTask: (taskId: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   completeTask: (taskId: string) => Promise<void>;
-  
+
   // Reward methods
   addReward: (reward: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateReward: (rewardId: string, updates: Partial<Reward>) => Promise<void>;
   deleteReward: (rewardId: string) => Promise<void>;
   redeemReward: (rewardId: string) => Promise<void>;
-  
+
   // Redemption methods
   approveRedemption: (redemptionId: string, approved: boolean) => Promise<void>;
-  
+
   // Notification methods
   sendNotification: (title: string, message: string, type?: Notification['type']) => Promise<void>;
   markNotificationAsRead: (notificationId: string) => Promise<void>;
-  
+
   // Flash Reminder methods
   addFlashReminder: (reminder: Omit<FlashReminder, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateFlashReminder: (reminderId: string, updates: Partial<FlashReminder>) => Promise<void>;
   deleteFlashReminder: (reminderId: string) => Promise<void>;
-  
+
   // Achievement methods
   addAchievement: (achievement: Omit<Achievement, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateAchievement: (achievementId: string, updates: Partial<Achievement>) => Promise<void>;
   deleteAchievement: (achievementId: string) => Promise<void>;
   checkAchievements: () => Promise<void>;
   claimAchievementReward: (userAchievementId: string) => Promise<void>;
-  
+
   // Surprise Mission methods
   loadSurpriseMissionConfig: () => Promise<void>;
   updateSurpriseMissionSettings: (settings: Omit<SurpriseMissionConfig, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   completeSurpriseMission: (score: number, totalQuestions: number, xpEarned: number, goldEarned: number) => Promise<void>;
-  
+
+  // Note methods
+  addNote: (note: Omit<Note, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateNote: (noteId: string, updates: Partial<Note>) => Promise<void>;
+  deleteNote: (noteId: string) => Promise<void>;
+
   // Progress methods
   adjustUserXP: (amount: number) => Promise<void>;
   adjustUserGold: (amount: number) => Promise<void>;
   resetUserData: () => Promise<void>;
   createTestData: () => Promise<void>;
   resetAllTasks: () => Promise<void>;
-  
+
   // Utility methods
   getCalendarMonth: (year: number, month: number) => CalendarDay[];
 }
@@ -111,6 +117,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [surpriseMissionConfig, setSurpriseMissionConfig] = useState<SurpriseMissionConfig | null>(null);
   const [isSurpriseMissionCompletedToday, setIsSurpriseMissionCompletedToday] = useState(false);
   const [surpriseMissionHistory, setSurpriseMissionHistory] = useState<DailySurpriseMissionStatus[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Prevent duplicate listeners and optimize re-renders
@@ -556,6 +563,46 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('❌ Erro ao excluir lembrete:', error);
       toast.error('Erro ao excluir lembrete');
+      throw error;
+    }
+  }, []);
+
+  const addNote = useCallback(async (noteData: Omit<Note, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
+    if (!user?.userId) throw new Error('Usuário não autenticado');
+
+    const completeNoteData = {
+      ...noteData,
+      ownerId: user.userId
+    };
+
+    try {
+      await FirestoreService.createNote(completeNoteData);
+      toast.success('Anotação criada com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao criar anotação:', error);
+      toast.error('Erro ao criar anotação');
+      throw error;
+    }
+  }, [user?.userId]);
+
+  const updateNote = useCallback(async (noteId: string, updates: Partial<Note>) => {
+    try {
+      await FirestoreService.updateNote(noteId, updates);
+      toast.success('Anotação atualizada com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar anotação:', error);
+      toast.error('Erro ao atualizar anotação');
+      throw error;
+    }
+  }, []);
+
+  const deleteNote = useCallback(async (noteId: string) => {
+    try {
+      await FirestoreService.deleteNote(noteId);
+      toast.success('Anotação excluída com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao excluir anotação:', error);
+      toast.error('Erro ao excluir anotação');
       throw error;
     }
   }, []);
@@ -1272,6 +1319,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         );
         unsubscribeFunctions.push(unsubscribeUserAchievements);
 
+        // Subscribe to notes (admin only)
+        if (user?.role === 'admin') {
+          const unsubscribeNotes = FirestoreService.subscribeToNotes(
+            user.userId,
+            (notes) => {
+              setNotes(notes);
+              console.log('📝 DataContext: Notes updated:', notes.length);
+            }
+          );
+          unsubscribeFunctions.push(unsubscribeNotes);
+        }
+
         setListenersInitialized(true);
         setLoading(false);
 
@@ -1391,6 +1450,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     surpriseMissionConfig,
     isSurpriseMissionCompletedToday,
     surpriseMissionHistory,
+    notes,
     loading,
     addTask,
     updateTask,
@@ -1406,6 +1466,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     addFlashReminder,
     updateFlashReminder,
     deleteFlashReminder,
+    addNote,
+    updateNote,
+    deleteNote,
     addAchievement,
     updateAchievement,
     deleteAchievement,
@@ -1432,6 +1495,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     surpriseMissionConfig,
     isSurpriseMissionCompletedToday,
     surpriseMissionHistory,
+    notes,
     loading,
     addTask,
     updateTask,
@@ -1447,6 +1511,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     addFlashReminder,
     updateFlashReminder,
     deleteFlashReminder,
+    addNote,
+    updateNote,
+    deleteNote,
     addAchievement,
     updateAchievement,
     deleteAchievement,

@@ -15,8 +15,9 @@ import AchievementManager from './AchievementManager';
 import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 import BirthdayManager from './BirthdayManager';
 import DailyRewardsHistory from './DailyRewardsHistory';
+import NotesManager from './NotesManager';
 
-type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'system';
+type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -43,6 +44,7 @@ const ParentPanel: React.FC = () => {
     { id: 'notifications', label: 'Notificações', icon: '🔔' },
     { id: 'history', label: 'Histórico Tarefas', icon: '📈' },
     { id: 'rewardsHistory', label: 'Histórico Gold', icon: '💰' },
+    { id: 'notes', label: 'Anotações', icon: '📝' },
     { id: 'system', label: 'Ferramentas de Sistema', icon: '🔧' }
   ] as const;
 
@@ -110,6 +112,9 @@ const ParentPanel: React.FC = () => {
           )}
           {activeTab === 'rewardsHistory' && (
             <DailyRewardsHistory />
+          )}
+          {activeTab === 'notes' && (
+            <NotesManager />
           )}
           {activeTab === 'system' && (
             <div className="space-y-6">

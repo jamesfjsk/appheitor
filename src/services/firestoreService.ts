@@ -1661,14 +1661,87 @@ export class FirestoreService {
   static async syncUserData(userId: string): Promise<void> {
     try {
       console.log('🔄 FirestoreService: Syncing user data for:', userId);
-      
+
       // Force refresh user progress
       await this.ensureUserProgress(userId);
-      
+
       console.log('✅ FirestoreService: User data synced successfully');
     } catch (error) {
       console.error('❌ FirestoreService: Error syncing user data:', error);
       throw error;
     }
+  }
+
+  // ========================================
+  // 📝 NOTES MANAGEMENT
+  // ========================================
+
+  static async createNote(noteData: Omit<import('../types').Note, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      const noteRef = doc(collection(db, 'notes'));
+      const completeNoteData = {
+        ...noteData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      await setDoc(noteRef, completeNoteData);
+      console.log('✅ FirestoreService: Note created:', noteRef.id);
+      return noteRef.id;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error creating note:', error);
+      throw error;
+    }
+  }
+
+  static async updateNote(noteId: string, updates: Partial<import('../types').Note>): Promise<void> {
+    try {
+      const noteRef = doc(db, 'notes', noteId);
+      await updateDoc(noteRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      console.log('✅ FirestoreService: Note updated:', noteId);
+    } catch (error) {
+      console.error('❌ FirestoreService: Error updating note:', error);
+      throw error;
+    }
+  }
+
+  static async deleteNote(noteId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'notes', noteId));
+      console.log('✅ FirestoreService: Note deleted:', noteId);
+    } catch (error) {
+      console.error('❌ FirestoreService: Error deleting note:', error);
+      throw error;
+    }
+  }
+
+  static subscribeToNotes(ownerId: string, callback: (notes: import('../types').Note[]) => void): () => void {
+    const q = query(
+      collection(db, 'notes'),
+      where('ownerId', '==', ownerId),
+      orderBy('pinned', 'desc'),
+      orderBy('updatedAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q,
+      (snapshot) => {
+        const notes = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+          updatedAt: doc.data().updatedAt?.toDate() || new Date()
+        } as import('../types').Note));
+
+        callback(notes);
+      },
+      (error) => {
+        console.error('❌ FirestoreService: Error in notes subscription:', error);
+      }
+    );
+
+    return unsubscribe;
   }
 }

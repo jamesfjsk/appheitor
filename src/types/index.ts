@@ -218,3 +218,15 @@ export interface UserAchievement {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface Note {
+  id: string;
+  ownerId: string; // Admin UID
+  title: string;
+  content: string;
+  category?: 'general' | 'tasks' | 'rewards' | 'progress' | 'important';
+  color?: string;
+  pinned: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
