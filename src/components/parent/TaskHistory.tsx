@@ -24,6 +24,15 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
     goldEarned: number;
     completedAt: Date;
   }>>([]);
+  const [dailyProgressData, setDailyProgressData] = useState<Array<{
+    date: string;
+    tasksCompleted: number;
+    totalTasksAvailable: number;
+    goldPenalty: number;
+    allTasksBonusGold: number;
+    xpEarned: number;
+    goldEarned: number;
+  }>>([]);
   const [loading, setLoading] = useState(false);
   const [lastLoadedWeek, setLastLoadedWeek] = useState<string>('');
 
@@ -41,25 +50,59 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
   // Load completion history only when week changes
   const loadCompletionHistory = useCallback(async () => {
     if (!childUid || weekData.weekKey === lastLoadedWeek) return;
-    
+
     setLoading(true);
     try {
       console.log('📈 TaskHistory: Loading completion history for week:', weekData.weekKey);
+
+      // Load task completions
       const history = await FirestoreService.getTaskCompletionHistory(childUid, weekData.weekStart, weekData.weekEnd);
       setTaskCompletions(history);
+
+      // Load daily progress data (penalties/bonuses)
+      const dailyData: Array<{
+        date: string;
+        tasksCompleted: number;
+        totalTasksAvailable: number;
+        goldPenalty: number;
+        allTasksBonusGold: number;
+        xpEarned: number;
+        goldEarned: number;
+      }> = [];
+
+      for (let d = new Date(weekData.weekStart); d <= weekData.weekEnd; d.setDate(d.getDate() + 1)) {
+        const dateString = d.toISOString().split('T')[0];
+        const dailyProgress = await FirestoreService.getDailyProgress(childUid, dateString);
+
+        if (dailyProgress && dailyProgress.summaryProcessed) {
+          dailyData.push({
+            date: dateString,
+            tasksCompleted: dailyProgress.tasksCompleted || 0,
+            totalTasksAvailable: dailyProgress.totalTasksAvailable || 0,
+            goldPenalty: dailyProgress.goldPenalty || 0,
+            allTasksBonusGold: dailyProgress.allTasksBonusGold || 0,
+            xpEarned: dailyProgress.xpEarned || 0,
+            goldEarned: dailyProgress.goldEarned || 0
+          });
+        }
+      }
+
+      setDailyProgressData(dailyData);
       setLastLoadedWeek(weekData.weekKey);
-      
+
       console.log('✅ TaskHistory: History loaded successfully:', {
         weekKey: weekData.weekKey,
-        completions: history.length
+        completions: history.length,
+        dailyProgressDays: dailyData.length
       });
     } catch (error) {
       console.error('❌ TaskHistory: Error loading completion history:', error);
       setTaskCompletions([]);
+      setDailyProgressData([]);
     } finally {
       setLoading(false);
     }
-  }, [childUid, weekData.weekKey, lastLoadedWeek]);
+  }, [childUid, weekData.weekKey, weekData.weekStart, weekData.weekEnd, lastLoadedWeek]);
 
   useEffect(() => {
     loadCompletionHistory();
@@ -78,29 +121,52 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
     return weekData.weekDays.map(day => {
       const dayString = day.toISOString().split('T')[0];
       const dayCompletions = taskCompletions.filter(completion => completion.date === dayString);
-      
+      const dayProgress = dailyProgressData.find(dp => dp.date === dayString);
+
       const completedTasks = dayCompletions.length;
       const xpEarned = dayCompletions.reduce((sum, completion) => sum + completion.xpEarned, 0);
       const goldEarned = dayCompletions.reduce((sum, completion) => sum + completion.goldEarned, 0);
-      
+
+      // Add penalties and bonuses
+      const goldPenalty = dayProgress?.goldPenalty || 0;
+      const allTasksBonusGold = dayProgress?.allTasksBonusGold || 0;
+      const totalGoldForDay = goldEarned + allTasksBonusGold - goldPenalty;
+      const totalTasksAvailable = dayProgress?.totalTasksAvailable || 0;
+
       return {
         date: day,
         completed: completedTasks,
         xpEarned,
         goldEarned,
-        completions: dayCompletions
+        goldPenalty,
+        allTasksBonusGold,
+        totalGoldForDay,
+        totalTasksAvailable,
+        completions: dayCompletions,
+        hasProgress: !!dayProgress
       };
     });
-  }, [weekData.weekDays, taskCompletions]);
+  }, [weekData.weekDays, taskCompletions, dailyProgressData]);
 
   // Memoize totals
   const weekTotals = useMemo(() => {
     const totalWeekXP = weekCompletionData.reduce((sum, day) => sum + day.xpEarned, 0);
     const totalWeekGold = weekCompletionData.reduce((sum, day) => sum + day.goldEarned, 0);
+    const totalWeekGoldNet = weekCompletionData.reduce((sum, day) => sum + day.totalGoldForDay, 0);
     const totalWeekTasks = weekCompletionData.reduce((sum, day) => sum + day.completed, 0);
+    const totalPenalties = weekCompletionData.reduce((sum, day) => sum + day.goldPenalty, 0);
+    const totalBonuses = weekCompletionData.reduce((sum, day) => sum + day.allTasksBonusGold, 0);
     const avgDailyCompletion = totalWeekTasks / 7;
 
-    return { totalWeekXP, totalWeekGold, totalWeekTasks, avgDailyCompletion };
+    return {
+      totalWeekXP,
+      totalWeekGold,
+      totalWeekGoldNet,
+      totalWeekTasks,
+      totalPenalties,
+      totalBonuses,
+      avgDailyCompletion
+    };
   }, [weekCompletionData]);
 
   const weeks = [
@@ -202,9 +268,18 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
           className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
         >
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-medium text-gray-600">Total de Gold</p>
-              <p className="text-2xl font-bold text-gray-900">{weekTotals.totalWeekGold}</p>
+              <p className={`text-2xl font-bold ${weekTotals.totalWeekGoldNet < weekTotals.totalWeekGold ? 'text-orange-600' : 'text-gray-900'}`}>
+                {weekTotals.totalWeekGoldNet}
+              </p>
+              {weekTotals.totalWeekGoldNet !== weekTotals.totalWeekGold && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Ganho: {weekTotals.totalWeekGold}
+                  {weekTotals.totalPenalties > 0 && ` • Penalidades: -${weekTotals.totalPenalties}`}
+                  {weekTotals.totalBonuses > 0 && ` • Bônus: +${weekTotals.totalBonuses}`}
+                </p>
+              )}
             </div>
             <div className="bg-yellow-600 p-3 rounded-lg">
               <Star className="w-6 h-6 text-white" />
@@ -245,11 +320,13 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
                       {isToday && <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">HOJE</span>}
                     </span>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span>{day.completed} tarefas</span>
+                      <span>{day.completed}{day.totalTasksAvailable > 0 && `/${day.totalTasksAvailable}`} tarefas</span>
                       <span>•</span>
                       <span>{day.xpEarned} XP</span>
                       <span>•</span>
-                      <span>{day.goldEarned} Gold</span>
+                      <span className={day.totalGoldForDay < day.goldEarned ? 'text-red-600' : day.totalGoldForDay > day.goldEarned ? 'text-green-600' : ''}>
+                        {day.totalGoldForDay} Gold
+                      </span>
                     </div>
                   </div>
                   
@@ -284,6 +361,30 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Show penalties and bonuses */}
+                  {day.hasProgress && (day.goldPenalty > 0 || day.allTasksBonusGold > 0) && (
+                    <div className="mt-2 space-y-1">
+                      {day.goldPenalty > 0 && (
+                        <div className="flex items-center justify-between text-xs bg-red-50 p-2 rounded border border-red-200">
+                          <div className="flex items-center gap-2">
+                            <span className="text-red-600">⚠️</span>
+                            <span className="text-red-700">Penalidade por tarefas incompletas</span>
+                          </div>
+                          <span className="text-red-600 font-semibold">-{day.goldPenalty} Gold</span>
+                        </div>
+                      )}
+                      {day.allTasksBonusGold > 0 && (
+                        <div className="flex items-center justify-between text-xs bg-green-50 p-2 rounded border border-green-200">
+                          <div className="flex items-center gap-2">
+                            <span className="text-green-600">🎁</span>
+                            <span className="text-green-700">Bônus por completar todas as tarefas</span>
+                          </div>
+                          <span className="text-green-600 font-semibold">+{day.allTasksBonusGold} Gold</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </motion.div>
@@ -417,22 +518,36 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
           Estatísticas da Semana
         </h3>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <div className="text-2xl font-bold text-blue-600">{weekTotals.avgDailyCompletion.toFixed(1)}</div>
             <div className="text-sm text-blue-600">Média Diária</div>
           </div>
-          
+
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">{weekTotals.totalWeekTasks}</div>
             <div className="text-sm text-green-600">Total Completadas</div>
           </div>
-          
+
           <div className="text-center p-4 bg-yellow-50 rounded-lg">
             <div className="text-2xl font-bold text-yellow-600">{weekTotals.totalWeekXP}</div>
             <div className="text-sm text-yellow-600">XP Ganho</div>
           </div>
-          
+
+          {weekTotals.totalPenalties > 0 && (
+            <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="text-2xl font-bold text-red-600">-{weekTotals.totalPenalties}</div>
+              <div className="text-sm text-red-600">Penalidades</div>
+            </div>
+          )}
+
+          {weekTotals.totalBonuses > 0 && (
+            <div className="text-center p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div className="text-2xl font-bold text-emerald-600">+{weekTotals.totalBonuses}</div>
+              <div className="text-sm text-emerald-600">Bônus</div>
+            </div>
+          )}
+
           <div className="text-center p-4 bg-purple-50 rounded-lg">
             <div className="text-2xl font-bold text-purple-600">{weekRedemptions.length}</div>
             <div className="text-sm text-purple-600">Resgates</div>
