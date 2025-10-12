@@ -149,6 +149,30 @@ const AdminControls: React.FC = () => {
       });
   };
 
+  const handleReprocessYesterday = async () => {
+    if (isProcessing || !childUid) return;
+
+    setIsProcessing(true);
+    playClick();
+
+    try {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      console.log('🔄 AdminControls: Reprocessing yesterday manually...');
+      await FirestoreService.processDailySummary(childUid, yesterday);
+
+      toast.success('✅ Dia anterior reprocessado com sucesso!');
+      console.log('✅ AdminControls: Yesterday reprocessed successfully');
+    } catch (error) {
+      console.error('❌ AdminControls: Error reprocessing yesterday:', error);
+      toast.error('Erro ao reprocessar dia anterior');
+      playError();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -531,6 +555,29 @@ const AdminControls: React.FC = () => {
         </div>
       </div>
 
+      {/* Botão Reprocessar Dia Anterior */}
+      <div className="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="font-semibold text-orange-900 mb-1">🔄 Reprocessar Penalidades</h4>
+            <p className="text-sm text-orange-700">
+              Recalcula as penalidades e bônus do dia anterior manualmente
+            </p>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleReprocessYesterday}
+            disabled={isProcessing}
+            className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg"
+          >
+            <RotateCcw className="w-5 h-5" />
+            {isProcessing ? 'Reprocessando...' : 'Reprocessar Ontem'}
+          </motion.button>
+        </div>
+      </div>
+
       {/* Botão Inicializar Dados de Teste */}
       <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
         <div className="flex items-center justify-between">
@@ -540,7 +587,7 @@ const AdminControls: React.FC = () => {
               Crie 5 tarefas e 5 recompensas variadas para testar o sistema
             </p>
           </div>
-          
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

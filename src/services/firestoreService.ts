@@ -1125,30 +1125,67 @@ export class FirestoreService {
       // Get task completions for the day
       const completions = await this.getTaskCompletionHistory(userId, date, date);
       const tasksCompleted = completions.length;
-      
-      // Get total tasks that were available that day (simplified - using current active tasks)
+
+      // Get all tasks (active and inactive) that existed at that time
       const tasksQuery = query(
         collection(db, 'tasks'),
-        where('ownerId', '==', userId),
-        where('active', '==', true)
+        where('ownerId', '==', userId)
       );
       const tasksSnapshot = await getDocs(tasksQuery);
-      const totalTasksAvailable = tasksSnapshot.size;
-      
+
+      // Filter tasks by frequency based on the day of week
+      const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const tasksForThatDay = tasksSnapshot.docs.filter(doc => {
+        const taskData = doc.data();
+
+        // Only count if task was active at that time
+        if (taskData.active === false) return false;
+
+        // Check if task was created before or on that day
+        const taskCreatedAt = taskData.createdAt?.toDate();
+        if (taskCreatedAt && taskCreatedAt > date) return false;
+
+        // Filter by frequency
+        switch (taskData.frequency) {
+          case 'daily':
+            return true;
+          case 'weekday':
+            return dayOfWeek >= 1 && dayOfWeek <= 5;
+          case 'weekend':
+            return dayOfWeek === 0 || dayOfWeek === 6;
+          default:
+            return true;
+        }
+      });
+
+      const totalTasksAvailable = tasksForThatDay.length;
+
+      console.log('📊 FirestoreService: Daily summary calculation:', {
+        date: dateString,
+        dayOfWeek: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][dayOfWeek],
+        totalTasksAvailable,
+        tasksCompleted,
+        completions: completions.length
+      });
+
       let goldPenalty = 0;
       let allTasksBonusGold = 0;
-      
+
       // Calculate penalties and bonuses
       if (totalTasksAvailable > 0) {
         const incompleteTasks = totalTasksAvailable - tasksCompleted;
-        
+
         if (incompleteTasks > 0) {
           goldPenalty = incompleteTasks; // 1 gold penalty per incomplete task
+          console.log(`⚠️ FirestoreService: Applying penalty - ${incompleteTasks} tasks incomplete = -${goldPenalty} gold`);
         }
-        
+
         if (tasksCompleted >= totalTasksAvailable) {
           allTasksBonusGold = 10; // Bonus for completing all tasks
+          console.log(`🎁 FirestoreService: All tasks completed! Bonus: +${allTasksBonusGold} gold`);
         }
+      } else {
+        console.log('⚠️ FirestoreService: No tasks available for this day, skipping penalties/bonuses');
       }
       
       // Apply penalties/bonuses to user progress
