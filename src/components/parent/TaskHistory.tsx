@@ -92,9 +92,26 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
 
       console.log('✅ TaskHistory: History loaded successfully:', {
         weekKey: weekData.weekKey,
+        weekStart: weekData.weekStart.toISOString(),
+        weekEnd: weekData.weekEnd.toISOString(),
         completions: history.length,
-        dailyProgressDays: dailyData.length
+        dailyProgressDays: dailyData.length,
+        taskCompletions: history,
+        dailyProgress: dailyData
       });
+
+      if (history.length === 0) {
+        console.warn('⚠️ TaskHistory: No task completions found. This could mean:');
+        console.warn('  1. No tasks were completed in this week');
+        console.warn('  2. Firestore index is still building');
+        console.warn('  3. Tasks were completed but not recorded in taskCompletions collection');
+      }
+
+      if (dailyData.length === 0) {
+        console.warn('⚠️ TaskHistory: No daily progress found. This could mean:');
+        console.warn('  1. Daily processing has not run yet');
+        console.warn('  2. Use "Reprocessar Ontem" button in Dashboard to populate data');
+      }
     } catch (error) {
       console.error('❌ TaskHistory: Error loading completion history:', error);
       setTaskCompletions([]);
@@ -123,9 +140,20 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
       const dayCompletions = taskCompletions.filter(completion => completion.date === dayString);
       const dayProgress = dailyProgressData.find(dp => dp.date === dayString);
 
-      const completedTasks = dayCompletions.length;
-      const xpEarned = dayCompletions.reduce((sum, completion) => sum + completion.xpEarned, 0);
-      const goldEarned = dayCompletions.reduce((sum, completion) => sum + completion.goldEarned, 0);
+      // If no taskCompletions but we have tasks data, try to infer from tasks
+      let completedTasks = dayCompletions.length;
+      let xpEarned = dayCompletions.reduce((sum, completion) => sum + completion.xpEarned, 0);
+      let goldEarned = dayCompletions.reduce((sum, completion) => sum + completion.goldEarned, 0);
+
+      // Fallback: check tasks with lastCompletedDate matching this day
+      if (completedTasks === 0 && tasks.length > 0) {
+        const dayTasks = tasks.filter(task => task.lastCompletedDate === dayString && task.status === 'done');
+        if (dayTasks.length > 0) {
+          completedTasks = dayTasks.length;
+          xpEarned = dayTasks.reduce((sum, task) => sum + (task.xp || 0), 0);
+          goldEarned = dayTasks.reduce((sum, task) => sum + (task.gold || 0), 0);
+        }
+      }
 
       // Add penalties and bonuses
       const goldPenalty = dayProgress?.goldPenalty || 0;
@@ -146,7 +174,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
         hasProgress: !!dayProgress
       };
     });
-  }, [weekData.weekDays, taskCompletions, dailyProgressData]);
+  }, [weekData.weekDays, taskCompletions, dailyProgressData, tasks]);
 
   // Memoize totals
   const weekTotals = useMemo(() => {
@@ -222,6 +250,65 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             <span className="text-blue-700 font-medium">Carregando histórico da semana...</span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Debug Info */}
+      {!loading && taskCompletions.length === 0 && dailyProgressData.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-orange-50 border border-orange-200 rounded-lg p-6"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-orange-600 font-semibold text-lg">⚠️ Nenhum histórico disponível</span>
+            </div>
+
+            <div className="bg-white rounded p-4 border border-orange-200">
+              <p className="text-sm font-semibold text-gray-900 mb-2">Status do Sistema:</p>
+              <div className="text-sm text-gray-700 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className={tasks.length > 0 ? 'text-green-600' : 'text-red-600'}>
+                    {tasks.length > 0 ? '✅' : '❌'}
+                  </span>
+                  <span>Tarefas cadastradas: <strong>{tasks.length}</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={tasks.filter(t => t.status === 'done').length > 0 ? 'text-green-600' : 'text-red-600'}>
+                    {tasks.filter(t => t.status === 'done').length > 0 ? '✅' : '❌'}
+                  </span>
+                  <span>Tarefas completadas hoje: <strong>{tasks.filter(t => t.status === 'done' && t.lastCompletedDate === new Date().toISOString().split('T')[0]).length}</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={taskCompletions.length > 0 ? 'text-green-600' : 'text-orange-600'}>
+                    {taskCompletions.length > 0 ? '✅' : '⚠️'}
+                  </span>
+                  <span>Registros de conclusão (taskCompletions): <strong>{taskCompletions.length}</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={dailyProgressData.length > 0 ? 'text-green-600' : 'text-orange-600'}>
+                    {dailyProgressData.length > 0 ? '✅' : '⚠️'}
+                  </span>
+                  <span>Processamento diário (dailyProgress): <strong>{dailyProgressData.length} dias</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-sm text-orange-800 space-y-2">
+              <p className="font-semibold">🔧 O que fazer:</p>
+              <ol className="list-decimal list-inside pl-2 space-y-1">
+                <li className="ml-2">Vá ao <strong>Dashboard</strong> e clique em <strong>"Reprocessar Ontem"</strong> para popular dados históricos</li>
+                <li className="ml-2">Complete algumas tarefas no <strong>Painel do Heitor</strong></li>
+                <li className="ml-2">Aguarde o processamento automático no próximo dia</li>
+                <li className="ml-2">Se o problema persistir, verifique o console do navegador (F12) para erros</li>
+              </ol>
+            </div>
+
+            <div className="text-xs text-orange-600 bg-orange-100 p-2 rounded">
+              <strong>Nota técnica:</strong> Os dados de histórico dependem da coleção <code>taskCompletions</code> (índice do Firestore) e <code>dailyProgress</code> (processamento diário). Se você acabou de configurar o sistema, é normal não ter dados ainda.
+            </div>
           </div>
         </motion.div>
       )}
