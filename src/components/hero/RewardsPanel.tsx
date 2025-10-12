@@ -339,9 +339,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                       ? 'text-green-300' 
                       : 'text-red-300'
                   }`}>
-                    {loadingDailyTasks 
-                      ? 'Carregando...' 
-                      : `${dailyTasksCompleted}/4 missões completadas hoje`
+                    {loadingDailyTasks
+                      ? 'Carregando...'
+                      : `${dailyTasksCompleted}/5 missões completadas hoje`
                     }
                   </p>
                 </div>
@@ -349,19 +349,19 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
               
               <div className="text-right">
                 <div className={`text-2xl font-bold ${
-                  loadingDailyTasks 
-                    ? 'text-gray-600' 
-                    : dailyTasksCompleted >= 4 
-                    ? 'text-green-200' 
+                  loadingDailyTasks
+                    ? 'text-gray-600'
+                    : dailyTasksCompleted >= 5
+                    ? 'text-green-200'
                     : 'text-red-200'
                 }`}>
-                  {dailyTasksCompleted}/4
+                  {dailyTasksCompleted}/5
                 </div>
                 <div className={`text-xs ${
-                  loadingDailyTasks 
-                    ? 'text-gray-500' 
-                    : dailyTasksCompleted >= 4 
-                    ? 'text-green-300' 
+                  loadingDailyTasks
+                    ? 'text-gray-500'
+                    : dailyTasksCompleted >= 5
+                    ? 'text-green-300'
                     : 'text-red-300'
                 }`}>
                   missões hoje
@@ -369,12 +369,12 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
             
-            {!loadingDailyTasks && dailyTasksCompleted < 4 && (
+            {!loadingDailyTasks && dailyTasksCompleted < 5 && (
               <div className="mt-3 p-3 bg-red-500/20 rounded-lg">
                 <p className="text-red-200 text-sm font-medium text-center">
-                  🚫 Complete pelo menos 4 missões hoje para desbloquear os resgates!
+                  🚫 Complete pelo menos 5 missões hoje para desbloquear os resgates!
                   <br />
-                  <span className="text-xs">Faltam {4 - dailyTasksCompleted} missões para liberar a loja.</span>
+                  <span className="text-xs">Faltam {5 - dailyTasksCompleted} missões para liberar a loja.</span>
                 </p>
               </div>
             )}
@@ -525,10 +525,10 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           <Star className="w-5 h-5 inline mr-2" />
                           Resgatar Agora!
                         </>
-                      ) : dailyTasksCompleted < 4 ? (
+                      ) : dailyTasksCompleted < 5 ? (
                         <>
                           <Lock className="w-5 h-5 inline mr-2" />
-                          Complete 4 Missões Hoje
+                          Complete 5 Missões Hoje
                         </>
                       ) : (
                         <>

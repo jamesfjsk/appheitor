@@ -413,16 +413,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) throw new Error('Child UID não definido');
     
     try {
-      // Check if user has completed at least 4 tasks today using current tasks data
+      // Check if user has completed at least 5 tasks today using current tasks data
       const today = new Date().toISOString().split('T')[0];
-      
+
       // Count completed tasks from current tasks data instead of relying on completion history
       const dayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-      
+
       // Filter tasks that should be available today based on frequency
       const todayTasks = tasks.filter(task => {
         if (!task.active) return false;
-        
+
         switch (task.frequency) {
           case 'daily':
             return true;
@@ -434,12 +434,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             return true;
         }
       });
-      
+
       // Count how many of today's tasks are completed
-      const todayCompletions = todayTasks.filter(task => 
+      const todayCompletions = todayTasks.filter(task =>
         task.status === 'done' && task.lastCompletedDate === today
       );
-      
+
       console.log('🔍 DataContext: Daily tasks verification for redemption:', {
         today,
         totalActiveTasks: tasks.filter(t => t.active).length,
@@ -447,9 +447,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         completedToday: todayCompletions.length,
         completedTasks: todayCompletions.map(t => ({ id: t.id, title: t.title }))
       });
-      
-      if (todayCompletions.length < 4) {
-        throw new Error(`Você precisa completar pelo menos 4 missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/4`);
+
+      if (todayCompletions.length < 5) {
+        throw new Error(`Você precisa completar pelo menos 5 missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/5`);
       }
       
       const reward = rewards.find(r => r.id === rewardId);
@@ -473,7 +473,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       toast.success('🎁 Recompensa solicitada! Aguarde aprovação.');
     } catch (error: any) {
       console.error('❌ Erro ao resgatar recompensa:', error);
-      if (error.message.includes('4 missões hoje')) {
+      if (error.message.includes('5 missões hoje')) {
         toast.error(error.message);
       } else if (error.message.includes('resgate pendente')) {
         toast.error('Você já tem um resgate pendente para esta recompensa!');
