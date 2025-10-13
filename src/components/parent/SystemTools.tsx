@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Database, Wrench, Activity, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, Database, Wrench, Activity, ChevronDown, ChevronRight, Clock } from 'lucide-react';
 import FirebaseDoctor from '../common/FirebaseDoctor';
 import DataDoctorPage from '../admin/dataDoctor/DataDoctorPage';
 import { XPRecoveryPage } from '../debug/XPRecoveryPage';
+import TimezoneTest from '../debug/TimezoneTest';
 
-type ToolType = 'firebase' | 'data' | 'xp';
+type ToolType = 'firebase' | 'data' | 'xp' | 'timezone';
 
 const SystemTools: React.FC = () => {
   const [selectedTool, setSelectedTool] = useState<ToolType | null>(null);
@@ -57,6 +58,22 @@ const SystemTools: React.FC = () => {
         'Detecta perda de XP/Gold',
         'Calcula valores corretos',
         'Restaura progresso com segurança'
+      ]
+    },
+    {
+      id: 'timezone' as ToolType,
+      title: 'Timezone Test',
+      description: 'Verificação de timezone e reset diário',
+      icon: Clock,
+      color: 'from-green-600 to-green-700',
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-200',
+      textColor: 'text-green-700',
+      features: [
+        'Mostra horário Brasil (GMT-3)',
+        'Compara com UTC',
+        'Valida data de reset',
+        'Teste em tempo real'
       ]
     }
   ];
@@ -148,6 +165,7 @@ const SystemTools: React.FC = () => {
               {selectedTool === 'firebase' && <FirebaseDoctor />}
               {selectedTool === 'data' && <DataDoctorPage />}
               {selectedTool === 'xp' && <XPRecoveryPage />}
+              {selectedTool === 'timezone' && <TimezoneTest />}
             </div>
           </motion.div>
         )}
@@ -161,7 +179,7 @@ const SystemTools: React.FC = () => {
       >
         <h3 className="text-lg font-bold text-blue-900 mb-4">💡 Quando usar cada ferramenta?</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg p-4">
             <h4 className="font-semibold text-blue-800 mb-2">🔬 Firebase Doctor</h4>
             <p className="text-sm text-blue-700">
@@ -180,6 +198,13 @@ const SystemTools: React.FC = () => {
             <h4 className="font-semibold text-red-800 mb-2">🔧 XP Recovery</h4>
             <p className="text-sm text-red-700">
               Use quando o XP/Gold do usuário estiver incorreto ou houver suspeita de perda de progresso.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg p-4">
+            <h4 className="font-semibold text-green-800 mb-2">🕐 Timezone Test</h4>
+            <p className="text-sm text-green-700">
+              Use para verificar se o horário está correto e validar o reset diário às 00:00 Brasil.
             </p>
           </div>
         </div>
