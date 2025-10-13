@@ -4,6 +4,8 @@ import { UserProgress, LevelSystem } from '../../types';
 import { CloudLightning as Lightning } from 'lucide-react';
 import { calculateLevelSystem, checkLevelUp, getNextMilestone, getLevelColor, getLevelIcon } from '../../utils/levelSystem';
 import { FirestoreService } from '../../services/firestoreService';
+import { getTodayBrazil } from '../../utils/timezone';
+
 
 interface ProgressBarProps {
   progress: UserProgress;
@@ -21,7 +23,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
       if (!progress.userId) return;
       
       try {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayBrazil();
         const dailyProgress = await FirestoreService.getDailyProgress(progress.userId, today);
         setDailyXP(dailyProgress?.xpEarned || 0);
       } catch (error) {
@@ -41,7 +43,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
       const xpGained = (progress.totalXP || 0) - previousXP;
       if (xpGained > 0) {
         try {
-          const today = new Date().toISOString().split('T')[0];
+          const today = getTodayBrazil();
           await FirestoreService.updateDailyProgress(progress.userId, today, xpGained, 0);
           setDailyXP(prev => prev + xpGained);
         } catch (error) {

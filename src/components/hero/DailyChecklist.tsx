@@ -4,6 +4,8 @@ import { Check, Clock, Sun, Sunset, Moon, Play, ChevronLeft, ChevronRight } from
 import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import TaskItem from './TaskItem';
+import { getTodayBrazil } from '../../utils/timezone';
+
 
 // Helper function to check if task should be shown today based on frequency
 const isTaskAvailableToday = (task: Task): boolean => {
@@ -24,7 +26,7 @@ const isTaskAvailableToday = (task: Task): boolean => {
 
 // Helper function to check if task is completed today
 const isTaskCompletedToday = (task: Task): boolean => {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const today = getTodayBrazil(); // YYYY-MM-DD format
   return task.status === 'done' && task.lastCompletedDate === today;
 };
 

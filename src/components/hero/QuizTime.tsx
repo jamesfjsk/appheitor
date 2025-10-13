@@ -5,6 +5,8 @@ import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
+import { getTodayBrazil } from '../../utils/timezone';
+
 
 interface QuizTimeProps {
   onComplete: () => void;
@@ -45,7 +47,7 @@ const QuizTime: React.FC<QuizTimeProps> = ({ onComplete }) => {
     if (!childUid) return;
     
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrazil();
       const quizCompleted = await FirestoreService.checkQuizCompletedToday(childUid, today);
       
       if (!quizCompleted) {
@@ -333,7 +335,7 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
       
       // Mark quiz as completed for today
       if (childUid) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayBrazil();
         await FirestoreService.markQuizCompletedToday(childUid, today, {
           score: correctAnswers,
           totalQuestions: questions.length,

@@ -5,6 +5,7 @@ import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp, calculateLevelSystem } from '../utils/levelSystem';
 import { getRewardsUnlockedAtLevel } from '../utils/rewardLevels';
+import { getTodayBrazil } from '../utils/timezone';
 import toast from 'react-hot-toast';
 
 interface DataContextType {
@@ -123,7 +124,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   // Prevent duplicate listeners and optimize re-renders
   const [listenersInitialized, setListenersInitialized] = useState(false);
   const [lastChildUid, setLastChildUid] = useState<string | null>(null);
-  const [lastResetDate, setLastResetDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [lastResetDate, setLastResetDate] = useState<string>(getTodayBrazil());
 
   // Define all callback hooks before any conditional logic
   const checkAchievements = useCallback(async () => {
@@ -294,7 +295,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       if (!task) throw new Error('Tarefa não encontrada');
       
       // Check if task is already completed today
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrazil();
       if (task.status === 'done' && task.lastCompletedDate === today) {
         throw new Error('Task already completed today');
       }
@@ -414,7 +415,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     
     try {
       // Check if user has completed at least 5 tasks today using current tasks data
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrazil();
 
       // Count completed tasks from current tasks data instead of relying on completion history
       const dayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
@@ -666,8 +667,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) throw new Error('Child UID não definido');
     
     try {
-      const today = new Date().toISOString().split('T')[0];
-      
+      const today = getTodayBrazil();
+
       await FirestoreService.markSurpriseMissionCompletedToday(childUid, today, {
         score,
         totalQuestions,
@@ -1045,7 +1046,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) return;
     
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrazil();
       const isCompleted = await FirestoreService.checkSurpriseMissionCompletedToday(childUid, today);
       setIsSurpriseMissionCompletedToday(isCompleted);
       
@@ -1161,8 +1162,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
             // ⚡ CLIENT-SIDE SAFETY: Reset task status locally if lastCompletedDate is not today
             // This is a fallback in case the Firestore reset didn't run
-            const today = new Date().toISOString().split('T')[0];
-            console.log(`📅 Today's date: ${today}`);
+            const today = getTodayBrazil();
+            console.log(`📅 Today's date (Brazil GMT-3): ${today}`);
 
             // Log current task statuses
             tasks.forEach(task => {
@@ -1395,7 +1396,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     // Check every minute if the date has changed
     const intervalId = setInterval(() => {
-      const currentDate = new Date().toISOString().split('T')[0];
+      const currentDate = getTodayBrazil();
 
       if (currentDate !== lastResetDate) {
         console.log(`📅 DAY CHANGE DETECTED! Was: ${lastResetDate}, Now: ${currentDate}`);
@@ -1422,9 +1423,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }, 60000); // Check every 60 seconds
 
     // Also check immediately on mount
-    const currentDate = new Date().toISOString().split('T')[0];
+    const currentDate = getTodayBrazil();
     if (currentDate !== lastResetDate) {
-      console.log(`📅 Initial date check - resetting from ${lastResetDate} to ${currentDate}`);
+      console.log(`📅 Initial date check (Brazil GMT-3) - resetting from ${lastResetDate} to ${currentDate}`);
       setLastResetDate(currentDate);
     }
 

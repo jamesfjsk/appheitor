@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Clock, Star, Zap } from 'lucide-react';
 import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
+import { getTodayBrazil } from '../../utils/timezone';
 import toast from 'react-hot-toast';
 import SpeedForce from './SpeedForce';
 
 // Helper function to check if task is completed today
 const isTaskCompletedToday = (task: Task): boolean => {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const today = getTodayBrazil();
   return task.status === 'done' && task.lastCompletedDate === today;
 };
 

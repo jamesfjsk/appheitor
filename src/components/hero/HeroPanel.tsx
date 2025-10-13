@@ -18,6 +18,8 @@ import SurpriseMissionQuiz from './SurpriseMissionQuiz';
 import FlashTimer from './FlashTimer';
 import BirthdayCelebration from './BirthdayCelebration';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { getTodayBrazil } from '../../utils/timezone';
+
 
 const HeroPanel: React.FC = () => {
   const { tasks, progress, loading, surpriseMissionConfig, isSurpriseMissionCompletedToday } = useData();
@@ -56,7 +58,7 @@ const HeroPanel: React.FC = () => {
     const checkQuizCompletion = () => {
       if (!progress.userId) return;
       
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrazil();
       const quizKey = `quiz_completed_${progress.userId}_${today}`;
       const completed = localStorage.getItem(quizKey);
       setQuizCompleted(!!completed);

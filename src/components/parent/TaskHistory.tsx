@@ -7,6 +7,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, subWeeks } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { getTodayBrazil } from '../../utils/timezone';
+
 
 interface TaskHistoryProps {
   tasks: Task[];
@@ -279,7 +281,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
                   <span className={tasks.filter(t => t.status === 'done').length > 0 ? 'text-green-600' : 'text-red-600'}>
                     {tasks.filter(t => t.status === 'done').length > 0 ? '✅' : '❌'}
                   </span>
-                  <span>Tarefas completadas hoje: <strong>{tasks.filter(t => t.status === 'done' && t.lastCompletedDate === new Date().toISOString().split('T')[0]).length}</strong></span>
+                  <span>Tarefas completadas hoje: <strong>{tasks.filter(t => t.status === 'done' && t.lastCompletedDate === getTodayBrazil()).length}</strong></span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={taskCompletions.length > 0 ? 'text-green-600' : 'text-orange-600'}>

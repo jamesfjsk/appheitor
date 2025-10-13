@@ -7,6 +7,8 @@ import { FirestoreService } from '../../services/firestoreService';
 import { Reward, RewardRedemption } from '../../types';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 import { isRewardUnlocked } from '../../utils/rewardLevels';
+import { getTodayBrazil } from '../../utils/timezone';
+
 
 interface RewardsPanelProps {
   isOpen: boolean;
@@ -32,7 +34,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
       setLoadingDailyTasks(true);
       try {
         // Count completed tasks from current tasks data instead of relying on completion history
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayBrazil();
         
         // Filter tasks that should be available today based on frequency
         const todayTasks = tasks.filter(task => {
@@ -72,7 +74,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
           console.log('📋 Firestore index is building for taskCompletions. Using default value.');
           
           // Fallback: use current tasks data directly
-          const today = new Date().toISOString().split('T')[0];
+          const today = getTodayBrazil();
           const todayTasks = tasks.filter(task => {
             if (!task.active) return false;
             

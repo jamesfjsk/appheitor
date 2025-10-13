@@ -17,6 +17,7 @@ import {
   addDoc
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { getTodayBrazil, getTodayStartBrazil, getYesterdayBrazil } from '../utils/timezone';
 import {
   User,
   Task,
@@ -251,7 +252,7 @@ export class FirestoreService {
   // ⚡ DAILY RESET: Reset tasks that were completed on previous days
   static async resetOutdatedTasks(userId: string): Promise<number> {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrazil();
 
       const tasksQuery = query(
         collection(db, 'tasks'),
@@ -385,7 +386,7 @@ export class FirestoreService {
 
       // Proceed with batch update
       const batch = writeBatch(db);
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrazil();
 
       // Update task status
       batch.update(taskRef, {
@@ -1082,19 +1083,16 @@ export class FirestoreService {
       
       const progressData = progressDoc.data();
       const lastProcessedDate = progressData.lastDailySummaryProcessedDate?.toDate();
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
+      const todayStart = getTodayStartBrazil();
+
       // If already processed today, skip
-      if (lastProcessedDate && lastProcessedDate >= today) {
+      if (lastProcessedDate && lastProcessedDate >= todayStart) {
         console.log('✅ FirestoreService: Daily processing already completed for today');
         return;
       }
-      
+
       // Process yesterday (if not already processed)
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayString = yesterday.toISOString().split('T')[0];
+      const { date: yesterday, dateString: yesterdayString } = getYesterdayBrazil();
       
       // Check if yesterday was already processed
       const yesterdayProgress = await this.getDailyProgress(userId, yesterdayString);
