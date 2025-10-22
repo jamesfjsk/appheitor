@@ -31,7 +31,8 @@ import {
   SurpriseMissionConfig,
   DailySurpriseMissionStatus,
   BirthdayEvent,
-  BirthdayConfig
+  BirthdayConfig,
+  GoldTransaction
 } from '../types';
 import { validateProgressUpdate, createProgressSnapshot } from '../utils/progressMonitor';
 
@@ -418,6 +419,24 @@ export class FirestoreService {
         updatedAt: serverTimestamp()
       });
 
+      // Create gold transaction record
+      if (goldReward > 0) {
+        const transactionRef = doc(collection(db, 'goldTransactions'));
+        batch.set(transactionRef, {
+          userId,
+          amount: goldReward,
+          type: 'earned',
+          source: 'task_completion',
+          description: `Tarefa concluída: ${taskTitle}`,
+          relatedId: taskId,
+          relatedTitle: taskTitle,
+          metadata: { xpEarned: xpReward, period: taskData.period },
+          balanceBefore: currentProgress.availableGold || 0,
+          balanceAfter: newGold,
+          createdAt: serverTimestamp()
+        });
+      }
+
       await batch.commit();
       console.log('✅ Task completed with validated rewards:', { taskId, xpReward, goldReward });
     } catch (error) {
@@ -473,6 +492,11 @@ export class FirestoreService {
     try {
       const batch = writeBatch(db);
 
+      // Get reward details for transaction
+      const rewardRef = doc(db, 'rewards', rewardId);
+      const rewardDoc = await getDoc(rewardRef);
+      const rewardTitle = rewardDoc.exists() ? rewardDoc.data().title : 'Recompensa';
+
       // Create redemption record
       const redemptionRef = doc(collection(db, 'redemptions'));
       batch.set(redemptionRef, {
@@ -487,13 +511,32 @@ export class FirestoreService {
       // Deduct gold from user
       const progressRef = doc(db, 'progress', userId);
       const progressDoc = await getDoc(progressRef);
-      
+
       if (progressDoc.exists()) {
         const currentProgress = progressDoc.data();
+        const currentGold = currentProgress.availableGold || 0;
+        const newGold = Math.max(0, currentGold - costGold);
+
         batch.update(progressRef, {
-          availableGold: Math.max(0, (currentProgress.availableGold || 0) - costGold),
+          availableGold: newGold,
           totalGoldSpent: (currentProgress.totalGoldSpent || 0) + costGold,
           updatedAt: serverTimestamp()
+        });
+
+        // Create gold transaction record
+        const transactionRef = doc(collection(db, 'goldTransactions'));
+        batch.set(transactionRef, {
+          userId,
+          amount: -costGold,
+          type: 'spent',
+          source: 'reward_redemption',
+          description: `Resgate de recompensa: ${rewardTitle}`,
+          relatedId: rewardId,
+          relatedTitle: rewardTitle,
+          metadata: { redemptionId: redemptionRef.id, status: 'pending' },
+          balanceBefore: currentGold,
+          balanceAfter: newGold,
+          createdAt: serverTimestamp()
         });
       }
 
@@ -527,13 +570,38 @@ export class FirestoreService {
       if (!approved) {
         const progressRef = doc(db, 'progress', redemptionData.userId);
         const progressDoc = await getDoc(progressRef);
-        
+
+        // Get reward details for transaction
+        const rewardRef = doc(db, 'rewards', redemptionData.rewardId);
+        const rewardDoc = await getDoc(rewardRef);
+        const rewardTitle = rewardDoc.exists() ? rewardDoc.data().title : 'Recompensa';
+
         if (progressDoc.exists()) {
           const currentProgress = progressDoc.data();
+          const currentGold = currentProgress.availableGold || 0;
+          const newGold = currentGold + redemptionData.costGold;
+
           batch.update(progressRef, {
-            availableGold: (currentProgress.availableGold || 0) + redemptionData.costGold,
+            availableGold: newGold,
             totalGoldSpent: Math.max(0, (currentProgress.totalGoldSpent || 0) - redemptionData.costGold),
             updatedAt: serverTimestamp()
+          });
+
+          // Create gold transaction record for refund
+          const transactionRef = doc(collection(db, 'goldTransactions'));
+          batch.set(transactionRef, {
+            userId: redemptionData.userId,
+            amount: redemptionData.costGold,
+            type: 'refund',
+            source: 'redemption_refund',
+            description: `Reembolso de resgate rejeitado: ${rewardTitle}`,
+            relatedId: redemptionData.rewardId,
+            relatedTitle: rewardTitle,
+            metadata: { redemptionId, rejectedBy: approvedBy },
+            balanceBefore: currentGold,
+            balanceAfter: newGold,
+            createdAt: serverTimestamp(),
+            createdBy: approvedBy
           });
         }
       } else {
@@ -1218,11 +1286,11 @@ export class FirestoreService {
       if (goldPenalty > 0 || allTasksBonusGold > 0) {
         const progressRef = doc(db, 'progress', userId);
         const progressDoc = await getDoc(progressRef);
-        
+
         if (progressDoc.exists()) {
           const currentProgress = progressDoc.data();
           const currentGold = currentProgress.availableGold || 0;
-          
+
           let newGold = currentGold;
           if (goldPenalty > 0) {
             newGold = Math.max(0, currentGold - goldPenalty); // Never go below 0
@@ -1230,13 +1298,53 @@ export class FirestoreService {
           if (allTasksBonusGold > 0) {
             newGold += allTasksBonusGold;
           }
-          
+
           await updateDoc(progressRef, {
             availableGold: newGold,
             totalGoldEarned: (currentProgress.totalGoldEarned || 0) + allTasksBonusGold,
             updatedAt: serverTimestamp()
           });
-          
+
+          // Create gold transaction records for penalties and bonuses
+          if (goldPenalty > 0) {
+            const penaltyTransactionRef = doc(collection(db, 'goldTransactions'));
+            await setDoc(penaltyTransactionRef, {
+              userId,
+              amount: -goldPenalty,
+              type: 'penalty',
+              source: 'daily_penalty',
+              description: `Penalidade diária: ${incompleteTasks} tarefas não concluídas`,
+              metadata: {
+                date: dateString,
+                tasksCompleted,
+                totalTasksAvailable,
+                incompleteTasks
+              },
+              balanceBefore: currentGold,
+              balanceAfter: goldPenalty > 0 && allTasksBonusGold === 0 ? Math.max(0, currentGold - goldPenalty) : currentGold - goldPenalty + allTasksBonusGold,
+              createdAt: serverTimestamp()
+            });
+          }
+
+          if (allTasksBonusGold > 0) {
+            const bonusTransactionRef = doc(collection(db, 'goldTransactions'));
+            await setDoc(bonusTransactionRef, {
+              userId,
+              amount: allTasksBonusGold,
+              type: 'bonus',
+              source: 'daily_bonus',
+              description: 'Bônus diário: Todas as tarefas concluídas!',
+              metadata: {
+                date: dateString,
+                tasksCompleted,
+                totalTasksAvailable
+              },
+              balanceBefore: goldPenalty > 0 ? Math.max(0, currentGold - goldPenalty) : currentGold,
+              balanceAfter: newGold,
+              createdAt: serverTimestamp()
+            });
+          }
+
           console.log('💰 FirestoreService: Applied daily adjustments:', {
             goldPenalty,
             allTasksBonusGold,
@@ -1806,5 +1914,232 @@ export class FirestoreService {
     );
 
     return unsubscribe;
+  }
+
+  // ========================================
+  // 💰 GOLD TRANSACTION MANAGEMENT
+  // ========================================
+
+  static async createGoldTransaction(
+    userId: string,
+    amount: number,
+    type: GoldTransaction['type'],
+    source: GoldTransaction['source'],
+    description: string,
+    options?: {
+      relatedId?: string;
+      relatedTitle?: string;
+      metadata?: Record<string, any>;
+      createdBy?: string;
+    }
+  ): Promise<string> {
+    try {
+      const progressRef = doc(db, 'progress', userId);
+      const progressDoc = await getDoc(progressRef);
+
+      if (!progressDoc.exists()) {
+        throw new Error('User progress not found');
+      }
+
+      const currentProgress = progressDoc.data();
+      const balanceBefore = currentProgress.availableGold || 0;
+      const balanceAfter = balanceBefore + amount;
+
+      const transactionRef = doc(collection(db, 'goldTransactions'));
+      const transactionData = {
+        userId,
+        amount,
+        type,
+        source,
+        description,
+        relatedId: options?.relatedId,
+        relatedTitle: options?.relatedTitle,
+        metadata: options?.metadata,
+        balanceBefore,
+        balanceAfter,
+        createdAt: serverTimestamp(),
+        createdBy: options?.createdBy
+      };
+
+      await setDoc(transactionRef, transactionData);
+      console.log('✅ FirestoreService: Gold transaction created:', {
+        id: transactionRef.id,
+        amount,
+        type,
+        source,
+        description
+      });
+
+      return transactionRef.id;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error creating gold transaction:', error);
+      throw error;
+    }
+  }
+
+  static async getGoldTransactionHistory(
+    userId: string,
+    options?: {
+      startDate?: Date;
+      endDate?: Date;
+      type?: GoldTransaction['type'];
+      source?: GoldTransaction['source'];
+      limitCount?: number;
+    }
+  ): Promise<GoldTransaction[]> {
+    try {
+      let q = query(
+        collection(db, 'goldTransactions'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+
+      if (options?.limitCount) {
+        q = query(q, limit(options.limitCount));
+      }
+
+      const snapshot = await getDocs(q);
+
+      let transactions = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          userId: data.userId,
+          amount: data.amount,
+          type: data.type,
+          source: data.source,
+          description: data.description,
+          relatedId: data.relatedId,
+          relatedTitle: data.relatedTitle,
+          metadata: data.metadata,
+          balanceBefore: data.balanceBefore,
+          balanceAfter: data.balanceAfter,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          createdBy: data.createdBy
+        } as GoldTransaction;
+      });
+
+      if (options?.startDate) {
+        transactions = transactions.filter(t => t.createdAt >= options.startDate!);
+      }
+
+      if (options?.endDate) {
+        transactions = transactions.filter(t => t.createdAt <= options.endDate!);
+      }
+
+      if (options?.type) {
+        transactions = transactions.filter(t => t.type === options.type);
+      }
+
+      if (options?.source) {
+        transactions = transactions.filter(t => t.source === options.source);
+      }
+
+      return transactions;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error getting gold transaction history:', error);
+      return [];
+    }
+  }
+
+  static subscribeToGoldTransactions(
+    userId: string,
+    onUpdate: (transactions: GoldTransaction[]) => void,
+    onError?: (error: any) => void
+  ): () => void {
+    try {
+      const transactionsQuery = query(
+        collection(db, 'goldTransactions'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc'),
+        limit(100)
+      );
+
+      return onSnapshot(
+        transactionsQuery,
+        (snapshot) => {
+          const transactions = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              userId: data.userId,
+              amount: data.amount,
+              type: data.type,
+              source: data.source,
+              description: data.description,
+              relatedId: data.relatedId,
+              relatedTitle: data.relatedTitle,
+              metadata: data.metadata,
+              balanceBefore: data.balanceBefore,
+              balanceAfter: data.balanceAfter,
+              createdAt: data.createdAt?.toDate() || new Date(),
+              createdBy: data.createdBy
+            } as GoldTransaction;
+          });
+          onUpdate(transactions);
+        },
+        (error) => {
+          console.error('❌ FirestoreService: Error in gold transactions listener:', error);
+          if (onError) onError(error);
+        }
+      );
+    } catch (error) {
+      console.error('❌ FirestoreService: Error setting up gold transactions listener:', error);
+      if (onError) onError(error);
+      return () => {};
+    }
+  }
+
+  static async adjustGoldManually(
+    userId: string,
+    amount: number,
+    reason: string,
+    adminUid: string
+  ): Promise<void> {
+    try {
+      const progressRef = doc(db, 'progress', userId);
+      const progressDoc = await getDoc(progressRef);
+
+      if (!progressDoc.exists()) {
+        throw new Error('User progress not found');
+      }
+
+      const currentProgress = progressDoc.data();
+      const currentGold = currentProgress.availableGold || 0;
+      const newGold = Math.max(0, currentGold + amount);
+
+      const batch = writeBatch(db);
+
+      batch.update(progressRef, {
+        availableGold: newGold,
+        totalGoldEarned: amount > 0 ? (currentProgress.totalGoldEarned || 0) + amount : currentProgress.totalGoldEarned,
+        updatedAt: serverTimestamp()
+      });
+
+      const transactionRef = doc(collection(db, 'goldTransactions'));
+      batch.set(transactionRef, {
+        userId,
+        amount,
+        type: 'adjustment',
+        source: 'admin_adjustment',
+        description: `Ajuste manual: ${reason}`,
+        metadata: { reason, adminUid },
+        balanceBefore: currentGold,
+        balanceAfter: newGold,
+        createdAt: serverTimestamp(),
+        createdBy: adminUid
+      });
+
+      await batch.commit();
+      console.log('✅ FirestoreService: Manual gold adjustment completed:', {
+        amount,
+        reason,
+        oldBalance: currentGold,
+        newBalance: newGold
+      });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error adjusting gold manually:', error);
+      throw error;
+    }
   }
 }

@@ -16,6 +16,7 @@ import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 import BirthdayManager from './BirthdayManager';
 import DailyRewardsHistory from './DailyRewardsHistory';
 import NotesManager from './NotesManager';
+import GoldHistory from './GoldHistory';
 
 type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system';
 
@@ -111,7 +112,7 @@ const ParentPanel: React.FC = () => {
             <TaskHistory tasks={tasks} />
           )}
           {activeTab === 'rewardsHistory' && (
-            <DailyRewardsHistory />
+            <GoldHistory />
           )}
           {activeTab === 'notes' && (
             <NotesManager />
