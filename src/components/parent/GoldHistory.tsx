@@ -26,6 +26,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { GoldTransaction } from '../../types';
 import toast from 'react-hot-toast';
+import MigrationButton from './MigrationButton';
 
 type PeriodFilter = 'today' | '7days' | '30days' | 'all' | 'custom';
 type TypeFilter = 'all' | 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment';
@@ -223,6 +224,9 @@ const GoldHistory: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Migration Button */}
+      <MigrationButton />
+
       {/* Header with Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">

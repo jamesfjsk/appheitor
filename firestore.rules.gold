@@ -1,0 +1,149 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isChild() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'child';
+    }
+
+    function getManagedChildId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.managedChildId;
+    }
+
+    // ========================================
+    // 💰 GOLD TRANSACTIONS
+    // ========================================
+    match /goldTransactions/{transactionId} {
+      // Admins podem ler todas as transações do filho gerenciado
+      allow read: if isAuthenticated() && (
+        (isAdmin() && resource.data.userId == getManagedChildId()) ||
+        (isChild() && resource.data.userId == request.auth.uid)
+      );
+
+      // Transações só podem ser criadas pelo sistema
+      // Para ajustes manuais, use FirestoreService.adjustGoldManually()
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ========================================
+    // OUTRAS COLLECTIONS (mantenha suas regras existentes aqui)
+    // ========================================
+
+    // Users
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Progress
+    match /progress/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Tasks
+    match /tasks/{taskId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Rewards
+    match /rewards/{rewardId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Redemptions
+    match /redemptions/{redemptionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Task Completions
+    match /taskCompletions/{completionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Daily Progress
+    match /dailyProgress/{progressId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Flash Reminders
+    match /flashReminders/{reminderId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Achievements
+    match /achievements/{achievementId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // User Achievements
+    match /userAchievements/{userAchievementId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Surprise Mission Config
+    match /surpriseMissionConfig/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Daily Surprise Mission Status
+    match /dailySurpriseMissionStatus/{statusId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Daily Quizzes
+    match /dailyQuizzes/{quizId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Birthday Events
+    match /birthdayEvents/{eventId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Birthday Config
+    match /birthdayConfig/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Notes
+    match /notes/{noteId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}
