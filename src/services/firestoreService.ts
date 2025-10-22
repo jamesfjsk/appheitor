@@ -1117,8 +1117,36 @@ export class FirestoreService {
 
   static async processDailySummary(userId: string, date: Date): Promise<void> {
     try {
+      // 🚨 TEMPORARY: Daily penalties system is DISABLED
+      // No gold will be deducted for incomplete tasks
+      const DAILY_PENALTIES_ENABLED = false;
+
       const dateString = date.toISOString().split('T')[0];
       console.log('🔄 FirestoreService: Processing daily summary for:', dateString);
+
+      if (!DAILY_PENALTIES_ENABLED) {
+        console.log('⚠️ FirestoreService: Daily penalties system is DISABLED - skipping penalty calculations');
+
+        // Still save daily progress for tracking, but without penalties
+        const completions = await this.getTaskCompletionHistory(userId, date, date);
+        const dailyProgressRef = doc(db, 'dailyProgress', `${userId}_${dateString}`);
+        await setDoc(dailyProgressRef, {
+          userId,
+          date: dateString,
+          xpEarned: completions.reduce((sum, c) => sum + c.xpEarned, 0),
+          goldEarned: completions.reduce((sum, c) => sum + c.goldEarned, 0),
+          tasksCompleted: completions.length,
+          totalTasksAvailable: 0,
+          goldPenalty: 0, // NO PENALTIES
+          allTasksBonusGold: 0, // NO BONUS EITHER (to keep it fair)
+          summaryProcessed: true,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        console.log('✅ FirestoreService: Daily progress saved (penalties disabled)');
+        return;
+      }
       
       // Get task completions for the day
       const completions = await this.getTaskCompletionHistory(userId, date, date);
