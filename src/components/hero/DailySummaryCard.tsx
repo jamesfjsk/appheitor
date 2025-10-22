@@ -31,40 +31,13 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = () => {
             </h3>
 
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-yellow-300">
-              <p className="text-yellow-900 font-semibold mb-3">
+              <p className="text-yellow-900 font-semibold">
                 ⚠️ Temporariamente Desativado
               </p>
 
-              <div className="text-sm text-gray-700 space-y-2">
-                <p>
-                  O sistema de penalidades e bônus diários está passando por manutenção.
-                </p>
-
-                <div className="bg-green-100 border border-green-300 rounded-lg p-3 mt-3">
-                  <p className="text-green-800 font-semibold flex items-center gap-2">
-                    ✅ Seu Gold está PROTEGIDO
-                  </p>
-                  <p className="text-green-700 text-xs mt-1">
-                    Você NÃO perderá gold por tarefas incompletas enquanto o sistema estiver em manutenção.
-                  </p>
-                </div>
-
-                <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mt-2">
-                  <p className="text-blue-800 font-semibold">
-                    📊 O que continua funcionando:
-                  </p>
-                  <ul className="text-blue-700 text-xs mt-1 space-y-1 list-disc list-inside">
-                    <li>Ganhar XP e Gold ao completar tarefas</li>
-                    <li>Resgatar recompensas (com 5 tarefas diárias)</li>
-                    <li>Sistema de níveis e conquistas</li>
-                    <li>Todas as tarefas e missões</li>
-                  </ul>
-                </div>
-
-                <p className="text-xs text-gray-600 mt-3 italic">
-                  O sistema voltará em breve com melhorias! Continue completando suas missões normalmente.
-                </p>
-              </div>
+              <p className="text-sm text-gray-700 mt-2">
+                O sistema de penalidades e bônus diários está passando por manutenção.
+              </p>
             </div>
           </div>
         </div>
