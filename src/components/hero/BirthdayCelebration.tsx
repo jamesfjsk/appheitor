@@ -87,10 +87,34 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
         setCelebrationStep(1);
       } else if (celebrationStep === 1) {
         // Step 2: Give special rewards
+        let totalGold = 0;
+        let totalXP = 0;
+
         for (const reward of birthdayRewards) {
           await adjustUserXP(reward.xp);
           await adjustUserGold(reward.gold);
+          totalGold += reward.gold;
+          totalXP += reward.xp;
         }
+
+        // Create gold transaction for birthday rewards
+        if (childUid && totalGold > 0) {
+          await FirestoreService.createGoldTransaction(
+            childUid,
+            totalGold,
+            'bonus',
+            'birthday',
+            `🎂 Presente de aniversário: ${currentAge} anos!`,
+            {
+              metadata: {
+                age: currentAge,
+                xpEarned: totalXP,
+                rewards: birthdayRewards
+              }
+            }
+          );
+        }
+
         playLevelUp();
         setCelebrationStep(2);
       } else if (celebrationStep === 2) {

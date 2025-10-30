@@ -325,15 +325,14 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
       
       if (xpReward > 0) {
         await adjustUserXP(xpReward);
-        await adjustUserGold(goldReward);
         playTaskComplete();
-        
+
         if (correctAnswers >= 4) {
           playLevelUp(); // Special sound for high scores
         }
       }
-      
-      // Mark quiz as completed for today
+
+      // Mark quiz as completed for today AND award gold with transaction
       if (childUid) {
         const today = getTodayBrazil();
         await FirestoreService.markQuizCompletedToday(childUid, today, {
@@ -343,6 +342,28 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
           goldEarned: goldReward,
           completedAt: new Date()
         });
+
+        // Award gold and create transaction
+        if (goldReward > 0) {
+          await adjustUserGold(goldReward);
+
+          // Create gold transaction record
+          await FirestoreService.createGoldTransaction(
+            childUid,
+            goldReward,
+            'earned',
+            'quiz',
+            `Quiz diário: ${correctAnswers} de ${questions.length} acertos`,
+            {
+              metadata: {
+                score: correctAnswers,
+                totalQuestions: questions.length,
+                xpEarned: xpReward,
+                date: today
+              }
+            }
+          );
+        }
       }
       
       // Don't close immediately, let user see results

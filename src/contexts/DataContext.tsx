@@ -665,7 +665,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
   const completeSurpriseMission = useCallback(async (score: number, totalQuestions: number, xpEarned: number, goldEarned: number) => {
     if (!childUid) throw new Error('Child UID não definido');
-    
+
     try {
       const today = getTodayBrazil();
 
@@ -676,20 +676,40 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         goldEarned,
         completedAt: new Date()
       });
-      
+
       // Store previous XP for level up check
       const previousXP = progress.totalXP || 0;
       const newTotalXP = (progress.totalXP || 0) + xpEarned;
       const newAvailableGold = (progress.availableGold || 0) + goldEarned;
       const newTotalGoldEarned = (progress.totalGoldEarned || 0) + goldEarned;
-      
+
       await FirestoreService.updateUserProgress(childUid, {
         totalXP: newTotalXP,
         availableGold: newAvailableGold,
         totalGoldEarned: newTotalGoldEarned,
         updatedAt: new Date()
       });
-      
+
+      // Create gold transaction for surprise mission
+      if (goldEarned > 0) {
+        await FirestoreService.createGoldTransaction(
+          childUid,
+          goldEarned,
+          'earned',
+          'surprise_mission',
+          `⚡ Missão Surpresa: ${score} de ${totalQuestions} acertos`,
+          {
+            metadata: {
+              score,
+              totalQuestions,
+              xpEarned,
+              accuracy: Math.round((score / totalQuestions) * 100),
+              date: today
+            }
+          }
+        );
+      }
+
       // Check for level up
       const levelUpCheck = checkLevelUp(previousXP, newTotalXP);
       if (levelUpCheck.leveledUp) {
@@ -698,15 +718,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           duration: 5000
         });
       }
-      
+
       setIsSurpriseMissionCompletedToday(true);
       await checkSurpriseMissionStatus();
-      
+
       // Trigger achievement check
       setTimeout(() => {
         checkAchievements();
       }, 1000);
-      
+
       toast.success(`🎯 Missão Surpresa completada! +${xpEarned} XP, +${goldEarned} Gold!`);
     } catch (error: any) {
       console.error('❌ Erro ao completar missão surpresa:', error);
@@ -796,18 +816,38 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         claimedAt: new Date(),
         updatedAt: new Date()
       });
-      
+
       const newTotalXP = (progress.totalXP || 0) + achievement.xpReward;
       const newAvailableGold = (progress.availableGold || 0) + achievement.goldReward;
       const newTotalGoldEarned = (progress.totalGoldEarned || 0) + achievement.goldReward;
-      
+
       await FirestoreService.updateUserProgress(childUid, {
         totalXP: newTotalXP,
         availableGold: newAvailableGold,
         totalGoldEarned: newTotalGoldEarned,
         updatedAt: new Date()
       });
-      
+
+      // Create gold transaction for achievement reward
+      if (achievement.goldReward > 0) {
+        await FirestoreService.createGoldTransaction(
+          childUid,
+          achievement.goldReward,
+          'earned',
+          'achievement',
+          `🏆 Conquista desbloqueada: ${achievement.title}`,
+          {
+            relatedId: achievement.id,
+            relatedTitle: achievement.title,
+            metadata: {
+              xpReward: achievement.xpReward,
+              tier: achievement.tier,
+              type: achievement.type
+            }
+          }
+        );
+      }
+
       toast.success(`🏆 Conquista resgatada! +${achievement.xpReward} XP, +${achievement.goldReward} Gold!`, {
         duration: 5000
       });
