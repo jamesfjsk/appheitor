@@ -169,6 +169,25 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
 
       {/* Controles e Informações */}
       <div className="flex items-center gap-3 flex-wrap justify-center lg:justify-end">
+        {/* Streak */}
+        {progress.streak > 0 && (
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            animate={{
+              scale: [1, 1.02, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-2 rounded-full font-bold shadow-lg text-sm flex items-center gap-1"
+            title={`Maior sequência: ${progress.longestStreak || 0} dias`}
+          >
+            🔥 {progress.streak} {progress.streak === 1 ? 'dia' : 'dias'}
+          </motion.div>
+        )}
+
         {/* Pontos Disponíveis */}
         <motion.div
           whileHover={{ scale: 1.05 }}
@@ -176,7 +195,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
         >
           🪙 {progress.availableGold || 0} Gold
         </motion.div>
-        
+
         {/* Nível */}
         <motion.div
           whileHover={{ scale: 1.05 }}

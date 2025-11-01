@@ -312,22 +312,46 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       );
       
       await FirestoreService.completeTaskWithRewards(
-        taskId, 
-        childUid, 
-        task.xp || 10, 
+        taskId,
+        childUid,
+        task.xp || 10,
         task.gold || 5
       );
-      
+
+      // Update streak (check if first task of the day)
+      try {
+        const streakResult = await FirestoreService.updateStreak(childUid);
+
+        if (streakResult.streakIncreased) {
+          setTimeout(() => {
+            toast.success(`🔥 Sequência de ${streakResult.streak} dias!`, {
+              duration: 4000,
+              icon: '🔥'
+            });
+          }, 1000);
+        }
+
+        if (streakResult.streakReset) {
+          setTimeout(() => {
+            toast('💔 Sequência resetada. Comece uma nova!', {
+              duration: 4000
+            });
+          }, 1000);
+        }
+      } catch (error) {
+        console.error('❌ Error updating streak:', error);
+      }
+
       // Check for level up
       const newXP = previousXP + (task.xp || 10);
       const levelUpCheck = checkLevelUp(previousXP, newXP);
-      
+
       if (levelUpCheck.leveledUp) {
         playLevelUp();
         toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
           duration: 5000
         });
-        
+
         // Check for newly unlocked rewards
         const newlyUnlockedRewards = getRewardsUnlockedAtLevel(levelUpCheck.newLevel);
         if (newlyUnlockedRewards.length > 0) {
@@ -338,12 +362,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           }, 2000);
         }
       }
-      
+
       // Trigger achievement check after task completion
       setTimeout(() => {
         checkAchievements();
-      }, 1000);
-      
+      }, 1500);
+
       toast.success(`+${task.xp || 10} XP, +${task.gold || 5} Gold! Tarefa completada!`);
     } catch (error: any) {
       console.error('❌ Erro ao completar tarefa:', error);
@@ -1179,8 +1203,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         // ⚡ DAILY PROCESSING: Process penalties/bonuses and reset tasks on first load
         console.log('🔄 DataContext: Initiating daily processing...');
 
-        // First, process any unprocessed daily summaries (penalties/bonuses)
-        FirestoreService.processUnprocessedDays(childUid)
+        // First, check and reset streak if user was inactive
+        FirestoreService.checkAndResetStreakIfNeeded(childUid)
+          .then(() => {
+            console.log('✅ DataContext: Streak check completed');
+
+            // Then process any unprocessed daily summaries (penalties/bonuses)
+            return FirestoreService.processUnprocessedDays(childUid);
+          })
           .then(() => {
             console.log('✅ DataContext: Daily summaries processed');
 

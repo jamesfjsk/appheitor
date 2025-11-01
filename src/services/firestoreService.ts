@@ -332,6 +332,157 @@ export class FirestoreService {
     }
   }
 
+  // ========================================
+  // 🔥 STREAK SYSTEM
+  // ========================================
+
+  static async updateStreak(userId: string): Promise<{
+    streak: number;
+    longestStreak: number;
+    streakIncreased: boolean;
+    streakReset: boolean;
+  }> {
+    try {
+      const progressRef = doc(db, 'progress', userId);
+      const progressDoc = await getDoc(progressRef);
+
+      if (!progressDoc.exists()) {
+        console.warn('⚠️ FirestoreService: Progress document not found for streak update');
+        return { streak: 1, longestStreak: 1, streakIncreased: true, streakReset: false };
+      }
+
+      const data = progressDoc.data();
+      const lastActivity = data.lastActivityDate?.toDate();
+      const currentStreak = data.streak || 0;
+      const currentLongestStreak = data.longestStreak || 0;
+
+      // Get today's start time in Brazil timezone
+      const todayStart = getTodayStartBrazil();
+      const yesterdayStart = new Date(todayStart);
+      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+      let newStreak = 1;
+      let streakIncreased = false;
+      let streakReset = false;
+
+      if (lastActivity) {
+        // Normalize lastActivity to start of day for comparison
+        const lastActivityStart = new Date(lastActivity);
+        lastActivityStart.setHours(0, 0, 0, 0);
+
+        const daysSinceActivity = Math.floor(
+          (todayStart.getTime() - lastActivityStart.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        console.log('🔥 Streak calculation:', {
+          lastActivity: lastActivity.toISOString(),
+          lastActivityStart: lastActivityStart.toISOString(),
+          todayStart: todayStart.toISOString(),
+          daysSinceActivity,
+          currentStreak
+        });
+
+        if (daysSinceActivity === 0) {
+          // Same day - maintain current streak
+          newStreak = Math.max(currentStreak, 1);
+          console.log('📅 Same day activity - maintaining streak:', newStreak);
+        } else if (daysSinceActivity === 1) {
+          // Consecutive day - increment streak
+          newStreak = currentStreak + 1;
+          streakIncreased = true;
+          console.log('🔥 Consecutive day! Streak increased:', currentStreak, '→', newStreak);
+        } else {
+          // Missed days - reset to 1
+          newStreak = 1;
+          streakReset = true;
+          console.log('💔 Streak broken! Days missed:', daysSinceActivity, '- resetting to 1');
+        }
+      } else {
+        // First activity ever
+        newStreak = 1;
+        streakIncreased = true;
+        console.log('🎉 First activity ever! Starting streak at 1');
+      }
+
+      const newLongestStreak = Math.max(currentLongestStreak, newStreak);
+
+      // Update progress with new streak values
+      await updateDoc(progressRef, {
+        streak: newStreak,
+        longestStreak: newLongestStreak,
+        lastActivityDate: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      console.log('✅ Streak updated:', {
+        oldStreak: currentStreak,
+        newStreak,
+        longestStreak: newLongestStreak,
+        streakIncreased,
+        streakReset
+      });
+
+      return {
+        streak: newStreak,
+        longestStreak: newLongestStreak,
+        streakIncreased,
+        streakReset
+      };
+    } catch (error) {
+      console.error('❌ FirestoreService: Error updating streak:', error);
+      throw error;
+    }
+  }
+
+  static async checkAndResetStreakIfNeeded(userId: string): Promise<void> {
+    try {
+      const progressRef = doc(db, 'progress', userId);
+      const progressDoc = await getDoc(progressRef);
+
+      if (!progressDoc.exists()) {
+        return;
+      }
+
+      const data = progressDoc.data();
+      const lastActivity = data.lastActivityDate?.toDate();
+      const currentStreak = data.streak || 0;
+
+      if (!lastActivity || currentStreak === 0) {
+        return;
+      }
+
+      const todayStart = getTodayStartBrazil();
+      const lastActivityStart = new Date(lastActivity);
+      lastActivityStart.setHours(0, 0, 0, 0);
+
+      const daysSinceActivity = Math.floor(
+        (todayStart.getTime() - lastActivityStart.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      // If more than 1 day has passed, reset streak
+      if (daysSinceActivity > 1) {
+        console.log('💔 Resetting streak due to inactivity:', {
+          currentStreak,
+          daysSinceActivity,
+          lastActivity: lastActivity.toISOString()
+        });
+
+        await updateDoc(progressRef, {
+          streak: 0,
+          updatedAt: serverTimestamp()
+        });
+
+        console.log('✅ Streak reset to 0 due to inactivity');
+      }
+    } catch (error) {
+      console.error('❌ FirestoreService: Error checking streak:', error);
+    }
+  }
+
+  // ========================================
+  // 🔥 TASK COMPLETION WITH REWARDS
+  // ========================================
+
   static async completeTaskWithRewards(taskId: string, userId: string, xpReward: number, goldReward: number): Promise<void> {
     try {
       // Get current progress first
