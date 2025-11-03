@@ -2446,7 +2446,7 @@ export class FirestoreService {
     }
   }
 
-  static async completePunishmentTask(punishmentId: string): Promise<void> {
+  static async completePunishmentTask(punishmentId: string, taskId: string, taskTitle: string): Promise<void> {
     try {
       const punishmentRef = doc(db, 'punishmentMode', punishmentId);
       const punishmentDoc = await getDoc(punishmentRef);
@@ -2491,7 +2491,9 @@ export class FirestoreService {
         punishmentId,
         userId: data.userId,
         completedAt: serverTimestamp(),
-        taskNumber: newTasksCompleted
+        taskNumber: newTasksCompleted,
+        taskId,
+        taskTitle
       });
 
       console.log('✅ FirestoreService: Punishment task completed:', {
@@ -2538,6 +2540,74 @@ export class FirestoreService {
     } catch (error) {
       console.error('❌ FirestoreService: Error checking expired punishments:', error);
       throw error;
+    }
+  }
+
+  static async getPunishmentTaskHistory(punishmentId: string): Promise<any[]> {
+    try {
+      const historyQuery = query(
+        collection(db, 'punishmentTaskCompletions'),
+        where('punishmentId', '==', punishmentId),
+        orderBy('completedAt', 'desc')
+      );
+
+      const snapshot = await getDocs(historyQuery);
+      return snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          punishmentId: data.punishmentId,
+          userId: data.userId,
+          completedAt: data.completedAt?.toDate() || new Date(),
+          taskNumber: data.taskNumber,
+          taskId: data.taskId,
+          taskTitle: data.taskTitle
+        };
+      });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error getting punishment task history:', error);
+      return [];
+    }
+  }
+
+  static subscribeToPunishmentTaskHistory(
+    punishmentId: string,
+    onUpdate: (history: any[]) => void,
+    onError?: (error: any) => void
+  ): () => void {
+    try {
+      const historyQuery = query(
+        collection(db, 'punishmentTaskCompletions'),
+        where('punishmentId', '==', punishmentId),
+        orderBy('completedAt', 'desc')
+      );
+
+      return onSnapshot(
+        historyQuery,
+        (snapshot) => {
+          const history = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              punishmentId: data.punishmentId,
+              userId: data.userId,
+              completedAt: data.completedAt?.toDate() || new Date(),
+              taskNumber: data.taskNumber,
+              taskId: data.taskId,
+              taskTitle: data.taskTitle
+            };
+          });
+          onUpdate(history);
+        },
+        (error) => {
+          console.error('❌ FirestoreService: Error in punishment history listener:', error);
+          if (onError) onError(error);
+        }
+      );
+    } catch (error) {
+      console.error('❌ FirestoreService: Error setting up punishment history listener:', error);
+      if (onError) onError(error);
+      return () => {};
     }
   }
 }

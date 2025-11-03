@@ -270,4 +270,6 @@ export interface PunishmentTaskCompletion {
   userId: string; // Child UID
   completedAt: Date;
   taskNumber: number; // 1-30
+  taskId: string; // ID of the task that was completed
+  taskTitle: string; // Title of the task for quick reference
 }

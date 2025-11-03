@@ -13,7 +13,7 @@ interface PunishmentContextType {
   minutesRemaining: number;
   secondsRemaining: number;
   tasksRemaining: number;
-  completePunishmentTask: () => Promise<void>;
+  completePunishmentTask: (taskId: string, taskTitle: string) => Promise<void>;
   checkAndDeactivateIfExpired: () => Promise<void>;
 }
 
@@ -92,13 +92,13 @@ export const PunishmentProvider: React.FC<PunishmentProviderProps> = ({ children
     }
   }, [punishment]);
 
-  const completePunishmentTask = useCallback(async () => {
+  const completePunishmentTask = useCallback(async (taskId: string, taskTitle: string) => {
     if (!punishment || !punishment.isActive) {
       throw new Error('Não há punição ativa');
     }
 
     try {
-      await FirestoreService.completePunishmentTask(punishment.id);
+      await FirestoreService.completePunishmentTask(punishment.id, taskId, taskTitle);
 
       const newTasksCompleted = (punishment.tasksCompleted || 0) + 1;
 
