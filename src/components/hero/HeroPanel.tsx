@@ -4,8 +4,10 @@ import { Zap as Lightning, Target, Star, Play } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { useSound } from '../../contexts/SoundContext';
+import { usePunishment } from '../../contexts/PunishmentContext';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 import HeroHeader from './HeroHeader';
+import PunishmentModeScreen from './PunishmentModeScreen';
 import ProgressBar from './ProgressBar';
 import DailyChecklist from './DailyChecklist';
 import DailySummaryCard from './DailySummaryCard';
@@ -25,6 +27,7 @@ const HeroPanel: React.FC = () => {
   const { tasks, progress, loading, surpriseMissionConfig, isSurpriseMissionCompletedToday } = useData();
   const { requestPermission, permission } = useNotifications();
   const { isSoundEnabled, toggleSound } = useSound();
+  const { isPunished } = usePunishment();
   
   // Calculate level system based on current XP
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
@@ -131,6 +134,10 @@ const HeroPanel: React.FC = () => {
         </div>
       </div>
     );
+  }
+
+  if (isPunished) {
+    return <PunishmentModeScreen />;
   }
 
   return (

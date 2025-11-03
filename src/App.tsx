@@ -6,6 +6,7 @@ import { DataProvider } from './contexts/DataContext';
 import { OfflineProvider } from './contexts/OfflineContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SoundProvider } from './contexts/SoundContext';
+import { PunishmentProvider } from './contexts/PunishmentContext';
 import LoginScreen from './components/auth/LoginScreen';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import HeroPanel from './components/hero/HeroPanel';
@@ -41,7 +42,8 @@ function App() {
           <AuthProvider>
             <NotificationProvider>
               <DataProvider>
-                <Router>
+                <PunishmentProvider>
+                  <Router>
                   <div className="min-h-screen bg-white">
                     <OfflineBanner />
                     <Routes>
@@ -77,7 +79,8 @@ function App() {
                     }}
                   />
                   <ChatFlashGPT />
-                </Router>
+                  </Router>
+                </PunishmentProvider>
               </DataProvider>
             </NotificationProvider>
           </AuthProvider>

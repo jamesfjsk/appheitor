@@ -601,9 +601,113 @@ const AdminControls: React.FC = () => {
         </div>
       </div>
 
-      {/* Controles Especiais */}
-      <div className="flex flex-wrap gap-2 pt-6 mt-6 border-t border-gray-200">
-        {/* Removed block/unblock rewards - not implemented in current system */}
+      {/* Modo Punição */}
+      <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h4 className="font-semibold text-red-900 mb-1 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Modo Punição (Desobediência/Desrespeito)
+            </h4>
+            <p className="text-sm text-red-700">
+              Ativar modo de punição de 7 dias ou 30 tarefas
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-red-900 mb-1">
+              Motivo da Punição
+            </label>
+            <input
+              type="text"
+              placeholder="Ex: Desobediência, desrespeito, falta de responsabilidade..."
+              className="w-full px-3 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              id="punishment-reason"
+            />
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={async () => {
+              if (!childUid) return;
+
+              const reasonInput = document.getElementById('punishment-reason') as HTMLInputElement;
+              const reason = reasonInput?.value?.trim();
+
+              if (!reason) {
+                toast.error('Por favor, informe o motivo da punição');
+                return;
+              }
+
+              const confirmed = window.confirm(
+                `⚠️ ATENÇÃO: Isso irá ativar o MODO PUNIÇÃO!\n\n` +
+                `O painel do Heitor será BLOQUEADO completamente até que ele:\n` +
+                `• Complete 30 tarefas (1 por hora)\n` +
+                `• OU aguarde 7 dias\n\n` +
+                `Motivo: ${reason}\n\n` +
+                `Tem certeza que deseja continuar?`
+              );
+
+              if (!confirmed) return;
+
+              setIsProcessing(true);
+              try {
+                await FirestoreService.activatePunishmentMode(childUid, user?.userId || '', reason);
+                toast.success('🚨 Modo Punição ativado com sucesso!');
+                reasonInput.value = '';
+              } catch (error: any) {
+                console.error('❌ Erro ao ativar modo punição:', error);
+                toast.error('Erro ao ativar modo punição');
+              } finally {
+                setIsProcessing(false);
+              }
+            }}
+            disabled={isProcessing}
+            className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-lg"
+          >
+            <AlertTriangle className="w-5 h-5" />
+            {isProcessing ? 'Ativando...' : 'Ativar Modo Punição'}
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={async () => {
+              if (!childUid) return;
+
+              const confirmed = window.confirm(
+                `Deseja DESATIVAR o Modo Punição?\n\n` +
+                `Isso irá restaurar imediatamente o acesso ao painel.`
+              );
+
+              if (!confirmed) return;
+
+              setIsProcessing(true);
+              try {
+                const activePunishment = await FirestoreService.getActivePunishment(childUid);
+                if (activePunishment) {
+                  await FirestoreService.deactivatePunishmentMode(activePunishment.id, 'admin_override');
+                  toast.success('✅ Modo Punição desativado!');
+                } else {
+                  toast('Não há punição ativa no momento');
+                }
+              } catch (error: any) {
+                console.error('❌ Erro ao desativar modo punição:', error);
+                toast.error('Erro ao desativar modo punição');
+              } finally {
+                setIsProcessing(false);
+              }
+            }}
+            disabled={isProcessing}
+            className="w-full px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <RotateCcw className="w-5 h-5" />
+            {isProcessing ? 'Desativando...' : 'Desativar Modo Punição (Override)'}
+          </motion.button>
+        </div>
       </div>
 
       {/* Reset Completo */}

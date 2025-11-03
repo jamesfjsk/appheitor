@@ -246,3 +246,28 @@ export interface GoldTransaction {
   createdAt: Date;
   createdBy?: string; // Admin UID for manual adjustments
 }
+
+export interface PunishmentMode {
+  id: string;
+  userId: string; // Child UID
+  isActive: boolean;
+  startDate: Date;
+  endDate: Date; // 7 days from startDate
+  tasksCompleted: number;
+  tasksRequired: number; // Always 30
+  activatedBy: string; // Admin UID
+  reason: string;
+  lastTaskCompletedAt?: Date;
+  deactivatedAt?: Date;
+  deactivatedReason?: 'time_completed' | 'tasks_completed' | 'admin_override';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PunishmentTaskCompletion {
+  id: string;
+  punishmentId: string;
+  userId: string; // Child UID
+  completedAt: Date;
+  taskNumber: number; // 1-30
+}

@@ -2293,4 +2293,250 @@ export class FirestoreService {
       throw error;
     }
   }
+
+  // ========================================
+  // 🔥 PUNISHMENT MODE MANAGEMENT
+  // ========================================
+
+  static async activatePunishmentMode(
+    userId: string,
+    adminUid: string,
+    reason: string
+  ): Promise<string> {
+    try {
+      const punishmentRef = doc(collection(db, 'punishmentMode'));
+      const startDate = new Date();
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+
+      const punishmentData = {
+        userId,
+        isActive: true,
+        startDate: Timestamp.fromDate(startDate),
+        endDate: Timestamp.fromDate(endDate),
+        tasksCompleted: 0,
+        tasksRequired: 30,
+        activatedBy: adminUid,
+        reason,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      await setDoc(punishmentRef, punishmentData);
+      console.log('✅ FirestoreService: Punishment mode activated:', punishmentRef.id);
+      return punishmentRef.id;
+    } catch (error) {
+      console.error('❌ FirestoreService: Error activating punishment mode:', error);
+      throw error;
+    }
+  }
+
+  static async deactivatePunishmentMode(
+    punishmentId: string,
+    reason: 'time_completed' | 'tasks_completed' | 'admin_override'
+  ): Promise<void> {
+    try {
+      const punishmentRef = doc(db, 'punishmentMode', punishmentId);
+      await updateDoc(punishmentRef, {
+        isActive: false,
+        deactivatedAt: serverTimestamp(),
+        deactivatedReason: reason,
+        updatedAt: serverTimestamp()
+      });
+      console.log('✅ FirestoreService: Punishment mode deactivated:', { punishmentId, reason });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error deactivating punishment mode:', error);
+      throw error;
+    }
+  }
+
+  static async getActivePunishment(userId: string): Promise<any | null> {
+    try {
+      const punishmentsQuery = query(
+        collection(db, 'punishmentMode'),
+        where('userId', '==', userId),
+        where('isActive', '==', true),
+        orderBy('createdAt', 'desc'),
+        limit(1)
+      );
+
+      const snapshot = await getDocs(punishmentsQuery);
+      if (snapshot.empty) {
+        return null;
+      }
+
+      const doc = snapshot.docs[0];
+      const data = doc.data();
+
+      return {
+        id: doc.id,
+        userId: data.userId,
+        isActive: data.isActive,
+        startDate: data.startDate?.toDate() || new Date(),
+        endDate: data.endDate?.toDate() || new Date(),
+        tasksCompleted: data.tasksCompleted || 0,
+        tasksRequired: data.tasksRequired || 30,
+        activatedBy: data.activatedBy,
+        reason: data.reason,
+        lastTaskCompletedAt: data.lastTaskCompletedAt?.toDate(),
+        deactivatedAt: data.deactivatedAt?.toDate(),
+        deactivatedReason: data.deactivatedReason,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date()
+      };
+    } catch (error) {
+      console.error('❌ FirestoreService: Error getting active punishment:', error);
+      throw error;
+    }
+  }
+
+  static subscribeToActivePunishment(
+    userId: string,
+    onUpdate: (punishment: any | null) => void,
+    onError?: (error: any) => void
+  ): () => void {
+    try {
+      const punishmentsQuery = query(
+        collection(db, 'punishmentMode'),
+        where('userId', '==', userId),
+        where('isActive', '==', true),
+        orderBy('createdAt', 'desc'),
+        limit(1)
+      );
+
+      return onSnapshot(
+        punishmentsQuery,
+        (snapshot) => {
+          if (snapshot.empty) {
+            onUpdate(null);
+            return;
+          }
+
+          const doc = snapshot.docs[0];
+          const data = doc.data();
+
+          const punishment = {
+            id: doc.id,
+            userId: data.userId,
+            isActive: data.isActive,
+            startDate: data.startDate?.toDate() || new Date(),
+            endDate: data.endDate?.toDate() || new Date(),
+            tasksCompleted: data.tasksCompleted || 0,
+            tasksRequired: data.tasksRequired || 30,
+            activatedBy: data.activatedBy,
+            reason: data.reason,
+            lastTaskCompletedAt: data.lastTaskCompletedAt?.toDate(),
+            deactivatedAt: data.deactivatedAt?.toDate(),
+            deactivatedReason: data.deactivatedReason,
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: data.updatedAt?.toDate() || new Date()
+          };
+
+          onUpdate(punishment);
+        },
+        (error) => {
+          console.error('❌ FirestoreService: Error in punishment listener:', error);
+          if (onError) onError(error);
+        }
+      );
+    } catch (error) {
+      console.error('❌ FirestoreService: Error setting up punishment listener:', error);
+      if (onError) onError(error);
+      return () => {};
+    }
+  }
+
+  static async completePunishmentTask(punishmentId: string): Promise<void> {
+    try {
+      const punishmentRef = doc(db, 'punishmentMode', punishmentId);
+      const punishmentDoc = await getDoc(punishmentRef);
+
+      if (!punishmentDoc.exists()) {
+        throw new Error('Punishment not found');
+      }
+
+      const data = punishmentDoc.data();
+      const currentTasksCompleted = data.tasksCompleted || 0;
+      const newTasksCompleted = currentTasksCompleted + 1;
+
+      const lastTaskTime = data.lastTaskCompletedAt?.toDate();
+      const now = new Date();
+
+      if (lastTaskTime) {
+        const timeDiff = now.getTime() - lastTaskTime.getTime();
+        const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+        if (hoursDiff < 1) {
+          throw new Error('Você precisa esperar 1 hora entre as tarefas');
+        }
+      }
+
+      const updates: any = {
+        tasksCompleted: newTasksCompleted,
+        lastTaskCompletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      if (newTasksCompleted >= 30) {
+        updates.isActive = false;
+        updates.deactivatedAt = serverTimestamp();
+        updates.deactivatedReason = 'tasks_completed';
+      }
+
+      await updateDoc(punishmentRef, updates);
+
+      const taskCompletionRef = doc(collection(db, 'punishmentTaskCompletions'));
+      await setDoc(taskCompletionRef, {
+        punishmentId,
+        userId: data.userId,
+        completedAt: serverTimestamp(),
+        taskNumber: newTasksCompleted
+      });
+
+      console.log('✅ FirestoreService: Punishment task completed:', {
+        punishmentId,
+        tasksCompleted: newTasksCompleted
+      });
+    } catch (error) {
+      console.error('❌ FirestoreService: Error completing punishment task:', error);
+      throw error;
+    }
+  }
+
+  static async checkAndDeactivateExpiredPunishments(): Promise<void> {
+    try {
+      const now = new Date();
+      const punishmentsQuery = query(
+        collection(db, 'punishmentMode'),
+        where('isActive', '==', true)
+      );
+
+      const snapshot = await getDocs(punishmentsQuery);
+      const batch = writeBatch(db);
+      let deactivatedCount = 0;
+
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const endDate = data.endDate?.toDate();
+
+        if (endDate && now >= endDate) {
+          batch.update(doc.ref, {
+            isActive: false,
+            deactivatedAt: serverTimestamp(),
+            deactivatedReason: 'time_completed',
+            updatedAt: serverTimestamp()
+          });
+          deactivatedCount++;
+        }
+      });
+
+      if (deactivatedCount > 0) {
+        await batch.commit();
+        console.log(`✅ FirestoreService: Deactivated ${deactivatedCount} expired punishments`);
+      }
+    } catch (error) {
+      console.error('❌ FirestoreService: Error checking expired punishments:', error);
+      throw error;
+    }
+  }
 }
