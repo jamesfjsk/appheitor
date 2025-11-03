@@ -294,7 +294,7 @@ const PunishmentModeScreen: React.FC = () => {
                     Última tarefa: {new Date(punishment.lastTaskCompletedAt).toLocaleTimeString('pt-BR')}
                     <br />
                     <span className="text-yellow-400">
-                      Aguarde 1 hora entre cada tarefa
+                      Aguarde 30 minutos entre cada tarefa
                     </span>
                   </p>
                 )}
@@ -325,7 +325,7 @@ const PunishmentModeScreen: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-yellow-400 mt-1">✓</span>
-                  <span>Você pode marcar uma tarefa a cada hora</span>
+                  <span>Você pode marcar uma tarefa a cada 30 minutos</span>
                 </li>
               </ul>
             </motion.div>

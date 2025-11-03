@@ -645,7 +645,7 @@ const AdminControls: React.FC = () => {
               const confirmed = window.confirm(
                 `⚠️ ATENÇÃO: Isso irá ativar o MODO PUNIÇÃO!\n\n` +
                 `O painel do Heitor será BLOQUEADO completamente até que ele:\n` +
-                `• Complete 30 tarefas (1 por hora)\n` +
+                `• Complete 30 tarefas (1 a cada 30 minutos)\n` +
                 `• OU aguarde 7 dias\n\n` +
                 `Motivo: ${reason}\n\n` +
                 `Tem certeza que deseja continuar?`

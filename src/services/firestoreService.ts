@@ -2464,10 +2464,11 @@ export class FirestoreService {
 
       if (lastTaskTime) {
         const timeDiff = now.getTime() - lastTaskTime.getTime();
-        const hoursDiff = timeDiff / (1000 * 60 * 60);
+        const minutesDiff = timeDiff / (1000 * 60);
 
-        if (hoursDiff < 1) {
-          throw new Error('Você precisa esperar 1 hora entre as tarefas');
+        if (minutesDiff < 30) {
+          const minutesRemaining = Math.ceil(30 - minutesDiff);
+          throw new Error(`Você precisa esperar mais ${minutesRemaining} minutos antes da próxima tarefa`);
         }
       }
 

@@ -113,8 +113,8 @@ export const PunishmentProvider: React.FC<PunishmentProviderProps> = ({ children
       }
     } catch (error: any) {
       console.error('❌ Error completing punishment task:', error);
-      if (error.message.includes('esperar 1 hora')) {
-        toast.error('⏳ Você precisa esperar 1 hora entre cada tarefa!');
+      if (error.message.includes('esperar')) {
+        toast.error(`⏳ ${error.message}`);
       } else {
         toast.error('Erro ao completar tarefa');
       }
