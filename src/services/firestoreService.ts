@@ -2304,6 +2304,33 @@ export class FirestoreService {
     reason: string
   ): Promise<string> {
     try {
+      console.log('🔄 FirestoreService: Activating punishment mode...', { userId, adminUid, reason });
+
+      // First, deactivate any existing active punishments
+      const existingQuery = query(
+        collection(db, 'punishmentMode'),
+        where('userId', '==', userId),
+        where('isActive', '==', true)
+      );
+
+      const existingSnapshot = await getDocs(existingQuery);
+      console.log('📊 FirestoreService: Found existing active punishments:', existingSnapshot.size);
+
+      if (!existingSnapshot.empty) {
+        const batch = writeBatch(db);
+        existingSnapshot.docs.forEach(doc => {
+          batch.update(doc.ref, {
+            isActive: false,
+            deactivatedAt: serverTimestamp(),
+            deactivatedReason: 'replaced_by_new',
+            updatedAt: serverTimestamp()
+          });
+        });
+        await batch.commit();
+        console.log('✅ FirestoreService: Deactivated existing punishments');
+      }
+
+      // Create new punishment
       const punishmentRef = doc(collection(db, 'punishmentMode'));
       const startDate = new Date();
       const endDate = new Date(startDate);
@@ -2322,11 +2349,18 @@ export class FirestoreService {
         updatedAt: serverTimestamp()
       };
 
+      console.log('💾 FirestoreService: Saving punishment data to Firestore...', punishmentRef.id);
       await setDoc(punishmentRef, punishmentData);
-      console.log('✅ FirestoreService: Punishment mode activated:', punishmentRef.id);
+      console.log('✅ FirestoreService: Punishment mode activated successfully:', punishmentRef.id);
+
       return punishmentRef.id;
     } catch (error) {
       console.error('❌ FirestoreService: Error activating punishment mode:', error);
+      console.error('Error details:', {
+        code: (error as any)?.code,
+        message: (error as any)?.message,
+        stack: (error as any)?.stack
+      });
       throw error;
     }
   }

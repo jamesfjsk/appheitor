@@ -655,12 +655,21 @@ const AdminControls: React.FC = () => {
 
               setIsProcessing(true);
               try {
-                await FirestoreService.activatePunishmentMode(childUid, user?.userId || '', reason);
+                console.log('🔄 AdminControls: Requesting punishment activation...', { childUid, adminUid: user?.userId });
+                const punishmentId = await FirestoreService.activatePunishmentMode(childUid, user?.userId || '', reason);
+                console.log('✅ AdminControls: Punishment activated successfully!', punishmentId);
                 toast.success('🚨 Modo Punição ativado com sucesso!');
                 reasonInput.value = '';
               } catch (error: any) {
-                console.error('❌ Erro ao ativar modo punição:', error);
-                toast.error('Erro ao ativar modo punição');
+                console.error('❌ AdminControls: Error activating punishment:', error);
+                console.error('Error code:', error?.code);
+                console.error('Error message:', error?.message);
+
+                if (error?.code === 'permission-denied') {
+                  toast.error('❌ Erro de permissão! Verifique se você é admin e se as regras do Firestore foram atualizadas.');
+                } else {
+                  toast.error(`Erro ao ativar modo punição: ${error?.message || 'Erro desconhecido'}`);
+                }
               } finally {
                 setIsProcessing(false);
               }
