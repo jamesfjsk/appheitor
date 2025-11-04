@@ -171,5 +171,34 @@ service cloud.firestore {
       allow create: if signedIn() && isAdmin() && request.resource.data.ownerId == request.auth.uid;
       allow update, delete: if signedIn() && isAdmin() && resource.data.ownerId == request.auth.uid;
     }
+
+    // ---------- PUNISHMENT MODE ----------
+    match /punishmentMode/{punishmentId} {
+      // Admin can read all; child can only read their own
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Only admin can create punishment mode
+      allow create: if signedIn() && isAdmin();
+
+      // Only admin can deactivate punishment mode
+      allow update: if signedIn() && isAdmin();
+
+      // Only admin can delete punishment records
+      allow delete: if signedIn() && isAdmin();
+    }
+
+    // ---------- PUNISHMENT TASK COMPLETIONS ----------
+    match /punishmentTaskCompletions/{completionId} {
+      // Admin can read all; child can only read their own
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+
+      // Child can create their own completions; admin can also create
+      allow create: if signedIn() && (
+        isAdmin() || request.resource.data.userId == request.auth.uid
+      );
+
+      // Only admin can update or delete completions
+      allow update, delete: if signedIn() && isAdmin();
+    }
   }
 }

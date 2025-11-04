@@ -2355,9 +2355,7 @@ export class FirestoreService {
       const punishmentsQuery = query(
         collection(db, 'punishmentMode'),
         where('userId', '==', userId),
-        where('isActive', '==', true),
-        orderBy('createdAt', 'desc'),
-        limit(1)
+        where('isActive', '==', true)
       );
 
       const snapshot = await getDocs(punishmentsQuery);
@@ -2365,11 +2363,21 @@ export class FirestoreService {
         return null;
       }
 
-      const doc = snapshot.docs[0];
-      const data = doc.data();
+      const punishments = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date()
+      }));
+
+      punishments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+      const mostRecent = punishments[0];
+      const data = snapshot.docs.find(d => d.id === mostRecent.id)?.data();
+
+      if (!data) return null;
 
       return {
-        id: doc.id,
+        id: mostRecent.id,
         userId: data.userId,
         isActive: data.isActive,
         startDate: data.startDate?.toDate() || new Date(),
@@ -2399,9 +2407,7 @@ export class FirestoreService {
       const punishmentsQuery = query(
         collection(db, 'punishmentMode'),
         where('userId', '==', userId),
-        where('isActive', '==', true),
-        orderBy('createdAt', 'desc'),
-        limit(1)
+        where('isActive', '==', true)
       );
 
       return onSnapshot(
@@ -2412,27 +2418,29 @@ export class FirestoreService {
             return;
           }
 
-          const doc = snapshot.docs[0];
-          const data = doc.data();
+          const punishments = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              userId: data.userId,
+              isActive: data.isActive,
+              startDate: data.startDate?.toDate() || new Date(),
+              endDate: data.endDate?.toDate() || new Date(),
+              tasksCompleted: data.tasksCompleted || 0,
+              tasksRequired: data.tasksRequired || 30,
+              activatedBy: data.activatedBy,
+              reason: data.reason,
+              lastTaskCompletedAt: data.lastTaskCompletedAt?.toDate(),
+              deactivatedAt: data.deactivatedAt?.toDate(),
+              deactivatedReason: data.deactivatedReason,
+              createdAt: data.createdAt?.toDate() || new Date(),
+              updatedAt: data.updatedAt?.toDate() || new Date()
+            };
+          });
 
-          const punishment = {
-            id: doc.id,
-            userId: data.userId,
-            isActive: data.isActive,
-            startDate: data.startDate?.toDate() || new Date(),
-            endDate: data.endDate?.toDate() || new Date(),
-            tasksCompleted: data.tasksCompleted || 0,
-            tasksRequired: data.tasksRequired || 30,
-            activatedBy: data.activatedBy,
-            reason: data.reason,
-            lastTaskCompletedAt: data.lastTaskCompletedAt?.toDate(),
-            deactivatedAt: data.deactivatedAt?.toDate(),
-            deactivatedReason: data.deactivatedReason,
-            createdAt: data.createdAt?.toDate() || new Date(),
-            updatedAt: data.updatedAt?.toDate() || new Date()
-          };
+          punishments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-          onUpdate(punishment);
+          onUpdate(punishments[0] || null);
         },
         (error) => {
           console.error('❌ FirestoreService: Error in punishment listener:', error);
@@ -2547,12 +2555,11 @@ export class FirestoreService {
     try {
       const historyQuery = query(
         collection(db, 'punishmentTaskCompletions'),
-        where('punishmentId', '==', punishmentId),
-        orderBy('completedAt', 'desc')
+        where('punishmentId', '==', punishmentId)
       );
 
       const snapshot = await getDocs(historyQuery);
-      return snapshot.docs.map(doc => {
+      const history = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -2564,6 +2571,9 @@ export class FirestoreService {
           taskTitle: data.taskTitle
         };
       });
+
+      history.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+      return history;
     } catch (error) {
       console.error('❌ FirestoreService: Error getting punishment task history:', error);
       return [];
@@ -2578,8 +2588,7 @@ export class FirestoreService {
     try {
       const historyQuery = query(
         collection(db, 'punishmentTaskCompletions'),
-        where('punishmentId', '==', punishmentId),
-        orderBy('completedAt', 'desc')
+        where('punishmentId', '==', punishmentId)
       );
 
       return onSnapshot(
@@ -2597,6 +2606,9 @@ export class FirestoreService {
               taskTitle: data.taskTitle
             };
           });
+
+          history.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+
           onUpdate(history);
         },
         (error) => {
