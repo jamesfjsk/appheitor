@@ -641,12 +641,15 @@ export class FirestoreService {
 
   static async redeemReward(userId: string, rewardId: string, costGold: number): Promise<void> {
     try {
+      console.log('🔄 FirestoreService: Starting reward redemption...', { userId, rewardId, costGold });
+
       const batch = writeBatch(db);
 
       // Get reward details for transaction
       const rewardRef = doc(db, 'rewards', rewardId);
       const rewardDoc = await getDoc(rewardRef);
       const rewardTitle = rewardDoc.exists() ? rewardDoc.data().title : 'Recompensa';
+      console.log('📦 FirestoreService: Reward details:', { rewardId, rewardTitle });
 
       // Create redemption record
       const redemptionRef = doc(collection(db, 'redemptions'));
@@ -658,6 +661,7 @@ export class FirestoreService {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
+      console.log('📝 FirestoreService: Created redemption record:', redemptionRef.id);
 
       // Deduct gold from user
       const progressRef = doc(db, 'progress', userId);
@@ -667,6 +671,13 @@ export class FirestoreService {
         const currentProgress = progressDoc.data();
         const currentGold = currentProgress.availableGold || 0;
         const newGold = Math.max(0, currentGold - costGold);
+
+        console.log('💰 FirestoreService: Gold deduction:', {
+          currentGold,
+          costGold,
+          newGold,
+          willDeduct: currentGold - costGold
+        });
 
         batch.update(progressRef, {
           availableGold: newGold,
@@ -689,9 +700,14 @@ export class FirestoreService {
           balanceAfter: newGold,
           createdAt: serverTimestamp()
         });
+        console.log('📊 FirestoreService: Created gold transaction record');
+      } else {
+        console.warn('⚠️ FirestoreService: Progress document not found for user:', userId);
       }
 
+      console.log('💾 FirestoreService: Committing batch...');
       await batch.commit();
+      console.log('✅ FirestoreService: Reward redemption completed successfully!');
     } catch (error) {
       console.error('❌ FirestoreService: Error redeeming reward:', error);
       throw error;

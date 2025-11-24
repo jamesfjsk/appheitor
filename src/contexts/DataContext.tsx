@@ -436,8 +436,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
   const redeemReward = useCallback(async (rewardId: string) => {
     if (!childUid) throw new Error('Child UID não definido');
-    
+
     try {
+      console.log('🔄 DataContext: Starting reward redemption process...', { rewardId, childUid });
+
       // Check if user has completed at least 5 tasks today using current tasks data
       const today = getTodayBrazil();
 
@@ -476,25 +478,38 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       if (todayCompletions.length < 5) {
         throw new Error(`Você precisa completar pelo menos 5 missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/5`);
       }
-      
+
       const reward = rewards.find(r => r.id === rewardId);
       if (!reward) throw new Error('Recompensa não encontrada');
-      
+
+      console.log('🎁 DataContext: Reward details:', {
+        rewardId: reward.id,
+        title: reward.title,
+        costGold: reward.costGold,
+        availableGold: progress.availableGold
+      });
+
       // Check if there's already a pending redemption for this reward
-      const existingPendingRedemption = redemptions.find(r => 
-        r.rewardId === rewardId && 
+      const existingPendingRedemption = redemptions.find(r =>
+        r.rewardId === rewardId &&
         r.status === 'pending'
       );
-      
+
       if (existingPendingRedemption) {
         throw new Error('Você já tem um resgate pendente para esta recompensa');
       }
-      
+
       if ((progress.availableGold || 0) < (reward.costGold || 0)) {
+        console.error('❌ DataContext: Insufficient gold!', {
+          availableGold: progress.availableGold,
+          costGold: reward.costGold
+        });
         throw new Error('Gold insuficiente');
       }
-      
+
+      console.log('💰 DataContext: Gold check passed. Calling FirestoreService...');
       await FirestoreService.redeemReward(childUid, rewardId, reward.costGold || 0);
+      console.log('✅ DataContext: Reward redemption completed successfully!');
       toast.success('🎁 Recompensa solicitada! Aguarde aprovação.');
     } catch (error: any) {
       console.error('❌ Erro ao resgatar recompensa:', error);
@@ -509,7 +524,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
       throw error;
     }
-  }, [childUid, rewards, progress.availableGold]);
+  }, [childUid, rewards, redemptions, tasks, progress.availableGold]);
 
   const approveRedemption = useCallback(async (redemptionId: string, approved: boolean) => {
     if (!user?.userId) throw new Error('Admin UID não definido');
