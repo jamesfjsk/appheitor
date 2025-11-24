@@ -719,6 +719,67 @@ const AdminControls: React.FC = () => {
         </div>
       </div>
 
+      {/* Recuperação de Progresso */}
+      <div className="pt-6 mt-6 border-t border-gray-200">
+        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+          <Save className="w-4 h-4 text-blue-500" />
+          Recuperação de Dados
+        </h4>
+        <p className="text-xs text-gray-600 mb-3">
+          Recupera XP e Gold baseado no histórico de transações salvo
+        </p>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={async () => {
+            if (!childUid) return;
+
+            const confirmed = window.confirm(
+              `Deseja recuperar o progresso do histórico?\n\n` +
+              `Isso irá:\n` +
+              `• Analisar todas as transações de gold salvas\n` +
+              `• Recalcular XP e Gold corretos\n` +
+              `• Restaurar o progresso perdido\n\n` +
+              `Continuar?`
+            );
+
+            if (!confirmed) return;
+
+            setIsProcessing(true);
+            try {
+              const recovered = await FirestoreService.recoverProgressFromHistory(childUid);
+
+              await FirestoreService.updateUserProgress(childUid, {
+                totalXP: recovered.totalXP,
+                availableGold: recovered.availableGold,
+                totalGoldEarned: recovered.totalGoldEarned,
+                totalGoldSpent: recovered.totalGoldSpent,
+                totalTasksCompleted: recovered.totalTasksCompleted
+              });
+
+              toast.success(
+                `✅ Progresso recuperado!\n` +
+                `XP: ${recovered.totalXP}\n` +
+                `Gold: ${recovered.availableGold}\n` +
+                `Tarefas: ${recovered.totalTasksCompleted}`
+              );
+
+              await syncData();
+            } catch (error: any) {
+              console.error('❌ Erro ao recuperar progresso:', error);
+              toast.error('Erro ao recuperar progresso');
+            } finally {
+              setIsProcessing(false);
+            }
+          }}
+          disabled={isProcessing}
+          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+        >
+          <Save className="w-4 h-4" />
+          {isProcessing ? 'Recuperando...' : 'Recuperar Progresso do Histórico'}
+        </motion.button>
+      </div>
+
       {/* Reset Completo */}
       <div className="pt-6 mt-6 border-t border-gray-200">
         <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">

@@ -1944,32 +1944,95 @@ export class FirestoreService {
     }
   }
 
+  static async recoverProgressFromHistory(userId: string): Promise<{
+    totalXP: number;
+    totalGoldEarned: number;
+    totalGoldSpent: number;
+    availableGold: number;
+    totalTasksCompleted: number;
+  }> {
+    try {
+      console.log('🔄 FirestoreService: Recovering progress from history for:', userId);
+
+      // Get all gold transactions
+      const transactionsQuery = query(
+        collection(db, 'goldTransactions'),
+        where('userId', '==', userId)
+      );
+      const transactionsSnapshot = await getDocs(transactionsQuery);
+
+      let totalGoldEarned = 0;
+      let totalGoldSpent = 0;
+      let totalXP = 0;
+      let taskCompletions = 0;
+
+      transactionsSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const amount = data.amount || 0;
+
+        if (data.type === 'earned' || data.type === 'bonus') {
+          totalGoldEarned += amount;
+        } else if (data.type === 'spent') {
+          totalGoldSpent += Math.abs(amount);
+        }
+
+        // Count task completions
+        if (data.source === 'task_completion') {
+          taskCompletions++;
+          // Estimate XP (typically 10 XP per task)
+          totalXP += 10;
+        }
+      });
+
+      const availableGold = totalGoldEarned - totalGoldSpent;
+
+      console.log('📊 FirestoreService: Recovery summary:', {
+        totalXP,
+        totalGoldEarned,
+        totalGoldSpent,
+        availableGold,
+        taskCompletions
+      });
+
+      return {
+        totalXP,
+        totalGoldEarned,
+        totalGoldSpent,
+        availableGold: Math.max(0, availableGold),
+        totalTasksCompleted: taskCompletions
+      };
+    } catch (error) {
+      console.error('❌ FirestoreService: Error recovering progress:', error);
+      throw error;
+    }
+  }
+
   static async completeUserReset(userId: string): Promise<void> {
     try {
       console.log('🔄 FirestoreService: Starting complete user reset for:', userId);
-      
+
       const batch = writeBatch(db);
-      
+
       // Delete all user tasks
       const tasksQuery = query(collection(db, 'tasks'), where('ownerId', '==', userId));
       const tasksSnapshot = await getDocs(tasksQuery);
       tasksSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-      
+
       // Delete all user rewards
       const rewardsQuery = query(collection(db, 'rewards'), where('ownerId', '==', userId));
       const rewardsSnapshot = await getDocs(rewardsQuery);
       rewardsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-      
+
       // Delete all user redemptions
       const redemptionsQuery = query(collection(db, 'redemptions'), where('userId', '==', userId));
       const redemptionsSnapshot = await getDocs(redemptionsQuery);
       redemptionsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-      
+
       // Delete all user notifications
       const notificationsQuery = query(collection(db, 'notifications'), where('toUserId', '==', userId));
       const notificationsSnapshot = await getDocs(notificationsQuery);
       notificationsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-      
+
       // Reset progress
       const progressRef = doc(db, 'progress', userId);
       batch.set(progressRef, {
@@ -1987,7 +2050,7 @@ export class FirestoreService {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
-      
+
       await batch.commit();
       console.log('✅ FirestoreService: Complete user reset finished');
     } catch (error) {
