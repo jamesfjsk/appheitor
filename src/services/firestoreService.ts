@@ -144,9 +144,15 @@ export class FirestoreService {
     try {
       const progressRef = doc(db, 'progress', userId);
       const progressDoc = await getDoc(progressRef);
-      
+
       if (progressDoc.exists()) {
         const data = progressDoc.data();
+        console.log('✅ FirestoreService.ensureUserProgress: Document exists', {
+          userId,
+          totalXP: data.totalXP,
+          availableGold: data.availableGold,
+          totalGoldEarned: data.totalGoldEarned
+        });
         return {
           userId,
           level: data.level || 1,
@@ -164,7 +170,8 @@ export class FirestoreService {
         };
       }
 
-      // Create default progress
+      // Create default progress with merge to prevent accidental overwrites
+      console.warn('⚠️ FirestoreService.ensureUserProgress: Document does NOT exist! Creating defaults with MERGE:', userId);
       const defaultProgress = {
         userId,
         level: 1,
@@ -181,7 +188,8 @@ export class FirestoreService {
         updatedAt: serverTimestamp()
       };
 
-      await setDoc(progressRef, defaultProgress);
+      // CRITICAL: Use merge: true to prevent overwriting existing data in case of race conditions
+      await setDoc(progressRef, defaultProgress, { merge: true });
       
       return {
         userId,
