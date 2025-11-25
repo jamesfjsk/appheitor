@@ -97,43 +97,57 @@ const QuizTime: React.FC<QuizTimeProps> = ({ onComplete }) => {
 Você é um assistente especializado em criar quizzes educativos desafiadores para o Heitor, um garoto inteligente de 9 anos apaixonado por lógica, ciências e perguntas que estimulam o pensamento crítico.
 
 🎯 OBJETIVO PRINCIPAL:
-Gerar EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro que combinem diversão, aprendizado e raciocínio lógico.
+Gerar EXATAMENTE 8 perguntas de múltipla escolha em português brasileiro que combinem diversão, aprendizado e raciocínio lógico DESAFIADOR.
 
-⚙️ DISTRIBUIÇÃO TEMÁTICA OBRIGATÓRIA (1 pergunta de cada categoria):
+⚙️ DISTRIBUIÇÃO TEMÁTICA OBRIGATÓRIA (8 perguntas, mais desafiadoras):
 
-1. **INGLÊS CONTEXTUAL**
-   - Frases do cotidiano com dedução de significado
-   - Expressões idiomáticas simples ou palavras em contexto
-   - Evite traduções diretas; foque em compreensão situacional
-   - Exemplo: "Se alguém diz 'Break a leg!' antes de uma apresentação, o que significa?"
+1. **INGLÊS CONTEXTUAL AVANÇADO**
+   - Expressões idiomáticas complexas e duplo sentido
+   - Compreensão de frases com contexto cultural
+   - Palavras com múltiplos significados dependendo do contexto
+   - Exemplo: "What does 'it's raining cats and dogs' mean when someone says this?"
 
-2. **ANIMAIS & NATUREZA**
-   - Comportamentos animais com explicação científica
-   - Adaptações evolutivas e sobrevivência
-   - Relações entre seres vivos e meio ambiente
-   - Foque no "POR QUÊ" e no "COMO", não apenas no "O QUÊ"
-   - Exemplo: "Por que os cactos têm espinhos em vez de folhas largas?"
+2. **ANIMAIS & NATUREZA COM RACIOCÍNIO**
+   - Comportamentos animais que exigem dedução
+   - Adaptações evolutivas com múltiplos fatores
+   - Cadeias alimentares e interdependências complexas
+   - Exemplo: "Por que os flamingos são rosa, mas nascem cinzas?"
 
-3. **MATEMÁTICA LÓGICA**
-   - Problemas que exigem raciocínio, não apenas decoreba
-   - Desafios de lógica matemática, padrões e sequências
-   - Situações práticas com cálculos mentais
-   - Enigmas numéricos que fazem pensar
-   - Exemplo: "Se você dobrar um papel 3 vezes, em quantas partes ele ficará dividido?"
+3. **MATEMÁTICA LÓGICA DESAFIADORA**
+   - Problemas de lógica com múltiplas etapas
+   - Padrões numéricos não-óbvios
+   - Enigmas que exigem pensamento reverso
+   - Exemplo: "Se 5 gatos pegam 5 ratos em 5 minutos, quantos gatos são necessários para pegar 100 ratos em 100 minutos?"
 
-4. **CIÊNCIAS & DESCOBERTAS**
-   - Fenômenos naturais com explicação científica
-   - Corpo humano, espaço, química básica, física do dia a dia
-   - Experimentos mentais e causas de eventos naturais
-   - Estimule a curiosidade sobre como o mundo funciona
-   - Exemplo: "Por que vemos o raio antes de ouvir o trovão?"
+4. **CIÊNCIAS COMPLEXAS**
+   - Fenômenos que exigem compreensão de causa e efeito
+   - Conceitos contra-intuitivos da física
+   - Química e biologia com raciocínio aplicado
+   - Exemplo: "Por que um navio de metal gigante flutua, mas uma moeda afunda?"
 
-5. **PENSAMENTO CRÍTICO & VALORES**
-   - Dilemas éticos apropriados para a idade
-   - Situações de convivência e resolução de conflitos
-   - Questões filosóficas leves sobre escolhas e consequências
-   - Cenários que desenvolvam empatia e raciocínio moral
-   - Exemplo: "Você encontrou R$ 20 no chão da escola. O que seria mais justo fazer?"
+5. **PENSAMENTO CRÍTICO AVANÇADO**
+   - Dilemas com múltiplas perspectivas válidas
+   - Situações que exigem ponderar prós e contras
+   - Consequências de segunda ordem
+   - Exemplo: "Seria justo dar a mesma nota para todos os alunos da turma? Por quê?"
+
+6. **HISTÓRIA & GEOGRAFIA LÓGICA**
+   - Conexões históricas causa-efeito
+   - Geografia com raciocínio sobre clima, cultura e recursos
+   - Por que civilizações se desenvolveram em determinados lugares
+   - Exemplo: "Por que grandes cidades antigas sempre foram construídas perto de rios?"
+
+7. **TECNOLOGIA & INOVAÇÃO**
+   - Como funcionam tecnologias do dia a dia
+   - Princípios científicos por trás de invenções
+   - Impacto da tecnologia na sociedade
+   - Exemplo: "Como um micro-ondas aquece a comida sem usar fogo?"
+
+8. **ENIGMAS & PARADOXOS**
+   - Quebra-cabeças lógicos clássicos adaptados
+   - Situações que parecem impossíveis mas têm solução
+   - Pensamento lateral e criatividade
+   - Exemplo: "Um homem empurra seu carro até um hotel e perde tudo. O que aconteceu?"
 
 📋 FORMATO JSON OBRIGATÓRIO (resposta deve ser APENAS o array JSON válido):
 [
@@ -154,10 +168,13 @@ Gerar EXATAMENTE 5 perguntas de múltipla escolha em português brasileiro que c
 - Trate o Heitor como alguém capaz de raciocinar
 
 **Dificuldade:**
-- Nível desafiador mas alcançável (zona de desenvolvimento proximal)
-- Exige leitura atenta, interpretação e raciocínio
-- Evite perguntas de "chute" ou conhecimento enciclopédico obscuro
-- A resposta deve ser lógica quando explicada
+- Nível SIGNIFICATIVAMENTE mais desafiador (zona de desafio produtivo)
+- Exige leitura atenta, interpretação profunda e raciocínio multi-etapas
+- Perguntas devem fazer o Heitor parar e PENSAR por 15-30 segundos
+- Evite perguntas óbvias ou que possam ser respondidas por eliminação fácil
+- Distratores devem ser plausíveis e exigir análise
+- A resposta deve exigir raciocínio, não só conhecimento
+- Mínimo 40% das perguntas devem ser de dificuldade ALTA
 
 **Estrutura das Perguntas:**
 - Questions devem provocar reflexão, não memorização
@@ -197,11 +214,11 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
 },
               {
                 role: 'user',
-                content: 'Gere 5 perguntas de quiz educativo para o Heitor seguindo exatamente o formato JSON especificado.'
+                content: 'Gere 8 perguntas DESAFIADORAS de quiz educativo para o Heitor seguindo exatamente o formato JSON especificado. Lembre-se: ele é MUITO inteligente, então faça perguntas que realmente o façam PENSAR!'
               }
             ],
-            temperature: 0.8,
-            max_tokens: 1500
+            temperature: 0.9,
+            max_tokens: 2500
           })
         });
 
@@ -219,7 +236,7 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
         // Parse JSON response
         const generatedQuestions = JSON.parse(content);
         
-        if (!Array.isArray(generatedQuestions) || generatedQuestions.length !== 5) {
+        if (!Array.isArray(generatedQuestions) || generatedQuestions.length !== 8) {
           throw new Error('Invalid questions format from OpenAI');
         }
 
@@ -250,9 +267,9 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
         
         const localQuestions = await response.json();
         
-        // Shuffle and pick 5 random questions
+        // Shuffle and pick 8 random questions
         const shuffled = localQuestions.sort(() => Math.random() - 0.5);
-        const selectedQuestions = shuffled.slice(0, 5);
+        const selectedQuestions = shuffled.slice(0, 8);
         
         console.log('✅ QuizTime: Using local questions as fallback');
         setQuestions(selectedQuestions);
@@ -299,36 +316,48 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
       setScore(correctAnswers);
       setShowResults(true);
       
-      // Award XP and Gold based on score
+      // Award XP and Gold based on score (8 questions, more challenging)
       let xpReward = 0;
       let goldReward = 0;
-      
-      if (correctAnswers >= 5) {
+
+      if (correctAnswers === 8) {
+        // Perfect score - MUITO difícil!
+        xpReward = 50;
+        goldReward = 30;
+      } else if (correctAnswers >= 7) {
+        // Excelente - 87.5%
+        xpReward = 35;
+        goldReward = 20;
+      } else if (correctAnswers >= 6) {
+        // Muito bom - 75%
         xpReward = 25;
         goldReward = 15;
-      } else if (correctAnswers >= 4) {
-        xpReward = 20;
+      } else if (correctAnswers >= 5) {
+        // Bom - 62.5%
+        xpReward = 18;
         goldReward = 10;
+      } else if (correctAnswers >= 4) {
+        // Razoável - 50%
+        xpReward = 12;
+        goldReward = 6;
       } else if (correctAnswers >= 3) {
-        xpReward = 15;
-        goldReward = 8;
+        // Básico - 37.5%
+        xpReward = 8;
+        goldReward = 4;
       } else if (correctAnswers >= 2) {
-        xpReward = 10;
-        goldReward = 5;
-      } else if (correctAnswers >= 1) {
         xpReward = 5;
-        goldReward = 3;
+        goldReward = 2;
       } else {
         xpReward = 2;
-        goldReward = 2; // Participation reward
+        goldReward = 1; // Participation reward
       }
       
       if (xpReward > 0) {
         await adjustUserXP(xpReward);
         playTaskComplete();
 
-        if (correctAnswers >= 4) {
-          playLevelUp(); // Special sound for high scores
+        if (correctAnswers >= 6) {
+          playLevelUp(); // Special sound for high scores (75%+)
         }
       }
 
@@ -375,18 +404,21 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
   };
 
   const getPerformanceMessage = (score: number) => {
-    if (score === 5) return "🏆 PERFEITO! Você é um gênio, velocista!";
-    if (score === 4) return "⚡ EXCELENTE! Quase perfeito, herói!";
-    if (score === 3) return "🌟 MUITO BOM! Você está aprendendo rápido!";
-    if (score === 2) return "💪 BOM TRABALHO! Continue praticando!";
-    if (score === 1) return "🎯 LEGAL! Todo herói começa assim!";
-    return "🌈 PARABÉNS! Você participou e isso é o mais importante!";
+    if (score === 8) return "🏆 PERFEIÇÃO ABSOLUTA! Você é imbatível, Flash!";
+    if (score === 7) return "⚡ INCRÍVEL! Quase perfeito, supergênio!";
+    if (score === 6) return "🌟 EXCELENTE! Você é muito inteligente!";
+    if (score === 5) return "🚀 MUITO BOM! Mais da metade, parabéns!";
+    if (score === 4) return "💪 BOM! Metade certa, continue assim!";
+    if (score === 3) return "🎯 RAZOÁVEL! Pratique mais e você melhora!";
+    if (score === 2) return "💡 Hmm, precisa estudar mais! Tente de novo amanhã!";
+    return "📚 Foi difícil, mas você participou! Estude e volte mais forte!";
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 4) return 'text-green-600';
-    if (score >= 2) return 'text-yellow-600';
-    return 'text-blue-600';
+    if (score >= 7) return 'text-green-600';
+    if (score >= 5) return 'text-yellow-600';
+    if (score >= 3) return 'text-orange-600';
+    return 'text-red-600';
   };
 
   const resetQuiz = () => {
@@ -484,10 +516,11 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
                     <span>Recompensas por acertos:</span>
                   </div>
                   <div className="text-sm text-yellow-700 mt-2 space-y-1">
-                    <div>🏆 5 acertos: +25 XP, +15 Gold</div>
-                    <div>🥇 4 acertos: +20 XP, +10 Gold</div>
-                    <div>🥈 3 acertos: +15 XP, +8 Gold</div>
-                    <div>🥉 Participação: +2 XP, +2 Gold</div>
+                    <div>🏆 8 acertos (PERFEITO): +50 XP, +30 Gold</div>
+                    <div>⭐ 7 acertos: +35 XP, +20 Gold</div>
+                    <div>🥇 6 acertos: +25 XP, +15 Gold</div>
+                    <div>🥈 5 acertos: +18 XP, +10 Gold</div>
+                    <div>🥉 4 acertos: +12 XP, +6 Gold</div>
                   </div>
                 </div>
                 
@@ -616,7 +649,7 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
                       ⚡ Gerando perguntas incríveis para você...
                     </p>
                     <p className="text-gray-500 text-sm">
-                      Criando 5 perguntas educativas personalizadas!
+                      Criando 8 perguntas DESAFIADORAS personalizadas!
                     </p>
                   </div>
                 )}
@@ -684,11 +717,11 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
                           <div className="flex justify-center gap-4 text-lg font-bold">
                             <div className="flex items-center gap-1 text-blue-600">
                               <Zap className="w-5 h-5" />
-                              <span>+{score >= 5 ? 25 : score >= 4 ? 20 : score >= 3 ? 15 : score >= 2 ? 10 : score >= 1 ? 5 : 2} XP</span>
+                              <span>+{score === 8 ? 50 : score >= 7 ? 35 : score >= 6 ? 25 : score >= 5 ? 18 : score >= 4 ? 12 : score >= 3 ? 8 : score >= 2 ? 5 : 2} XP</span>
                             </div>
                             <div className="flex items-center gap-1 text-yellow-600">
                               <span className="text-xl">🪙</span>
-                              <span>+{score >= 5 ? 12 : score >= 4 ? 10 : score >= 3 ? 8 : score >= 2 ? 5 : score >= 1 ? 3 : 2} Gold</span>
+                              <span>+{score === 8 ? 30 : score >= 7 ? 20 : score >= 6 ? 15 : score >= 5 ? 10 : score >= 4 ? 6 : score >= 3 ? 4 : score >= 2 ? 2 : 1} Gold</span>
                             </div>
                           </div>
                         </div>
