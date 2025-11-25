@@ -305,14 +305,26 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
   const calculateResults = async (answers: string[]) => {
     try {
       let correctAnswers = 0;
-      
+
       // Calculate score based on correct answers
       answers.forEach((answer, index) => {
         if (questions[index] && answer === questions[index].answer) {
           correctAnswers++;
         }
       });
-      
+
+      console.log('📊 Quiz Results:', {
+        userAnswers: answers,
+        correctAnswers,
+        totalQuestions: questions.length,
+        questions: questions.map((q, i) => ({
+          question: q.question,
+          userAnswer: answers[i],
+          correctAnswer: q.answer,
+          isCorrect: answers[i] === q.answer
+        }))
+      });
+
       setScore(correctAnswers);
       setShowResults(true);
       
@@ -566,7 +578,7 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
               animate={{ scale: 1, opacity: 1, rotateY: 0 }}
               exit={{ scale: 0.8, opacity: 0, rotateY: 90 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden"
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-hero-primary to-hero-secondary p-6 text-white relative overflow-hidden">
@@ -629,7 +641,7 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
               </div>
 
               {/* Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="p-6 overflow-y-auto max-h-[calc(95vh-100px)]">
                 {isGenerating && (
                   <div className="text-center py-12">
                     <motion.div
@@ -730,29 +742,29 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
                     
                     {/* Review Table */}
                     <div className="bg-gray-50 rounded-2xl p-6 mb-6 text-left">
-                      <h4 className="text-lg font-bold text-gray-900 mb-4 text-center">
+                      <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">
                         📚 Revisão das Perguntas
                       </h4>
-                      
-                      <div className="space-y-4 max-h-64 overflow-y-auto">
+
+                      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                         {questions.map((question, index) => {
                           const userAnswer = userAnswers[index];
                           const isCorrect = userAnswer === question.answer;
-                          
+
                           return (
                             <motion.div
                               key={index}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className={`p-4 rounded-lg border-2 ${
-                                isCorrect 
-                                  ? 'border-green-200 bg-green-50' 
-                                  : 'border-red-200 bg-red-50'
+                              transition={{ delay: index * 0.05 }}
+                              className={`p-4 rounded-xl border-2 shadow-md hover:shadow-lg transition-shadow ${
+                                isCorrect
+                                  ? 'border-green-400 bg-gradient-to-br from-green-50 to-green-100'
+                                  : 'border-red-400 bg-gradient-to-br from-red-50 to-red-100'
                               }`}
                             >
                               <div className="flex items-start gap-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                <div className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center ${
                                   isCorrect ? 'bg-green-500' : 'bg-red-500'
                                 }`}>
                                   {isCorrect ? (
@@ -762,29 +774,60 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
                                   )}
                                 </div>
                                 
-                                <div className="flex-1">
-                                  <h5 className="font-semibold text-gray-900 mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <h5 className="font-bold text-gray-900 mb-3 text-base leading-tight">
                                     {index + 1}. {question.question}
                                   </h5>
-                                  
-                                  <div className="text-sm space-y-1">
-                                    <div>
-                                      <span className="font-medium">Sua resposta: </span>
-                                      <span className={isCorrect ? 'text-green-600' : 'text-red-600'}>
-                                        {userAnswer}
-                                      </span>
+
+                                  <div className="space-y-2">
+                                    {/* Show all options with indicators */}
+                                    <div className="space-y-1 mb-3">
+                                      {question.options?.map((option: string, optIndex: number) => {
+                                        const isUserAnswer = option === userAnswer;
+                                        const isCorrectAnswer = option === question.answer;
+
+                                        return (
+                                          <div
+                                            key={optIndex}
+                                            className={`text-sm p-2 rounded-lg flex items-start gap-2 ${
+                                              isCorrectAnswer
+                                                ? 'bg-green-200 border border-green-400'
+                                                : isUserAnswer
+                                                ? 'bg-red-200 border border-red-400'
+                                                : 'bg-white border border-gray-200'
+                                            }`}
+                                          >
+                                            <span className="font-medium text-gray-600">
+                                              {String.fromCharCode(65 + optIndex)})
+                                            </span>
+                                            <span className={`flex-1 ${
+                                              isCorrectAnswer
+                                                ? 'font-semibold text-green-900'
+                                                : isUserAnswer
+                                                ? 'font-semibold text-red-900'
+                                                : 'text-gray-700'
+                                            }`}>
+                                              {option}
+                                            </span>
+                                            {isCorrectAnswer && (
+                                              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                            )}
+                                            {isUserAnswer && !isCorrectAnswer && (
+                                              <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                     </div>
-                                    
-                                    {!isCorrect && (
-                                      <div>
-                                        <span className="font-medium">Resposta correta: </span>
-                                        <span className="text-green-600">{question.answer}</span>
+
+                                    <div className="mt-3 p-3 bg-white rounded-lg border-2 border-blue-300 shadow-sm">
+                                      <div className="flex items-start gap-2">
+                                        <span className="text-lg">💡</span>
+                                        <div className="flex-1">
+                                          <span className="font-semibold text-blue-700">Explicação: </span>
+                                          <span className="text-gray-800 text-sm leading-relaxed">{question.explanation}</span>
+                                        </div>
                                       </div>
-                                    )}
-                                    
-                                    <div className="mt-2 p-2 bg-white rounded border">
-                                      <span className="font-medium text-blue-600">💡 Explicação: </span>
-                                      <span className="text-gray-700">{question.explanation}</span>
                                     </div>
                                   </div>
                                 </div>
