@@ -323,27 +323,27 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
       if (correctAnswers === 8) {
         // Perfect score - MUITO difícil!
         xpReward = 50;
-        goldReward = 30;
+        goldReward = 15;
       } else if (correctAnswers >= 7) {
         // Excelente - 87.5%
         xpReward = 35;
-        goldReward = 20;
+        goldReward = 12;
       } else if (correctAnswers >= 6) {
         // Muito bom - 75%
         xpReward = 25;
-        goldReward = 15;
+        goldReward = 10;
       } else if (correctAnswers >= 5) {
         // Bom - 62.5%
         xpReward = 18;
-        goldReward = 10;
+        goldReward = 7;
       } else if (correctAnswers >= 4) {
         // Razoável - 50%
         xpReward = 12;
-        goldReward = 6;
+        goldReward = 5;
       } else if (correctAnswers >= 3) {
         // Básico - 37.5%
         xpReward = 8;
-        goldReward = 4;
+        goldReward = 3;
       } else if (correctAnswers >= 2) {
         xpReward = 5;
         goldReward = 2;
@@ -516,11 +516,11 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
                     <span>Recompensas por acertos:</span>
                   </div>
                   <div className="text-sm text-yellow-700 mt-2 space-y-1">
-                    <div>🏆 8 acertos (PERFEITO): +50 XP, +30 Gold</div>
-                    <div>⭐ 7 acertos: +35 XP, +20 Gold</div>
-                    <div>🥇 6 acertos: +25 XP, +15 Gold</div>
-                    <div>🥈 5 acertos: +18 XP, +10 Gold</div>
-                    <div>🥉 4 acertos: +12 XP, +6 Gold</div>
+                    <div>🏆 8 acertos (PERFEITO): +50 XP, +15 Gold</div>
+                    <div>⭐ 7 acertos: +35 XP, +12 Gold</div>
+                    <div>🥇 6 acertos: +25 XP, +10 Gold</div>
+                    <div>🥈 5 acertos: +18 XP, +7 Gold</div>
+                    <div>🥉 4 acertos: +12 XP, +5 Gold</div>
                   </div>
                 </div>
                 
@@ -721,7 +721,7 @@ IMPORTANTE: Sua resposta deve conter APENAS o array JSON, sem texto adicional an
                             </div>
                             <div className="flex items-center gap-1 text-yellow-600">
                               <span className="text-xl">🪙</span>
-                              <span>+{score === 8 ? 30 : score >= 7 ? 20 : score >= 6 ? 15 : score >= 5 ? 10 : score >= 4 ? 6 : score >= 3 ? 4 : score >= 2 ? 2 : 1} Gold</span>
+                              <span>+{score === 8 ? 15 : score >= 7 ? 12 : score >= 6 ? 10 : score >= 5 ? 7 : score >= 4 ? 5 : score >= 3 ? 3 : score >= 2 ? 2 : 1} Gold</span>
                             </div>
                           </div>
                         </div>
