@@ -21,15 +21,6 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   const borderStyle = getAvatarBorderStyle(levelSystem.currentLevel);
 
-  // Debug log to see what progress we're receiving
-  console.log('🎯 HeroHeader: Received progress prop:', {
-    totalXP: progress.totalXP,
-    availableGold: progress.availableGold,
-    level: progress.level,
-    streak: progress.streak,
-    fullProgress: progress
-  });
-
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Bom dia';

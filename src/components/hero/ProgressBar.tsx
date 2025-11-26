@@ -12,12 +12,6 @@ interface ProgressBarProps {
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
-  console.log('📊 ProgressBar: Received progress:', {
-    totalXP: progress.totalXP,
-    availableGold: progress.availableGold,
-    level: progress.level
-  });
-
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [previousXP, setPreviousXP] = useState(progress.totalXP || 0);
