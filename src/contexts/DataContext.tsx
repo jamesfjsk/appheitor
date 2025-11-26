@@ -1316,12 +1316,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           childUid,
           (progress) => {
             if (progress) {
-              console.log('📊 DataContext: Progress updated:', {
+              console.log('📊 DataContext: Progress updated FULL DATA:', progress);
+              console.log('📊 DataContext: Setting progress state with:', {
                 level: progress.level,
                 totalXP: progress.totalXP,
-                availableGold: progress.availableGold
+                availableGold: progress.availableGold,
+                totalGoldEarned: progress.totalGoldEarned,
+                streak: progress.streak
               });
               setProgress(progress);
+              console.log('✅ DataContext: Progress state set!');
+            } else {
+              console.warn('⚠️ DataContext: Progress is NULL or undefined!');
             }
           },
           (error) => {

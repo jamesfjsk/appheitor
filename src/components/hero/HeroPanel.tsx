@@ -28,7 +28,17 @@ const HeroPanel: React.FC = () => {
   const { requestPermission, permission } = useNotifications();
   const { isSoundEnabled, toggleSound } = useSound();
   const { isPunished } = usePunishment();
-  
+
+  // Debug: Log progress from useData
+  console.log('🏠 HeroPanel: Progress from useData:', {
+    totalXP: progress.totalXP,
+    availableGold: progress.availableGold,
+    level: progress.level,
+    streak: progress.streak,
+    tasks: tasks.length,
+    loading
+  });
+
   // Calculate level system based on current XP
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   
