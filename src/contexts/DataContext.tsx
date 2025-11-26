@@ -1185,6 +1185,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setListenersInitialized(false);
     setLastChildUid(childUid);
 
+    // Capture user at the time of effect execution
+    const currentUser = user;
     let unsubscribeFunctions: (() => void)[] = [];
 
     const initializeData = async () => {
@@ -1210,9 +1212,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           );
         });
 
-        if (!hasProgress && user?.role === 'admin') {
+        if (!hasProgress && currentUser?.role === 'admin') {
           console.log('🔄 DataContext: Creating default data for child:', childUid);
-          await FirestoreService.createDefaultData(childUid, user.userId);
+          await FirestoreService.createDefaultData(childUid, currentUser.userId);
         }
 
         // ⚡ DAILY PROCESSING: Process penalties/bonuses and reset tasks on first load
@@ -1412,9 +1414,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         unsubscribeFunctions.push(unsubscribeUserAchievements);
 
         // Subscribe to notes (admin only)
-        if (user?.role === 'admin') {
+        if (currentUser?.role === 'admin') {
           const unsubscribeNotes = FirestoreService.subscribeToNotes(
-            user.userId,
+            currentUser.userId,
             (notes) => {
               setNotes(notes);
               console.log('📝 DataContext: Notes updated:', notes.length);
@@ -1475,7 +1477,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
       setListenersInitialized(false);
     };
-  }, [childUid, user?.userId, user?.role]);
+  }, [childUid]);
 
   // ⚡ AUTOMATIC DAY CHANGE MONITOR
   // This useEffect checks every minute if the date has changed
