@@ -502,6 +502,10 @@ const AdminControls: React.FC = () => {
                     quizEnabled: newQuizEnabled,
                     updatedAt: new Date()
                   });
+
+                  // Force data sync to update UI immediately
+                  await syncData();
+
                   playClick();
                   toast.success(
                     newQuizEnabled
