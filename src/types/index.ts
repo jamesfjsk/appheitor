@@ -27,6 +27,7 @@ export interface UserProgress {
   lastActivityDate: Date;
   updatedAt: Date;
   lastDailySummaryProcessedDate?: Date;
+  quizEnabled?: boolean; // Flag para ativar/desativar o quiz diário
 }
 
 export interface Task {

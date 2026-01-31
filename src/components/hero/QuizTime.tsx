@@ -13,7 +13,7 @@ interface QuizTimeProps {
 }
 
 const QuizTime: React.FC<QuizTimeProps> = ({ onComplete }) => {
-  const { adjustUserXP, adjustUserGold } = useData();
+  const { adjustUserXP, adjustUserGold, progress } = useData();
   const { childUid } = useAuth();
   const { playTaskComplete, playLevelUp } = useSound();
   
@@ -35,21 +35,29 @@ const QuizTime: React.FC<QuizTimeProps> = ({ onComplete }) => {
   useEffect(() => {
     const checkQuizStatus = () => {
       if (!childUid) return;
-      
+
       // Check quiz completion status from Firebase instead of localStorage
       checkQuizCompletionFromFirebase();
     };
-    
+
     checkQuizStatus();
-  }, [childUid]);
+  }, [childUid, progress.quizEnabled]);
 
   const checkQuizCompletionFromFirebase = async () => {
     if (!childUid) return;
-    
+
     try {
+      // Check if quiz is enabled (default to true if not set)
+      const quizEnabled = progress.quizEnabled ?? true;
+
+      if (!quizEnabled) {
+        console.log('📚 Quiz desativado pelo admin');
+        return;
+      }
+
       const today = getTodayBrazil();
       const quizCompleted = await FirestoreService.checkQuizCompletedToday(childUid, today);
-      
+
       if (!quizCompleted) {
         // Show prompt after 3 seconds
         const timer = setTimeout(() => {

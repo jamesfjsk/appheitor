@@ -474,6 +474,66 @@ const AdminControls: React.FC = () => {
         </div>
       </div>
 
+      {/* Configurações Gerais */}
+      <div className="mb-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 shadow-sm">
+        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Settings className="w-5 h-5 text-indigo-600" />
+          Configurações Gerais
+        </h3>
+
+        <div className="space-y-4">
+          {/* Toggle Quiz Diário */}
+          <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-indigo-100">
+            <div className="flex-1">
+              <h4 className="font-semibold text-gray-900 mb-1">Quiz Diário</h4>
+              <p className="text-sm text-gray-600">
+                Ativa ou desativa o quiz diário de conhecimentos para o Heitor
+              </p>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={async () => {
+                if (!childUid) return;
+                setIsProcessing(true);
+                try {
+                  const newQuizEnabled = !(progress.quizEnabled ?? true);
+                  await FirestoreService.updateUserProgress(childUid, {
+                    quizEnabled: newQuizEnabled,
+                    updatedAt: new Date()
+                  });
+                  playClick();
+                  toast.success(
+                    newQuizEnabled
+                      ? '✅ Quiz diário ativado!'
+                      : '❌ Quiz diário desativado!'
+                  );
+                } catch (error: any) {
+                  console.error('❌ Erro ao atualizar configuração de quiz:', error);
+                  playError();
+                  toast.error('Erro ao atualizar configuração');
+                } finally {
+                  setIsProcessing(false);
+                }
+              }}
+              disabled={isProcessing}
+              className={`
+                relative inline-flex h-10 w-20 items-center rounded-full transition-colors
+                ${(progress.quizEnabled ?? true) ? 'bg-green-500' : 'bg-gray-300'}
+                ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+              `}
+            >
+              <span
+                className={`
+                  inline-block h-8 w-8 transform rounded-full bg-white transition-transform shadow-lg
+                  ${(progress.quizEnabled ?? true) ? 'translate-x-10' : 'translate-x-1'}
+                `}
+              />
+            </motion.button>
+          </div>
+        </div>
+      </div>
+
       {/* Botão Salvar & Sincronizar */}
       <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
         <div className="flex items-center justify-between">
