@@ -489,6 +489,9 @@ const AdminControls: React.FC = () => {
               <p className="text-sm text-gray-600">
                 Ativa ou desativa o quiz diário de conhecimentos para o Heitor
               </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Estado atual: {progress.quizEnabled === undefined ? 'não definido (padrão: ativo)' : progress.quizEnabled ? 'ativo' : 'desativado'}
+              </p>
             </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -496,15 +499,19 @@ const AdminControls: React.FC = () => {
               onClick={async () => {
                 if (!childUid) return;
                 setIsProcessing(true);
+
+                const currentValue = progress.quizEnabled ?? true;
+                const newQuizEnabled = !currentValue;
+
+                console.log('🔧 Toggle Quiz - Estado atual:', currentValue, '→ Novo estado:', newQuizEnabled);
+
                 try {
-                  const newQuizEnabled = !(progress.quizEnabled ?? true);
                   await FirestoreService.updateUserProgress(childUid, {
                     quizEnabled: newQuizEnabled,
                     updatedAt: new Date()
                   });
 
-                  // Force data sync to update UI immediately
-                  await syncData();
+                  console.log('✅ Salvo no Firebase com sucesso!');
 
                   playClick();
                   toast.success(
@@ -512,6 +519,11 @@ const AdminControls: React.FC = () => {
                       ? '✅ Quiz diário ativado!'
                       : '❌ Quiz diário desativado!'
                   );
+
+                  // Small delay to allow Firestore listener to update
+                  setTimeout(() => {
+                    console.log('🔍 Valor após atualização:', progress.quizEnabled);
+                  }, 500);
                 } catch (error: any) {
                   console.error('❌ Erro ao atualizar configuração de quiz:', error);
                   playError();

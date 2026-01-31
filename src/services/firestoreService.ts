@@ -1661,7 +1661,8 @@ export class FirestoreService {
               totalTasksCompleted: data.totalTasksCompleted || 0,
               lastActivityDate: data.lastActivityDate?.toDate() || new Date(),
               updatedAt: data.updatedAt?.toDate() || new Date(),
-              lastDailySummaryProcessedDate: data.lastDailySummaryProcessedDate?.toDate()
+              lastDailySummaryProcessedDate: data.lastDailySummaryProcessedDate?.toDate(),
+              quizEnabled: data.quizEnabled
             };
             onUpdate(progress);
           } else {
