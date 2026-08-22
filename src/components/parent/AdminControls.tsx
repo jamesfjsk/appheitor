@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
 import { calculateLevelSystem, getXPMilestones } from '../../utils/levelSystem';
 import { FirestoreService } from '../../services/firestoreService';
+import VacationModeControl from './VacationModeControl';
 import toast from 'react-hot-toast';
 
 const AdminControls: React.FC = () => {
@@ -480,6 +481,8 @@ const AdminControls: React.FC = () => {
           <Settings className="w-5 h-5 text-indigo-600" />
           Configurações Gerais
         </h3>
+
+        <VacationModeControl />
 
         <div className="space-y-4">
           {/* Toggle Quiz Diário */}

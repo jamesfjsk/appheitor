@@ -7,6 +7,7 @@ import { OfflineProvider } from './contexts/OfflineContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SoundProvider } from './contexts/SoundContext';
 import { PunishmentProvider } from './contexts/PunishmentContext';
+import { VacationProvider } from './contexts/VacationContext';
 import LoginScreen from './components/auth/LoginScreen';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import HeroPanel from './components/hero/HeroPanel';
@@ -41,6 +42,7 @@ function App() {
         <SoundProvider>
           <AuthProvider>
             <NotificationProvider>
+              <VacationProvider>
               <DataProvider>
                 <PunishmentProvider>
                   <Router>
@@ -82,6 +84,7 @@ function App() {
                   </Router>
                 </PunishmentProvider>
               </DataProvider>
+              </VacationProvider>
             </NotificationProvider>
           </AuthProvider>
         </SoundProvider>

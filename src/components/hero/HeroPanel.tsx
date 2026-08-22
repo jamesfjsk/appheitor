@@ -19,6 +19,7 @@ import QuizTime from './QuizTime';
 import SurpriseMissionQuiz from './SurpriseMissionQuiz';
 import FlashTimer from './FlashTimer';
 import BirthdayCelebration from './BirthdayCelebration';
+import VacationBanner from './VacationBanner';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { getTodayBrazil } from '../../utils/timezone';
 
@@ -453,12 +454,14 @@ const HeroPanel: React.FC = () => {
         </div>
 
         <div className="relative z-10 container mx-auto px-4 py-6 max-w-6xl">
-          <HeroHeader 
+          <HeroHeader
             progress={progress}
             onOpenRewards={() => setShowRewards(true)}
             onOpenCalendar={() => setShowCalendar(true)}
             onOpenTimer={() => setShowTimer(true)}
           />
+
+          <VacationBanner />
           
           {/* Controle de Som */}
           <motion.div

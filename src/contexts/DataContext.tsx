@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useSound } from './SoundContext';
+import { useVacation } from './VacationContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus, Note } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp, calculateLevelSystem } from '../utils/levelSystem';
@@ -92,6 +93,7 @@ interface DataProviderProps {
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const { user, childUid } = useAuth();
   const { playLevelUp, playAchievement } = useSound();
+  const { applyXP: vacationApplyXP, applyGold: vacationApplyGold, isActive: vacationActive } = useVacation();
   
   // Initialize all state hooks first (before any conditional logic)
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -302,20 +304,25 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       
       // Store previous progress for level up check
       const previousXP = progress.totalXP || 0;
-      
-      setTasks(prevTasks => 
-        prevTasks.map(t => 
-          t.id === taskId 
+
+      const baseXP = task.xp || 10;
+      const baseGold = task.gold || 5;
+      const xpReward = vacationApplyXP(baseXP);
+      const goldReward = vacationApplyGold(baseGold);
+
+      setTasks(prevTasks =>
+        prevTasks.map(t =>
+          t.id === taskId
             ? { ...t, status: 'done', lastCompletedDate: today, updatedAt: new Date() }
             : t
         )
       );
-      
+
       await FirestoreService.completeTaskWithRewards(
         taskId,
         childUid,
-        task.xp || 10,
-        task.gold || 5
+        xpReward,
+        goldReward
       );
 
       // Update streak (check if first task of the day)
@@ -343,7 +350,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
 
       // Check for level up
-      const newXP = previousXP + (task.xp || 10);
+      const newXP = previousXP + xpReward;
       const levelUpCheck = checkLevelUp(previousXP, newXP);
 
       if (levelUpCheck.leveledUp) {
@@ -368,7 +375,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         checkAchievements();
       }, 1500);
 
-      toast.success(`+${task.xp || 10} XP, +${task.gold || 5} Gold! Tarefa completada!`);
+      toast.success(
+        vacationActive
+          ? `Ferias em dobro! +${xpReward} XP, +${goldReward} Gold!`
+          : `+${xpReward} XP, +${goldReward} Gold! Tarefa completada!`
+      );
     } catch (error: any) {
       console.error('❌ Erro ao completar tarefa:', error);
       if (error.message === 'Task already completed today') {
@@ -386,7 +397,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
       throw error;
     }
-  }, [childUid, tasks, progress.totalXP, playLevelUp, checkAchievements]);
+  }, [childUid, tasks, progress.totalXP, playLevelUp, checkAchievements, vacationApplyXP, vacationApplyGold, vacationActive]);
 
   const addReward = useCallback(async (rewardData: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -708,19 +719,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     try {
       const today = getTodayBrazil();
 
+      const finalXP = vacationApplyXP(xpEarned);
+      const finalGold = vacationApplyGold(goldEarned);
+
       await FirestoreService.markSurpriseMissionCompletedToday(childUid, today, {
         score,
         totalQuestions,
-        xpEarned,
-        goldEarned,
+        xpEarned: finalXP,
+        goldEarned: finalGold,
         completedAt: new Date()
       });
 
       // Store previous XP for level up check
       const previousXP = progress.totalXP || 0;
-      const newTotalXP = (progress.totalXP || 0) + xpEarned;
-      const newAvailableGold = (progress.availableGold || 0) + goldEarned;
-      const newTotalGoldEarned = (progress.totalGoldEarned || 0) + goldEarned;
+      const newTotalXP = (progress.totalXP || 0) + finalXP;
+      const newAvailableGold = (progress.availableGold || 0) + finalGold;
+      const newTotalGoldEarned = (progress.totalGoldEarned || 0) + finalGold;
 
       await FirestoreService.updateUserProgress(childUid, {
         totalXP: newTotalXP,
@@ -730,10 +744,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       });
 
       // Create gold transaction for surprise mission
-      if (goldEarned > 0) {
+      if (finalGold > 0) {
         await FirestoreService.createGoldTransaction(
           childUid,
-          goldEarned,
+          finalGold,
           'earned',
           'surprise_mission',
           `⚡ Missão Surpresa: ${score} de ${totalQuestions} acertos`,
@@ -741,9 +755,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             metadata: {
               score,
               totalQuestions,
-              xpEarned,
+              xpEarned: finalXP,
               accuracy: Math.round((score / totalQuestions) * 100),
-              date: today
+              date: today,
+              vacationBonus: vacationActive
             }
           }
         );
@@ -766,13 +781,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         checkAchievements();
       }, 1000);
 
-      toast.success(`🎯 Missão Surpresa completada! +${xpEarned} XP, +${goldEarned} Gold!`);
+      toast.success(
+        vacationActive
+          ? `Ferias em dobro! Missao Surpresa: +${finalXP} XP, +${finalGold} Gold!`
+          : `🎯 Missão Surpresa completada! +${finalXP} XP, +${finalGold} Gold!`
+      );
     } catch (error: any) {
       console.error('❌ Erro ao completar missão surpresa:', error);
       toast.error('Erro ao completar missão surpresa');
       throw error;
     }
-  }, [childUid, progress.totalXP, progress.availableGold, progress.totalGoldEarned, playLevelUp, checkAchievements]);
+  }, [childUid, progress.totalXP, progress.availableGold, progress.totalGoldEarned, playLevelUp, checkAchievements, vacationApplyXP, vacationApplyGold, vacationActive]);
 
   const claimAchievementReward = useCallback(async (userAchievementId: string) => {
     if (!childUid) throw new Error('Child UID não definido');
