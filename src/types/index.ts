@@ -28,6 +28,90 @@ export interface UserProgress {
   updatedAt: Date;
   lastDailySummaryProcessedDate?: Date;
   quizEnabled?: boolean; // Flag para ativar/desativar o quiz diário
+  quizRequired?: boolean; // Quiz obrigatório: a criança precisa fazer antes de seguir
+  quizQuestionCount?: number; // Quantidade de perguntas do quiz diário (padrão 8)
+}
+
+// ========================================
+// QUIZ DIÁRIO (prova gerada com antecedência e guardada em dailyQuizzes)
+// ========================================
+export type DailyQuizQuestionKind = 'lesson' | 'knowledge';
+
+export interface DailyQuizQuestion {
+  question: string;
+  options: string[];
+  answer: string;
+  explanation: string;
+  kind: DailyQuizQuestionKind;
+  subject: string;
+}
+
+export interface DailyQuizTheme {
+  id: string;          // id do tema no currículo
+  category: string;    // filosofia, caráter, ciência...
+  title: string;
+  lesson: string;      // a "ideia do dia": texto curto e concreto
+  whyItMatters: string;
+}
+
+export interface DailyQuiz {
+  id: string;
+  userId: string;
+  date: string;        // YYYY-MM-DD (Brasil)
+  status: 'ready' | 'completed';
+  theme: DailyQuizTheme;
+  questions: DailyQuizQuestion[];
+  reflectionPrompt: string;
+  source: 'ai' | 'offline';
+  generatedAt: Date;
+  completed: boolean;
+  score?: number;
+  totalQuestions?: number;
+  xpEarned?: number;
+  goldEarned?: number;
+  answers?: string[];
+  reflection?: string;
+  completedAt?: Date;
+}
+
+// ========================================
+// ARENA DE INGLÊS (jogos de vocabulário)
+// ========================================
+export type EnglishGameId = 'mine_rush' | 'block_memory' | 'creeper_quiz' | 'crafting_words';
+
+export interface EnglishGameSession {
+  id: string;
+  userId: string;
+  game: EnglishGameId;
+  category: string;       // fruits | animals | ... | mixed
+  date: string;           // YYYY-MM-DD
+  correct: number;
+  total: number;
+  score: number;
+  durationSec: number;
+  xpEarned: number;
+  goldEarned: number;
+  rewarded: boolean;      // false quando o limite diário de rodadas premiadas já passou
+  depth?: number;         // Mine Rush: blocos quebrados na corrida
+  maxCombo?: number;      // Mine Rush: maior sequência de acertos
+  createdAt: Date;
+}
+
+export interface EnglishWordStat {
+  seen: number;
+  correct: number;
+  wrong: number;
+  streak: number;         // acertos seguidos; 3+ = dominada
+  lastAt?: Date;
+}
+
+export interface EnglishProgress {
+  userId: string;
+  words: Record<string, EnglishWordStat>;
+  sessions: number;
+  updatedAt: Date;
+  bestDepth?: number;     // Mine Rush: recorde de profundidade (blocos)
+  bestScore?: number;     // Mine Rush: recorde de pontos
 }
 
 export interface Task {
@@ -55,7 +139,7 @@ export interface Reward {
   description: string;
   category: 'toy' | 'activity' | 'treat' | 'privilege' | 'custom';
   costGold: number;
-  emoji: string;
+  emoji: string; // icon key Flash Missions (legado: emoji)
   active: boolean;
   requiredLevel: number;
   createdAt: Date;
@@ -160,7 +244,7 @@ export interface NotificationPayload {
   icon?: string;
   badge?: string;
   tag?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   requireInteraction?: boolean;
 }
 
@@ -196,7 +280,7 @@ export interface Achievement {
   ownerId: string; // Child UID
   title: string;
   description: string;
-  icon: string; // emoji ou ícone
+  icon: string; // icon key Flash Missions (legado: emoji)
   type: 'xp' | 'level' | 'tasks' | 'checkin' | 'streak' | 'redemptions' | 'custom';
   target: number; // valor alvo (ex: 1000 para 1000 XP)
   xpReward: number;
@@ -237,11 +321,11 @@ export interface GoldTransaction {
   userId: string; // Child UID
   amount: number; // Positive for gain, negative for spend
   type: 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment';
-  source: 'task_completion' | 'reward_redemption' | 'daily_bonus' | 'daily_penalty' | 'admin_adjustment' | 'birthday' | 'quiz' | 'surprise_mission' | 'achievement' | 'redemption_refund';
+  source: 'task_completion' | 'reward_redemption' | 'daily_bonus' | 'daily_penalty' | 'admin_adjustment' | 'birthday' | 'quiz' | 'surprise_mission' | 'achievement' | 'redemption_refund' | 'english_game';
   description: string; // Human-readable description
   relatedId?: string; // Task ID, Reward ID, Achievement ID, etc.
   relatedTitle?: string; // Title of related item for quick reference
-  metadata?: Record<string, any>; // Additional context
+  metadata?: Record<string, unknown>; // Additional context
   balanceBefore: number; // Gold balance before transaction
   balanceAfter: number; // Gold balance after transaction
   createdAt: Date;
@@ -273,4 +357,17 @@ export interface PunishmentTaskCompletion {
   taskNumber: number; // 1-30
   taskId: string; // ID of the task that was completed
   taskTitle: string; // Title of the task for quick reference
+}
+export interface DailyProgress {
+  userId: string;
+  date: string; // YYYY-MM-DD format
+  xpEarned: number;
+  goldEarned: number;
+  tasksCompleted: number;
+  totalTasksAvailable: number;
+  goldPenalty: number;
+  allTasksBonusGold: number;
+  summaryProcessed: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

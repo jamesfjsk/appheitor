@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Save, Trophy, Type, FileText, Target, Zap, Star } from 'lucide-react';
+import { IconPicker } from '../../icons';
 import { useData } from '../../contexts/DataContext';
 import { Achievement } from '../../types';
 import toast from 'react-hot-toast';
 
+type AchievementTemplate = Pick<Achievement, 'title' | 'description' | 'icon' | 'type' | 'target' | 'xpReward' | 'goldReward'>;
+
 interface AchievementFormProps {
-  achievement?: Achievement;
+  achievement?: Achievement | null;
   onClose: () => void;
   isOpen: boolean;
 }
@@ -16,7 +19,7 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    icon: '🏆',
+    icon: 'trophy',
     type: 'tasks' as Achievement['type'],
     target: 1,
     xpReward: 25,
@@ -42,7 +45,7 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
       setFormData({
         title: '',
         description: '',
-        icon: '🏆',
+        icon: 'trophy',
         type: 'tasks',
         target: 1,
         xpReward: 25,
@@ -55,8 +58,8 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
 
   // Listen for template usage
   useEffect(() => {
-    const handleUseTemplate = (event: any) => {
-      const template = event.detail;
+    const handleUseTemplate = (event: Event) => {
+      const template = (event as CustomEvent<AchievementTemplate>).detail;
       setFormData({
         title: template.title,
         description: template.description,
@@ -148,7 +151,7 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     if (errors[field]) {
@@ -157,18 +160,13 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
   };
 
   const typeOptions = [
-    { value: 'xp', label: '💙 XP Total', description: 'Baseado no XP acumulado' },
-    { value: 'level', label: '🏆 Nível', description: 'Baseado no nível alcançado' },
-    { value: 'tasks', label: '📝 Tarefas', description: 'Baseado em tarefas completadas' },
-    { value: 'streak', label: '🔥 Sequência', description: 'Baseado em dias consecutivos' },
-    { value: 'checkin', label: '📅 Check-in', description: 'Baseado em check-ins diários' },
-    { value: 'redemptions', label: '🎁 Resgates', description: 'Baseado em recompensas resgatadas' },
-    { value: 'custom', label: '⭐ Personalizado', description: 'Conquista manual' },
-  ];
-
-  const iconSuggestions = [
-    '🏆', '🥇', '🥈', '🥉', '⭐', '🌟', '💎', '👑', '🎯', '🔥',
-    '⚡', '💪', '🚀', '🎊', '🎉', '🏅', '🎖️', '🏵️', '🎗️', '🎀'
+    { value: 'xp', label: 'XP Total', description: 'Baseado no XP acumulado' },
+    { value: 'level', label: 'Nível', description: 'Baseado no nível alcançado' },
+    { value: 'tasks', label: 'Tarefas', description: 'Baseado em tarefas completadas' },
+    { value: 'streak', label: 'Sequência', description: 'Baseado em dias consecutivos' },
+    { value: 'checkin', label: 'Check-in', description: 'Baseado em check-ins diários' },
+    { value: 'redemptions', label: 'Resgates', description: 'Baseado em recompensas resgatadas' },
+    { value: 'custom', label: 'Personalizado', description: 'Conquista manual' },
   ];
 
   const getTargetSuggestions = () => {
@@ -305,46 +303,14 @@ const AchievementForm: React.FC<AchievementFormProps> = ({ achievement, onClose,
             {/* Ícone */}
             <div>
               <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                <span className="text-lg">🎨</span>
+                <Trophy className="w-4 h-4" />
                 <span>Ícone *</span>
               </label>
-              
-              <div className="flex items-center gap-4 mb-3">
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) => handleInputChange('icon', e.target.value)}
-                  className={`w-16 px-3 py-2 border rounded-lg text-center text-2xl ${
-                    errors.icon ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="🏆"
-                  maxLength={2}
-                />
-                <span className="text-sm text-gray-600">
-                  Escolha um emoji
-                </span>
-              </div>
-              
-              {errors.icon && (
-                <p className="mb-3 text-sm text-red-600">{errors.icon}</p>
-              )}
-              
-              <div className="grid grid-cols-5 gap-2">
-                {iconSuggestions.map((icon) => (
-                  <button
-                    key={icon}
-                    type="button"
-                    onClick={() => handleInputChange('icon', icon)}
-                    className={`p-2 text-xl rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-                      formData.icon === icon
-                        ? 'border-yellow-500 bg-yellow-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {icon}
-                  </button>
-                ))}
-              </div>
+              <IconPicker
+                value={formData.icon}
+                onChange={(key) => handleInputChange('icon', key)}
+                error={errors.icon}
+              />
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { PunishmentMode } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../utils/errors';
 
 interface PunishmentContextType {
   punishment: PunishmentMode | null;
@@ -19,6 +20,7 @@ interface PunishmentContextType {
 
 const PunishmentContext = createContext<PunishmentContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePunishment = () => {
   const context = useContext(PunishmentContext);
   if (!context) {
@@ -111,10 +113,11 @@ export const PunishmentProvider: React.FC<PunishmentProviderProps> = ({ children
           duration: 4000
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ Error completing punishment task:', error);
-      if (error.message.includes('esperar')) {
-        toast.error(`⏳ ${error.message}`);
+      const message = getErrorMessage(error);
+      if (message.includes('esperar')) {
+        toast.error(`⏳ ${message}`);
       } else {
         toast.error('Erro ao completar tarefa');
       }

@@ -19,7 +19,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um doce gostoso como recompensa',
     category: 'treat',
     costGold: 15,
-    emoji: '🍭',
+    emoji: 'candy',
     requiredLevel: 1,
     levelRange: 'Flash Iniciante'
   },
@@ -28,7 +28,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Seu biscoito preferido de sobremesa',
     category: 'treat',
     costGold: 20,
-    emoji: '🍪',
+    emoji: 'cookie',
     requiredLevel: 3,
     levelRange: 'Flash Iniciante'
   },
@@ -37,7 +37,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um sorvete delicioso',
     category: 'treat',
     costGold: 25,
-    emoji: '🍦',
+    emoji: 'ice-cream',
     requiredLevel: 5,
     levelRange: 'Flash Iniciante'
   },
@@ -48,7 +48,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Tempo adicional para jogar seus jogos favoritos',
     category: 'activity',
     costGold: 30,
-    emoji: '🎮',
+    emoji: 'gamepad',
     requiredLevel: 6,
     levelRange: 'Flash Iniciante'
   },
@@ -57,7 +57,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Tempo adicional no tablet ou celular',
     category: 'activity',
     costGold: 45,
-    emoji: '📱',
+    emoji: 'phone',
     requiredLevel: 8,
     levelRange: 'Flash Iniciante'
   },
@@ -66,7 +66,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Uma hora a mais de desenho ou filme',
     category: 'activity',
     costGold: 60,
-    emoji: '📺',
+    emoji: 'tv',
     requiredLevel: 10,
     levelRange: 'Flash Iniciante'
   },
@@ -77,7 +77,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Você decide qual filme assistir em família',
     category: 'privilege',
     costGold: 50,
-    emoji: '🎬',
+    emoji: 'movie',
     requiredLevel: 11,
     levelRange: 'Flash Aprendiz'
   },
@@ -86,7 +86,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Você decide o lanche da tarde',
     category: 'privilege',
     costGold: 40,
-    emoji: '🥪',
+    emoji: 'sandwich',
     requiredLevel: 15,
     levelRange: 'Flash Aprendiz'
   },
@@ -95,7 +95,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Você decide o que vamos jantar hoje',
     category: 'privilege',
     costGold: 75,
-    emoji: '🍕',
+    emoji: 'pizza',
     requiredLevel: 20,
     levelRange: 'Flash Aprendiz'
   },
@@ -106,7 +106,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um passeio especial no parque',
     category: 'activity',
     costGold: 100,
-    emoji: '🏞️',
+    emoji: 'park',
     requiredLevel: 21,
     levelRange: 'Flash Aprendiz'
   },
@@ -115,7 +115,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Ir ao cinema assistir um filme',
     category: 'activity',
     costGold: 150,
-    emoji: '🎭',
+    emoji: 'theater',
     requiredLevel: 25,
     levelRange: 'Flash Aprendiz'
   },
@@ -124,7 +124,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um dia inteiro de diversão na piscina',
     category: 'activity',
     costGold: 120,
-    emoji: '🏊',
+    emoji: 'swim',
     requiredLevel: 30,
     levelRange: 'Flash Júnior'
   },
@@ -133,7 +133,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Convidar um amigo para dormir em casa',
     category: 'activity',
     costGold: 200,
-    emoji: '🏠',
+    emoji: 'home',
     requiredLevel: 35,
     levelRange: 'Flash Júnior'
   },
@@ -144,7 +144,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um carrinho legal para brincar',
     category: 'toy',
     costGold: 180,
-    emoji: '🚗',
+    emoji: 'car',
     requiredLevel: 36,
     levelRange: 'Flash Júnior'
   },
@@ -153,7 +153,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um super-herói para suas aventuras',
     category: 'toy',
     costGold: 220,
-    emoji: '🦸',
+    emoji: 'hero',
     requiredLevel: 40,
     levelRange: 'Flash Júnior'
   },
@@ -162,7 +162,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um jogo novo para jogar em família',
     category: 'toy',
     costGold: 250,
-    emoji: '🎲',
+    emoji: 'dice',
     requiredLevel: 45,
     levelRange: 'Flash Júnior'
   },
@@ -171,7 +171,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Materiais para desenhar e criar',
     category: 'toy',
     costGold: 200,
-    emoji: '🎨',
+    emoji: 'art',
     requiredLevel: 50,
     levelRange: 'Flash Júnior'
   },
@@ -182,7 +182,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Uma camiseta oficial do seu herói favorito',
     category: 'toy',
     costGold: 300,
-    emoji: '👕',
+    emoji: 'shirt',
     requiredLevel: 51,
     levelRange: 'Flash Responsável'
   },
@@ -191,7 +191,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um tênis legal para correr como o Flash',
     category: 'toy',
     costGold: 400,
-    emoji: '👟',
+    emoji: 'sneaker',
     requiredLevel: 60,
     levelRange: 'Flash Responsável'
   },
@@ -200,7 +200,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Um set LEGO para construir aventuras',
     category: 'toy',
     costGold: 500,
-    emoji: '🧱',
+    emoji: 'lego',
     requiredLevel: 70,
     levelRange: 'Flash Responsável'
   },
@@ -209,7 +209,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Uma bicicleta para suas aventuras',
     category: 'toy',
     costGold: 800,
-    emoji: '🚲',
+    emoji: 'bike',
     requiredLevel: 75,
     levelRange: 'Flash Responsável'
   },
@@ -220,7 +220,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Fone especial para jogos',
     category: 'toy',
     costGold: 600,
-    emoji: '🎧',
+    emoji: 'headphones',
     requiredLevel: 76,
     levelRange: 'Flash Disciplinado'
   },
@@ -229,7 +229,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Seu próprio tablet para estudar e se divertir',
     category: 'toy',
     costGold: 1200,
-    emoji: '📱',
+    emoji: 'phone',
     requiredLevel: 80,
     levelRange: 'Flash Disciplinado'
   },
@@ -238,7 +238,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Uma viagem especial em família',
     category: 'activity',
     costGold: 1000,
-    emoji: '✈️',
+    emoji: 'plane',
     requiredLevel: 85,
     levelRange: 'Flash Disciplinado'
   },
@@ -247,7 +247,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Seu próprio console para jogar',
     category: 'toy',
     costGold: 1500,
-    emoji: '🎮',
+    emoji: 'gamepad',
     requiredLevel: 90,
     levelRange: 'Flash Disciplinado'
   },
@@ -258,7 +258,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Uma viagem incrível para onde você quiser',
     category: 'activity',
     costGold: 8000,
-    emoji: '🏖️',
+    emoji: 'beach',
     requiredLevel: 91,
     levelRange: 'Flash Master'
   },
@@ -267,7 +267,7 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'Uma festa de aniversário inesquecível',
     category: 'activity',
     costGold: 6000,
-    emoji: '🎉',
+    emoji: 'party',
     requiredLevel: 95,
     levelRange: 'Flash Master'
   },
@@ -276,31 +276,11 @@ export const LEVEL_REWARD_TEMPLATES: LevelRewardTemplate[] = [
     description: 'O presente que você sempre quis',
     category: 'custom',
     costGold: 10000,
-    emoji: '🎁',
+    emoji: 'gift',
     requiredLevel: 100,
     levelRange: 'Flash Master'
   }
 ];
-
-export function getRewardsByLevel(level: number): LevelRewardTemplate[] {
-  return LEVEL_REWARD_TEMPLATES.filter(reward => reward.requiredLevel <= level);
-}
-
-export function getLockedRewards(level: number): LevelRewardTemplate[] {
-  return LEVEL_REWARD_TEMPLATES.filter(reward => reward.requiredLevel > level);
-}
-
-export function getNextUnlockLevel(currentLevel: number): number | null {
-  const nextReward = LEVEL_REWARD_TEMPLATES
-    .filter(reward => reward.requiredLevel > currentLevel)
-    .sort((a, b) => a.requiredLevel - b.requiredLevel)[0];
-  
-  return nextReward ? nextReward.requiredLevel : null;
-}
-
-export function getRewardsUnlockedAtLevel(level: number): LevelRewardTemplate[] {
-  return LEVEL_REWARD_TEMPLATES.filter(reward => reward.requiredLevel === level);
-}
 
 export function isRewardUnlocked(requiredLevel: number, currentLevel: number): boolean {
   return currentLevel >= requiredLevel;

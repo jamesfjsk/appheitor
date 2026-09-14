@@ -1,6 +1,23 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback, ReactNode } from 'react';
-import { supabase, VacationMode } from '../lib/supabase';
+import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../config/firebase';
 import { getTodayBrazil } from '../utils/timezone';
+import { useAuth } from './AuthContext';
+
+// Modo férias: documento único em settings/vacationMode (antes vivia no Supabase)
+export interface VacationMode {
+  id: string;
+  is_enabled: boolean;
+  title: string;
+  message: string;
+  start_date: string | null; // YYYY-MM-DD
+  end_date: string | null;   // YYYY-MM-DD
+  xp_multiplier: number;
+  gold_multiplier: number;
+  updated_at: string;
+}
+
+const VACATION_DOC = doc(db, 'settings', 'vacationMode');
 
 interface VacationContextType {
   config: VacationMode | null;
@@ -17,6 +34,7 @@ interface VacationContextType {
 
 const VacationContext = createContext<VacationContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useVacation = (): VacationContextType => {
   const ctx = useContext(VacationContext);
   if (!ctx) throw new Error('useVacation deve ser usado dentro de VacationProvider');
@@ -42,66 +60,61 @@ const computeDaysRemaining = (config: VacationMode | null): number | null => {
 export const VacationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<VacationMode | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('vacation_mode')
-        .select('*')
-        .eq('id', 'default')
-        .maybeSingle();
-
-      if (error) {
-        console.error('VacationContext load error:', error);
-        setConfig(null);
-      } else {
-        setConfig((data as VacationMode) ?? null);
-      }
-    } catch (err) {
-      console.error('VacationContext unexpected error:', err);
-      setConfig(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { user } = useAuth();
+  const uid = user?.userId ?? null;
 
   useEffect(() => {
-    load();
-
-    const channel = supabase
-      .channel('vacation-mode-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'vacation_mode', filter: 'id=eq.default' },
-        (payload) => {
-          if (payload.new && typeof payload.new === 'object') {
-            setConfig(payload.new as VacationMode);
-          } else if (payload.eventType === 'DELETE') {
-            setConfig(null);
-          }
+    // Sem login as regras negam a leitura; espera o usuário entrar
+    if (!uid) {
+      setConfig(null);
+      setLoading(false);
+      return;
+    }
+    const unsubscribe = onSnapshot(
+      VACATION_DOC,
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          setConfig({
+            id: snap.id,
+            is_enabled: Boolean(data.is_enabled),
+            title: data.title ?? '',
+            message: data.message ?? '',
+            start_date: data.start_date ?? null,
+            end_date: data.end_date ?? null,
+            xp_multiplier: Number(data.xp_multiplier) || 1,
+            gold_multiplier: Number(data.gold_multiplier) || 1,
+            updated_at: data.updated_at?.toDate?.().toISOString?.() ?? '',
+          });
+        } else {
+          setConfig(null);
         }
-      )
-      .subscribe();
+        setLoading(false);
+      },
+      (error) => {
+        console.error('VacationContext: erro ao ouvir settings/vacationMode', error);
+        setConfig(null);
+        setLoading(false);
+      }
+    );
 
+    // Reavalia a janela de datas de hora em hora (o documento não muda, o dia sim)
     const interval = setInterval(() => {
       setConfig((current) => (current ? { ...current } : current));
     }, 60 * 60 * 1000);
 
     return () => {
-      supabase.removeChannel(channel);
+      unsubscribe();
       clearInterval(interval);
     };
-  }, [load]);
+  }, [uid]);
 
   const updateConfig = useCallback(async (updates: Partial<Omit<VacationMode, 'id' | 'updated_at'>>) => {
-    const { data, error } = await supabase
-      .from('vacation_mode')
-      .upsert({ id: 'default', ...updates, updated_at: new Date().toISOString() })
-      .select()
-      .maybeSingle();
+    await setDoc(VACATION_DOC, { ...updates, updated_at: serverTimestamp() }, { merge: true });
+  }, []);
 
-    if (error) throw error;
-    if (data) setConfig(data as VacationMode);
+  const reload = useCallback(async () => {
+    /* o listener já mantém o estado atualizado */
   }, []);
 
   const value = useMemo<VacationContextType>(() => {
@@ -119,9 +132,9 @@ export const VacationProvider: React.FC<{ children: ReactNode }> = ({ children }
       applyXP: (amount: number) => Math.round(amount * xpMultiplier),
       applyGold: (amount: number) => Math.round(amount * goldMultiplier),
       updateConfig,
-      reload: load,
+      reload,
     };
-  }, [config, loading, updateConfig, load]);
+  }, [config, loading, updateConfig, reload]);
 
   return <VacationContext.Provider value={value}>{children}</VacationContext.Provider>;
 };

@@ -1,11 +1,11 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { 
+import {
   initializeFirestore,
-  enableNetwork, 
-  enableIndexedDbPersistence
+  enableIndexedDbPersistence,
+  type FirestoreSettings
 } from 'firebase/firestore';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, type Messaging, type MessagePayload } from 'firebase/messaging';
 
 // ========================================
 // 🔥 VALIDAÇÃO DAS VARIÁVEIS ENV
@@ -27,7 +27,7 @@ const optionalEnvVars = {
 
 // Verificar variáveis obrigatórias
 const missingVars = Object.entries(requiredEnvVars)
-  .filter(([key, value]) => !value || value.trim() === '')
+  .filter(([, value]) => !value || value.trim() === '')
   .map(([key]) => key);
 
 if (missingVars.length > 0) {
@@ -63,7 +63,7 @@ export const auth = getAuth(app);
 export const db = initializeFirestore(app, {
   experimentalAutoDetectLongPolling: true,
   useFetchStreams: false,
-});
+} as FirestoreSettings);
 
 // Habilitar persistência offline
 enableIndexedDbPersistence(db).catch((error) => {
@@ -71,7 +71,7 @@ enableIndexedDbPersistence(db).catch((error) => {
 });
 
 // Messaging (opcional)
-let messaging: any = null;
+let messaging: Messaging | null = null;
 try {
   if ('serviceWorker' in navigator && 'Notification' in window) {
     messaging = getMessaging(app);
@@ -104,8 +104,9 @@ export const onMessageListener = () => {
     return Promise.reject('Messaging não disponível');
   }
   
-  return new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
+  const activeMessaging = messaging;
+  return new Promise<MessagePayload>((resolve) => {
+    onMessage(activeMessaging, (payload) => {
       resolve(payload);
     });
   });

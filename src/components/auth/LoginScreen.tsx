@@ -1,14 +1,17 @@
+import { CHILD_PHOTO_URL } from '../../config/rules';
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CloudLightning as Lightning, Shield, Wifi, WifiOff } from 'lucide-react';
+import { Shield, Wifi, WifiOff } from 'lucide-react';
+import { BrandMark, FlashIcon } from '../../icons';
 import LoadingSpinner from '../common/LoadingSpinner';
+import ComicBackdrop from '../common/ComicBackdrop';
 import { useOffline } from '../../contexts/OfflineContext';
 import toast from 'react-hot-toast';
 
 const LoginScreen: React.FC = () => {
-  const { user, login, register, loading } = useAuth();
+  const { user, login, loading } = useAuth();
   const { isOffline } = useOffline();
   const [formData, setFormData] = useState({
     email: '',
@@ -55,7 +58,7 @@ const LoginScreen: React.FC = () => {
     }
     try {
       await login('heitor@flash.com', '123456');
-    } catch (error) {
+    } catch {
       // Error already handled in AuthContext
     }
   };
@@ -65,36 +68,32 @@ const LoginScreen: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-600 via-red-500 to-red-700 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen relative overflow-hidden bg-[#6B0A18] flex items-center justify-center p-4">
+      <ComicBackdrop />
+      <div className="max-w-md w-full relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white rounded-2xl shadow-2xl p-8"
+          className="comic-card p-8"
         >
           {/* Logo e Título */}
           <div className="text-center mb-8">
             <motion.div
               animate={{ 
                 scale: [1, 1.05, 1],
-                rotate: [0, 2, -2, 0]
               }}
               transition={{ 
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-2xl border-4 border-yellow-400"
+              className="inline-flex items-center justify-center mb-4"
             >
-              <img 
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
-                alt="Avatar do Heitor"
-                className="w-full h-full object-cover rounded-full"
-              />
+              <BrandMark className="w-20 h-20" />
             </motion.div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Heitor Missions</h1>
-            <p className="text-gray-600">Sistema de missões personalizado para o Heitor</p>
+            <h1 className="ink-title text-3xl mb-2">Flash Missions</h1>
+            <p className="text-gray-600">Missões do Heitor na velocidade da luz</p>
           </div>
 
           {/* Status de Conexão */}
@@ -125,11 +124,11 @@ const LoginScreen: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleHeitorLogin}
-                className="w-full p-6 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl font-bold text-xl flex items-center justify-center gap-4 hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+                className="w-full p-6 bg-red-600 text-white rounded-2xl font-bold text-xl flex items-center justify-center gap-4 hover:bg-red-700 transition-all duration-200 comic-chip"
               >
-                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center border-[3px] border-[#1A1214] overflow-hidden">
                   <img 
-                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+                    src={CHILD_PHOTO_URL}
                     alt="Avatar do Heitor"
                     className="w-full h-full object-cover rounded-full"
                   />
@@ -144,10 +143,10 @@ const LoginScreen: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setLoginMode('admin_form')}
-                className="w-full p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-4 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+                className="w-full p-6 bg-[#1A1214] text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-4 hover:bg-black transition-all duration-200 comic-chip"
               >
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30">
-                  <Shield className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center border-[3px] border-white/30">
+                  <FlashIcon name="shield" className="w-6 h-6 text-[#1A1214]" />
                 </div>
                 <div className="text-left">
                   <div className="text-lg font-bold">Entrar como Pai</div>

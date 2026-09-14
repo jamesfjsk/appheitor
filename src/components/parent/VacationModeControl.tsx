@@ -56,7 +56,7 @@ const VacationModeControl: React.FC = () => {
         gold_multiplier: goldMultiplier,
       });
       toast.success(isEnabled ? 'Modo Férias ativado!' : 'Modo Férias atualizado');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Vacation update error:', err);
       toast.error('Erro ao salvar Modo Férias');
     } finally {
@@ -104,7 +104,7 @@ const VacationModeControl: React.FC = () => {
                   : 'bg-gray-100 text-gray-700 border border-gray-200'
               }`}
             >
-              {isActive ? 'ATIVO AGORA' : 'INATIVO'}
+              {isActive ? 'Ligado' : 'Desligado'}
             </span>
             {isActive && daysRemaining !== null && (
               <span className="text-xs text-orange-700 font-medium">
@@ -187,7 +187,7 @@ const VacationModeControl: React.FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  <Zap className="w-3 h-3 text-blue-500" /> Multiplicador XP
+                  <Zap className="w-3 h-3 text-blue-500" /> XP das missões vale
                 </label>
                 <input
                   type="number"
@@ -200,7 +200,7 @@ const VacationModeControl: React.FC = () => {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
-                  <Coins className="w-3 h-3 text-yellow-500" /> Multiplicador Gold
+                  <Coins className="w-3 h-3 text-yellow-500" /> Gold das missões vale
                 </label>
                 <input
                   type="number"

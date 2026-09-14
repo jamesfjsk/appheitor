@@ -13,9 +13,9 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import HeroPanel from './components/hero/HeroPanel';
 import ParentPanel from './components/parent/ParentPanel';
 import OfflineBanner from './components/common/OfflineBanner';
-import DoctorPage from './components/debug/DoctorPage';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ChatFlashGPT from './components/common/ChatFlashGPT';
+import { AI_CHAT_ENABLED } from './config/rules';
 import './index.css';
 
 // Component to handle role-based redirect for root path
@@ -66,7 +66,6 @@ function App() {
                           </ProtectedRoute>
                         } 
                       />
-                      <Route path="/doctor" element={<DoctorPage />} />
                       <Route path="/" element={<RoleBasedRedirect />} />
                     </Routes>
                   </div>
@@ -80,7 +79,7 @@ function App() {
                       },
                     }}
                   />
-                  <ChatFlashGPT />
+                  {AI_CHAT_ENABLED && <ChatFlashGPT />}
                   </Router>
                 </PunishmentProvider>
               </DataProvider>

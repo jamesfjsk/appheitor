@@ -34,7 +34,9 @@ service cloud.firestore {
     // ---------- TASKS ----------
     match /tasks/{taskId} {
       // Admin lê tudo; filho só lê as suas
-      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
 
       // Só admin cria/edita/exclui tarefas (evita bagunça)
       allow create, update, delete: if isAdmin();
@@ -42,7 +44,9 @@ service cloud.firestore {
       // ---------- TASK COMPLETIONS (subcoleção) ----------
       match /completions/{dateId} {
         // Admin lê tudo; filho lê só as suas completions
-        allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+        // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+        allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+        allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
 
         // Filho pode criar completion em seu próprio nome; admin também pode
         allow create: if signedIn() && (
@@ -59,7 +63,9 @@ service cloud.firestore {
     // ---------- REWARDS ----------
     match /rewards/{rewardId} {
       // Admin lê tudo; filho lê só as suas
-      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
 
       // Admin cria/edita/exclui recompensas (para um ownerId=uid do filho)
       // Regras mínimas de integridade: ownerId (string), createdAt (timestamp)
@@ -72,7 +78,9 @@ service cloud.firestore {
     // ---------- REDEMPTIONS (resgates) ----------
     match /redemptions/{docId} {
       // Admin lê tudo; filho lê só os seus resgates
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
 
       // Filho pode criar resgate em seu próprio nome; admin também pode
       allow create: if signedIn() && (
@@ -86,7 +94,9 @@ service cloud.firestore {
     // ---------- NOTIFICATIONS (opcional) ----------
     match /notifications/{id} {
       // Admin lê tudo; filho lê o que é endereçado a ele
-      allow read: if signedIn() && (isAdmin() || resource.data.toUserId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.toUserId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.toUserId == request.auth.uid);
 
       // Somente admin cria/edita/exclui notificações
       allow create, update, delete: if isAdmin();
@@ -100,28 +110,37 @@ service cloud.firestore {
 
     // Daily Surprise Mission Status
     match /dailySurpriseMissionStatus/{statusId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
       allow delete: if isAdmin();
     }
 
     // Daily Quizzes
     match /dailyQuizzes/{quizId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAdmin();
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // A prova é gerada e respondida pela própria criança ou pelo responsável
+      allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
     }
 
     // Daily Progress
     match /dailyProgress/{progressId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
       allow delete: if isAdmin();
     }
 
     // Birthday Events
     match /birthdayEvents/{eventId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
       allow delete: if isAdmin();
     }
@@ -134,33 +153,43 @@ service cloud.firestore {
 
     // Flash Reminders
     match /flashReminders/{reminderId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
       allow create, update, delete: if isAdmin();
     }
 
     // Achievements
     match /achievements/{achievementId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.ownerId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
       allow create, update, delete: if isAdmin();
     }
 
     // User Achievements
     match /userAchievements/{userAchievementId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
       allow delete: if isAdmin();
     }
 
     // Task Completions (global collection)
     match /taskCompletions/{completionId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
       allow update, delete: if isAdmin();
     }
 
     // Progress Snapshots (audit trail)
     match /progressSnapshots/{snapshotId} {
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create: if signedIn() && request.resource.data.userId is string;
       allow update, delete: if isAdmin();
     }
@@ -172,10 +201,49 @@ service cloud.firestore {
       allow update, delete: if signedIn() && isAdmin() && resource.data.ownerId == request.auth.uid;
     }
 
+    // ---------- GOLD TRANSACTIONS (livro-razão do gold) ----------
+    match /goldTransactions/{transactionId} {
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ---------- AJUSTES MANUAIS DE XP (só responsável) ----------
+    match /xpAdjustments/{adjustmentId} {
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // ---------- ARENA DE INGLÊS ----------
+    match /englishSessions/{sessionId} {
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+    match /englishProgress/{uid} {
+      allow read: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
+    // ---------- SETTINGS (modo férias, regras do dia) ----------
+    match /settings/{settingId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
     // ---------- PUNISHMENT MODE ----------
     match /punishmentMode/{punishmentId} {
       // Admin can read all; child can only read their own
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
 
       // Only admin can create punishment mode
       allow create: if signedIn() && isAdmin();
@@ -190,7 +258,9 @@ service cloud.firestore {
     // ---------- PUNISHMENT TASK COMPLETIONS ----------
     match /punishmentTaskCompletions/{completionId} {
       // Admin can read all; child can only read their own
-      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
 
       // Child can create their own completions; admin can also create
       allow create: if signedIn() && (

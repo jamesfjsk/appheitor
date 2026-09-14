@@ -1,6 +1,8 @@
+import { TASK_DEFAULT_XP, TASK_DEFAULT_GOLD } from '../../config/rules';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Clock, Star, Zap } from 'lucide-react';
+import { Clock } from 'lucide-react';
+import { FlashIcon, CheckMark } from '../../icons';
 import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import { getTodayBrazil } from '../../utils/timezone';
@@ -104,8 +106,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
       }`}>
         <Clock className="w-3 h-3" />
         <span>{task.time}</span>
-        {isCompletedToday && <span>✅</span>}
-        {!isCompletedToday && isOverdue && <span className="animate-pulse">⚠️</span>}
+        {isCompletedToday && <CheckMark className="w-3 h-3" />}
+        {!isCompletedToday && isOverdue && <FlashIcon name="warning" className="w-3 h-3 animate-pulse text-red-500" />}
       </div>
     );
   };
@@ -119,12 +121,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
     }
   };
 
-  const getPeriodEmoji = () => {
+  const getPeriodIcon = () => {
     switch (task.period) {
-      case 'morning': return '🌅';
-      case 'afternoon': return '☀️';
-      case 'evening': return '🌙';
-      default: return '⭐';
+      case 'morning': return 'sun';
+      case 'afternoon': return 'sunset';
+      case 'evening': return 'moon';
+      default: return 'star';
     }
   };
 
@@ -231,7 +233,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   exit={{ scale: 0, rotate: 180 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <Star className={`${guidedMode ? 'w-10 h-10' : 'w-8 h-8'} fill-current drop-shadow-lg`} />
+                  <FlashIcon name="star" className={`${guidedMode ? 'w-10 h-10' : 'w-8 h-8'}`} />
                 </motion.div>
               ) : isTaskCompletedToday(task) ? (
                 <motion.div
@@ -240,7 +242,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Check className={`${guidedMode ? 'w-10 h-10' : 'w-8 h-8'} drop-shadow-lg`} />
+                  <FlashIcon name="check" className={`${guidedMode ? 'w-10 h-10' : 'w-8 h-8'}`} />
                 </motion.div>
               ) : (
                 <motion.div
@@ -293,7 +295,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
 
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg">{getPeriodEmoji()}</span>
+                    <FlashIcon name={getPeriodIcon()} className="w-4 h-4 text-red-600" />
                     <span className="text-xs text-gray-600 font-medium capitalize">
                       {task.period === 'morning' && 'Manhã'}
                       {task.period === 'afternoon' && 'Tarde'}
@@ -308,15 +310,15 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               {/* Pontos da tarefa */}
               <div className={`flex items-center space-x-2 ml-4 ${guidedMode ? 'flex-col space-x-0 space-y-1' : ''}`}>
                 <div className="flex items-center space-x-1">
-                  <Zap className={`${guidedMode ? 'w-6 h-6' : 'w-5 h-5'} text-blue-500`} />
+                  <FlashIcon name="xp" className={`${guidedMode ? 'w-6 h-6' : 'w-5 h-5'} text-blue-600`} />
                   <span className={`text-blue-600 font-bold ${guidedMode ? 'text-lg' : 'text-base'}`}>
-                  +{task.xp || 10} XP
+                  +{task.xp || TASK_DEFAULT_XP} XP
                   </span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <span className={`${guidedMode ? 'text-lg' : 'text-sm'}`}>🪙</span>
+                  <FlashIcon name="gold" className={`${guidedMode ? 'w-5 h-5' : 'w-4 h-4'} text-yellow-600`} />
                   <span className={`text-yellow-600 font-bold ${guidedMode ? 'text-lg' : 'text-base'}`}>
-                    +{task.gold || 1} Gold
+                    +{task.gold || TASK_DEFAULT_GOLD} Gold
                   </span>
                 </div>
               </div>
@@ -375,9 +377,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
                   delay: i * 0.15,
                   ease: "easeOut"
                 }}
-                className="absolute text-yellow-400 text-lg"
+                className="absolute text-yellow-400"
               >
-                ⚡
+                <FlashIcon name="bolt" className="w-5 h-5" />
               </motion.div>
             ))}
             </div>
@@ -399,7 +401,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, index, guidedMode
               className="absolute -top-8 left-1/2 transform -translate-x-1/2 pointer-events-none z-20"
             >
               <div className="bg-gradient-to-r from-blue-400 to-yellow-400 text-white px-3 py-1 rounded-full font-bold text-sm shadow-lg">
-                +{task.xp || 10} XP, +{task.gold || 5} Gold
+                +{task.xp || TASK_DEFAULT_XP} XP, +{task.gold || TASK_DEFAULT_GOLD} Gold
               </div>
             </motion.div>
           )}

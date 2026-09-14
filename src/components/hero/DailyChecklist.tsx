@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Clock, Sun, Sunset, Moon, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { FlashIcon, IconBadge } from '../../icons';
 import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import TaskItem from './TaskItem';
@@ -61,12 +62,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     if (selectedPeriod !== currentPeriod) {
       onPeriodChange(currentPeriod);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally runs once on mount
   }, []);
 
   const periods = [
-    { id: 'morning', label: 'Manhã', icon: Sun, color: 'from-orange-400 to-yellow-400' },
-    { id: 'afternoon', label: 'Tarde', icon: Sunset, color: 'from-blue-400 to-blue-500' },
-    { id: 'evening', label: 'Noite', icon: Moon, color: 'from-purple-400 to-purple-500' }
+    { id: 'morning', label: 'Manhã', icon: 'sun', color: 'from-amber-400 to-orange-500' },
+    { id: 'afternoon', label: 'Tarde', icon: 'sunset', color: 'from-red-500 to-red-700' },
+    { id: 'evening', label: 'Noite', icon: 'moon', color: 'from-slate-700 to-slate-900' }
   ] as const;
 
   const filteredTasks = tasks.filter(task => 
@@ -104,7 +106,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     
     try {
       await completeTask(taskId);
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ Erro ao completar tarefa:', error);
       // Error is already handled in DataContext
     }
@@ -112,9 +114,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   
   const getTimeBasedMessage = () => {
     const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) return "🌅 Bom dia, Flash! Vamos começar as missões matinais?";
-    if (hour >= 12 && hour < 18) return "☀️ Boa tarde, herói! Hora das missões da tarde!";
-    return "🌙 Boa noite, velocista! Últimas missões do dia!";
+    if (hour >= 6 && hour < 12) return 'Bom dia, Flash! Vamos começar as missões matinais?';
+    if (hour >= 12 && hour < 18) return 'Boa tarde, herói! Hora das missões da tarde!';
+    return 'Boa noite, velocista! Últimas missões do dia!';
   };
 
   return (
@@ -122,25 +124,14 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.4 }}
-      className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+      className="comic-card p-6"
     >
       {/* Header com Seletor de Período */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4 sm:mb-0 flex items-center gap-3">
-          <motion.div
-            animate={{
-              rotate: [0, 360],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center"
-          >
-            <Clock className="w-5 h-5 text-red-600" />
-          </motion.div>
+          <h2 className="ink-title text-3xl mb-4 sm:mb-0 flex items-center gap-3">
+          <span className="inline-flex">
+            <IconBadge name="bolt" size={36} />
+          </span>
           Missões Diárias
         </h2>
 
@@ -148,7 +139,6 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           {/* Period Selector */}
           <div className="flex gap-2">
             {periods.map((period) => {
-              const Icon = period.icon;
               const isSelected = selectedPeriod === period.id;
               const isCurrent = period.id === currentPeriod;
               
@@ -158,13 +148,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onPeriodChange(period.id)}
-                  className={`px-6 py-3 rounded-2xl font-bold text-lg transition-all duration-200 flex items-center gap-3 relative shadow-lg ${
+                  className={`px-5 py-3 rounded-2xl font-bold text-lg transition-all duration-200 flex items-center gap-2 relative comic-chip ${
                     isSelected
-                      ? `bg-gradient-to-r ${period.color} text-white shadow-xl border-2 border-white`
-                      : 'bg-white/80 text-gray-700 hover:bg-white border-2 border-gray-200 hover:border-gray-300'
+                      ? `bg-gradient-to-r ${period.color} text-white`
+                      : 'bg-white text-gray-700 hover:bg-yellow-50'
                   }`}
                 >
-                  <Icon className="w-6 h-6" />
+                  <FlashIcon name={period.icon} className="w-5 h-5" />
                   {period.label}
                   {isCurrent && !isSelected && (
                     <motion.div
@@ -190,7 +180,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   : 'bg-white/80 text-gray-700 hover:bg-white border-2 border-gray-200 hover:border-gray-300'
               }`}
             >
-              <Play className="w-6 h-6" />
+              <FlashIcon name="play" className="w-6 h-6" />
               {guidedMode ? 'Modo Guiado ON' : 'Iniciar Missões'}
             </motion.button>
           )}
@@ -224,9 +214,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               <motion.span
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="text-yellow-400 text-xl"
+                className="inline-flex text-yellow-400"
               >
-                ⚡
+                <FlashIcon name="bolt" className="w-5 h-5 text-yellow-500" />
               </motion.span>
             )}
           </div>
@@ -254,7 +244,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       {guidedMode && currentTask && (
         <div className="mb-4 flex items-center justify-between bg-white/10 rounded-xl p-3">
           <div className="flex items-center gap-2 text-white/80 text-sm">
-            <Play className="w-4 h-4" />
+            <FlashIcon name="play" className="w-4 h-4" />
             Missão {filteredTasks.findIndex(t => t.id === currentTask.id) + 1} de {totalTasks}
           </div>
           <div className="flex gap-2">
@@ -316,13 +306,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="text-6xl mb-4"
+                className="mb-4 inline-flex justify-center w-full"
               >
-                {isCurrentPeriod ? '⚡' : '😴'}
+                <IconBadge name={isCurrentPeriod ? 'bolt' : 'moon'} size={72} />
               </motion.div>
-              <p className="text-white/80 text-lg">
+              <p className="text-gray-700 text-lg font-semibold">
                 {isCurrentPeriod 
-                  ? 'Todas as missões deste período foram completadas! 🎉'
+                  ? 'Todas as missões deste período foram completadas!'
                   : 'Nenhuma missão para este período ainda.'
                 }
               </p>
@@ -362,11 +352,12 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
             }}
             className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20"
           />
-          <div className="relative z-10 text-red-600 font-bold text-2xl mb-2">
-            🎉 Período Completo! 🎉
+          <div className="relative z-10 text-red-600 font-bold text-2xl mb-2 flex items-center justify-center gap-2">
+            <FlashIcon name="trophy" className="w-7 h-7" />
+            Período Completo!
           </div>
           <p className="relative z-10 text-red-600 text-lg font-semibold">
-            Você completou todas as missões! ⚡ Incrível!
+            Você completou todas as missões. Incrível!
           </p>
         </motion.div>
       )}

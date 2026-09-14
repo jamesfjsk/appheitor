@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Save, Gift, Star, Type, FileText } from 'lucide-react';
+import { X, Save, Gift, Type, FileText } from 'lucide-react';
+import { IconPicker } from '../../icons';
 import { useData } from '../../contexts/DataContext';
 import { Reward } from '../../types';
-import { LEVEL_REWARD_TEMPLATES } from '../../utils/rewardLevels';
 import toast from 'react-hot-toast';
 
+export interface RewardFormInitialData {
+  title?: string;
+  description?: string;
+  costGold?: number;
+  emoji?: string;
+  category?: Reward['category'];
+  requiredLevel?: number;
+  isActive?: boolean;
+}
+
 interface RewardFormProps {
-  reward?: Reward;
-  initialData?: any;
+  reward?: Reward | null;
+  initialData?: RewardFormInitialData | null;
   onClose: () => void;
   isOpen: boolean;
 }
@@ -19,7 +29,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
     title: '',
     description: '',
     goldCost: 50,
-    icon: '🎁',
+    icon: 'gift',
     category: 'custom' as Reward['category'],
     requiredLevel: 1,
     isActive: true,
@@ -34,7 +44,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
         title: initialData.title || '',
         description: initialData.description || '',
         goldCost: initialData.costGold || 50,
-        icon: initialData.emoji || '🎁',
+        icon: initialData.emoji || 'gift',
         category: initialData.category || 'custom',
         requiredLevel: initialData.requiredLevel || 1,
         isActive: initialData.isActive !== false,
@@ -56,7 +66,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
         title: '',
         description: '',
         goldCost: 50,
-        icon: '🎁',
+        icon: 'gift',
         category: 'custom',
         requiredLevel: 1,
         isActive: true,
@@ -135,7 +145,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Limpar erro do campo quando usuário começar a digitar
@@ -145,16 +155,11 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
   };
 
   const categoryOptions = [
-    { value: 'toy', label: '🧸 Brinquedos' },
-    { value: 'activity', label: '🎮 Atividades' },
-    { value: 'treat', label: '🍭 Guloseimas' },
-    { value: 'privilege', label: '👑 Privilégios' },
-    { value: 'custom', label: '⭐ Personalizado' },
-  ];
-
-  const iconSuggestions = [
-    '🎁', '🏆', '🎮', '🍦', '🍕', '🎬', '📱', '🎨', '⚽', '🎵',
-    '🚗', '🧸', '📚', '🍭', '🎪', '🎯', '🎲', '🎸', '🎤', '🎭'
+    { value: 'toy', label: 'Brinquedos' },
+    { value: 'activity', label: 'Atividades' },
+    { value: 'treat', label: 'Guloseimas' },
+    { value: 'privilege', label: 'Privilégios' },
+    { value: 'custom', label: 'Personalizado' },
   ];
 
   if (!isOpen) return null;
@@ -306,46 +311,14 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
           {/* Ícone */}
           <div>
             <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-              <span className="text-lg">🎨</span>
+              <Gift className="w-4 h-4" />
               <span>Ícone da Recompensa *</span>
             </label>
-            
-            <div className="flex items-center gap-4 mb-3">
-              <input
-                type="text"
-                value={formData.emoji}
-                onChange={(e) => handleInputChange('emoji', e.target.value)}
-                className={`w-20 px-3 py-2 border rounded-lg text-center text-2xl ${
-                  errors.emoji ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="🎁"
-                maxLength={2}
-              />
-              <span className="text-sm text-gray-600">
-                Escolha um emoji que represente a recompensa
-              </span>
-            </div>
-            
-            {errors.emoji && (
-              <p className="mb-3 text-sm text-red-600">{errors.emoji}</p>
-            )}
-            
-            <div className="grid grid-cols-10 gap-2">
-              {iconSuggestions.map((icon) => (
-                <button
-                  key={icon}
-                  type="button"
-                  onClick={() => handleInputChange('emoji', icon)}
-                  className={`p-2 text-2xl rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-                    formData.emoji === icon
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  {icon}
-                </button>
-              ))}
-            </div>
+            <IconPicker
+              value={formData.icon}
+              onChange={(key) => handleInputChange('icon', key)}
+              error={errors.icon}
+            />
           </div>
 
           {/* Status ativo */}

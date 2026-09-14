@@ -14,10 +14,15 @@ import {
   serverTimestamp,
   writeBatch,
   Timestamp,
-  addDoc
+  increment,
+  runTransaction,
+  type FirestoreError,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { getTodayBrazil, getTodayStartBrazil, getYesterdayBrazil } from '../utils/timezone';
+import { getTodayBrazil, getYesterdayBrazil, getBrazilDate } from '../utils/timezone';
+import { format } from 'date-fns';
+import { getLevelFromXP } from '../utils/levelSystem';
+import { processPendingDays } from './dailyRulesService';
 import {
   User,
   Task,
@@ -31,10 +36,45 @@ import {
   SurpriseMissionConfig,
   DailySurpriseMissionStatus,
   BirthdayEvent,
-  BirthdayConfig,
-  GoldTransaction
+  GoldTransaction,
+  DailyProgress,
+  PunishmentMode,
+  PunishmentTaskCompletion
 } from '../types';
-import { validateProgressUpdate, createProgressSnapshot } from '../utils/progressMonitor';
+
+function omitUndefined<T extends Record<string, unknown>>(data: T): T {
+  return Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined)
+  ) as T;
+}
+
+function asDate(value: unknown): Date {
+  if (!value) return new Date(0);
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? new Date(0) : value;
+  if (typeof value === 'object' && value !== null && 'toDate' in value && typeof (value as Timestamp).toDate === 'function') {
+    return (value as Timestamp).toDate();
+  }
+  const parsed = new Date(value as string | number);
+  return Number.isNaN(parsed.getTime()) ? new Date(0) : parsed;
+}
+
+function mapGoldTransaction(id: string, data: Record<string, unknown>): GoldTransaction {
+  return {
+    id,
+    userId: String(data.userId || ''),
+    amount: Number(data.amount) || 0,
+    type: data.type as GoldTransaction['type'],
+    source: data.source as GoldTransaction['source'],
+    description: String(data.description || ''),
+    relatedId: data.relatedId as string | undefined,
+    relatedTitle: data.relatedTitle as string | undefined,
+    metadata: data.metadata as Record<string, unknown> | undefined,
+    balanceBefore: Number(data.balanceBefore) || 0,
+    balanceAfter: Number(data.balanceAfter) || 0,
+    createdAt: asDate(data.createdAt),
+    createdBy: data.createdBy as string | undefined,
+  };
+}
 
 export class FirestoreService {
   // ========================================
@@ -299,38 +339,6 @@ export class FirestoreService {
     }
   }
 
-  static async forceResetAllCompletedTasks(userId: string): Promise<number> {
-    try {
-      const tasksQuery = query(
-        collection(db, 'tasks'),
-        where('ownerId', '==', userId),
-        where('status', '==', 'done')
-      );
-
-      const tasksSnapshot = await getDocs(tasksQuery);
-      const batch = writeBatch(db);
-
-      tasksSnapshot.docs.forEach(taskDoc => {
-        const task = taskDoc.data() as Task;
-        console.log(`🔄 Force resetting task "${task.title}"`);
-        batch.update(taskDoc.ref, {
-          status: 'pending',
-          updatedAt: serverTimestamp()
-        });
-      });
-
-      if (tasksSnapshot.size > 0) {
-        await batch.commit();
-        console.log(`✅ Force reset ${tasksSnapshot.size} completed tasks for user ${userId}`);
-      }
-
-      return tasksSnapshot.size;
-    } catch (error) {
-      console.error('❌ FirestoreService: Error force resetting tasks:', error);
-      throw error;
-    }
-  }
-
   static async deleteTask(taskId: string): Promise<void> {
     try {
       await deleteDoc(doc(db, 'tasks', taskId));
@@ -343,6 +351,24 @@ export class FirestoreService {
   // ========================================
   // 🔥 STREAK SYSTEM
   // ========================================
+
+  // ========================================
+  // 🔥 SEQUÊNCIA DE DIAS (STREAK)
+  // Baseada em datas "YYYY-MM-DD" no fuso do Brasil, sem aritmética de horas.
+  // Regra: primeira missão do dia conta o dia. Ontem contou -> +1. Antes de ontem -> volta a 1.
+  // ========================================
+
+  /** Data (Brasil) da última missão concluída, a partir do campo novo ou do timestamp antigo */
+  private static lastStreakDate(data: Record<string, unknown>): string | null {
+    if (typeof data.lastStreakDate === 'string' && data.lastStreakDate) return data.lastStreakDate;
+    const legacy = data.lastActivityDate as { toDate?: () => Date } | undefined;
+    const d = legacy?.toDate?.();
+    return d ? getBrazilDate(d).toISOString().split('T')[0] : null;
+  }
+
+  private static yesterdayString(): string {
+    return getYesterdayBrazil().dateString;
+  }
 
   static async updateStreak(userId: string): Promise<{
     streak: number;
@@ -360,127 +386,63 @@ export class FirestoreService {
       }
 
       const data = progressDoc.data();
-      const lastActivity = data.lastActivityDate?.toDate();
       const currentStreak = data.streak || 0;
       const currentLongestStreak = data.longestStreak || 0;
+      const today = getTodayBrazil();
+      const yesterday = this.yesterdayString();
+      const last = this.lastStreakDate(data);
 
-      // Get today's start time in Brazil timezone
-      const todayStart = getTodayStartBrazil();
-      const yesterdayStart = new Date(todayStart);
-      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-
-      let newStreak = 1;
+      let newStreak: number;
       let streakIncreased = false;
       let streakReset = false;
 
-      if (lastActivity) {
-        // Normalize lastActivity to start of day for comparison
-        const lastActivityStart = new Date(lastActivity);
-        lastActivityStart.setHours(0, 0, 0, 0);
-
-        const daysSinceActivity = Math.floor(
-          (todayStart.getTime() - lastActivityStart.getTime()) / (1000 * 60 * 60 * 24)
-        );
-
-        console.log('🔥 Streak calculation:', {
-          lastActivity: lastActivity.toISOString(),
-          lastActivityStart: lastActivityStart.toISOString(),
-          todayStart: todayStart.toISOString(),
-          daysSinceActivity,
-          currentStreak
-        });
-
-        if (daysSinceActivity === 0) {
-          // Same day - maintain current streak
-          newStreak = Math.max(currentStreak, 1);
-          console.log('📅 Same day activity - maintaining streak:', newStreak);
-        } else if (daysSinceActivity === 1) {
-          // Consecutive day - increment streak
-          newStreak = currentStreak + 1;
-          streakIncreased = true;
-          console.log('🔥 Consecutive day! Streak increased:', currentStreak, '→', newStreak);
-        } else {
-          // Missed days - reset to 1
-          newStreak = 1;
-          streakReset = true;
-          console.log('💔 Streak broken! Days missed:', daysSinceActivity, '- resetting to 1');
-        }
+      if (last === today) {
+        // Já contou hoje: mantém
+        newStreak = Math.max(currentStreak, 1);
+      } else if (last === yesterday && currentStreak > 0) {
+        newStreak = currentStreak + 1;
+        streakIncreased = true;
       } else {
-        // First activity ever
+        // Primeira atividade ou sequência quebrada
         newStreak = 1;
         streakIncreased = true;
-        console.log('🎉 First activity ever! Starting streak at 1');
+        streakReset = last !== null && last !== yesterday && currentStreak > 0;
       }
 
       const newLongestStreak = Math.max(currentLongestStreak, newStreak);
 
-      // Update progress with new streak values
       await updateDoc(progressRef, {
         streak: newStreak,
         longestStreak: newLongestStreak,
+        lastStreakDate: today,
         lastActivityDate: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
 
-      console.log('✅ Streak updated:', {
-        oldStreak: currentStreak,
-        newStreak,
-        longestStreak: newLongestStreak,
-        streakIncreased,
-        streakReset
-      });
-
-      return {
-        streak: newStreak,
-        longestStreak: newLongestStreak,
-        streakIncreased,
-        streakReset
-      };
+      return { streak: newStreak, longestStreak: newLongestStreak, streakIncreased, streakReset };
     } catch (error) {
       console.error('❌ FirestoreService: Error updating streak:', error);
       throw error;
     }
   }
 
+  /** Ao abrir o app: se nem hoje nem ontem tiveram missão, a sequência volta a 0 */
   static async checkAndResetStreakIfNeeded(userId: string): Promise<void> {
     try {
       const progressRef = doc(db, 'progress', userId);
       const progressDoc = await getDoc(progressRef);
-
-      if (!progressDoc.exists()) {
-        return;
-      }
+      if (!progressDoc.exists()) return;
 
       const data = progressDoc.data();
-      const lastActivity = data.lastActivityDate?.toDate();
       const currentStreak = data.streak || 0;
+      const last = this.lastStreakDate(data);
+      if (!last || currentStreak === 0) return;
 
-      if (!lastActivity || currentStreak === 0) {
-        return;
-      }
-
-      const todayStart = getTodayStartBrazil();
-      const lastActivityStart = new Date(lastActivity);
-      lastActivityStart.setHours(0, 0, 0, 0);
-
-      const daysSinceActivity = Math.floor(
-        (todayStart.getTime() - lastActivityStart.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      // If more than 1 day has passed, reset streak
-      if (daysSinceActivity > 1) {
-        console.log('💔 Resetting streak due to inactivity:', {
-          currentStreak,
-          daysSinceActivity,
-          lastActivity: lastActivity.toISOString()
-        });
-
-        await updateDoc(progressRef, {
-          streak: 0,
-          updatedAt: serverTimestamp()
-        });
-
-        console.log('✅ Streak reset to 0 due to inactivity');
+      const today = getTodayBrazil();
+      const yesterday = this.yesterdayString();
+      if (last !== today && last !== yesterday) {
+        console.log('💔 Sequência zerada por inatividade. Última missão em', last);
+        await updateDoc(progressRef, { streak: 0, updatedAt: serverTimestamp() });
       }
     } catch (error) {
       console.error('❌ FirestoreService: Error checking streak:', error);
@@ -488,7 +450,7 @@ export class FirestoreService {
   }
 
   // ========================================
-  // 🔥 TASK COMPLETION WITH REWARDS
+  // 🔥 TASK COMPLETION
   // ========================================
 
   static async completeTaskWithRewards(taskId: string, userId: string, xpReward: number, goldReward: number): Promise<void> {
@@ -502,36 +464,7 @@ export class FirestoreService {
       }
 
       const currentProgress = progressDoc.data();
-      const newXP = (currentProgress.totalXP || 0) + xpReward;
       const newGold = (currentProgress.availableGold || 0) + goldReward;
-      const newTotalGold = (currentProgress.totalGoldEarned || 0) + goldReward;
-
-      // Validate progress update
-      const validation = await validateProgressUpdate(
-        userId,
-        {
-          totalXP: newXP,
-          availableGold: newGold,
-          totalGoldEarned: newTotalGold
-        },
-        `Task completion: ${taskId}`
-      );
-
-      // Log warnings
-      if (validation.warnings.length > 0) {
-        console.warn('⚠️ Progress update warnings:', validation.warnings);
-      }
-
-      // Reject if validation failed
-      if (!validation.isValid) {
-        console.error('❌ Progress update rejected:', validation.errors);
-        throw new Error(`Progress validation failed: ${validation.errors.join(', ')}`);
-      }
-
-      // Create snapshot before update
-      if (validation.snapshot) {
-        await createProgressSnapshot(validation.snapshot);
-      }
 
       // Get task details for history
       const taskRef = doc(db, 'tasks', taskId);
@@ -568,13 +501,13 @@ export class FirestoreService {
         createdAt: serverTimestamp()
       });
 
-      // Update user progress with validated values
+      // Incrementos atômicos: não dependem do valor lido, então duas
+      // conclusões seguidas (ou outra aba aberta) não sobrescrevem uma à outra
       batch.update(progressRef, {
-        totalXP: newXP,
-        availableGold: newGold,
-        totalGoldEarned: newTotalGold,
-        totalTasksCompleted: (currentProgress.totalTasksCompleted || 0) + 1,
-        lastActivityDate: serverTimestamp(),
+        totalXP: increment(xpReward),
+        availableGold: increment(goldReward),
+        totalGoldEarned: increment(goldReward),
+        totalTasksCompleted: increment(1),
         updatedAt: serverTimestamp()
       });
 
@@ -919,7 +852,7 @@ export class FirestoreService {
     }
   }
 
-  static async createUserAchievement(userAchievementData: Omit<UserAchievement, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  static async createUserAchievement(userAchievementData: Omit<UserAchievement, 'id' | 'createdAt' | 'updatedAt' | 'unlockedAt'> & { unlockedAt?: Date | null }): Promise<string> {
     try {
       const userAchievementRef = doc(collection(db, 'userAchievements'));
       const completeData = {
@@ -937,7 +870,7 @@ export class FirestoreService {
     }
   }
 
-  static async updateUserAchievement(userAchievementId: string, updates: Partial<UserAchievement>): Promise<void> {
+  static async updateUserAchievement(userAchievementId: string, updates: Omit<Partial<UserAchievement>, 'unlockedAt'> & { unlockedAt?: Date | null }): Promise<void> {
     try {
       const userAchievementRef = doc(db, 'userAchievements', userAchievementId);
       await updateDoc(userAchievementRef, {
@@ -982,7 +915,7 @@ export class FirestoreService {
     }
   }
 
-  static async updateSurpriseMissionConfig(configData: Omit<SurpriseMissionConfig, 'id' | 'createdAt' | 'updatedAt'>, lastUpdatedBy: string): Promise<void> {
+  static async updateSurpriseMissionConfig(configData: Omit<SurpriseMissionConfig, 'id' | 'lastUpdatedBy' | 'createdAt' | 'updatedAt'>, lastUpdatedBy: string): Promise<void> {
     try {
       const configRef = doc(db, 'surpriseMissionConfig', 'default');
       const configDoc = await getDoc(configRef);
@@ -1195,7 +1128,7 @@ export class FirestoreService {
   // 🔥 DAILY PROGRESS TRACKING
   // ========================================
 
-  static async getDailyProgress(userId: string, date: string): Promise<any> {
+  static async getDailyProgress(userId: string, date: string): Promise<DailyProgress | null> {
     try {
       const progressRef = doc(db, 'dailyProgress', `${userId}_${date}`);
       const progressDoc = await getDoc(progressRef);
@@ -1270,8 +1203,8 @@ export class FirestoreService {
     completedAt: Date;
   }>> {
     try {
-      const startDateString = startDate.toISOString().split('T')[0];
-      const endDateString = endDate.toISOString().split('T')[0];
+      const startDateString = format(startDate, 'yyyy-MM-dd');
+      const endDateString = format(endDate, 'yyyy-MM-dd');
       
       const completionsQuery = query(
         collection(db, 'taskCompletions'),
@@ -1311,252 +1244,13 @@ export class FirestoreService {
   // 🔥 DAILY PROCESSING (PENALTIES/BONUSES)
   // ========================================
 
+  /** Fecha os dias pendentes (penalidade/bônus). Implementação em dailyRulesService. */
   static async processUnprocessedDays(userId: string): Promise<void> {
-    try {
-      console.log('🔄 FirestoreService: Starting daily processing for user:', userId);
-      
-      // Get user progress to check last processed date
-      const progressRef = doc(db, 'progress', userId);
-      const progressDoc = await getDoc(progressRef);
-      
-      if (!progressDoc.exists()) {
-        console.log('⚠️ FirestoreService: No progress document found, skipping daily processing');
-        return;
-      }
-      
-      const progressData = progressDoc.data();
-      const lastProcessedDate = progressData.lastDailySummaryProcessedDate?.toDate();
-      const todayStart = getTodayStartBrazil();
-
-      // If already processed today, skip
-      if (lastProcessedDate && lastProcessedDate >= todayStart) {
-        console.log('✅ FirestoreService: Daily processing already completed for today');
-        return;
-      }
-
-      // Process yesterday (if not already processed)
-      const { date: yesterday, dateString: yesterdayString } = getYesterdayBrazil();
-      
-      // Check if yesterday was already processed
-      const yesterdayProgress = await this.getDailyProgress(userId, yesterdayString);
-      
-      if (!yesterdayProgress || !yesterdayProgress.summaryProcessed) {
-        console.log('🔄 FirestoreService: Processing yesterday:', yesterdayString);
-        await this.processDailySummary(userId, yesterday);
-      }
-      
-      // Update last processed date
-      await updateDoc(progressRef, {
-        lastDailySummaryProcessedDate: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      
-      console.log('✅ FirestoreService: Daily processing completed');
-    } catch (error) {
-      console.error('❌ FirestoreService: Error in daily processing:', error);
-      throw error;
-    }
+    const results = await processPendingDays(userId);
+    if (results.length > 0) console.log('✅ Fechamento diário:', results);
   }
 
-  static async processDailySummary(userId: string, date: Date): Promise<void> {
-    try {
-      // 🚨 TEMPORARY: Daily penalties system is DISABLED
-      // No gold will be deducted for incomplete tasks
-      const DAILY_PENALTIES_ENABLED = false;
-
-      const dateString = date.toISOString().split('T')[0];
-      console.log('🔄 FirestoreService: Processing daily summary for:', dateString);
-
-      if (!DAILY_PENALTIES_ENABLED) {
-        console.log('⚠️ FirestoreService: Daily penalties system is DISABLED - skipping penalty calculations');
-
-        // Still save daily progress for tracking, but without penalties
-        const completions = await this.getTaskCompletionHistory(userId, date, date);
-        const dailyProgressRef = doc(db, 'dailyProgress', `${userId}_${dateString}`);
-        await setDoc(dailyProgressRef, {
-          userId,
-          date: dateString,
-          xpEarned: completions.reduce((sum, c) => sum + c.xpEarned, 0),
-          goldEarned: completions.reduce((sum, c) => sum + c.goldEarned, 0),
-          tasksCompleted: completions.length,
-          totalTasksAvailable: 0,
-          goldPenalty: 0, // NO PENALTIES
-          allTasksBonusGold: 0, // NO BONUS EITHER (to keep it fair)
-          summaryProcessed: true,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        console.log('✅ FirestoreService: Daily progress saved (penalties disabled)');
-        return;
-      }
-      
-      // Get task completions for the day
-      const completions = await this.getTaskCompletionHistory(userId, date, date);
-      const tasksCompleted = completions.length;
-
-      // Get all tasks (active and inactive) that existed at that time
-      const tasksQuery = query(
-        collection(db, 'tasks'),
-        where('ownerId', '==', userId)
-      );
-      const tasksSnapshot = await getDocs(tasksQuery);
-
-      // Filter tasks by frequency based on the day of week
-      const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-      const tasksForThatDay = tasksSnapshot.docs.filter(doc => {
-        const taskData = doc.data();
-
-        // Only count if task was active at that time
-        if (taskData.active === false) return false;
-
-        // Check if task was created before or on that day
-        const taskCreatedAt = taskData.createdAt?.toDate();
-        if (taskCreatedAt && taskCreatedAt > date) return false;
-
-        // Filter by frequency
-        switch (taskData.frequency) {
-          case 'daily':
-            return true;
-          case 'weekday':
-            return dayOfWeek >= 1 && dayOfWeek <= 5;
-          case 'weekend':
-            return dayOfWeek === 0 || dayOfWeek === 6;
-          default:
-            return true;
-        }
-      });
-
-      const totalTasksAvailable = tasksForThatDay.length;
-
-      console.log('📊 FirestoreService: Daily summary calculation:', {
-        date: dateString,
-        dayOfWeek: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][dayOfWeek],
-        totalTasksAvailable,
-        tasksCompleted,
-        completions: completions.length
-      });
-
-      let goldPenalty = 0;
-      let allTasksBonusGold = 0;
-
-      // Calculate penalties and bonuses
-      if (totalTasksAvailable > 0) {
-        const incompleteTasks = totalTasksAvailable - tasksCompleted;
-
-        if (incompleteTasks > 0) {
-          goldPenalty = incompleteTasks; // 1 gold penalty per incomplete task
-          console.log(`⚠️ FirestoreService: Applying penalty - ${incompleteTasks} tasks incomplete = -${goldPenalty} gold`);
-        }
-
-        if (tasksCompleted >= totalTasksAvailable) {
-          allTasksBonusGold = 10; // Bonus for completing all tasks
-          console.log(`🎁 FirestoreService: All tasks completed! Bonus: +${allTasksBonusGold} gold`);
-        }
-      } else {
-        console.log('⚠️ FirestoreService: No tasks available for this day, skipping penalties/bonuses');
-      }
-      
-      // Apply penalties/bonuses to user progress
-      if (goldPenalty > 0 || allTasksBonusGold > 0) {
-        const progressRef = doc(db, 'progress', userId);
-        const progressDoc = await getDoc(progressRef);
-
-        if (progressDoc.exists()) {
-          const currentProgress = progressDoc.data();
-          const currentGold = currentProgress.availableGold || 0;
-
-          let newGold = currentGold;
-          if (goldPenalty > 0) {
-            newGold = Math.max(0, currentGold - goldPenalty); // Never go below 0
-          }
-          if (allTasksBonusGold > 0) {
-            newGold += allTasksBonusGold;
-          }
-
-          await updateDoc(progressRef, {
-            availableGold: newGold,
-            totalGoldEarned: (currentProgress.totalGoldEarned || 0) + allTasksBonusGold,
-            updatedAt: serverTimestamp()
-          });
-
-          // Create gold transaction records for penalties and bonuses
-          if (goldPenalty > 0) {
-            const penaltyTransactionRef = doc(collection(db, 'goldTransactions'));
-            await setDoc(penaltyTransactionRef, {
-              userId,
-              amount: -goldPenalty,
-              type: 'penalty',
-              source: 'daily_penalty',
-              description: `Penalidade diária: ${incompleteTasks} tarefas não concluídas`,
-              metadata: {
-                date: dateString,
-                tasksCompleted,
-                totalTasksAvailable,
-                incompleteTasks
-              },
-              balanceBefore: currentGold,
-              balanceAfter: goldPenalty > 0 && allTasksBonusGold === 0 ? Math.max(0, currentGold - goldPenalty) : currentGold - goldPenalty + allTasksBonusGold,
-              createdAt: serverTimestamp()
-            });
-          }
-
-          if (allTasksBonusGold > 0) {
-            const bonusTransactionRef = doc(collection(db, 'goldTransactions'));
-            await setDoc(bonusTransactionRef, {
-              userId,
-              amount: allTasksBonusGold,
-              type: 'bonus',
-              source: 'daily_bonus',
-              description: 'Bônus diário: Todas as tarefas concluídas!',
-              metadata: {
-                date: dateString,
-                tasksCompleted,
-                totalTasksAvailable
-              },
-              balanceBefore: goldPenalty > 0 ? Math.max(0, currentGold - goldPenalty) : currentGold,
-              balanceAfter: newGold,
-              createdAt: serverTimestamp()
-            });
-          }
-
-          console.log('💰 FirestoreService: Applied daily adjustments:', {
-            goldPenalty,
-            allTasksBonusGold,
-            oldGold: currentGold,
-            newGold
-          });
-        }
-      }
-      
-      // Save daily summary
-      const dailyProgressRef = doc(db, 'dailyProgress', `${userId}_${dateString}`);
-      await setDoc(dailyProgressRef, {
-        userId,
-        date: dateString,
-        xpEarned: completions.reduce((sum, c) => sum + c.xpEarned, 0),
-        goldEarned: completions.reduce((sum, c) => sum + c.goldEarned, 0),
-        tasksCompleted,
-        totalTasksAvailable,
-        goldPenalty,
-        allTasksBonusGold,
-        summaryProcessed: true,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-      
-      console.log('✅ FirestoreService: Daily summary processed successfully');
-    } catch (error) {
-      console.error('❌ FirestoreService: Error processing daily summary:', error);
-      throw error;
-    }
-  }
-
-  // ========================================
-  // 🔥 REAL-TIME LISTENERS
-  // ========================================
-
-  static subscribeToUserTasks(userId: string, onUpdate: (tasks: Task[]) => void, onError?: (error: any) => void): () => void {
+  static subscribeToUserTasks(userId: string, onUpdate: (tasks: Task[]) => void, onError?: (error: FirestoreError) => void): () => void {
     try {
       const tasksQuery = query(
         collection(db, 'tasks'),
@@ -1590,17 +1284,17 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in tasks listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up tasks listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
 
-  static subscribeToUserRewards(userId: string, onUpdate: (rewards: Reward[]) => void, onError?: (error: any) => void): () => void {
+  static subscribeToUserRewards(userId: string, onUpdate: (rewards: Reward[]) => void, onError?: (error: FirestoreError) => void): () => void {
     try {
       const rewardsQuery = query(
         collection(db, 'rewards'),
@@ -1630,17 +1324,17 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in rewards listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up rewards listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
 
-  static subscribeToUserProgress(userId: string, onUpdate: (progress: UserProgress | null) => void, onError?: (error: any) => void): () => void {
+  static subscribeToUserProgress(userId: string, onUpdate: (progress: UserProgress | null) => void, onError?: (error: FirestoreError) => void): () => void {
     try {
       const progressRef = doc(db, 'progress', userId);
 
@@ -1671,17 +1365,17 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in progress listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up progress listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
 
-  static subscribeToUserRedemptions(userId: string, onUpdate: (redemptions: RewardRedemption[]) => void, onError?: (error: any) => void): () => void {
+  static subscribeToUserRedemptions(userId: string, onUpdate: (redemptions: RewardRedemption[]) => void, onError?: (error: FirestoreError) => void): () => void {
     try {
       const redemptionsQuery = query(
         collection(db, 'redemptions'),
@@ -1708,17 +1402,17 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in redemptions listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up redemptions listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
 
-  static subscribeToUserNotifications(userId: string, onUpdate: (notifications: Notification[]) => void, onError?: (error: any) => void): () => void {
+  static subscribeToUserNotifications(userId: string, onUpdate: (notifications: Notification[]) => void, onError?: (error: FirestoreError) => void): () => void {
     try {
       const notificationsQuery = query(
         collection(db, 'notifications'),
@@ -1746,17 +1440,17 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in notifications listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up notifications listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
 
-  static subscribeToUserFlashReminders(userId: string, onUpdate: (reminders: FlashReminder[]) => void, onError?: (error: any) => void): () => void {
+  static subscribeToUserFlashReminders(userId: string, onUpdate: (reminders: FlashReminder[]) => void, onError?: (error: FirestoreError) => void): () => void {
     try {
       const remindersQuery = query(
         collection(db, 'flashReminders'),
@@ -1787,17 +1481,17 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in flash reminders listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up flash reminders listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
 
-  static subscribeToUserAchievements(userId: string, onUpdate: (achievements: Achievement[]) => void, onError?: (error: any) => void): () => void {
+  static subscribeToUserAchievements(userId: string, onUpdate: (achievements: Achievement[]) => void, onError?: (error: FirestoreError) => void): () => void {
     try {
       const achievementsQuery = query(
         collection(db, 'achievements'),
@@ -1829,17 +1523,17 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in achievements listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up achievements listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
 
-  static subscribeToUserAchievementProgress(userId: string, onUpdate: (userAchievements: UserAchievement[]) => void, onError?: (error: any) => void): () => void {
+  static subscribeToUserAchievementProgress(userId: string, onUpdate: (userAchievements: UserAchievement[]) => void, onError?: (error: FirestoreError) => void): () => void {
     try {
       const userAchievementsQuery = query(
         collection(db, 'userAchievements'),
@@ -1868,12 +1562,12 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in user achievements listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up user achievements listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
@@ -1884,7 +1578,7 @@ export class FirestoreService {
 
   static async createDefaultData(childUid: string, adminUid: string): Promise<void> {
     try {
-      console.log('🔄 FirestoreService: Creating default data for child:', childUid);
+      console.log('🔄 FirestoreService: Creating default data for child:', childUid, 'by admin:', adminUid);
       
       // Ensure progress exists
       await this.ensureUserProgress(childUid);
@@ -1892,178 +1586,6 @@ export class FirestoreService {
       console.log('✅ FirestoreService: Default data created successfully');
     } catch (error) {
       console.error('❌ FirestoreService: Error creating default data:', error);
-      throw error;
-    }
-  }
-
-  static async createTestData(childUid: string, adminUid: string): Promise<void> {
-    try {
-      console.log('🔄 FirestoreService: Creating test data for child:', childUid);
-      
-      const batch = writeBatch(db);
-      
-      // Test tasks
-      const testTasks = [
-        { title: 'Escovar os dentes', description: 'Escove bem os dentes pela manhã', period: 'morning', xp: 10, gold: 5 },
-        { title: 'Arrumar a cama', description: 'Deixe sua cama arrumadinha', period: 'morning', xp: 15, gold: 8 },
-        { title: 'Fazer o dever de casa', description: 'Complete todas as atividades escolares', period: 'afternoon', xp: 25, gold: 15 },
-        { title: 'Organizar os brinquedos', description: 'Guarde todos os brinquedos no lugar', period: 'evening', xp: 20, gold: 10 },
-        { title: 'Tomar banho', description: 'Tome um banho relaxante', period: 'evening', xp: 15, gold: 8 }
-      ];
-      
-      testTasks.forEach(task => {
-        const taskRef = doc(collection(db, 'tasks'));
-        batch.set(taskRef, {
-          ...task,
-          ownerId: childUid,
-          frequency: 'daily',
-          active: true,
-          status: 'pending',
-          createdBy: adminUid,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-      });
-      
-      // Test rewards
-      const testRewards = [
-        { title: '30 min de videogame extra', description: 'Tempo adicional para jogar', category: 'activity', costGold: 25, emoji: '🎮', requiredLevel: 1 },
-        { title: 'Escolher o filme da noite', description: 'Você decide qual filme assistir', category: 'privilege', costGold: 40, emoji: '🎬', requiredLevel: 5 },
-        { title: 'Sorvete especial', description: 'Um sorvete delicioso', category: 'treat', costGold: 35, emoji: '🍦', requiredLevel: 3 },
-        { title: 'Ida ao parque', description: 'Um passeio especial no parque', category: 'activity', costGold: 80, emoji: '🏞️', requiredLevel: 10 },
-        { title: 'Brinquedo novo', description: 'Um brinquedo legal para você', category: 'toy', costGold: 150, emoji: '🧸', requiredLevel: 15 }
-      ];
-      
-      testRewards.forEach(reward => {
-        const rewardRef = doc(collection(db, 'rewards'));
-        batch.set(rewardRef, {
-          ...reward,
-          ownerId: childUid,
-          active: true,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-      });
-      
-      await batch.commit();
-      console.log('✅ FirestoreService: Test data created successfully');
-    } catch (error) {
-      console.error('❌ FirestoreService: Error creating test data:', error);
-      throw error;
-    }
-  }
-
-  static async recoverProgressFromHistory(userId: string): Promise<{
-    totalXP: number;
-    totalGoldEarned: number;
-    totalGoldSpent: number;
-    availableGold: number;
-    totalTasksCompleted: number;
-  }> {
-    try {
-      console.log('🔄 FirestoreService: Recovering progress from history for:', userId);
-
-      // Get all gold transactions
-      const transactionsQuery = query(
-        collection(db, 'goldTransactions'),
-        where('userId', '==', userId)
-      );
-      const transactionsSnapshot = await getDocs(transactionsQuery);
-
-      let totalGoldEarned = 0;
-      let totalGoldSpent = 0;
-      let totalXP = 0;
-      let taskCompletions = 0;
-
-      transactionsSnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const amount = data.amount || 0;
-
-        if (data.type === 'earned' || data.type === 'bonus') {
-          totalGoldEarned += amount;
-        } else if (data.type === 'spent') {
-          totalGoldSpent += Math.abs(amount);
-        }
-
-        // Count task completions
-        if (data.source === 'task_completion') {
-          taskCompletions++;
-          // Estimate XP (typically 10 XP per task)
-          totalXP += 10;
-        }
-      });
-
-      const availableGold = totalGoldEarned - totalGoldSpent;
-
-      console.log('📊 FirestoreService: Recovery summary:', {
-        totalXP,
-        totalGoldEarned,
-        totalGoldSpent,
-        availableGold,
-        taskCompletions
-      });
-
-      return {
-        totalXP,
-        totalGoldEarned,
-        totalGoldSpent,
-        availableGold: Math.max(0, availableGold),
-        totalTasksCompleted: taskCompletions
-      };
-    } catch (error) {
-      console.error('❌ FirestoreService: Error recovering progress:', error);
-      throw error;
-    }
-  }
-
-  static async completeUserReset(userId: string): Promise<void> {
-    try {
-      console.log('🔄 FirestoreService: Starting complete user reset for:', userId);
-
-      const batch = writeBatch(db);
-
-      // Delete all user tasks
-      const tasksQuery = query(collection(db, 'tasks'), where('ownerId', '==', userId));
-      const tasksSnapshot = await getDocs(tasksQuery);
-      tasksSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-
-      // Delete all user rewards
-      const rewardsQuery = query(collection(db, 'rewards'), where('ownerId', '==', userId));
-      const rewardsSnapshot = await getDocs(rewardsQuery);
-      rewardsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-
-      // Delete all user redemptions
-      const redemptionsQuery = query(collection(db, 'redemptions'), where('userId', '==', userId));
-      const redemptionsSnapshot = await getDocs(redemptionsQuery);
-      redemptionsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-
-      // Delete all user notifications
-      const notificationsQuery = query(collection(db, 'notifications'), where('toUserId', '==', userId));
-      const notificationsSnapshot = await getDocs(notificationsQuery);
-      notificationsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-
-      // Reset progress
-      const progressRef = doc(db, 'progress', userId);
-      batch.set(progressRef, {
-        userId,
-        level: 1,
-        totalXP: 0,
-        availableGold: 0,
-        totalGoldEarned: 0,
-        totalGoldSpent: 0,
-        streak: 0,
-        longestStreak: 0,
-        rewardsRedeemed: 0,
-        totalTasksCompleted: 0,
-        lastActivityDate: serverTimestamp(),
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-
-      await batch.commit();
-      console.log('✅ FirestoreService: Complete user reset finished');
-    } catch (error) {
-      console.error('❌ FirestoreService: Error in complete user reset:', error);
       throw error;
     }
   }
@@ -2168,7 +1690,7 @@ export class FirestoreService {
     options?: {
       relatedId?: string;
       relatedTitle?: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       createdBy?: string;
     }
   ): Promise<string> {
@@ -2180,12 +1702,18 @@ export class FirestoreService {
         throw new Error('User progress not found');
       }
 
+      if (!amount) {
+        return '';
+      }
+
       const currentProgress = progressDoc.data();
-      const balanceBefore = currentProgress.availableGold || 0;
-      const balanceAfter = balanceBefore + amount;
+      // Callers (quiz, inglês, conquista, aniversário, missão surpresa)
+      // já aplicaram o gold no progress. O saldo lido aqui é o DEPOIS.
+      const balanceAfter = currentProgress.availableGold || 0;
+      const balanceBefore = balanceAfter - amount;
 
       const transactionRef = doc(collection(db, 'goldTransactions'));
-      const transactionData = {
+      const transactionData = omitUndefined({
         userId,
         amount,
         type,
@@ -2198,7 +1726,7 @@ export class FirestoreService {
         balanceAfter,
         createdAt: serverTimestamp(),
         createdBy: options?.createdBy
-      };
+      });
 
       await setDoc(transactionRef, transactionData);
       console.log('✅ FirestoreService: Gold transaction created:', {
@@ -2239,24 +1767,7 @@ export class FirestoreService {
 
       const snapshot = await getDocs(q);
 
-      let transactions = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          userId: data.userId,
-          amount: data.amount,
-          type: data.type,
-          source: data.source,
-          description: data.description,
-          relatedId: data.relatedId,
-          relatedTitle: data.relatedTitle,
-          metadata: data.metadata,
-          balanceBefore: data.balanceBefore,
-          balanceAfter: data.balanceAfter,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          createdBy: data.createdBy
-        } as GoldTransaction;
-      });
+      let transactions = snapshot.docs.map((item) => mapGoldTransaction(item.id, item.data()));
 
       if (options?.startDate) {
         transactions = transactions.filter(t => t.createdAt >= options.startDate!);
@@ -2284,48 +1795,57 @@ export class FirestoreService {
   static subscribeToGoldTransactions(
     userId: string,
     onUpdate: (transactions: GoldTransaction[]) => void,
-    onError?: (error: any) => void
+    onError?: (error: FirestoreError) => void,
+    options?: { since?: Date | null; limitCount?: number }
   ): () => void {
-    try {
-      const transactionsQuery = query(
+    const cap = options?.limitCount ?? 2000;
+    const since = options?.since || null;
+
+    const emit = (items: GoldTransaction[]) => {
+      const sorted = [...items].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      onUpdate(since ? sorted.filter((item) => item.createdAt >= since) : sorted);
+    };
+
+    const listenSimple = (): (() => void) => {
+      const simpleQuery = query(
         collection(db, 'goldTransactions'),
         where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
-        limit(100)
+        limit(cap)
       );
-
       return onSnapshot(
-        transactionsQuery,
-        (snapshot) => {
-          const transactions = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              userId: data.userId,
-              amount: data.amount,
-              type: data.type,
-              source: data.source,
-              description: data.description,
-              relatedId: data.relatedId,
-              relatedTitle: data.relatedTitle,
-              metadata: data.metadata,
-              balanceBefore: data.balanceBefore,
-              balanceAfter: data.balanceAfter,
-              createdAt: data.createdAt?.toDate() || new Date(),
-              createdBy: data.createdBy
-            } as GoldTransaction;
-          });
-          onUpdate(transactions);
-        },
+        simpleQuery,
+        (snapshot) => emit(snapshot.docs.map((item) => mapGoldTransaction(item.id, item.data()))),
         (error) => {
-          console.error('❌ FirestoreService: Error in gold transactions listener:', error);
-          if (onError) onError(error);
+          console.error('❌ FirestoreService: Error in gold transactions fallback listener:', error);
+          if (onError) onError(error as FirestoreError);
+          onUpdate([]);
         }
       );
+    };
+
+    try {
+      const constraints = [
+        where('userId', '==', userId),
+        ...(since ? [where('createdAt', '>=', Timestamp.fromDate(since))] : []),
+        orderBy('createdAt', 'desc'),
+        limit(cap)
+      ];
+      const transactionsQuery = query(collection(db, 'goldTransactions'), ...constraints);
+
+      let unsubscribe = onSnapshot(
+        transactionsQuery,
+        (snapshot) => emit(snapshot.docs.map((item) => mapGoldTransaction(item.id, item.data()))),
+        (error) => {
+          console.warn('⚠️ FirestoreService: gold index/query failed, using fallback:', error.code);
+          unsubscribe = listenSimple();
+        }
+      );
+
+      return () => unsubscribe();
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up gold transactions listener:', error);
-      if (onError) onError(error);
-      return () => {};
+      if (onError) onError(error as FirestoreError);
+      return listenSimple();
     }
   }
 
@@ -2334,7 +1854,7 @@ export class FirestoreService {
     amount: number,
     reason: string,
     adminUid: string
-  ): Promise<void> {
+  ): Promise<{ before: number; after: number }> {
     try {
       const progressRef = doc(db, 'progress', userId);
       const progressDoc = await getDoc(progressRef);
@@ -2358,7 +1878,7 @@ export class FirestoreService {
       const transactionRef = doc(collection(db, 'goldTransactions'));
       batch.set(transactionRef, {
         userId,
-        amount,
+        amount: newGold - currentGold,
         type: 'adjustment',
         source: 'admin_adjustment',
         description: `Ajuste manual: ${reason}`,
@@ -2376,10 +1896,37 @@ export class FirestoreService {
         oldBalance: currentGold,
         newBalance: newGold
       });
+      return { before: currentGold, after: newGold };
     } catch (error) {
       console.error('❌ FirestoreService: Error adjusting gold manually:', error);
       throw error;
     }
+  }
+
+  /**
+   * Ajuste manual de XP com motivo, em transação (não sobrescreve XP que a criança
+   * ganhe no mesmo instante). Registra em xpAdjustments; o XP não passa pelo livro de gold.
+   */
+  static async adjustXPManually(userId: string, amount: number, reason: string, adminUid: string): Promise<{ before: number; after: number }> {
+    const progressRef = doc(db, 'progress', userId);
+    const logRef = doc(collection(db, 'xpAdjustments'));
+    return runTransaction(db, async (tx) => {
+      const snap = await tx.get(progressRef);
+      if (!snap.exists()) throw new Error('User progress not found');
+      const before = Number(snap.data().totalXP) || 0;
+      const after = Math.max(0, before + amount);
+      tx.update(progressRef, { totalXP: after, level: getLevelFromXP(after), updatedAt: serverTimestamp() });
+      tx.set(logRef, {
+        userId,
+        amount: after - before,
+        reason,
+        xpBefore: before,
+        xpAfter: after,
+        createdAt: serverTimestamp(),
+        createdBy: adminUid,
+      });
+      return { before, after };
+    });
   }
 
   // ========================================
@@ -2444,10 +1991,11 @@ export class FirestoreService {
       return punishmentRef.id;
     } catch (error) {
       console.error('❌ FirestoreService: Error activating punishment mode:', error);
+      const details = error as { code?: string; message?: string; stack?: string } | null;
       console.error('Error details:', {
-        code: (error as any)?.code,
-        message: (error as any)?.message,
-        stack: (error as any)?.stack
+        code: details?.code,
+        message: details?.message,
+        stack: details?.stack
       });
       throw error;
     }
@@ -2472,7 +2020,7 @@ export class FirestoreService {
     }
   }
 
-  static async getActivePunishment(userId: string): Promise<any | null> {
+  static async getActivePunishment(userId: string): Promise<PunishmentMode | null> {
     try {
       const punishmentsQuery = query(
         collection(db, 'punishmentMode'),
@@ -2522,8 +2070,8 @@ export class FirestoreService {
 
   static subscribeToActivePunishment(
     userId: string,
-    onUpdate: (punishment: any | null) => void,
-    onError?: (error: any) => void
+    onUpdate: (punishment: PunishmentMode | null) => void,
+    onError?: (error: FirestoreError) => void
   ): () => void {
     try {
       const punishmentsQuery = query(
@@ -2566,12 +2114,12 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in punishment listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up punishment listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }
@@ -2602,7 +2150,7 @@ export class FirestoreService {
         }
       }
 
-      const updates: any = {
+      const updates: Record<string, unknown> = {
         tasksCompleted: newTasksCompleted,
         lastTaskCompletedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -2673,7 +2221,7 @@ export class FirestoreService {
     }
   }
 
-  static async getPunishmentTaskHistory(punishmentId: string): Promise<any[]> {
+  static async getPunishmentTaskHistory(punishmentId: string): Promise<PunishmentTaskCompletion[]> {
     try {
       const historyQuery = query(
         collection(db, 'punishmentTaskCompletions'),
@@ -2704,8 +2252,8 @@ export class FirestoreService {
 
   static subscribeToPunishmentTaskHistory(
     punishmentId: string,
-    onUpdate: (history: any[]) => void,
-    onError?: (error: any) => void
+    onUpdate: (history: PunishmentTaskCompletion[]) => void,
+    onError?: (error: FirestoreError) => void
   ): () => void {
     try {
       const historyQuery = query(
@@ -2735,12 +2283,12 @@ export class FirestoreService {
         },
         (error) => {
           console.error('❌ FirestoreService: Error in punishment history listener:', error);
-          if (onError) onError(error);
+          if (onError) onError(error as FirestoreError);
         }
       );
     } catch (error) {
       console.error('❌ FirestoreService: Error setting up punishment history listener:', error);
-      if (onError) onError(error);
+      if (onError) onError(error as FirestoreError);
       return () => {};
     }
   }

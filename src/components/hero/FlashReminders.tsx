@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { FlashIcon, IconBadge } from '../../icons';
 import { FlashReminder } from '../../types';
 import { useData } from '../../contexts/DataContext';
 
-interface FlashRemindersProps {}
-
-const FlashReminders: React.FC<FlashRemindersProps> = () => {
+const FlashReminders: React.FC = () => {
   const { flashReminders } = useData();
   const [currentReminderIndex, setCurrentReminderIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
@@ -65,11 +64,11 @@ const FlashReminders: React.FC<FlashRemindersProps> = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.5 }}
-        className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+        className="comic-card p-6"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-400" fill="currentColor" />
+            <FlashIcon name="bolt" className="w-5 h-5 text-amber-500" />
             Lembretes Flash
           </h3>
           <button
@@ -82,7 +81,9 @@ const FlashReminders: React.FC<FlashRemindersProps> = () => {
         </div>
         
         <div className="text-center py-6">
-          <div className="text-4xl mb-2">⚡</div>
+          <div className="mb-2 flex justify-center">
+            <IconBadge name="bolt" size={48} />
+          </div>
           <p className="text-gray-600 text-sm">
             Nenhum lembrete ativo no momento
           </p>
@@ -99,12 +100,12 @@ const FlashReminders: React.FC<FlashRemindersProps> = () => {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.5 }}
-      className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 relative overflow-hidden"
+      className="comic-card p-6 relative overflow-hidden"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
-          <Zap className="w-5 h-5 text-yellow-400" fill="currentColor" />
+          <FlashIcon name="bolt" className="w-5 h-5 text-amber-500" />
           Lembretes Flash
         </h3>
         
@@ -177,9 +178,9 @@ const FlashReminders: React.FC<FlashRemindersProps> = () => {
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
-                  className="text-2xl"
+                  className="inline-flex"
                 >
-                  {currentReminder.icon}
+                  <IconBadge name={currentReminder.icon} size={40} />
                 </motion.span>
                 
                 <div className="flex-1">

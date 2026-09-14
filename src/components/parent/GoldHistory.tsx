@@ -5,14 +5,10 @@ import {
   TrendingDown,
   DollarSign,
   Calendar,
-  Filter,
-  ChevronDown,
   Loader,
   Award,
   Gift,
   AlertTriangle,
-  Plus,
-  Minus,
   RefreshCw,
   Star,
   Target,
@@ -20,23 +16,35 @@ import {
   Trophy,
   Cake,
   Brain,
-  Settings
+  Settings,
+  Gamepad2
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { GoldTransaction } from '../../types';
+import { getTodayStartBrazil } from '../../utils/timezone';
 import toast from 'react-hot-toast';
-import MigrationButton from './MigrationButton';
 
-type PeriodFilter = 'today' | '7days' | '30days' | 'all' | 'custom';
+type PeriodFilter = 'today' | '7days' | '30days' | 'all';
 type TypeFilter = 'all' | 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment';
-type SourceFilter = 'all' | 'task_completion' | 'reward_redemption' | 'daily_bonus' | 'daily_penalty' | 'admin_adjustment' | 'birthday' | 'quiz' | 'surprise_mission' | 'achievement' | 'redemption_refund';
+type SourceFilter = 'all' | 'task_completion' | 'reward_redemption' | 'daily_bonus' | 'daily_penalty' | 'admin_adjustment' | 'birthday' | 'quiz' | 'surprise_mission' | 'achievement' | 'redemption_refund' | 'english_game';
+
+function sinceForPeriod(period: PeriodFilter): Date | null {
+  if (period === 'all') return null;
+  const start = getTodayStartBrazil();
+  if (period === 'today') return start;
+  const days = period === '7days' ? 7 : 30;
+  return new Date(start.getTime() - days * 24 * 60 * 60 * 1000);
+}
 
 const GoldHistory: React.FC = () => {
   const { childUid, user } = useAuth();
+  const { progress } = useData();
   const [transactions, setTransactions] = useState<GoldTransaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('30days');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [showAdjustmentModal, setShowAdjustmentModal] = useState(false);
@@ -44,67 +52,40 @@ const GoldHistory: React.FC = () => {
   const [adjustmentReason, setAdjustmentReason] = useState('');
 
   useEffect(() => {
-    if (!childUid) return;
+    if (!childUid) {
+      setTransactions([]);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
+    setLoadError(null);
+
     const unsubscribe = FirestoreService.subscribeToGoldTransactions(
       childUid,
       (updatedTransactions) => {
         setTransactions(updatedTransactions);
+        setLoadError(null);
         setLoading(false);
       },
       (error) => {
         console.error('Error loading transactions:', error);
+        setLoadError(error.message || 'Não foi possível carregar o histórico de gold.');
         setLoading(false);
-      }
+      },
+      { since: sinceForPeriod(periodFilter) }
     );
 
     return () => unsubscribe();
-  }, [childUid]);
-
-  const getDateRange = (period: PeriodFilter): { start: Date | null; end: Date | null } => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    switch (period) {
-      case 'today':
-        return { start: today, end: now };
-      case '7days':
-        const sevenDaysAgo = new Date(today);
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        return { start: sevenDaysAgo, end: now };
-      case '30days':
-        const thirtyDaysAgo = new Date(today);
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        return { start: thirtyDaysAgo, end: now };
-      case 'all':
-        return { start: null, end: null };
-      default:
-        return { start: null, end: null };
-    }
-  };
+  }, [childUid, periodFilter]);
 
   const filteredTransactions = useMemo(() => {
-    let filtered = [...transactions];
-
-    const dateRange = getDateRange(periodFilter);
-    if (dateRange.start) {
-      filtered = filtered.filter(t => t.createdAt >= dateRange.start!);
-    }
-    if (dateRange.end) {
-      filtered = filtered.filter(t => t.createdAt <= dateRange.end!);
-    }
-
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(t => t.type === typeFilter);
-    }
-
-    if (sourceFilter !== 'all') {
-      filtered = filtered.filter(t => t.source === sourceFilter);
-    }
-
-    return filtered;
-  }, [transactions, periodFilter, typeFilter, sourceFilter]);
+    return transactions.filter((t) => {
+      if (typeFilter !== 'all' && t.type !== typeFilter) return false;
+      if (sourceFilter !== 'all' && t.source !== sourceFilter) return false;
+      return true;
+    });
+  }, [transactions, typeFilter, sourceFilter]);
 
   const statistics = useMemo(() => {
     const earned = filteredTransactions
@@ -140,7 +121,8 @@ const GoldHistory: React.FC = () => {
       quiz: <Brain className="w-5 h-5" />,
       surprise_mission: <Zap className="w-5 h-5" />,
       achievement: <Trophy className="w-5 h-5" />,
-      redemption_refund: <RefreshCw className="w-5 h-5" />
+      redemption_refund: <RefreshCw className="w-5 h-5" />,
+      english_game: <Gamepad2 className="w-5 h-5" />
     };
 
     return iconMap[transaction.source] || <DollarSign className="w-5 h-5" />;
@@ -175,7 +157,8 @@ const GoldHistory: React.FC = () => {
       quiz: 'Quiz',
       surprise_mission: 'Missão Surpresa',
       achievement: 'Conquista',
-      redemption_refund: 'Reembolso'
+      redemption_refund: 'Reembolso',
+      english_game: 'Arena de Inglês'
     };
 
     return labels[source] || source;
@@ -200,7 +183,7 @@ const GoldHistory: React.FC = () => {
         childUid,
         amount,
         adjustmentReason,
-        user.uid
+        user.userId
       );
 
       toast.success(`Ajuste de ${amount > 0 ? '+' : ''}${amount} Gold realizado com sucesso!`);
@@ -225,7 +208,6 @@ const GoldHistory: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Migration Button */}
-      <MigrationButton />
 
       {/* Header with Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -236,7 +218,7 @@ const GoldHistory: React.FC = () => {
               Histórico Completo de Gold
             </h2>
             <p className="text-gray-600 mt-1">
-              Todas as transações de gold registradas
+              Todas as transações de gold registradas · saldo atual: {progress.availableGold || 0} Gold
             </p>
           </div>
 
@@ -309,11 +291,18 @@ const GoldHistory: React.FC = () => {
               <option value="quiz">Quiz</option>
               <option value="surprise_mission">Missão Surpresa</option>
               <option value="birthday">Aniversário</option>
+              <option value="english_game">Arena de Inglês</option>
               <option value="admin_adjustment">Ajustes Manuais</option>
             </select>
           </div>
         </div>
       </div>
+
+      {loadError && (
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
+          {loadError}
+        </div>
+      )}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -453,7 +442,9 @@ const GoldHistory: React.FC = () => {
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <p className="text-gray-600 text-lg">Nenhuma transação encontrada</p>
             <p className="text-gray-500 text-sm mt-1">
-              Tente ajustar os filtros acima
+              {periodFilter === 'today'
+                ? 'Não houve gold hoje. Troque o período para “Todo o período” para ver o histórico completo.'
+                : 'Tente ajustar os filtros acima. O saldo atual do Heitor aparece no topo desta tela.'}
             </p>
           </div>
         )}

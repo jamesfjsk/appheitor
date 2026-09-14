@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Save, Zap, Type, MessageCircle, Palette, AlertTriangle, Eye } from 'lucide-react';
+import { X, Save, Type, MessageCircle, Palette, AlertTriangle, Eye } from 'lucide-react';
+import { IconBadge, IconPicker } from '../../icons';
 import { useData } from '../../contexts/DataContext';
 import { FlashReminder } from '../../types';
 import toast from 'react-hot-toast';
 
 interface FlashReminderFormProps {
-  reminder?: FlashReminder;
+  reminder?: FlashReminder | null;
   onClose: () => void;
   isOpen: boolean;
 }
@@ -16,7 +17,7 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
   const [formData, setFormData] = useState({
     title: '',
     message: '',
-    icon: '⚡',
+    icon: 'bolt',
     color: 'yellow' as FlashReminder['color'],
     priority: 'medium' as FlashReminder['priority'],
     active: true,
@@ -40,7 +41,7 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
       setFormData({
         title: '',
         message: '',
-        icon: '⚡',
+        icon: 'bolt',
         color: 'yellow',
         priority: 'medium',
         active: true,
@@ -112,7 +113,7 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     if (errors[field]) {
@@ -135,44 +136,39 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
     { value: 'high', label: 'Alta', description: 'Lembrete que pisca' },
   ];
 
-  const iconSuggestions = [
-    '⚡', '💧', '🦸', '🌬️', '😊', '🗂️', '📚', '🎯', '💪', '🧠',
-    '⭐', '🔥', '💎', '🚀', '🌟', '⏰', '🎵', '🎨', '🏃', '🧘'
-  ];
-
   const templates = [
     {
       title: 'Hidratação Flash',
       message: 'Beba água para manter sua energia de super-herói!',
-      icon: '💧',
+      icon: 'water',
       color: 'blue' as const,
       priority: 'medium' as const
     },
     {
       title: 'Postura de Herói',
       message: 'Sente-se direito como um verdadeiro velocista!',
-      icon: '🦸',
+      icon: 'hero',
       color: 'red' as const,
       priority: 'low' as const
     },
     {
       title: 'Respiração Flash',
       message: 'Respire fundo e mantenha o foco nas missões!',
-      icon: '🌬️',
+      icon: 'wind',
       color: 'green' as const,
       priority: 'medium' as const
     },
     {
       title: 'Energia Positiva',
       message: 'Sorria! Você está fazendo um trabalho incrível!',
-      icon: '😊',
+      icon: 'smile',
       color: 'yellow' as const,
       priority: 'high' as const
     },
     {
       title: 'Organização Flash',
       message: 'Mantenha seu espaço organizado como a STAR Labs!',
-      icon: '🗂️',
+      icon: 'folder',
       color: 'purple' as const,
       priority: 'low' as const
     }
@@ -229,7 +225,7 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
                   className="p-3 text-left border border-gray-200 rounded-lg hover:border-yellow-300 hover:bg-yellow-50 transition-colors"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{template.icon}</span>
+                    <IconBadge name={template.icon} size={28} />
                     <span className="font-medium text-sm">{template.title}</span>
                   </div>
                   <p className="text-xs text-gray-600">{template.message}</p>
@@ -294,46 +290,13 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
             {/* Ícone */}
             <div>
               <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                <span className="text-lg">🎨</span>
                 <span>Ícone *</span>
               </label>
-              
-              <div className="flex items-center gap-4 mb-3">
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) => handleInputChange('icon', e.target.value)}
-                  className={`w-16 px-3 py-2 border rounded-lg text-center text-2xl ${
-                    errors.icon ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="⚡"
-                  maxLength={2}
-                />
-                <span className="text-sm text-gray-600">
-                  Escolha um emoji
-                </span>
-              </div>
-              
-              {errors.icon && (
-                <p className="mb-3 text-sm text-red-600">{errors.icon}</p>
-              )}
-              
-              <div className="grid grid-cols-5 gap-2">
-                {iconSuggestions.map((icon) => (
-                  <button
-                    key={icon}
-                    type="button"
-                    onClick={() => handleInputChange('icon', icon)}
-                    className={`p-2 text-xl rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-                      formData.icon === icon
-                        ? 'border-yellow-500 bg-yellow-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {icon}
-                  </button>
-                ))}
-              </div>
+              <IconPicker
+                value={formData.icon}
+                onChange={(key) => handleInputChange('icon', key)}
+                error={errors.icon}
+              />
             </div>
 
             {/* Cor */}
@@ -438,7 +401,7 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
               ${formData.priority === 'high' ? 'animate-pulse' : ''}
             `}>
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{formData.icon}</span>
+                <IconBadge name={formData.icon} size={36} />
                 <div>
                   <h4 className="font-bold text-lg">{formData.title || 'Título do Lembrete'}</h4>
                   <p className="text-sm opacity-90">{formData.message || 'Mensagem do lembrete aparecerá aqui...'}</p>

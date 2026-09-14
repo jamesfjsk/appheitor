@@ -69,7 +69,7 @@ const SurpriseMissionConfigComponent: React.FC = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     if (errors[field]) {
@@ -206,7 +206,7 @@ const SurpriseMissionConfigComponent: React.FC = () => {
           </div>
           
           <div className="space-y-2 max-h-32 overflow-y-auto">
-            {surpriseMissionHistory.slice(0, 5).map((history, index) => (
+            {surpriseMissionHistory.slice(0, 5).map((history) => (
               <div key={history.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <span className="font-medium text-gray-900">

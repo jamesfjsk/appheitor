@@ -1,3 +1,4 @@
+import { CHILD_PHOTO_URL } from '../../config/rules';
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Zap, Maximize2, Minimize2, Trash2 } from 'lucide-react';
@@ -135,7 +136,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Sabe, quando eu e
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ ChatFlashGPT: Error calling OpenAI API:', error);
       setError('Ops! Algo deu errado. Tente novamente em alguns segundos.');
       
@@ -451,7 +452,7 @@ Exemplo: "⚡ Olá, pequeno velocista! Que pergunta incrível! Sabe, quando eu e
                     {message.role === 'user' && (
                       <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 mt-1 border-2 border-white shadow-md">
                         <img 
-                          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+                          src={CHILD_PHOTO_URL}
                           alt="Avatar do Heitor"
                           className="w-full h-full object-cover rounded-full"
                         />

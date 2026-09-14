@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Sun, Sunset, Moon } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
@@ -7,13 +7,13 @@ import TaskForm from './TaskForm';
 import toast from 'react-hot-toast';
 
 interface TaskManagerProps {
-  tasks: any[];
+  tasks: Task[];
 }
 
 const TaskManager: React.FC<TaskManagerProps> = ({ tasks }) => {
   const { updateTask, deleteTask } = useData();
   const [showForm, setShowForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<any | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const periodIcons = {
@@ -51,7 +51,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks }) => {
     }
   };
 
-  const handleToggleActive = async (task: any) => {
+  const handleToggleActive = async (task: Task) => {
     if (isProcessing) return;
     
     setIsProcessing(true);
@@ -253,7 +253,6 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks }) => {
                     </div>
                     
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-500">{task.points} pts</span>
                       <span className="text-sm text-gray-500">{task.xp || 10} XP, {task.gold || 5} Gold</span>
                       
                       <div className="flex gap-2">

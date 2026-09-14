@@ -14,6 +14,7 @@ interface SoundContextType {
 
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSound = () => {
   const context = useContext(SoundContext);
   if (!context) {
@@ -48,7 +49,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     // Initialize AudioContext after user interaction
     const initAudioContext = () => {
       if (!audioContext) {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
         setAudioContext(ctx);
       }
     };
@@ -104,7 +105,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const playSequence = (notes: { freq: number; duration: number; delay: number; type?: OscillatorType; volume?: number }[]) => {
     if (!isSoundEnabled || !audioContext) return;
 
-    notes.forEach((note, index) => {
+    notes.forEach((note) => {
       setTimeout(() => {
         playTone(note.freq, note.duration, note.type || 'sine', note.volume || 0.3);
       }, note.delay);

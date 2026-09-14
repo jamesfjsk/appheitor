@@ -1,11 +1,11 @@
+import { CHILD_PHOTO_URL } from '../../config/rules';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CloudLightning as Lightning, LogOut, Gift, Calendar, Clock } from 'lucide-react';
+import { FlashIcon } from '../../icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserProgress } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import { calculateLevelSystem, getLevelIcon, getAvatarBorderStyle } from '../../utils/levelSystem';
-import SpeedForce from './SpeedForce';
 
 interface HeroHeaderProps {
   progress: UserProgress;
@@ -16,7 +16,6 @@ interface HeroHeaderProps {
 
 const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer }) => {
   const { logout } = useAuth();
-  const { user: currentUser } = useAuth();
   const { playClick } = useSound();
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   const borderStyle = getAvatarBorderStyle(levelSystem.currentLevel);
@@ -30,11 +29,11 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
 
   const getMotivationalMessage = () => {
     const messages = [
-      '⚡ Pronto para mais aventuras?',
-      '🏃‍♂️ A velocidade está no seu sangue!',
-      '💪 Cada missão te deixa mais forte!',
-      '🌟 Você é incrível como o Flash!',
-      '🔥 Vamos acelerar hoje!'
+      'Pronto para mais aventuras?',
+      'A velocidade está no seu sangue!',
+      'Cada missão te deixa mais forte!',
+      'Você é incrível como o Flash!',
+      'Vamos acelerar hoje!'
     ];
     return messages[Math.floor(Math.random() * messages.length)];
   };
@@ -44,9 +43,8 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="flex flex-col lg:flex-row items-center justify-between glass-card particles-bg rounded-2xl shadow-lg p-6 gap-4 relative overflow-hidden"
+      className="flex flex-col lg:flex-row items-center justify-between comic-card p-6 gap-4 relative overflow-hidden"
     >
-      <SpeedForce intensity="low" />
       {/* Avatar e Saudação */}
       <div className="flex items-center gap-4">
         <motion.div
@@ -63,7 +61,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
         >
           <div className={`w-16 h-16 bg-gradient-to-br from-hero-primary to-hero-secondary rounded-full flex items-center justify-center text-2xl font-bold text-yellow-400 overflow-hidden energy-glow ${borderStyle.borderClass} ${borderStyle.glowClass} ${borderStyle.ringClass}`}>
             <img 
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+              src={CHILD_PHOTO_URL}
               alt="Avatar do Heitor"
               className="w-full h-full object-cover rounded-full"
             />
@@ -141,9 +139,9 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-300 rounded-full flex items-center justify-center"
+            className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-300 rounded-full border-2 border-[#1A1214] flex items-center justify-center text-[#1A1214]"
           >
-            ⭐
+            <FlashIcon name="star" className="w-3.5 h-3.5" />
           </motion.div>
         </motion.div>
 
@@ -154,7 +152,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             transition={{ delay: 0.2 }}
             className="hero-title text-2xl md:text-3xl lg:text-4xl text-gray-900"
           >
-            {getGreeting()}, Heitor! ⚡
+            {getGreeting()}, Heitor!
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, x: -20 }}
@@ -181,28 +179,29 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-2 rounded-full font-bold shadow-lg text-sm flex items-center gap-1"
+            className="comic-chip bg-gradient-to-r from-orange-500 to-red-600 text-white px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1.5"
             title={`Maior sequência: ${progress.longestStreak || 0} dias`}
           >
-            🔥 {progress.streak} {progress.streak === 1 ? 'dia' : 'dias'}
+            <FlashIcon name="fire" className="w-4 h-4" />
+            {progress.streak} {progress.streak === 1 ? 'dia' : 'dias'}
           </motion.div>
         )}
 
         {/* Pontos Disponíveis */}
         <motion.div
           whileHover={{ scale: 1.05 }}
-          className="bg-yellow-500 text-white px-3 py-2 rounded-full font-bold shadow-lg text-sm flex items-center gap-1"
+          className="comic-chip bg-yellow-400 text-[#1A1214] px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1.5"
         >
-          🪙 {progress.availableGold || 0} Gold
+          <FlashIcon name="gold" className="w-4 h-4" />
+          {progress.availableGold || 0} Gold
         </motion.div>
 
         {/* Nível */}
         <motion.div
           whileHover={{ scale: 1.05 }}
-          className="bg-yellow-400 text-red-600 px-3 py-2 rounded-full font-bold shadow-lg text-sm flex items-center gap-1"
+          className="comic-chip bg-red-600 text-yellow-300 px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1.5"
         >
-          <span className="text-base">{getLevelIcon(levelSystem.currentLevel)}</span>
-          <Lightning className="w-4 h-4" fill="currentColor" />
+          <FlashIcon name={getLevelIcon(levelSystem.currentLevel)} className="w-4 h-4" />
           Nível {levelSystem.currentLevel}
         </motion.div>
 
@@ -214,10 +213,10 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             onOpenRewards();
           }}
-          className="p-2 bg-purple-500 hover:bg-purple-600 rounded-full text-white transition-all duration-200 shadow-lg btn-glow"
+          className="comic-chip p-2 bg-red-600 hover:bg-red-700 rounded-xl text-yellow-300 transition-all duration-200"
           title="Loja de Recompensas"
         >
-          <Gift className="w-5 h-5" />
+          <FlashIcon name="gift" className="w-5 h-5" />
         </motion.button>
 
         {/* Botão Calendário */}
@@ -228,10 +227,10 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             onOpenCalendar();
           }}
-          className="p-2 bg-blue-500 hover:bg-blue-600 rounded-full text-white transition-all duration-200 shadow-lg btn-glow"
+          className="comic-chip p-2 bg-[#1A1214] hover:bg-black rounded-xl text-yellow-300 transition-all duration-200"
           title="Calendário de Missões"
         >
-          <Calendar className="w-5 h-5" />
+          <FlashIcon name="calendar" className="w-5 h-5" />
         </motion.button>
 
         {/* Botão Timer */}
@@ -242,10 +241,10 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             onOpenTimer();
           }}
-          className="p-2 bg-gradient-to-r from-hero-primary to-hero-secondary hover:from-hero-secondary hover:to-hero-primary rounded-full text-white transition-all duration-200 shadow-lg btn-glow lightning-bolt"
+          className="comic-chip p-2 bg-yellow-400 hover:bg-yellow-300 rounded-xl text-red-700 transition-all duration-200"
           title="Flash Timer"
         >
-          <Clock className="w-5 h-5" />
+          <FlashIcon name="clock" className="w-5 h-5" />
         </motion.button>
 
         {/* Botão Logout */}
@@ -256,10 +255,10 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             playClick();
             logout();
           }}
-          className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all duration-200"
+          className="comic-chip p-2 bg-white hover:bg-cream rounded-xl text-[#1A1214] transition-all duration-200"
           title="Sair"
         >
-          <LogOut className="w-5 h-5" />
+          <FlashIcon name="logout" className="w-5 h-5" />
         </motion.button>
       </div>
     </motion.header>

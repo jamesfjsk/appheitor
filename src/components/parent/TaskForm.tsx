@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 import { X, Save, Clock, Zap, Calendar, Type, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useData } from '../../contexts/DataContext';
+import { Task } from '../../types';
 
 interface TaskFormProps {
-  task?: any;
+  task?: Task | null;
   onClose: () => void;
   isOpen: boolean;
 }
@@ -67,8 +68,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
       newErrors.description = 'Descrição deve ter no máximo 200 caracteres';
     }
 
-    if (formData.xpReward < 1 || formData.xpReward > 50) {
-    }
     if (formData.xp < 1 || formData.xp > 50) {
       newErrors.xp = 'XP deve estar entre 1 e 50';
     }
@@ -100,7 +99,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
 
     const taskData = {
       ...formData,
-      status: 'pending',
+      status: 'pending' as const,
     };
 
     if (task) {
@@ -120,7 +119,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onClose, isOpen }) => {
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Limpar erro do campo quando usuário começar a digitar

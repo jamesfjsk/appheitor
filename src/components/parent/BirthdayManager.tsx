@@ -1,6 +1,7 @@
+import { CHILD_BIRTH_DATE, childAgeInYear } from '../../config/rules';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Cake, Calendar, Gift, Star, Crown, Heart, Settings } from 'lucide-react';
+import { Cake, Calendar, Crown, Heart, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { BirthdayEvent } from '../../types';
@@ -23,7 +24,7 @@ const BirthdayManager: React.FC = () => {
         // Calculate next birthday
         const today = new Date();
         const currentYear = today.getFullYear();
-        const birthdayThisYear = new Date(currentYear, 8, 18); // September 18th (month is 0-indexed)
+        const birthdayThisYear = new Date(currentYear, CHILD_BIRTH_DATE.month - 1, CHILD_BIRTH_DATE.day);
         
         let nextBirthdayDate: Date;
         let nextAge: number;
@@ -34,7 +35,7 @@ const BirthdayManager: React.FC = () => {
           nextAge = 9; // Heitor is turning 9
         } else {
           // Birthday already happened this year, next is next year
-          nextBirthdayDate = new Date(currentYear + 1, 8, 18);
+          nextBirthdayDate = new Date(currentYear + 1, CHILD_BIRTH_DATE.month - 1, CHILD_BIRTH_DATE.day);
           nextAge = 10; // Next year he'll be 10
         }
         
@@ -61,7 +62,7 @@ const BirthdayManager: React.FC = () => {
     
     try {
       const currentYear = new Date().getFullYear();
-      const age = currentYear - 2015;
+      const age = childAgeInYear(currentYear);
       
       // Mark birthday as not completed to trigger celebration
       await FirestoreService.markBirthdayCompleted(childUid, currentYear - 1, age - 1);
@@ -157,7 +158,7 @@ const BirthdayManager: React.FC = () => {
               </div>
               
               <div className="bg-white/20 rounded-xl p-4">
-                <div className="text-lg font-bold">18/12/{nextBirthday.date.getFullYear()}</div>
+                <div className="text-lg font-bold">{String(CHILD_BIRTH_DATE.day).padStart(2, '0')}/{String(CHILD_BIRTH_DATE.month).padStart(2, '0')}/{nextBirthday.date.getFullYear()}</div>
                 <div className="text-yellow-300">data especial</div>
               </div>
             </div>

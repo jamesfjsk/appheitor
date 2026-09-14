@@ -1,12 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, LogOut, Save } from 'lucide-react';
+import { LogOut, Save } from 'lucide-react';
+import { BrandMark } from '../../icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
 
-interface ParentHeaderProps {}
-
-const ParentHeader: React.FC<ParentHeaderProps> = () => {
+const ParentHeader: React.FC = () => {
   const { logout, user, childUid, syncData } = useAuth();
   const { playClick } = useSound();
 
@@ -19,9 +18,7 @@ const ParentHeader: React.FC<ParentHeaderProps> = () => {
     >
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
         <div className="flex items-center gap-4 mb-4 md:mb-0">
-          <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Shield className="w-6 h-6 text-white" />
-          </div>
+          <BrandMark className="w-12 h-12" />
           
           <div>
             <h1 className="text-2xl font-bold text-gray-900">

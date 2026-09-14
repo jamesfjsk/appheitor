@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, ChevronLeft, ChevronRight, X, Star, Target, Clock, CheckCircle } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, X, Star, Target } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { FirestoreService } from '../../services/firestoreService';
@@ -15,12 +15,12 @@ interface CalendarModalProps {
 }
 
 const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
-  const { progress } = useData();
+  const { progress, tasks } = useData();
   const { childUid } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
   // Load calendar data when month changes
   useEffect(() => {
@@ -50,31 +50,26 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
           
           const tasksCompleted = dayCompletions.length;
           const pointsEarned = dayCompletions.reduce((sum, completion) => sum + completion.xpEarned, 0);
-          
-          // Estimate total tasks (this could be improved by storing daily task counts)
-          const totalTasks = 5; // Average estimate, could be made more accurate
-          
+
+          // Missões previstas para esse dia da semana, pela frequência das missões ativas
+          const dow = date.getDay();
+          const totalTasks = tasks.filter((t) => {
+            if (!t.active) return false;
+            if (t.frequency === 'weekday') return dow >= 1 && dow <= 5;
+            if (t.frequency === 'weekend') return dow === 0 || dow === 6;
+            return true;
+          }).length;
+
           let status: CalendarDay['status'] = 'future';
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           date.setHours(0, 0, 0, 0);
-          
+
+          const isFullDay = totalTasks > 0 && tasksCompleted >= totalTasks;
           if (date < today) {
-            if (tasksCompleted >= 3) { // Consider 3+ tasks as "completed" day
-              status = 'completed';
-            } else if (tasksCompleted > 0) {
-              status = 'partial';
-            } else {
-              status = 'missed';
-            }
+            status = isFullDay ? 'completed' : tasksCompleted > 0 ? 'partial' : 'missed';
           } else if (date.getTime() === today.getTime()) {
-            if (tasksCompleted >= 3) {
-              status = 'completed';
-            } else if (tasksCompleted > 0) {
-              status = 'partial';
-            } else {
-              status = 'future';
-            }
+            status = isFullDay ? 'completed' : tasksCompleted > 0 ? 'partial' : 'future';
           }
           
           days.push({
@@ -86,8 +81,8 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
             tasks: dayCompletions.map(completion => ({
               id: completion.taskId,
               title: completion.taskTitle,
-              points: completion.xpEarned
-            })) as any[]
+              xp: completion.xpEarned
+            })) as Task[]
           });
         }
         
@@ -100,6 +95,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
     };
     
     loadCalendarData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tasks is read as a snapshot; refetching history on every task update is not intended
   }, [currentDate, childUid]);
 
   const monthStart = startOfMonth(currentDate);
@@ -339,7 +335,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
                           <Target className="w-4 h-4 text-green-500" />
                           <span className="text-gray-700">{task.title}</span>
                           <span className="text-hero-accent font-semibold">
-                            +{task.points}pts
+                            +{task.xp}pts
                           </span>
                         </div>
                       ))}

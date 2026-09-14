@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Zap, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { IconBadge } from '../../icons';
 import { useData } from '../../contexts/DataContext';
 import { FlashReminder } from '../../types';
 import FlashReminderForm from './FlashReminderForm';
@@ -21,7 +22,7 @@ const FlashReminderManager: React.FC = () => {
       try {
         await deleteFlashReminder(reminderId);
         toast.success('Lembrete excluído com sucesso!');
-      } catch (error) {
+      } catch {
         toast.error('Erro ao excluir lembrete');
       }
     }
@@ -31,7 +32,7 @@ const FlashReminderManager: React.FC = () => {
     try {
       await updateFlashReminder(reminder.id, { active: !reminder.active });
       toast.success(reminder.active ? 'Lembrete desativado' : 'Lembrete ativado');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao atualizar lembrete');
     }
   };
@@ -40,7 +41,7 @@ const FlashReminderManager: React.FC = () => {
     try {
       await updateFlashReminder(reminder.id, { showOnDashboard: !reminder.showOnDashboard });
       toast.success(reminder.showOnDashboard ? 'Removido do painel' : 'Adicionado ao painel');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao atualizar lembrete');
     }
   };
@@ -119,7 +120,7 @@ const FlashReminderManager: React.FC = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3 flex-1">
-                      <span className="text-2xl">{reminder.icon}</span>
+                      <IconBadge name={reminder.icon} size={40} />
                       
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -216,7 +217,7 @@ const FlashReminderManager: React.FC = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-xl opacity-50">{reminder.icon}</span>
+                    <IconBadge name={reminder.icon} size={36} muted />
                     <div>
                       <h4 className="font-semibold text-gray-700">{reminder.title}</h4>
                       <p className="text-sm text-gray-500">{reminder.message}</p>

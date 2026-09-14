@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Play, Pause, RotateCcw, X, Zap, Settings } from 'lucide-react';
+import { FlashIcon } from '../../icons';
 import { useSound } from '../../contexts/SoundContext';
 
 interface FlashTimerProps {
@@ -9,7 +10,7 @@ interface FlashTimerProps {
 }
 
 const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
-  const { playTaskComplete, playLevelUp, isSoundEnabled } = useSound();
+  const { isSoundEnabled } = useSound();
   
   // Timer state
   const [totalSeconds, setTotalSeconds] = useState(300); // 5 minutes default
@@ -27,21 +28,21 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
 
   // Preset times in seconds
   const presets = [
-    { label: '1 min', seconds: 60, emoji: '⚡' },
-    { label: '5 min', seconds: 300, emoji: '🏃' },
-    { label: '10 min', seconds: 600, emoji: '💪' },
-    { label: '15 min', seconds: 900, emoji: '🎯' },
-    { label: '25 min', seconds: 1500, emoji: '🧠' },
-    { label: '30 min', seconds: 1800, emoji: '🏆' },
-    { label: '45 min', seconds: 2700, emoji: '⭐' },
-    { label: '1 hora', seconds: 3600, emoji: '👑' }
+    { label: '1 min', seconds: 60, icon: 'bolt' },
+    { label: '5 min', seconds: 300, icon: 'runner' },
+    { label: '10 min', seconds: 600, icon: 'muscle' },
+    { label: '15 min', seconds: 900, icon: 'target' },
+    { label: '25 min', seconds: 1500, icon: 'brain' },
+    { label: '30 min', seconds: 1800, icon: 'trophy' },
+    { label: '45 min', seconds: 2700, icon: 'star' },
+    { label: '1 hora', seconds: 3600, icon: 'crown' }
   ];
 
   // Initialize audio context
   useEffect(() => {
     const initAudio = () => {
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
       }
     };
     
@@ -75,6 +76,7 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
         clearInterval(intervalRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- playFinishSound is recreated every render; adding it would restart the interval each tick
   }, [isRunning, remainingSeconds]);
 
   // Cleanup on unmount
@@ -294,7 +296,9 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
                         : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                     }`}
                   >
-                    <div className="text-lg mb-1">{preset.emoji}</div>
+                    <div className="mb-1 flex justify-center">
+                      <FlashIcon name={preset.icon} className="w-5 h-5" />
+                    </div>
                     <div>{preset.label}</div>
                   </motion.button>
                 ))}

@@ -30,12 +30,9 @@ export default {
         info: '#3B82F6',
       },
       fontFamily: {
-        // Fonte infantil
-        comic: ['Comic Neue', 'cursive'],
-        // Fonte adulta
+        comic: ['Fredoka', 'Inter', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
-        // Fonte de destaque
-        poppins: ['Poppins', 'sans-serif'],
+        display: ['Righteous', 'Fredoka', 'sans-serif'],
       },
       fontSize: {
         // Tamanhos otimizados para toque

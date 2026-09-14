@@ -5,6 +5,7 @@ import { usePunishment } from '../../contexts/PunishmentContext';
 import { useData } from '../../contexts/DataContext';
 import { FirestoreService } from '../../services/firestoreService';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { PunishmentTaskCompletion, Task } from '../../types';
 
 const PunishmentModeScreen: React.FC = () => {
   const {
@@ -15,7 +16,6 @@ const PunishmentModeScreen: React.FC = () => {
     hoursRemaining,
     minutesRemaining,
     secondsRemaining,
-    tasksRemaining,
     completePunishmentTask
   } = usePunishment();
 
@@ -24,8 +24,8 @@ const PunishmentModeScreen: React.FC = () => {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<any>(null);
-  const [taskHistory, setTaskHistory] = useState<any[]>([]);
+  const [, setSelectedTask] = useState<Task | null>(null);
+  const [taskHistory, setTaskHistory] = useState<PunishmentTaskCompletion[]>([]);
 
   useEffect(() => {
     if (!punishment) return;
@@ -43,7 +43,7 @@ const PunishmentModeScreen: React.FC = () => {
   if (loading) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-red-900 via-red-800 to-black flex items-center justify-center z-50">
-        <LoadingSpinner size="large" color="yellow" />
+        <LoadingSpinner size="lg" color="yellow" />
       </div>
     );
   }
@@ -62,7 +62,7 @@ const PunishmentModeScreen: React.FC = () => {
     setShowTaskModal(true);
   };
 
-  const handleSelectTask = async (task: any) => {
+  const handleSelectTask = async (task: Task) => {
     setSelectedTask(task);
     setIsCompleting(true);
     setShowTaskModal(false);
@@ -350,7 +350,7 @@ const PunishmentModeScreen: React.FC = () => {
                       Nenhuma tarefa completada ainda
                     </p>
                   ) : (
-                    taskHistory.map((item, index) => (
+                    taskHistory.map((item) => (
                       <div
                         key={item.id}
                         className="bg-yellow-900/30 border border-yellow-600/30 rounded-lg p-3"

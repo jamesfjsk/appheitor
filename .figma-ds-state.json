@@ -1,0 +1,58 @@
+{
+  "runId": "flash-kit-2026-09-14",
+  "fileKey": "QDbYcYNpVuHUUATeHToheB",
+  "phase": "phase1",
+  "collections": {
+    "primitives": "VariableCollectionId:5:16",
+    "spacing": "VariableCollectionId:5:28",
+    "radius": "VariableCollectionId:5:35",
+    "color": "VariableCollectionId:5:41"
+  },
+  "modes": {
+    "primitive": "5:2",
+    "spacing": "5:3",
+    "radius": "5:4",
+    "hero": "5:5",
+    "parent": "5:6"
+  },
+  "colors": {
+    "crimson/400": "VariableID:5:17",
+    "crimson/500": "VariableID:5:18",
+    "crimson/800": "VariableID:5:19",
+    "crimson/900": "VariableID:5:20",
+    "gold/500": "VariableID:5:21",
+    "gold/700": "VariableID:5:22",
+    "cream/50": "VariableID:5:23",
+    "ink/900": "VariableID:5:24",
+    "white/1000": "VariableID:5:25",
+    "gray/700": "VariableID:5:26",
+    "blue/600": "VariableID:5:27"
+  },
+  "spaces": {
+    "spacing/1": "VariableID:5:29",
+    "spacing/2": "VariableID:5:30",
+    "spacing/3": "VariableID:5:31",
+    "spacing/4": "VariableID:5:32",
+    "spacing/6": "VariableID:5:33",
+    "spacing/8": "VariableID:5:34"
+  },
+  "radii": {
+    "radius/sm": "VariableID:5:36",
+    "radius/md": "VariableID:5:37",
+    "radius/lg": "VariableID:5:38",
+    "radius/xl": "VariableID:5:39",
+    "radius/comic": "VariableID:5:40"
+  },
+  "semantics": {
+    "color/bg/canvas": "VariableID:5:42",
+    "color/bg/surface": "VariableID:5:43",
+    "color/bg/brand": "VariableID:5:44",
+    "color/bg/accent": "VariableID:5:45",
+    "color/bg/ink": "VariableID:5:46",
+    "color/text/primary": "VariableID:5:47",
+    "color/text/on-brand": "VariableID:5:48",
+    "color/text/accent": "VariableID:5:49",
+    "color/border/ink": "VariableID:5:50",
+    "color/border/gold": "VariableID:5:51"
+  }
+}

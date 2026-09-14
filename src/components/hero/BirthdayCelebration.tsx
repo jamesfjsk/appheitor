@@ -1,6 +1,7 @@
+import { CHILD_BIRTHDAY_MMDD, childAgeInYear, CHILD_PHOTO_URL } from '../../config/rules';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Star, Cake, PartyPopper, Heart, Crown, Zap, X } from 'lucide-react';
+import { Gift, Star, Cake, PartyPopper, Heart, Zap } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
@@ -8,6 +9,13 @@ import { FirestoreService } from '../../services/firestoreService';
 
 interface BirthdayCelebrationProps {
   onComplete: () => void;
+}
+
+interface BirthdayReward {
+  title: string;
+  description: string;
+  xp: number;
+  gold: number;
 }
 
 const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete }) => {
@@ -18,7 +26,7 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
   const [showCelebration, setShowCelebration] = useState(false);
   const [currentAge, setCurrentAge] = useState(0);
   const [celebrationStep, setCelebrationStep] = useState(0);
-  const [birthdayRewards, setBirthdayRewards] = useState<any[]>([]);
+  const [birthdayRewards, setBirthdayRewards] = useState<BirthdayReward[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Check if today is birthday
@@ -31,9 +39,9 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
         const todayString = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         
         // Check if today is December 18th (Heitor's birthday)
-        if (todayString === '09-18') {
+        if (todayString === CHILD_BIRTHDAY_MMDD) {
           const currentYear = today.getFullYear();
-          const age = 9; // Heitor está fazendo 9 anos hoje!
+          const age = childAgeInYear(currentYear);
           
           // Check if birthday celebration was already completed this year
           const birthdayCompleted = await FirestoreService.checkBirthdayCompletedThisYear(childUid, currentYear);
@@ -134,17 +142,6 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
     } finally {
       setIsProcessing(false);
     }
-  };
-
-  const getBirthdayMessage = () => {
-    const messages = [
-      `🎉 FELIZ ANIVERSÁRIO, HEITOR! 🎉`,
-      `Hoje você completa ${currentAge} anos de pura velocidade e heroísmo!`,
-      `O Flash ficaria orgulhoso de ver como você cresceu!`,
-      `Que este novo ano seja cheio de aventuras incríveis!`
-    ];
-    
-    return messages[celebrationStep] || messages[0];
   };
 
   const getStepTitle = () => {
@@ -321,7 +318,7 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
                 >
                   <div className="w-32 h-32 mx-auto mb-6 relative">
                     <img 
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU"
+                      src={CHILD_PHOTO_URL}
                       alt="Avatar do Heitor"
                       className="w-full h-full object-cover rounded-full border-4 border-yellow-400 shadow-2xl"
                     />

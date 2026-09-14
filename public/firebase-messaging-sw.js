@@ -4,12 +4,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 
 // Configuração do Firebase (será preenchida automaticamente)
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "your-sender-id",
-  appId: "your-app-id"
+  apiKey: "AIzaSyDxWOm5irJVoI4ZdKX80wO4lwLgVAwPI4k",
+  authDomain: "app-heitor.firebaseapp.com",
+  projectId: "app-heitor",
+  storageBucket: "app-heitor.firebasestorage.app",
+  messagingSenderId: "662366085752",
+  appId: "1:662366085752:web:cdac67d00e90fea892038d"
 };
 
 firebase.initializeApp(firebaseConfig);

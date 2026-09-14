@@ -1,10 +1,11 @@
+import { REDEEM_MIN_TASKS } from '../../config/rules';
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Star, Lock, CheckCircle, Clock, X, Filter, Unlock } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Star, Lock, CheckCircle, Clock, X, Unlock } from 'lucide-react';
+import { FlashIcon, IconBadge } from '../../icons';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { FirestoreService } from '../../services/firestoreService';
-import { Reward, RewardRedemption } from '../../types';
+import { Reward } from '../../types';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 import { isRewardUnlocked } from '../../utils/rewardLevels';
 import { getTodayBrazil } from '../../utils/timezone';
@@ -125,7 +126,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     const hasEnoughGold = (progress.availableGold || 0) >= goldCost;
     const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
     const notPending = !redemption; // Only check if there's no pending redemption
-    const hasCompletedEnoughTasks = dailyTasksCompleted >= 5;
+    const hasCompletedEnoughTasks = dailyTasksCompleted >= REDEEM_MIN_TASKS;
     
     console.log('🔥 Verificando se pode resgatar:', {
       reward: reward.title,
@@ -145,18 +146,18 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   };
 
   const categories = [
-    { id: 'all', label: 'Todas', icon: '🎁' },
-    { id: 'treat', label: 'Guloseimas', icon: '🍭' },
-    { id: 'toy', label: 'Brinquedos', icon: '🧸' },
-    { id: 'activity', label: 'Atividades', icon: '🎮' },
-    { id: 'privilege', label: 'Privilégios', icon: '👑' },
+    { id: 'all', label: 'Todas', icon: 'gift' },
+    { id: 'treat', label: 'Guloseimas', icon: 'candy' },
+    { id: 'toy', label: 'Brinquedos', icon: 'teddy' },
+    { id: 'activity', label: 'Atividades', icon: 'gamepad' },
+    { id: 'privilege', label: 'Privilégios', icon: 'crown' },
   ];
 
   const filters = [
-    { id: 'all', label: 'Todas', icon: '🎁' },
-    { id: 'available', label: 'Disponíveis', icon: '✅' },
-    { id: 'locked', label: 'Bloqueadas', icon: '🔒' },
-  ];
+    { id: 'all', label: 'Todas', icon: 'gift' },
+    { id: 'available', label: 'Disponíveis', icon: 'check' },
+    { id: 'locked', label: 'Bloqueadas', icon: 'lock' },
+  ] as const;
 
   const filteredRewards = rewards.filter(reward => {
     // Filter by active status
@@ -226,7 +227,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
         <div className="flex items-center justify-between p-6 border-b border-white/20">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-hero-accent rounded-full flex items-center justify-center">
-              <Gift className="w-6 h-6 text-hero-primary" />
+              <FlashIcon name="gift" className="w-6 h-6 text-hero-primary" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white">Loja de Recompensas</h2>
@@ -265,7 +266,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                <span>{category.icon}</span>
+                <FlashIcon name={category.icon} className="w-4 h-4" />
                 {category.label}
               </motion.button>
             ))}
@@ -285,7 +286,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <span className="text-xs">{filter.icon}</span>
+                <FlashIcon name={filter.icon} className="w-4 h-4" />
                 {filter.label}
               </motion.button>
             ))}
@@ -298,7 +299,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
           <div className={`p-4 rounded-xl border-2 ${
             loadingDailyTasks 
               ? 'bg-gray-100 border-gray-300' 
-              : dailyTasksCompleted >= 4 
+              : dailyTasksCompleted >= REDEEM_MIN_TASKS 
               ? 'bg-green-400/20 border-green-400/30' 
               : 'bg-red-400/20 border-red-400/30'
           }`}>
@@ -307,13 +308,13 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                   loadingDailyTasks 
                     ? 'bg-gray-300' 
-                    : dailyTasksCompleted >= 4 
+                    : dailyTasksCompleted >= REDEEM_MIN_TASKS 
                     ? 'bg-green-500' 
                     : 'bg-red-500'
                 }`}>
                   {loadingDailyTasks ? (
                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : dailyTasksCompleted >= 4 ? (
+                  ) : dailyTasksCompleted >= REDEEM_MIN_TASKS ? (
                     <CheckCircle className="w-6 h-6 text-white" />
                   ) : (
                     <Lock className="w-6 h-6 text-white" />
@@ -323,13 +324,13 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                   <h3 className={`font-bold text-lg ${
                     loadingDailyTasks 
                       ? 'text-gray-600' 
-                      : dailyTasksCompleted >= 4 
+                      : dailyTasksCompleted >= REDEEM_MIN_TASKS 
                       ? 'text-green-200' 
                       : 'text-red-200'
                   }`}>
                     {loadingDailyTasks 
                       ? 'Verificando missões de hoje...' 
-                      : dailyTasksCompleted >= 4 
+                      : dailyTasksCompleted >= REDEEM_MIN_TASKS 
                       ? '✅ Resgates Liberados!' 
                       : '🔒 Resgates Bloqueados'
                     }
@@ -337,13 +338,13 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                   <p className={`text-sm ${
                     loadingDailyTasks 
                       ? 'text-gray-500' 
-                      : dailyTasksCompleted >= 4 
+                      : dailyTasksCompleted >= REDEEM_MIN_TASKS 
                       ? 'text-green-300' 
                       : 'text-red-300'
                   }`}>
                     {loadingDailyTasks
                       ? 'Carregando...'
-                      : `${dailyTasksCompleted}/5 missões completadas hoje`
+                      : `${dailyTasksCompleted}/${REDEEM_MIN_TASKS} missões completadas hoje`
                     }
                   </p>
                 </div>
@@ -353,16 +354,16 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 <div className={`text-2xl font-bold ${
                   loadingDailyTasks
                     ? 'text-gray-600'
-                    : dailyTasksCompleted >= 5
+                    : dailyTasksCompleted >= REDEEM_MIN_TASKS
                     ? 'text-green-200'
                     : 'text-red-200'
                 }`}>
-                  {dailyTasksCompleted}/5
+                  {dailyTasksCompleted}/{REDEEM_MIN_TASKS}
                 </div>
                 <div className={`text-xs ${
                   loadingDailyTasks
                     ? 'text-gray-500'
-                    : dailyTasksCompleted >= 5
+                    : dailyTasksCompleted >= REDEEM_MIN_TASKS
                     ? 'text-green-300'
                     : 'text-red-300'
                 }`}>
@@ -371,12 +372,12 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
             
-            {!loadingDailyTasks && dailyTasksCompleted < 5 && (
+            {!loadingDailyTasks && dailyTasksCompleted < REDEEM_MIN_TASKS && (
               <div className="mt-3 p-3 bg-red-500/20 rounded-lg">
                 <p className="text-red-200 text-sm font-medium text-center">
-                  🚫 Complete pelo menos 5 missões hoje para desbloquear os resgates!
+                  🚫 Complete pelo menos {REDEEM_MIN_TASKS} missões hoje para desbloquear os resgates!
                   <br />
-                  <span className="text-xs">Faltam {5 - dailyTasksCompleted} missões para liberar a loja.</span>
+                  <span className="text-xs">Faltam {REDEEM_MIN_TASKS - dailyTasksCompleted} missões para liberar a loja.</span>
                 </p>
               </div>
             )}
@@ -387,7 +388,6 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
           {filteredRewards.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredRewards.map((reward, index) => {
-                const redemption = getRedemptionStatus(reward.id);
                 const canRedeemReward = canRedeem(reward);
                 const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
                 const requiredLevel = reward.requiredLevel || 1;
@@ -431,9 +431,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     <div className="text-center mb-4">
                       <motion.div 
                         whileHover={isUnlocked ? { scale: 1.1, rotate: 5 } : {}}
-                        className={`text-5xl mb-3 ${!isUnlocked ? 'grayscale opacity-50' : ''}`}
+                        className={`mb-3 flex justify-center ${!isUnlocked ? 'grayscale opacity-50' : ''}`}
                       >
-                        {reward.emoji}
+                        <IconBadge name={reward.emoji} size={64} muted={!isUnlocked} />
                       </motion.div>
                       <h3 className={`font-bold text-xl mb-2 ${
                         isUnlocked ? 'text-gray-900' : 'text-gray-500'
@@ -449,7 +449,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                       {/* Level requirement indicator */}
                       {!isUnlocked && (
                         <div className="mt-2 px-2 py-1 bg-gray-600/50 rounded-full text-xs text-gray-200">
-                          🔒 Desbloqueado no nível {requiredLevel}
+                          Desbloqueado no nível {requiredLevel}
                         </div>
                       )}
                       
@@ -469,7 +469,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           }}
                           className="mt-3 px-3 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-red-600 rounded-full text-sm font-bold shadow-lg border-2 border-white"
                         >
-                          ⚡ NOVO! DESBLOQUEADO! ⚡
+                          Novo desbloqueio
                         </motion.div>
                       )}
                     </div>
@@ -527,10 +527,10 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           <Star className="w-5 h-5 inline mr-2" />
                           Resgatar Agora!
                         </>
-                      ) : dailyTasksCompleted < 5 ? (
+                      ) : dailyTasksCompleted < REDEEM_MIN_TASKS ? (
                         <>
                           <Lock className="w-5 h-5 inline mr-2" />
-                          Complete 5 Missões Hoje
+                          Complete {REDEEM_MIN_TASKS} Missões Hoje
                         </>
                       ) : (
                         <>
@@ -560,9 +560,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                   <p className="text-gray-600 text-lg">
                     Nenhuma recompensa disponível nesta categoria
                   </p>
-                  {dailyTasksCompleted < 4 ? (
+                  {dailyTasksCompleted < REDEEM_MIN_TASKS ? (
                     <p className="text-red-400 text-sm mt-2">
-                      Complete {4 - dailyTasksCompleted} missões hoje para liberar os resgates!
+                      Complete {REDEEM_MIN_TASKS - dailyTasksCompleted} missões hoje para liberar os resgates!
                     </p>
                   ) : (
                     <p className="text-hero-primary text-sm mt-2">
@@ -597,7 +597,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 const reward = getRewardById(redemption.rewardId);
                 if (!reward) return null;
                 
-                const statusConfig = {
+                const statusConfig: Record<string, { color: string; textColor: string; label: string; icon: string }> = {
                   pending: { color: 'bg-yellow-400/20 border-yellow-400/30', textColor: 'text-yellow-200', label: '⏳ Aguardando', icon: '⏳' },
                   approved: { color: 'bg-green-400/20 border-green-400/30', textColor: 'text-green-200', label: '✅ Aprovado', icon: '✅' },
                   rejected: { color: 'bg-red-400/20 border-red-400/30', textColor: 'text-red-200', label: '❌ Rejeitado', icon: '❌' }
@@ -615,7 +615,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="text-xl">{reward.emoji}</div>
+                        <IconBadge name={reward.emoji} size={36} />
                         <div>
                           <h5 className="font-medium text-gray-900">{reward.title}</h5>
                           <p className="text-xs text-gray-600">

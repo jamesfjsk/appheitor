@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, Trophy, Star, Zap, Brain, CheckCircle, XCircle, Target, Play, ChevronLeft } from 'lucide-react';
-import { useData } from '../../contexts/DataContext';
+import { generateQuiz, loadQuizSession, saveQuizSession, clearQuizSession, getQuizHistory, rememberQuizQuestions, QuizSource } from '../../services/aiQuiz';
 import { useAuth } from '../../contexts/AuthContext';
+import { getTodayBrazil } from '../../utils/timezone';
+import { motion } from 'framer-motion';
+import { X, ChevronRight, Trophy, Star, Zap, Brain, CheckCircle, XCircle, Target, ChevronLeft } from 'lucide-react';
+import { useData } from '../../contexts/DataContext';
 import { useSound } from '../../contexts/SoundContext';
 import { SurpriseMissionQuestion } from '../../types';
 
@@ -14,11 +16,9 @@ interface SurpriseMissionQuizProps {
 
 const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClose, onComplete }) => {
   const { surpriseMissionConfig, completeSurpriseMission } = useData();
-  const { childUid } = useAuth();
   const { playTaskComplete, playLevelUp } = useSound();
   
   // OpenAI API Key from environment variables
-  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -28,6 +28,8 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
   const [error, setError] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
+  const [source, setSource] = useState<QuizSource>('ai');
+  const { childUid } = useAuth();
   const [reviewFilter, setReviewFilter] = useState<'all' | 'correct' | 'wrong'>('all');
   const [detailedResults, setDetailedResults] = useState<Array<{
     question: string;
@@ -44,6 +46,7 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
       generateQuestions();
       setTimeStarted(new Date());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- generateQuestions is recreated every render; the effect should only fire when the quiz opens
   }, [isOpen, surpriseMissionConfig]);
 
   // Helper function to categorize questions for improvement suggestions
@@ -98,8 +101,6 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
       .slice(0, 3); // Top 3 categories with most errors
     
     sortedCategories.forEach(([category, count]) => {
-      const percentage = Math.round((count / totalWrong) * 100);
-      
       switch (category) {
         case 'inglês':
           suggestions.push(`📚 Inglês (${count} erros): Pratique vocabulário básico com jogos e desenhos em inglês!`);
@@ -131,7 +132,7 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
   };
 
   const getPerformanceLevel = (score: number) => {
-    const percentage = (score / 30) * 100;
+    const percentage = (score / (questions.length || 30)) * 100;
     
     if (percentage >= 90) return { level: 'Excepcional', color: 'text-purple-600', emoji: '🏆' };
     if (percentage >= 80) return { level: 'Excelente', color: 'text-green-600', emoji: '⚡' };
@@ -142,179 +143,39 @@ const SurpriseMissionQuiz: React.FC<SurpriseMissionQuizProps> = ({ isOpen, onClo
   };
 
   const generateQuestions = async () => {
-    if (!surpriseMissionConfig) return;
-    
+    if (!surpriseMissionConfig || !childUid) return;
     setIsGenerating(true);
     setError(null);
-    
     try {
-      console.log('🎯 SurpriseMissionQuiz: Generating questions with config:', surpriseMissionConfig);
-      
-     // Check if OpenAI API key is available
-     if (!OPENAI_API_KEY || OPENAI_API_KEY.trim() === '') {
-       throw new Error('OpenAI API key not configured');
-     }
-     
-      // Build dynamic prompt based on configuration
-      const themePrompts = {
-        english: 'vocabulário em inglês, gramática básica, animais, cores, números, família, comida e objetos do cotidiano',
-        math: 'matemática básica incluindo adição, subtração, multiplicação, divisão, formas geométricas, frações simples e problemas práticos',
-        general: 'conhecimentos gerais incluindo ciências básicas, geografia do Brasil, história, animais, corpo humano, planetas e curiosidades educativas',
-        mixed: 'uma mistura equilibrada de inglês, matemática(logica), ciências, geografia, história e conhecimentos gerais'
-      };
-      
-      const difficultyPrompts = {
-        easy: 'nível fácil',
-        medium: 'nível médio, com algum desafio mas ainda apropriado para a idade, estimulando o raciocínio',
-        hard: 'nível mais desafiador, que estimule o aprendizado avançado'
-      };
-      
-      const themeDescription = themePrompts[surpriseMissionConfig.theme];
-      const difficultyDescription = difficultyPrompts[surpriseMissionConfig.difficulty];
-      
-     console.log('🤖 SurpriseMissionQuiz: Using OpenAI API to generate questions...');
-     
-     const response = await fetch('https://api.openai.com/v1/chat/completions', {
-       method: 'POST',
-       headers: {
-         'Content-Type': 'application/json',
-         'Authorization': `Bearer ${OPENAI_API_KEY}`
-       },
-       body: JSON.stringify({
-         model: 'gpt-4o',
-         messages: [
-           {
-             role: 'system',
-             content: `Você é um gerador de quiz educativo especializado em criar provas personalizadas para crianças do terceiro ano do fundamental(9 anos).
-
-MISSÃO: Criar EXATAMENTE 30 perguntas de múltipla escolha em português brasileiro.
-
-TEMA: ${themeDescription}
-DIFICULDADE: ${difficultyDescription}
-
-REGRAS OBRIGATÓRIAS:
-- EXATAMENTE 30 perguntas (nem mais, nem menos)
-- 4 opções por pergunta, apenas 1 correta
-- Perguntas claras e adequadas para idade 9 anos
-- Explicações educativas e motivadoras
-- Incluir variedade dentro do tema escolhido
-
-FORMATO OBRIGATÓRIO - Responda APENAS com JSON válido:
-[
-  {
-    "question": "Pergunta aqui?",
-    "options": ["Opção A", "Opção B", "Opção C", "Opção D"],
-    "answer": "Opção correta exata",
-    "explanation": "Explicação educativa e motivadora"
-  }
-]
-
-IMPORTANTE: 
-- NAO REPETIR PERGUNTA
-- Não inclua numeração nas perguntas
-- Certifique-se de que a resposta correta está EXATAMENTE igual a uma das opções
-- Explicações devem ser educativas mas simples
-- Varie o tipo de pergunta dentro do tema`
-           },
-           {
-             role: 'user',
-             content: `Gere uma prova de 30 questões sobre ${themeDescription} com ${difficultyDescription} para o Heitor (9 anos). 
-IMPORTANTE: Para dificuldade "${surpriseMissionConfig.difficulty}", as perguntas devem ser ${difficultyDescription}.
-
-${surpriseMissionConfig.difficulty === 'hard' ? `
-ESPECIAL PARA NÍVEL DIFÍCIL - Inclua perguntas como:
-- Problemas matemáticos de múltiplas etapas
-- Interpretação de situações complexas
-- Dedução lógica e raciocínio crítico
-- Ciências com experimentos mentais
-- Geografia com análise de causa e efeito
-- História com conexões temporais
-- Inglês com gramática avançada e interpretação
-- Situações práticas que exijam aplicação de conhecimento
-
-Exemplo de pergunta HARD: "Se a Terra gira 360° em 24 horas, quantos graus ela gira em 3 horas? E por que isso afeta os fusos horários?"
-` : ''}
-
-Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafiem e eduquem!`
-           }
-         ],
-         temperature: 0.8,
-         max_tokens: 4000
-       })
-     });
-
-     if (!response.ok) {
-       const errorText = await response.text();
-       console.error('❌ OpenAI API Error:', response.status, errorText);
-       throw new Error(`OpenAI API Error: ${response.status} - ${errorText}`);
-     }
-
-     const data = await response.json();
-     const content = data.choices[0]?.message?.content;
-     
-     if (!content) {
-       throw new Error('No content received from OpenAI');
-     }
-
-     console.log('🤖 OpenAI Response received, parsing JSON...');
-     
-     // Clean the content to ensure it's valid JSON
-     let cleanContent = content.trim();
-     if (cleanContent.startsWith('```json')) {
-       cleanContent = cleanContent.replace(/```json\s*/, '').replace(/```\s*$/, '');
-     }
-     if (cleanContent.startsWith('```')) {
-       cleanContent = cleanContent.replace(/```\s*/, '').replace(/```\s*$/, '');
-     }
-     
-     // Parse JSON response
-     const generatedQuestions = JSON.parse(cleanContent);
-     
-     if (!Array.isArray(generatedQuestions)) {
-       throw new Error('Response is not an array');
-     }
-     
-     if (generatedQuestions.length !== 30) {
-       console.warn(`⚠️ Expected 30 questions, got ${generatedQuestions.length}. Using available questions.`);
-     }
-
-     // Validate question structure
-     const validQuestions = generatedQuestions.every((q, index) => {
-       const isValid = q.question && 
-         Array.isArray(q.options) && 
-         q.options.length === 4 && 
-         q.answer && 
-         q.explanation &&
-         q.options.includes(q.answer);
-       
-       if (!isValid) {
-         console.error(`❌ Invalid question at index ${index}:`, q);
-       }
-       
-       return isValid;
-     });
-
-     if (!validQuestions) {
-       throw new Error('Some questions have invalid structure from OpenAI');
-     }
-
-     console.log('✅ SurpriseMissionQuiz: Questions generated successfully with OpenAI');
-     console.log('📊 Generated questions preview:', generatedQuestions.slice(0, 3).map(q => q.question));
-     
-     setQuestions(generatedQuestions.slice(0, 30)); // Ensure exactly 30 questions
-      
-    } catch (error: any) {
-      console.error('❌ SurpriseMissionQuiz: Error generating questions with OpenAI:', error);
-      
-      // Show specific error message
-      if (error.message.includes('API key')) {
-        setError('❌ Chave da OpenAI não configurada. Configure VITE_OPENAI_API_KEY no arquivo .env para usar a IA.');
-      } else if (error.message.includes('quota') || error.message.includes('billing')) {
-        setError('❌ Limite da API OpenAI atingido. Verifique sua conta OpenAI.');
-      } else if (error.message.includes('JSON')) {
-        setError('❌ Erro ao processar resposta da IA. Tente novamente.');
+      const today = getTodayBrazil();
+      // Missão pela metade (fechou o app, recarregou): retoma de onde parou
+      const cached = loadQuizSession('surprise', childUid, today);
+      if (cached) {
+        setQuestions(cached.questions);
+        setUserAnswers(cached.answers);
+        setCurrentQuestion(Math.min(cached.currentQuestion, cached.questions.length - 1));
+        setSource(cached.source);
+        return;
+      }
+      const count = surpriseMissionConfig.questionsCount || 30;
+      const result = await generateQuiz({
+        count,
+        theme: surpriseMissionConfig.theme,
+        difficulty: surpriseMissionConfig.difficulty,
+        avoid: getQuizHistory('surprise', childUid),
+      });
+      if (result.questions.length === 0) throw new Error('Nenhuma pergunta disponível');
+      setQuestions(result.questions);
+      setSource(result.source);
+      saveQuizSession('surprise', childUid, today, { questions: result.questions, answers: [], currentQuestion: 0, source: result.source, startedAt: new Date().toISOString() });
+      rememberQuizQuestions('surprise', childUid, result.questions);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('SurpriseMissionQuiz: erro ao gerar perguntas:', error);
+      if (message.includes('quota') || message.includes('billing') || message.includes('429')) {
+        setError('Limite da IA atingido por agora. Tente de novo mais tarde.');
       } else {
-        setError(`❌ Erro ao gerar perguntas: ${error.message}`);
+        setError('Não consegui montar a missão agora. Tente novamente.');
       }
     } finally {
       setIsGenerating(false);
@@ -333,6 +194,7 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
         setSelectedAnswer(null);
+        if (childUid) saveQuizSession('surprise', childUid, getTodayBrazil(), { questions, answers: newAnswers, currentQuestion: currentQuestion + 1, source, startedAt: '' });
       } else {
         // Quiz completed
         calculateResults(newAnswers);
@@ -345,7 +207,11 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
       setCurrentQuestion(currentQuestion - 1);
       setSelectedAnswer(userAnswers[currentQuestion - 1] || null);
       // Remove the last answer from userAnswers
-      setUserAnswers(prev => prev.slice(0, -1));
+      setUserAnswers(prev => {
+        const next = prev.slice(0, -1);
+        if (childUid) saveQuizSession('surprise', childUid, getTodayBrazil(), { questions, answers: next, currentQuestion: currentQuestion - 1, source, startedAt: '' });
+        return next;
+      });
     }
   };
 
@@ -395,26 +261,27 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
       
       // Gold: 10% base de participação + 90% por mérito baseado em acertos
       const participationGold = Math.round(baseGold * 0.1); // 10% por participar
-      const meritGold = Math.round((baseGold * 0.9) * (correctAnswers / 30)); // 90% por acertos
+      const totalQuestions = questions.length;
+      const meritGold = Math.round((baseGold * 0.9) * (correctAnswers / totalQuestions)); // 90% por acertos
       const finalGold = participationGold + meritGold;
+      await completeSurpriseMission(correctAnswers, totalQuestions, finalXP, finalGold);
+      if (childUid) clearQuizSession('surprise', childUid, getTodayBrazil());
       
-      await completeSurpriseMission(correctAnswers, 30, finalXP, finalGold);
-      
-      if (correctAnswers >= 25) {
+      if (correctAnswers >= Math.ceil(questions.length * 0.8)) {
         playLevelUp(); // Special sound for excellent performance
       } else {
         playTaskComplete();
       }
       
       onComplete();
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ SurpriseMissionQuiz: Error saving results:', error);
       setError('Erro ao salvar resultados da missão');
     }
   };
 
   const getPerformanceMessage = (score: number) => {
-    const percentage = (score / 30) * 100;
+    const percentage = (score / (questions.length || 30)) * 100;
     
     if (percentage >= 90) return "🏆 EXCEPCIONAL! Você é um verdadeiro gênio, velocista!";
     if (percentage >= 80) return "⚡ EXCELENTE! Performance digna do Flash!";
@@ -425,18 +292,14 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
   };
 
   const getScoreColor = (score: number) => {
-    const percentage = (score / 30) * 100;
+    const percentage = (score / (questions.length || 30)) * 100;
     if (percentage >= 80) return 'text-green-600';
     if (percentage >= 60) return 'text-yellow-600';
     if (percentage >= 40) return 'text-orange-600';
     return 'text-blue-600';
   };
 
-  const getBonusMultiplier = (score: number) => {
-    // Nova lógica: sempre retorna 1 para XP (valor integral)
-    // Gold é calculado separadamente por mérito
-    return 1;
-  };
+  const total = questions.length || 30;
 
   const resetQuiz = () => {
     setCurrentQuestion(0);
@@ -579,12 +442,12 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                 🎯 Gerando sua missão surpresa personalizada...
               </p>
               <p className="text-gray-500 text-base">
-                A IA está criando 30 perguntas únicas baseadas nas suas configurações!
+                A IA está criando {total} perguntas únicas baseadas nas suas configurações!
               </p>
               <div className="mt-6 space-y-2 text-sm text-gray-500">
                 <p>• Analisando tema: {surpriseMissionConfig.theme}</p>
                 <p>• Ajustando dificuldade: {surpriseMissionConfig.difficulty}</p>
-                <p>• Criando 30 questões personalizadas...</p>
+                <p>• Criando {total} questões personalizadas...</p>
                 <p>• Preparando explicações educativas...</p>
               </div>
             </div>
@@ -638,7 +501,7 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                 
                 {/* Star Rating Visual */}
                 <div className="flex justify-center gap-1 mb-8">
-                  {Array.from({ length: 30 }).map((_, i) => (
+                  {Array.from({ length: total }).map((_, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, rotate: -180 }}
@@ -673,18 +536,18 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-2 text-2xl font-bold text-yellow-600 mb-2">
                         <Star className="w-6 h-6" />
-                        <span>+{Math.round(surpriseMissionConfig.goldReward * 0.1) + Math.round((surpriseMissionConfig.goldReward * 0.9) * (score / 30))}</span>
+                        <span>+{Math.round(surpriseMissionConfig.goldReward * 0.1) + Math.round((surpriseMissionConfig.goldReward * 0.9) * (score / total))}</span>
                       </div>
                       <div className="text-sm text-yellow-600">Gold Ganho</div>
                       <div className="text-xs text-yellow-600 font-bold mt-1">
-                        {Math.round(surpriseMissionConfig.goldReward * 0.1)} base + {Math.round((surpriseMissionConfig.goldReward * 0.9) * (score / 30))} mérito
+                        {Math.round(surpriseMissionConfig.goldReward * 0.1)} base + {Math.round((surpriseMissionConfig.goldReward * 0.9) * (score / total))} mérito
                       </div>
                     </div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-lg font-bold text-purple-600">
-                      {Math.round((score / 30) * 100)}% de Aproveitamento
+                      {Math.round((score / total) * 100)}% de Aproveitamento
                     </div>
                     {timeStarted && (
                       <div className="text-sm text-gray-600 mt-1">
@@ -706,11 +569,11 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                       <div className="text-xs text-green-600">Acertos</div>
                     </div>
                     <div className="text-center p-3 bg-white rounded-lg">
-                      <div className="text-xl font-bold text-red-600">{30 - score}</div>
+                      <div className="text-xl font-bold text-red-600">{total - score}</div>
                       <div className="text-xs text-red-600">Erros</div>
                     </div>
                     <div className="text-center p-3 bg-white rounded-lg">
-                      <div className="text-xl font-bold text-blue-600">{Math.round((score / 30) * 100)}%</div>
+                      <div className="text-xl font-bold text-blue-600">{Math.round((score / total) * 100)}%</div>
                       <div className="text-xs text-blue-600">Aproveitamento</div>
                     </div>
                     <div className="text-center p-3 bg-white rounded-lg">
@@ -809,7 +672,7 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
               {/* Detailed Review */}
               <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-left">
                 <h4 className="text-xl font-bold text-gray-900 mb-4 text-center">
-                  📚 Revisão Completa das 30 Questões
+                  📚 Revisão Completa das {total} Questões
                 </h4>
                 
                 {/* Filter buttons */}
@@ -842,7 +705,7 @@ Siga exatamente o formato JSON especificado. Crie perguntas que realmente desafi
                         : 'bg-white text-gray-600 hover:bg-gray-100'
                     }`}
                   >
-                    Erros ({30 - score})
+                    Erros ({total - score})
                   </button>
                 </div>
                 

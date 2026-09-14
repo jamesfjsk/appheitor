@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Trophy, Star, Zap, Target, Calendar, User, Settings } from 'lucide-react';
+import { Plus, Edit2, Trash2, Trophy, Star, Zap, Target, User, Settings } from 'lucide-react';
+import { IconBadge } from '../../icons';
 import { useData } from '../../contexts/DataContext';
-import { Achievement, UserAchievement } from '../../types';
+import { Achievement } from '../../types';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 import AchievementForm from './AchievementForm';
 import toast from 'react-hot-toast';
@@ -23,7 +24,7 @@ const AchievementManager: React.FC = () => {
       try {
         await deleteAchievement(achievementId);
         toast.success('Conquista excluída com sucesso!');
-      } catch (error) {
+      } catch {
         toast.error('Erro ao excluir conquista');
       }
     }
@@ -33,7 +34,7 @@ const AchievementManager: React.FC = () => {
     try {
       await updateAchievement(achievement.id, { isActive: !achievement.isActive });
       toast.success(achievement.isActive ? 'Conquista desativada' : 'Conquista ativada');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao atualizar conquista');
     }
   };
@@ -50,7 +51,8 @@ const AchievementManager: React.FC = () => {
       toast.success('Verificação de conquistas executada!');
     } catch (error) {
       console.error('❌ Error in manual achievement check:', error);
-      if (!error.message?.includes('index')) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes('index')) {
         toast.error('Erro ao verificar conquistas');
       }
     }
@@ -91,7 +93,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Primeiro Passo',
       description: 'Complete sua primeira tarefa',
-      icon: '🌟',
+      icon: 'spark',
       type: 'tasks' as const,
       target: 1,
       xpReward: 10,
@@ -100,7 +102,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Primeiro Resgate',
       description: 'Resgate sua primeira recompensa na loja',
-      icon: '🎁',
+      icon: 'gift',
       type: 'redemptions' as const,
       target: 1,
       xpReward: 15,
@@ -109,7 +111,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Colecionador Iniciante',
       description: 'Resgate 5 recompensas diferentes',
-      icon: '🛍️',
+      icon: 'gift',
       type: 'redemptions' as const,
       target: 5,
       xpReward: 50,
@@ -118,7 +120,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Colecionador Expert',
       description: 'Resgate 10 recompensas',
-      icon: '🏪',
+      icon: 'home',
       type: 'redemptions' as const,
       target: 10,
       xpReward: 100,
@@ -127,7 +129,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Comprador VIP',
       description: 'Resgate 25 recompensas',
-      icon: '💎',
+      icon: 'gem',
       type: 'redemptions' as const,
       target: 25,
       xpReward: 200,
@@ -136,7 +138,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Sequência Iniciante',
       description: 'Complete tarefas por 3 dias consecutivos',
-      icon: '🔥',
+      icon: 'fire',
       type: 'streak' as const,
       target: 3,
       xpReward: 25,
@@ -145,7 +147,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Flash Nível 5',
       description: 'Alcance o nível 5',
-      icon: '⚡',
+      icon: 'bolt',
       type: 'level' as const,
       target: 5,
       xpReward: 50,
@@ -154,7 +156,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Dedicado',
       description: 'Complete 10 tarefas no total',
-      icon: '🎯',
+      icon: 'target',
       type: 'tasks' as const,
       target: 10,
       xpReward: 75,
@@ -163,7 +165,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Colecionador',
       description: 'Resgate 10 recompensas',
-      icon: '🛍️',
+      icon: 'gift',
       type: 'redemptions' as const,
       target: 10,
       xpReward: 100,
@@ -172,7 +174,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Responsável',
       description: 'Complete 50 tarefas no total',
-      icon: '🏆',
+      icon: 'trophy',
       type: 'tasks' as const,
       target: 50,
       xpReward: 100,
@@ -181,7 +183,7 @@ const AchievementManager: React.FC = () => {
     {
       title: 'Mestre da Experiência',
       description: 'Acumule 1000 XP total',
-      icon: '💎',
+      icon: 'gem',
       type: 'xp' as const,
       target: 1000,
       xpReward: 150,
@@ -404,7 +406,7 @@ const AchievementManager: React.FC = () => {
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-4 flex-1">
-                            <div className="text-3xl">{achievement.icon}</div>
+                            <IconBadge name={achievement.icon} size={48} />
                             
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
@@ -555,7 +557,7 @@ const AchievementManager: React.FC = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="text-xl opacity-50">{achievement.icon}</span>
+                          <IconBadge name={achievement.icon} size={36} muted />
                           <div>
                             <h4 className="font-semibold text-gray-700">{achievement.title}</h4>
                             <p className="text-sm text-gray-500">{achievement.description}</p>
@@ -634,7 +636,7 @@ const AchievementManager: React.FC = () => {
                               ? 'bg-green-500 text-white'
                               : 'bg-gray-200 text-gray-600'
                           }`}>
-                            <span className="text-xl">{achievement.icon}</span>
+                            <IconBadge name={achievement.icon} size={36} />
                           </div>
                           
                           <div className="flex-1">

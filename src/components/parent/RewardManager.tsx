@@ -1,17 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Gift, Star, Check, X, Clock, Lock, Crown } from 'lucide-react';
+import { Plus, Edit2, Trash2, Gift, Star, Check, X, Clock, Crown } from 'lucide-react';
+import { IconBadge } from '../../icons';
 import { useData } from '../../contexts/DataContext';
-import { Reward, RewardRedemption } from '../../types';
-import { RewardForm } from './RewardForm';
-import { LEVEL_REWARD_TEMPLATES } from '../../utils/rewardLevels';
+import { Reward } from '../../types';
+import { RewardForm, RewardFormInitialData } from './RewardForm';
+import { LEVEL_REWARD_TEMPLATES, LevelRewardTemplate } from '../../utils/rewardLevels';
 import toast from 'react-hot-toast';
 
 const RewardManager: React.FC = () => {
-  const { rewards, redemptions, progress, addReward, updateReward, deleteReward, approveRedemption } = useData();
+  const { rewards, redemptions, updateReward, deleteReward, approveRedemption } = useData();
   const [showForm, setShowForm] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
-  const [initialRewardData, setInitialRewardData] = useState<any>(null);
+  const [initialRewardData, setInitialRewardData] = useState<RewardFormInitialData | null>(null);
   const [activeTab, setActiveTab] = useState<'rewards' | 'redemptions'>('rewards');
   const [showTemplates, setShowTemplates] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -80,14 +81,14 @@ const RewardManager: React.FC = () => {
     setInitialRewardData(null);
   };
 
-  const handleUseTemplate = (template: any) => {
+  const handleUseTemplate = (template: LevelRewardTemplate) => {
     if (isProcessing) return;
     console.log('🎁 Using template:', template);
     setInitialRewardData({
       title: template.title,
       description: template.description,
-      goldCost: template.costGold,
-      icon: template.emoji,
+      costGold: template.costGold,
+      emoji: template.emoji,
       category: template.category,
       requiredLevel: template.requiredLevel,
       isActive: true
@@ -212,7 +213,7 @@ const RewardManager: React.FC = () => {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl">{template.emoji}</span>
+                      <IconBadge name={template.emoji} size={36} />
                       <div>
                         <h4 className="font-semibold text-gray-900 text-sm">{template.title}</h4>
                         <p className="text-xs text-gray-600">{template.description}</p>
@@ -302,7 +303,7 @@ const RewardManager: React.FC = () => {
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <div className="text-2xl">{reward.icon}</div>
+                          <IconBadge name={reward.emoji} size={40} />
                           <div>
                             <h4 className="font-semibold text-gray-900">{reward.title}</h4>
                             <p className="text-sm text-gray-600">{categoryLabels[reward.category]}</p>
@@ -386,7 +387,7 @@ const RewardManager: React.FC = () => {
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <div className="text-2xl opacity-50">{reward.icon}</div>
+                          <IconBadge name={reward.emoji} size={40} muted />
                           <div>
                             <h4 className="font-semibold text-gray-700">{reward.title}</h4>
                             <p className="text-sm text-gray-500">{categoryLabels[reward.category]}</p>
@@ -481,7 +482,7 @@ const RewardManager: React.FC = () => {
                       }
                     };
                     
-                    const config = statusConfig[redemption.status] || statusConfig.pending;
+                    const config = statusConfig[redemption.status as keyof typeof statusConfig] || statusConfig.pending;
                     const StatusIcon = config.icon;
                     
                     return (
@@ -494,7 +495,7 @@ const RewardManager: React.FC = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <div className="text-3xl">{reward.icon}</div>
+                            <IconBadge name={reward.emoji} size={48} />
                             <div>
                               <h4 className="font-semibold text-gray-900">{reward.title}</h4>
                               <p className="text-sm text-gray-600">{reward.description}</p>

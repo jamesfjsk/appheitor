@@ -17,6 +17,7 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) {
@@ -29,7 +30,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const { user } = useAuth();
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [isSupported] = useState('Notification' in window);
-  const [fcmToken, setFcmToken] = useState<string | null>(null);
+  const [, setFcmToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (isSupported) {
@@ -50,7 +51,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       // Escutar mensagens em foreground
       onMessageListener()
-        .then((payload: any) => {
+        .then((payload) => {
           console.log('📨 Mensagem recebida em foreground:', payload);
           
           // Mostrar toast com a mensagem
@@ -198,7 +199,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Simular delay de rede
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    if (user?.userType === 'child') {
+    if (user?.role === 'child') {
       // Se estamos no painel da criança, mostrar a notificação
       if (permission === 'granted') {
         new Notification(payload.title, {
@@ -222,7 +223,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
     
     // Confirmar envio para o pai
-    if (user?.userType === 'parent') {
+    if (user?.role === 'admin') {
       toast.success('📤 Notificação enviada para o Heitor!');
     }
   };

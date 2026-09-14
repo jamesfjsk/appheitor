@@ -1,18 +1,28 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Lock, Star, Target, Zap, X, CheckCircle } from 'lucide-react';
+import { X } from 'lucide-react';
+import { IconBadge, FlashIcon, CheckMark } from '../../icons';
 import toast from 'react-hot-toast';
-import { Achievement, UserAchievement, UserProgress } from '../../types';
+import { Achievement } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 
-interface AchievementsBadgesProps {}
+type AchievementWithProgress = Achievement & {
+  currentProgress: number;
+  progressPercentage: number;
+  isCompleted: boolean;
+  isReadyToUnlock: boolean;
+  unlockedAt?: Date;
+  userAchievementId?: string;
+  rewardClaimed: boolean;
+};
 
-const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
+const AchievementsBadges: React.FC = () => {
   const { achievements, userAchievements, progress, claimAchievementReward } = useData();
-  const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
+  const { childUid } = useAuth();
+  const [selectedAchievement, setSelectedAchievement] = useState<AchievementWithProgress | null>(null);
 
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
 
@@ -133,11 +143,11 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.5 }}
-        className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+        className="comic-card p-6"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-yellow-400" />
+            <FlashIcon name="trophy" className="w-5 h-5 text-amber-500" />
             Conquistas Flash
           </h3>
           <div className="flex items-center gap-2">
@@ -219,67 +229,34 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                   </div>
                 )}
 
-                <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                  {/* Icon */}
-                  <div className={`text-2xl mb-1 ${
-                    achievement.isCompleted 
-                      ? 'text-red-600' 
-                      : achievement.progressPercentage > 0 
-                      ? 'text-blue-600' 
-                      : 'text-gray-400'
-                  }`}>
-                    {achievement.isCompleted ? (
-                      <motion.span
-                        animate={{
-                          scale: [1, 1.3, 1],
-                          rotate: [0, 15, -15, 0]
-                        }}
-                        transition={{
-                          duration: 1,
-                          repeat: 2,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        {achievement.icon}
-                      </motion.span>
-                    ) : achievement.isReadyToUnlock ? (
-                      <motion.span
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          rotate: [0, 10, -10, 0]
-                        }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                        className="text-green-600"
-                      >
-                        {achievement.icon}
-                      </motion.span>
-                    ) : achievement.progressPercentage > 0 ? (
-                      achievement.icon
-                    ) : (
-                      <Lock className="w-5 h-5" />
-                    )}
-                  </div>
+                <div className="relative z-10 flex flex-col items-center justify-center h-full px-1">
+                  <FlashIcon
+                    name={achievement.icon}
+                    className={`w-8 h-8 ${
+                      !achievement.isCompleted && !achievement.isReadyToUnlock ? 'opacity-55 grayscale' : ''
+                    }`}
+                  />
 
-                  {/* Progress indicator */}
+                  {!achievement.isCompleted && !achievement.isReadyToUnlock && achievement.progressPercentage === 0 && (
+                    <span className="absolute bottom-1 right-1">
+                      <FlashIcon name="lock" className="w-3.5 h-3.5" />
+                    </span>
+                  )}
+
                   {!achievement.isCompleted && achievement.progressPercentage > 0 && (
-                    <div className="text-xs font-bold text-blue-600">
+                    <div className="mt-0.5 text-[10px] font-bold text-blue-700 leading-none">
                       {Math.round(achievement.progressPercentage)}%
                     </div>
                   )}
 
-                  {/* Completed checkmark */}
                   {achievement.isCompleted && (
-                    <motion.div
+                    <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center"
+                      className="absolute top-0.5 right-0.5 z-20 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
                     >
-                      <CheckCircle className="w-3 h-3 text-white" />
-                    </motion.div>
+                      <CheckMark className="w-3 h-3 text-white" />
+                    </motion.span>
                   )}
 
                   {/* Ready to unlock badge */}
@@ -299,7 +276,9 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <div className="text-4xl mb-2">🏆</div>
+            <div className="mb-2 flex justify-center">
+              <IconBadge name="trophy" size={56} />
+            </div>
             <p className="text-gray-600 text-sm">
               Nenhuma conquista criada ainda
             </p>
@@ -421,19 +400,19 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                 {/* Rewards */}
                 <div className="bg-gray-50 rounded-xl p-4 mb-6">
                   <h4 className="font-semibold text-gray-900 mb-3 text-center">
-                    🎁 Recompensas
+                    Recompensas
                   </h4>
                   <div className="flex justify-center gap-6">
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 text-blue-600 font-bold">
-                        <Zap className="w-4 h-4" />
+                        <FlashIcon name="bolt" className="w-4 h-4" />
                         +{selectedAchievement.xpReward}
                       </div>
                       <div className="text-xs text-gray-600">XP</div>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center justify-center gap-1 text-yellow-600 font-bold">
-                        <Star className="w-4 h-4" />
+                        <FlashIcon name="star" className="w-4 h-4" />
                         +{selectedAchievement.goldReward}
                       </div>
                       <div className="text-xs text-gray-600">Gold</div>
@@ -446,7 +425,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                   {selectedAchievement.isCompleted ? (
                     selectedAchievement.rewardClaimed ? (
                       <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
-                        <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                        <FlashIcon name="check" className="w-8 h-8 text-green-600 mx-auto mb-2" />
                         <p className="font-bold text-green-900">Recompensa Resgatada!</p>
                         {selectedAchievement.unlockedAt && (
                           <p className="text-sm text-green-700 mt-1">
@@ -456,7 +435,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                       </div>
                     ) : (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-3">
-                        <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                        <FlashIcon name="star" className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
                         <p className="font-bold text-yellow-900">Conquista Desbloqueada!</p>
                         {selectedAchievement.unlockedAt && (
                           <p className="text-sm text-yellow-700 mt-1">
@@ -477,6 +456,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                                   achievementId: selectedAchievement.id,
                                   progress: selectedAchievement.currentProgress,
                                   isCompleted: true,
+                                  rewardClaimed: false,
                                   unlockedAt: new Date()
                                 });
                                 await claimAchievementReward(newUserAchievementId);
@@ -488,7 +468,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                           }}
                           className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-red-600 rounded-lg font-bold transition-all duration-200 shadow-lg"
                         >
-                          <Star className="w-4 h-4 inline mr-2" />
+                          <FlashIcon name="star" className="w-4 h-4 inline mr-2" />
                           Resgatar Recompensa
                         </motion.button>
                       </div>
@@ -499,7 +479,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ duration: 1, repeat: Infinity }}
                       >
-                        <Star className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                        <FlashIcon name="star" className="w-8 h-8 text-green-600 mx-auto mb-2" />
                       </motion.div>
                       <p className="font-bold text-green-900">Pronta para Desbloquear!</p>
                       <p className="text-sm text-green-700">
@@ -525,6 +505,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                                 achievementId: selectedAchievement.id,
                                 progress: selectedAchievement.currentProgress,
                                 isCompleted: true,
+                                rewardClaimed: false,
                                 unlockedAt: new Date()
                               });
                             }
@@ -537,13 +518,13 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                         }}
                         className="w-full py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold transition-all duration-200 shadow-lg"
                       >
-                        <Star className="w-4 h-4 inline mr-2" />
+                        <FlashIcon name="star" className="w-4 h-4 inline mr-2" />
                         Desbloquear Agora!
                       </motion.button>
                     </div>
                   ) : selectedAchievement.progressPercentage > 0 ? (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                      <FlashIcon name="target" className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                       <p className="font-bold text-blue-900">Em Progresso</p>
                       <p className="text-sm text-blue-700 mt-1">
                         Faltam {selectedAchievement.target - selectedAchievement.currentProgress} para completar
@@ -551,7 +532,7 @@ const AchievementsBadges: React.FC<AchievementsBadgesProps> = () => {
                     </div>
                   ) : (
                     <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                      <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <FlashIcon name="lock" className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                       <p className="font-bold text-gray-700">Ainda Bloqueada</p>
                       <p className="text-sm text-gray-600 mt-1">
                         Continue progredindo para desbloquear!

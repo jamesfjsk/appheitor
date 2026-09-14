@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Target, Award, Calendar, Gift, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { TrendingUp, Target, Award, Calendar, Gift, Clock, CheckCircle, AlertTriangle, Coins } from 'lucide-react';
 import { Task, UserProgress } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { calculateLevelSystem, getLevelTitle, getLevelIcon } from '../../utils/levelSystem';
+import { calculateLevelSystem, getLevelIcon } from '../../utils/levelSystem';
+import { FlashIcon } from '../../icons';
 import { FirestoreService } from '../../services/firestoreService';
 
 interface ProgressDashboardProps {
@@ -17,14 +18,17 @@ interface ProgressDashboardProps {
 const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }) => {
   const { redemptions } = useData();
   const { childUid } = useAuth();
-  const [weeklyCompletions, setWeeklyCompletions] = useState<any[]>([]);
+  const [weeklyCompletions, setWeeklyCompletions] = useState<Awaited<ReturnType<typeof FirestoreService.getTaskCompletionHistory>>>([]);
   const [loadingWeekly, setLoadingWeekly] = useState(false);
   const [lastLoadedWeek, setLastLoadedWeek] = useState<string>('');
   
-  const today = new Date();
-  const weekStart = startOfWeek(today, { locale: ptBR });
-  const weekEnd = endOfWeek(today, { locale: ptBR });
-  const weekKey = `${weekStart.toISOString().split('T')[0]}_${weekEnd.toISOString().split('T')[0]}`;
+  const { today, weekStart, weekEnd, weekKey } = useMemo(() => {
+    const today = new Date();
+    const weekStart = startOfWeek(today, { locale: ptBR });
+    const weekEnd = endOfWeek(today, { locale: ptBR });
+    const weekKey = `${weekStart.toISOString().split('T')[0]}_${weekEnd.toISOString().split('T')[0]}`;
+    return { today, weekStart, weekEnd, weekKey };
+  }, []);
   
   // Memoize level system calculation to prevent unnecessary recalculations
   const levelSystem = useMemo(() => calculateLevelSystem(progress.totalXP || 0), [progress.totalXP]);
@@ -56,7 +60,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
     };
     
     loadWeeklyData();
-  }, [childUid, weekKey, lastLoadedWeek]);
+  }, [childUid, weekKey, lastLoadedWeek, weekStart, weekEnd]);
 
   // Memoize calculations to prevent unnecessary re-renders
   const dashboardStats = useMemo(() => {
@@ -95,10 +99,17 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
     },
     {
       title: 'Nível Atual',
-      value: `${getLevelIcon(levelSystem.currentLevel)} ${levelSystem.currentLevel}`,
+      value: levelSystem.currentLevel,
       icon: TrendingUp,
       color: 'bg-blue-500',
-      change: levelSystem.levelTitle
+      change: levelSystem.isMaxLevel ? levelSystem.levelTitle : `faltam ${levelSystem.xpNeededForNext} XP para o ${levelSystem.currentLevel + 1}`
+    },
+    {
+      title: 'Gold Disponível',
+      value: progress.availableGold || 0,
+      icon: Coins,
+      color: 'bg-amber-500',
+      change: `${progress.totalGoldEarned || 0} ganhos no total`
     },
     {
       title: 'Taxa de Conclusão',
@@ -128,7 +139,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
       color: 'bg-purple-500',
       change: 'realizados'
     }
-  ], [levelSystem, dashboardStats, progress.streak]);
+  ], [levelSystem, dashboardStats, progress.streak, progress.availableGold, progress.totalGoldEarned]);
 
   // Memoize tasks by period to prevent recalculation
   const tasksByPeriod = useMemo(() => ({
@@ -283,7 +294,7 @@ const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ tasks, progress }
                 
                 <div className="text-center p-3 bg-purple-50 rounded-lg">
                   <div className="text-xl font-bold text-purple-600 flex items-center justify-center gap-1">
-                    <span className="text-sm">{getLevelIcon(levelSystem.currentLevel)}</span>
+                    <FlashIcon name={getLevelIcon(levelSystem.currentLevel)} className="w-4 h-4" />
                     <span>{levelSystem.currentLevel}</span>
                   </div>
                   <div className="text-xs text-purple-600">{levelSystem.levelTitle}</div>

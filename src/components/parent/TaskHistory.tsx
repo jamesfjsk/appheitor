@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { Calendar, TrendingUp, BarChart3, Sun, Sunset, Moon, CheckCircle, Star, Gift } from 'lucide-react';
+import { TrendingUp, BarChart3, CheckCircle, Star, Gift } from 'lucide-react';
+import { IconBadge } from '../../icons';
 import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -112,10 +114,11 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
       if (dailyData.length === 0) {
         console.warn('⚠️ TaskHistory: No daily progress found. This could mean:');
         console.warn('  1. Daily processing has not run yet');
-        console.warn('  2. Use "Reprocessar Ontem" button in Dashboard to populate data');
+        console.warn('  2. Use "Fechar dias pendentes" em Ajustes para fechar os dias');
       }
     } catch (error) {
       console.error('❌ TaskHistory: Error loading completion history:', error);
+      toast.error('Não foi possível carregar o histórico de tarefas. Veja o console do navegador.');
       setTaskCompletions([]);
       setDailyProgressData([]);
     } finally {
@@ -206,18 +209,6 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
     { value: 3, label: 'Há 3 Semanas' }
   ];
 
-  const periodIcons = {
-    morning: Sun,
-    afternoon: Sunset,
-    evening: Moon
-  };
-
-  const periodLabels = {
-    morning: 'Manhã',
-    afternoon: 'Tarde',
-    evening: 'Noite'
-  };
-
   return (
     <div className="space-y-6">
       {/* Header com Seletor de Semana */}
@@ -301,7 +292,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
             <div className="text-sm text-orange-800 space-y-2">
               <p className="font-semibold">🔧 O que fazer:</p>
               <ol className="list-decimal list-inside pl-2 space-y-1">
-                <li className="ml-2">Vá ao <strong>Dashboard</strong> e clique em <strong>"Reprocessar Ontem"</strong> para popular dados históricos</li>
+                <li className="ml-2">Vá em <strong>Ajustes</strong> e clique em <strong>"Fechar dias pendentes"</strong> para fechar os dias anteriores</li>
                 <li className="ml-2">Complete algumas tarefas no <strong>Painel do Heitor</strong></li>
                 <li className="ml-2">Aguarde o processamento automático no próximo dia</li>
                 <li className="ml-2">Se o problema persistir, verifique o console do navegador (F12) para erros</li>
@@ -555,7 +546,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
                     rejected: { color: 'bg-red-50 border-red-200', textColor: 'text-red-600', label: '❌ Rejeitado' }
                   };
                   
-                  const config = statusConfig[redemption.status] || statusConfig.pending;
+                  const config = statusConfig[redemption.status as keyof typeof statusConfig] || statusConfig.pending;
                   
                   return (
                     <motion.div
@@ -566,7 +557,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ tasks }) => {
                       className={`flex items-center justify-between p-3 rounded-lg border ${config.color}`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="text-xl">{reward.emoji}</div>
+                        <IconBadge name={reward.emoji} size={36} />
                         <div>
                           <h5 className="font-medium text-gray-900">{reward.title}</h5>
                           <p className="text-xs text-gray-600">

@@ -10,6 +10,7 @@ import { auth } from '../config/firebase';
 import { User } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import toast from 'react-hot-toast';
+import { getErrorCode } from '../utils/errors';
 
 interface AuthContextType {
   user: User | null;
@@ -23,6 +24,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -82,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         return user;
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ AUTH - Error in user setup:', error);
       throw error;
     }
@@ -100,11 +102,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(null);
           setChildUid(null);
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('🚨 AUTH - Error in auth state change:', error);
-        if (error.code === 'permission-denied') {
+        const code = getErrorCode(error);
+        if (code === 'permission-denied') {
           toast.error('❌ Acesso negado. Verifique as regras do Firestore.');
-        } else if (error.code === 'failed-precondition') {
+        } else if (code === 'failed-precondition') {
           toast.error('❌ Banco Firestore não configurado.');
         } else {
           toast.error('❌ Erro de autenticação');
@@ -117,13 +120,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return () => unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- ensureUserSetup is stable for the lifetime of the provider; the listener must be registered once
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
+    } catch (error) {
       const errorMessages = {
         'auth/user-not-found': 'Usuário não encontrado',
         'auth/wrong-password': 'Senha incorreta',
@@ -131,7 +135,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         'auth/network-request-failed': 'Erro de conexão'
       };
       
-      const message = errorMessages[error.code as keyof typeof errorMessages] || 'Erro ao fazer login';
+      const message = errorMessages[getErrorCode(error) as keyof typeof errorMessages] || 'Erro ao fazer login';
       toast.error(message);
       throw error;
     } finally {
@@ -142,11 +146,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (email: string, password: string, displayName: string, userType: 'parent' | 'child') => {
     try {
       setLoading(true);
+      console.log('📝 AUTH - Registering new', userType, 'account:', email);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = await ensureUserSetup(userCredential.user);
       setUser(user);
       toast.success(`Conta criada com sucesso! Bem-vindo, ${displayName}!`);
-    } catch (error: any) {
+    } catch (error) {
       const errorMessages = {
         'auth/email-already-in-use': 'Este email já está em uso',
         'auth/weak-password': 'Senha muito fraca. Use pelo menos 6 caracteres',
@@ -154,7 +159,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         'auth/network-request-failed': 'Erro de conexão'
       };
       
-      const message = errorMessages[error.code as keyof typeof errorMessages] || 'Erro ao criar conta';
+      const message = errorMessages[getErrorCode(error) as keyof typeof errorMessages] || 'Erro ao criar conta';
       toast.error(message);
       throw error;
     } finally {
@@ -180,7 +185,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         await FirestoreService.syncUserData(childUid);
         toast.success('🔄 Dados sincronizados com sucesso!');
-      } catch (error: any) {
+      } catch (error) {
         console.error('❌ Erro ao sincronizar dados:', error);
         toast.error('Erro ao sincronizar dados');
       }

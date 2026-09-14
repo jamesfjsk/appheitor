@@ -60,34 +60,24 @@ export function getLevelTitle(level: number): string {
  * Retorna a cor do nível baseado no título
  */
 export function getLevelColor(level: number): string {
-  if (level >= 100) return "from-yellow-400 to-red-600";       // Lenda da Força
-  if (level >= 90)  return "from-purple-700 to-indigo-800";     // Mestre do Tempo
-  if (level >= 80)  return "from-pink-500 to-violet-600";       // Guardião Multiversal
-  if (level >= 70)  return "from-blue-600 to-blue-800";         // Elite Central City
-  if (level >= 60)  return "from-red-500 to-yellow-400";        // Barry Ascendido
-  if (level >= 50)  return "from-amber-500 to-yellow-500";      // Discípulo do Reverso
-  if (level >= 40)  return "from-orange-500 to-red-500";        // Wally West
-  if (level >= 30)  return "from-teal-500 to-cyan-600";         // STAR Labs
-  if (level >= 20)  return "from-green-500 to-lime-500";        // Iniciado
-  if (level >= 10)  return "from-yellow-400 to-yellow-500";     // Novato
-  return "from-red-500 to-orange-600";                          // Recruta
+  if (level >= 90) return 'from-yellow-300 to-red-700';
+  if (level >= 70) return 'from-yellow-400 to-red-600';
+  if (level >= 50) return 'from-red-500 to-red-800';
+  if (level >= 30) return 'from-amber-400 to-red-600';
+  if (level >= 10) return 'from-yellow-400 to-amber-500';
+  return 'from-red-500 to-red-700';
 }
 
 /**
  * Retorna o ícone do nível baseado na progressão
  */
 export function getLevelIcon(level: number): string {
-  if (level >= 100) return "⚡👑"; // Lenda da Força
-  if (level >= 90)  return "🌀";   // Mestre do Tempo
-  if (level >= 80)  return "🌌";   // Guardião Multiversal
-  if (level >= 70)  return "🏙️";   // Elite Central City
-  if (level >= 60)  return "🟥⚡";  // Barry Allen Ascendido
-  if (level >= 50)  return "🟡🌀";  // Discípulo do Flash Reverso
-  if (level >= 40)  return "🧤";   // Wally West em Ação
-  if (level >= 30)  return "🔬";   // STAR Labs Training
-  if (level >= 20)  return "🔺";   // Iniciado na Força
-  if (level >= 10)  return "🧪";   // Novato
-  return "👟";                     // Recruta
+  if (level >= 90) return 'crown';
+  if (level >= 70) return 'trophy';
+  if (level >= 50) return 'gem';
+  if (level >= 30) return 'medal';
+  if (level >= 10) return 'star';
+  return 'bolt';
 }
 
 
@@ -141,41 +131,6 @@ export function checkLevelUp(previousXP: number, currentXP: number): {
     newLevel,
     levelsGained
   };
-}
-
-/**
- * Verifica se deve disparar verificação de conquistas baseado em mudanças no progresso
- */
-export function shouldTriggerAchievementCheck(
-  previousProgress: Partial<UserProgress>, 
-  currentProgress: UserProgress
-): boolean {
-  // Check if any achievement-relevant metric changed
-  return (
-    (previousProgress.totalXP || 0) !== (currentProgress.totalXP || 0) ||
-    (previousProgress.totalTasksCompleted || 0) !== (currentProgress.totalTasksCompleted || 0) ||
-    (previousProgress.streak || 0) !== (currentProgress.streak || 0) ||
-    (previousProgress.longestStreak || 0) !== (currentProgress.longestStreak || 0) ||
-    (previousProgress.rewardsRedeemed || 0) !== (currentProgress.rewardsRedeemed || 0) ||
-    getLevelFromXP(previousProgress.totalXP || 0) !== getLevelFromXP(currentProgress.totalXP || 0)
-  );
-}
-
-/**
- * Gera lista de marcos de XP para referência
- */
-export function getXPMilestones(): Array<{ level: number; xp: number; title: string }> {
-  const milestones = [];
-  
-  for (let level = 1; level <= 100; level++) {
-    milestones.push({
-      level,
-      xp: getXPForLevel(level),
-      title: getLevelTitle(level)
-    });
-  }
-  
-  return milestones;
 }
 
 /**
@@ -243,8 +198,6 @@ export function getAvatarBorderStyle(level: number): {
   description: string;
   tier: number;
 } {
-  const tier = Math.floor((level - 1) / 5) + 1; // Tier 1-20
-  
   if (level >= 95) {
     return {
       borderClass: 'border-8 border-gradient-to-r from-purple-400 via-pink-400 via-yellow-400 via-blue-400 to-purple-400',

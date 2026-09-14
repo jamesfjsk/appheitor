@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Bell, MessageCircle, Zap } from 'lucide-react';
+import { Send, Bell, MessageCircle } from 'lucide-react';
 import { useNotifications } from '../../contexts/NotificationContext';
 import toast from 'react-hot-toast';
 
@@ -27,7 +27,7 @@ const NotificationSender: React.FC = () => {
       id: 'reward',
       title: '🎁 Nova Recompensa',
       message: 'Uma nova recompensa foi adicionada na loja! Vá conferir!',
-      icon: '🎁'
+      icon: 'gift'
     },
     {
       id: 'bedtime',
@@ -56,7 +56,7 @@ const NotificationSender: React.FC = () => {
       setMessage('');
       setSelectedTemplate('');
       toast.success('Notificação enviada para o Heitor!');
-    } catch (error) {
+    } catch {
       toast.error('Erro ao enviar notificação');
     }
   };
