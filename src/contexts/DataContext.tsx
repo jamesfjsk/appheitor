@@ -8,6 +8,13 @@ import { checkLevelUp, calculateLevelSystem } from '../utils/levelSystem';
 import { getTodayBrazil } from '../utils/timezone';
 import { getErrorMessage, getErrorCode } from '../utils/errors';
 import toast from 'react-hot-toast';
+import { useOffline } from './OfflineContext';
+import { getVillage, grantLevelGift } from '../services/villageService';
+import { getSettings } from '../services/settingsService';
+import { DEFAULT_ECONOMY, DEFAULT_VILLAGE_SETTINGS } from '../config/village';
+import { computeTaskLoot, xpWithBoots } from '../services/village/loot';
+import { dueTasksOn, periodAllowedAt } from '../services/village/schedule';
+import type { EconomySettings, Period, VillageSettings } from '../types/village';
 
 interface DataContextType {
   tasks: Task[];
@@ -92,6 +99,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const { user, childUid } = useAuth();
   const { playLevelUp, playAchievement } = useSound();
   const { applyXP: vacationApplyXP, applyGold: vacationApplyGold, isActive: vacationActive } = useVacation();
+  const { isOffline } = useOffline();
   
   // Initialize all state hooks first (before any conditional logic)
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -296,18 +304,51 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const task = tasks.find(t => t.id === taskId);
       if (!task) throw new Error('Tarefa não encontrada');
       
-      // Check if task is already completed today
       const today = getTodayBrazil();
       if (task.status === 'done' && task.lastCompletedDate === today) {
         throw new Error('Task already completed today');
       }
-      
-      // Store previous progress for level up check
+
+      if (isOffline) {
+        toast.error('Sem internet: a missão não foi salva');
+        throw new Error('offline');
+      }
+
+      const hour = Number(new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'America/Sao_Paulo',
+        hour: 'numeric',
+        hour12: false,
+      }).format(new Date()));
+      const [village, economyRaw, villageSetRaw] = await Promise.all([
+        getVillage(childUid),
+        getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>),
+        getSettings('village', DEFAULT_VILLAGE_SETTINGS as unknown as Record<string, unknown>),
+      ]);
+      const economy = economyRaw as unknown as EconomySettings;
+      const villageSet = villageSetRaw as unknown as VillageSettings;
+      if (!periodAllowedAt(task.period, hour, economy)) {
+        const abre = task.period === 'afternoon' ? economy.periodStartHours.afternoon : economy.periodStartHours.evening;
+        toast.error(`Abre às ${abre}h`);
+        throw new Error('PERIOD_LOCKED');
+      }
+
       const previousXP = progress.totalXP || 0;
+      const byPeriod: Record<Period, number> = { morning: 0, afternoon: 0, evening: 0 };
+      for (const t of tasks) {
+        if (t.id === taskId) continue;
+        if (t.status === 'done' && t.lastCompletedDate === today) byPeriod[t.period] += 1;
+      }
+      const loot = computeTaskLoot({
+        period: task.period,
+        gear: village.gear,
+        completionsTodayByPeriod: byPeriod,
+        settings: economy,
+        effectsEnabled: villageSet.effectsEnabled,
+      });
 
       const baseXP = task.xp || 10;
       const baseGold = task.gold || 5;
-      const xpReward = vacationApplyXP(baseXP);
+      const xpReward = xpWithBoots(vacationApplyXP(baseXP), village.gear, villageSet.effectsEnabled);
       const goldReward = vacationApplyGold(baseGold);
 
       setTasks(prevTasks =>
@@ -322,10 +363,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         taskId,
         childUid,
         xpReward,
-        goldReward
+        goldReward,
+        loot.qty > 0 ? loot : undefined
       );
 
-      // Update streak (check if first task of the day)
       try {
         const streakResult = await FirestoreService.updateStreak(childUid);
 
@@ -349,7 +390,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         console.error('❌ Error updating streak:', error);
       }
 
-      // Check for level up
       const newXP = previousXP + xpReward;
       const levelUpCheck = checkLevelUp(previousXP, newXP);
 
@@ -358,8 +398,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         toast.success(`Nível ${levelUpCheck.newLevel} alcançado`, {
           duration: 5000
         });
+        void grantLevelGift(childUid, levelUpCheck.newLevel).catch((e) => console.warn('grantLevelGift', e));
+        window.dispatchEvent(new CustomEvent('miner-level-up', { detail: { level: levelUpCheck.newLevel } }));
 
-        // Recompensas reais da loja que este nível libera
         const newlyUnlockedRewards = rewards.filter(r => r.active && (r.requiredLevel || 1) === levelUpCheck.newLevel);
         if (newlyUnlockedRewards.length > 0) {
           setTimeout(() => {
@@ -370,23 +411,21 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         }
       }
 
-      // Trigger achievement check after task completion
       setTimeout(() => {
         checkAchievements();
       }, 1500);
 
-      toast.success(
-        vacationActive
-          ? `Ferias em dobro! +${xpReward} XP, +${goldReward} Gold!`
-          : `+${xpReward} XP, +${goldReward} Gold! Tarefa completada!`
-      );
+      const matLabel = loot.qty > 0 ? `, +${loot.qty} ${loot.material}` : '';
+      toast.success(`+${goldReward} gold${matLabel}, +${xpReward} XP`);
     } catch (error) {
       console.error('❌ Erro ao completar tarefa:', error);
-      if (getErrorMessage(error) === 'Task already completed today') {
+      const msg = getErrorMessage(error);
+      if (msg === 'Task already completed today') {
         toast('Missão já feita hoje. Volta amanhã.');
+      } else if (msg === 'offline' || msg === 'PERIOD_LOCKED') {
+        /* toast já mostrado */
       } else {
-        toast.error('Erro ao completar tarefa');
-        // Revert optimistic update
+        toast.error('Sem internet: a missão não foi salva');
         setTasks(prevTasks => 
           prevTasks.map(t => 
             t.id === taskId 
@@ -397,7 +436,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
       throw error;
     }
-  }, [childUid, tasks, rewards, progress.totalXP, playLevelUp, checkAchievements, vacationApplyXP, vacationApplyGold, vacationActive]);
+  }, [childUid, tasks, rewards, progress.totalXP, playLevelUp, checkAchievements, vacationApplyXP, vacationApplyGold, isOffline]);
 
   const addReward = useCallback(async (rewardData: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid) throw new Error('Child UID não definido');
@@ -453,41 +492,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       // Check if user has completed at least 5 tasks today using current tasks data
       const today = getTodayBrazil();
-
-      // Count completed tasks from current tasks data instead of relying on completion history
-      const dayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-
-      // Filter tasks that should be available today based on frequency
-      const todayTasks = tasks.filter(task => {
-        if (!task.active) return false;
-
-        switch (task.frequency) {
-          case 'daily':
-            return true;
-          case 'weekday':
-            return dayOfWeek >= 1 && dayOfWeek <= 5;
-          case 'weekend':
-            return dayOfWeek === 0 || dayOfWeek === 6;
-          default:
-            return true;
-        }
-      });
-
-      // Count how many of today's tasks are completed
-      const todayCompletions = todayTasks.filter(task =>
-        task.status === 'done' && task.lastCompletedDate === today
+      const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
+      const due = dueTasksOn(tasks, today);
+      const dueIds = new Set(due.map((t) => t.id));
+      const todayCompletions = tasks.filter((task) =>
+        dueIds.has(task.id) && task.status === 'done' && task.lastCompletedDate === today
       );
+      const minTasks = economy.redeemMinTasks ?? 5;
 
-      console.log('🔍 DataContext: Daily tasks verification for redemption:', {
-        today,
-        totalActiveTasks: tasks.filter(t => t.active).length,
-        todayTasks: todayTasks.length,
-        completedToday: todayCompletions.length,
-        completedTasks: todayCompletions.map(t => ({ id: t.id, title: t.title }))
-      });
-
-      if (todayCompletions.length < 5) {
-        throw new Error(`Você precisa completar pelo menos 5 missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/5`);
+      if (todayCompletions.length < minTasks) {
+        throw new Error(`Você precisa completar pelo menos ${minTasks} missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/${minTasks}`);
       }
 
       const reward = rewards.find(r => r.id === rewardId);

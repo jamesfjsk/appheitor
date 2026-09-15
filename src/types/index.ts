@@ -324,7 +324,7 @@ export interface GoldTransaction {
   userId: string; // Child UID
   amount: number; // Positive for gain, negative for spend
   type: 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment';
-  source: 'task_completion' | 'reward_redemption' | 'daily_bonus' | 'daily_penalty' | 'admin_adjustment' | 'birthday' | 'quiz' | 'surprise_mission' | 'achievement' | 'redemption_refund' | 'english_game';
+  source: 'task_completion' | 'reward_redemption' | 'daily_bonus' | 'daily_penalty' | 'admin_adjustment' | 'birthday' | 'quiz' | 'surprise_mission' | 'achievement' | 'redemption_refund' | 'english_game' | 'village_shop' | 'chest' | 'task_reversal' | 'level_gift';
   description: string; // Human-readable description
   relatedId?: string; // Task ID, Reward ID, Achievement ID, etc.
   relatedTitle?: string; // Title of related item for quick reference

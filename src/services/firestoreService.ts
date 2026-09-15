@@ -23,6 +23,9 @@ import { getTodayBrazil, getYesterdayBrazil, getBrazilDate } from '../utils/time
 import { format } from 'date-fns';
 import { getLevelFromXP } from '../utils/levelSystem';
 import { processPendingDays } from './dailyRulesService';
+import { initialBaseDoc } from '../config/englishBase';
+import { fromBaseDoc } from './englishBaseService';
+import type { Material } from '../types/english';
 import {
   User,
   Task,
@@ -378,48 +381,44 @@ export class FirestoreService {
   }> {
     try {
       const progressRef = doc(db, 'progress', userId);
-      const progressDoc = await getDoc(progressRef);
-
-      if (!progressDoc.exists()) {
-        console.warn('⚠️ FirestoreService: Progress document not found for streak update');
-        return { streak: 1, longestStreak: 1, streakIncreased: true, streakReset: false };
-      }
-
-      const data = progressDoc.data();
-      const currentStreak = data.streak || 0;
-      const currentLongestStreak = data.longestStreak || 0;
       const today = getTodayBrazil();
       const yesterday = this.yesterdayString();
-      const last = this.lastStreakDate(data);
+      let result = { streak: 1, longestStreak: 1, streakIncreased: true, streakReset: false };
 
-      let newStreak: number;
-      let streakIncreased = false;
-      let streakReset = false;
-
-      if (last === today) {
-        // Já contou hoje: mantém
-        newStreak = Math.max(currentStreak, 1);
-      } else if (last === yesterday && currentStreak > 0) {
-        newStreak = currentStreak + 1;
-        streakIncreased = true;
-      } else {
-        // Primeira atividade ou sequência quebrada
-        newStreak = 1;
-        streakIncreased = true;
-        streakReset = last !== null && last !== yesterday && currentStreak > 0;
-      }
-
-      const newLongestStreak = Math.max(currentLongestStreak, newStreak);
-
-      await updateDoc(progressRef, {
-        streak: newStreak,
-        longestStreak: newLongestStreak,
-        lastStreakDate: today,
-        lastActivityDate: serverTimestamp(),
-        updatedAt: serverTimestamp()
+      await runTransaction(db, async (tx) => {
+        const progressDoc = await tx.get(progressRef);
+        if (!progressDoc.exists()) {
+          result = { streak: 1, longestStreak: 1, streakIncreased: true, streakReset: false };
+          return;
+        }
+        const data = progressDoc.data();
+        const currentStreak = data.streak || 0;
+        const currentLongestStreak = data.longestStreak || 0;
+        const last = this.lastStreakDate(data);
+        let newStreak: number;
+        let streakIncreased = false;
+        let streakReset = false;
+        if (last === today) {
+          newStreak = Math.max(currentStreak, 1);
+        } else if (last === yesterday && currentStreak > 0) {
+          newStreak = currentStreak + 1;
+          streakIncreased = true;
+        } else {
+          newStreak = 1;
+          streakIncreased = true;
+          streakReset = last !== null && last !== yesterday && currentStreak > 0;
+        }
+        const newLongestStreak = Math.max(currentLongestStreak, newStreak);
+        tx.update(progressRef, {
+          streak: newStreak,
+          longestStreak: newLongestStreak,
+          lastStreakDate: today,
+          lastActivityDate: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        result = { streak: newStreak, longestStreak: newLongestStreak, streakIncreased, streakReset };
       });
-
-      return { streak: newStreak, longestStreak: newLongestStreak, streakIncreased, streakReset };
+      return result;
     } catch (error) {
       console.error('❌ FirestoreService: Error updating streak:', error);
       throw error;
@@ -453,88 +452,166 @@ export class FirestoreService {
   // 🔥 TASK COMPLETION
   // ========================================
 
-  static async completeTaskWithRewards(taskId: string, userId: string, xpReward: number, goldReward: number): Promise<void> {
+  static async completeTaskWithRewards(
+    taskId: string,
+    userId: string,
+    xpReward: number,
+    goldReward: number,
+    loot?: { material: Material; qty: number }
+  ): Promise<void> {
     try {
-      // Get current progress first
-      const progressRef = doc(db, 'progress', userId);
-      const progressDoc = await getDoc(progressRef);
-
-      if (!progressDoc.exists()) {
-        throw new Error('Progress document not found');
-      }
-
-      const currentProgress = progressDoc.data();
-      const newGold = (currentProgress.availableGold || 0) + goldReward;
-
-      // Get task details for history
-      const taskRef = doc(db, 'tasks', taskId);
-      const taskDoc = await getDoc(taskRef);
-
-      if (!taskDoc.exists()) {
-        throw new Error('Task not found');
-      }
-
-      const taskData = taskDoc.data();
-      const taskTitle = taskData.title || 'Tarefa Sem Título';
-
-      // Proceed with batch update
-      const batch = writeBatch(db);
       const today = getTodayBrazil();
+      const progressRef = doc(db, 'progress', userId);
+      const taskRef = doc(db, 'tasks', taskId);
+      const baseRef = doc(db, 'englishBase', userId);
+      const now = new Date().toISOString();
 
-      // Update task status
-      batch.update(taskRef, {
-        status: 'done',
-        lastCompletedDate: today,
-        updatedAt: serverTimestamp()
-      });
+      await runTransaction(db, async (tx) => {
+        const taskDoc = await tx.get(taskRef);
+        if (!taskDoc.exists()) throw new Error('Task not found');
+        const taskData = taskDoc.data();
+        if (taskData.lastCompletedDate === today) throw new Error('Task already completed today');
 
-      // Create task completion record WITH TASK TITLE
-      const completionRef = doc(collection(db, 'taskCompletions'));
-      batch.set(completionRef, {
-        taskId,
-        userId,
-        taskTitle,
-        date: today,
-        xpEarned: xpReward,
-        goldEarned: goldReward,
-        completedAt: serverTimestamp(),
-        createdAt: serverTimestamp()
-      });
+        const progressDoc = await tx.get(progressRef);
+        if (!progressDoc.exists()) throw new Error('Progress document not found');
+        const baseDoc = await tx.get(baseRef);
 
-      // Incrementos atômicos: não dependem do valor lido, então duas
-      // conclusões seguidas (ou outra aba aberta) não sobrescrevem uma à outra
-      batch.update(progressRef, {
-        totalXP: increment(xpReward),
-        availableGold: increment(goldReward),
-        totalGoldEarned: increment(goldReward),
-        totalTasksCompleted: increment(1),
-        updatedAt: serverTimestamp()
-      });
+        const goldBefore = Number(progressDoc.data()?.availableGold) || 0;
+        const goldAfter = goldBefore + goldReward;
+        const taskTitle = taskData.title || 'Tarefa Sem Título';
 
-      // Create gold transaction record
-      if (goldReward > 0) {
-        const transactionRef = doc(collection(db, 'goldTransactions'));
-        batch.set(transactionRef, {
-          userId,
-          amount: goldReward,
-          type: 'earned',
-          source: 'task_completion',
-          description: `Tarefa concluída: ${taskTitle}`,
-          relatedId: taskId,
-          relatedTitle: taskTitle,
-          metadata: { xpEarned: xpReward, period: taskData.period },
-          balanceBefore: currentProgress.availableGold || 0,
-          balanceAfter: newGold,
-          createdAt: serverTimestamp()
+        tx.update(taskRef, {
+          status: 'done',
+          lastCompletedDate: today,
+          updatedAt: serverTimestamp(),
         });
-      }
 
-      await batch.commit();
-      console.log('✅ Task completed with validated rewards:', { taskId, xpReward, goldReward });
+        const completionRef = doc(collection(db, 'taskCompletions'));
+        tx.set(completionRef, omitUndefined({
+          taskId,
+          userId,
+          taskTitle,
+          date: today,
+          xpEarned: xpReward,
+          goldEarned: goldReward,
+          materialsEarned: loot && loot.qty > 0 ? { [loot.material]: loot.qty } : {},
+          completedAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+        }));
+
+        tx.update(progressRef, {
+          totalXP: increment(xpReward),
+          availableGold: goldAfter,
+          totalGoldEarned: increment(Math.max(0, goldReward)),
+          totalTasksCompleted: increment(1),
+          updatedAt: serverTimestamp(),
+        });
+
+        if (loot && loot.qty > 0) {
+          if (!baseDoc.exists()) {
+            const initial = initialBaseDoc(userId, now);
+            initial.materials[loot.material] = (initial.materials[loot.material] || 0) + loot.qty;
+            tx.set(baseRef, initial);
+          } else {
+            tx.update(baseRef, {
+              [`materials.${loot.material}`]: increment(loot.qty),
+              updatedAt: now,
+            });
+          }
+        } else if (!baseDoc.exists()) {
+          tx.set(baseRef, initialBaseDoc(userId, now));
+        }
+
+        if (goldReward !== 0) {
+          tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
+            userId,
+            amount: goldReward,
+            type: 'earned' as const,
+            source: 'task_completion' as const,
+            description: `Tarefa concluída: ${taskTitle}`,
+            relatedId: taskId,
+            relatedTitle: taskTitle,
+            metadata: { xpEarned: xpReward, period: taskData.period, materialsEarned: loot ?? null },
+            balanceBefore: goldBefore,
+            balanceAfter: goldAfter,
+            createdAt: serverTimestamp(),
+          }));
+        }
+      });
+      console.log('✅ Task completed with validated rewards:', { taskId, xpReward, goldReward, loot });
     } catch (error) {
       console.error('❌ FirestoreService: Error completing task with rewards:', error);
       throw error;
     }
+  }
+
+  static async revertTaskCompletion(taskId: string, date: string, adminUid: string): Promise<void> {
+    const completions = await getDocs(
+      query(collection(db, 'taskCompletions'), where('taskId', '==', taskId), where('date', '==', date))
+    );
+    const live = completions.docs.find((d) => d.data().reverted !== true);
+    if (!live) throw new Error('Conclusão não encontrada');
+    const data = live.data();
+    const userId = String(data.userId || '');
+    const xp = Number(data.xpEarned) || 0;
+    const gold = Number(data.goldEarned) || 0;
+    const materials = (data.materialsEarned || {}) as Record<string, number>;
+
+    await runTransaction(db, async (tx) => {
+      const completionRef = live.ref;
+      const cSnap = await tx.get(completionRef);
+      if (!cSnap.exists() || cSnap.data().reverted === true) return;
+      const progressRef = doc(db, 'progress', userId);
+      const taskRef = doc(db, 'tasks', taskId);
+      const baseRef = doc(db, 'englishBase', userId);
+      const villageRef = doc(db, 'village', userId);
+      const pSnap = await tx.get(progressRef);
+      const tSnap = await tx.get(taskRef);
+      const bSnap = await tx.get(baseRef);
+      const vSnap = await tx.get(villageRef);
+      const goldBefore = Number(pSnap.data()?.availableGold) || 0;
+      const goldAfter = Math.max(0, goldBefore - gold);
+      const xpNow = Math.max(0, (Number(pSnap.data()?.totalXP) || 0) - xp);
+
+      tx.update(completionRef, { reverted: true, revertedBy: adminUid, revertedAt: serverTimestamp() });
+      if (tSnap.exists() && tSnap.data().lastCompletedDate === date) {
+        tx.update(taskRef, { status: 'pending', lastCompletedDate: '', updatedAt: serverTimestamp() });
+      }
+      if (pSnap.exists()) {
+        tx.update(progressRef, {
+          totalXP: xpNow,
+          availableGold: goldAfter,
+          totalTasksCompleted: increment(-1),
+          updatedAt: serverTimestamp(),
+        });
+      }
+      if (gold > 0) {
+        tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
+          userId,
+          amount: goldAfter - goldBefore,
+          type: 'refund' as const,
+          source: 'task_reversal' as const,
+          description: `Não foi feita: ${data.taskTitle || taskId}`,
+          relatedId: taskId,
+          relatedTitle: data.taskTitle,
+          metadata: { date, reverted: true },
+          balanceBefore: goldBefore,
+          balanceAfter: goldAfter,
+          createdAt: serverTimestamp(),
+          createdBy: adminUid,
+        }));
+      }
+      if (bSnap.exists()) {
+        const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+        for (const [m, qty] of Object.entries(materials)) {
+          if (typeof qty === 'number' && qty > 0) updates[`materials.${m}`] = increment(-qty);
+        }
+        tx.update(baseRef, updates);
+      }
+      if (vSnap.exists()) {
+        tx.update(villageRef, { [`claimed.daily:${date}`]: vSnap.data()?.claimed?.[`daily:${date}`] ?? null, updatedAt: new Date().toISOString() });
+      }
+    });
   }
 
   // ========================================

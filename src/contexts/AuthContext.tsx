@@ -20,6 +20,7 @@ interface AuthContextType {
   register: (email: string, password: string, displayName: string, userType: 'parent' | 'child') => Promise<void>;
   logout: () => Promise<void>;
   syncData: () => Promise<void>;
+  setViewChildUid: (uid: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -192,6 +193,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const setViewChildUid = (uid: string) => {
+    if (user?.role !== 'admin' || !uid) return;
+    setChildUid(uid);
+  };
+
   const value: AuthContextType = {
     user,
     childUid,
@@ -199,7 +205,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
-    syncData
+    syncData,
+    setViewChildUid,
   };
 
   return (

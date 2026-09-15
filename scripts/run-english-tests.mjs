@@ -1,6 +1,4 @@
-// Roda os testes de src/services/english/__tests__/*.test.ts: cada arquivo vira um
-// bundle CommonJS (esbuild, o mesmo do Vite) num diretório temporário e é executado
-// em Node. Sai com código 1 se qualquer arquivo falhar. Uso: npm run test:english
+// Roda testes puros em Node (esbuild). Pastas: english e village.
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -10,33 +8,42 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const testsDir = join(root, 'src', 'services', 'english', '__tests__');
-const files = readdirSync(testsDir).filter((f) => f.endsWith('.test.ts')).sort();
-// Lançador JS do esbuild: evita depender de npx/shell no Windows
 const esbuildBin = require.resolve('esbuild/bin/esbuild');
-const outDir = mkdtempSync(join(tmpdir(), 'english-tests-'));
 
+const dirs = process.argv.slice(2);
+const targets = (dirs.length ? dirs : ['english', 'village']).map((name) => ({
+  name,
+  dir: join(root, 'src', 'services', name, '__tests__'),
+}));
+
+const outDir = mkdtempSync(join(tmpdir(), 'app-tests-'));
 let failed = 0;
+let filesRun = 0;
+
 try {
-  for (const file of files) {
-    const outfile = join(outDir, file.replace(/\.ts$/, '.cjs'));
-    console.log(`\n== ${file}`);
-    const bundle = spawnSync(
-      process.execPath,
-      [esbuildBin, join(testsDir, file), '--bundle', '--platform=node', '--format=cjs', '--log-level=warning', `--outfile=${outfile}`],
-      { stdio: 'inherit' }
-    );
-    if (bundle.status !== 0) {
-      failed++;
-      console.error(`  bundle falhou: ${file}`);
-      continue;
+  for (const { name, dir } of targets) {
+    const files = readdirSync(dir).filter((f) => f.endsWith('.test.ts')).sort();
+    for (const file of files) {
+      filesRun++;
+      const outfile = join(outDir, `${name}-${file.replace(/\.ts$/, '.cjs')}`);
+      console.log(`\n== ${name}/${file}`);
+      const bundle = spawnSync(
+        process.execPath,
+        [esbuildBin, join(dir, file), '--bundle', '--platform=node', '--format=cjs', '--log-level=warning', `--outfile=${outfile}`],
+        { stdio: 'inherit' }
+      );
+      if (bundle.status !== 0) {
+        failed++;
+        console.error(`  bundle falhou: ${file}`);
+        continue;
+      }
+      const run = spawnSync(process.execPath, [outfile], { stdio: 'inherit' });
+      if (run.status !== 0) failed++;
     }
-    const run = spawnSync(process.execPath, [outfile], { stdio: 'inherit' });
-    if (run.status !== 0) failed++;
   }
 } finally {
   rmSync(outDir, { recursive: true, force: true });
 }
 
-console.log(failed ? `\n${failed} arquivo(s) de teste com falha` : `\nTodos os ${files.length} arquivos de teste passaram`);
+console.log(failed ? `\n${failed} arquivo(s) de teste com falha` : `\nTodos os ${filesRun} arquivos de teste passaram`);
 process.exit(failed ? 1 : 0);

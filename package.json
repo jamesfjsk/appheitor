@@ -12,7 +12,8 @@
     "lint:fix": "eslint . --fix",
     "prebuild": "npm run typecheck",
     "preview": "vite preview",
-    "test:english": "node scripts/run-english-tests.mjs"
+    "test:english": "node scripts/run-english-tests.mjs",
+    "test:village": "node scripts/run-english-tests.mjs village"
   },
   "dependencies": {
     "clsx": "^2.1.1",

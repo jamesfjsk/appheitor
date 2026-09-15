@@ -151,6 +151,24 @@ export function buildingIcon(id: BuildingId, level: number): string {
   return level >= 1 ? BUILDING_BY_ID[id].icon : TERRAIN_ICON;
 }
 
+const VILLAGE_BUILDING_FILES = new Set([
+  'fornalha-1',
+  'fornalha-2',
+  'fornalha-3',
+  'bau-1',
+  'campinho-1',
+]);
+
+export const BUILDING_PLACA = '/assets/village/buildings/placa.png';
+
+/** Sprite da Vila por nível; placa no 0; cai no ícone da Base se o PNG ainda não existir. */
+export function buildingSprite(id: BuildingId, level: number): string {
+  if (level <= 0) return BUILDING_PLACA;
+  const key = `${id}-${level}`;
+  if (VILLAGE_BUILDING_FILES.has(key)) return `/assets/village/buildings/${key}.png`;
+  return buildingIcon(id, level);
+}
+
 /** Torre, Mesa e Campinho só aparecem com Fornalha e Baú no nível 1 ou mais */
 export function isBuildingUnlocked(id: BuildingId, buildings: Record<BuildingId, number>): boolean {
   if (!BUILDING_BY_ID[id].requiresCore) return true;

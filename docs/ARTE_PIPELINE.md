@@ -31,3 +31,7 @@ Decisão do pai (15/09/2026): toda a arte é gerada por IA, sem ninguém desenha
 - Construções (96x96, níveis 1-3): Fornalha (feita), Baú (n1 feito), Cerca, Torre, Mesa de Encantamento, Campinho (n1 feito), Cofre (Etapa 2); placa de lote vazio.
 - Itens (32x32): picaretas x5, capacete de ferro (feito), botas (feitas), lanterna, capa, materiais (usar os ícones já existentes de madeira/pedra/ferro/redstone), esmeralda e diamante (existentes), baú fechado/aberto do dia, baú das tochas.
 - Cena: tile de grama com caminho (feito), tile de grama pura, tile de pedra, cerca, árvore, tocha de chão, fumaça (3 quadros), céu dia/noite (gradiente por código).
+
+## Lote gerado em 15/09 (Etapa 1)
+
+`node scripts/pixellab-gen.cjs --sheet` gerou os 79 sprites do manifesto sem falhas (folha de contato em `public/assets/village/sheet.png`; ordem: buildings, char, items, npc, pets, rewards, tiles). Dois foram refeitos depois de olhar a folha, com prompt ajustado no manifesto: `buildings/placa.png` (saiu como estacas sem placa; agora é a placa de madeira no terreno vazio) e `rewards/amigo.png` (saiu como silhuetas pretas; agora são duas crianças coloridas). Observação de curadoria: a Mesa de Encantamento nos níveis 2-3 fica roxa e diferente das outras construções de propósito (prompt "enchanting library"); se o pai não gostar, regenerar com `--only buildings/mesa --force` depois de trocar a descrição. Aprovação do lote pelo pai: pendente.

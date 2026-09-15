@@ -36,7 +36,7 @@ export const DAILY_QUIZ_QUESTIONS = 8;
 
 /** Fechamento do dia (penalidade por missão perdida e bônus por dia completo): padrões */
 export const DAILY_RULES_DEFAULTS = {
-  enabled: false,
+  enabled: true,
   penaltyPerMissedTask: 1,
   allDoneBonus: 10,
   /** quantos dias para trás o fechamento pode alcançar se o app ficar fechado */
