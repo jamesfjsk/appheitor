@@ -4,17 +4,17 @@ import { useSound } from './SoundContext';
 import { useVacation } from './VacationContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus, Note } from '../types';
 import { FirestoreService } from '../services/firestoreService';
-import { checkLevelUp, calculateLevelSystem } from '../utils/levelSystem';
+import { checkLevelUp, calculateLevelSystem, emitMinerLevelUp } from '../utils/levelSystem';
 import { getTodayBrazil } from '../utils/timezone';
 import { getErrorMessage, getErrorCode } from '../utils/errors';
 import toast from 'react-hot-toast';
 import { useOffline } from './OfflineContext';
-import { getVillage, grantLevelGift } from '../services/villageService';
+import { getVillage } from '../services/villageService';
 import { getSettings } from '../services/settingsService';
-import { DEFAULT_ECONOMY, DEFAULT_VILLAGE_SETTINGS } from '../config/village';
+import { DEFAULT_ECONOMY, DEFAULT_MODULES, DEFAULT_VILLAGE_SETTINGS } from '../config/village';
 import { computeTaskLoot, xpWithBoots } from '../services/village/loot';
 import { dueTasksOn, periodAllowedAt } from '../services/village/schedule';
-import type { EconomySettings, Period, VillageSettings } from '../types/village';
+import type { EconomySettings, ModuleSettings, Period, VillageSettings } from '../types/village';
 
 interface DataContextType {
   tasks: Task[];
@@ -319,13 +319,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         hour: 'numeric',
         hour12: false,
       }).format(new Date()));
-      const [village, economyRaw, villageSetRaw] = await Promise.all([
+      const [village, economyRaw, villageSetRaw, modulesRaw] = await Promise.all([
         getVillage(childUid),
         getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>),
         getSettings('village', DEFAULT_VILLAGE_SETTINGS as unknown as Record<string, unknown>),
+        getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>),
       ]);
       const economy = economyRaw as unknown as EconomySettings;
       const villageSet = villageSetRaw as unknown as VillageSettings;
+      const modules = modulesRaw as unknown as ModuleSettings;
       if (!periodAllowedAt(task.period, hour, economy)) {
         const abre = task.period === 'afternoon' ? economy.periodStartHours.afternoon : economy.periodStartHours.evening;
         toast.error(`Abre às ${abre}h`);
@@ -338,17 +340,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         if (t.id === taskId) continue;
         if (t.status === 'done' && t.lastCompletedDate === today) byPeriod[t.period] += 1;
       }
+      const effectsOn = villageSet.effectsEnabled && modules.effects !== false;
       const loot = computeTaskLoot({
         period: task.period,
         gear: village.gear,
         completionsTodayByPeriod: byPeriod,
         settings: economy,
-        effectsEnabled: villageSet.effectsEnabled,
+        effectsEnabled: effectsOn,
       });
 
       const baseXP = task.xp || 10;
       const baseGold = task.gold || 5;
-      const xpReward = xpWithBoots(vacationApplyXP(baseXP), village.gear, villageSet.effectsEnabled);
+      const xpReward = xpWithBoots(vacationApplyXP(baseXP), village.gear, effectsOn);
       const goldReward = vacationApplyGold(baseGold);
 
       setTasks(prevTasks =>
@@ -398,8 +401,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         toast.success(`Nível ${levelUpCheck.newLevel} alcançado`, {
           duration: 5000
         });
-        void grantLevelGift(childUid, levelUpCheck.newLevel).catch((e) => console.warn('grantLevelGift', e));
-        window.dispatchEvent(new CustomEvent('miner-level-up', { detail: { level: levelUpCheck.newLevel } }));
+        emitMinerLevelUp(levelUpCheck);
 
         const newlyUnlockedRewards = rewards.filter(r => r.active && (r.requiredLevel || 1) === levelUpCheck.newLevel);
         if (newlyUnlockedRewards.length > 0) {
@@ -786,6 +788,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         toast.success(`Nível ${levelUpCheck.newLevel} alcançado`, {
           duration: 5000
         });
+        emitMinerLevelUp(levelUpCheck);
       }
 
       setIsSurpriseMissionCompletedToday(true);
@@ -957,7 +960,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         toast.success(`Nível ${levelUpCheck.newLevel} alcançado`, {
           duration: 5000
         });
-      
+        emitMinerLevelUp(levelUpCheck);
+
         if (levelUpCheck.leveledUp) {
           const newlyUnlockedRewards = rewards.filter(r => r.active && (r.requiredLevel || 1) === levelUpCheck.newLevel);
           if (newlyUnlockedRewards.length > 0) {

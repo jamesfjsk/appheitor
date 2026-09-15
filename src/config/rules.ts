@@ -34,11 +34,16 @@ export const AI_CHAT_ENABLED = false;
 /** Quiz do dia: quantidade de perguntas */
 export const DAILY_QUIZ_QUESTIONS = 8;
 
+/** Teto de nível da temporada (curva em `levelSystem.ts`) */
+export const LEVEL_CAP = 40;
+/** Semanas de uma temporada Miner Missions */
+export const SEASON_WEEKS = 13;
+
 /** Fechamento do dia (penalidade por missão perdida e bônus por dia completo): padrões */
 export const DAILY_RULES_DEFAULTS = {
   enabled: true,
   penaltyPerMissedTask: 1,
-  allDoneBonus: 10,
+  allDoneBonus: 0,
   /** quantos dias para trás o fechamento pode alcançar se o app ficar fechado */
   maxLookbackDays: 7,
 };

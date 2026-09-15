@@ -6,6 +6,7 @@ import { deleteNotice, saveNotice, subscribeNotices } from '../../services/villa
 import { saveSettings, subscribeSettings } from '../../services/settingsService';
 import type { FatherNotice, NoticeType, PauseDaysSettings } from '../../types/village';
 import NotificationSender from './NotificationSender';
+import { getTodayBrazil } from '../../utils/timezone';
 
 const TEMPLATES: Array<{ id: string; type: NoticeType; text: string; pause?: boolean }> = [
   { id: 'treino', type: 'compromisso', text: 'Treino de futebol hoje.' },
@@ -40,7 +41,7 @@ const PlacaManager: React.FC = () => {
 
   const createFromTemplate = async (tpl: typeof TEMPLATES[number]) => {
     if (!childUid) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getTodayBrazil();
     await saveNotice(childUid, { type: tpl.type, text: tpl.text, when: today });
     if (tpl.pause && window.confirm('Marcar hoje como folga?')) {
       await applyPause(today);

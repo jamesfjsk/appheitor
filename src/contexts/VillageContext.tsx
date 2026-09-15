@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthContext';
-import { useData } from './DataContext';
 import { subscribeBase } from '../services/englishBaseService';
 import { subscribeSettings } from '../services/settingsService';
 import {
@@ -26,6 +25,7 @@ import {
 } from '../config/village';
 import type { BaseDoc } from '../types/english';
 import type {
+  ChestContents,
   EconomySettings,
   FatherNotice,
   ModuleSettings,
@@ -53,7 +53,7 @@ interface VillageContextValue {
   buyCosmetic: (itemId: string) => Promise<void>;
   craftGear: (gearId: string) => Promise<void>;
   tradeMaterials: (from: Material, to: Material) => Promise<void>;
-  openChest: () => Promise<void>;
+  openChest: () => Promise<ChestContents>;
   ackNotice: (id: string) => Promise<void>;
   dismissNotice: (key: string) => Promise<void>;
   confirmHabit: (habitId: string) => Promise<void>;
@@ -61,6 +61,7 @@ interface VillageContextValue {
 
 const VillageContext = createContext<VillageContextValue | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useVillage(): VillageContextValue {
   const ctx = useContext(VillageContext);
   if (!ctx) throw new Error('useVillage precisa do VillageProvider');
@@ -72,7 +73,6 @@ const emptyBuildings: BaseDoc['buildings'] = { ...INITIAL_BUILDINGS };
 
 export const VillageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, childUid } = useAuth();
-  const { progress } = useData();
   const uid = user?.role === 'child' ? user.userId : childUid;
   const [village, setVillage] = useState<VillageDoc>(initialVillageDoc(uid || 'pending', new Date().toISOString()));
   const [materials, setMaterials] = useState(emptyBase);
@@ -97,12 +97,13 @@ export const VillageProvider: React.FC<{ children: ReactNode }> = ({ children })
       subscribeNotices(uid, setNotices),
     ];
     return () => unsubs.forEach((u) => u());
-  }, [uid]);
+  }, [uid, user?.role]);
 
-  const wrap = useCallback(async (fn: () => Promise<void>, ok: string) => {
+  const wrap = useCallback(async <T,>(fn: () => Promise<T>, ok: string): Promise<T> => {
     try {
-      await fn();
+      const value = await fn();
       toast.success(ok);
+      return value;
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Não deu certo');
       throw e;
@@ -124,11 +125,11 @@ export const VillageProvider: React.FC<{ children: ReactNode }> = ({ children })
     buyCosmetic: (itemId) => wrap(() => buyCosmetic(uid!, itemId), 'Item comprado'),
     craftGear: (gearId) => wrap(() => craftGear(uid!, gearId), 'Equipamento pronto'),
     tradeMaterials: (from, to) => wrap(() => tradeMaterials(uid!, from, to), 'Troca feita'),
-    openChest: () => wrap(() => openDailyChest(uid!, getTodayBrazil()).then(() => undefined), 'Baú aberto'),
+    openChest: () => wrap(() => openDailyChest(uid!, getTodayBrazil()), 'Baú aberto') as Promise<ChestContents>,
     ackNotice: (id) => wrap(() => ackNotice(id), 'Combinado'),
     dismissNotice: (key) => wrap(() => dismissAutoNotice(uid!, key), 'Recado dispensado'),
     confirmHabit: (habitId) => wrap(() => confirmHabit(uid!, habitId, getTodayBrazil()), 'Hábito feito'),
-  }), [village, materials, buildings, settings, economy, modules, pauseDays, notices, loading, uid, wrap, progress.availableGold]);
+  }), [village, materials, buildings, settings, economy, modules, pauseDays, notices, loading, uid, wrap]);
 
   return <VillageContext.Provider value={value}>{children}</VillageContext.Provider>;
 };

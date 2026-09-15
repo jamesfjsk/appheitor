@@ -50,6 +50,35 @@ export function isChestTime(
   return hourBrazil >= settings.chestOpenHour;
 }
 
+/**
+ * Tochas (dias completos seguidos) depois de fechar um dia.
+ * Dia sem missão devida, folga, férias e punição não mexem; dia perdido zera; dia completo soma.
+ */
+export function nextFullDays(input: {
+  due: number;
+  done: number;
+  fullDays: number;
+  fullDaysStart: string | null;
+  date: string;
+  skip: boolean;
+}): { fullDays: number; fullDaysStart: string | null; changed: boolean } {
+  if (input.skip || input.due <= 0) {
+    return { fullDays: input.fullDays, fullDaysStart: input.fullDaysStart, changed: false };
+  }
+  if (input.done >= input.due) {
+    return { fullDays: input.fullDays + 1, fullDaysStart: input.fullDaysStart || input.date, changed: true };
+  }
+  return { fullDays: 0, fullDaysStart: null, changed: true };
+}
+
+/** Um intervalo (instantes em ms, ex.: punição) alcança algum momento da data YYYY-MM-DD no fuso do Brasil? */
+export function rangeCoversDate(startMs: number, endMs: number, date: string): boolean {
+  const dayStart = Date.parse(`${date}T00:00:00.000-03:00`);
+  const dayEnd = Date.parse(`${date}T23:59:59.999-03:00`);
+  if (!Number.isFinite(dayStart) || !Number.isFinite(dayEnd)) return false;
+  return startMs <= dayEnd && endMs >= dayStart;
+}
+
 export function periodFromHour(hourBrazil: number): Period {
   if (hourBrazil >= 18) return 'evening';
   if (hourBrazil >= 12) return 'afternoon';

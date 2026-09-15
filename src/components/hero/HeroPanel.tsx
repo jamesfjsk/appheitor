@@ -1,5 +1,5 @@
 import { CHILD_BIRTHDAY_MMDD } from '../../config/rules';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import ComicBackdrop from '../common/ComicBackdrop';
 import { useData } from '../../contexts/DataContext';
@@ -31,9 +31,17 @@ const VillageGate: React.FC<{
   quizLocked: boolean;
 }> = (props) => {
   const { village, loading } = useVillage();
+  const forceOnboard = import.meta.env.DEV && new URLSearchParams(window.location.search).get('onboard') === '1';
   if (loading) return <LoadingSpinner size="lg" />;
-  if (!village.onboardedAt) return <Onboarding />;
+  if (!village.onboardedAt || forceOnboard) return <Onboarding />;
   return <VillageHome {...props} />;
+};
+
+const AfterOnboard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { village, loading } = useVillage();
+  const forceOnboard = import.meta.env.DEV && new URLSearchParams(window.location.search).get('onboard') === '1';
+  if (loading || !village.onboardedAt || forceOnboard) return null;
+  return <>{children}</>;
 };
 
 const HeroPanel: React.FC = () => {
@@ -70,43 +78,54 @@ const HeroPanel: React.FC = () => {
     return () => clearTimeout(timer);
   }, [permission, requestPermission]);
 
+  const markQuizDone = useCallback(() => {
+    if (!progress.userId) return;
+    localStorage.setItem(`quiz_completed_${progress.userId}_${getTodayBrazil()}`, '1');
+    setQuizCompleted(true);
+  }, [progress.userId]);
+
   if (loading) return <LoadingSpinner size="lg" />;
   if (isPunished) return <PunishmentModeScreen />;
 
-  const quizLocked = Boolean(progress.quizRequired) && !quizCompleted;
+  const quizLocked = (Boolean(progress.quizRequired) && !quizCompleted)
+    || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('quiz') === 'lock');
   const today = new Date();
   const todayString = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
   return (
     <>
-      <div className="mn-page relative overflow-hidden min-h-screen">
-        <ComicBackdrop />
-        <VillageProvider>
-          <VillageGate
-            selectedPeriod={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
-            guidedMode={guidedMode}
-            onToggleGuidedMode={() => setGuidedMode((v) => !v)}
-            onOpenRewards={() => setShowRewards(true)}
-            onOpenCalendar={() => setShowCalendar(true)}
-            onOpenTimer={() => setShowTimer(true)}
-            onOpenQuiz={() => setQuizRequestId((n) => n + 1)}
-            quizLocked={quizLocked}
-          />
-        </VillageProvider>
-        {todayString === CHILD_BIRTHDAY_MMDD && (
-          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
-            <div className="mc-panel px-6 py-3 text-white font-bold">Feliz aniversário, Heitor!</div>
+      <VillageProvider>
+        <div className="mn-page relative overflow-hidden min-h-screen">
+          <ComicBackdrop />
+          <div className="relative z-10">
+            <VillageGate
+              selectedPeriod={selectedPeriod}
+              onPeriodChange={setSelectedPeriod}
+              guidedMode={guidedMode}
+              onToggleGuidedMode={() => setGuidedMode((v) => !v)}
+              onOpenRewards={() => setShowRewards(true)}
+              onOpenCalendar={() => setShowCalendar(true)}
+              onOpenTimer={() => setShowTimer(true)}
+              onOpenQuiz={() => setQuizRequestId((n) => n + 1)}
+              quizLocked={quizLocked}
+            />
           </div>
-        )}
-      </div>
+          {todayString === CHILD_BIRTHDAY_MMDD && (
+            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+              <div className="mc-panel px-6 py-3 text-white font-bold">Feliz aniversário, Heitor!</div>
+            </div>
+          )}
+        </div>
+        <AfterOnboard>
+          <DailyQuiz
+            onComplete={markQuizDone}
+            openRequested={quizRequestId}
+          />
+          <LevelUpModal />
+        </AfterOnboard>
+      </VillageProvider>
 
-      <DailyQuiz
-        onComplete={() => setQuizCompleted(true)}
-        openRequested={quizRequestId}
-      />
       <BirthdayCelebration onComplete={() => undefined} />
-      <LevelUpModal />
       <AnimatePresence>
         {showRewards && <RewardsPanel isOpen={showRewards} onClose={() => setShowRewards(false)} />}
       </AnimatePresence>

@@ -22,6 +22,8 @@ interface DailyQuizProps {
 
 type Phase = 'prompt' | 'lesson' | 'questions' | 'results';
 
+const QUIZ_DONE_KEY = (uid: string, date: string) => `quiz_completed_${uid}_${date}`;
+
 const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const { childUid } = useAuth();
   const { progress, adjustUserXP, adjustUserGold } = useData();
@@ -95,6 +97,12 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
     if (openRequested) setOpen(true);
   }, [openRequested]);
 
+  useEffect(() => {
+    if (!quiz?.completed || !childUid) return;
+    localStorage.setItem(QUIZ_DONE_KEY(childUid, today), '1');
+    onComplete();
+  }, [quiz?.completed, childUid, today, onComplete]);
+
   const ready = Boolean(quiz && quiz.questions.length > 0 && !quiz.completed);
   const question = quiz?.questions[current];
   const isLast = quiz ? current === quiz.questions.length - 1 : false;
@@ -147,6 +155,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
       if (correct / total >= 0.75) playLevelUp();
       else playTaskComplete();
       setPhase('results');
+      localStorage.setItem(QUIZ_DONE_KEY(childUid, today), '1');
       onComplete();
     } catch (e) {
       console.error('DailyQuiz: erro ao salvar resultado', e);

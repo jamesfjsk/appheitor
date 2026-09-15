@@ -64,9 +64,10 @@ export async function generateDailyQuiz(opts: {
   count: number;
   avoidQuestions: string[];
   signal?: AbortSignal;
+  forceOffline?: boolean;
 }): Promise<GeneratedDailyQuiz> {
   const age = childAgeToday();
-  if (isAIConfigured()) {
+  if (!opts.forceOffline && isAIConfigured()) {
     try {
       const system = buildPrompt(opts.seed, opts.count, age);
       const avoidText = opts.avoidQuestions.length ? `Perguntas já usadas (não repita nem parafraseie):\n- ${opts.avoidQuestions.slice(-60).join('\n- ')}` : 'Primeira prova: capriche.';

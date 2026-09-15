@@ -12,6 +12,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Material } from '../types/english';
@@ -34,18 +35,20 @@ import {
   DEFAULT_VILLAGE_SETTINGS,
   FREE_COSMETIC_IDS,
   GEAR_BY_ID,
+  cosmeticHasSprite,
   initialVillageDoc,
 } from '../config/village';
 import { MATERIALS, initialBaseDoc } from '../config/englishBase';
 import { MINER_MISSIONS_ACHIEVEMENTS } from '../config/villageAchievements';
 import { fromBaseDoc } from './englishBaseService';
-import { claimKey, hasClaim } from './village/claims';
+import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from './village/claims';
 import { chestAllowed, dailyChestContents } from './village/chest';
 import { canBuy, canCraft, priceOf, tradePreview } from './village/shop';
 import { dueTasksOn } from './village/schedule';
 import { getTodayBrazil } from '../utils/timezone';
 import { getSettings } from './settingsService';
 import { touchHealth } from './observability';
+import { getLegacyLevelFromXP } from '../utils/levelSystem';
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const str = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : fallback);
@@ -164,8 +167,8 @@ export function subscribeVillage(
     (snap) => {
       if (snap.exists()) onChange(fromVillageDoc(uid, snap.data()));
       else {
+        // Sem criar o doc aqui: só o VillageProvider da criança chama ensureVillage (o painel nunca cria docs dela)
         onChange(initialVillageDoc(uid, nowIso()));
-        void ensureVillage(uid);
       }
     },
     (e) => onError?.(e)
@@ -228,6 +231,7 @@ export async function saveCharacter(uid: string, character: VillageCharacter): P
 export async function buyCosmetic(uid: string, itemId: string): Promise<void> {
   const item = COSMETIC_BY_ID[itemId];
   if (!item) throw new Error('Item desconhecido');
+  if (!cosmeticHasSprite(itemId)) throw new Error('Este item ainda não tem sprite');
   await runTransaction(db, async (tx) => {
     const vSnap = await tx.get(villageRef(uid));
     const pSnap = await tx.get(progressRef(uid));
@@ -332,7 +336,7 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
   const today = date || getTodayBrazil();
   const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }).format(new Date()));
   const [economy, tasksSnap, doneSnap] = await Promise.all([
-    getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as Promise<EconomySettings>,
+    getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as Promise<EconomySettings>,
     getDocs(query(collection(db, 'tasks'), where('ownerId', '==', uid))),
     getDocs(query(collection(db, 'taskCompletions'), where('userId', '==', uid), where('date', '==', today))),
   ]);
@@ -402,22 +406,34 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
   return contents;
 }
 
-export async function grantLevelGift(uid: string, level: number): Promise<boolean> {
-  const key = claimKey('level', level);
+export async function grantLevelGift(
+  uid: string,
+  level: number,
+  material: 'madeira' | 'pedra' | 'ferro',
+): Promise<boolean> {
+  if (material !== 'madeira' && material !== 'pedra' && material !== 'ferro') {
+    throw new Error('Escolha madeira, pedra ou ferro');
+  }
   let granted = false;
   await runTransaction(db, async (tx) => {
     const vSnap = await tx.get(villageRef(uid));
     const bSnap = await tx.get(baseRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    const key = levelGiftClaimKey(village.season, level);
     if (hasClaim(village, key)) return;
     granted = true;
     const claimed = { ...village.claimed, [key]: nowIso() };
+    const rareKind = rareGiftForLevel(level);
+    const rare: VillageRare = {
+      diamante: village.rare.diamante + (rareKind === 'diamante' ? 1 : 0),
+      esmeralda: village.rare.esmeralda + (rareKind === 'esmeralda' ? 1 : 0),
+    };
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
-    const materials = { ...base.materials, madeira: base.materials.madeira + 1 };
-    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, updatedAt: nowIso() }));
-    else tx.update(villageRef(uid), stripUndefined({ claimed, updatedAt: nowIso() }));
+    const materials = { ...base.materials, [material]: base.materials[material] + 1 };
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, updatedAt: nowIso() }));
     if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
-    else tx.update(baseRef(uid), { 'materials.madeira': increment(1), updatedAt: nowIso() });
+    else tx.update(baseRef(uid), { [`materials.${material}`]: increment(1), updatedAt: nowIso() });
   });
   return granted;
 }
@@ -497,15 +513,30 @@ export async function deleteNotice(id: string): Promise<void> {
 }
 
 export async function startNewSeason(uid: string, adminUid: string): Promise<void> {
+  const achSnap = await getDocs(query(collection(db, 'achievements'), where('ownerId', '==', uid)));
+  const packTitles = new Set(MINER_MISSIONS_ACHIEVEMENTS.map((a) => a.title));
+  const packAlreadyActive = achSnap.docs.some((d) => {
+    const data = d.data();
+    return data.isActive !== false && packTitles.has(String(data.title || ''));
+  });
+  if (packAlreadyActive) throw new Error('A fase Miner Missions já está ativa.');
+  const activeTitles = achSnap.docs
+    .filter((d) => d.data().isActive !== false)
+    .map((d) => String(d.data().title || ''))
+    .filter(Boolean);
+
   await runTransaction(db, async (tx) => {
     const pSnap = await tx.get(progressRef(uid));
     const vSnap = await tx.get(villageRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const progress = pSnap.data() || {};
+    const totalXP = Number(progress.totalXP) || 0;
     tx.set(doc(collection(db, 'progressSnapshots')), {
       userId: uid,
-      totalXP: progress.totalXP || 0,
+      totalXP,
       streak: progress.streak || 0,
+      level: getLegacyLevelFromXP(totalXP),
+      achievements: activeTitles,
       createdAt: serverTimestamp(),
       reason: 'Nova fase: Miner Missions',
     });
@@ -514,20 +545,23 @@ export async function startNewSeason(uid: string, adminUid: string): Promise<voi
     }
     tx.set(doc(collection(db, 'xpAdjustments')), {
       userId: uid,
-      amount: -(Number(progress.totalXP) || 0),
+      amount: -totalXP,
       reason: 'Nova fase: Miner Missions',
       createdBy: adminUid,
       createdAt: serverTimestamp(),
     });
-    const nextSeason = Math.max(1, village.season + 1);
+    const nextSeason = village.season > 0 ? village.season + 1 : 1;
     if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, season: nextSeason, updatedAt: nowIso() }));
     else tx.update(villageRef(uid), { season: nextSeason, updatedAt: nowIso() });
   });
 
-  const achSnap = await getDocs(query(collection(db, 'achievements'), where('ownerId', '==', uid)));
-  await Promise.all(achSnap.docs.map((d) => updateDoc(d.ref, { isActive: false, updatedAt: nowIso() })));
+  const batch = writeBatch(db);
+  for (const d of achSnap.docs) {
+    batch.update(d.ref, { isActive: false, updatedAt: nowIso() });
+  }
   for (const a of MINER_MISSIONS_ACHIEVEMENTS) {
-    await setDoc(doc(collection(db, 'achievements')), {
+    const ref = doc(collection(db, 'achievements'));
+    batch.set(ref, {
       ...a,
       ownerId: uid,
       createdBy: adminUid,
@@ -535,6 +569,7 @@ export async function startNewSeason(uid: string, adminUid: string): Promise<voi
       updatedAt: serverTimestamp(),
     });
   }
+  await batch.commit();
 }
 
 export async function listDayCompletions(uid: string, date: string): Promise<Array<{ taskId: string; taskTitle: string; date: string }>> {

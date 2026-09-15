@@ -1,7 +1,7 @@
 import type { BoardItem, HabitDef, LineDef, NoticeContext, Period } from '../../types/village';
-import { HABITS } from '../../config/village';
+import { HABIT_BY_ID } from '../../config/village';
 import { claimKey } from './claims';
-import { periodFromHour } from './schedule';
+import { periodFromHour, weekdayFromDate } from './schedule';
 
 const MAX_BOARD = 3;
 
@@ -80,7 +80,23 @@ export function habitsForNow(habits: HabitDef[], date: string, hour: number): Ha
 }
 
 export function defaultHabitsForNow(date: string, hour: number): HabitDef[] {
-  return habitsForNow(HABITS, date, hour);
+  return [habitTipForNow(date, hour)];
+}
+
+/**
+ * Um hábito por turno: manhã (água/postura/alongar em rodízio), tarde arrumar,
+ * noite tela, depois das 21h sono. Terça e sexta: gentileza (olheiro), salvo de noite.
+ */
+export function habitTipForNow(date: string, hour: number): HabitDef {
+  if (hour >= 21) return HABIT_BY_ID.sono;
+  const dow = weekdayFromDate(date);
+  if (dow === 2 || dow === 5) return HABIT_BY_ID.gentileza;
+  const period: Period = periodFromHour(hour);
+  if (period === 'afternoon') return HABIT_BY_ID.arrumar;
+  if (period === 'evening') return HABIT_BY_ID.tela;
+  const morning = ['agua', 'postura', 'alongar'] as const;
+  const dayNum = Math.floor(Date.parse(`${date}T12:00:00.000-03:00`) / 86400000);
+  return HABIT_BY_ID[morning[((dayNum % 3) + 3) % 3]];
 }
 
 /** Escolhe uma fala que não repetiu nos últimos 14 ids. */

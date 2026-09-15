@@ -24,7 +24,6 @@ import { format } from 'date-fns';
 import { getLevelFromXP } from '../utils/levelSystem';
 import { processPendingDays } from './dailyRulesService';
 import { initialBaseDoc } from '../config/englishBase';
-import { fromBaseDoc } from './englishBaseService';
 import type { Material } from '../types/english';
 import {
   User,
@@ -546,6 +545,9 @@ export class FirestoreService {
   }
 
   static async revertTaskCompletion(taskId: string, date: string, adminUid: string): Promise<void> {
+    if (date !== getTodayBrazil()) {
+      throw new Error('Só dá para desfazer missão de hoje.');
+    }
     const completions = await getDocs(
       query(collection(db, 'taskCompletions'), where('taskId', '==', taskId), where('date', '==', date))
     );
@@ -600,9 +602,14 @@ export class FirestoreService {
         }));
       }
       if (bSnap.exists()) {
+        // Valor absoluto, nunca negativo (a criança pode já ter gasto o material devolvido)
+        const current = (bSnap.data()?.materials || {}) as Record<string, unknown>;
         const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
         for (const [m, qty] of Object.entries(materials)) {
-          if (typeof qty === 'number' && qty > 0) updates[`materials.${m}`] = increment(-qty);
+          if (typeof qty === 'number' && qty > 0) {
+            const have = typeof current[m] === 'number' ? (current[m] as number) : 0;
+            updates[`materials.${m}`] = Math.max(0, have - qty);
+          }
         }
         tx.update(baseRef, updates);
       }

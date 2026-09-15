@@ -18,11 +18,13 @@ interface HeroHeaderProps {
   onOpenCalendar: () => void;
   onOpenTimer: () => void;
   avatarSrc?: string;
+  avatar?: React.ReactNode;
   subtitle?: string;
   extraButton?: React.ReactNode;
+  fullDays?: number;
 }
 
-const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer, avatarSrc, subtitle, extraButton }) => {
+const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer, avatarSrc, avatar, subtitle, extraButton, fullDays }) => {
   const { logout } = useAuth();
   const { playClick, isSoundEnabled, toggleSound } = useSound();
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
@@ -45,8 +47,6 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
     return messages[Math.floor(Math.random() * messages.length)];
   };
 
-  const streak = progress.streak || 0;
-
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -56,13 +56,15 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
     >
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-4 min-w-0">
-          <div className="mc-slot w-[72px] h-[72px] p-1 shrink-0 overflow-hidden">
-            <img
-              src={avatarSrc || MINER}
-              alt=""
-              className="w-full h-full object-contain mc-pixel"
-              draggable={false}
-            />
+          <div className="mc-slot w-[72px] h-[72px] p-1 shrink-0 overflow-hidden flex items-center justify-center">
+            {avatar || (
+              <img
+                src={avatarSrc || MINER}
+                alt=""
+                className="w-full h-full object-contain mc-pixel"
+                draggable={false}
+              />
+            )}
           </div>
 
           <div className="min-w-0">
@@ -124,12 +126,12 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
       <div className="flex flex-wrap gap-2">
         <div
           className="mc-slot mc-chip"
-          title={`Maior sequência: ${progress.longestStreak || 0} dias`}
+          title={`Dias completos na Vila: ${fullDays ?? 0}`}
         >
           <img src={TORCH} alt="" className="mc-pixel" draggable={false} />
           <div>
-            <span className="mc-num text-white">{streak}</span>
-            <span className="mc-chip-l">{streak === 1 ? 'dia seguido' : 'dias seguidos'}</span>
+            <span className="mc-num text-white">{fullDays ?? 0}</span>
+            <span className="mc-chip-l">{(fullDays ?? 0) === 1 ? 'dia completo' : 'dias completos'}</span>
           </div>
         </div>
         <div className="mc-slot mc-chip">

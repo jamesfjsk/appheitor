@@ -122,12 +122,12 @@ test('rewardFor: tabelas de XP/gold, mínimo 5 XP, não premiado só tentativa',
   expect(rewardFor('letter', 3, false)).toEqual({ xp: MIN_XP, gold: 0 });
 });
 
-test('buildXp 10/15/20 e bônus da Fornalha com teto 3', () => {
-  expect(BUILD_XP).toEqual([10, 15, 20]);
-  expect(buildXp(1)).toBe(10);
-  expect(buildXp(2)).toBe(15);
-  expect(buildXp(3)).toBe(20);
-  expect(buildXp(9)).toBe(20);
+test('buildXp 0 (construir não paga XP) e bônus da Fornalha com teto 3', () => {
+  expect(BUILD_XP).toEqual([0, 0, 0]);
+  expect(buildXp(1)).toBe(0);
+  expect(buildXp(2)).toBe(0);
+  expect(buildXp(3)).toBe(0);
+  expect(buildXp(9)).toBe(0);
   expect(applyFurnaceBonus(2, 1, true)).toBe(3);
   expect(applyFurnaceBonus(3, 1, true)).toBe(3);
   expect(applyFurnaceBonus(2, 0, true)).toBe(2);

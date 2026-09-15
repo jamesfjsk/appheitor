@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { COSMETICS } from '../../../config/village';
+import { COSMETICS, cosmeticHasSprite } from '../../../config/village';
 import { priceOf } from '../../../services/village/shop';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
@@ -27,7 +27,7 @@ const Mercado: React.FC<{ onClose: () => void; onOpenRewards: () => void }> = ({
         </div>
         {tab === 'shop' && (
           <div className="p-4 space-y-2">
-            {COSMETICS.filter((c) => !c.free).map((c) => {
+            {COSMETICS.filter((c) => !c.free && cosmeticHasSprite(c.id)).map((c) => {
               const price = priceOf(c, settings);
               const owned = village.owned.includes(c.id);
               const days = Math.max(1, Math.ceil(price / 10));

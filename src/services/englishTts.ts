@@ -11,6 +11,9 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
 import { speakAsync } from './englishGameService';
 import { recordUsage } from './aiUsage';
+import { DEFAULT_MODULES } from '../config/village';
+import { getSettings } from './settingsService';
+import type { ModuleSettings } from '../types/village';
 
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
 const SPEECH_URL = 'https://api.openai.com/v1/audio/speech';
@@ -70,6 +73,8 @@ async function resolveUrl(hash: string, normalized: string): Promise<string | nu
     if (typeof url === 'string' && url) return url;
   }
   if (!hasKey()) return null;
+  const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
+  if (modules.tts === false) return null;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GENERATE_TIMEOUT_MS);
   try {

@@ -31,8 +31,8 @@ export const GOLD_BY_MATERIAL: Record<ContractType, [number, number, number, num
   note: [0, 4, 6, 8],
 };
 
-/** XP fixo por nível de construção (índice = nível - 1) */
-export const BUILD_XP: [number, number, number] = [10, 15, 20];
+/** XP por nível de construção: construir não paga XP (só a construção) */
+export const BUILD_XP: [number, number, number] = [0, 0, 0];
 
 const clampMaterial = (n: number): MaterialCount => Math.max(0, Math.min(MAX_MATERIAL, Math.floor(n))) as MaterialCount;
 

@@ -13,7 +13,7 @@ import { collection, doc, getDoc, getDocs, onSnapshot, query, runTransaction, se
 import { db } from '../config/firebase';
 import { getTodayBrazil } from '../utils/timezone';
 import { DAILY_RULES_DEFAULTS } from '../config/rules';
-import { dueTasksOn } from './village/schedule';
+import { dueTasksOn, nextFullDays, rangeCoversDate } from './village/schedule';
 import { fromVillageDoc } from './villageService';
 import { initialVillageDoc } from '../config/village';
 import { touchHealth } from './observability';
@@ -104,17 +104,21 @@ async function isPauseDay(date: string): Promise<boolean> {
   return dates.includes(date);
 }
 
+/**
+ * A data (YYYY-MM-DD, Brasil) caiu dentro de alguma punição? Olha todas as punições do usuário,
+ * ativas ou já encerradas (o fechamento do dia roda depois, quando a punição pode já ter acabado),
+ * e compara instantes no fuso do Brasil: punição ligada às 21h de terça cobre a terça.
+ */
 async function isPunishedOn(userId: string, date: string): Promise<boolean> {
-  const snap = await getDocs(query(collection(db, 'punishmentMode'), where('userId', '==', userId), where('isActive', '==', true)));
+  const snap = await getDocs(query(collection(db, 'punishmentMode'), where('userId', '==', userId)));
   return snap.docs.some((d) => {
     const data = d.data();
     const start = data.startDate?.toDate?.() as Date | undefined;
     const end = data.endDate?.toDate?.() as Date | undefined;
     if (!start || !end) return false;
-    const day = date;
-    const startS = start.toISOString().slice(0, 10);
-    const endS = end.toISOString().slice(0, 10);
-    return day >= startS && day <= endS;
+    const deactivated = data.deactivatedAt?.toDate?.() as Date | undefined;
+    const endMs = deactivated ? Math.min(end.getTime(), deactivated.getTime()) : end.getTime();
+    return rangeCoversDate(start.getTime(), endMs, date);
   });
 }
 
@@ -228,14 +232,21 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
     const village = villageSnap.exists()
       ? fromVillageDoc(userId, villageSnap.data() as Record<string, unknown>)
       : initialVillageDoc(userId, new Date().toISOString());
-    if (!paused && !punished && !vacation) {
-      const complete = due > 0 && done.count >= due;
-      const fullDays = complete ? village.fullDays + 1 : 0;
-      const fullDaysStart = complete ? (village.fullDaysStart || date) : null;
+    // Tochas: dia sem missão devida, folga, férias e punição não mexem (nextFullDays é puro e testado)
+    const torches = nextFullDays({
+      due,
+      done: done.count,
+      fullDays: village.fullDays,
+      fullDaysStart: village.fullDaysStart,
+      date,
+      skip: paused || punished || vacation,
+    });
+    if (torches.changed) {
+      const patch = { fullDays: torches.fullDays, fullDaysStart: torches.fullDaysStart, updatedAt: new Date().toISOString() };
       if (villageSnap.exists()) {
-        tx.update(villageRef, { fullDays, fullDaysStart, updatedAt: new Date().toISOString() });
+        tx.update(villageRef, patch);
       } else {
-        tx.set(villageRef, { ...village, fullDays, fullDaysStart, updatedAt: new Date().toISOString() });
+        tx.set(villageRef, { ...village, ...patch });
       }
     }
 

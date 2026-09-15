@@ -68,6 +68,97 @@ journal: nada aqui (reflexões ficam em dailyQuizzes.reflection e no Diário, Et
 - Loja da Vila (gold, instantâneo, `goldPriceMultiplier` no painel): peles e 8 cores de roupa grátis; penteados 20; camisa do time 40; boné 30; capacete decorativo 60; capas 80-150; pets (lobo, gato, papagaio) 120-150; creeper amigo 250; coroa 200. Catálogo ≈ 1.500 gold.
 - **Educação financeira** (Banco da Vila): o Cofrinho paga **juros semanais de 5% sobre o gold guardado, teto 20 gold por semana** (`goal_interest`, calculado uma vez por semana ISO por meta aberta, idempotente por `lastInterestWeek`), para ele sentir o valor de guardar; gold no cofre não conta para comprar na loja nem para prêmios reais até a meta fechar; saque só cancelando a meta (o responsável decide, sem juros no cancelamento). O **Extrato do minerador** mostra à criança, por semana: ganhou, gastou, guardou e juros, com uma frase do Sábio sobre o hábito (ex.: "Quem guarda um pouco todo dia constrói a base sem pressa"). Na Loja e nos Prêmios de verdade, quando falta gold para algo, o botão vira "Criar meta no Cofrinho" com o valor já preenchido (planejar antes de comprar).
 
+## Economia interna v2 (decidida em 15/09/2026)
+
+Pedido do pai: reformular level up, custos e distribuição de gold como uma economia de jogo de verdade. Esta seção condensa três desenhos independentes (lente de jogo, de educação e de operação) e **prevalece sobre a seção "Economia (referência)" acima** onde houver conflito. O pai respondeu às oito perguntas do fim em 15/09/2026 aceitando todas as recomendações; as respostas estão registradas lá. A curva nova entra junto com "Iniciar nova fase" em 18/09 (fim da Etapa 1); o resto entra na Etapa 2 (`docs/etapas/ETAPA_2_BANCO_E_TEMPORADA.md`).
+
+### Princípios
+
+1. **Gold é escolha, XP é crescimento, material é construção, raro é marco.** Só gold compra prêmios reais e cosméticos; XP nunca compra nada, só sobe de nível e libera coisas; materiais constroem e craftam; raros destravam o topo dos equipamentos. Tochas e estrelas são contadores, não moedas.
+2. **Gold só por esforço, com valor fixo.** Toda torneira tem cota diária e valor conhecido; nada de faixa aleatória em gold (o Baú sorteia só qual material). Sem grind: não existe atividade repetível que pague.
+3. **A régua é o dia de renda (D)**: o que um dia normal rende (5 de 6 missões + prova + 2 contratos, cerca de 45 gold). Todo preço, real ou do jogo, é pensado e mostrado em dias ("cerca de 3 dias no seu ritmo"). O painel calcula `R7` (média dos últimos 7 dias) e sugere preços por faixa.
+4. **Nível serve para algo**: cada nível dá material, cada patente (5 níveis) dá um raro e um título, cada marco (10 níveis) dá um cosmético exclusivo, e receitas e itens têm nível mínimo. Temporada de 13 semanas: XP zera com uma estrela permanente; gold, base, equipamentos e cosméticos nunca zeram.
+5. **Aprender não é emprego**: atividades novas de aprendizado (Redstone, reflexão, dilemas, hábitos) pagam XP e material, nunca gold. A prova é a única "aula paga".
+
+### Torneiras de gold (dia)
+
+| Torneira | Valor | Dia típico | Dia perfeito |
+|---|---|---|---|
+| Missões (6) | 5 gold, 10 XP, 1 material do período | 25 | 30 |
+| Prova (8 perguntas) | 2 gold + 6 XP por acerto; 8/8 dá 1 esmeralda | 12 | 16 |
+| Mina (3 contratos) | tabela atual (0-5 gold, 5-20 XP, 0-3 materiais) | 8-10 | 18 |
+| Baú do Dia (todas as devidas, após 18h) | 10 gold + 1 por tocha (teto 15) + 2 materiais; esmeralda a cada 3 tochas. **Substitui** o bônus fixo de dia completo | 0 | 10-15 |
+| Penalidade | 1 gold por missão perdida (nunca toca o Cofrinho) | -1 | 0 |
+| **Total** | | **cerca de 45 gold, 110 XP, 9 materiais** | **cerca de 80 gold, 175 XP, 17 materiais** |
+
+Semanais, com teto: Baú das 7 tochas (20 gold + 1 diamante), desafio do pai (até 60 gold por semana), conquistas (5-40 cada, uma vez), juros do Cofrinho (5%, teto 20). Gold "dado pelo jogo" (baús, conquistas, desafios, juros, Comerciante) fica limitado por `gameGoldDailyCap` (35) e não passa de 25% da semana. Semana típica perto de 330 gold; perfeita perto de 600.
+
+Ralos, destino alvo de cada 100 gold: 60 prêmios reais, 20 Loja da Vila, 20 Cofrinho. Saldo parado saudável: 2 a 7 D; acima de 15 D o painel avisa "gold sobrando: suba preços ou crie uma meta grande".
+
+### Curva de nível (temporada)
+
+Fórmula recomendada: **XP acumulado para o nível L = 5 x (L - 1) x (L + 10)**; cada nível pede 10 XP a mais que o anterior (60, 70, 80...). Teto **40** por temporada. Nível 2 no primeiro dia; com 110 XP por dia: 5 no dia 3, 10 no dia 8, 20 no dia 26, 30 no dia 53, 36 na semana 12; Lenda (40) só com constância acima da média. Quem faz pouco (60 XP por dia) fecha perto do 28.
+
+| Quando | Ganha | Libera (nível mínimo) |
+|---|---|---|
+| Todo nível | 1 material à escolha (no modal) + fala do Sábio | |
+| 5 (Aprendiz) | 1 esmeralda + título | picareta de pedra; boné, camisa do time |
+| 10 (Madeira) | 1 diamante + cosmético exclusivo | picareta de ferro, botas; capacete decorativo |
+| 15 (Pedra) | 1 esmeralda | capacete (escudo), lanterna; pets |
+| 20 (Ferro) | 1 diamante + cosmético exclusivo | picareta de ouro; capas; 2a meta no Cofrinho |
+| 25 (Ouro) | 1 esmeralda | capa |
+| 30 (Diamante) | 1 diamante + cosmético exclusivo | picareta de diamante; premium (coroa) |
+| 35 (Esmeralda) | 1 esmeralda | |
+| 40 (Lenda) | coroa de Lenda + estrela | Expansão do terreno (Etapa 4) |
+
+Patentes da temporada dão 4 esmeraldas e 3 diamantes: quem nunca tira 8/8 ainda chega à picareta de diamante. Sem gold por nível (gold é trabalho).
+
+### Preços em dias de renda
+
+| Faixa | Dias | Gold (D = 45) | Prêmios reais | Loja |
+|---|---|---|---|---|
+| Mimo | 0,5 | 20-25 | sobremesa, 20 min de tela | penteado |
+| Pequeno | 1 | 45 | sorvete, escolher o jantar | boné, camisa |
+| Médio | 3 | 135 | pizza, filme, dormir tarde | pets, capa |
+| Grande | 7 | 315 | passeio, brinquedo pequeno | coroa, premium |
+| Enorme | 20 | 900 | jogo, Lego grande: **só por meta no Cofrinho** | |
+| Temporada | 50 | 2.250 | bicicleta: só por meta, fecha com a estrela | |
+
+Regra para o pai: "um prêmio de N dias custa N vezes o que ele ganha num dia normal". O `RewardForm` mostra `R7` e botões por faixa; o preço fica fixo depois de cadastrado e é revisado uma vez por mês.
+
+### Materiais
+
+Produção de 9 a 17 por dia (muito mais do que os custos atuais previam). Ajustes: construções com custo x2 em madeira, pedra e ferro (base completa em 3 semanas, não em 10 dias), redstone fora da troca 3:1 do Ferreiro (segura ouro e diamante), Comerciante compra 10 materiais por 3 gold com 2 vendas por dia (antecipar da Etapa 4 para a 2: é o ralo terminal), decorações em materiais (absorvem o excedente).
+
+### Controles de inflação
+
+1. Cotas por fonte e tela "Dia fechado"; nada repetível.
+2. Tetos: `gameGoldDailyCap`, `challengeGoldWeeklyCap` (60), `achievementGoldCap` (40).
+3. Régua atrelada à renda: `R7` nos prêmios, `goldPriceMultiplier` na Loja; ação "Reajustar prêmios x1,1 / x0,9" no painel.
+4. Ralos que crescem com a temporada: catálogo gira, decorações, Expansão, prêmio da temporada.
+5. Cartão **Balança** no painel (28 dias de `goldTransactions`): ganho por fonte, gasto por ralo, guardado, saldo em D, taxa de poupança (alvo 20%), alertas "saldo parado > 14 D", "nada comprado há 21 dias", "gold de jogo > 30%". Módulo puro `balance.ts` com testes.
+6. Curva e tabela só mudam entre temporadas; toda fonte nova de gold ou XP entra atualizando a tabela e rodando `scripts/econ-sim.mjs` (simulador de 91 dias com três perfis, a criar).
+
+### Botões novos em `settings/economy`
+
+`incomeDayGold` 45 (reserva de `R7`), `quizGoldPerHit` 2 / `quizXpPerHit` 6, `dailyChestGold` [10, 15], `gameGoldDailyCap` 35, `levelCurve { base: 50, step: 10 }`, `levelCap` 40, `seasonWeeks` 13, `buildCostMultiplier` 2, `challengeGoldWeeklyCap` 60, `achievementGoldCap` 40, `merchantBuy { materials: 10, gold: 3, dailyCap: 2 }`, `savingsTargetPct` 20; `interestRatePct` e `interestCapGold` mudam de `settings/village` para cá. Regra de operação: um botão por vez, no domingo, e esperar 7 dias.
+
+### O que muda no código (quando aprovado)
+
+`levelSystem.ts` (fórmula, teto 40, títulos a cada 5), `rules.ts` (`PRICE_BANDS`, `MAX_LEVEL`, `allDoneBonus` 0), `village.ts` (`LEVEL_REWARDS`, `GEAR[].minLevel`, `COSMETICS[].minLevel`, `DEFAULT_ECONOMY`), `villageAchievements.ts` (alvos 5/10/20/30/40), `grantLevelGift` (material à escolha e raro nas chaves `level:<temporada>:<n>`), `chest.ts` (escada por tochas), `quizRewards` linear, `RewardForm` (faixas), `village/{uid}.seasonStartXP` e `seasonHistory`, puros novos `income.ts`, `levels.ts` e `balance.ts` com testes. A Etapa 1 (em andamento) não precisa parar: a curva entra na "nova fase"; Baú em escada, `minLevel` e Comerciante entram na Etapa 2.
+
+### Decisões do pai (15/09/2026)
+
+1. **Teto de nível por temporada**: 40.
+2. **Gold ao subir de patente**: nenhum; patente dá raro, título e cosmético exclusivo.
+3. **Prova**: 2 gold + 6 XP por acerto, linear; 8/8 dá esmeralda.
+4. **Baú do Dia no lugar do bônus de dia completo**: sim; `allDoneBonus` vira 0.
+5. **Prêmios Enormes só pelo Cofrinho**: sim.
+6. **Quando aplicar a curva nova**: na "nova fase" de 18/09.
+7. **Custo das construções x2**: sim.
+8. **Comerciante já na Etapa 2**: sim.
+
+
 ## Etapas
 
 Cada etapa tem: objetivo, pré-requisitos, entregas, arquivos, frentes paralelas (arquivos disjuntos), aceite e "não fazer". Uma IA executando uma etapa lê este documento inteiro, o documento de API da etapa anterior e os arquivos citados; constrói módulos puros primeiro (com testes), depois serviços, telas e painel em paralelo, depois integra e testa no navegador (Playwright já instalado no scratchpad; login "Entrar como Heitor"; o modal "Prova do dia" pode ser escondido com `display:none` no teste); termina com relatório: arquivos, decisões, saídas de tsc/eslint/testes/build, fotos, pendências. Nunca commita; o pai decide.
@@ -78,6 +169,8 @@ Objetivo: tudo que o Heitor vê no tema de mina, sem mudar lógica. Especificaç
 Depois: `DailyQuiz.tsx`, `SurpriseMissionQuiz.tsx`, `BirthdayCelebration.tsx`, `PunishmentModeScreen.tsx`, `FlashTimer.tsx` no mesmo padrão (`docs/MINER_MISSIONS_TEMA.md`), e o `ComicBackdrop.tsx` (o pai está mexendo nele para um vídeo) recebe um fundo de pedra por padrão quando o vídeo não estiver ativo. Aceite: tsc/eslint/build limpos; fotos em `docs/exemplos/telas/tema/` (desktop e 390 px) de todas as telas; zero "Flash" em texto visível (`grep -rn "Flash" src --include=*.tsx` só em identificadores).
 
 ### Etapa 1: a Vila jogável (~2 semanas)
+
+**Estado (15/09/2026):** executada pelo Cursor a partir de `docs/etapas/ETAPA_1_VILA.md`; revisada em `docs/etapas/REVISAO_ETAPA_1.md` (6 itens altos, correções até 18/09, curva de nível nova junto com a "nova fase", hábitos viram "Dica do turno" sem botão, `allDoneBonus` 0, XP de construção 0, cosméticos sem arte escondidos). Bloqueante corrigido na revisão: a regra de `tasks` impedia a criança de concluir missão.
 
 Objetivo: casa do jogo. Personagem + base + missões pagando materiais + Oficina + Mercado com Loja da Vila + Baú do Dia; Mina, Biblioteca (prova), Torre, Mapa, Placas e Ampulheta acessíveis da Vila.
 Pré-requisitos: Etapa 0; ícones gerados pelo líder (`b_<id>_1..3.webp` para as 6 construções, `b_placa.webp`, picaretas `g_pickaxe_0..4`, `g_capa`, baús `chest_day_open`, `chest_streak`, `chest_streak_open`, distritos `d_oficina`, `d_mercado`, `d_placa`, `fx_rachadura`).
@@ -91,6 +184,8 @@ Aceite: tsc/eslint/build/testes limpos; testes de loot (período → material; p
 Não fazer: mexer em `englishBase` além de `materials`; mudar regras de punição/penalidade; criar custo obrigatório em gold.
 
 ### Etapa 2: efeitos, baús, Banco da Vila e desafios (~2 semanas)
+
+**Arquivo da etapa:** `docs/etapas/ETAPA_2_BANCO_E_TEMPORADA.md` (dois lotes: Lote 1 dinheiro e regras, com a economia v2 inteira e a Cloud Function `openai`; Lote 2 autonomia, temporada, painel "Hoje" e relatório semanal). O texto abaixo é o plano original; o arquivo da etapa prevalece.
 
 Objetivo: o equipamento importa, o dia tem clímax e ele aprende a poupar e a cumprir metas com prazo.
 **Banco da Vila** (frente própria, arquivos disjuntos): módulo puro `src/services/village/bank.ts` (cálculo de juros por semana ISO com teto, validação de depósito, resumo semanal do extrato a partir de `goldTransactions`) com testes; `src/services/goalsService.ts` (`createGoal`, `depositGoal` em `runTransaction` tocando `goals` + `progress.availableGold` + `goldTransactions` `goal_deposit`, `applyWeeklyInterest` idempotente por `lastInterestWeek`, `finishGoal(goalId, 'achieved' | 'cancelled')` só para admin com `goal_withdraw` no cancelamento); `src/services/challengesService.ts` (`subscribeChallenges`, `bumpChallenge(userId, kind, value, absolute?)` chamado em `DataContext.completeTask`, `updateStreak`, `completeDailyQuiz`, `englishBaseService.completeContract` e na Oficina de Redstone; ao completar paga XP/gold via `adjustUserXP/adjustUserGold` + `createGoldTransaction('challenge')`); regras em `firestore.rules` (`goals`: criança cria/lê/atualiza `savedGold` só via transação própria, fechamento admin; `challenges`: leitura pela criança, escrita admin). Telas: construção nova **Cofre** na cena da vila (7º lote, ícone `b_cofre_1..3` conforme o total guardado: 0-99, 100-299, 300+) que abre `Cofrinho.tsx` (metas abertas com barra, "Guardar" com valor, meta batida mostra "Avise seu pai"), `Extrato.tsx` (semana atual e anteriores, frase do Sábio), `DesafiosCard.tsx` (desafios da semana com prazo e progresso, no topo da Vila abaixo das missões); Loja e Prêmios com o atalho "Criar meta no Cofrinho". Painel: `GoalsPanel.tsx` (aprovar/cancelar metas, ver histórico) e `ChallengeManager.tsx` (criar desafios; modelos prontos: "5 dias seguidos", "20 missões na semana", "prova 8/8 duas vezes", "3 contratos de inglês por dia durante 5 dias"), adaptados da V2 (`appheitor-v2/src/components/parent/GoalsPanel.tsx`, `ChallengeManager.tsx`, `LedgerList.tsx`) para o Firestore e para o visual dos painéis atuais.

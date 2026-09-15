@@ -20,7 +20,7 @@ import {
 import { subscribeBase } from '../../services/englishBaseService';
 import { FirestoreService } from '../../services/firestoreService';
 import { getAppVersion, subscribeClientErrors, subscribeHealth, type ClientErrorRow } from '../../services/observability';
-import { getTodayBrazil, getYesterdayBrazil } from '../../utils/timezone';
+import { getTodayBrazil } from '../../utils/timezone';
 import type {
   EconomySettings,
   HealthDoc,
@@ -60,8 +60,8 @@ const VillageManager: React.FC = () => {
   const [health, setHealth] = useState<HealthDoc | null>(null);
   const [errors, setErrors] = useState<ClientErrorRow[]>([]);
   const [todayDone, setTodayDone] = useState<Array<{ taskId: string; taskTitle: string; date: string }>>([]);
-  const [yesterdayDone, setYesterdayDone] = useState<Array<{ taskId: string; taskTitle: string; date: string }>>([]);
   const [seasonStep, setSeasonStep] = useState(0);
+  const [seasonBusy, setSeasonBusy] = useState(false);
   const [pauseInput, setPauseInput] = useState('');
 
   useEffect(() => {
@@ -77,9 +77,7 @@ const VillageManager: React.FC = () => {
       subscribeClientErrors(childUid, setErrors),
     ];
     const today = getTodayBrazil();
-    const yesterday = getYesterdayBrazil().dateString;
     void listDayCompletions(childUid, today).then(setTodayDone);
-    void listDayCompletions(childUid, yesterday).then(setYesterdayDone);
     return () => unsubs.forEach((u) => u());
   }, [childUid]);
 
@@ -159,14 +157,10 @@ const VillageManager: React.FC = () => {
 
       <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Não foi feita</h2>
-        <p className="text-sm text-gray-600 mb-3">Desfaz a conclusão, devolve gold/XP/materiais. O Baú do Dia, se já aberto, não reabre.</p>
-        {[
-          { label: 'Hoje', rows: todayDone },
-          { label: 'Ontem', rows: yesterdayDone },
-        ].map((block) => (
-          <div key={block.label} className="mb-4">
-            <h3 className="font-semibold text-gray-800 mb-2">{block.label}</h3>
-            {block.rows.length === 0 ? <p className="text-sm text-gray-500">Nenhuma conclusão.</p> : block.rows.map((row) => (
+        <p className="text-sm text-gray-600 mb-3">Desfaz a conclusão de hoje, devolve gold/XP/materiais. O Baú do Dia, se já aberto, não reabre. Missões de ontem ficam para a Etapa 2.</p>
+        <div className="mb-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Hoje</h3>
+            {todayDone.length === 0 ? <p className="text-sm text-gray-500">Nenhuma conclusão.</p> : todayDone.map((row) => (
               <div key={row.taskId} className="flex items-center justify-between border-b border-gray-100 py-2">
                 <span className="text-sm">{row.taskTitle}</span>
                 <button
@@ -176,18 +170,14 @@ const VillageManager: React.FC = () => {
                     if (!user || !window.confirm(`Marcar "${row.taskTitle}" como não feita?`)) return;
                     await FirestoreService.revertTaskCompletion(row.taskId, row.date, user.userId);
                     toast.success('Conclusão desfeita');
-                    const today = getTodayBrazil();
-                    const yesterday = getYesterdayBrazil().dateString;
-                    setTodayDone(await listDayCompletions(childUid, today));
-                    setYesterdayDone(await listDayCompletions(childUid, yesterday));
+                    setTodayDone(await listDayCompletions(childUid, getTodayBrazil()));
                   }}
                 >
                   Não foi feita
                 </button>
               </div>
             ))}
-          </div>
-        ))}
+        </div>
         {tasks.length === 0 && <p className="text-xs text-gray-400">Lista de missões carregada pelo painel.</p>}
       </section>
 
@@ -316,13 +306,21 @@ const VillageManager: React.FC = () => {
                 type="button"
                 className="px-4 py-2 bg-amber-700 text-white rounded-lg"
                 onClick={async () => {
-                  if (!user) return;
-                  await startNewSeason(childUid, user.userId);
-                  setSeasonStep(0);
-                  toast.success('Nova fase iniciada');
+                  if (!user || seasonBusy) return;
+                  setSeasonBusy(true);
+                  try {
+                    await startNewSeason(childUid, user.userId);
+                    setSeasonStep(0);
+                    toast.success('Nova fase iniciada');
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : 'Não deu para iniciar a fase');
+                  } finally {
+                    setSeasonBusy(false);
+                  }
                 }}
+                disabled={seasonBusy}
               >
-                Confirmar de novo
+                {seasonBusy ? 'Iniciando…' : 'Confirmar de novo'}
               </button>
               <button type="button" className="px-4 py-2 border rounded-lg" onClick={() => setSeasonStep(0)}>Cancelar</button>
             </div>

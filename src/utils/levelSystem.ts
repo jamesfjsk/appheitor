@@ -1,102 +1,78 @@
 import { LevelSystem } from '../types';
+import { LEVEL_CAP } from '../config/rules';
 
-// ========================================
-// 🔥 SISTEMA DE NÍVEIS FLASH MISSIONS
-// ========================================
-
-/**
- * Calcula o XP necessário para um nível específico
- * Nível 1: 0-100 XP
- * Nível 2: 100-250 XP  
- * Nível 3: 250-450 XP
- * Nível 4: 450-700 XP
- * Nível 5: 700-1000 XP
- * A partir do nível 5: cada nível requer +350 XP do anterior
- */
+/** XP acumulado para alcançar o nível L: 5 * (L - 1) * (L + 10). Nível 1 = 0. */
 export function getXPForLevel(level: number): number {
-  if (level <= 1) return 0;
-  if (level === 2) return 100;
-  if (level === 3) return 250;
-  if (level === 4) return 450;
-  if (level === 5) return 700;
-  if (level === 6) return 1000;
-  
-  // A partir do nível 6: 1000 + (level - 6) * 350
-  return 1000 + (level - 6) * 350;
+  const L = Math.min(LEVEL_CAP, Math.max(1, Math.floor(level)));
+  if (L <= 1) return 0;
+  return 5 * (L - 1) * (L + 10);
+}
+
+/** Nível a partir do XP total (laço até LEVEL_CAP). */
+export function getLevelFromXP(totalXP: number): number {
+  const xp = Math.max(0, totalXP);
+  let level = 1;
+  while (level < LEVEL_CAP && xp >= getXPForLevel(level + 1)) {
+    level += 1;
+  }
+  return level;
 }
 
 /**
- * Calcula o nível baseado no XP total
+ * Curva antiga (pré-temporada 1), só para o snapshot histórico em "Iniciar nova fase".
+ * Não usar para progresso ao vivo.
  */
-export function getLevelFromXP(totalXP: number): number {
+export function getLegacyLevelFromXP(totalXP: number): number {
   if (totalXP < 100) return 1;
   if (totalXP < 250) return 2;
   if (totalXP < 450) return 3;
   if (totalXP < 700) return 4;
   if (totalXP < 1000) return 5;
-  
-  // A partir de 1000 XP, cada 350 XP = 1 nível
   return Math.min(100, 6 + Math.floor((totalXP - 1000) / 350));
 }
 
-/**
- * Retorna o título do nível baseado no número
- */
+/** Título a cada 5 níveis, teto 40. */
 export function getLevelTitle(level: number): string {
-  if (level >= 100) return 'Lenda da Mina';
-  if (level >= 90)  return 'Mestre do Nether';
-  if (level >= 80)  return 'Engenheiro de Redstone';
-  if (level >= 70)  return 'Minerador de Esmeralda';
-  if (level >= 60)  return 'Minerador de Diamante';
-  if (level >= 50)  return 'Minerador de Ouro';
-  if (level >= 40)  return 'Minerador de Ferro';
-  if (level >= 30)  return 'Minerador de Pedra';
-  if (level >= 20)  return 'Minerador de Madeira';
-  if (level >= 10)  return 'Aprendiz da Mina';
+  if (level >= 40) return 'Lenda da Mina';
+  if (level >= 35) return 'Minerador de Esmeralda';
+  if (level >= 30) return 'Minerador de Diamante';
+  if (level >= 25) return 'Minerador de Ouro';
+  if (level >= 20) return 'Minerador de Ferro';
+  if (level >= 15) return 'Minerador de Pedra';
+  if (level >= 10) return 'Minerador de Madeira';
+  if (level >= 5) return 'Aprendiz da Mina';
   return 'Novato da Mina';
 }
 
-/**
- * Retorna a cor do nível baseado no título
- */
 export function getLevelColor(level: number): string {
-  if (level >= 90) return 'from-yellow-300 to-red-700';
-  if (level >= 70) return 'from-yellow-400 to-red-600';
-  if (level >= 50) return 'from-red-500 to-red-800';
-  if (level >= 30) return 'from-amber-400 to-red-600';
-  if (level >= 10) return 'from-yellow-400 to-amber-500';
+  if (level >= 40) return 'from-yellow-300 to-red-700';
+  if (level >= 35) return 'from-yellow-400 to-red-600';
+  if (level >= 30) return 'from-red-500 to-red-800';
+  if (level >= 25) return 'from-amber-400 to-red-600';
+  if (level >= 20) return 'from-yellow-400 to-amber-500';
+  if (level >= 10) return 'from-amber-300 to-yellow-500';
   return 'from-red-500 to-red-700';
 }
 
-/**
- * Retorna o ícone do nível baseado na progressão
- */
 export function getLevelIcon(level: number): string {
-  if (level >= 90) return 'crown';
-  if (level >= 70) return 'trophy';
-  if (level >= 50) return 'gem';
-  if (level >= 30) return 'medal';
-  if (level >= 10) return 'star';
+  if (level >= 40) return 'crown';
+  if (level >= 30) return 'trophy';
+  if (level >= 20) return 'gem';
+  if (level >= 10) return 'medal';
+  if (level >= 5) return 'star';
   return 'bolt';
 }
 
-
-/**
- * Calcula todas as informações do sistema de níveis
- */
 export function calculateLevelSystem(totalXP: number): LevelSystem {
   const currentLevel = getLevelFromXP(totalXP);
-  const nextLevel = Math.min(100, currentLevel + 1);
-  
+  const nextLevel = Math.min(LEVEL_CAP, currentLevel + 1);
   const xpForCurrentLevel = getXPForLevel(currentLevel);
-  const xpForNextLevel = getXPForLevel(nextLevel);
-  
+  const xpForNextLevel = currentLevel >= LEVEL_CAP ? totalXP : getXPForLevel(nextLevel);
   const currentLevelXP = totalXP - xpForCurrentLevel;
-  const xpNeededForCurrentLevel = xpForNextLevel - xpForCurrentLevel;
+  const xpNeededForCurrentLevel = Math.max(1, xpForNextLevel - xpForCurrentLevel);
   const xpNeededForNext = xpForNextLevel - totalXP;
-  
-  const progressPercentage = currentLevel >= 100 
-    ? 100 
+  const progressPercentage = currentLevel >= LEVEL_CAP
+    ? 100
     : (currentLevelXP / xpNeededForCurrentLevel) * 100;
 
   return {
@@ -108,13 +84,10 @@ export function calculateLevelSystem(totalXP: number): LevelSystem {
     progressPercentage: Math.min(100, Math.max(0, progressPercentage)),
     levelTitle: getLevelTitle(currentLevel),
     nextLevelTitle: getLevelTitle(nextLevel),
-    isMaxLevel: currentLevel >= 100
+    isMaxLevel: currentLevel >= LEVEL_CAP,
   };
 }
 
-/**
- * Verifica se houve level up comparando XP anterior e atual
- */
 export function checkLevelUp(previousXP: number, currentXP: number): {
   leveledUp: boolean;
   previousLevel: number;
@@ -124,73 +97,46 @@ export function checkLevelUp(previousXP: number, currentXP: number): {
   const previousLevel = getLevelFromXP(previousXP);
   const newLevel = getLevelFromXP(currentXP);
   const levelsGained = newLevel - previousLevel;
-  
   return {
     leveledUp: levelsGained > 0,
     previousLevel,
     newLevel,
-    levelsGained
+    levelsGained,
   };
 }
 
-/**
- * Calcula XP necessário para alcançar um nível específico
- */
-export function getXPNeededForLevel(targetLevel: number, currentXP: number): number {
-  const targetXP = getXPForLevel(targetLevel);
-  return Math.max(0, targetXP - currentXP);
+/** Níveis recém-alcançados, na ordem (para o modal de presente). */
+export function levelsReached(previousLevel: number, newLevel: number): number[] {
+  const out: number[] = [];
+  for (let l = previousLevel + 1; l <= newLevel; l++) out.push(l);
+  return out;
 }
 
-/**
- * Retorna informações sobre o próximo marco importante
- */
+export function emitMinerLevelUp(check: { leveledUp: boolean; previousLevel: number; newLevel: number }): void {
+  if (!check.leveledUp || typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('miner-level-up', {
+    detail: { level: check.newLevel, levels: levelsReached(check.previousLevel, check.newLevel) },
+  }));
+}
+
+export function getXPNeededForLevel(targetLevel: number, currentXP: number): number {
+  return Math.max(0, getXPForLevel(targetLevel) - currentXP);
+}
+
 export function getNextMilestone(currentLevel: number): {
   level: number;
   title: string;
   description: string;
 } {
-  if (currentLevel < 11) {
-    return {
-      level: 11,
-      title: "Aprendiz da Mina",
-      description: "Torne-se aprendiz da mina."
-    };
-  } else if (currentLevel < 26) {
-    return {
-      level: 26,
-      title: "Minerador Júnior",
-      description: "Evolua para minerador júnior."
-    };
-  } else if (currentLevel < 51) {
-    return {
-      level: 51,
-      title: "Minerador Responsável",
-      description: "Alcance o posto de minerador responsável."
-    };
-  } else if (currentLevel < 76) {
-    return {
-      level: 76,
-      title: "Minerador Disciplinado",
-      description: "Torne-se um minerador disciplinado."
-    };
-  } else if (currentLevel < 91) {
-    return {
-      level: 91,
-      title: "Mestre da Mina",
-      description: "Alcance o posto de mestre da mina."
-    };
-  } else {
-    return {
-      level: 100,
-      title: "Lenda da Mina",
-      description: "Você já é um mestre!"
-    };
-  }
+  const marks = [5, 10, 15, 20, 25, 30, 35, 40];
+  const level = marks.find((m) => currentLevel < m) ?? LEVEL_CAP;
+  return {
+    level,
+    title: getLevelTitle(level),
+    description: currentLevel >= LEVEL_CAP ? 'Você já é uma lenda da mina!' : `Próximo marco: ${getLevelTitle(level)}.`,
+  };
 }
 
-/**
- * Retorna o estilo de borda baseado no nível (evolui a cada 5 níveis)
- */
 export function getAvatarBorderStyle(level: number): {
   borderClass: string;
   glowClass: string;
@@ -198,165 +144,83 @@ export function getAvatarBorderStyle(level: number): {
   description: string;
   tier: number;
 } {
-  if (level >= 95) {
+  if (level >= 40) {
     return {
       borderClass: 'border-8 border-gradient-to-r from-purple-400 via-pink-400 via-yellow-400 via-blue-400 to-purple-400',
       glowClass: 'shadow-2xl shadow-purple-500/50',
       ringClass: 'ring-8 ring-purple-400/30 ring-offset-4 ring-offset-white',
-      description: 'Velocista Dimensional',
-      tier: 20
+      description: 'Lenda da Mina',
+      tier: 8,
     };
-  } else if (level >= 90) {
-    return {
-      borderClass: 'border-8 border-gradient-to-r from-purple-400 via-pink-400 to-purple-400',
-      glowClass: 'shadow-2xl shadow-purple-500/40',
-      ringClass: 'ring-6 ring-purple-400/25 ring-offset-4 ring-offset-white',
-      description: 'Velocista Cósmico',
-      tier: 19
-    };
-  } else if (level >= 85) {
+  }
+  if (level >= 35) {
     return {
       borderClass: 'border-6 border-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400',
       glowClass: 'shadow-xl shadow-indigo-500/40',
       ringClass: 'ring-6 ring-indigo-400/25 ring-offset-3 ring-offset-white',
-      description: 'Velocista Supremo',
-      tier: 18
+      description: 'Minerador de Esmeralda',
+      tier: 7,
     };
-  } else if (level >= 80) {
-    return {
-      borderClass: 'border-6 border-gradient-to-r from-indigo-400 to-blue-400',
-      glowClass: 'shadow-xl shadow-indigo-500/30',
-      ringClass: 'ring-4 ring-indigo-400/20 ring-offset-3 ring-offset-white',
-      description: 'Velocista Lendário',
-      tier: 17
-    };
-  } else if (level >= 75) {
+  }
+  if (level >= 30) {
     return {
       borderClass: 'border-6 border-gradient-to-r from-blue-400 to-cyan-400',
       glowClass: 'shadow-xl shadow-blue-500/30',
       ringClass: 'ring-4 ring-blue-400/20 ring-offset-2 ring-offset-white',
-      description: 'Velocista Épico',
-      tier: 16
+      description: 'Minerador de Diamante',
+      tier: 6,
     };
-  } else if (level >= 70) {
-    return {
-      borderClass: 'border-5 border-gradient-to-r from-blue-400 to-teal-400',
-      glowClass: 'shadow-lg shadow-blue-500/25',
-      ringClass: 'ring-4 ring-blue-400/15 ring-offset-2 ring-offset-white',
-      description: 'Velocista Heroico',
-      tier: 15
-    };
-  } else if (level >= 65) {
-    return {
-      borderClass: 'border-5 border-gradient-to-r from-teal-400 to-green-400',
-      glowClass: 'shadow-lg shadow-teal-500/25',
-      ringClass: 'ring-3 ring-teal-400/15 ring-offset-2 ring-offset-white',
-      description: 'Velocista Mestre',
-      tier: 14
-    };
-  } else if (level >= 60) {
+  }
+  if (level >= 25) {
     return {
       borderClass: 'border-5 border-gradient-to-r from-green-400 to-emerald-400',
       glowClass: 'shadow-lg shadow-green-500/20',
       ringClass: 'ring-3 ring-green-400/15 ring-offset-1 ring-offset-white',
-      description: 'Velocista Experiente',
-      tier: 13
+      description: 'Minerador de Ouro',
+      tier: 5,
     };
-  } else if (level >= 55) {
-    return {
-      borderClass: 'border-4 border-gradient-to-r from-emerald-400 to-lime-400',
-      glowClass: 'shadow-lg shadow-emerald-500/20',
-      ringClass: 'ring-3 ring-emerald-400/10 ring-offset-1 ring-offset-white',
-      description: 'Velocista Avançado',
-      tier: 12
-    };
-  } else if (level >= 50) {
-    return {
-      borderClass: 'border-4 border-gradient-to-r from-lime-400 to-yellow-400',
-      glowClass: 'shadow-md shadow-lime-500/20',
-      ringClass: 'ring-2 ring-lime-400/10 ring-offset-1 ring-offset-white',
-      description: 'Velocista Competente',
-      tier: 11
-    };
-  } else if (level >= 45) {
+  }
+  if (level >= 20) {
     return {
       borderClass: 'border-4 border-gradient-to-r from-yellow-400 to-orange-400',
       glowClass: 'shadow-md shadow-yellow-500/15',
       ringClass: 'ring-2 ring-yellow-400/10',
-      description: 'Velocista Habilidoso',
-      tier: 10
+      description: 'Minerador de Ferro',
+      tier: 4,
     };
-  } else if (level >= 40) {
+  }
+  if (level >= 15) {
     return {
-      borderClass: 'border-4 border-gradient-to-r from-orange-400 to-red-400',
-      glowClass: 'shadow-md shadow-orange-500/15',
-      ringClass: 'ring-2 ring-orange-400/10',
-      description: 'Velocista Dedicado',
-      tier: 9
-    };
-  } else if (level >= 35) {
-    return {
-      borderClass: 'border-4 border-gradient-to-r from-red-400 to-pink-400',
-      glowClass: 'shadow-md shadow-red-500/10',
-      ringClass: 'ring-1 ring-red-400/10',
-      description: 'Velocista Determinado',
-      tier: 8
-    };
-  } else if (level >= 30) {
-    return {
-      borderClass: 'border-3 border-gradient-to-r from-pink-400 to-rose-400',
-      glowClass: 'shadow shadow-pink-500/10',
-      ringClass: 'ring-1 ring-pink-400/10',
-      description: 'Velocista Persistente',
-      tier: 7
-    };
-  } else if (level >= 25) {
-    return {
-      borderClass: 'border-3 border-gradient-to-r from-rose-400 to-red-400',
-      glowClass: 'shadow shadow-rose-500/10',
-      ringClass: '',
-      description: 'Velocista Focado',
-      tier: 6
-    };
-  } else if (level >= 20) {
-    return {
-      borderClass: 'border-3 border-red-400',
+      borderClass: 'border-4 border-red-400',
       glowClass: 'shadow shadow-red-400/10',
       ringClass: '',
-      description: 'Velocista Disciplinado',
-      tier: 5
+      description: 'Minerador de Pedra',
+      tier: 3,
     };
-  } else if (level >= 15) {
-    return {
-      borderClass: 'border-3 border-orange-400',
-      glowClass: 'shadow-sm shadow-orange-400/10',
-      ringClass: '',
-      description: 'Velocista Empenhado',
-      tier: 4
-    };
-  } else if (level >= 10) {
+  }
+  if (level >= 10) {
     return {
       borderClass: 'border-3 border-yellow-400',
       glowClass: 'shadow-sm shadow-yellow-400/10',
       ringClass: '',
-      description: 'Velocista Aprendiz',
-      tier: 3
+      description: 'Minerador de Madeira',
+      tier: 2,
     };
-  } else if (level >= 5) {
+  }
+  if (level >= 5) {
     return {
       borderClass: 'border-2 border-yellow-300',
       glowClass: '',
       ringClass: '',
-      description: 'Velocista Amador',
-      tier: 2
-    };
-  } else {
-    return {
-      borderClass: 'border-2 border-gray-300',
-      glowClass: '',
-      ringClass: '',
-      description: 'Velocista Iniciante',
-      tier: 1
+      description: 'Aprendiz da Mina',
+      tier: 1,
     };
   }
+  return {
+    borderClass: 'border-2 border-gray-300',
+    glowClass: '',
+    ringClass: '',
+    description: 'Novato da Mina',
+    tier: 0,
+  };
 }

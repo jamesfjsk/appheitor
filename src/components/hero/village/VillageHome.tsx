@@ -4,19 +4,21 @@ import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { getTodayBrazil } from '../../../utils/timezone';
-import { characterSpriteSrc, DISTRICT_LABELS } from '../../../config/village';
+import { DISTRICT_ICONS, DISTRICT_LABELS, HOTBAR_ICONS, NPC_PORTRAIT } from '../../../config/village';
 import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import { dueTasksOn } from '../../../services/village/schedule';
 import { chestAllowed } from '../../../services/village/chest';
-import { noticesForNow, defaultHabitsForNow } from '../../../services/village/notices';
+import { noticesForNow, habitTipForNow, pickLine } from '../../../services/village/notices';
 import { CHILD_BIRTHDAY_MMDD } from '../../../config/rules';
 import { VILLAGE_LINES } from '../../../data/villageLines';
+import { HABIT_LINES } from '../../../data/habitLines';
 import HeroHeader from '../HeroHeader';
 import DailyChecklist from '../DailyChecklist';
 import VacationBanner from '../VacationBanner';
 import YesterdaySummary from '../YesterdaySummary';
 import ProgressBar from '../ProgressBar';
 import VillageScene from './VillageScene';
+import CharacterPreview from './CharacterPreview';
 import DailyChest from './DailyChest';
 import Oficina from './Oficina';
 import Mercado from './Mercado';
@@ -40,6 +42,10 @@ interface Props {
 }
 
 function brazilHour(): number {
+  if (import.meta.env.DEV) {
+    const h = Number(new URLSearchParams(window.location.search).get('h'));
+    if (Number.isFinite(h) && h >= 0 && h < 24) return h;
+  }
   return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }).format(new Date()));
 }
 
@@ -47,7 +53,7 @@ const VillageHome: React.FC<Props> = ({
   selectedPeriod, onPeriodChange, guidedMode, onToggleGuidedMode,
   onOpenRewards, onOpenCalendar, onOpenTimer, onOpenQuiz, quizLocked,
 }) => {
-  const { village, materials, buildings, economy, pauseDays, notices, ackNotice, confirmHabit } = useVillage();
+  const { village, materials, buildings, economy, pauseDays, notices, ackNotice } = useVillage();
   const { tasks, progress } = useData();
   const { playClick } = useSound();
   const [hour, setHour] = useState(brazilHour);
@@ -105,7 +111,24 @@ const VillageHome: React.FC<Props> = ({
     fatherNotices: notices,
     dismissed: village.noticesDismissed,
   }, today, hour);
-  const habits = defaultHabitsForNow(today, hour);
+  const habit = habitTipForNow(today, hour);
+  const habitLine = useMemo(() => {
+    const lines = HABIT_LINES[habit.npc];
+    const dayKey = `habit-tip:${today}:${habit.npc}`;
+    try {
+      const saved = localStorage.getItem(dayKey);
+      const hit = lines.find((l) => l.id === saved);
+      if (hit) return hit;
+    } catch { /* ignore */ }
+    let recent: string[] = [];
+    try { recent = JSON.parse(localStorage.getItem('habit-line-recent') || '[]') as string[]; } catch { recent = []; }
+    const picked = pickLine(lines, recent);
+    try {
+      localStorage.setItem(dayKey, picked.id);
+      localStorage.setItem('habit-line-recent', JSON.stringify([...recent, picked.id].slice(-14)));
+    } catch { /* ignore */ }
+    return picked;
+  }, [habit.npc, today]);
   const turnMin = done >= Math.min(due.length, 1) && !quizLocked;
   const turnFull = due.length > 0 && done >= due.length && gate.reason === 'already';
 
@@ -120,7 +143,11 @@ const VillageHome: React.FC<Props> = ({
       setSpeech(VILLAGE_LINES.comerciante[hour % 3].text);
       return;
     }
-    if (id.startsWith('build:')) { setDistrict('workshop'); return; }
+    if (id.startsWith('build:')) {
+      if (quizLocked) onOpenQuiz();
+      else setDistrict('workshop');
+      return;
+    }
   };
 
   const fullscreen = () => {
@@ -136,8 +163,9 @@ const VillageHome: React.FC<Props> = ({
         onOpenRewards={onOpenRewards}
         onOpenCalendar={onOpenCalendar}
         onOpenTimer={onOpenTimer}
-        avatarSrc={characterSpriteSrc(village.gear, village.character.shirt)}
+        avatar={<CharacterPreview character={village.character} gear={village.gear} size={64} />}
         subtitle={`${village.characterName} · ${village.name}`}
+        fullDays={village.fullDays}
         extraButton={
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" title="Tela cheia" onClick={() => { playClick(); fullscreen(); }}>
             <Maximize2 className="w-5 h-5" />
@@ -155,11 +183,13 @@ const VillageHome: React.FC<Props> = ({
             )}
           </div>
         ))}
-        {habits.map((h) => (
-          <button key={h.id} type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3 mr-2 mb-2" onClick={() => void confirmHabit(h.id)}>
-            {h.confirmLabel} · {h.label}
-          </button>
-        ))}
+        <div className="mc-row rounded px-3 py-2 flex items-center gap-3">
+          <img src={NPC_PORTRAIT[habit.npc]} alt="" className="w-10 h-10 mc-pixel" />
+          <div>
+            <p className="mc-lbl">Dica do turno</p>
+            <p className="text-sm">{habitLine.text}</p>
+          </div>
+        </div>
       </div>
       <VillageScene village={village} buildings={buildings} hour={hour} gated={quizLocked} reducedMotion={reduced} onClickSpot={openDistrict} />
       {speech && (
@@ -185,7 +215,8 @@ const VillageHome: React.FC<Props> = ({
         </div>
         <p className="text-sm mt-2">Baú do Dia: {gate.ok ? 'Pronto' : gate.reason === 'already' ? 'Aberto' : gate.reason === 'hour' ? `Abre às ${economy.chestOpenHour}h` : `Faltam missões`}</p>
       </div>
-      <ProgressBar />
+      <ProgressBar progress={progress} />
+      <div id="vila-missoes">
       <DailyChecklist
         tasks={tasks}
         selectedPeriod={selectedPeriod}
@@ -193,6 +224,7 @@ const VillageHome: React.FC<Props> = ({
         guidedMode={guidedMode}
         onToggleGuidedMode={onToggleGuidedMode}
       />
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
         {([
           ['mine', 'Mina'],
@@ -205,6 +237,7 @@ const VillageHome: React.FC<Props> = ({
           ['chest', 'Baú do Dia'],
         ] as const).map(([id, label]) => {
           const locked = quizLocked && (id === 'mine' || id === 'workshop' || id === 'market' || id === 'chest');
+          const icon = DISTRICT_ICONS[id];
           return (
             <button
               key={id}
@@ -218,21 +251,38 @@ const VillageHome: React.FC<Props> = ({
                 setDistrict(id);
               }}
             >
-              <p className="font-bold">{locked ? `Cadeado · ${label}` : DISTRICT_LABELS[id] || label}</p>
+              <div className="flex items-center gap-2">
+                {icon && (
+                  <img
+                    src={icon}
+                    alt=""
+                    className="w-8 h-8 mc-pixel"
+                    style={locked ? { filter: 'grayscale(1) brightness(0.5)' } : undefined}
+                    draggable={false}
+                  />
+                )}
+                <div>
+                  <p className="font-bold">{DISTRICT_LABELS[id] || label}</p>
+                  {locked && <p className="text-xs mc-muted">Faça a prova do dia</p>}
+                </div>
+              </div>
             </button>
           );
         })}
       </div>
 
       <nav className="mc-hotbar fixed bottom-0 inset-x-0 z-30 justify-center py-2 bg-[#2f2a27]/95">
-        {[
-          ['vila', () => setDistrict(null)],
-          ['missões', () => document.querySelector('.mc-inv')?.scrollIntoView({ behavior: 'smooth' })],
-          ['mina', () => (quizLocked ? onOpenQuiz() : setDistrict('mine'))],
-          ['oficina', () => (quizLocked ? onOpenQuiz() : setDistrict('workshop'))],
-          ['mercado', () => (quizLocked ? onOpenQuiz() : setDistrict('market'))],
-        ].map(([label, fn]) => (
-          <button key={String(label)} type="button" className="mc-slot rounded px-3 min-h-[44px]" onClick={() => { playClick(); (fn as () => void)(); }}>{label}</button>
+        {([
+          ['Vila', () => setDistrict(null)],
+          ['Missões', () => document.getElementById('vila-missoes')?.scrollIntoView({ behavior: 'smooth' })],
+          ['Mina', () => (quizLocked ? onOpenQuiz() : setDistrict('mine'))],
+          ['Oficina', () => (quizLocked ? onOpenQuiz() : setDistrict('workshop'))],
+          ['Mercado', () => (quizLocked ? onOpenQuiz() : setDistrict('market'))],
+        ] as Array<[string, () => void]>).map(([label, fn]) => (
+          <button key={label} type="button" className="mc-slot rounded px-3 min-h-[44px] flex items-center gap-1" onClick={() => { playClick(); fn(); }}>
+            {HOTBAR_ICONS[label] && <img src={HOTBAR_ICONS[label]} alt="" className="w-5 h-5 mc-pixel" draggable={false} />}
+            {label}
+          </button>
         ))}
       </nav>
 

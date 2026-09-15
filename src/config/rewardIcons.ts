@@ -7,37 +7,41 @@ export interface RewardIconDef {
 const file = (id: string) => `/assets/village/rewards/${id}.png`;
 
 export const REWARD_ICONS: RewardIconDef[] = [
-  { id: 'doce', label: 'Doce', file: file('doce') },
-  { id: 'sorvete', label: 'Sorvete', file: file('sorvete') },
-  { id: 'pizza', label: 'Pizza', file: file('pizza') },
-  { id: 'brinquedo', label: 'Brinquedo', file: file('brinquedo') },
-  { id: 'videogame', label: 'Videogame', file: file('videogame') },
-  { id: 'tela', label: 'Tempo de tela', file: file('tela') },
-  { id: 'filme', label: 'Filme', file: file('filme') },
-  { id: 'pesca', label: 'Vara de pesca', file: file('pesca') },
-  { id: 'bicicleta', label: 'Bicicleta', file: file('bicicleta') },
-  { id: 'futebol', label: 'Futebol', file: file('futebol') },
-  { id: 'passeio', label: 'Passeio', file: file('passeio') },
-  { id: 'dormir', label: 'Dormir tarde', file: file('dormir') },
-  { id: 'dinheiro', label: 'Dinheiro', file: file('dinheiro') },
-  { id: 'livro', label: 'Livro', file: file('livro') },
-  { id: 'blocos', label: 'Blocos de montar', file: file('blocos') },
-  { id: 'jantar', label: 'Escolha do jantar', file: file('jantar') },
-  { id: 'parque', label: 'Parque', file: file('parque') },
-  { id: 'cinema', label: 'Cinema', file: file('cinema') },
   { id: 'amigo', label: 'Chamar amigo', file: file('amigo') },
-  { id: 'musica', label: 'Música', file: file('musica') },
-  { id: 'desenho', label: 'Desenhar', file: file('desenho') },
-  { id: 'piscina', label: 'Piscina', file: file('piscina') },
-  { id: 'lanche', label: 'Lanche especial', file: file('lanche') },
-  { id: 'poster', label: 'Pôster', file: file('poster') },
-  { id: 'bola', label: 'Bola nova', file: file('bola') },
-  { id: 'jogo', label: 'Jogo novo', file: file('jogo') },
-  { id: 'acampamento', label: 'Acampamento', file: file('acampamento') },
-  { id: 'massagem', label: 'Massagem', file: file('massagem') },
+  { id: 'bicicleta', label: 'Bicicleta', file: file('bicicleta') },
+  { id: 'blocos', label: 'Blocos de montar', file: file('blocos') },
+  { id: 'brinquedo', label: 'Brinquedo', file: file('brinquedo') },
+  { id: 'carrinho', label: 'Carrinho', file: file('carrinho') },
   { id: 'chocolate', label: 'Chocolate', file: file('chocolate') },
-  { id: 'surpresa', label: 'Surpresa do pai', file: file('surpresa') },
+  { id: 'chuteira', label: 'Chuteira', file: file('chuteira') },
+  { id: 'dinheiro', label: 'Dinheiro', file: file('dinheiro') },
+  { id: 'doce', label: 'Doce', file: file('doce') },
+  { id: 'dormir-tarde', label: 'Dormir tarde', file: file('dormir-tarde') },
+  { id: 'filme', label: 'Filme', file: file('filme') },
+  { id: 'futebol', label: 'Futebol', file: file('futebol') },
+  { id: 'hamburguer', label: 'Hambúrguer', file: file('hamburguer') },
+  { id: 'jantar', label: 'Escolha do jantar', file: file('jantar') },
+  { id: 'livro', label: 'Livro', file: file('livro') },
+  { id: 'mochila', label: 'Mochila', file: file('mochila') },
+  { id: 'passeio', label: 'Passeio', file: file('passeio') },
+  { id: 'pelucia', label: 'Pelúcia', file: file('pelucia') },
+  { id: 'pesca', label: 'Vara de pesca', file: file('pesca') },
+  { id: 'pipoca', label: 'Pipoca', file: file('pipoca') },
+  { id: 'piscina', label: 'Piscina', file: file('piscina') },
+  { id: 'pizza', label: 'Pizza', file: file('pizza') },
+  { id: 'presente', label: 'Presente', file: file('presente') },
+  { id: 'refrigerante', label: 'Refrigerante', file: file('refrigerante') },
+  { id: 'skate', label: 'Skate', file: file('skate') },
+  { id: 'sorvete', label: 'Sorvete', file: file('sorvete') },
+  { id: 'tablet', label: 'Tablet', file: file('tablet') },
+  { id: 'tabuleiro', label: 'Tabuleiro', file: file('tabuleiro') },
+  { id: 'tela', label: 'Tempo de tela', file: file('tela') },
+  { id: 'videogame', label: 'Videogame', file: file('videogame') },
 ];
+
+const ALIAS: Record<string, string> = {
+  dormir: 'dormir-tarde',
+};
 
 export const REWARD_ICON_BY_ID: Record<string, RewardIconDef> = Object.fromEntries(
   REWARD_ICONS.map((i) => [i.id, i])
@@ -45,6 +49,7 @@ export const REWARD_ICON_BY_ID: Record<string, RewardIconDef> = Object.fromEntri
 
 export function rewardIconSrc(emoji: string): string | null {
   if (!emoji?.startsWith('reward:')) return null;
-  const id = emoji.slice('reward:'.length);
+  const raw = emoji.slice('reward:'.length);
+  const id = ALIAS[raw] || raw;
   return REWARD_ICON_BY_ID[id]?.file ?? null;
 }

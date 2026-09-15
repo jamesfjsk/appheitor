@@ -21,7 +21,7 @@ const ParentHeader: React.FC = () => {
     return subscribeSettings(
       'testChild',
       { uid: null } as unknown as Record<string, unknown>,
-      (v) => setTestChild(v as TestChildSettings & { email?: string })
+      (v) => setTestChild(v as unknown as TestChildSettings & { email?: string })
     );
   }, []);
 

@@ -82,8 +82,8 @@ const DailyRulesManager: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold text-gray-900">Fechamento do dia</h2>
           <p className="text-sm text-gray-500 max-w-xl">
-            Todo dia, na primeira vez que o app abre, o dia anterior é fechado: cada missão do dia que ficou sem fazer desconta gold,
-            e o dia com todas as missões feitas ganha um bônus. Nunca deixa o saldo negativo e não cobra dias de férias.
+            Todo dia, na primeira vez que o app abre, o dia anterior é fechado: cada missão do dia que ficou sem fazer desconta gold.
+            O Baú do Dia é a recompensa de dia completo (bônus de gold padrão 0). Nunca deixa o saldo negativo e não cobra dias de férias.
             {rules.activatedOn && <span className="block mt-1">Valendo desde {fmt(rules.activatedOn)}.</span>}
           </p>
         </div>
@@ -103,7 +103,7 @@ const DailyRulesManager: React.FC = () => {
           <input type="number" min={0} value={penalty} onChange={(e) => setPenalty(Number(e.target.value))} className="rounded-lg border border-gray-300 px-3 py-2" />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-gray-700">Bônus por dia completo</span>
+          <span className="text-sm font-semibold text-gray-700">Bônus por dia completo (padrão 0)</span>
           <input type="number" min={0} value={bonus} onChange={(e) => setBonus(Number(e.target.value))} className="rounded-lg border border-gray-300 px-3 py-2" />
         </label>
         <div className="flex gap-2">

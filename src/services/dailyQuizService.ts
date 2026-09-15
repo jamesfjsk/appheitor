@@ -9,6 +9,9 @@ import { DailyQuiz, DailyQuizQuestion, DailyQuizTheme } from '../types';
 import { generateDailyQuiz } from './aiDailyQuiz';
 import { pickThemeForDate } from '../config/quizCurriculum';
 import { DAILY_QUIZ_QUESTIONS } from '../config/rules';
+import { DEFAULT_MODULES } from '../config/village';
+import { getSettings } from './settingsService';
+import type { ModuleSettings } from '../types/village';
 
 export const dailyQuizId = (userId: string, date: string) => `${userId}_${date}`;
 
@@ -100,7 +103,13 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
   const recentIds = recent.filter((q) => q.date !== date).map((q) => q.theme.id).filter(Boolean);
   const avoid = recent.flatMap((q) => q.questions.map((x) => x.question));
   const seed = pickThemeForDate(date, recentIds);
-  const generated = await generateDailyQuiz({ seed, count, avoidQuestions: avoid });
+  const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
+  const generated = await generateDailyQuiz({
+    seed,
+    count,
+    avoidQuestions: avoid,
+    forceOffline: modules.aiGeneration === false,
+  });
 
   const ref = doc(db, 'dailyQuizzes', dailyQuizId(userId, date));
   await setDoc(ref, {

@@ -38,8 +38,14 @@ service cloud.firestore {
       allow get: if signedIn() && (isAdmin() || resource == null || resource.data.ownerId == request.auth.uid);
       allow list: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
 
-      // Só admin cria/edita/exclui tarefas (evita bagunça)
-      allow create, update, delete: if isAdmin();
+      // Só admin cria/exclui tarefas (evita bagunça). A criança só pode marcar a própria missão
+      // como feita: status, lastCompletedDate e updatedAt (completeTaskWithRewards, na transação).
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.ownerId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'lastCompletedDate', 'updatedAt'])
+      );
 
       // ---------- TASK COMPLETIONS (subcoleção) ----------
       match /completions/{dateId} {

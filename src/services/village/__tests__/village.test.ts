@@ -1,11 +1,12 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import { DEFAULT_ECONOMY, EMPTY_GEAR, MATERIAL_BY_PERIOD } from '../../../config/village';
 import { isoWeekOf } from '../../../utils/isoWeek';
-import { claimKey, hasClaim } from '../claims';
+import { getLevelFromXP, getLevelTitle, getXPForLevel } from '../../../utils/levelSystem';
+import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from '../claims';
 import { chestAllowed, dailyChestContents } from '../chest';
 import { computeTaskLoot, xpWithBoots } from '../loot';
 import { defaultHabitsForNow, noticesForNow, pickLine } from '../notices';
-import { dueTasksOn, isChestTime, periodAllowedAt, weekdayFromDate } from '../schedule';
+import { dueTasksOn, isChestTime, nextFullDays, periodAllowedAt, rangeCoversDate, weekdayFromDate } from '../schedule';
 import { canBuy, canCraft, priceOf, tradePreview } from '../shop';
 import type { NoticeContext, ScheduleTask, VillageGear } from '../../../types/village';
 
@@ -142,6 +143,26 @@ test('periodAllowedAt e isChestTime', () => {
   expect(weekdayFromDate('2026-09-15')).toBe(2);
 });
 
+test('nextFullDays: soma no dia completo, zera no perdido, não mexe sem missão devida/folga/punição', () => {
+  const base = { fullDays: 3, fullDaysStart: '2026-09-12', date: '2026-09-15', skip: false };
+  expect(nextFullDays({ ...base, due: 6, done: 6 })).toEqual({ fullDays: 4, fullDaysStart: '2026-09-12', changed: true });
+  expect(nextFullDays({ ...base, due: 6, done: 5 })).toEqual({ fullDays: 0, fullDaysStart: null, changed: true });
+  expect(nextFullDays({ ...base, due: 0, done: 0 })).toEqual({ fullDays: 3, fullDaysStart: '2026-09-12', changed: false });
+  expect(nextFullDays({ ...base, due: 6, done: 0, skip: true })).toEqual({ fullDays: 3, fullDaysStart: '2026-09-12', changed: false });
+  expect(nextFullDays({ ...base, fullDays: 0, fullDaysStart: null, due: 2, done: 2 })).toEqual({ fullDays: 1, fullDaysStart: '2026-09-15', changed: true });
+});
+
+test('rangeCoversDate compara no fuso do Brasil', () => {
+  // punição ativada terça 21h de Brasília (= quarta 00h UTC) cobre a terça
+  const start = Date.parse('2026-09-15T21:00:00.000-03:00');
+  const end = Date.parse('2026-09-22T21:00:00.000-03:00');
+  expect(rangeCoversDate(start, end, '2026-09-15')).toBe(true);
+  expect(rangeCoversDate(start, end, '2026-09-14')).toBe(false);
+  expect(rangeCoversDate(start, end, '2026-09-22')).toBe(true);
+  expect(rangeCoversDate(start, end, '2026-09-23')).toBe(false);
+  expect(rangeCoversDate(start, end, 'data-ruim')).toBe(false);
+});
+
 test('baú determinístico, esmeralda a cada N dias e teto de gold', () => {
   const v0 = { fullDays: 0, gear: gear() };
   const a = dailyChestContents('uid-a', '2026-09-15', v0);
@@ -184,6 +205,35 @@ test('claimKey estável', () => {
   expect(claimKey('streak', 7, '2026-09-01')).toBe('streak:7:2026-09-01');
   expect(hasClaim({ claimed: { 'daily:2026-09-15': 'iso' } }, 'daily:2026-09-15')).toBe(true);
   expect(hasClaim({ claimed: {} }, 'daily:2026-09-15')).toBe(false);
+});
+
+test('curva nova e chave de presente por temporada', () => {
+  expect(getXPForLevel(1)).toBe(0);
+  expect(getXPForLevel(2)).toBe(60);
+  expect(getXPForLevel(3)).toBe(130);
+  expect(getXPForLevel(5)).toBe(300);
+  expect(getXPForLevel(10)).toBe(900);
+  expect(getXPForLevel(20)).toBe(2850);
+  expect(getXPForLevel(30)).toBe(5800);
+  expect(getXPForLevel(40)).toBe(9750);
+  expect(getLevelFromXP(0)).toBe(1);
+  expect(getLevelFromXP(59)).toBe(1);
+  expect(getLevelFromXP(60)).toBe(2);
+  expect(getLevelFromXP(129)).toBe(2);
+  expect(getLevelFromXP(130)).toBe(3);
+  expect(getLevelFromXP(9750)).toBe(40);
+  expect(getLevelFromXP(20000)).toBe(40);
+  expect(getLevelTitle(1)).toBe('Novato da Mina');
+  expect(getLevelTitle(5)).toBe('Aprendiz da Mina');
+  expect(getLevelTitle(10)).toBe('Minerador de Madeira');
+  expect(getLevelTitle(40)).toBe('Lenda da Mina');
+  expect(levelGiftClaimKey(0, 2)).toBe('level:0:2');
+  expect(levelGiftClaimKey(1, 2)).toBe('level:1:2');
+  expect(levelGiftClaimKey(2, 10)).toBe('level:2:10');
+  expect(rareGiftForLevel(4)).toBe(null);
+  expect(rareGiftForLevel(5)).toBe('esmeralda');
+  expect(rareGiftForLevel(10)).toBe('diamante');
+  expect(rareGiftForLevel(40)).toBe('diamante');
 });
 
 test('priceOf com multiplicador e canCraft recusa sem ferro', () => {
@@ -231,8 +281,11 @@ test('noticesForNow e habitsForNow e pickLine sem repetir 14 dias', () => {
   expect(night.some((i) => i.text.startsWith('Amanhã:'))).toBe(true);
   expect(night.some((i) => i.text.includes('Baú'))).toBe(false);
 
-  const morningHabits = defaultHabitsForNow('2026-09-15', 9);
-  expect(morningHabits.some((h) => h.id === 'alongar' || h.id === 'agua')).toBe(true);
+  const morningHabits = defaultHabitsForNow('2026-09-16', 9);
+  expect(morningHabits).toHaveLength(1);
+  expect(['agua', 'postura', 'alongar']).toContain(morningHabits[0].id);
+  const tuesday = defaultHabitsForNow('2026-09-15', 9);
+  expect(tuesday.map((h) => h.id)).toEqual(['gentileza']);
   const late = defaultHabitsForNow('2026-09-15', 22);
   expect(late.map((h) => h.id)).toEqual(['sono']);
 
