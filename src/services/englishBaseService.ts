@@ -12,6 +12,7 @@ import { db } from '../config/firebase';
 import type { BaseDoc, BuildingId, Contract, ContractOutcome, ContractResult, DailyPlan, Material, MaterialCount, PlanSource, ScaffoldStage } from '../types/english';
 import { BUILDINGS, MATERIALS, baseLevel, buildingCost, buildingOpensLater, canAfford, initialBaseDoc, isBuildingUnlocked, missingMaterials } from '../config/englishBase';
 import { DEFAULT_ECONOMY } from '../config/village';
+import { getSettings } from './settingsService';
 import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, buildXp, rewardFor } from '../config/englishRewards';
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
@@ -624,11 +625,14 @@ export function baseLevelOf(base: BaseDoc): number {
   return baseLevel(base.buildings);
 }
 
-function nextCost(id: BuildingId, nextLevel: number) {
-  return buildingCost(id, nextLevel, DEFAULT_ECONOMY.buildCostMultiplier);
+function nextCost(id: BuildingId, nextLevel: number, multiplier = DEFAULT_ECONOMY.buildCostMultiplier) {
+  return buildingCost(id, nextLevel, multiplier);
 }
 
-function levelPrereq(base: BaseDoc, nextLevel: number): string | null {
+function levelPrereq(base: BaseDoc, nextLevel: number, id: BuildingId): string | null {
+  if (id === 'cofre' || id === 'agenda' || id === 'mercado' || id === 'cerca' || id === 'fornalha' || id === 'bau') {
+    return null;
+  }
   if (nextLevel >= 2 && (base.buildings.fornalha < 1 || base.buildings.bau < 1 || base.buildings.cerca < 1)) {
     return 'Precisa da Fornalha, do Armazém e da Cerca no nível 1';
   }
@@ -639,7 +643,7 @@ function levelPrereq(base: BaseDoc, nextLevel: number): string | null {
 }
 
 /** Pode construir o próximo nível? Traz o que falta de cada material (só os > 0) */
-export function canBuild(base: BaseDoc, id: BuildingId): {
+export function canBuild(base: BaseDoc, id: BuildingId, multiplier = DEFAULT_ECONOMY.buildCostMultiplier): {
   ok: boolean;
   missing: Partial<Record<Material, number>>;
   nextLevel: number;
@@ -648,8 +652,8 @@ export function canBuild(base: BaseDoc, id: BuildingId): {
 } {
   const nextLevel = (base.buildings[id] ?? 0) + 1;
   const unlocked = isBuildingUnlocked(id, base.buildings);
-  const later = buildingOpensLater(id, nextLevel) || levelPrereq(base, nextLevel);
-  const cost = nextCost(id, nextLevel);
+  const later = buildingOpensLater(id, nextLevel) || levelPrereq(base, nextLevel, id);
+  const cost = nextCost(id, nextLevel, multiplier);
   if (!cost) return { ok: false, missing: {}, nextLevel, unlocked, later };
   const gap = missingMaterials(base.materials, cost);
   const missing: Partial<Record<Material, number>> = {};
@@ -665,19 +669,21 @@ export function canBuild(base: BaseDoc, id: BuildingId): {
 
 /** Valida custo e desbloqueio, debita os materiais e sobe o nível; o XP devolvido é aplicado pela tela */
 export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise<{ newLevel: number; xp: number }> {
+  const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as { buildCostMultiplier?: number };
+  const multiplier = economy.buildCostMultiplier ?? DEFAULT_ECONOMY.buildCostMultiplier;
   const ref = baseRef(uid);
   let out: { newLevel: number; xp: number } | null = null;
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
     const base = snap.exists() ? fromBaseDoc(uid, snap.data()) : initialBaseDoc(uid, nowIso());
-    const check = canBuild(base, buildingId);
-    if (check.later) throw new Error(`Abre na ${check.later}.`);
+    const check = canBuild(base, buildingId, multiplier);
+    if (check.later) throw new Error(/^(Precisa|Em breve)/.test(check.later) ? `${check.later}.` : `Abre na ${check.later}.`);
     if (!check.unlocked) {
       if (buildingId === 'cofre') throw new Error('Construa o Armazém primeiro.');
       if (buildingId === 'cerca') throw new Error('Construa a Fornalha primeiro.');
       throw new Error('Essa construção ainda está bloqueada: suba a Fornalha e o Armazém ao nível 1 primeiro.');
     }
-    const cost = nextCost(buildingId, check.nextLevel);
+    const cost = nextCost(buildingId, check.nextLevel, multiplier);
     if (!cost) throw new Error('Essa construção já está no nível máximo.');
     if (!check.ok) throw new Error('Faltam materiais para construir.');
     const materials = { ...base.materials };

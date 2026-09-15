@@ -6,6 +6,7 @@ import TaskItem from './TaskItem';
 import { useClock } from '../../contexts/ClockContext';
 import { addDays } from '../../utils/clock';
 import { dueTasksOn, extraVisibleOn } from '../../services/village/schedule';
+import { useVillage } from '../../contexts/VillageContext';
 import { lateWindow } from '../../services/village/late';
 import { FirestoreService } from '../../services/firestoreService';
 
@@ -50,6 +51,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const { completeTask, completeLateTask } = useData();
   const { childUid } = useAuth();
   const { hour, weekday, today, period: clockPeriod } = useClock();
+  const { economy } = useVillage();
   const [yesterdayDone, setYesterdayDone] = React.useState<string[]>([]);
 
   const getCurrentPeriod = (): 'morning' | 'afternoon' | 'evening' => clockPeriod;
@@ -198,13 +200,17 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
         </div>
       )}
 
-      {lateWindow(hour) && dueTasksOn(tasks, addDays(today, -1)).filter((t) => !yesterdayDone.includes(t.id)).map((t) => {
+      {lateWindow(hour, economy) && dueTasksOn(tasks, addDays(today, -1)).filter((t) => !yesterdayDone.includes(t.id)).map((t) => {
         const full = tasks.find((x) => x.id === t.id);
         if (!full) return null;
         return (
           <div key={`late-${t.id}`} className="mc-row rounded p-3 mb-2 flex justify-between items-center">
             <p className="text-sm">Recuperar: {full.title}</p>
-            <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" onClick={() => void completeLateTask(full.id)}>Recuperar</button>
+            <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" onClick={() => {
+              void completeLateTask(full.id).then(() => {
+                setYesterdayDone((ids) => ids.includes(full.id) ? ids : [...ids, full.id]);
+              }).catch(() => undefined);
+            }}>Recuperar</button>
           </div>
         );
       })}

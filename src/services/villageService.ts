@@ -35,6 +35,7 @@ import type {
 import {
   CATALOG_VERSION,
   COSMETIC_BY_ID,
+  COSMETICS,
   DEFAULT_ECONOMY,
   DEFAULT_MODULES,
   DEFAULT_VILLAGE_SETTINGS,
@@ -486,7 +487,7 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
         type: 'earned' as const,
         source: 'chest' as const,
         description: 'Baú do Dia',
-        metadata: { due, done, contents, date: today, capped: cut.paid < (economy.dailyChestGold[0] + village.fullDays) },
+        metadata: { due, done, contents, date: today, capped: cut.capped },
         balanceBefore: gold,
         balanceAfter: after,
         createdAt: serverTimestamp(),
@@ -724,12 +725,20 @@ export async function openStreakChest(uid: string): Promise<{ gold: number; diam
     const rare = { ...village.rare, diamante: village.rare.diamante + 1 };
     const trophy = n >= 21 ? 'trophy_ouro' : n >= 14 ? 'trophy_prata' : 'trophy_bronze';
     const extra = ['diamante', trophy];
+    const owned = [...(village.owned || [])];
+    if (n >= 21) {
+      const gift = COSMETICS.find((c) => !c.free && !owned.includes(c.id) && cosmeticHasSprite(c.id));
+      if (gift && !extra.includes(gift.id)) {
+        extra.push(gift.id);
+        owned.push(gift.id);
+      }
+    }
     const newItems = [...village.newItems];
     for (const id of extra) {
       if (!newItems.includes(id)) newItems.push(id);
     }
-    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, newItems, updatedAt: nowIso() }));
-    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, newItems, updatedAt: nowIso() }));
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, newItems, owned, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, newItems, owned, updatedAt: nowIso() }));
     if (pSnap.exists()) {
       tx.update(progressRef(uid), {
         availableGold: after,

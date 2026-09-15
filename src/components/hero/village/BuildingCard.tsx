@@ -37,11 +37,13 @@ interface Props {
   onOpenBank?: () => void;
   onOpenAgenda?: () => void;
   onOpenMarket?: () => void;
+  onCreateGoal?: (title: string, gold: number, rewardId?: string) => void;
+  shopLocked?: boolean;
 }
 
 const BuildingCard: React.FC<Props> = ({
   id, onClose, onOpenMine, onOpenChest, onOpenTower, onOpenWorkshop, onOpenQuiz,
-  onOpenBank, onOpenAgenda, onOpenMarket,
+  onOpenBank, onOpenAgenda, onOpenMarket, onCreateGoal, shopLocked = false,
 }) => {
   const { childUid } = useAuth();
   const { village, materials, buildings, economy } = useVillage();
@@ -54,18 +56,19 @@ const BuildingCard: React.FC<Props> = ({
   const def = BUILDING_BY_ID[id];
   const level = buildings[id] || 0;
   const fakeBase = { ...initialBaseDoc(childUid || 'x', new Date().toISOString()), materials, buildings };
-  const info = canBuild(fakeBase, id);
+  const info = canBuild(fakeBase, id, economy.buildCostMultiplier);
   const cost = buildingCost(id, info.nextLevel, economy.buildCostMultiplier);
   const nextText = buildingEffectNext(id, level);
   const missingText = MATERIALS.filter((m) => (info.missing[m] || 0) > 0)
     .map((m) => `${info.missing[m]} ${MATERIAL_LABELS[m]}`)
     .join(', ');
-  const pipCount = !def.opensIn && (def.liveMaxLevel ?? 3) === 1 ? 1 : 3;
-  const atCap = pipCount === 1 ? level >= 1 : level >= BUILDING_MAX_LEVEL;
+  const maxLive = def.liveMaxLevel ?? BUILDING_MAX_LEVEL;
+  const atCap = level >= maxLive;
+  const pipCount = Math.max(1, maxLive || 1);
 
   const actionLabel = level === 0 ? 'Construir' : 'Melhorar';
   const lockLabel = info.later
-    ? (info.later === 'Em breve' && atCap ? null : `Abre na ${info.later}`)
+    ? (info.later === 'Em breve' && atCap ? null : (/^(Precisa|Em breve)/.test(info.later) ? info.later : `Abre na ${info.later}`))
     : !info.unlocked
       ? id === 'cerca'
         ? 'Precisa da Fornalha nível 1'
@@ -319,13 +322,11 @@ const BuildingCard: React.FC<Props> = ({
                   </div>
                 </div>
               ) : (
-                <p className="text-sm mc-muted">Construa a Biblioteca para abrir a prova do dia.</p>
+                <p className="text-sm mc-muted">A Mesa ainda não foi construída. A prova do dia já pode ser feita.</p>
               )}
-              {level >= 1 && (
-                <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
-                  Prova do dia
-                </button>
-              )}
+              <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
+                Prova do dia
+              </button>
               <button type="button" className="mc-btn mc-btn-dark w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenMine(); }}>
                 Ir para a Mina
               </button>
@@ -369,13 +370,17 @@ const BuildingCard: React.FC<Props> = ({
             <>
               <button
                 type="button"
-                disabled={level < 1}
+                disabled={level < 1 || shopLocked}
                 className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
-                onClick={() => { playClick(); onOpenMarket?.(); }}
+                onClick={() => {
+                  if (shopLocked) { toast.error('Em punição: Mercado fechado'); return; }
+                  playClick();
+                  onOpenMarket?.();
+                }}
               >
-                {level < 1 ? 'Construa o Mercado para abrir' : 'Abrir o Mercado'}
+                {shopLocked ? 'Mercado fechado na punição' : level < 1 ? 'Construa o Mercado para abrir' : 'Abrir o Mercado'}
               </button>
-              <RewardsPanel isOpen onClose={() => undefined} embedded />
+              <RewardsPanel isOpen onClose={() => undefined} embedded browseOnly={level < 1} onCreateGoal={onCreateGoal} />
             </>
           )}
 

@@ -262,11 +262,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
         ? missedTasks.slice(1).map((t) => t.id)
         : missedTasks.map((t) => t.id);
     const crackPeriod = (missedTasks.find((t) => missedIds.includes(t.id))?.period || firstMissedPeriod) as Period;
-    let cracks = cracksAfterClose(village.cracks, missedIds, DEFAULT_LOTS_BY_PERIOD, crackPeriod);
-    if (cerca >= 2) {
-      const previous = new Set(village.cracks);
-      cracks = cracks.filter((lot) => !previous.has(lot));
-    }
+    const cracks = cracksAfterClose(cerca >= 2 ? [] : village.cracks, missedIds, DEFAULT_LOTS_BY_PERIOD, crackPeriod);
     const punishKey = claimKey('punish', date);
     const claimed = { ...village.claimed };
     if (punished && !hasClaim(village, punishKey)) {

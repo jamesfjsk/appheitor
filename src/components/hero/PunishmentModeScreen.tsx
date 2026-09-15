@@ -38,7 +38,9 @@ const PunishmentModeScreen: React.FC<{ onClose?: () => void }> = ({ onClose }) =
       punishment.id,
       (history) => {
         setTaskHistory(history);
-      }
+      },
+      undefined,
+      punishment.userId
     );
 
     return () => unsubscribe();

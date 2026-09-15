@@ -132,6 +132,33 @@ export const ITEMS: Item[] = [
     minLevel: n,
     source: 'marco',
   })),
+  {
+    id: 'trophy_bronze',
+    name: 'Troféu de bronze',
+    kind: 'milestone',
+    icon: '/assets/village/items/trophy_bronze.png',
+    rarity: 'comum',
+    description: 'Baú das 7 tochas.',
+    source: 'evento',
+  },
+  {
+    id: 'trophy_prata',
+    name: 'Troféu de prata',
+    kind: 'milestone',
+    icon: '/assets/village/items/trophy_prata.png',
+    rarity: 'raro',
+    description: 'Baú das 14 tochas.',
+    source: 'evento',
+  },
+  {
+    id: 'trophy_ouro',
+    name: 'Troféu de ouro',
+    kind: 'milestone',
+    icon: '/assets/village/items/trophy_ouro.png',
+    rarity: 'epico',
+    description: 'Baú das 21 tochas.',
+    source: 'evento',
+  },
 ];
 
 export const ITEM_BY_ID: Record<string, Item> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));

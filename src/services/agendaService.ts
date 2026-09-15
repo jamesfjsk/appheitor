@@ -22,10 +22,6 @@ import { organizationXp, plannedAheadDays, studyPlanFor, weekOrganized } from '.
 import { claimKey, hasClaim } from './village/claims';
 import { fromVillageDoc, stripUndefined } from './villageService';
 
-function omitUndefined<T extends Record<string, unknown>>(data: T): T {
-  return Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined)) as T;
-}
-
 function asIso(value: unknown): string {
   if (typeof value === 'string') return value;
   if (value && typeof value === 'object' && 'toDate' in value && typeof (value as { toDate: () => Date }).toDate === 'function') {
@@ -105,10 +101,12 @@ export async function createAgendaItem(
 }
 
 export async function updateAgendaItem(id: string, patch: Partial<AgendaItem>): Promise<void> {
-  await updateDoc(doc(db, 'agenda', id), omitUndefined({
-    ...patch,
-    updatedAt: nowBrazil().iso,
-  } as Record<string, unknown>));
+  const data: Record<string, unknown> = { updatedAt: nowBrazil().iso };
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === undefined) continue;
+    data[k] = v === '' ? null : v;
+  }
+  await updateDoc(doc(db, 'agenda', id), data);
 }
 
 export async function deleteAgendaItem(id: string): Promise<void> {

@@ -230,6 +230,7 @@ test('agenda: repetição semanal, plano de estudo e XP de antecedência', () =>
     nowBrazil(Date.parse('2026-09-16T00:00:00.000Z'))
   );
   expect(due).toBe(true);
+  expect(reminderDue({ ...item, doneAt: '2026-09-16' }, nowBrazil(Date.parse('2026-09-16T00:00:00.000Z')))).toBe(false);
 });
 
 test('balança de 7 dias não conta depósito como gasto', () => {

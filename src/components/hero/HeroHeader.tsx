@@ -9,7 +9,7 @@ import { useClock } from '../../contexts/ClockContext';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 
 const MINER = ISO_MINER;
-const TORCH = '/assets/village/items/lantern.png';
+const TORCH = '/assets/english/ui/torch.webp';
 const GOLD = '/assets/english/ui/gold.webp';
 const DIAMOND = '/assets/english/ui/diamond.webp';
 const SUN = '/assets/english/ui/sun.webp';
@@ -129,12 +129,12 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenGold, onOpenPac
         </div>
         <div
           className="mc-slot mc-chip py-1"
-          title={`Dias completos na Vila: ${fullDays ?? 0}`}
+          title={`Tochas seguidas: ${fullDays ?? 0}`}
         >
           <img src={TORCH} alt="" className="mc-pixel" draggable={false} />
           <div>
             <span className="mc-num text-white">{fullDays ?? 0}</span>
-            <span className="mc-chip-l">{(fullDays ?? 0) === 1 ? 'dia completo' : 'dias completos'}</span>
+            <span className="mc-chip-l">{(fullDays ?? 0) === 1 ? 'tocha' : 'tochas'}</span>
           </div>
         </div>
         <button type="button" className="mc-slot mc-chip py-1" onClick={() => { playClick(); onOpenGold?.(); }} title="Extrato">

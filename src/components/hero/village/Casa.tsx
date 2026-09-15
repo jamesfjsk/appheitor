@@ -8,9 +8,11 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { houseSprite, houseTitle } from '../../../config/village';
 import type { AgendaItem, Period } from '../../../types/village';
 import DailyChecklist from '../DailyChecklist';
+import FlashTimer from '../FlashTimer';
 import CharacterPreview from './CharacterPreview';
 import { dayTimeline, occurrencesBetween } from '../../../services/village/agenda';
 import { markAgendaDone } from '../../../services/agendaService';
+import { periodAllowedAt } from '../../../services/village/schedule';
 import { addDays, getTodayBrazil } from '../../../utils/clock';
 
 const SUN = '/assets/english/ui/sun.webp';
@@ -42,6 +44,8 @@ const Casa: React.FC<{
   const { childUid } = useAuth();
   const { playClick } = useSound();
   const [tab, setTab] = useState<Tab>('missoes');
+  const [focusMin, setFocusMin] = useState<number | null>(null);
+  const [focusTaskId, setFocusTaskId] = useState<string | null>(null);
   const night = hour >= 19 || hour < 6;
   const allDone = due > 0 && done >= due;
   const name = village.characterName || 'Heitor';
@@ -112,12 +116,26 @@ const Casa: React.FC<{
                         {row.time || (row.period === 'morning' ? 'Manhã' : row.period === 'afternoon' ? 'Tarde' : row.period === 'evening' ? 'Noite' : '')}
                         {' · '}{row.title}
                       </p>
-                      {row.kind === 'mission' && row.taskId && (
-                        <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => { playClick(); void completeTask(row.taskId!); }}>Concluir</button>
-                      )}
-                      {row.kind === 'focus' && row.taskId && (
-                        <button type="button" className="mc-btn mc-btn-gold min-h-[36px] px-2" onClick={() => { playClick(); void completeTask(row.taskId!); }}>Foco</button>
-                      )}
+                      {row.kind === 'mission' && row.taskId && (() => {
+                        const full = tasks.find((x) => x.id === row.taskId);
+                        if (!full) return null;
+                        if (full.status === 'done' && full.lastCompletedDate === today) return null;
+                        if (!periodAllowedAt(full.period, hour, economy)) return null;
+                        return (
+                          <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => { playClick(); void completeTask(row.taskId!); }}>Concluir</button>
+                        );
+                      })()}
+                      {row.kind === 'focus' && row.taskId && (() => {
+                        const full = tasks.find((x) => x.id === row.taskId);
+                        if (full && full.status === 'done' && full.lastCompletedDate === today) return null;
+                        return (
+                          <button type="button" className="mc-btn mc-btn-gold min-h-[36px] px-2" onClick={() => {
+                            playClick();
+                            setFocusTaskId(row.taskId!);
+                            setFocusMin(15);
+                          }}>Foco</button>
+                        );
+                      })()}
                       {row.kind === 'agenda' && row.agendaId && childUid && (
                         <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => {
                           playClick();
@@ -127,6 +145,20 @@ const Casa: React.FC<{
                     </div>
                   ))}
                 </div>
+              )}
+              {focusMin && (
+                <FlashTimer
+                  isOpen
+                  embedded
+                  minutes={focusMin}
+                  onClose={() => { setFocusMin(null); setFocusTaskId(null); }}
+                  onFinished={() => {
+                    if (focusTaskId) void completeTask(focusTaskId);
+                    toast.success('Foco concluído');
+                    setFocusMin(null);
+                    setFocusTaskId(null);
+                  }}
+                />
               )}
               <DailyChecklist
                 tasks={tasks}

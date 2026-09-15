@@ -38,7 +38,7 @@ const Cofrinho: React.FC<{
   const open = useMemo(() => goals.filter((g) => g.status === 'open' || g.status === 'cancel_requested'), [goals]);
   const gold = progress.availableGold || 0;
   const vaultLv = buildings.cofre || 0;
-  const goalCap = vaultGoalCap(vaultLv);
+  const goalCap = Math.min(economy.maxOpenGoals ?? 2, vaultGoalCap(vaultLv));
   const ratePct = economy.interestRatePct ?? 5;
   const bankOn = modules.bank !== false;
   const interestOn = modules.interest !== false && vaultLv >= 2;
@@ -114,10 +114,11 @@ const Cofrinho: React.FC<{
           ))}
         </div>
         <div className="p-4 space-y-4">
-          {tab === 'extrato' && <Extrato embedded />}
+          {tab === 'extrato' && <Extrato embedded monthly={vaultLv >= 3} />}
           {tab === 'paciencia' && (
             <div className="space-y-3 text-sm">
               <p>O gold que já estava guardado rende {ratePct}% por semana, com teto de {economy.interestCapGold ?? 20} gold somando as metas. O Cofre nível 2 libera o bônus; o nível 3 abre a faixa da temporada e o Extrato mensal.</p>
+              {vaultLv >= 3 && <p>Cofre nível 3: prêmios da temporada e o Extrato mensal estão liberados.</p>}
               <p className="mc-muted">Na poupança de verdade, 100 reais rendem menos de 1 real por mês; aqui o bônus é maior de propósito, para você treinar.</p>
             </div>
           )}
@@ -126,7 +127,10 @@ const Cofrinho: React.FC<{
               {!bankOn ? (
                 <p className="text-sm">O Cofre ainda está sendo cavado. Em breve você guarda gold aqui.</p>
               ) : vaultLv < 1 ? (
-                <p className="text-sm">Construa o Cofre no lote da Vila para abrir a primeira meta.</p>
+                <div className="space-y-2">
+                  <p className="text-sm">Construa o Cofre no lote da Vila para abrir a primeira meta.</p>
+                  {preset && <p className="text-sm">Meta pronta: {preset.title} ({preset.targetGold} gold). Constrói o Cofre e eu abro o formulário.</p>}
+                </div>
               ) : (
                 <>
                   <p className="text-sm mc-muted">Gold livre: <span className="mc-num text-white" style={{ fontSize: 12 }}>{gold}</span></p>

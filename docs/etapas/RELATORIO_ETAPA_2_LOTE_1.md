@@ -1,35 +1,46 @@
-# Relatório — Etapa 2 Lote 1 (revisão da seção 7)
+# Relatório — Etapa 2 Lote 1 (seções 10–12)
 
-Branch `etapa-2`. WIP anterior: `f02ba5c`. Este relatório cobre a execução da `REVISAO_ETAPA_2_LOTE_1.md` seção 7. **Lote 2 não começou.**
+Branch `etapa-2`. WIP: `f02ba5c`. Revisão 1: `64532f6`. Este texto cobre a rodada das seções 10, 11 e 12 de `REVISAO_ETAPA_2_LOTE_1.md`. **Lote 2 não começou.**
 
 Data: 15/09/2026.
 
-## Decisões
+## Decisões (mantidas)
 
-1. **A4, A6, A7 desfeitos; A5 ficou.** Prova volta a ser portão (`quizLocked`) e abre com `onboardedAt`. Clique no lote abre sempre o `BuildingCard`; atalho só por NPC e hotbar. Juros únicos de `settings/economy` (5%, teto 20). Cofre 1 = 1 meta, 2 = 2 metas + bônus, 3 = faixa temporada. Mercado e Agenda continuam construções: custo n1 igual ao da Fornalha, sem pré-requisito, hotbar Mercado de volta, sprites `buildings/mercado-1.png` e `buildings/agenda-1.png`.
-2. **Exceção A6 × VILA_MAPA (M33):** o lote do Armazém (`build:bau`) com nível ≥ 1 abre a Mochila, porque o mapa pede isso; o cartão da obra continua no nível 0 e pelo atalho Obras da Ferraria.
-3. **`modules.bank` padrão `true` (A10).** Extrato e Paciência sempre abrem; o Cofrinho some se o módulo estiver desligado ou o Cofre não existir.
-4. **Lanterna (A9):** `canCraft` devolve `soon` até existir efeito. Capacete continua forjável (já absorve 1 perda).
-5. **Punição (M24):** a Vila permanece visível, com Mercado/Baú/Loja travados; prova e Mina abertas. Tarefas extras ficam num botão “Tarefas da punição”, não no lugar da Vila.
-6. **R7:** Mercado e RewardForm leem `referenceIncome` dos 7 dias. Sem movimento (conta resetada) cai na reserva 45 — o aceite mostrou 45 por isso.
-7. **Reversão de dia fechado (M15):** não implementada. Bloqueante do Lote 2.
-8. **ChatFlashGPT:** continua desligado e ainda lê chave no cliente. Não migrado.
-9. **Item temporada no simulador:** o perfil misto alerta 50 D inalcançável. Constantes não mexidas.
-10. **`learning/{uid}`:** Lote 2. Quem implementar precisa de subcoleção por semana.
-11. **Aceite:** `reset-test-account.cjs` não reconstroi obras; para as fotos o script `scripts/patch-test-etapa2.cjs` ligou Fornalha, Armazém, Cofre 2, Mercado e Agenda. Reset de novo no fim.
-12. **Compromissos vazios** na conta de teste (Agenda antiga) não entram mais na Linha do dia.
+1. A4/A6/A7 da primeira revisão: prova é portão; lote abre o cartão; juros únicos de `settings/economy`. A5: Mercado e Agenda continuam construções.
+2. Exceção A6 × mapa: `build:bau` com nível ≥ 1 abre a Mochila.
+3. `modules.bank` padrão `true`. Lanterna continua `soon`.
+4. Punição: Vila visível; Mercado/Baú/Loja fechados; prova e Mina abertas.
+5. Reversão de dia fechado (M15): Lote 2. ChatFlashGPT: Lote 2. `learning/{uid}`: Lote 2.
+6. Simulador: perfil misto ainda alerta temporada 50 D. Constantes não mexidas.
+
+## O que esta rodada fechou
+
+Ordem pedida: D1, D1b/A4, R1, D2, D4/R2, depois D3, D5, D7, D8, D9 e parciais da seção 10.
+
+| # | Correção |
+|---|---|
+| D1 | `completeTask` chama `repairLot(uid, ontem)`. Toast `Lote consertado: +N gold`. Linha `goldTransactions` `source: repair`, `metadata.date` = ontem. |
+| D1b/A4 | `subscribeToUserProgress` mapeia `quizRequired` e `quizQuestionCount`. `openDistrict`, teclas, hotbar, header, cartão e clique da cena passam pelo portão. Cadeado da Mina na cena (`gated`). “Prova do dia” no cartão da Mesa em qualquer nível. |
+| R1 | Se a completion determinística existe revertida, grava doc novo com campo `key`. Regra: criança pode `update` só com `resource.data.reverted == true`. |
+| D2 | Mesma trava em teclas, lotes, hotbar, avatar, Baú do dia, cartão e atalhos internos. Listener de `punishmentTaskCompletions` filtra `punishmentId` + `userId`; índice correspondente publicado. |
+| D4/R2 | Ao tocar, grava `remindedFor` + `remindedAt`. `reminderDue` falso com `doneAt`. Um `AudioContext`. Efeito não depende de `agendaFlash`. |
+| D3 | Recuperar some da lista (`yesterdayDone`); `completeLateTask` com toast. |
+| D5 | `seeItems` só no fechar/desmontar da Mochila. |
+| D7 | Tela de prêmios usa `dueTasksOn` e `redeemMinTasks`; `browseOnly` esconde Pedir. |
+| D8 | Dock do Baú: minutos restantes `chestOpenHour*60 - (hora*60+minuto)`. |
+| D9 + parciais | chip tochas; `lockLabel` sem “Abre na Precisa…”; `vaultInterestRatePct` removida; Cofre 3 + teto de metas; Extrato “Semana N de YYYY”; poupança ≤ 100%; Balança com gasto por ralo; `canBuild` lê economy; Cerca 2 cura overnight; `metadata.capped`; `trophy_*` no catálogo; Foco abre o cronômetro; Linha do dia esconde Concluir se feito; Agenda recusa título vazio; `FlashTimer` uma vez; Obras sem Melhorar em Barraca/Sino; `rewardTitle` lido; extras Foco desativadas depois da data. |
 
 ## Saídas dos comandos
 
 | Comando | Resultado |
 |---|---|
-| `npx tsc --noEmit -p tsconfig.app.json` | ok (exit 0) |
+| `npx tsc --noEmit -p tsconfig.app.json` | ok |
 | `npx eslint src --max-warnings 6` | 6 avisos pré-existentes em `src/icons/index.tsx` |
-| `npm run test:english` | 11 arquivos, todos passaram (inclui `village/etapa2.test.ts` 14 casos e `utils/clock.test.ts`) |
-| `npx vite build` | ok; bundle sem `sk-` (`dist/assets/App-BdiZJLGm.js`) |
-| `node scripts/econ-sim.mjs` | ver abaixo |
-| `npx firebase-tools deploy --only firestore:rules,firestore:indexes,functions --project app-heitor` | **Deploy complete.** `openai` e `agendaReminders` atualizados em `southamerica-east1`. |
-| TTS real (conta de teste, `kind: tts`, “Hello miner.”) | **HTTP 200**, URL `https://firebasestorage.googleapis.com/v0/b/app-heitor.firebasestorage.app/o/eng...` (token de download, M8) |
+| `npm run test:english` | 11 arquivos, todos passaram |
+| `npx vite build` | ok; `dist/assets/App-BGCcbLp1.js`. Sem chave `sk-` (os `sk-` do arquivo são `task-reminder` e `ask-evidence`) |
+| `node scripts/econ-sim.mjs` | iguais à passagem anterior; misto alerta temporada 50 D |
+| regras e índices | `npx firebase-tools deploy --only firestore:rules,firestore:indexes --project app-heitor` — **Deploy complete** |
+| função | republicada no projeto `app-heitor` (job MCP `1789516245535`, success). TTS **não** foi retestado nesta rodada |
 
 ### Simulador (91 dias)
 
@@ -37,81 +48,63 @@ Data: 15/09/2026.
 == típico ==
 ganho 2912  gasto 728  guardado 507  saldo 1840  xp 6916
 materiais madeira 91 pedra 91 ferro 0
-nível por semana: S1:Nv3 S2:Nv5 S3:Nv8 S4:Nv10 S5:Nv13 S6:Nv15 S7:Nv17 S8:Nv20 S9:Nv22 S10:Nv25 S11:Nv27 S12:Nv30 S13:Nv32
+nível por semana: S1:Nv3 … S13:Nv32
 
 == misto ==
 ganho 2093  gasto 1365  guardado 122  saldo 657  xp 4914
-materiais madeira 91 pedra 91 ferro 0
-nível por semana: S1:Nv2 … S13:Nv23
 ALERTA item temporada (50 D) inalcançável em 13 semanas
 
 == perfeito ==
 ganho 5086  gasto 0  guardado 1498  saldo 3836  xp 8918
 materiais madeira 91 pedra 91 ferro 91
-nível por semana: S1:Nv4 … S13:Nv40
 ```
 
-## Fotos (`docs/exemplos/telas/etapa2/`)
+## Aceite D1, D1b, D2, D4 (fotos)
 
-Conta `teste@flash.com`, Vite `http://localhost:5174`, `?h=14` e `?h=19`. Script `docs/exemplos/telas/etapa2/_shot_aceite.mjs`. Reset antes e depois.
+Conta `teste@flash.com`, Vite `http://localhost:5174`, `?h=19`. Scripts `scripts/patch-test-d1d4.cjs` e `docs/exemplos/telas/etapa2/_shot_d1d4.mjs`. Reset da conta no fim (agenda e punição de teste também limpos).
 
-| Arquivo | O que mostra |
+| Arquivo | O que conferiu |
 |---|---|
-| `01-vila.png` | Cena, relógio 14:00, hotbar com Mercado, Placa “Hoje você tem”, Cofre/Agenda/Barraca no mapa |
-| `02-casa.png` / `03-casa-linha.png` | Casa com Linha do dia (missões + Fechar o dia 21:00) |
-| `04-mercado.png` | Mercado com prêmios embutidos; R7 reserva 45 (sem ganhos na semana) |
-| `05-agenda.png` | Formulário com lembrete, repetir, nota, Foco 15/25, abas Hoje/Semana/Mês |
-| `06-banco.png` | Chip de gold abre Extrato (sem depender do Cofrinho) |
-| `07-meta-criada.png` / `08-deposito.png` | Meta “Pizza”, depósito 20, saldo 100→80, toast “Guardou 20 gold” / “Meta criada” |
-| `09-extrato.png` | Semana guardou 20; poupança 0% porque o gold semeado não é ganho (não explode para 400%) |
-| `10-vila-noite.png` | Cena com `?h=19` |
-
-Aceite da seção 10, o que foi conferido de verdade: (1) depósito 20 com saldo caindo; (8) Mercado/Comerciante visíveis. O restante (juros forçando `lastInterestWeek`, desafio 20, Baú das tochas, capacete, prova 6/8 e 8/8, terceira venda, punição, missão recuperada, conserto, desligar `aiGeneration`) **não teve foto nesta passagem** — o roteiro automático cobriu Vila, Casa, Mercado, Agenda, Banco e o depósito.
-
-## Fora do escopo (já estava; só registrado)
-
-- Tela de abertura “Abrindo a vila”: `index.html`, `src/main.tsx`, `src/App.tsx`, `src/styles/boot.css`, `src/components/common/bootOverlay.ts`, `useDismissBoot.tsx`, `LoadingSpinner.tsx`, `ReadyBoot` no painel e no `HeroPanel`, trechos de `miner.css`.
-- `src/components/hero/english/base/BaseMap.tsx` (mapa da Mina).
-- `DailyChecklist` com `mc-inv` no lugar de `mc-panel`.
-- Lanterna ainda sem efeito em contratos/prova de amanhã (A9 trava a forja até isso existir).
+| `11-d1b-cadeado.png` | Vila com `quizRequired` verdadeiro. O cadeado na boca da Mina é pequeno na foto noturna; o portão está na foto seguinte. |
+| `12-d1b-portao.png` | Clique na Mina abre **Prova do dia** (“Hoje tem prova antes de tudo”), sem “Mais tarde”. |
+| `13-d1b-mesa.png` | Mesa nível 0: “A prova do dia já pode ser feita” + botão **Prova do dia**. |
+| `14-d1-conserto.png` | Terceira missão do dia: toast **Lote consertado: +10 gold** (metade da penalidade 20 de ontem). Saldo 100+15+10=125. Firestore: 1 linha `repair` amount 10, `metadata.date` **2026-09-14**. |
+| `15-d2-banner.png` | Faixa de punição; Vila continua visível; botão “Tarefas da punição”. |
+| `16-d2-mercado.png` | Hotbar Mercado recusa: toast “Em punição: Mercado, Baú e Loja fechados…”. |
+| `17-d2-mochila.png` | Tecla I recusa do mesmo jeito (segundo toast). |
+| `18-d2-tarefas.png` | Clique em “Tarefas da punição” não gerou `Missing or insufficient permissions` no log. A tela de punição não é `fixed` e ficou fora do recorte de 900 px. |
+| `19-d4-alarme.png` | Toast `19:00 · Aceite D4` com Ok; fala do Olheiro; placa “Hoje você tem”. |
+| `20-d4-depois-ok.png` | 8 s depois do Ok: sem segundo toast. Firestore: `remindedFor 2026-09-15` e `remindedAt` gravados. |
 
 ## Conferência de conexões (recebe de / entrega para)
 
+A tabela da revisão 1 afirmava “Prova: porta na cena” e isso **não batia**. Nesta rodada a prova é portão de verdade: o cliente lê `quizRequired`, e `openDistrict` intercepta Mina, Mercado, Ferraria, lotes e NPCs.
+
 | Fluxo | Recebe de | Entrega para |
 |---|---|---|
-| Missão paga | `DataContext.completeTask` `src/contexts/DataContext.tsx:304` | `FirestoreService.completeTaskWithRewards`; `bumpChallenge(..., 'tasks_count')` `:376`; streak `:382`; `repairLot` automático `:436` |
-| Prova | `HeroPanel` `DailyQuiz` `src/components/hero/HeroPanel.tsx:114` com `quizLocked` `:86`; porta na cena `VillageHome.tsx:283` `gated={quizLocked}` | `payQuizRewards` `DailyQuiz.tsx:150` → `firestoreService.ts:1394` chave `quiz:<date>`; `bumpChallenge` quiz em `dailyQuizService.ts:156` |
-| Mina / contrato | `englishBaseService.completeContract` `:504` | `bumpChallenge(..., 'english_contracts')` `:593`; TTS pela função `englishTts.ts:57` |
-| Fechar o dia | `dailyRulesService.ts` | capacete, tochas, `punished`, `bumpChallenge` `full_days` `:322`, rachaduras |
-| Conserto | `repairLot` `villageService.ts:813`; também `DataContext.tsx:436` quando o dia fica completo | linha `repair`, chave `repair:<date>` |
-| Missão recuperada | `firestoreService` caminho `late`; `DailyChecklist` lista por completion de ontem | linha `late_task`; não sobrescreve `lastCompletedDate` de hoje |
-| Baú do Dia | `openDailyChest` `villageService.ts:410` (`dueCompletionsCount`) | `chest`, `newItems`, teto `caps.ts` |
-| Baú das tochas | `openStreakChest` `villageService.ts:705`; hotspot `VillageScene.tsx:648` | `streak_chest`, diamante |
-| Comerciante | `sellMaterials` `villageService.ts:756` | recusa se teto 0; `merchant_sale` |
-| Cofrinho | `goalsService` depósito/juros; `bank.ts` `weeklyInterest` `:37` | `goal_deposit` tipo `saved`; `goal_interest` amount 0 + metadata; `applyWeeklyInterest` no boot `DataContext.tsx:1273` |
-| Tetos | `caps.gameGoldRoom` `src/services/village/caps.ts:20` | chest, streak, challenge, interest (metadata), merchant, repair |
-| Agenda → Placa | `VillageHome.tsx:198-203` `todayAgenda` / `tomorrowAgenda` | bloco “Hoje você tem” / “Amanhã” |
-| Agenda → cabeçalho | `nextEvents` `VillageHome.tsx:200` | `HeroHeader` `nextEventLabel` `:263` |
-| Agenda → alarme | intervalo 60 s `VillageHome.tsx:149` `reminderDue` | som checkpoint, toast Ok, `agendaFlash`, fala do Olheiro |
-| Agenda → Casa | `dayTimeline` `agenda.ts:55` usado em `Casa.tsx:51` | Linha do dia |
-| Semana organizada | `weeklyOrganizedBonus` `agendaService.ts:181` chamado `VillageHome.tsx:134` | +1 madeira, chave `agenda:week:<semana>` |
-| Relógio | `ClockContext.tsx:103` dispara `dayChanged` | `DataContext.tsx:1492` e `VillageHome.tsx:80` |
-| Chip gold | `HeroHeader.tsx:140` | `VillageHome` distrito `extrato` (Banco na aba Extrato) |
-| Chip nível | `HeroHeader` | Torre |
-| Avatar | `HeroHeader` | Mochila |
+| Missão paga | `DataContext.completeTask` `src/contexts/DataContext.tsx:304` | `completeTaskWithRewards`; `bumpChallenge` `tasks_count` `:376`; streak `:384`; **conserto automático com data de ontem** `:447` |
+| Prova (portão) | `progress.quizRequired` mapeado em `firestoreService.ts:1576`; `quizLocked` `HeroPanel.tsx:86`; `openDistrict` `VillageHome.tsx:210` `quizBlocksDest`; cena `gated={quizLocked}` `:315`; hotbar/teclas/cartão pelo mesmo `openDistrict` | `DailyQuiz` sem “Mais tarde”; `payQuizRewards` `firestoreService.ts:1417` chave `quiz:<date>` |
+| Conserto | `repairLot` `villageService.ts:822` lê `dailyProgress/{uid}_{date}` (ontem) e completions **devidas de hoje** | linha `repair`, chave `repair:<ontem>`, toast `:448` |
+| Completion revertida | id determinístico para conferir; se `reverted` grava doc novo `:531`; regra `firestore.rules:219` update criança só com `reverted == true` | criança refaz missão desfeita sem `permission denied` |
+| Punição | `lockedShop` em `openDistrict` `:214` (teclas, hotbar, avatar, Baú, cartão, atalhos) | Mercado/Baú/Loja fechados; Mina e prova abertas; histórico `punishmentId`+`userId` `:2479` |
+| Agenda alarme | `reminderDue` `agenda.ts:113` (falso se `doneAt` ou `remindedFor`) | um `AudioContext`; grava `remindedFor` `VillageHome.tsx:140`; toast Ok; Olheiro |
+| Missão recuperada | transação late + `yesterdayDone` `DailyChecklist.tsx:211` | some da lista; toast; sem segundo `pageerror` |
+| Mochila “Novo” | `seeItems` no unmount `Mochila.tsx:34` | troca de aba não apaga o badge |
+| Prêmios | `dueTasksOn` `RewardsPanel.tsx:51` | teto `min(redeemMinTasks, devidas)` |
+| Relógio | `ClockContext` `dayChanged` | `DataContext` extras expiradas + fechamento; `VillageHome` toast “Novo dia” |
+| Agenda → Placa / cabeçalho / Casa | `todayAgenda` / `nextEvents` / `dayTimeline` | iguais à revisão 1 |
+| Baú / Comerciante / Cofrinho / tetos | sem mudança de fiação; conserto agora consome o teto com `metadata.capped` | |
 
-Não existem ainda (Lote 2 ou depois): efeito da Lanterna em contratos/prova; reversão de dia fechado; conquista do jogo `achievement` em transação; ChatFlashGPT pela função; vida dos NPCs (seção 14).
-
-## O que a revisão pediu e ficou feito
-
-- A1–A3, A11, A12, A9, A10; A8 seção 13 (timeline, Placa, chip, alarme, Foco/`FlashTimer`, formulário, Mês/`CalendarModal`, plano + Não, editar/apagar, bônus semanal).
-- M1–M18 e M29–M38 (dinheiro, regras, função TTS `getDownloadURL`, tetos, Balança 7 dias, R7).
-- M19–M28 e baixos: confirmação da Loja, Mochila equipa/tira, Extrato com linhas, punição sem sumir a Vila, conserto ao concluir, aba Agenda no painel, teclas 1–5, “Vender 10” desligado sem material, `VILA_API.md` atualizado.
-- M26: botão “Propor desafio” fora da tela da criança.
+Não existem ainda (Lote 2 ou depois): efeito da Lanterna; reversão de dia fechado; conquista `achievement` em transação; ChatFlashGPT pela função; vida dos NPCs.
 
 ## Pendências honestas
 
-- Aceite 2–7 e 9–12 da seção 10 sem foto (juros forçados, desafio, Baú/esmeralda/tochas, capacete, prova, terceira venda, punição, recuperar, conserto, desligar IA).
-- Compromissos antigos da conta de teste (títulos vazios) ainda aparecem na Agenda até o reset/apagar.
-- `FlashTimer` e `CalendarModal` continuam arquivos próprios, agora só usados pela Agenda (não órfãos).
-- Node 20 das functions está deprecado (aviso do Firebase no deploy).
+- O ícone de cadeado na Mina é difícil de ver à noite na foto `11`; o portão está provado pelo clique (`12`).
+- A tela “Tarefas da punição” não é `position: fixed`; a foto `18` não a enquadra. O listener com `userId` não quebrou (sem erro de permissão).
+- TTS desta republicação da função não foi chamado de novo.
+- Node 20 das functions continua deprecado no Firebase.
+- Item temporada 50 D inalcançável no perfil misto do simulador.
+
+## Fora do escopo (só registrado)
+
+Tela de abertura / `boot.css`; `BaseMap.tsx`; `DailyChecklist` com `mc-inv`; lanterna sem efeito em contratos.

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Maximize2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useVillage } from '../../../contexts/VillageContext';
@@ -12,7 +12,7 @@ import { dueTasksOn, periodAllowedAt } from '../../../services/village/schedule'
 import { chestAllowed } from '../../../services/village/chest';
 import { noticesForNow, habitTipForNow, pickLine } from '../../../services/village/notices';
 import { nextEvents, occurrencesBetween, reminderDue } from '../../../services/village/agenda';
-import { markAgendaDone, subscribeAgenda, weeklyOrganizedBonus } from '../../../services/agendaService';
+import { markAgendaDone, subscribeAgenda, updateAgendaItem, weeklyOrganizedBonus } from '../../../services/agendaService';
 import { createMineSfx } from '../english/mine/sfx';
 import { CHILD_BIRTHDAY_MMDD } from '../../../config/rules';
 import { VILLAGE_LINES } from '../../../data/villageLines';
@@ -42,6 +42,16 @@ import type { Period } from '../../../types/village';
 import BuildingCard from './BuildingCard';
 
 type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'editor' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | null;
+
+function quizBlocksDest(id: string): boolean {
+  return id === 'mine' || id === 'market' || id === 'workshop'
+    || id === 'npc:ferreiro' || id === 'npc:comerciante'
+    || id.startsWith('build:');
+}
+
+function shopBlocksDest(id: string): boolean {
+  return id === 'market' || id === 'npc:comerciante' || id === 'chest' || id === 'pack' || id === 'chest_streak';
+}
 
 interface Props {
   selectedPeriod: Period;
@@ -74,45 +84,15 @@ const VillageHome: React.FC<Props> = ({
   const { childUid } = useAuth();
   const dismissSpeech = useCallback(() => setSpeech(null), []);
   const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reminderSfx = useRef<ReturnType<typeof createMineSfx> | null>(null);
+  const reminderCtx = useRef<AudioContext | null>(null);
+  const remindedStamp = useRef(new Set<string>());
 
   useEffect(() => {
     const onDay = () => toast.success('Novo dia na Vila');
     window.addEventListener(DAY_CHANGED_EVENT, onDay);
     return () => window.removeEventListener(DAY_CHANGED_EVENT, onDay);
   }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setDistrict(null); setLot(null); return; }
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const k = e.key.toLowerCase();
-      if (k === '1') { setDistrict(null); setLot(null); setDockTab('vila'); }
-      if (k === '2' || k === 'm') { setDistrict('house'); setLot(null); setDockTab('missoes'); }
-      if (k === '3') setDistrict('mine');
-      if (k === '4') {
-        if ((buildings.mercado || 0) >= 1) setDistrict('market');
-        else setLot('mercado');
-      }
-      if (k === '5' || k === 'i') setDistrict('pack');
-      if (k === 'b') setDistrict('chest');
-      if (k === 'a') {
-        if ((buildings.agenda || 0) >= 1) setDistrict('agenda');
-        else setLot('agenda');
-      }
-      if (k === 'i') setDistrict('pack');
-      if (k === 'e') setDistrict('mine');
-      if (k === 'o') {
-        if ((buildings.fornalha || 0) >= 1) setDistrict('workshop');
-        else setLot('fornalha');
-      }
-      if (k === 'l') {
-        if ((buildings.mercado || 0) >= 1) setDistrict('market');
-        else setLot('mercado');
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [buildings.agenda, buildings.mercado, buildings.fornalha]);
 
   useEffect(() => {
     if (!district && !lot) return;
@@ -140,16 +120,27 @@ const VillageHome: React.FC<Props> = ({
   }, [childUid, today, now.weekday, now.hour]);
 
   useEffect(() => {
-    const sfx = createMineSfx(() => {
-      const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      return AC ? new AC() : null;
-    }, () => true);
+    if (!reminderSfx.current) {
+      reminderSfx.current = createMineSfx(() => {
+        if (!reminderCtx.current) {
+          const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+          reminderCtx.current = AC ? new AC() : null;
+        }
+        return reminderCtx.current;
+      }, () => true);
+    }
     const tick = () => {
       for (const item of occurrencesBetween(agendaItems, addDays(today, -1), addDays(today, 1))) {
+        if (!item.title.trim()) continue;
         if (!reminderDue(item, now)) continue;
-        if (agendaFlash === item.id) continue;
+        const stamp = `${item.id}:${item.date}`;
+        if (remindedStamp.current.has(stamp)) continue;
+        remindedStamp.current.add(stamp);
+        if (childUid) {
+          void updateAgendaItem(item.id, { remindedFor: item.date, remindedAt: now.iso }).catch(() => undefined);
+        }
         setAgendaFlash(item.id);
-        sfx.checkpoint();
+        reminderSfx.current?.checkpoint();
         toast((t) => (
           <span className="flex items-center gap-2">
             {item.time ? `${item.time} · ` : ''}{item.title}
@@ -163,7 +154,7 @@ const VillageHome: React.FC<Props> = ({
     tick();
     const id = window.setInterval(tick, 60_000);
     return () => window.clearInterval(id);
-  }, [agendaItems, today, now, agendaFlash]);
+  }, [agendaItems, today, now, childUid]);
 
   const due = useMemo(() => dueTasksOn(tasks, today), [tasks, today]);
   const done = due.filter((t) => {
@@ -214,9 +205,13 @@ const VillageHome: React.FC<Props> = ({
     ? `${upcoming.date === today ? 'Hoje' : upcoming.date === addDays(today, 1) ? 'Amanhã' : upcoming.date.slice(8)}: ${upcoming.title}`
     : undefined;
 
-  const openDistrict = (id: string) => {
+  const openDistrict = useCallback((id: string) => {
     playClick();
-    if (lockedShop && (id === 'market' || id === 'npc:comerciante' || id === 'chest' || id === 'pack')) {
+    if (quizLocked && quizBlocksDest(id)) {
+      onOpenQuiz();
+      return;
+    }
+    if (lockedShop && (shopBlocksDest(id) || id === 'build:bau')) {
       toast.error('Em punição: Mercado, Baú e Loja fechados. Prova e Mina continuam abertas.');
       return;
     }
@@ -261,7 +256,25 @@ const VillageHome: React.FC<Props> = ({
       const bid = id.slice('build:'.length);
       if (bid in BUILDING_BY_ID) setLot(bid as BuildingId);
     }
-  };
+  }, [buildings, hour, lockedShop, onOpenQuiz, playClick, quizLocked]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setDistrict(null); setLot(null); return; }
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const k = e.key.toLowerCase();
+      if (k === '1') { setDistrict(null); setLot(null); setDockTab('vila'); }
+      if (k === '2' || k === 'm') { setDistrict('house'); setLot(null); setDockTab('missoes'); }
+      if (k === '3' || k === 'e') openDistrict('mine');
+      if (k === '4' || k === 'l') openDistrict('market');
+      if (k === '5' || k === 'i') openDistrict('pack');
+      if (k === 'b') openDistrict('chest');
+      if (k === 'a') openDistrict('agenda');
+      if (k === 'o') openDistrict('npc:ferreiro');
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [openDistrict]);
 
   const fullscreen = () => {
     const el = document.documentElement;
@@ -274,7 +287,7 @@ const VillageHome: React.FC<Props> = ({
       <HeroHeader
         progress={progress}
         onOpenGold={() => setDistrict('extrato')}
-        onOpenPack={() => setDistrict('pack')}
+        onOpenPack={() => openDistrict('pack')}
         onOpenTower={() => setDistrict('tower')}
         nextEventLabel={nextEventLabel}
         hour={hour}
@@ -370,7 +383,7 @@ const VillageHome: React.FC<Props> = ({
         })()}
         <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3" onClick={() => { playClick(); setDistrict('house'); }}>Abrir a Casa</button>
         {gate.ok && (
-          <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" onClick={() => { playClick(); setDistrict('chest'); }}>Baú do Dia</button>
+          <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" onClick={() => openDistrict('chest')}>Baú do Dia</button>
         )}
       </div>
       <DesafiosCard embedded />
@@ -381,7 +394,10 @@ const VillageHome: React.FC<Props> = ({
             <span className="mc-num text-white">{done}/{due.length}</span>
             <span className="text-sm">{turnFull ? 'Dia completo' : turnMin ? 'Mínimo do dia' : 'Dia em andamento'}</span>
         <span className="text-sm mc-muted">
-          Baú: {gate.ok ? `${economy.dailyChestGold[0]} + ${village.fullDays} tochas = ${Math.min(economy.dailyChestGold[1], economy.dailyChestGold[0] + village.fullDays)} gold` : gate.reason === 'already' ? 'aberto' : gate.reason === 'hour' ? `abre às ${economy.chestOpenHour}h (faltam ${Math.max(0, economy.chestOpenHour - hour)}h${String(Math.max(0, hour >= economy.chestOpenHour ? 0 : 60 - minute)).padStart(2, '0')})` : 'faltam missões'}
+          Baú: {gate.ok ? `${economy.dailyChestGold[0]} + ${village.fullDays} tochas = ${Math.min(economy.dailyChestGold[1], economy.dailyChestGold[0] + village.fullDays)} gold` : gate.reason === 'already' ? 'aberto' : gate.reason === 'hour' ? (() => {
+            const remain = Math.max(0, economy.chestOpenHour * 60 - (hour * 60 + minute));
+            return `abre às ${economy.chestOpenHour}h (faltam ${Math.floor(remain / 60)}h${String(remain % 60).padStart(2, '0')})`;
+          })() : 'faltam missões'}
         </span>
             <div className="mn-dock-mats">
               {(Object.keys(MATERIAL_LABELS) as Array<keyof typeof MATERIAL_LABELS>).map((m) => (
@@ -396,13 +412,9 @@ const VillageHome: React.FC<Props> = ({
             {([
               ['Vila', 'vila', () => { setDistrict(null); setLot(null); setDockTab('vila'); }],
               ['Missões', 'missoes', () => { setDistrict('house'); setLot(null); setDockTab('missoes'); }],
-              ['Mina', 'mine', () => setDistrict('mine')],
-              ['Mercado', 'market', () => {
-                if (lockedShop) { toast.error('Em punição: Mercado fechado'); return; }
-                if ((buildings.mercado || 0) >= 1) setDistrict('market');
-                else setLot('mercado');
-              }],
-              ['Mochila', 'pack', () => setDistrict('pack')],
+              ['Mina', 'mine', () => openDistrict('mine')],
+              ['Mercado', 'market', () => openDistrict('market')],
+              ['Mochila', 'pack', () => openDistrict('pack')],
             ] as Array<[string, string, () => void]>).map(([label, id, fn]) => {
               const on = id === 'vila'
                 ? !district && !lot && dockTab !== 'missoes'
@@ -431,37 +443,54 @@ const VillageHome: React.FC<Props> = ({
         <BuildingCard
           id={lot}
           onClose={() => setLot(null)}
-          onOpenMine={() => { setLot(null); setDistrict('mine'); }}
-          onOpenChest={() => { setLot(null); setDistrict('chest'); }}
+          onOpenMine={() => { setLot(null); openDistrict('mine'); }}
+          onOpenChest={() => { setLot(null); openDistrict('chest'); }}
           onOpenTower={() => { setLot(null); setDistrict('tower'); }}
-          onOpenWorkshop={() => { setLot(null); setDistrict('workshop'); }}
+          onOpenWorkshop={() => { setLot(null); openDistrict('npc:ferreiro'); }}
           onOpenQuiz={() => { setLot(null); onOpenQuiz(); }}
           onOpenBank={() => { setLot(null); setDistrict('bank'); }}
-          onOpenAgenda={() => { setLot(null); setDistrict('agenda'); }}
-          onOpenMarket={() => { setLot(null); setDistrict('market'); }}
+          onOpenAgenda={() => { setLot(null); openDistrict('agenda'); }}
+          onOpenMarket={() => { setLot(null); openDistrict('market'); }}
+          onCreateGoal={(title, gold, rewardId) => {
+            setGoalPreset({ title, targetGold: gold, rewardId });
+            if ((buildings.cofre || 0) < 1) {
+              setLot('cofre');
+              toast('Construa o Cofre para guardar essa meta');
+              return;
+            }
+            setLot(null);
+            setDistrict('bank');
+          }}
+          shopLocked={lockedShop}
         />
       )}
       {district === 'chest' && <DailyChest hour={hour} onClose={() => setDistrict(null)} />}
       {district === 'workshop' && (
         <Oficina
           onClose={() => setDistrict(null)}
-          onOpenPack={() => setDistrict('pack')}
+          onOpenPack={() => openDistrict('pack')}
           onOpenLot={(bid) => { setDistrict(null); setLot(bid as BuildingId); }}
         />
       )}
       {district === 'market' && (
         <Mercado
           onClose={() => setDistrict(null)}
-          onOpenRewards={() => setDistrict('market')}
+          onOpenRewards={() => openDistrict('market')}
           onCreateGoal={(title, gold, rewardId) => {
             setGoalPreset({ title, targetGold: gold, rewardId });
+            if ((buildings.cofre || 0) < 1) {
+              setDistrict(null);
+              setLot('cofre');
+              toast('Construa o Cofre para guardar essa meta');
+              return;
+            }
             setDistrict('bank');
           }}
-          onOpenPack={() => setDistrict('pack')}
+          onOpenPack={() => openDistrict('pack')}
         />
       )}
-      {district === 'pack' ? <Mochila onClose={() => setDistrict(null)} onOpenWorkshop={() => setDistrict('workshop')} onOpenMarket={() => setDistrict('market')} /> : null}
-      {district === 'editor' ? <CharacterEditor onClose={() => setDistrict(null)} onBuy={() => setDistrict('market')} /> : null}
+      {district === 'pack' ? <Mochila onClose={() => setDistrict(null)} onOpenWorkshop={() => openDistrict('npc:ferreiro')} onOpenMarket={() => openDistrict('market')} /> : null}
+      {district === 'editor' ? <CharacterEditor onClose={() => setDistrict(null)} onBuy={() => openDistrict('market')} /> : null}
       {district === 'mine' && <EnglishBase onClose={() => setDistrict(null)} />}
       {district === 'bank' && (
         <Cofrinho
@@ -487,7 +516,7 @@ const VillageHome: React.FC<Props> = ({
           done={done}
           due={due.length}
           chestReady={gate.ok}
-          onOpenChest={() => setDistrict('chest')}
+          onOpenChest={() => openDistrict('chest')}
           agendaItems={agendaItems}
         />
       )}

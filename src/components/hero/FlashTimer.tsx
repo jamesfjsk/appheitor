@@ -29,6 +29,7 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = fal
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const finishedOnceRef = useRef(false);
 
   // Preset times in seconds
   const presets = [
@@ -49,6 +50,7 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = fal
     setRemainingSeconds(sec);
     setIsFinished(false);
     setIsRunning(false);
+    finishedOnceRef.current = false;
   }, [minutes]);
   useEffect(() => {
     const initAudio = () => {
@@ -70,7 +72,10 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = fal
             setIsRunning(false);
             setIsFinished(true);
             playFinishSound();
-            onFinished?.();
+            if (!finishedOnceRef.current) {
+              finishedOnceRef.current = true;
+              onFinished?.();
+            }
             return 0;
           }
           return prev - 1;

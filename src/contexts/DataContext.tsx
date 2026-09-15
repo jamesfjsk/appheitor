@@ -5,7 +5,7 @@ import { useVacation } from './VacationContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus, Note } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp, calculateLevelSystem, emitMinerLevelUp } from '../utils/levelSystem';
-import { getTodayBrazil, nowBrazil } from '../utils/clock';
+import { addDays, getTodayBrazil, nowBrazil } from '../utils/clock';
 import { DAY_CHANGED_EVENT } from './ClockContext';
 import { getErrorMessage, getErrorCode } from '../utils/errors';
 import toast from 'react-hot-toast';
@@ -430,7 +430,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         checkAchievements();
       }, 1500);
 
-      const matLabel = loot.qty > 0 ? `, +${loot.qty} ${loot.material}` : '';
+      const shownQty = loot.qty > 0 && task.optional === true ? loot.qty * 2 : loot.qty;
+      const matLabel = shownQty > 0 ? `, +${shownQty} ${loot.material}` : '';
       const goldLabel = goldReward > 0 ? `+${goldReward} gold` : 'sem gold';
       toast.success(`${goldLabel}${matLabel}, +${xpReward} XP`);
 
@@ -443,8 +444,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             return full?.status === 'done' && full.lastCompletedDate === today;
           }).length;
           if (doneNow >= dueNow.length) {
-            const refund = await repairLot(childUid, today);
-            if (refund > 0) toast.success(`Lote consertado: +${refund} gold`);
+            const refund = await repairLot(childUid, addDays(today, -1));
+            toast.success(refund > 0 ? `Lote consertado: +${refund} gold` : 'Lote consertado');
           }
         }
       } catch (e) {
@@ -479,8 +480,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) throw new Error('Child UID não definido');
     const task = tasks.find((t) => t.id === taskId);
     if (!task) throw new Error('Tarefa não encontrada');
-    await FirestoreService.completeTaskWithRewards(taskId, childUid, task.xp ?? 10, task.gold ?? 5, undefined, { late: true });
-    toast.success('Missão recuperada (metade do gold, sem material)');
+    try {
+      await FirestoreService.completeTaskWithRewards(taskId, childUid, task.xp ?? 10, task.gold ?? 5, undefined, { late: true });
+      toast.success('Missão recuperada (metade do gold, sem material)');
+    } catch (error) {
+      const msg = getErrorMessage(error);
+      toast.error(msg === 'Missão já recuperada' ? msg : (msg || 'Não deu para recuperar'));
+      throw error;
+    }
   }, [childUid, tasks]);
 
   const addReward = useCallback(async (rewardData: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
@@ -1480,6 +1487,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       FirestoreService.processUnprocessedDays(childUid)
         .then(() => applyWeeklyInterest(childUid).catch(() => 0))
         .then(() => FirestoreService.resetOutdatedTasks(childUid))
+        .then(() => FirestoreService.deactivateExpiredExtras(childUid).catch(() => 0))
         .then(() => {
           setLastResetDate(currentDate);
         })

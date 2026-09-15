@@ -347,6 +347,24 @@ export class FirestoreService {
     }
   }
 
+  static async deactivateExpiredExtras(userId: string): Promise<number> {
+    const today = getTodayBrazil();
+    const snap = await getDocs(query(collection(db, 'tasks'), where('ownerId', '==', userId)));
+    const batch = writeBatch(db);
+    let n = 0;
+    for (const d of snap.docs) {
+      const data = d.data();
+      if (data.optional !== true || data.active === false) continue;
+      const date = data.date;
+      if (typeof date === 'string' && date < today) {
+        batch.update(d.ref, { active: false, updatedAt: serverTimestamp() });
+        n += 1;
+      }
+    }
+    if (n > 0) await batch.commit();
+    return n;
+  }
+
   static async deleteTask(taskId: string): Promise<void> {
     try {
       await deleteDoc(doc(db, 'tasks', taskId));
@@ -504,11 +522,15 @@ export class FirestoreService {
         if (!late && taskData.date && taskData.date !== today) {
           throw new Error('Essa extra não é de hoje');
         }
-        const completionRef = doc(db, 'taskCompletions', `${userId}_${taskId}_${date}`);
+        const completionKey = `${userId}_${taskId}_${date}`;
+        const completionRef = doc(db, 'taskCompletions', completionKey);
         const existingCompletion = await tx.get(completionRef);
         if (existingCompletion.exists() && existingCompletion.data().reverted !== true) {
           throw new Error(late ? 'Missão já recuperada' : 'Task already completed today');
         }
+        const writeRef = existingCompletion.exists()
+          ? doc(collection(db, 'taskCompletions'))
+          : completionRef;
         if (!late && taskData.lastCompletedDate === today) throw new Error('Task already completed today');
         if (late && taskData.lastCompletedDate === date) throw new Error('Task already completed today');
         if (!late && !periodAllowedAt(taskData.period || 'morning', hour, economy)) {
@@ -542,11 +564,12 @@ export class FirestoreService {
           updatedAt: serverTimestamp(),
         });
 
-        tx.set(completionRef, omitUndefined({
+        tx.set(writeRef, omitUndefined({
           taskId,
           userId,
           taskTitle,
           date,
+          key: completionKey,
           xpEarned: xpPay,
           goldEarned: goldPay,
           materialsEarned: lootPay && lootPay.qty > 0 ? { [lootPay.material]: lootPay.qty } : {},
@@ -1549,7 +1572,9 @@ export class FirestoreService {
               lastActivityDate: data.lastActivityDate?.toDate() || new Date(),
               updatedAt: data.updatedAt?.toDate() || new Date(),
               lastDailySummaryProcessedDate: data.lastDailySummaryProcessedDate?.toDate(),
-              quizEnabled: data.quizEnabled
+              quizEnabled: data.quizEnabled,
+              quizRequired: data.quizRequired === true,
+              quizQuestionCount: typeof data.quizQuestionCount === 'number' ? data.quizQuestionCount : undefined,
             };
             onUpdate(progress);
           } else {
@@ -1584,6 +1609,7 @@ export class FirestoreService {
               id: doc.id,
               userId: data.userId,
               rewardId: data.rewardId,
+              rewardTitle: typeof data.rewardTitle === 'string' ? data.rewardTitle : undefined,
               costGold: data.costGold || 0,
               status: data.status || 'pending',
               createdAt: data.createdAt?.toDate() || new Date(),
@@ -2446,13 +2472,20 @@ export class FirestoreService {
   static subscribeToPunishmentTaskHistory(
     punishmentId: string,
     onUpdate: (history: PunishmentTaskCompletion[]) => void,
-    onError?: (error: FirestoreError) => void
+    onError?: (error: FirestoreError) => void,
+    userId?: string
   ): () => void {
     try {
-      const historyQuery = query(
-        collection(db, 'punishmentTaskCompletions'),
-        where('punishmentId', '==', punishmentId)
-      );
+      const historyQuery = userId
+        ? query(
+          collection(db, 'punishmentTaskCompletions'),
+          where('punishmentId', '==', punishmentId),
+          where('userId', '==', userId)
+        )
+        : query(
+          collection(db, 'punishmentTaskCompletions'),
+          where('punishmentId', '==', punishmentId)
+        );
 
       return onSnapshot(
         historyQuery,

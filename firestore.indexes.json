@@ -257,6 +257,20 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "punishmentTaskCompletions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "punishmentId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

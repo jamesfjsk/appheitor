@@ -111,6 +111,7 @@ export function dayTimeline(
 }
 
 export function reminderDue(item: AgendaItem, now: BrazilNow): boolean {
+  if (item.doneAt) return false;
   if (item.remindedFor && item.remindedFor === item.date) return false;
   if (item.remindedAt && item.repeat !== 'weekly') return false;
   const minutes = item.remindMinutesBefore ?? 0;

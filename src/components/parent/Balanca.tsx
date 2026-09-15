@@ -20,7 +20,7 @@ const Balanca: React.FC = () => {
   }, [childUid]);
 
   const cut = useMemo(() => txsLastDays(txs, 7), [txs]);
-  const { earned, spent, saved, bySource, r7, rate, gamePct } = useMemo(
+  const { earned, spent, saved, bySource, spentBy, r7, rate, gamePct } = useMemo(
     () => balancaTotals(cut, DEFAULT_ECONOMY.incomeDayGold),
     [cut]
   );
@@ -52,8 +52,16 @@ const Balanca: React.FC = () => {
       <h3 className="text-lg font-semibold text-gray-900">Balança (7 dias)</h3>
       <p className="text-sm text-gray-700">Ganhou {earned} · Gastou {spent} · Guardou {saved} · Saldo {gold} ({days.toFixed(1)} D) · Poupança {rate}%</p>
       <ul className="text-sm text-gray-600 list-disc pl-5">
-        {Object.entries(bySource).map(([k, v]) => <li key={k}>{k}: {v}</li>)}
+        {Object.entries(bySource).map(([k, v]) => <li key={k}>{k}: +{v}</li>)}
       </ul>
+      {Object.keys(spentBy).length > 0 && (
+        <>
+          <p className="text-sm font-medium text-gray-800">Gastou por ralo</p>
+          <ul className="text-sm text-gray-600 list-disc pl-5">
+            {Object.entries(spentBy).map(([k, v]) => <li key={k}>{k}: −{v}</li>)}
+          </ul>
+        </>
+      )}
       {days > 14 && <p className="text-sm text-amber-700">Saldo parado &gt; 14 D</p>}
       {daysSinceSpend > 21 && <p className="text-sm text-amber-700">Nada comprado há 21 dias</p>}
       {gamePct > 30 && <p className="text-sm text-amber-700">Gold de jogo &gt; 30% ({gamePct}%)</p>}

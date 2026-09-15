@@ -52,10 +52,10 @@ const FALLBACK: SceneAnchors = {
   },
   hotspots: { mine: { x: 545, y: 32, w: 210, h: 138 } },
   lights: [
-    { id: 'mina', x: 640, y: 95, r: 90 },
-    { id: 'fogueira', x: 1045, y: 198, r: 70 },
-    { id: 'casa', x: 986, y: 148, r: 55 },
-    { id: 'forja', x: 90, y: 230, r: 50 },
+    { id: 'mina', x: 640, y: 96, r: 52 },
+    { id: 'fogueira', x: 1020, y: 210, r: 54 },
+    { id: 'poste-l', x: 382, y: 430, r: 40 },
+    { id: 'poste-r', x: 876, y: 442, r: 40 },
   ],
   water: { x: 1125, y: 345, w: 145, h: 125 },
   smokeOffset: { dx: 51, dy: 8 },
@@ -319,6 +319,143 @@ function nightOf(hour: number) {
   return hour >= 19 || hour < 6;
 }
 
+function isSkyPixel(r: number, g: number, b: number, y: number) {
+  if (y > 122) return false;
+  if (b > 180 && g > 120 && r < 170 && b > r + 40) return true;
+  if (b > 200 && g > 160 && r < 210 && b >= g) return true;
+  if (r > 175 && g > 185 && b > 200 && Math.abs(r - g) < 45 && Math.abs(g - b) < 55) return true;
+  return false;
+}
+
+function skyWeight(r: number, g: number, b: number, y: number) {
+  if (y > 122) return 0;
+  if (isSkyPixel(r, g, b, y)) return 1;
+  if (y < 108 && b > 128 && b >= g - 4 && b > r + 6 && g > 78 && r < 210) {
+    const how = Math.min(1, (b - r) / 85);
+    if (how > 0.22 && !(g > b + 18)) return how * 0.9;
+  }
+  return 0;
+}
+
+type NightStar = { x: number; y: number; s: number; p: number };
+type NightBake = { canvas: HTMLCanvasElement; stars: NightStar[] };
+
+const nightBake = new Map<string, NightBake>();
+let nightShade: HTMLCanvasElement | null = null;
+
+function bakeNight(source: HTMLImageElement): NightBake {
+  const key = `${source.src}|n4`;
+  const hit = nightBake.get(key);
+  if (hit) return hit;
+  const w = source.naturalWidth || source.width;
+  const h = source.naturalHeight || source.height;
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const c = canvas.getContext('2d');
+  if (!c) {
+    const empty = { canvas, stars: [] as NightStar[] };
+    nightBake.set(key, empty);
+    return empty;
+  }
+  c.drawImage(source, 0, 0);
+  const img = c.getImageData(0, 0, w, h);
+  const d = img.data;
+  const wt = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      wt[y * w + x] = skyWeight(d[i], d[i + 1], d[i + 2], y);
+    }
+  }
+  const dil = new Float32Array(w * h);
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const p = y * w + x;
+      if (wt[p] >= 0.95) continue;
+      const n = Math.max(wt[p - 1], wt[p + 1], wt[p - w], wt[p + w]);
+      if (n < 0.55) continue;
+      const i = p * 4;
+      const g = d[i + 1];
+      const b = d[i + 2];
+      if (g > b + 22) continue;
+      dil[p] = n * 0.72;
+    }
+  }
+  const sky: number[] = [];
+  for (let y = 0; y < h; y++) {
+    const t = Math.min(1, y / 108);
+    const sr = 8 + t * 14;
+    const sg = 14 + t * 20;
+    const sb = 48 + t * 38;
+    for (let x = 0; x < w; x++) {
+      const p = y * w + x;
+      const wSky = Math.max(wt[p], dil[p]);
+      const i = p * 4;
+      const r = d[i];
+      const g = d[i + 1];
+      const b = d[i + 2];
+      if (wSky > 0.04) {
+        const cloud = r > 200 && g > 200 && b > 200 ? 1 : 0;
+        d[i] = Math.round(r * (1 - wSky) + (sr + cloud * 32) * wSky);
+        d[i + 1] = Math.round(g * (1 - wSky) + (sg + cloud * 26) * wSky);
+        d[i + 2] = Math.round(b * (1 - wSky) + (sb + cloud * 18) * wSky);
+        if (wSky > 0.7 && (x + y * 3) % 11 === 0) sky.push(x, y);
+      } else if (y < 138) {
+        d[i] = Math.round(r * 0.7 + 6);
+        d[i + 1] = Math.round(g * 0.72 + 10);
+        d[i + 2] = Math.min(255, Math.round(b * 0.88 + 26));
+      }
+    }
+  }
+  c.putImageData(img, 0, 0);
+  const stars: NightStar[] = [];
+  const pairs = Math.floor(sky.length / 2);
+  for (let i = 0; i < 96 && pairs > 0; i++) {
+    const idx = ((i * 37 + 11) % pairs) * 2;
+    stars.push({
+      x: sky[idx],
+      y: sky[idx + 1],
+      s: i % 12 === 0 ? 2 : 1,
+      p: i * 0.73,
+    });
+  }
+  const baked = { canvas, stars };
+  nightBake.set(key, baked);
+  return baked;
+}
+
+function paintNightSky(
+  ctx: CanvasRenderingContext2D,
+  stars: NightStar[],
+  elapsed: number,
+  reduced: boolean,
+  moon: HTMLImageElement | null,
+) {
+  ctx.save();
+  stars.forEach((st) => {
+    const tw = reduced ? 0.8 : 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(elapsed * 1.7 + st.p));
+    ctx.globalAlpha = tw;
+    ctx.fillStyle = st.s > 1 ? '#fff4c4' : '#e4ecff';
+    ctx.fillRect(st.x, st.y, st.s, st.s);
+  });
+  ctx.globalAlpha = 1;
+  const mx = 236;
+  const my = 14;
+  ctx.fillStyle = 'rgba(186, 206, 255, 0.18)';
+  ctx.beginPath();
+  ctx.arc(mx + 20, my + 20, 36, 0, Math.PI * 2);
+  ctx.fill();
+  if (moon) ctx.drawImage(moon, mx, my, 40, 40);
+  else {
+    ctx.fillStyle = '#efe9c6';
+    ctx.beginPath();
+    ctx.arc(mx + 20, my + 20, 15, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 type Lamp = {
   x: number;
   y: number;
@@ -334,31 +471,30 @@ function nightLamps(
 ): Lamp[] {
   const lamps: Lamp[] = [];
   anchors.lights.forEach((l) => {
-    if (l.id === 'mina') lamps.push({ x: l.x, y: l.y, r: 56, rgb: [255, 210, 140], base: 0.34, flicker: 0.04 });
-    if (l.id === 'fogueira') lamps.push({ x: l.x, y: l.y, r: 42, rgb: [255, 150, 70], base: 0.38, flicker: 0.12 });
-    if (l.id === 'casa') lamps.push({ x: l.x, y: l.y, r: 68, rgb: [255, 196, 90], base: 0.44, flicker: 0.05 });
-    if (l.id === 'forja') lamps.push({ x: l.x, y: l.y, r: 40, rgb: [255, 130, 50], base: 0.3, flicker: 0.1 });
+    if (l.id === 'mina') lamps.push({ x: l.x, y: l.y, r: 52, rgb: [255, 214, 150], base: 0.36, flicker: 0.03 });
+    if (l.id === 'fogueira') lamps.push({ x: l.x, y: l.y, r: 54, rgb: [255, 150, 70], base: 0.62, flicker: 0.14 });
+    if (l.id.startsWith('poste')) lamps.push({ x: l.x, y: l.y, r: 38, rgb: [255, 196, 92], base: 0.52, flicker: 0.05 });
   });
+  const house = anchors.house;
+  if (house) {
+    lamps.push({
+      x: house.x + house.w * 0.55,
+      y: house.y + house.h * 0.38,
+      r: 48,
+      rgb: [255, 196, 90],
+      base: 0.42,
+      flicker: 0.04,
+    });
+  }
   const furnace = anchors.lots.find((l) => l.id === 'fornalha');
   if (furnace && (buildings.fornalha || 0) >= 1) {
     lamps.push({
-      x: furnace.x + furnace.w * 0.5,
-      y: furnace.y + furnace.h * 0.48,
-      r: 32,
+      x: furnace.x + furnace.w * 0.52,
+      y: furnace.y + furnace.h * 0.55,
+      r: 46,
       rgb: [255, 140, 60],
-      base: 0.32,
-      flicker: 0.1,
-    });
-  }
-  const torre = anchors.lots.find((l) => l.id === 'torre');
-  if (torre && (buildings.torre || 0) >= 1) {
-    lamps.push({
-      x: torre.x + torre.w * 0.5,
-      y: torre.y + 8,
-      r: 16,
-      rgb: [255, 214, 140],
-      base: 0.22,
-      flicker: 0.06,
+      base: 0.55,
+      flicker: 0.12,
     });
   }
   return lamps;
@@ -368,14 +504,59 @@ function paintLamp(ctx: CanvasRenderingContext2D, lamp: Lamp, elapsed: number, r
   const wave = reduced ? 1 : 1 + lamp.flicker * Math.sin(elapsed * 5.2 + lamp.x * 0.02);
   const a = lamp.base * wave;
   const g = ctx.createRadialGradient(lamp.x, lamp.y, 0, lamp.x, lamp.y, lamp.r);
-  g.addColorStop(0, `rgba(${lamp.rgb[0]},${lamp.rgb[1]},${lamp.rgb[2]},${Math.min(0.36, a)})`);
-  g.addColorStop(0.18, `rgba(${lamp.rgb[0]},${lamp.rgb[1]},${lamp.rgb[2]},${a * 0.14})`);
-  g.addColorStop(0.55, `rgba(${lamp.rgb[0]},${lamp.rgb[1]},${lamp.rgb[2]},${a * 0.04})`);
+  g.addColorStop(0, `rgba(${lamp.rgb[0]},${lamp.rgb[1]},${lamp.rgb[2]},${Math.min(0.55, a)})`);
+  g.addColorStop(0.22, `rgba(${lamp.rgb[0]},${lamp.rgb[1]},${lamp.rgb[2]},${a * 0.22})`);
+  g.addColorStop(0.6, `rgba(${lamp.rgb[0]},${lamp.rgb[1]},${lamp.rgb[2]},${a * 0.07})`);
   g.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = g;
   ctx.beginPath();
   ctx.arc(lamp.x, lamp.y, lamp.r, 0, Math.PI * 2);
   ctx.fill();
+}
+
+function paintNightLighting(
+  ctx: CanvasRenderingContext2D,
+  W: number,
+  H: number,
+  lamps: Lamp[],
+  elapsed: number,
+  reduced: boolean,
+) {
+  if (!nightShade) nightShade = document.createElement('canvas');
+  if (nightShade.width !== W || nightShade.height !== H) {
+    nightShade.width = W;
+    nightShade.height = H;
+  }
+  const d = nightShade.getContext('2d');
+  if (!d) return;
+  d.globalCompositeOperation = 'source-over';
+  d.clearRect(0, 0, W, H);
+  const veil = d.createLinearGradient(0, 56, 0, H);
+  veil.addColorStop(0, 'rgba(8, 12, 32, 0)');
+  veil.addColorStop(0.12, 'rgba(10, 16, 40, 0.38)');
+  veil.addColorStop(0.32, 'rgba(8, 14, 36, 0.58)');
+  veil.addColorStop(1, 'rgba(6, 10, 28, 0.7)');
+  d.fillStyle = veil;
+  d.fillRect(0, 0, W, H);
+  d.globalCompositeOperation = 'destination-out';
+  lamps.forEach((lamp) => {
+    const wave = reduced ? 1 : 1 + lamp.flicker * Math.sin(elapsed * 5.2 + lamp.x * 0.02);
+    const rad = lamp.r * 1.45;
+    const g = d.createRadialGradient(lamp.x, lamp.y, 0, lamp.x, lamp.y, rad);
+    g.addColorStop(0, `rgba(0,0,0,${0.88 * wave})`);
+    g.addColorStop(0.4, `rgba(0,0,0,${0.5 * wave})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    d.fillStyle = g;
+    d.beginPath();
+    d.arc(lamp.x, lamp.y, rad, 0, Math.PI * 2);
+    d.fill();
+  });
+  d.globalCompositeOperation = 'source-over';
+  ctx.drawImage(nightShade, 0, 0);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  lamps.forEach((lamp) => paintLamp(ctx, lamp, elapsed, reduced));
+  ctx.restore();
 }
 
 function skyPair(hour: number): [string, string] {
@@ -437,26 +618,6 @@ function paintBirds(ctx: CanvasRenderingContext2D, W: number, elapsed: number) {
   }
 }
 
-function paintCampfire(ctx: CanvasRenderingContext2D, x: number, y: number, elapsed: number, reduced: boolean) {
-  const glow = ctx.createRadialGradient(x, y, 2, x, y, 38);
-  glow.addColorStop(0, `rgba(255, 170, 50, ${reduced ? 0.28 : 0.34 + 0.08 * Math.sin(elapsed * 6)})`);
-  glow.addColorStop(1, 'rgba(255, 120, 20, 0)');
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(x, y, 38, 0, Math.PI * 2);
-  ctx.fill();
-  const n = reduced ? 3 : 7;
-  for (let i = 0; i < n; i++) {
-    const t = elapsed * (2.8 + i * 0.15) + i;
-    const fx = x + Math.sin(t) * (4 + i);
-    const fy = y - 6 - (i * 3 + (t % 10));
-    ctx.fillStyle = i % 2 ? `rgba(255, 210, 80, ${0.5 - i * 0.05})` : `rgba(255, 90, 20, ${0.55 - i * 0.04})`;
-    ctx.beginPath();
-    ctx.arc(fx, fy, reduced ? 3 : 2 + (i % 3), 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
 interface Props {
   village: VillageDoc;
   buildings: Record<BuildingId, number>;
@@ -496,7 +657,7 @@ const VillageScene: React.FC<Props> = ({
 
   useEffect(() => {
     let alive = true;
-        fetch(`${ANCHORS_URL}?v=pack2`)
+        fetch(`${ANCHORS_URL}?v=lamps1`)
       .then((r) => r.json())
       .then((j: SceneAnchors) => {
         if (alive && j?.size?.w) {
@@ -566,34 +727,38 @@ const VillageScene: React.FC<Props> = ({
       ctx.clearRect(0, 0, W, H);
 
       const moon = img(MOON, bump);
-      paintSky(ctx, W, night, hour, elapsed, reducedMotion, moon);
+      const ground = img(BACKDROP, bump);
+      const nightGround = night && ground ? bakeNight(ground) : null;
 
-      if (!reducedMotion) {
+      if (!ground) {
+        paintSky(ctx, W, night, hour, elapsed, reducedMotion, moon);
+      } else if (!night) {
+        paintSky(ctx, W, false, hour, elapsed, reducedMotion, moon);
+      }
+
+      if (!reducedMotion && !night) {
         const clouds = img(CLOUDS, bump);
         if (clouds) {
           ctx.save();
           ctx.beginPath();
           ctx.rect(0, 0, W, SKY_H);
           ctx.clip();
-          if (!night) {
-            const x1 = ((elapsed * 12) % (W + 512)) - 512;
-            const x2 = ((elapsed * 8 + 400) % (W + 512)) - 512;
-            ctx.globalAlpha = 0.55;
-            ctx.drawImage(clouds, x1, 8, 512, 128);
-            ctx.globalAlpha = 0.32;
-            ctx.drawImage(clouds, x2, 40, 512, 128);
-          } else {
-            ctx.globalAlpha = 0.18;
-            ctx.drawImage(clouds, 80, 10, 512, 128);
-          }
+          const x1 = ((elapsed * 12) % (W + 512)) - 512;
+          const x2 = ((elapsed * 8 + 400) % (W + 512)) - 512;
+          ctx.globalAlpha = 0.55;
+          ctx.drawImage(clouds, x1, 8, 512, 128);
+          ctx.globalAlpha = 0.32;
+          ctx.drawImage(clouds, x2, 40, 512, 128);
           ctx.restore();
         }
-        if (!night) paintBirds(ctx, W, elapsed);
+        paintBirds(ctx, W, elapsed);
       }
 
-      const ground = img(BACKDROP, bump);
-      if (ground) ctx.drawImage(ground, 0, 0, W, H);
-      else {
+      if (nightGround) {
+        ctx.drawImage(nightGround.canvas, 0, 0, W, H);
+      } else if (ground) {
+        ctx.drawImage(ground, 0, 0, W, H);
+      } else {
         ctx.fillStyle = '#5b9b3a';
         ctx.fillRect(0, 0, W, H);
       }
@@ -860,7 +1025,6 @@ const VillageScene: React.FC<Props> = ({
       }
 
       const camp = anchors.lights.find((l) => l.id === 'fogueira');
-      if (camp) paintCampfire(ctx, camp.x, camp.y, elapsed, reducedMotion);
       if (camp && !reducedMotion) {
         if (embers.current.length < 10 && Math.random() < 0.2) {
           embers.current.push({
@@ -914,14 +1078,13 @@ const VillageScene: React.FC<Props> = ({
       } else if (hour >= 16 && hour < 19) {
         ctx.fillStyle = 'rgba(255,130,60,0.2)';
         ctx.fillRect(0, 0, W, H);
-      } else if (night) {
-        ctx.fillStyle = 'rgba(8, 14, 32, 0.5)';
-        ctx.fillRect(0, 0, W, H);
       }
       ctx.restore();
 
       if (night) {
-        nightLamps(anchors, buildings).forEach((lamp) => paintLamp(ctx, lamp, elapsed, reducedMotion));
+        const lamps = nightLamps(anchors, buildings);
+        paintNightLighting(ctx, W, H, lamps, elapsed, reducedMotion);
+        if (nightGround) paintNightSky(ctx, nightGround.stars, elapsed, reducedMotion, moon);
         if (!reducedMotion) {
           flies.current.forEach((f, i) => {
             const x = f.x + Math.sin(elapsed * 0.8 + f.p) * 28;

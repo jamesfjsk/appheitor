@@ -24,7 +24,7 @@ const SOURCE_LABEL: Record<string, string> = {
   shop: 'Loja',
 };
 
-const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ onClose, embedded }) => {
+const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: boolean }> = ({ onClose, embedded, monthly }) => {
   const { childUid } = useAuth();
   const { economy } = useVillage();
   const { today } = useClock();
@@ -61,7 +61,10 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ onClo
     <div className="space-y-3">
       {rows.map((r) => (
         <div key={r.weekIso} className="mc-card p-3 text-sm space-y-1">
-          <p className="font-bold">Semana {r.weekIso.replace('W', '')}</p>
+          <p className="font-bold">Semana {(() => {
+            const [y, w] = r.weekIso.split('-W');
+            return `${Number(w)} de ${y}`;
+          })()}</p>
           <p>Ganhou <span className="mc-num" style={{ fontSize: 12 }}>{r.earned}</span> · Gastou <span className="mc-num" style={{ fontSize: 12 }}>{r.spent}</span></p>
           <p>Guardou <span className="mc-num" style={{ fontSize: 12 }}>{r.saved}</span> · Juros <span className="mc-num" style={{ fontSize: 12 }}>{r.interest}</span>{r.interest > 0 ? ' · paciência rendeu +' + r.interest : ''}</p>
           <p>Guardou {r.savingsRatePct}% do que ganhou (alvo {economy.savingsTargetPct}%).</p>
@@ -77,6 +80,12 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ onClo
           </p>
         ))}
       </div>
+      {monthly && (
+        <div className="mc-card p-3 space-y-1">
+          <p className="font-bold text-sm">Extrato mensal</p>
+          <p className="text-sm">Ganhou {txs.filter((t) => t.amount > 0 && t.type !== 'saved').reduce((s, t) => s + t.amount, 0)} · Guardou {txs.filter((t) => t.source === 'goal_deposit').reduce((s, t) => s + Math.abs(t.amount), 0)}</p>
+        </div>
+      )}
       {monthHonest && (
         <p className="text-sm mc-muted">Na poupança de verdade, 100 reais rendem menos de 1 real por mês; aqui o bônus é maior de propósito, para você treinar.</p>
       )}

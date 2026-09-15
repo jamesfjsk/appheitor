@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
@@ -27,6 +27,11 @@ const Mochila: React.FC<{
   const level = calculateLevelSystem(progress.totalXP || 0).currentLevel;
   const [tab, setTab] = useState(startTab);
   const newSet = useMemo(() => new Set(village.newItems || []), [village.newItems]);
+  const close = () => {
+    void seeItems();
+    onClose();
+  };
+  useEffect(() => () => { void seeItems(); }, [seeItems]);
 
   const equippedId = (slot: SlotId): string | null => {
     if (slot === 'pickaxe') {
@@ -44,11 +49,11 @@ const Mochila: React.FC<{
   const gearItems = ITEMS.filter((i) => i.kind === 'gear');
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-2" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-2" onClick={close}>
       <div className="mc-modal rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
         <div className="p-4 border-b-4 border-[#17130f] flex justify-between">
           <h2 className="mc-title text-sm">Mochila</h2>
-          <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
+          <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={close} aria-label="Fechar"><X /></button>
         </div>
         <div className="mc-hotbar p-3">
           {([
@@ -57,7 +62,7 @@ const Mochila: React.FC<{
             ['gear', 'Equipamentos'],
             ['mats', 'Materiais'],
           ] as const).map(([id, label]) => (
-            <button key={id} type="button" className={`mc-slot rounded px-3 ${tab === id ? 'mc-slot-selected' : ''}`} onClick={() => { playClick(); setTab(id); if (id !== 'equip') void seeItems(); }}>
+            <button key={id} type="button" className={`mc-slot rounded px-3 ${tab === id ? 'mc-slot-selected' : ''}`} onClick={() => { playClick(); setTab(id); }}>
               {label}
             </button>
           ))}

@@ -71,6 +71,10 @@ const Agenda: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const save = async () => {
     if (!childUid) return;
+    if (!title.trim()) {
+      toast.error('Dê um nome ao compromisso');
+      return;
+    }
     playClick();
     try {
       if (editing) {
@@ -78,17 +82,17 @@ const Agenda: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           title: title.trim().slice(0, 40),
           kind,
           date,
-          time: time || undefined,
+          time: time.trim(),
           remindMinutesBefore: remind,
           repeat,
-          notes: notes.trim().slice(0, 140) || undefined,
+          notes: notes.trim().slice(0, 140),
         });
         toast.success('Compromisso atualizado');
         resetForm();
         return;
       }
       const id = await createAgendaItem(childUid, {
-        title,
+        title: title.trim(),
         kind,
         date,
         time: time || undefined,
@@ -98,10 +102,13 @@ const Agenda: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         createdBy: 'child',
       });
       toast.success('Compromisso salvo');
-      setTitle('');
-      if (kind === 'prova' || kind === 'trabalho') {
+      const savedKind = kind;
+      const savedDate = date;
+      const savedTitle = title;
+      resetForm();
+      if (savedKind === 'prova' || savedKind === 'trabalho') {
         setAskPlan(id);
-        setPlanDays(studyPlanFor({ kind, date, title }, today));
+        setPlanDays(studyPlanFor({ kind: savedKind, date: savedDate, title: savedTitle }, today));
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Não deu certo');

@@ -64,7 +64,15 @@ service cloud.firestore {
         signedIn()
         && resource.data.ownerId == request.auth.uid
         && resource.data.status != 'proposed'
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'lastCompletedDate', 'updatedAt'])
+        && (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'lastCompletedDate', 'updatedAt'])
+          || (
+            resource.data.origin == 'agenda'
+            && resource.data.optional == true
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'updatedAt'])
+            && request.resource.data.active == false
+          )
+        )
       );
 
       // ---------- TASK COMPLETIONS (subcoleção) ----------
@@ -208,7 +216,13 @@ service cloud.firestore {
       allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
       allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.reverted == true
+        && request.resource.data.userId == request.auth.uid
+      );
+      allow delete: if isAdmin();
     }
 
     // Progress Snapshots (audit trail)

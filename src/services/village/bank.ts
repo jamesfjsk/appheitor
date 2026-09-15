@@ -30,10 +30,6 @@ export function vaultGoalCap(vaultLevel: number): number {
   return 0;
 }
 
-export function vaultInterestRatePct(): number {
-  return DEFAULT_ECONOMY.interestRatePct ?? 5;
-}
-
 export function weeklyInterest(
   goals: Array<Pick<GoalDoc, 'id' | 'status' | 'savedGold' | 'lastInterestWeek'>>,
   weekIso: string,
@@ -137,7 +133,7 @@ export function weeklyStatement(
       spent += Math.abs(t.amount);
     }
   }
-  const savingsRatePct = earned > 0 ? Math.round((saved / earned) * 100) : 0;
+  const savingsRatePct = earned > 0 ? Math.min(100, Math.round((saved / earned) * 100)) : 0;
   return { weekIso, earned, spent, saved, interest, savingsRatePct, bySource };
 }
 
@@ -149,5 +145,5 @@ export function savingsRate(transactionsMonth: GoldTransaction[]): number {
     .filter((t) => t.source === 'goal_deposit')
     .reduce((s, t) => s + Math.abs(t.amount), 0);
   if (earned <= 0) return 0;
-  return Math.round((saved / earned) * 100);
+  return Math.min(100, Math.round((saved / earned) * 100));
 }

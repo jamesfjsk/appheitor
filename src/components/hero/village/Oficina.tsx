@@ -70,7 +70,7 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
                   if (!item) return null;
                   const current = g.slot === 'pickaxe' ? village.gear.pickaxe : village.gear[g.slot];
                   const check = canCraft(materials, village.rare, g.id, current, level);
-                  const state = check.reason === 'already' ? 'seu' : check.reason === 'level' ? 'bloqueado' : 'a_venda';
+                  const state = check.reason === 'already' ? 'seu' : check.reason === 'soon' ? 'em_breve' : check.reason === 'level' ? 'bloqueado' : 'a_venda';
                   return (
                     <ItemSlot
                       key={g.id}
@@ -157,7 +157,9 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
                         <p className="text-xs mc-muted mt-1">Próximo: {MATERIALS.filter((m) => (cost[m] || 0) > 0).map((m) => `${cost[m]} ${MATERIAL_LABELS[m]}`).join(' · ')}</p>
                       )}
                     </div>
-                    <button type="button" className="mc-btn mc-btn-stone min-h-[36px] px-2" onClick={() => { playClick(); onOpenLot?.(b.id); }}>{bLevel === 0 ? 'Construir' : 'Melhorar'}</button>
+                    <button type="button" className="mc-btn mc-btn-stone min-h-[36px] px-2" onClick={() => { playClick(); onOpenLot?.(b.id); }}>
+                      {bLevel === 0 ? 'Construir' : (b.liveMaxLevel ?? 3) <= bLevel ? 'Ver' : 'Melhorar'}
+                    </button>
                   </div>
                 );
               })}

@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
+import { useVillage } from '../../contexts/VillageContext';
 import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { getTodayBrazil } from '../../utils/clock';
@@ -27,6 +28,7 @@ const QUIZ_DONE_KEY = (uid: string, date: string) => `quiz_completed_${uid}_${da
 const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const { childUid } = useAuth();
   const { progress } = useData();
+  const { economy } = useVillage();
   const { playTaskComplete, playLevelUp, playError, playClick } = useSound();
 
   const today = getTodayBrazil();
@@ -142,7 +144,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
     try {
       const correct = finalAnswers.filter((a, i) => quiz.questions[i] && a === quiz.questions[i].answer).length;
       const total = quiz.questions.length;
-      const r = quizRewards(correct, total);
+      const r = quizRewards(correct, total, economy);
       setScore(correct);
       setReward(r);
 

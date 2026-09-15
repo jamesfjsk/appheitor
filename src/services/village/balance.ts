@@ -22,6 +22,34 @@ export function txsLastDays(txs: GoldTransaction[], days: number, nowMs = Date.n
   });
 }
 
+const DRAIN_LABEL: Record<string, string> = {
+  reward_redemption: 'Prêmios',
+  shop: 'Loja',
+  goal_withdraw: 'Devolveu do Cofrinho',
+  task_reversal: 'Missão desfeita',
+};
+
+const SOURCE_LABEL: Record<string, string> = {
+  task_completion: 'Missão',
+  quiz: 'Prova',
+  chest: 'Baú do Dia',
+  streak_chest: 'Baú das tochas',
+  challenge: 'Desafio',
+  merchant_sale: 'Comerciante',
+  goal_deposit: 'Guardou no Cofrinho',
+  goal_withdraw: 'Devolveu do Cofrinho',
+  goal_interest: 'Bônus de paciência',
+  repair: 'Conserto',
+  late_task: 'Missão recuperada',
+  reward_redemption: 'Prêmio',
+  shop: 'Loja',
+  achievement: 'Conquista',
+};
+
+export function sourceLabel(source: string): string {
+  return SOURCE_LABEL[source] || source;
+}
+
 export function balancaTotals(cut: GoldTransaction[], fallbackR7 = DEFAULT_ECONOMY.incomeDayGold) {
   const earned = cut
     .filter((t) => t.amount > 0 && t.type !== 'saved' && t.source !== 'goal_interest')
@@ -36,7 +64,15 @@ export function balancaTotals(cut: GoldTransaction[], fallbackR7 = DEFAULT_ECONO
   for (const t of cut) {
     if (t.amount <= 0) continue;
     if (t.type === 'saved') continue;
-    bySource[t.source] = (bySource[t.source] || 0) + t.amount;
+    const label = sourceLabel(t.source);
+    bySource[label] = (bySource[label] || 0) + t.amount;
+  }
+  const spentBy: Record<string, number> = {};
+  for (const t of cut) {
+    if (t.amount >= 0) continue;
+    if (t.type === 'saved') continue;
+    const label = DRAIN_LABEL[t.source] || sourceLabel(t.source);
+    spentBy[label] = (spentBy[label] || 0) + Math.abs(t.amount);
   }
   const r7 = referenceIncome(cut, fallbackR7);
   const gameGold = cut
@@ -47,6 +83,7 @@ export function balancaTotals(cut: GoldTransaction[], fallbackR7 = DEFAULT_ECONO
     spent,
     saved,
     bySource,
+    spentBy,
     r7,
     rate: savingsRate(cut),
     gameGold,

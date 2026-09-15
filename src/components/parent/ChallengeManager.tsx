@@ -57,7 +57,7 @@ const ChallengeManager: React.FC = () => {
         <div key={c.id} className="border border-gray-200 rounded p-3 flex flex-wrap justify-between gap-2">
           <div>
             <p className="font-medium">{c.title}</p>
-            <p className="text-sm text-gray-600">{c.progress}/{c.target} · {c.status} · até {c.endsOn}</p>
+            <p className="text-sm text-gray-600">{c.progress}/{c.target} · {c.status === 'proposed' ? 'proposta' : c.status === 'active' ? 'ativa' : c.status} · até {c.endsOn.split('-').reverse().slice(0, 2).join('/')}{c.status === 'proposed' ? ` · +${c.goldReward} gold, +${c.xpReward} XP, meta ${c.target}` : ''}</p>
           </div>
           {c.status === 'proposed' && (
             <div className="flex gap-2">
