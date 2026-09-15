@@ -196,7 +196,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             if (shouldComplete && !existingUserAchievement.isCompleted) {
               achievementsUnlocked++;
               playAchievement();
-              toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
+              toast.success(`Conquista desbloqueada: ${achievement.title}`, {
                 duration: 6000
               });
               console.log(`✅ Achievement unlocked: ${achievement.title}`);
@@ -223,7 +223,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           if (shouldComplete) {
             achievementsUnlocked++;
             playAchievement();
-            toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
+            toast.success(`Conquista desbloqueada: ${achievement.title}`, {
               duration: 6000
             });
             console.log(`✅ New achievement unlocked: ${achievement.title}`);
@@ -331,16 +331,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
         if (streakResult.streakIncreased) {
           setTimeout(() => {
-            toast.success(`🔥 Sequência de ${streakResult.streak} dias!`, {
+            toast.success(`Sequência de ${streakResult.streak} dias`, {
               duration: 4000,
-              icon: '🔥'
+              icon: undefined
             });
           }, 1000);
         }
 
         if (streakResult.streakReset) {
           setTimeout(() => {
-            toast('💔 Sequência resetada. Comece uma nova!', {
+            toast('Sequência zerada. Hoje começa uma nova.', {
               duration: 4000
             });
           }, 1000);
@@ -355,7 +355,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       if (levelUpCheck.leveledUp) {
         playLevelUp();
-        toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
+        toast.success(`Nível ${levelUpCheck.newLevel} alcançado`, {
           duration: 5000
         });
 
@@ -364,7 +364,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         if (newlyUnlockedRewards.length > 0) {
           setTimeout(() => {
             newlyUnlockedRewards.forEach(reward => {
-              toast.success(`🎁 Nova recompensa desbloqueada: ${reward.title}!`);
+              toast.success(`Nova recompensa liberada: ${reward.title}`);
             });
           }, 2000);
         }
@@ -383,7 +383,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('❌ Erro ao completar tarefa:', error);
       if (getErrorMessage(error) === 'Task already completed today') {
-        toast('⚠️ Tarefa já foi completada hoje!');
+        toast('Missão já feita hoje. Volta amanhã.');
       } else {
         toast.error('Erro ao completar tarefa');
         // Revert optimistic update
@@ -521,7 +521,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       console.log('💰 DataContext: Gold check passed. Calling FirestoreService...');
       await FirestoreService.redeemReward(childUid, rewardId, reward.costGold || 0);
       console.log('✅ DataContext: Reward redemption completed successfully!');
-      toast.success('🎁 Recompensa solicitada! Aguarde aprovação.');
+      toast.success('Troca pedida. Aguarde a aprovação.');
     } catch (error) {
       console.error('❌ Erro ao resgatar recompensa:', error);
       const message = getErrorMessage(error);
@@ -543,7 +543,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     
     try {
       await FirestoreService.approveRedemption(redemptionId, approved, user.userId);
-      toast.success(approved ? '✅ Resgate aprovado!' : '❌ Resgate rejeitado!');
+      toast.success(approved ? 'Troca aprovada.' : 'Troca recusada.');
     } catch (error) {
       console.error('❌ Erro ao processar resgate:', error);
       toast.error('Erro ao processar resgate');
@@ -562,7 +562,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         type,
         read: false
       });
-      toast.success('📤 Notificação enviada para o Heitor!');
+      toast.success('Notificação enviada para o Heitor.');
     } catch (error) {
       console.error('❌ Erro ao enviar notificação:', error);
       toast.error('Erro ao enviar notificação');
@@ -589,7 +589,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     
     try {
       await FirestoreService.createFlashReminder(completeReminderData);
-      toast.success('Lembrete Flash criado com sucesso!');
+      toast.success('Lembrete criado.');
     } catch (error) {
       console.error('❌ Erro ao criar lembrete:', error);
       toast.error('Erro ao criar lembrete');
@@ -600,7 +600,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const updateFlashReminder = useCallback(async (reminderId: string, updates: Partial<FlashReminder>) => {
     try {
       await FirestoreService.updateFlashReminder(reminderId, updates);
-      toast.success('Lembrete Flash atualizado com sucesso!');
+      toast.success('Lembrete atualizado.');
     } catch (error) {
       console.error('❌ Erro ao atualizar lembrete:', error);
       toast.error('Erro ao atualizar lembrete');
@@ -611,7 +611,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const deleteFlashReminder = useCallback(async (reminderId: string) => {
     try {
       await FirestoreService.deleteFlashReminder(reminderId);
-      toast.success('Lembrete Flash excluído com sucesso!');
+      toast.success('Lembrete excluído.');
     } catch (error) {
       console.error('❌ Erro ao excluir lembrete:', error);
       toast.error('Erro ao excluir lembrete');
@@ -751,7 +751,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           finalGold,
           'earned',
           'surprise_mission',
-          `⚡ Missão Surpresa: ${score} de ${totalQuestions} acertos`,
+          `Missão Surpresa: ${score} de ${totalQuestions} acertos`,
           {
             metadata: {
               score,
@@ -769,7 +769,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const levelUpCheck = checkLevelUp(previousXP, newTotalXP);
       if (levelUpCheck.leveledUp) {
         playLevelUp();
-        toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
+        toast.success(`Nível ${levelUpCheck.newLevel} alcançado`, {
           duration: 5000
         });
       }
@@ -785,7 +785,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       toast.success(
         vacationActive
           ? `Ferias em dobro! Missao Surpresa: +${finalXP} XP, +${finalGold} Gold!`
-          : `🎯 Missão Surpresa completada! +${finalXP} XP, +${finalGold} Gold!`
+          : `Missão Surpresa concluída: +${finalXP} XP, +${finalGold} gold`
       );
     } catch (error) {
       console.error('❌ Erro ao completar missão surpresa:', error);
@@ -849,7 +849,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               });
               
               playAchievement();
-              toast.success(`🏆 Conquista desbloqueada: ${achievement.title}!`, {
+              toast.success(`Conquista desbloqueada: ${achievement.title}`, {
                 duration: 6000
               });
             } else {
@@ -896,7 +896,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           achievement.goldReward,
           'earned',
           'achievement',
-          `🏆 Conquista desbloqueada: ${achievement.title}`,
+          `Conquista desbloqueada: ${achievement.title}`,
           {
             relatedId: achievement.id,
             relatedTitle: achievement.title,
@@ -908,7 +908,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         );
       }
 
-      toast.success(`🏆 Conquista resgatada! +${achievement.xpReward} XP, +${achievement.goldReward} Gold!`, {
+      toast.success(`Recompensa resgatada: +${achievement.xpReward} XP, +${achievement.goldReward} gold`, {
         duration: 5000
       });
     } catch (error) {
@@ -940,7 +940,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       
       if (levelUpCheck.leveledUp) {
         playLevelUp();
-        toast.success(`🎉 LEVEL UP! Você alcançou o nível ${levelUpCheck.newLevel}!`, {
+        toast.success(`Nível ${levelUpCheck.newLevel} alcançado`, {
           duration: 5000
         });
       
@@ -949,7 +949,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           if (newlyUnlockedRewards.length > 0) {
             setTimeout(() => {
               newlyUnlockedRewards.forEach(reward => {
-                toast.success(`🎁 Nova recompensa desbloqueada: ${reward.title}!`);
+                toast.success(`Nova recompensa liberada: ${reward.title}`);
               });
             }, 2000);
           }
@@ -1432,7 +1432,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           })
           .then(resetCount => {
             console.log(`✅ AUTO-RESET: ${resetCount} tasks reset for new day`);
-            toast.success(`🌅 Novo dia! Penalidades/bônus processados e ${resetCount} tarefas resetadas.`);
+            toast.success(`Novo dia: ${resetCount} missões prontas para hoje.`);
             setLastResetDate(currentDate);
           })
           .catch(error => {

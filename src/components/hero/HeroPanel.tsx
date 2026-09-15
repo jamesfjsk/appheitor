@@ -1,11 +1,9 @@
-import { CHILD_BIRTHDAY_MMDD, CHILD_PHOTO_URL } from '../../config/rules';
+import { CHILD_BIRTHDAY_MMDD } from '../../config/rules';
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlashIcon, IconBadge } from '../../icons';
 import ComicBackdrop from '../common/ComicBackdrop';
 import { useData } from '../../contexts/DataContext';
 import { useNotifications } from '../../contexts/NotificationContext';
-import { useSound } from '../../contexts/SoundContext';
 import { usePunishment } from '../../contexts/PunishmentContext';
 import HeroHeader from './HeroHeader';
 import PunishmentModeScreen from './PunishmentModeScreen';
@@ -25,11 +23,16 @@ import YesterdaySummary from './YesterdaySummary';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { getTodayBrazil } from '../../utils/timezone';
 
+const MINER = '/assets/english/ui/miner.webp';
+const EMERALD = '/assets/english/ui/emerald.webp';
+const STAR = '/assets/english/ui/star.webp';
+const GOLD = '/assets/english/ui/gold.webp';
+const TROPHY = '/assets/english/ui/trophy.webp';
+const CAKE = '/assets/english/ui/base/i_cake.webp';
 
 const HeroPanel: React.FC = () => {
   const { tasks, progress, loading, surpriseMissionConfig, isSurpriseMissionCompletedToday } = useData();
   const { requestPermission, permission } = useNotifications();
-  const { isSoundEnabled, toggleSound } = useSound();
   const { isPunished } = usePunishment();
 
   // Estados locais com keys para forçar re-render
@@ -114,9 +117,9 @@ const HeroPanel: React.FC = () => {
 
   const getMotivationalMessage = () => {
     if (progressPercentage === 100) {
-      return 'Incrível! Você completou todas as missões hoje!';
+      return 'Todas as missões de hoje concluídas.';
     } else if (progressPercentage >= 75) {
-      return 'Quase lá, velocista! Mais algumas missões!';
+      return 'Quase lá. Faltam poucas missões.';
     } else if (progressPercentage >= 50) {
       return 'Você está indo muito bem! Continue assim!';
     } else if (progressPercentage >= 25) {
@@ -133,107 +136,56 @@ const HeroPanel: React.FC = () => {
     return <PunishmentModeScreen />;
   }
 
+  const themeLabel =
+    surpriseMissionConfig?.theme === 'english' ? 'Inglês' :
+    surpriseMissionConfig?.theme === 'math' ? 'Matemática' :
+    surpriseMissionConfig?.theme === 'general' ? 'Conhecimentos Gerais' :
+    'Tudo Misturado';
+  const difficultyLabel =
+    surpriseMissionConfig?.difficulty === 'easy' ? 'Fácil' :
+    surpriseMissionConfig?.difficulty === 'medium' ? 'Médio' :
+    'Difícil';
+
   return (
     <>
-      <div className="min-h-screen relative overflow-hidden bg-[#6B0A18]">
+      <div className="mn-page relative overflow-hidden">
         <ComicBackdrop />
 
-        <div className="relative z-10 container mx-auto px-4 py-6 max-w-6xl">
-          <HeroHeader
-            progress={progress}
-            onOpenRewards={() => setShowRewards(true)}
-            onOpenCalendar={() => setShowCalendar(true)}
-            onOpenTimer={() => setShowTimer(true)}
-          />
-
-          <VacationBanner />
-          <YesterdaySummary />
-          
-          {/* Controle de Som */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="fixed top-4 right-4 z-40"
-          >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggleSound}
-              className={`comic-chip p-3 rounded-xl transition-all duration-200 ${
-                isSoundEnabled 
-                  ? 'bg-yellow-400 text-red-700' 
-                  : 'bg-slate-300 text-slate-600'
-              }`}
-              title={isSoundEnabled ? 'Desativar sons' : 'Ativar sons'}
-            >
-              <FlashIcon name={isSoundEnabled ? 'volume' : 'mute'} className="w-5 h-5" />
-            </motion.button>
-          </motion.div>
-
-          <AnimatePresence>
-            {showWelcome && (
-              <motion.div
-                initial={{ opacity: 0, y: -50, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -50, scale: 0.9 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="mb-8 text-center"
-              >
-                <div className="comic-card p-8 relative overflow-hidden">
-                  {/* Efeito de brilho de fundo */}
-                  <motion.div
-                    animate={{
-                      opacity: [0.3, 0.6, 0.3],
-                      scale: [1, 1.05, 1]
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-white/30 to-yellow-400/20 rounded-3xl"
-                  />
-                  <div className="relative z-10">
-                    <motion.div
-                      animate={{
-                        rotate: [0, 5, -5, 0],
-                        scale: [1, 1.1, 1]
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                      className="w-16 h-16 mx-auto mb-4 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-white shadow-xl"
-                    >
-                      <img 
-                        src={CHILD_PHOTO_URL}
-                        alt="Avatar do Heitor"
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    </motion.div>
-                    <h2 className="ink-title text-3xl md:text-4xl mb-3">
-                    Bem-vindo de volta, Heitor!
-                    </h2>
-                    <p className="text-red-700 text-xl font-bold">
-                    {getMotivationalMessage()}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Coluna Principal - Checklist */}
-            <div className="lg:col-span-2 space-y-6">
-              <ProgressBar 
+        <div className="relative z-10 mx-auto w-full max-w-[1040px] px-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-4 items-start">
+            <div className="flex flex-col gap-4 min-w-0">
+              <HeroHeader
                 progress={progress}
+                onOpenRewards={() => setShowRewards(true)}
+                onOpenCalendar={() => setShowCalendar(true)}
+                onOpenTimer={() => setShowTimer(true)}
               />
-              
-              
-              <DailyChecklist 
+
+              <VacationBanner />
+              <YesterdaySummary />
+
+              <AnimatePresence>
+                {showWelcome && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    className="mc-card mc-pop rounded-lg p-4 flex items-center gap-3"
+                  >
+                    <div className="mc-slot w-14 h-14 p-1 shrink-0">
+                      <img src={MINER} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-lg font-bold text-white leading-tight">Bem-vindo de volta, Heitor!</p>
+                      <p className="text-sm mc-muted">{getMotivationalMessage()}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <ProgressBar progress={progress} />
+
+              <DailyChecklist
                 tasks={tasks}
                 selectedPeriod={selectedPeriod}
                 onPeriodChange={setSelectedPeriod}
@@ -242,160 +194,76 @@ const HeroPanel: React.FC = () => {
               />
             </div>
 
-            {/* Coluna Lateral - Avatar e Conquistas */}
-            <div className="space-y-6">
-              {/* Missão Surpresa */}
-              {shouldShowSurpriseMission && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9, x: 50 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.8, duration: 0.6 }}
-                  className="comic-card p-6 relative overflow-hidden"
-                >
-                  <div className="relative z-10">
-                    <div className="text-center mb-4">
-                      <div className="mx-auto mb-3 flex justify-center">
-                        <IconBadge name="target" size={64} />
-                      </div>
-                      
-                      <h3 className="ink-title text-xl mb-2">
-                        Missão Surpresa disponível
-                      </h3>
-                      
-                      <p className="text-gray-600 text-sm mb-3">
-                        Uma prova especial criada só para você!
-                      </p>
-                      
-                      <div className="flex items-center justify-center gap-2 text-sm mb-4">
-                        <span className="comic-chip bg-yellow-100 text-[#1A1214] px-2 py-1 rounded-full font-medium">
-                          {surpriseMissionConfig.theme === 'english' ? 'Inglês' : 
-                               surpriseMissionConfig.theme === 'math' ? 'Matemática' : 
-                               surpriseMissionConfig.theme === 'general' ? 'Conhecimentos Gerais' : 
-                               'Tudo Misturado'}
-                        </span>
-                        <span className="comic-chip bg-red-100 text-red-800 px-2 py-1 rounded-full font-medium">
-                          {surpriseMissionConfig.difficulty === 'easy' ? 'Fácil' : 
-                               surpriseMissionConfig.difficulty === 'medium' ? 'Médio' : 
-                               'Difícil'}
-                        </span>
-                      </div>
-                      
-                      <div className="bg-yellow-50 border-2 border-[#1A1214] rounded-xl p-3 mb-4">
-                        <div className="flex items-center justify-center gap-4 text-lg font-bold">
-                          <div className="flex items-center gap-1 text-blue-700">
-                            <FlashIcon name="xp" className="w-5 h-5" />
-                            +{surpriseMissionConfig.xpReward} XP
-                          </div>
-                          <div className="flex items-center gap-1 text-amber-700">
-                            <FlashIcon name="gold" className="w-5 h-5" />
-                            +{surpriseMissionConfig.goldReward} Gold
-                          </div>
-                        </div>
-                        <p className="text-center text-yellow-800 text-xs mt-1">
-                          30 questões + bônus por performance!
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setShowSurpriseMission(true)}
-                      className="w-full py-4 bg-red-600 text-yellow-300 rounded-xl font-bold text-lg comic-chip flex items-center justify-center gap-2"
-                    >
-                      <FlashIcon name="play" className="w-6 h-6" />
-                      Iniciar Missão Surpresa!
-                    </motion.button>
-                  </div>
-                  
-                </motion.div>
-              )}
-              
+            <div className="flex flex-col gap-4">
               <EnglishArenaCard />
 
-              
+              {shouldShowSurpriseMission && surpriseMissionConfig && (
+                <div className="mc-panel rounded-lg p-4">
+                  <h3 className="mc-h">
+                    <img src={EMERALD} alt="" className="mc-pixel" draggable={false} />
+                    Missão Surpresa
+                  </h3>
+                  <p className="text-sm text-white/85 mt-2 mb-3">Uma prova especial criada para você.</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="mc-slot px-2 py-1 mc-font text-[8px] text-white">{themeLabel}</span>
+                    <span className="mc-slot px-2 py-1 mc-font text-[8px] text-white">{difficultyLabel}</span>
+                  </div>
+                  <div className="mc-card p-2 mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex items-center gap-1">
+                        <img src={STAR} alt="" className="w-5 h-5 mc-pixel" draggable={false} />
+                        <span className="mc-font text-[9px] mc-good">+{surpriseMissionConfig.xpReward} XP</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <img src={GOLD} alt="" className="w-5 h-5 mc-pixel" draggable={false} />
+                        <span className="mc-font text-[9px] mc-warn">+{surpriseMissionConfig.goldReward} Gold</span>
+                      </span>
+                    </div>
+                    <p className="text-xs mc-muted mt-1">30 questões + bônus por desempenho</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowSurpriseMission(true)}
+                    className="mc-btn mc-btn-green w-full py-3 font-bold"
+                  >
+                    Iniciar Missão Surpresa
+                  </button>
+                </div>
+              )}
+
               <FlashReminders />
-              
               <AchievementsBadges />
             </div>
           </div>
 
-          {/* Mensagem motivacional flutuante */}
           <AnimatePresence>
             {showMissionComplete && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.5, y: 50 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8, y: -50 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.92 }}
                 className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
               >
-                <div className="bg-gradient-to-r from-hero-accent to-yellow-400 text-hero-primary text-2xl md:text-3xl font-bold px-6 py-3 rounded-2xl shadow-xl border-2 border-[#1A1214] flex items-center gap-3">
-                  <FlashIcon name="trophy" className="w-8 h-8" />
-                  Período Completo!
+                <div className="mc-panel mc-pop px-6 py-3 flex items-center gap-3">
+                  <img src={TROPHY} alt="" className="w-8 h-8 mc-pixel" draggable={false} />
+                  <span className="mc-title text-sm">Período completo</span>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Special Birthday Message */}
           {(() => {
             const today = new Date();
             const todayString = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
             const isBirthday = todayString === CHILD_BIRTHDAY_MMDD;
             
             return isBirthday && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5, y: 50 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none"
-              >
-                <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xl font-bold px-8 py-4 rounded-2xl shadow-2xl border-4 border-yellow-400 relative overflow-hidden">
-                  <motion.div
-                    animate={{
-                      x: ['-100%', '100%'],
-                      opacity: [0, 0.5, 0]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear"
-                    }}
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent skew-x-12"
-                  />
-                  <div className="relative z-10 flex items-center gap-3">
-                    <motion.span
-                      animate={{
-                        scale: [1, 1.3, 1],
-                        rotate: [0, 10, -10, 0]
-                      }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      🎂
-                    </motion.span>
-                    <span>FELIZ ANIVERSÁRIO, HEITOR!</span>
-                    <motion.span
-                      animate={{
-                        scale: [1, 1.3, 1],
-                        rotate: [0, -10, 10, 0]
-                      }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: 0.5
-                      }}
-                    >
-                      🎉
-                    </motion.span>
-                  </div>
+              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none">
+                <div className="mc-panel px-6 py-3 flex items-center gap-3">
+                  <img src={CAKE} alt="" className="w-8 h-8 mc-pixel" draggable={false} />
+                  <span className="font-bold text-white">Feliz aniversário, Heitor!</span>
                 </div>
-              </motion.div>
+              </div>
             );
           })()}
         </div>

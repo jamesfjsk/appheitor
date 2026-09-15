@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { getTodayBrazil } from '../../utils/timezone';
 import { addDaysStr, getDayClosure, DayClosure } from '../../services/dailyRulesService';
+
+const TROPHY = '/assets/english/ui/trophy.webp';
+const CREEPER = '/assets/english/ui/creeper.webp';
 
 /** Resumo de ontem para a criança: dia completo com bônus ou missões perdidas com penalidade */
 const YesterdaySummary: React.FC = () => {
@@ -22,23 +24,27 @@ const YesterdaySummary: React.FC = () => {
   const missed = closure.totalTasksAvailable - closure.tasksCompleted;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl px-4 py-3 mb-4 flex items-center justify-between gap-3 ${full ? 'bg-green-100 text-green-900' : 'bg-orange-100 text-orange-900'}`}
-    >
-      <div>
-        <p className="font-bold">
+    <div className={`mc-card rounded-lg px-4 py-3 flex items-center gap-3 ${full ? 'mc-slot-good' : 'mc-slot-bad'}`}>
+      <div className="mc-slot w-12 h-12 p-1 shrink-0">
+        <img
+          src={full ? TROPHY : CREEPER}
+          alt=""
+          className="w-full h-full object-contain mc-pixel"
+          draggable={false}
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[17px] font-bold text-white">
           {full ? 'Ontem foi dia completo!' : `Ontem faltaram ${missed} ${missed === 1 ? 'missão' : 'missões'}`}
         </p>
-        <p className="text-sm opacity-80">
+        <p className="text-sm mc-muted">
           {closure.tasksCompleted} de {closure.totalTasksAvailable} missões feitas
         </p>
       </div>
-      <div className="text-right font-bold text-lg whitespace-nowrap">
+      <div className={`mc-num whitespace-nowrap ${full ? 'mc-good' : 'mc-bad'}`}>
         {full ? `+${closure.allTasksBonusGold} gold` : `-${closure.goldPenalty} gold`}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+// Fundo da tela da criança. Padrão: "mina" (pedra escura com tochas, só CSS, leve).
+// A variante "video" guarda o embed do TikTok que o pai montou; fica disponível por prop, desligada por padrão.
+
 const TIKTOK_ID = '7682451095804857630';
 const POSTER_SRC = '/bg/hq-comic.jpg';
 const PLAYER_SRC =
@@ -14,7 +17,7 @@ function pingPlayer(frame: Window | null | undefined) {
   frame.postMessage({ 'x-tiktok-player': true, type: 'play' }, '*');
 }
 
-const ComicBackdrop: React.FC<{ className?: string }> = ({ className = '' }) => {
+const VideoBackdrop: React.FC<{ className?: string }> = ({ className = '' }) => {
   const playerRef = useRef<HTMLIFrameElement>(null);
   const [src, setSrc] = useState(PLAYER_SRC);
   const [ready, setReady] = useState(false);
@@ -85,5 +88,17 @@ const ComicBackdrop: React.FC<{ className?: string }> = ({ className = '' }) => 
     </div>
   );
 };
+
+/** Fundo de mina: pedra escura com profundidade, brilho de tochas nos cantos e chão mais escuro (classes em src/styles/miner.css) */
+const MineBackdrop: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <div className={`mn-backdrop ${className}`} aria-hidden>
+    <div className="mn-backdrop-torch mn-backdrop-torch-left" />
+    <div className="mn-backdrop-torch mn-backdrop-torch-right" />
+    <div className="mn-backdrop-floor" />
+  </div>
+);
+
+const ComicBackdrop: React.FC<{ className?: string; variant?: 'mine' | 'video' }> = ({ className = '', variant = 'mine' }) =>
+  variant === 'video' ? <VideoBackdrop className={className} /> : <MineBackdrop className={className} />;
 
 export default ComicBackdrop;

@@ -1,11 +1,16 @@
-import { CHILD_PHOTO_URL } from '../../config/rules';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FlashIcon } from '../../icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserProgress } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
-import { calculateLevelSystem, getLevelIcon, getAvatarBorderStyle } from '../../utils/levelSystem';
+import { calculateLevelSystem } from '../../utils/levelSystem';
+
+const MINER = '/assets/english/ui/miner.webp';
+const CHEST = '/assets/english/ui/chest.webp';
+const TORCH = '/assets/english/ui/torch.webp';
+const GOLD = '/assets/english/ui/gold.webp';
+const DIAMOND = '/assets/english/ui/diamond.webp';
 
 interface HeroHeaderProps {
   progress: UserProgress;
@@ -16,9 +21,8 @@ interface HeroHeaderProps {
 
 const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer }) => {
   const { logout } = useAuth();
-  const { playClick } = useSound();
+  const { playClick, isSoundEnabled, toggleSound } = useSound();
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
-  const borderStyle = getAvatarBorderStyle(levelSystem.currentLevel);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -29,237 +33,115 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
 
   const getMotivationalMessage = () => {
     const messages = [
-      'Pronto para mais aventuras?',
-      'A velocidade está no seu sangue!',
-      'Cada missão te deixa mais forte!',
-      'Você é incrível como o Flash!',
-      'Vamos acelerar hoje!'
+      'Pronto para mais uma escavação?',
+      'Cada missão rende um bloco a mais na base.',
+      'Picareta na mão: as missões de hoje esperam.',
+      'Quem minera todo dia acha diamante.',
+      'Vamos cavar fundo hoje.'
     ];
     return messages[Math.floor(Math.random() * messages.length)];
   };
+
+  const streak = progress.streak || 0;
 
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="flex flex-col lg:flex-row items-center justify-between comic-card p-6 gap-4 relative overflow-hidden"
+      className="mc-panel rounded-lg p-4 flex flex-col gap-4"
     >
-      {/* Avatar e Saudação */}
-      <div className="flex items-center gap-4">
-        <motion.div
-          animate={{
-            scale: [1, 1.05, 1],
-            rotate: [0, 2, -2, 0]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="relative"
-        >
-          <div className={`w-16 h-16 bg-gradient-to-br from-hero-primary to-hero-secondary rounded-full flex items-center justify-center text-2xl font-bold text-yellow-400 overflow-hidden energy-glow ${borderStyle.borderClass} ${borderStyle.glowClass} ${borderStyle.ringClass}`}>
-            <img 
-              src={CHILD_PHOTO_URL}
-              alt="Avatar do Heitor"
-              className="w-full h-full object-cover rounded-full"
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="mc-slot w-[72px] h-[72px] p-1 shrink-0 overflow-hidden">
+            <img
+              src={MINER}
+              alt=""
+              className="w-full h-full object-contain mc-pixel"
+              draggable={false}
             />
           </div>
-          
-          {/* Efeitos especiais para níveis altos */}
-          {borderStyle.tier >= 15 && (
-            <motion.div
-              animate={{
-                rotate: [0, 360],
-                scale: [1, 1.1, 1],
-                opacity: [0.3, 0.7, 0.3]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="absolute -inset-2 border-2 border-purple-400/30 rounded-full"
-            />
-          )}
-          
-          {borderStyle.tier >= 18 && (
-            <motion.div
-              animate={{
-                rotate: [360, 0],
-                scale: [1.1, 1.3, 1.1],
-                opacity: [0.2, 0.5, 0.2]
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="absolute -inset-4 border border-pink-400/20 rounded-full"
-            />
-          )}
-          
-          {/* Partículas orbitais para níveis supremos */}
-          {borderStyle.tier >= 20 && (
-            <>
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{
-                    rotate: [0, 360],
-                    scale: [0.8, 1.2, 0.8],
-                    opacity: [0.4, 0.8, 0.4]
-                  }}
-                  transition={{
-                    duration: 2 + i * 0.3,
-                    repeat: Infinity,
-                    ease: "linear",
-                    delay: i * 0.5
-                  }}
-                  className="absolute w-2 h-2 bg-purple-400 rounded-full"
-                  style={{
-                    left: '50%',
-                    top: '50%',
-                    transformOrigin: '50% 50px',
-                    transform: `translate(-50%, -50%) rotate(${i * 60}deg)`
-                  }}
-                />
-              ))}
-            </>
-          )}
-          
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.7, 1, 0.7]
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-300 rounded-full border-2 border-[#1A1214] flex items-center justify-center text-[#1A1214]"
-          >
-            <FlashIcon name="star" className="w-3.5 h-3.5" />
-          </motion.div>
-        </motion.div>
 
-        <div className="relative z-10">
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="hero-title text-2xl md:text-3xl lg:text-4xl text-gray-900"
+          <div className="min-w-0">
+            <p className="mc-title text-[10px]">Miner Missions</p>
+            <h1 className="text-[28px] font-bold leading-tight text-white">
+              {getGreeting()}, Heitor!
+            </h1>
+            <p className="text-base mc-muted mt-1">
+              {getMotivationalMessage()}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => { playClick(); onOpenRewards(); }}
+            className="mc-btn mc-btn-gold w-[44px] h-[44px] p-0"
+            title="Baú de recompensas"
           >
-            {getGreeting()}, Heitor!
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="hero-subtitle text-gray-600 text-base md:text-lg lg:text-xl"
+            <img src={CHEST} alt="" className="w-[26px] h-[26px] mc-pixel" draggable={false} />
+          </button>
+          <button
+            type="button"
+            onClick={() => { playClick(); onOpenCalendar(); }}
+            className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
+            title="Calendário"
           >
-            {getMotivationalMessage()}
-          </motion.p>
+            <FlashIcon name="calendar" className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => { playClick(); onOpenTimer(); }}
+            className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
+            title="Cronômetro"
+          >
+            <FlashIcon name="clock" className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => { playClick(); toggleSound(); }}
+            className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
+            title={isSoundEnabled ? 'Desativar sons' : 'Ativar sons'}
+          >
+            <FlashIcon name={isSoundEnabled ? 'volume' : 'mute'} className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => { playClick(); logout(); }}
+            className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
+            title="Sair"
+          >
+            <FlashIcon name="logout" className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
-      {/* Controles e Informações */}
-      <div className="flex items-center gap-3 flex-wrap justify-center lg:justify-end">
-        {/* Streak */}
-        {progress.streak > 0 && (
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            animate={{
-              scale: [1, 1.02, 1],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="comic-chip bg-gradient-to-r from-orange-500 to-red-600 text-white px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1.5"
-            title={`Maior sequência: ${progress.longestStreak || 0} dias`}
-          >
-            <FlashIcon name="fire" className="w-4 h-4" />
-            {progress.streak} {progress.streak === 1 ? 'dia' : 'dias'}
-          </motion.div>
-        )}
-
-        {/* Pontos Disponíveis */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="comic-chip bg-yellow-400 text-[#1A1214] px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1.5"
+      <div className="flex flex-wrap gap-2">
+        <div
+          className="mc-slot mc-chip"
+          title={`Maior sequência: ${progress.longestStreak || 0} dias`}
         >
-          <FlashIcon name="gold" className="w-4 h-4" />
-          {progress.availableGold || 0} Gold
-        </motion.div>
-
-        {/* Nível */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="comic-chip bg-red-600 text-yellow-300 px-3 py-2 rounded-full font-bold text-sm flex items-center gap-1.5"
-        >
-          <FlashIcon name={getLevelIcon(levelSystem.currentLevel)} className="w-4 h-4" />
-          Nível {levelSystem.currentLevel}
-        </motion.div>
-
-        {/* Botão Recompensas */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            playClick();
-            onOpenRewards();
-          }}
-          className="comic-chip p-2 bg-red-600 hover:bg-red-700 rounded-xl text-yellow-300 transition-all duration-200"
-          title="Loja de Recompensas"
-        >
-          <FlashIcon name="gift" className="w-5 h-5" />
-        </motion.button>
-
-        {/* Botão Calendário */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            playClick();
-            onOpenCalendar();
-          }}
-          className="comic-chip p-2 bg-[#1A1214] hover:bg-black rounded-xl text-yellow-300 transition-all duration-200"
-          title="Calendário de Missões"
-        >
-          <FlashIcon name="calendar" className="w-5 h-5" />
-        </motion.button>
-
-        {/* Botão Timer */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            playClick();
-            onOpenTimer();
-          }}
-          className="comic-chip p-2 bg-yellow-400 hover:bg-yellow-300 rounded-xl text-red-700 transition-all duration-200"
-          title="Flash Timer"
-        >
-          <FlashIcon name="clock" className="w-5 h-5" />
-        </motion.button>
-
-        {/* Botão Logout */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            playClick();
-            logout();
-          }}
-          className="comic-chip p-2 bg-white hover:bg-cream rounded-xl text-[#1A1214] transition-all duration-200"
-          title="Sair"
-        >
-          <FlashIcon name="logout" className="w-5 h-5" />
-        </motion.button>
+          <img src={TORCH} alt="" className="mc-pixel" draggable={false} />
+          <div>
+            <span className="mc-num text-white">{streak}</span>
+            <span className="mc-chip-l">{streak === 1 ? 'dia seguido' : 'dias seguidos'}</span>
+          </div>
+        </div>
+        <div className="mc-slot mc-chip">
+          <img src={GOLD} alt="" className="mc-pixel" draggable={false} />
+          <div>
+            <span className="mc-num mc-warn">{progress.availableGold || 0}</span>
+            <span className="mc-chip-l">gold</span>
+          </div>
+        </div>
+        <div className="mc-slot mc-chip">
+          <img src={DIAMOND} alt="" className="mc-pixel" draggable={false} />
+          <div>
+            <span className="mc-num mc-diamond">Nível {levelSystem.currentLevel}</span>
+            <span className="mc-chip-l">{levelSystem.levelTitle}</span>
+          </div>
+        </div>
       </div>
     </motion.header>
   );

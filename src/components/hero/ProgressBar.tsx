@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserProgress } from '../../types';
-import { FlashIcon, IconBadge } from '../../icons';
-import { calculateLevelSystem, checkLevelUp, getLevelColor, getLevelIcon } from '../../utils/levelSystem';
+import { calculateLevelSystem, checkLevelUp } from '../../utils/levelSystem';
 import { FirestoreService } from '../../services/firestoreService';
 import { getTodayBrazil } from '../../utils/timezone';
 
+const STAR = '/assets/english/ui/star.webp';
+const MAP = '/assets/english/ui/map.webp';
+const DIAMOND = '/assets/english/ui/diamond.webp';
 
 interface ProgressBarProps {
   progress: UserProgress;
@@ -82,33 +84,33 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
 
     const mensagensHeitorFlash = [
-      "Quem consegue se controlar é mais forte do que qualquer herói.",
+      "Quem consegue se controlar é mais forte do que qualquer armadura.",
       "Coragem é seguir em frente mesmo quando dá vontade de parar.",
       "A maior vitória é vencer a si mesmo todos os dias.",
       "Cada dia é uma nova chance de crescer e melhorar.",
       "A força verdadeira aparece quando você faz o certo mesmo sozinho.",
-      "Grandes poderes nascem da paciência e do treino constante.",
+      "Grandes construções nascem da paciência e do treino constante.",
       "O que você planta hoje, você colhe amanhã. Escolha bem.",
       "Ser confiável nas pequenas coisas mostra que você está pronto para as grandes.",
       "Caminhos bons são feitos de passos firmes, mesmo que pequenos.",
-      "Ser herói é fazer boas escolhas, mesmo quando ninguém vê.",
-      "Treinar sua mente te leva mais longe do que qualquer corrida.",
-      "Uma mente tranquila corre mais rápido do que qualquer raio.",
+      "Ser bom minerador é fazer boas escolhas, mesmo quando ninguém vê.",
+      "Treinar sua mente te leva mais fundo do que qualquer picareta.",
+      "Uma mente tranquila acha mais diamantes do que a pressa.",
       "O tempo é seu aliado. Use com calma e sabedoria.",
       "Primeiro a gente cresce por dentro, depois por fora.",
       "As conquistas de hoje nascem do esforço de agora.",
-      "Correr não é só chegar no fim — é aprender no caminho.",
+      "Minerar não é só achar o minério — é aprender no caminho.",
       "O mais importante não é vencer, é se tornar alguém melhor.",
       "Dias difíceis treinam sua força. Não fuja deles.",
       "Tudo começa pequeno. Até o mar começou com gotas.",
-      "A bondade vale mais que qualquer superpoder.",
+      "A bondade vale mais que qualquer diamante.",
       "Você não escolhe tudo, mas escolhe como vai agir.",
       "O caminho certo quase nunca é o mais fácil.",
       "Quem tem raízes firmes não cai com o vento.",
       "Cada esforço é uma semente que um dia vira vitória.",
-      "Ser calmo no meio da pressa é um superpoder de verdade.",
+      "Ser calmo no meio da pressa é a ferramenta mais rara.",
       "Subir devagar também é subir. O importante é não parar.",
-      "A beleza do herói está em como ele trata os outros.",
+      "O valor de um minerador está em como ele trata os outros.",
       "O que te move não é a pressa — é o propósito."
     ];
 
@@ -116,215 +118,78 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
     return mensagensHeitorFlash[messageIndex];
   };
 
+  const xpNoNivel = Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel);
+  const xpDoNivel = Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel);
+
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+      <motion.section
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3 }}
-        className="comic-card p-6 relative overflow-hidden"
+        className="mc-panel rounded-lg p-4"
       >
-        {/* Lightning background animation */}
-        <motion.div
-          animate={{
-            x: ['-100%', '100%'],
-            opacity: [0, 0.3, 0]
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent skew-x-12"
-        />
-        
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-900 font-bold text-lg flex items-center gap-2">
-              <FlashIcon name="bolt" className="w-5 h-5 text-amber-500" />
-              Progresso Flash
-            </h3>
-            <div className="flex items-center gap-3">
-              <div className="text-amber-600 font-bold">
-                {Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel)}/{Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel)} XP
-              </div>
-              {dailyXP > 0 && (
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold"
-                >
-                  +{dailyXP} hoje
-                </motion.div>
-              )}
-            </div>
+        <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+          <h3 className="mc-lbl">Progresso do minerador</h3>
+          <div className="flex items-center gap-2">
+            <span className="mc-num text-white">{xpNoNivel} / {xpDoNivel} XP</span>
+            {dailyXP > 0 && (
+              <span className="mc-font text-[8px] mc-good">+{dailyXP} hoje</span>
+            )}
           </div>
-
-          {/* Barra de Progresso */}
-          <div className="relative mb-4">
-            <div className="w-full bg-[#1A1214]/12 border-2 border-[#1A1214] rounded-full h-4 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${levelSystem.progressPercentage}%` }}
-                transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-                className={`h-full bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} rounded-full relative overflow-hidden`}
-              >
-                {/* Efeito de brilho */}
-                <motion.div
-                  animate={{
-                    x: ['-100%', '100%'],
-                    opacity: [0.3, 0.8, 0.3]
-                  }}
-                  transition={{
-                    duration: 2.5,
-                    repeat: Infinity,
-                  }}
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full"
-                />
-                
-                {/* Raios de energia na barra de progresso */}
-                {levelSystem.progressPercentage > 50 && (
-                  <motion.div
-                    animate={{
-                      opacity: [0.2, 0.5, 0.2],
-                      scale: [0.95, 1.05, 0.95]
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-transparent to-yellow-400/20 rounded-full"
-                  />
-                )}
-                
-                {/* Lightning effect when close to level up */}
-                {levelSystem.progressPercentage > 80 && !levelSystem.isMaxLevel && (
-                  <motion.div
-                    animate={{
-                      opacity: [0.6, 1, 0.6],
-                      scale: [1, 1.08, 1],
-                      boxShadow: [
-                        '0 0 5px rgba(255, 212, 0, 0.5)',
-                        '0 0 15px rgba(255, 212, 0, 0.8)',
-                        '0 0 5px rgba(255, 212, 0, 0.5)'
-                      ]
-                    }}
-                    transition={{
-                      duration: 0.8,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className={`absolute inset-0 bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} rounded-full`}
-                  />
-                )}
-              </motion.div>
-            </div>
-            
-            {/* Indicador de Nível */}
-            <div className="flex justify-between mt-2 text-sm">
-              <div className="text-[#1A1214]/80">
-                <span className="font-bold inline-flex items-center gap-1">
-                  <FlashIcon name={getLevelIcon(levelSystem.currentLevel)} className="w-4 h-4" />
-                  Nível {levelSystem.currentLevel}
-                </span>
-                <div className="text-xs text-gray-600">{levelSystem.levelTitle}</div>
-              </div>
-              {!levelSystem.isMaxLevel && (
-                <div className="text-gray-600 text-right">
-                  <span className="font-bold inline-flex items-center gap-1">
-                    <FlashIcon name={getLevelIcon(levelSystem.currentLevel + 1)} className="w-4 h-4" />
-                    Nível {levelSystem.currentLevel + 1}
-                  </span>
-                  <div className="text-xs text-gray-600">{levelSystem.nextLevelTitle}</div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Estatísticas Rápidas */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <motion.div
-                animate={{
-                  scale: [1, 1.05, 1]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="text-2xl font-bold text-amber-600"
-              >
-                {levelSystem.currentXP}
-              </motion.div>
-              <div className="text-gray-600 text-sm">Total de XP</div>
-            </div>
-            
-            <div className="text-center">
-              <motion.div
-                animate={{
-                  scale: progress.streak > 0 ? [1, 1.1, 1] : 1
-                }}
-                transition={{
-                  duration: 1,
-                  repeat: progress.streak > 0 ? Infinity : 0,
-                  ease: "easeInOut"
-                }}
-                className="text-2xl font-bold text-amber-600 flex items-center justify-center gap-1"
-              >
-                {progress.streak > 0 && <FlashIcon name="fire" className="w-6 h-6 text-orange-500" />}
-                {progress.streak}
-              </motion.div>
-              <div className="text-gray-600 text-sm">Dias Seguidos</div>
-            </div>
-          </div>
-
-          {/* Mensagem Motivacional */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center"
-          >
-            <p className="text-yellow-800 text-sm font-medium">
-              {getDailyMotivationalMessage()}
-            </p>
-          </motion.div>
         </div>
-      </motion.div>
 
-      {/* Level Up Animation */}
+        <div className="mc-bar">
+          <div className="mc-bar-fill" style={{ width: `${levelSystem.progressPercentage}%` }} />
+        </div>
+
+        <div className="flex justify-between mt-2">
+          <div>
+            <div className="mc-num mc-diamond">Nível {levelSystem.currentLevel}</div>
+            <div className="text-sm text-white/85">{levelSystem.levelTitle}</div>
+          </div>
+          {!levelSystem.isMaxLevel && (
+            <div className="text-right">
+              <div className="mc-num mc-muted">Nível {levelSystem.currentLevel + 1}</div>
+              <div className="text-sm mc-muted">{levelSystem.nextLevelTitle}</div>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <div className="mc-slot flex items-center gap-2 px-3 py-2">
+            <img src={STAR} alt="" className="w-7 h-7 mc-pixel shrink-0" draggable={false} />
+            <div>
+              <div className="mc-num text-white">{levelSystem.currentXP}</div>
+              <div className="text-xs mc-muted">XP total</div>
+            </div>
+          </div>
+          <div className="mc-slot flex items-center gap-2 px-3 py-2">
+            <img src={MAP} alt="" className="w-7 h-7 mc-pixel shrink-0" draggable={false} />
+            <div>
+              <div className="mc-num text-white">{progress.totalTasksCompleted || 0}</div>
+              <div className="text-xs mc-muted">Missões concluídas</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mc-card rounded px-3 py-2 mt-3 text-sm text-center text-white/90">
+          {getDailyMotivationalMessage()}
+        </div>
+      </motion.section>
+
       <AnimatePresence>
         {showLevelUp && (
           <motion.div
-            initial={{ opacity: 0, scale: 0, rotate: -180 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            exit={{ opacity: 0, scale: 0, rotate: 180 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
             className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
           >
-            <div className={`bg-gradient-to-r ${getLevelColor(levelSystem.currentLevel)} text-white text-4xl md:text-6xl font-bold px-8 py-4 rounded-3xl shadow-2xl border-4 border-white relative overflow-hidden`}>
-              {/* Lightning background */}
-              <motion.div
-                animate={{
-                  x: ['-100%', '100%'],
-                  opacity: [0, 1, 0]
-                }}
-                transition={{
-                  duration: 0.5,
-                  repeat: 3,
-                  ease: "linear"
-                }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12"
-              />
-              <div className="relative z-10">
-                <div className="mb-2 flex justify-center">
-                  <IconBadge name={getLevelIcon(levelSystem.currentLevel)} size={48} />
-                </div>
-                <div>NÍVEL {levelSystem.currentLevel}!</div>
-                <div className="text-lg md:text-xl mt-2">{levelSystem.levelTitle}</div>
-              </div>
+            <div className="mc-panel mc-pop rounded-lg px-8 py-6 text-center">
+              <img src={DIAMOND} alt="" className="w-12 h-12 mx-auto mb-3 mc-pixel" draggable={false} />
+              <div className="mc-title text-lg">Nível {levelSystem.currentLevel}</div>
+              <div className="text-lg text-white mt-2">{levelSystem.levelTitle}</div>
             </div>
           </motion.div>
         )}

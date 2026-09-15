@@ -1,11 +1,28 @@
-import { CHILD_BIRTHDAY_MMDD, childAgeInYear, CHILD_PHOTO_URL } from '../../config/rules';
+import { CHILD_BIRTHDAY_MMDD, childAgeInYear } from '../../config/rules';
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Star, Cake, PartyPopper, Heart, Zap } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
+
+const BANNER = '/assets/english/ui/banner.webp';
+const CAKE = '/assets/english/ui/base/i_cake.webp';
+const STAR = '/assets/english/ui/star.webp';
+const GOLD = '/assets/english/ui/gold.webp';
+
+const FIREWORKS = [
+  { left: '8%', top: '12%', color: '#ffd83d', delay: '0ms' },
+  { left: '22%', top: '6%', color: '#ff7b6b', delay: '40ms' },
+  { left: '38%', top: '14%', color: '#5ee0e6', delay: '80ms' },
+  { left: '54%', top: '4%', color: '#9be36a', delay: '120ms' },
+  { left: '70%', top: '11%', color: '#c084fc', delay: '160ms' },
+  { left: '86%', top: '7%', color: '#f59e0b', delay: '200ms' },
+  { left: '12%', top: '78%', color: '#9be36a', delay: '80ms' },
+  { left: '30%', top: '86%', color: '#ffd83d', delay: '140ms' },
+  { left: '62%', top: '82%', color: '#5ee0e6', delay: '40ms' },
+  { left: '84%', top: '74%', color: '#ff7b6b', delay: '180ms' },
+];
 
 interface BirthdayCelebrationProps {
   onComplete: () => void;
@@ -53,19 +70,19 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
             // Create special birthday rewards
             const specialRewards = [
               {
-                title: `🎂 Festa de ${age} Anos!`,
+                title: `Festa de ${age} Anos!`,
                 description: `Uma festa incrível para comemorar seus ${age} anos de vida!`,
                 xp: age * 10,
                 gold: age * 5
               },
               {
-                title: '🎁 Presente Especial de Aniversário',
+                title: 'Presente Especial de Aniversário',
                 description: 'Um presente muito especial escolhido especialmente para você!',
                 xp: 100,
                 gold: 50
               },
               {
-                title: '👑 Dia do Rei Aniversariante',
+                title: 'Dia do Rei Aniversariante',
                 description: 'Hoje você é o rei! Escolha tudo que quiser fazer!',
                 xp: 50,
                 gold: 25
@@ -82,6 +99,11 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
     
     checkBirthday();
   }, [childUid]);
+
+  useEffect(() => {
+    if (showCelebration) playLevelUp();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- playLevelUp é recriado a cada render do SoundProvider; o som deve tocar uma vez por abertura
+  }, [showCelebration]);
 
   const handleCelebrationStep = async () => {
     if (isProcessing) return;
@@ -112,7 +134,7 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
             totalGold,
             'bonus',
             'birthday',
-            `🎂 Presente de aniversário: ${currentAge} anos!`,
+            `Presente de aniversário: ${currentAge} anos!`,
             {
               metadata: {
                 age: currentAge,
@@ -146,377 +168,123 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
 
   const getStepTitle = () => {
     switch (celebrationStep) {
-      case 0: return '🎂 Parabéns, Herói!';
-      case 1: return '🎁 Presentes Especiais!';
-      case 2: return '👑 Você é Incrível!';
-      default: return '🎉 Feliz Aniversário!';
+      case 0: return 'Parabéns, minerador!';
+      case 1: return 'Presentes especiais';
+      case 2: return 'Você é incrível';
+      default: return 'Feliz aniversário, Heitor!';
     }
   };
+
+  const buttonLabel = isProcessing
+    ? 'Processando...'
+    : celebrationStep === 0
+      ? 'Começar celebração'
+      : celebrationStep === 1
+        ? 'Receber presentes'
+        : 'Finalizar celebração';
 
   return (
     <AnimatePresence>
       {showCelebration && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-gradient-to-br from-purple-600/90 via-pink-500/90 to-red-500/90 flex items-center justify-center z-50 p-4"
-        >
-          {/* Confetti and celebration effects */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {/* Confetti particles */}
-            {[...Array(50)].map((_, i) => (
-              <motion.div
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {FIREWORKS.map((dot, i) => (
+              <span
                 key={i}
-                initial={{ 
-                  opacity: 1,
-                  scale: 0,
-                  x: '50%',
-                  y: '50%',
-                  rotate: 0
+                className="absolute w-2.5 h-2.5 mc-pop"
+                style={{
+                  left: dot.left,
+                  top: dot.top,
+                  backgroundColor: dot.color,
+                  animationDelay: dot.delay,
+                  boxShadow: `2px 2px 0 #17130f`,
                 }}
-                animate={{ 
-                  opacity: [1, 1, 0],
-                  scale: [0, 1, 1],
-                  x: `${Math.random() * 100}%`,
-                  y: `${Math.random() * 100}%`,
-                  rotate: Math.random() * 720
-                }}
-                transition={{ 
-                  duration: 3,
-                  delay: i * 0.05,
-                  ease: "easeOut",
-                  repeat: Infinity,
-                  repeatDelay: 2
-                }}
-                className={`absolute w-3 h-3 ${
-                  i % 4 === 0 ? 'bg-yellow-400' :
-                  i % 4 === 1 ? 'bg-pink-400' :
-                  i % 4 === 2 ? 'bg-blue-400' : 'bg-green-400'
-                } rounded-full`}
               />
-            ))}
-            
-            {/* Birthday balloons */}
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={`balloon-${i}`}
-                animate={{
-                  y: [0, -20, 0],
-                  x: [0, Math.sin(i) * 10, 0],
-                  rotate: [0, 5, -5, 0]
-                }}
-                transition={{
-                  duration: 3 + i * 0.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: i * 0.3
-                }}
-                className="absolute text-4xl"
-                style={{
-                  left: `${10 + i * 10}%`,
-                  top: `${20 + (i % 3) * 20}%`
-                }}
-              >
-                🎈
-              </motion.div>
-            ))}
-            
-            {/* Fireworks */}
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={`firework-${i}`}
-                animate={{
-                  scale: [0, 1.5, 0],
-                  opacity: [0, 1, 0],
-                  rotate: [0, 360]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  delay: i * 0.8,
-                  ease: "easeOut"
-                }}
-                className="absolute text-6xl"
-                style={{
-                  left: `${Math.random() * 80 + 10}%`,
-                  top: `${Math.random() * 60 + 20}%`
-                }}
-              >
-                🎆
-              </motion.div>
             ))}
           </div>
 
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0, rotateY: -90 }}
-            animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-            exit={{ scale: 0.5, opacity: 0, rotateY: 90 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden relative"
-          >
-            {/* Header with birthday theme */}
-            <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 p-8 text-white text-center relative overflow-hidden">
-              {/* Sparkle effects */}
-              <motion.div
-                animate={{
-                  x: ['-100%', '100%'],
-                  opacity: [0, 0.5, 0]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent skew-x-12"
-              />
-              
-              <div className="relative z-10">
-                <motion.div
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 10, -10, 0]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white shadow-2xl"
-                >
-                  <Cake className="w-12 h-12 text-pink-600" />
-                </motion.div>
-                
-                <h1 className="text-4xl font-bold mb-4" style={{ fontFamily: 'Comic Neue, cursive' }}>
-                  {getStepTitle()}
-                </h1>
-                
-                <motion.div
-                  animate={{
-                    scale: [1, 1.05, 1],
-                    color: ['#FFFFFF', '#FFD700', '#FFFFFF']
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="text-2xl font-bold"
-                >
-                  {currentAge} ANOS DE PURA MAGIA! ⚡
-                </motion.div>
+          <div className="mc-panel rounded-lg max-w-lg w-full overflow-hidden relative mc-pop">
+            <div className="relative h-[140px] overflow-hidden border-b-4 border-[#17130f]">
+              <img src={BANNER} alt="" className="absolute inset-0 w-full h-full object-cover mc-pixel" draggable={false} />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2f2a27] via-[#2f2a27]/30 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 px-4 pb-3">
+                <h1 className="mc-title text-sm sm:text-base">Feliz aniversário, Heitor!</h1>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="p-8 text-center">
+            <div className="p-5 text-center">
+              <img src={CAKE} alt="" className="w-24 h-24 mx-auto mb-3 mc-pixel" draggable={false} />
+              <p className="mc-num text-[#ffd83d] mb-1" style={{ fontSize: 18 }}>{currentAge} anos</p>
+              <p className="text-white font-bold text-lg mb-4">{getStepTitle()}</p>
+
               {celebrationStep === 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-6"
-                >
-                  <div className="w-32 h-32 mx-auto mb-6 relative">
-                    <img 
-                      src={CHILD_PHOTO_URL}
-                      alt="Avatar do Heitor"
-                      className="w-full h-full object-cover rounded-full border-4 border-yellow-400 shadow-2xl"
-                    />
-                    <motion.div
-                      animate={{
-                        rotate: [0, 360],
-                        scale: [1, 1.1, 1]
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "linear"
-                      }}
-                      className="absolute -inset-4 border-4 border-pink-400/50 rounded-full"
-                    />
-                    <motion.div
-                      animate={{
-                        rotate: [360, 0],
-                        scale: [1.1, 1.3, 1.1]
-                      }}
-                      transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: "linear"
-                      }}
-                      className="absolute -inset-8 border-2 border-purple-400/30 rounded-full"
-                    />
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <p className="text-2xl font-bold text-gray-800" style={{ fontFamily: 'Comic Neue, cursive' }}>
-                      🎂 Hoje é um dia MUITO especial! 🎂
-                    </p>
-                    <p className="text-xl text-gray-700 leading-relaxed">
-                      Heitor, você está completando <span className="text-pink-600 font-bold">{currentAge} anos</span> de vida!
-                    </p>
-                    <p className="text-lg text-gray-600">
-                      Você cresceu tanto e se tornou um verdadeiro herói! 
-                      O Flash ficaria orgulhoso de ver como você é responsável e dedicado! ⚡
-                    </p>
-                  </div>
-                </motion.div>
+                <div className="space-y-3 text-left">
+                  <p className="text-white/90 text-[17px] leading-relaxed">
+                    Hoje é um dia muito especial. Você está completando {currentAge} anos.
+                  </p>
+                  <p className="text-sm mc-muted">
+                    Você cresceu, aprendeu e mostrou responsabilidade nas missões de todo dia.
+                  </p>
+                </div>
               )}
 
               {celebrationStep === 1 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="space-y-6"
-                >
-                  <h3 className="text-3xl font-bold text-gray-800 mb-6" style={{ fontFamily: 'Comic Neue, cursive' }}>
-                    🎁 Presentes Especiais de Aniversário! 🎁
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    {birthdayRewards.map((reward, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.3 }}
-                        className="bg-gradient-to-r from-yellow-100 to-pink-100 border-2 border-yellow-300 rounded-2xl p-6"
-                      >
-                        <div className="flex items-center gap-4">
-                          <motion.div
-                            animate={{
-                              scale: [1, 1.2, 1],
-                              rotate: [0, 10, -10, 0]
-                            }}
-                            transition={{
-                              duration: 1,
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                              delay: index * 0.2
-                            }}
-                            className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-white shadow-lg"
-                          >
-                            <Gift className="w-8 h-8 text-red-600" />
-                          </motion.div>
-                          
-                          <div className="flex-1 text-left">
-                            <h4 className="text-xl font-bold text-gray-900 mb-2">
-                              {reward.title}
-                            </h4>
-                            <p className="text-gray-700 mb-3">
-                              {reward.description}
-                            </p>
-                            <div className="flex items-center gap-4 text-lg font-bold">
-                              <div className="flex items-center gap-1 text-blue-600">
-                                <Zap className="w-5 h-5" />
-                                +{reward.xp} XP
-                              </div>
-                              <div className="flex items-center gap-1 text-yellow-600">
-                                <Star className="w-5 h-5" />
-                                +{reward.gold} Gold
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
+                <div className="space-y-2 text-left">
+                  {birthdayRewards.map((reward) => (
+                    <div key={reward.title} className="mc-card rounded p-3">
+                      <h4 className="font-bold text-[17px] text-white mb-1">{reward.title}</h4>
+                      <p className="text-[13px] mc-muted mb-2">{reward.description}</p>
+                      <div className="flex items-center gap-3">
+                        <span className="mc-slot flex items-center gap-1.5 px-2 py-1">
+                          <img src={STAR} alt="" className="w-5 h-5 mc-pixel" draggable={false} />
+                          <span className="mc-font text-[8px] mc-good">+{reward.xp} XP</span>
+                        </span>
+                        <span className="mc-slot flex items-center gap-1.5 px-2 py-1">
+                          <img src={GOLD} alt="" className="w-5 h-5 mc-pixel" draggable={false} />
+                          <span className="mc-font text-[8px] mc-warn">+{reward.gold} GOLD</span>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
 
               {celebrationStep === 2 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="space-y-6"
-                >
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      rotate: [0, 5, -5, 0]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="text-8xl mb-6"
-                  >
-                    👑
-                  </motion.div>
-                  
-                  <h3 className="text-4xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Comic Neue, cursive' }}>
-                    Você é o Rei do Dia! 👑
-                  </h3>
-                  
-                  <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-2 border-yellow-300 rounded-2xl p-6">
-                    <p className="text-xl text-gray-800 leading-relaxed mb-4">
-                      Heitor, você é uma pessoa incrível! 
-                    </p>
-                    <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                      Seus {currentAge} anos são uma prova de como você cresceu, aprendeu e se tornou um verdadeiro herói!
-                    </p>
-                    <p className="text-lg text-pink-600 font-bold">
-                      Que este novo ano seja cheio de aventuras, descobertas e muita felicidade! ⚡💖
-                    </p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="text-gray-600 text-lg">
-                      Esta data ficará marcada para sempre no seu sistema! 📅
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Todo ano no dia 18 de dezembro, você receberá uma celebração especial!
-                    </p>
-                  </div>
-                </motion.div>
+                <div className="space-y-3">
+                  <p className="text-white/90 text-[17px] leading-relaxed">
+                    Heitor, seus {currentAge} anos mostram o quanto você cresceu e aprendeu.
+                  </p>
+                  <p className="text-sm mc-muted">
+                    Que este novo ano seja cheio de missões, descobertas e muita felicidade.
+                  </p>
+                  <p className="text-xs mc-muted">
+                    Todo ano, no seu aniversário, você recebe uma celebração especial.
+                  </p>
+                </div>
               )}
 
-              {/* Action Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                type="button"
                 onClick={handleCelebrationStep}
                 disabled={isProcessing}
-                className="mt-8 px-12 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl font-bold text-xl transition-all duration-200 shadow-2xl hover:shadow-3xl flex items-center justify-center gap-3 mx-auto"
-                style={{ fontFamily: 'Comic Neue, cursive' }}
+                className={`mt-6 w-full py-3 font-bold mc-btn ${celebrationStep === 2 ? 'mc-btn-green' : 'mc-btn-gold'}`}
               >
-                {isProcessing ? (
-                  <>
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Processando...
-                  </>
-                ) : celebrationStep === 0 ? (
-                  <>
-                    <PartyPopper className="w-6 h-6" />
-                    Começar Celebração!
-                  </>
-                ) : celebrationStep === 1 ? (
-                  <>
-                    <Gift className="w-6 h-6" />
-                    Receber Presentes!
-                  </>
-                ) : (
-                  <>
-                    <Heart className="w-6 h-6" />
-                    Finalizar Celebração!
-                  </>
-                )}
-              </motion.button>
+                {buttonLabel}
+              </button>
 
-              {/* Skip button for testing */}
               <button
+                type="button"
                 onClick={() => {
                   setShowCelebration(false);
                   onComplete();
                 }}
-                className="mt-4 text-gray-500 hover:text-gray-700 text-sm underline"
+                className="mt-3 text-sm mc-muted underline"
               >
                 Pular celebração (apenas para teste)
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
     </AnimatePresence>
   );

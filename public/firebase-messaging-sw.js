@@ -20,11 +20,11 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('📨 Background Message received:', payload);
   
-  const notificationTitle = payload.notification?.title || 'Flash Missions';
+  const notificationTitle = payload.notification?.title || 'Miner Missions';
   const notificationOptions = {
     body: payload.notification?.body || 'Nova notificação!',
-    icon: '/vite.svg',
-    badge: '/vite.svg',
+    icon: '/icons/miner-192.png',
+    badge: '/icons/miner-192.png',
     tag: 'flash-missions',
     requireInteraction: true,
     actions: [

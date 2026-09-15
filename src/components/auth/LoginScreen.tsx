@@ -1,14 +1,13 @@
-import { CHILD_PHOTO_URL } from '../../config/rules';
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Shield, Wifi, WifiOff } from 'lucide-react';
-import { BrandMark, FlashIcon } from '../../icons';
+import { FlashIcon } from '../../icons';
 import LoadingSpinner from '../common/LoadingSpinner';
-import ComicBackdrop from '../common/ComicBackdrop';
 import { useOffline } from '../../contexts/OfflineContext';
 import toast from 'react-hot-toast';
+
+const BANNER = '/assets/english/ui/banner.webp';
+const MINER = '/assets/english/ui/miner.webp';
 
 const LoginScreen: React.FC = () => {
   const { user, login, loading } = useAuth();
@@ -68,127 +67,66 @@ const LoginScreen: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#6B0A18] flex items-center justify-center p-4">
-      <ComicBackdrop />
-      <div className="max-w-md w-full relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="comic-card p-8"
-        >
-          {/* Logo e Título */}
-          <div className="text-center mb-8">
-            <motion.div
-              animate={{ 
-                scale: [1, 1.05, 1],
-              }}
-              transition={{ 
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="inline-flex items-center justify-center mb-4"
-            >
-              <BrandMark className="w-20 h-20" />
-            </motion.div>
-            <h1 className="ink-title text-3xl mb-2">Flash Missions</h1>
-            <p className="text-gray-600">Missões do Heitor na velocidade da luz</p>
+    <div className="mn-page flex items-center justify-center p-4">
+      <div className="mc-panel mc-pop rounded-lg overflow-hidden w-full max-w-[440px]">
+        <div className="relative h-[140px] overflow-hidden border-b-4 border-[#17130f]">
+          <img src={BANNER} alt="" className="absolute inset-0 w-full h-full object-cover mc-pixel" draggable={false} />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2f2a27] via-[#2f2a27]/30 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 px-4 pb-3">
+            <h1 className="mc-title text-base sm:text-lg">Miner Missions</h1>
+            <p className="text-white/85">Missões do Heitor</p>
+          </div>
+        </div>
+
+        <div className="p-5">
+          <div className="mc-lbl flex items-center gap-2 mb-4">
+            <span className={`w-2.5 h-2.5 ${isOffline ? 'bg-[#ff7b6b]' : 'bg-[#9be36a]'}`} />
+            {isOffline ? <span className="mc-bad">Sem internet</span> : <span className="mc-good">Conectado</span>}
           </div>
 
-          {/* Status de Conexão */}
-          <div className={`mb-6 p-3 rounded-lg flex items-center gap-2 ${
-            isOffline ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
-          }`}>
-            {isOffline ? (
-              <>
-                <WifiOff className="w-5 h-5" />
-                <span className="text-sm font-medium">Sem conexão - Login indisponível</span>
-              </>
-            ) : (
-              <>
-                <Wifi className="w-5 h-5" />
-                <span className="text-sm font-medium">Conectado - Firebase ativo</span>
-              </>
-            )}
-          </div>
-
-          {/* Seleção de Perfil */}
           {loginMode === 'initial' && !isOffline && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4 mb-6"
-            >
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+            <div className="space-y-3">
+              <button
+                type="button"
+                data-testid="login-heitor"
                 onClick={handleHeitorLogin}
-                className="w-full p-6 bg-red-600 text-white rounded-2xl font-bold text-xl flex items-center justify-center gap-4 hover:bg-red-700 transition-all duration-200 comic-chip"
+                className="mc-btn mc-btn-row mc-btn-green w-full h-16 rounded-lg px-3 text-left"
               >
-                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center border-[3px] border-[#1A1214] overflow-hidden">
-                  <img 
-                    src={CHILD_PHOTO_URL}
-                    alt="Avatar do Heitor"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </div>
-                <div className="text-left">
-                  <div className="text-xl font-bold">Entrar como Heitor</div>
-                  <div className="text-yellow-300 text-sm font-medium">Painel de Missões</div>
-                </div>
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                <span className="mc-slot w-12 h-12 p-1 shrink-0">
+                  <img src={MINER} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
+                </span>
+                <span>
+                  <span className="block text-xl font-bold">Entrar como Heitor</span>
+                  <span className="block text-sm text-white/85">Painel de missões</span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                data-testid="login-pai"
                 onClick={() => setLoginMode('admin_form')}
-                className="w-full p-6 bg-[#1A1214] text-white rounded-2xl font-semibold text-lg flex items-center justify-center gap-4 hover:bg-black transition-all duration-200 comic-chip"
+                className="mc-btn mc-btn-row mc-btn-stone w-full h-14 rounded-lg px-3 text-left"
               >
-                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center border-[3px] border-white/30">
-                  <FlashIcon name="shield" className="w-6 h-6 text-[#1A1214]" />
-                </div>
-                <div className="text-left">
-                  <div className="text-lg font-bold">Entrar como Pai</div>
-                  <div className="text-blue-200 text-sm font-medium">Painel Administrativo</div>
-                </div>
-              </motion.button>
-            </motion.div>
+                <span className="mc-slot w-12 h-12 flex items-center justify-center shrink-0">
+                  <FlashIcon name="shield" className="w-6 h-6" />
+                </span>
+                <span>
+                  <span className="block text-lg font-bold">Entrar como Pai</span>
+                  <span className="block text-sm text-white/85">Painel dos pais</span>
+                </span>
+              </button>
+            </div>
           )}
 
-          {/* Formulário de Login */}
           {loginMode === 'admin_form' && !isOffline && (
-            <motion.form
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-blue-900">Painel Administrativo</div>
-                    <div className="text-sm text-blue-700">Acesso para pais e responsáveis</div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLoginMode('initial')}
-                  className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 bg-white/50 hover:bg-white/80 rounded-lg transition-colors font-medium"
-                >
-                  ← Voltar
-                </button>
+            <form onSubmit={handleSubmit} className="mc-inv mc-pop rounded-lg p-4 space-y-4">
+              <div className="mc-h">
+                <FlashIcon name="shield" className="w-[26px] h-[26px]" />
+                Entrar como Pai
               </div>
 
-              {/* Nome (apenas para registro) */}
               <div>
-                <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                  Email
-                </label>
+                <label htmlFor="email" className="mc-lbl mb-1 block">Email</label>
                 <input
                   type="email"
                   id="email"
@@ -196,16 +134,13 @@ const LoginScreen: React.FC = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                  className="w-full h-11 px-3 bg-white text-[#1f1a17] border-[3px] border-[#373737] rounded-md outline-none focus:border-[#5b9b3a]"
                   placeholder="seu@email.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                  Senha
-                </label>
+                <label htmlFor="password" className="mc-lbl mb-1 block">Senha</label>
                 <input
                   type="password"
                   id="password"
@@ -213,47 +148,38 @@ const LoginScreen: React.FC = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                  className="w-full h-11 px-3 bg-white text-[#1f1a17] border-[3px] border-[#373737] rounded-md outline-none focus:border-[#5b9b3a]"
                   placeholder="••••••••"
                 />
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <button
                 type="submit"
                 disabled={loading || isOffline}
-                className="w-full py-4 px-4 rounded-xl font-bold text-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200"
+                className="mc-btn mc-btn-green w-full h-12 rounded-md text-lg font-bold"
               >
-                {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Entrando...
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    Entrar como Admin
-                  </div>
-                )}
-              </motion.button>
-            </motion.form>
+                {loading ? 'Entrando...' : 'Entrar'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setLoginMode('initial')}
+                className="mc-muted underline text-sm"
+              >
+                Voltar
+              </button>
+            </form>
           )}
 
-          {/* Mensagem quando offline */}
           {isOffline && (
-            <div className="text-center py-8">
-              <WifiOff className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                Sem Conexão
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Este aplicativo requer conexão com a internet para funcionar.
-                Conecte-se e recarregue a página.
+            <div className="mc-card rounded-md p-4 text-center">
+              <p className="mc-bad font-bold text-lg">Sem conexão</p>
+              <p className="text-sm text-white/85 mt-2">
+                Este aplicativo precisa de internet para funcionar. Conecte-se e recarregue a página.
               </p>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

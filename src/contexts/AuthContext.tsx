@@ -106,11 +106,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.error('🚨 AUTH - Error in auth state change:', error);
         const code = getErrorCode(error);
         if (code === 'permission-denied') {
-          toast.error('❌ Acesso negado. Verifique as regras do Firestore.');
+          toast.error('Acesso negado. Verifique as regras do Firestore.');
         } else if (code === 'failed-precondition') {
-          toast.error('❌ Banco Firestore não configurado.');
+          toast.error('Banco Firestore não configurado.');
         } else {
-          toast.error('❌ Erro de autenticação');
+          toast.error('Erro de autenticação');
         }
         setUser(null);
         setChildUid(null);
@@ -184,7 +184,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (childUid) {
       try {
         await FirestoreService.syncUserData(childUid);
-        toast.success('🔄 Dados sincronizados com sucesso!');
+        toast.success('Dados sincronizados.');
       } catch (error) {
         console.error('❌ Erro ao sincronizar dados:', error);
         toast.error('Erro ao sincronizar dados');

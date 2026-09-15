@@ -21,7 +21,7 @@ const OfflineBanner: React.FC = () => {
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               <span className="font-medium text-sm">
-                Sem conexão com a internet. O Flash Missions precisa de internet para funcionar.
+                Sem conexão com a internet. O Miner Missions precisa de internet para funcionar.
               </span>
             </div>
           </div>

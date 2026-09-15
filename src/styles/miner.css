@@ -49,6 +49,56 @@
     repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.10) 0 2px, transparent 2px 10px);
 }
 
+/* ---------- fundo de mina (atrás dos painéis) ---------- */
+.mn-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background-color: #1d1917;
+  background-image:
+    radial-gradient(ellipse 120% 70% at 50% -10%, rgba(255, 255, 255, 0.05), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 12px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 12px),
+    linear-gradient(180deg, #2a2522 0%, #1d1917 55%, #15120f 100%);
+}
+
+.mn-backdrop-torch {
+  position: absolute;
+  top: 6%;
+  width: 46vw;
+  height: 46vw;
+  max-width: 620px;
+  max-height: 620px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 170, 60, 0.20) 0%, rgba(255, 120, 30, 0.08) 35%, transparent 70%);
+  animation: mn-torch 3.2s ease-in-out infinite;
+}
+
+.mn-backdrop-torch-left { left: -14vw; }
+.mn-backdrop-torch-right { right: -14vw; animation-delay: -1.4s; }
+
+.mn-backdrop-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28%;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.25) 0 6px, transparent 6px 40px),
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
+}
+
+@keyframes mn-torch {
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mn-backdrop-torch { animation: none; }
+}
+
 /* ---------- painel claro de inventário (conteúdo do dia a dia) ---------- */
 .mc-inv {
   background: var(--mc-inv);
@@ -89,6 +139,8 @@
 
 .mc-row.is-done { background: #bfd9ad; }
 .mc-row.is-locked { background: #bdbdbd; color: var(--mc-inv-muted); }
+/* missão em foco no modo guiado (o ring do Tailwind perdia para o box-shadow do mc-row) */
+.mc-row.is-focus { box-shadow: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #8d8d8d, 0 0 0 3px var(--mc-gold-hi); }
 
 /* ---------- rótulos e números ---------- */
 .mc-lbl {
@@ -160,6 +212,10 @@
 }
 
 .mc-hotbar > button img { width: 26px; height: 26px; }
+/* segunda barra de filtros, menor */
+.mc-hotbar > button.text-\[13px\] { font-size: 13px; }
+/* botão largo com conteúdo alinhado à esquerda (login) */
+.mc-btn.mc-btn-row { justify-content: flex-start; gap: 16px; }
 
 /* ---------- tochas de dias seguidos ---------- */
 .mc-torches { display: flex; gap: 4px; align-items: flex-end; }

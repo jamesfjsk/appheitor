@@ -1,15 +1,30 @@
 import { REDEEM_MIN_TASKS } from '../../config/rules';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Lock, CheckCircle, Clock, X, Unlock } from 'lucide-react';
-import { FlashIcon, IconBadge } from '../../icons';
+import { X } from 'lucide-react';
+import { FlashIcon } from '../../icons';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSound } from '../../contexts/SoundContext';
 import { Reward } from '../../types';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 import { isRewardUnlocked } from '../../utils/rewardLevels';
 import { getTodayBrazil } from '../../utils/timezone';
+const UI = '/assets/english/ui';
+/** Ícone pixel por categoria do prêmio (o campo emoji legado não tem equivalente pixel; a Etapa 1 traz ícones próprios) */
+const REWARD_CATEGORY_ICON: Record<string, string> = {
+  treat: `${UI}/apple.webp`,
+  toy: `${UI}/chest.webp`,
+  activity: `${UI}/map.webp`,
+  privilege: `${UI}/gold.webp`,
+  custom: `${UI}/star.webp`,
+};
+const rewardIcon = (category: string): string => REWARD_CATEGORY_ICON[category] ?? REWARD_CATEGORY_ICON.custom;
 
+const CHEST = '/assets/english/ui/chest.webp';
+const GOLD = '/assets/english/ui/gold.webp';
+const MAP = '/assets/english/ui/map.webp';
+const CLOCK = '/assets/english/ui/clock.webp';
 
 interface RewardsPanelProps {
   isOpen: boolean;
@@ -19,10 +34,13 @@ interface RewardsPanelProps {
 const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   const { rewards, redemptions, progress, redeemReward, tasks } = useData();
   const { childUid } = useAuth();
+  const { playClick } = useSound();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'available' | 'locked'>('all');
   const [dailyTasksCompleted, setDailyTasksCompleted] = useState<number>(0);
   const [loadingDailyTasks, setLoadingDailyTasks] = useState(true);
+  const [confirming, setConfirming] = useState<Reward | null>(null);
+  const [redeeming, setRedeeming] = useState(false);
   
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   const currentLevel = levelSystem.currentLevel;
@@ -154,9 +172,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   ];
 
   const filters = [
-    { id: 'all', label: 'Todas', icon: 'gift' },
-    { id: 'available', label: 'Disponíveis', icon: 'check' },
-    { id: 'locked', label: 'Bloqueadas', icon: 'lock' },
+    { id: 'all', label: 'Todas' },
+    { id: 'available', label: 'Disponíveis' },
+    { id: 'locked', label: 'Bloqueadas' },
   ] as const;
 
   const filteredRewards = rewards.filter(reward => {
@@ -175,466 +193,264 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   });
 
   const handleRedeem = async (reward: Reward) => {
-    if (!canRedeem(reward)) return;
+    if (!canRedeem(reward)) { setConfirming(null); return; }
     
     try {
+      setRedeeming(true);
       await redeemReward(reward.id);
+      setConfirming(null);
     } catch (error) {
       console.error('Erro ao resgatar recompensa:', error);
+    } finally {
+      setRedeeming(false);
     }
   };
 
-  const getStatusBadge = (reward: Reward) => {
-    // Show badge only for pending redemptions
-    const pendingRedemption = redemptions
-      .filter(r => r.rewardId === reward.id && r.status === 'pending')
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-    
-    if (!pendingRedemption) return null;
-    
-    const statusConfig = {
-      pending: { icon: Clock, color: 'bg-yellow-500', text: 'Aguardando' },
-    };
-    
-    const config = statusConfig.pending;
-    const Icon = config.icon;
-    
-    return (
-      <div className={`absolute -top-2 -right-2 ${config.color} text-white rounded-full p-1 text-xs font-bold flex items-center gap-1`}>
-        <Icon className="w-3 h-3" />
-        <span className="hidden sm:inline">{config.text}</span>
-      </div>
-    );
-  };
-
   if (!isOpen) return null;
+
+  const missingGold = (reward: Reward) => Math.max(0, (reward.costGold || 0) - (progress.availableGold || 0));
+  const gateOpen = dailyTasksCompleted >= REDEEM_MIN_TASKS;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-gradient-to-br from-hero-primary to-hero-secondary rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+        className="mc-panel rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/20">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-hero-accent rounded-full flex items-center justify-center">
-              <FlashIcon name="gift" className="w-6 h-6 text-hero-primary" />
+        <div className="p-4 border-b-4 border-[#17130f] flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <h2 className="mc-h">
+              <img src={CHEST} alt="" className="mc-pixel" draggable={false} />
+              Baú de recompensas
+            </h2>
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <img src={GOLD} alt="" className="w-[22px] h-[22px] mc-pixel" draggable={false} />
+              <span className="mc-num text-[#ffd83d]" style={{ fontSize: 16 }}>{progress.availableGold || 0}</span>
+              <span className="text-xs font-semibold mc-muted">gold disponível</span>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white">Loja de Recompensas</h2>
-              <p className="text-hero-accent font-semibold">
-                Você tem {progress.availableGold || 0} Gold disponível
-                {progress.totalGoldSpent > 0 && (
-                  <span className="text-xs block text-white/70">
-                    Total ganho: {progress.totalGoldEarned || 0} | Gasto: {progress.totalGoldSpent || 0}
-                  </span>
-                )}
-              </p>
-            </div>
+            {progress.totalGoldSpent > 0 && (
+              <p className="mc-lbl mt-1">ganho {progress.totalGoldEarned || 0} · gasto {progress.totalGoldSpent || 0}</p>
+            )}
           </div>
-          
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors text-white"
-          >
-            <X className="w-6 h-6" />
+          <button type="button" onClick={onClose} className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0" aria-label="Fechar">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Categories */}
-        <div className="p-6 border-b border-white/20 space-y-4">
-          {/* Category Filters */}
-          <div className="flex gap-2 overflow-x-auto">
+        <div className="p-4 space-y-3">
+          <div className="mc-hotbar">
             {categories.map((category) => (
-              <motion.button
+              <button
                 key={category.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                type="button"
                 onClick={() => setSelectedCategory(category.id)}
-                className={`px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
-                  selectedCategory === category.id
-                    ? 'bg-hero-accent text-hero-primary shadow-lg'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`mc-slot rounded ${selectedCategory === category.id ? 'mc-slot-selected' : ''}`}
               >
-                <FlashIcon name={category.icon} className="w-4 h-4" />
+                {category.id === 'all'
+                  ? <img src={CHEST} alt="" className="w-[22px] h-[22px] mc-pixel" draggable={false} />
+                  : <FlashIcon name={category.icon} className="w-[22px] h-[22px]" />}
                 {category.label}
-              </motion.button>
+              </button>
             ))}
           </div>
-          
-          {/* Availability Filters */}
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="mc-hotbar">
             {filters.map((filter) => (
-              <motion.button
+              <button
                 key={filter.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                type="button"
                 onClick={() => setSelectedFilter(filter.id)}
-                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 flex items-center gap-1 whitespace-nowrap text-sm ${
-                  selectedFilter === filter.id
-                    ? 'bg-white text-hero-primary shadow-lg'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`mc-slot rounded text-[13px] min-h-[44px] ${selectedFilter === filter.id ? 'mc-slot-selected' : ''}`}
               >
-                <FlashIcon name={filter.icon} className="w-4 h-4" />
                 {filter.label}
-              </motion.button>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Rewards Grid */}
-        {/* Daily Tasks Requirement Banner */}
-        <div className="p-6 border-b border-white/20">
-          <div className={`p-4 rounded-xl border-2 ${
-            loadingDailyTasks 
-              ? 'bg-gray-100 border-gray-300' 
-              : dailyTasksCompleted >= REDEEM_MIN_TASKS 
-              ? 'bg-green-400/20 border-green-400/30' 
-              : 'bg-red-400/20 border-red-400/30'
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  loadingDailyTasks 
-                    ? 'bg-gray-300' 
-                    : dailyTasksCompleted >= REDEEM_MIN_TASKS 
-                    ? 'bg-green-500' 
-                    : 'bg-red-500'
-                }`}>
-                  {loadingDailyTasks ? (
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : dailyTasksCompleted >= REDEEM_MIN_TASKS ? (
-                    <CheckCircle className="w-6 h-6 text-white" />
-                  ) : (
-                    <Lock className="w-6 h-6 text-white" />
-                  )}
-                </div>
-                <div>
-                  <h3 className={`font-bold text-lg ${
-                    loadingDailyTasks 
-                      ? 'text-gray-600' 
-                      : dailyTasksCompleted >= REDEEM_MIN_TASKS 
-                      ? 'text-green-200' 
-                      : 'text-red-200'
-                  }`}>
-                    {loadingDailyTasks 
-                      ? 'Verificando missões de hoje...' 
-                      : dailyTasksCompleted >= REDEEM_MIN_TASKS 
-                      ? '✅ Resgates Liberados!' 
-                      : '🔒 Resgates Bloqueados'
-                    }
-                  </h3>
-                  <p className={`text-sm ${
-                    loadingDailyTasks 
-                      ? 'text-gray-500' 
-                      : dailyTasksCompleted >= REDEEM_MIN_TASKS 
-                      ? 'text-green-300' 
-                      : 'text-red-300'
-                  }`}>
-                    {loadingDailyTasks
-                      ? 'Carregando...'
-                      : `${dailyTasksCompleted}/${REDEEM_MIN_TASKS} missões completadas hoje`
-                    }
-                  </p>
-                </div>
-              </div>
-              
-              <div className="text-right">
-                <div className={`text-2xl font-bold ${
-                  loadingDailyTasks
-                    ? 'text-gray-600'
-                    : dailyTasksCompleted >= REDEEM_MIN_TASKS
-                    ? 'text-green-200'
-                    : 'text-red-200'
-                }`}>
-                  {dailyTasksCompleted}/{REDEEM_MIN_TASKS}
-                </div>
-                <div className={`text-xs ${
-                  loadingDailyTasks
-                    ? 'text-gray-500'
-                    : dailyTasksCompleted >= REDEEM_MIN_TASKS
-                    ? 'text-green-300'
-                    : 'text-red-300'
-                }`}>
-                  missões hoje
-                </div>
-              </div>
-            </div>
-            
-            {!loadingDailyTasks && dailyTasksCompleted < REDEEM_MIN_TASKS && (
-              <div className="mt-3 p-3 bg-red-500/20 rounded-lg">
-                <p className="text-red-200 text-sm font-medium text-center">
-                  🚫 Complete pelo menos {REDEEM_MIN_TASKS} missões hoje para desbloquear os resgates!
-                  <br />
-                  <span className="text-xs">Faltam {REDEEM_MIN_TASKS - dailyTasksCompleted} missões para liberar a loja.</span>
+        <div className="px-4 pb-4">
+          <div className="mc-card rounded p-3 flex items-center gap-3">
+            <img src={MAP} alt="" className="w-10 h-10 mc-pixel shrink-0" draggable={false} />
+            <div className="flex-1 min-w-0">
+              <p className={`font-bold text-[17px] ${loadingDailyTasks ? '' : gateOpen ? 'mc-good' : 'mc-bad'}`}>
+                {loadingDailyTasks
+                  ? 'Conferindo as missões de hoje...'
+                  : gateOpen
+                    ? 'Trocas liberadas'
+                    : 'Trocas bloqueadas'}
+              </p>
+              <p className="text-sm text-white/85">
+                {dailyTasksCompleted}/{REDEEM_MIN_TASKS} missões feitas hoje
+              </p>
+              {!loadingDailyTasks && !gateOpen && (
+                <p className="text-sm mc-muted mt-1">
+                  Faça pelo menos {REDEEM_MIN_TASKS} missões hoje para liberar as trocas. Faltam {REDEEM_MIN_TASKS - dailyTasksCompleted}.
                 </p>
-              </div>
-            )}
+              )}
+            </div>
+            <span className="mc-num" style={{ fontSize: 18 }}>{dailyTasksCompleted}/{REDEEM_MIN_TASKS}</span>
           </div>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-96">
+        <div className="px-4 pb-4">
           {filteredRewards.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredRewards.map((reward, index) => {
+            <div className="mc-inv rounded p-3 space-y-2 max-h-[50vh] overflow-y-auto">
+              {filteredRewards.map((reward) => {
                 const canRedeemReward = canRedeem(reward);
                 const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
                 const requiredLevel = reward.requiredLevel || 1;
-                const pendingRedemption = redemptions
-                  .filter(r => r.rewardId === reward.id && r.status === 'pending')
-                  .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-                
+                const pendingRedemption = getRedemptionStatus(reward.id);
+                const locked = !isUnlocked || missingGold(reward) > 0;
+                const justUnlocked = isUnlocked && requiredLevel > 1 && currentLevel === requiredLevel;
+                const isConfirming = confirming?.id === reward.id;
+
                 return (
-                  <motion.div
+                  <div
                     key={reward.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`relative backdrop-blur-sm rounded-2xl p-4 border transition-all duration-300 ${
-                      isUnlocked 
-                        ? 'bg-white border-gray-200 shadow-md' 
-                        : 'bg-gray-100 border-gray-300 opacity-75'
-                    }`}
+                    className={`mc-row rounded p-3 flex flex-wrap items-center gap-3 ${locked ? 'is-locked' : ''}`}
                   >
-                    {getStatusBadge(reward)}
-                    
-                    {/* Lock indicator for locked rewards */}
-                    {!isUnlocked && (
-                      <div className="absolute -top-2 -left-2 bg-gray-600 text-white rounded-full p-2">
-                        <Lock className="w-4 h-4" />
+                    <div className="mc-slot w-[52px] h-[52px] p-1 shrink-0 flex items-center justify-center">
+                      <img src={rewardIcon(reward.category)} alt="" draggable={false} className={`w-9 h-9 mc-pixel ${!isUnlocked ? 'grayscale opacity-60' : ''}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[17px] font-bold leading-tight">{reward.title}</h3>
+                      <p className="text-[13px] mc-muted">{reward.description}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <img src={GOLD} alt="" className="w-4 h-4 mc-pixel" draggable={false} />
+                        <span className="mc-num">{reward.costGold || 0}</span>
+                        <span className="mc-lbl">gold</span>
+                        {!isUnlocked && <span className="text-xs font-semibold mc-muted">Nível {requiredLevel}</span>}
+                        {justUnlocked && <span className="mc-font text-[8px] mc-good">Novo</span>}
+                        {pendingRedemption && <span className="mc-lbl mc-warn">Aguardando</span>}
                       </div>
-                    )}
-                    
-                    {/* New unlock indicator */}
-                    {isUnlocked && requiredLevel > 1 && currentLevel === requiredLevel && (
-                      <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="absolute -top-2 -left-2 bg-yellow-400 text-red-600 rounded-full p-2"
-                      >
-                        <Unlock className="w-4 h-4" />
-                      </motion.div>
-                    )}
-                    
-                    <div className="text-center mb-4">
-                      <motion.div 
-                        whileHover={isUnlocked ? { scale: 1.1, rotate: 5 } : {}}
-                        className={`mb-3 flex justify-center ${!isUnlocked ? 'grayscale opacity-50' : ''}`}
-                      >
-                        <IconBadge name={reward.emoji} size={64} muted={!isUnlocked} />
-                      </motion.div>
-                      <h3 className={`font-bold text-xl mb-2 ${
-                        isUnlocked ? 'text-gray-900' : 'text-gray-500'
-                      }`}>
-                        {reward.title}
-                      </h3>
-                      <p className={`text-base leading-relaxed ${
-                        isUnlocked ? 'text-gray-600' : 'text-gray-400'
-                      }`}>
-                        {reward.description}
-                      </p>
-                      
-                      {/* Level requirement indicator */}
-                      {!isUnlocked && (
-                        <div className="mt-2 px-2 py-1 bg-gray-600/50 rounded-full text-xs text-gray-200">
-                          Desbloqueado no nível {requiredLevel}
+                      {isConfirming && (
+                        <div className="mc-card rounded p-3 mt-2">
+                          <p className="text-sm text-white mb-2">
+                            Trocar {reward.costGold || 0} gold por {reward.title}?
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              disabled={redeeming}
+                              onClick={() => void handleRedeem(reward)}
+                              className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold"
+                            >
+                              Confirmar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirming(null)}
+                              className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
                         </div>
                       )}
-                      
-                      {/* Just unlocked indicator */}
-                      {isUnlocked && requiredLevel > 1 && currentLevel === requiredLevel && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-                          animate={{ 
-                            opacity: 1, 
-                            scale: [1, 1.1, 1], 
-                            rotate: [0, 5, -5, 0] 
-                          }}
-                          transition={{ 
-                            delay: 0.3,
-                            scale: { duration: 2, repeat: Infinity },
-                            rotate: { duration: 1, repeat: Infinity }
-                          }}
-                          className="mt-3 px-3 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-red-600 rounded-full text-sm font-bold shadow-lg border-2 border-white"
-                        >
-                          Novo desbloqueio
-                        </motion.div>
-                      )}
                     </div>
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`flex items-center gap-1 font-bold ${
-                        isUnlocked ? 'text-hero-accent' : 'text-gray-400'
-                      }`}>
-                        <Star className="w-4 h-4" />
-                        {reward.costGold || 0} Gold
-                      </div>
-                      
-                      {!isUnlocked ? (
-                        <span className="text-gray-400 text-sm font-medium flex items-center gap-1">
-                          <Lock className="w-4 h-4" />
+                    {!isConfirming && (
+                      !isUnlocked ? (
+                        <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
                           Nível {requiredLevel}
-                        </span>
-                      ) : (progress.availableGold || 0) >= (reward.costGold || 0) ? (
-                        <span className="text-green-600 text-sm font-medium">
-                          ✓ Disponível
-                        </span>
-                      ) : (
-                        <span className="text-red-600 text-sm font-medium">
-                          <Lock className="w-4 h-4 inline mr-1" />
-                          Faltam {(reward.costGold || 0) - (progress.availableGold || 0)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <motion.button
-                      whileHover={canRedeemReward ? { scale: 1.02 } : {}}
-                      whileTap={canRedeemReward ? { scale: 0.98 } : {}}
-                      onClick={() => handleRedeem(reward)}
-                      disabled={!canRedeemReward}
-                      className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg ${
-                        !isUnlocked
-                          ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                        : canRedeemReward
-                          ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-red-600 hover:from-yellow-300 hover:to-yellow-400 shadow-xl hover:shadow-2xl transform hover:-translate-y-1'
-                          : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      }`}
-                    >
-                      {!isUnlocked ? (
-                        <>
-                          <Lock className="w-5 h-5 inline mr-2" />
-                          Nível {requiredLevel} Necessário
-                        </>
+                        </button>
                       ) : pendingRedemption ? (
-                        <>
-                          <Clock className="w-5 h-5 inline mr-2" />
-                          Aguardando Aprovação
-                        </>
+                        <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
+                          Aguardando
+                        </button>
                       ) : canRedeemReward ? (
-                        <>
-                          <Star className="w-5 h-5 inline mr-2" />
-                          Resgatar Agora!
-                        </>
+                        <button
+                          type="button"
+                          onClick={() => { playClick(); setConfirming(reward); }}
+                          className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto"
+                        >
+                          Trocar
+                        </button>
                       ) : dailyTasksCompleted < REDEEM_MIN_TASKS ? (
-                        <>
-                          <Lock className="w-5 h-5 inline mr-2" />
-                          Complete {REDEEM_MIN_TASKS} Missões Hoje
-                        </>
+                        <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
+                          Faça {REDEEM_MIN_TASKS} missões
+                        </button>
                       ) : (
-                        <>
-                          <Lock className="w-5 h-5 inline mr-2" />
-                          Gold Insuficiente
-                        </>
-                      )}
-                    </motion.button>
-                  </motion.div>
+                        <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
+                          Faltam {missingGold(reward)} gold
+                        </button>
+                      )
+                    )}
+                  </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🎁</div>
+            <div className="mc-row rounded p-6 text-center">
+              <img src={CHEST} alt="" className="w-14 h-14 mx-auto mb-3 mc-pixel" draggable={false} />
               {selectedFilter === 'locked' ? (
                 <>
-                  <p className="text-gray-600 text-lg">
-                    Nenhuma recompensa bloqueada nesta categoria
-                  </p>
-                  <p className="text-hero-primary text-sm mt-2">
-                    Você já desbloqueou todas! 🎉
-                  </p>
+                  <p className="font-bold text-[17px]">Nenhuma recompensa bloqueada nesta categoria</p>
+                  <p className="text-[13px] mc-muted mt-2">Você já desbloqueou todas.</p>
                 </>
               ) : selectedFilter === 'available' ? (
                 <>
-                  <p className="text-gray-600 text-lg">
-                    Nenhuma recompensa disponível nesta categoria
-                  </p>
+                  <p className="font-bold text-[17px]">Nenhuma recompensa disponível nesta categoria</p>
                   {dailyTasksCompleted < REDEEM_MIN_TASKS ? (
-                    <p className="text-red-400 text-sm mt-2">
-                      Complete {REDEEM_MIN_TASKS - dailyTasksCompleted} missões hoje para liberar os resgates!
+                    <p className="text-[13px] mc-muted mt-2">
+                      Complete {REDEEM_MIN_TASKS - dailyTasksCompleted} missões hoje para liberar as trocas.
                     </p>
                   ) : (
-                    <p className="text-hero-primary text-sm mt-2">
-                      Complete mais missões para ganhar Gold!
-                    </p>
+                    <p className="text-[13px] mc-muted mt-2">Complete mais missões para ganhar gold.</p>
                   )}
                 </>
               ) : (
                 <>
-                  <p className="text-gray-600 text-lg">
-                    Nenhuma recompensa nesta categoria
-                  </p>
-                  <p className="text-hero-primary text-sm mt-2">
-                    Peça para o papai adicionar algumas recompensas!
-                  </p>
+                  <p className="font-bold text-[17px]">Nenhuma recompensa nesta categoria</p>
+                  <p className="text-[13px] mc-muted mt-2">Peça para o papai adicionar algumas recompensas.</p>
                 </>
               )}
             </div>
           )}
         </div>
         
-        {/* Histórico de Resgates do Usuário */}
         {redemptions.length > 0 && (
-          <div className="p-6 border-t border-white/20">
-            <h3 className="text-gray-900 font-bold text-lg mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-yellow-400" />
-              Meus Resgates ({redemptions.length})
+          <div className="p-4 border-t-4 border-[#17130f]">
+            <h3 className="mc-h mb-3">
+              <img src={CLOCK} alt="" className="mc-pixel" draggable={false} />
+              Minhas trocas ({redemptions.length})
             </h3>
-            
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {redemptions.slice(0, 10).map((redemption, index) => {
+            <div className="space-y-2">
+              {redemptions.slice(0, 10).map((redemption) => {
                 const reward = getRewardById(redemption.rewardId);
                 if (!reward) return null;
-                
-                const statusConfig: Record<string, { color: string; textColor: string; label: string; icon: string }> = {
-                  pending: { color: 'bg-yellow-400/20 border-yellow-400/30', textColor: 'text-yellow-200', label: '⏳ Aguardando', icon: '⏳' },
-                  approved: { color: 'bg-green-400/20 border-green-400/30', textColor: 'text-green-200', label: '✅ Aprovado', icon: '✅' },
-                  rejected: { color: 'bg-red-400/20 border-red-400/30', textColor: 'text-red-200', label: '❌ Rejeitado', icon: '❌' }
-                };
-                
-                const config = statusConfig[redemption.status] || statusConfig.pending;
-                
+                const statusLabel =
+                  redemption.status === 'pending' ? 'Aguardando' :
+                  redemption.status === 'approved' ? 'Aprovado' :
+                  redemption.status === 'rejected' ? 'Recusado' :
+                  'Entregue';
+                const statusClass =
+                  redemption.status === 'pending' ? 'mc-warn' :
+                  redemption.status === 'rejected' ? 'mc-bad' :
+                  'mc-good';
+
                 return (
-                  <motion.div
-                    key={redemption.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`border rounded-lg p-3 ${config.color}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <IconBadge name={reward.emoji} size={36} />
-                        <div>
-                          <h5 className="font-medium text-gray-900">{reward.title}</h5>
-                          <p className="text-xs text-gray-600">
-                            {redemption.createdAt.toLocaleDateString('pt-BR')} às {redemption.createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right">
-                        <div className={`text-sm font-medium ${config.textColor} flex items-center gap-1`}>
-                          <span>{config.icon}</span>
-                          <span>{config.label}</span>
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          -{redemption.costGold} Gold
-                        </div>
-                      </div>
+                  <div key={redemption.id} className="mc-card rounded p-3 flex items-center gap-3">
+                    <div className="mc-slot w-10 h-10 p-1 flex items-center justify-center shrink-0">
+                      <img src={rewardIcon(reward.category)} alt="" draggable={false} className="w-7 h-7 mc-pixel" />
                     </div>
-                  </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-bold text-[15px]">{reward.title}</h5>
+                      <p className="text-[12px] mc-muted">
+                        {redemption.createdAt.toLocaleDateString('pt-BR')} às {redemption.createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className={`mc-font text-[8px] ${statusClass}`}>{statusLabel}</div>
+                      <div className="mc-lbl">-{redemption.costGold} gold</div>
+                    </div>
+                  </div>
                 );
               })}
             </div>
