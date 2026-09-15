@@ -16,22 +16,28 @@ import {
 import { db } from '../config/firebase';
 import type { Material } from '../types/english';
 import type {
+  EconomySettings,
+  FatherNotice,
+  ModuleSettings,
   NoticeType,
   VillageCharacter,
   VillageDoc,
   VillageGear,
   VillageRare,
+  VillageSettings,
 } from '../types/village';
 import {
   CATALOG_VERSION,
   COSMETIC_BY_ID,
   DEFAULT_ECONOMY,
+  DEFAULT_MODULES,
   DEFAULT_VILLAGE_SETTINGS,
   FREE_COSMETIC_IDS,
   GEAR_BY_ID,
   initialVillageDoc,
 } from '../config/village';
 import { MATERIALS, initialBaseDoc } from '../config/englishBase';
+import { MINER_MISSIONS_ACHIEVEMENTS } from '../config/villageAchievements';
 import { fromBaseDoc } from './englishBaseService';
 import { claimKey, hasClaim } from './village/claims';
 import { chestAllowed, dailyChestContents } from './village/chest';
@@ -40,7 +46,6 @@ import { dueTasksOn } from './village/schedule';
 import { getTodayBrazil } from '../utils/timezone';
 import { getSettings } from './settingsService';
 import { touchHealth } from './observability';
-import type { EconomySettings, FatherNotice, VillageSettings } from '../types/village';
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const str = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : fallback);
@@ -227,12 +232,17 @@ export async function buyCosmetic(uid: string, itemId: string): Promise<void> {
     const vSnap = await tx.get(villageRef(uid));
     const pSnap = await tx.get(progressRef(uid));
     const sSnap = await tx.get(doc(db, 'settings', 'village'));
+    const mSnap = await tx.get(doc(db, 'settings', 'modules'));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const settings = {
       ...DEFAULT_VILLAGE_SETTINGS,
       ...(sSnap.exists() ? (sSnap.data() as Partial<VillageSettings>) : {}),
     };
-    if (!settings.shopEnabled) throw new Error('A loja da Vila está desligada');
+    const modules = {
+      ...DEFAULT_MODULES,
+      ...(mSnap.exists() ? (mSnap.data() as Partial<ModuleSettings>) : {}),
+    };
+    if (!settings.shopEnabled || modules.shop === false) throw new Error('A loja da Vila está desligada');
     const gold = Number(pSnap.data()?.availableGold) || 0;
     const check = canBuy(village, gold, item, settings);
     if (!check.ok) {
@@ -513,6 +523,33 @@ export async function startNewSeason(uid: string, adminUid: string): Promise<voi
     if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, season: nextSeason, updatedAt: nowIso() }));
     else tx.update(villageRef(uid), { season: nextSeason, updatedAt: nowIso() });
   });
+
+  const achSnap = await getDocs(query(collection(db, 'achievements'), where('ownerId', '==', uid)));
+  await Promise.all(achSnap.docs.map((d) => updateDoc(d.ref, { isActive: false, updatedAt: nowIso() })));
+  for (const a of MINER_MISSIONS_ACHIEVEMENTS) {
+    await setDoc(doc(collection(db, 'achievements')), {
+      ...a,
+      ownerId: uid,
+      createdBy: adminUid,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  }
+}
+
+export async function listDayCompletions(uid: string, date: string): Promise<Array<{ taskId: string; taskTitle: string; date: string }>> {
+  const snap = await getDocs(query(
+    collection(db, 'taskCompletions'),
+    where('userId', '==', uid),
+    where('date', '==', date)
+  ));
+  return snap.docs
+    .filter((d) => d.data().reverted !== true)
+    .map((d) => ({
+      taskId: String(d.data().taskId || ''),
+      taskTitle: String(d.data().taskTitle || 'Missão'),
+      date,
+    }));
 }
 
 export { stripUndefined };

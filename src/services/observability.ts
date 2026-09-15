@@ -1,5 +1,6 @@
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, onSnapshot, query, setDoc, where } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
+import type { HealthDoc } from '../types/village';
 
 const STACK_MAX = 2048;
 
@@ -52,4 +53,57 @@ export function installErrorLog(): void {
 
 export function getAppVersion(): string {
   return appVersion();
+}
+
+export function subscribeHealth(uid: string, onChange: (doc: HealthDoc | null) => void): () => void {
+  if (!uid) return () => undefined;
+  return onSnapshot(doc(db, 'health', uid), (snap) => {
+    if (!snap.exists()) {
+      onChange(null);
+      return;
+    }
+    const d = snap.data();
+    onChange({
+      lastCloseDay: typeof d.lastCloseDay === 'string' ? d.lastCloseDay : null,
+      lastQuizGenerated: typeof d.lastQuizGenerated === 'string' ? d.lastQuizGenerated : null,
+      lastPlanGenerated: typeof d.lastPlanGenerated === 'string' ? d.lastPlanGenerated : null,
+      lastChestDate: typeof d.lastChestDate === 'string' ? d.lastChestDate : null,
+      updatedAt: typeof d.updatedAt === 'string' ? d.updatedAt : '',
+    });
+  });
+}
+
+export interface ClientErrorRow {
+  id: string;
+  message: string;
+  stack: string;
+  uid: string;
+  route: string;
+  appVersion: string;
+  createdAt: string;
+}
+
+export function subscribeClientErrors(uid: string, onChange: (rows: ClientErrorRow[]) => void): () => void {
+  if (!uid) return () => undefined;
+  return onSnapshot(
+    query(collection(db, 'clientErrors'), where('uid', '==', uid)),
+    (snap) => {
+      const rows = snap.docs
+        .map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            message: String(data.message || ''),
+            stack: String(data.stack || ''),
+            uid: String(data.uid || ''),
+            route: String(data.route || ''),
+            appVersion: String(data.appVersion || ''),
+            createdAt: String(data.createdAt || ''),
+          };
+        })
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        .slice(0, 20);
+      onChange(rows);
+    }
+  );
 }

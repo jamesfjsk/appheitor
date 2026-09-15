@@ -263,6 +263,36 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ---------- VILA (Etapa 1) ----------
+    match /village/{uid} {
+      allow read, write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
+    match /notices/{noticeId} {
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ackAt'])
+      );
+    }
+
+    match /habits/{habitId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /clientErrors/{errorId} {
+      allow create: if signedIn();
+      allow read, delete: if isAdmin();
+    }
+
+    match /health/{uid} {
+      allow read, write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
     // ---------- PUNISHMENT MODE ----------
     match /punishmentMode/{punishmentId} {
       // Admin can read all; child can only read their own

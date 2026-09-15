@@ -4,7 +4,7 @@ import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { getTodayBrazil } from '../../../utils/timezone';
-import { characterSpriteSrc, DISTRICT_LABELS, MATERIAL_BY_PERIOD } from '../../../config/village';
+import { characterSpriteSrc, DISTRICT_LABELS } from '../../../config/village';
 import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import { dueTasksOn } from '../../../services/village/schedule';
 import { chestAllowed } from '../../../services/village/chest';
@@ -251,5 +251,3 @@ const VillageHome: React.FC<Props> = ({
 };
 
 export default VillageHome;
-
-void MATERIAL_BY_PERIOD;

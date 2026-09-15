@@ -115,6 +115,33 @@ const LoginScreen: React.FC = () => {
                   <span className="block text-sm text-white/85">Painel dos pais</span>
                 </span>
               </button>
+
+              {import.meta.env.DEV && Boolean(__TEST_CHILD_EMAIL__) && (
+                <button
+                  type="button"
+                  data-testid="login-teste"
+                  onClick={async () => {
+                    if (isOffline) {
+                      toast.error('Sem conexão com a internet. Conecte-se para fazer login.');
+                      return;
+                    }
+                    try {
+                      await login(__TEST_CHILD_EMAIL__, __TEST_CHILD_PASSWORD__);
+                    } catch {
+                      // Error already handled in AuthContext
+                    }
+                  }}
+                  className="mc-btn mc-btn-row mc-btn-stone w-full h-14 rounded-lg px-3 text-left"
+                >
+                  <span className="mc-slot w-12 h-12 flex items-center justify-center shrink-0">
+                    <FlashIcon name="gamepad" className="w-6 h-6" />
+                  </span>
+                  <span>
+                    <span className="block text-lg font-bold">Entrar como conta de teste</span>
+                    <span className="block text-sm text-white/85">Só no modo desenvolvimento</span>
+                  </span>
+                </button>
+              )}
             </div>
           )}
 

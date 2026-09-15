@@ -17,7 +17,8 @@ import {
   Cake,
   Brain,
   Settings,
-  Gamepad2
+  Store,
+  Gamepad2,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
@@ -28,7 +29,7 @@ import toast from 'react-hot-toast';
 
 type PeriodFilter = 'today' | '7days' | '30days' | 'all';
 type TypeFilter = 'all' | 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment';
-type SourceFilter = 'all' | 'task_completion' | 'reward_redemption' | 'daily_bonus' | 'daily_penalty' | 'admin_adjustment' | 'birthday' | 'quiz' | 'surprise_mission' | 'achievement' | 'redemption_refund' | 'english_game';
+type SourceFilter = 'all' | GoldTransaction['source'];
 
 function sinceForPeriod(period: PeriodFilter): Date | null {
   if (period === 'all') return null;
@@ -122,7 +123,11 @@ const GoldHistory: React.FC = () => {
       surprise_mission: <Zap className="w-5 h-5" />,
       achievement: <Trophy className="w-5 h-5" />,
       redemption_refund: <RefreshCw className="w-5 h-5" />,
-      english_game: <Gamepad2 className="w-5 h-5" />
+      english_game: <Gamepad2 className="w-5 h-5" />,
+      village_shop: <Store className="w-5 h-5" />,
+      chest: <Star className="w-5 h-5" />,
+      task_reversal: <RefreshCw className="w-5 h-5" />,
+      level_gift: <Trophy className="w-5 h-5" />
     };
 
     return iconMap[transaction.source] || <DollarSign className="w-5 h-5" />;
@@ -158,7 +163,11 @@ const GoldHistory: React.FC = () => {
       surprise_mission: 'Missão Surpresa',
       achievement: 'Conquista',
       redemption_refund: 'Reembolso',
-      english_game: 'Arena de Inglês'
+      english_game: 'Arena de Inglês',
+      village_shop: 'Loja da Vila',
+      chest: 'Baú do Dia',
+      task_reversal: 'Missão revertida',
+      level_gift: 'Presente de nível'
     };
 
     return labels[source] || source;
@@ -292,6 +301,10 @@ const GoldHistory: React.FC = () => {
               <option value="surprise_mission">Missão Surpresa</option>
               <option value="birthday">Aniversário</option>
               <option value="english_game">Arena de Inglês</option>
+              <option value="village_shop">Loja da Vila</option>
+              <option value="chest">Baú do Dia</option>
+              <option value="task_reversal">Missão revertida</option>
+              <option value="level_gift">Presente de nível</option>
               <option value="admin_adjustment">Ajustes Manuais</option>
             </select>
           </div>

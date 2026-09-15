@@ -564,11 +564,9 @@ export class FirestoreService {
       const progressRef = doc(db, 'progress', userId);
       const taskRef = doc(db, 'tasks', taskId);
       const baseRef = doc(db, 'englishBase', userId);
-      const villageRef = doc(db, 'village', userId);
       const pSnap = await tx.get(progressRef);
       const tSnap = await tx.get(taskRef);
       const bSnap = await tx.get(baseRef);
-      const vSnap = await tx.get(villageRef);
       const goldBefore = Number(pSnap.data()?.availableGold) || 0;
       const goldAfter = Math.max(0, goldBefore - gold);
       const xpNow = Math.max(0, (Number(pSnap.data()?.totalXP) || 0) - xp);
@@ -607,9 +605,6 @@ export class FirestoreService {
           if (typeof qty === 'number' && qty > 0) updates[`materials.${m}`] = increment(-qty);
         }
         tx.update(baseRef, updates);
-      }
-      if (vSnap.exists()) {
-        tx.update(villageRef, { [`claimed.daily:${date}`]: vSnap.data()?.claimed?.[`daily:${date}`] ?? null, updatedAt: new Date().toISOString() });
       }
     });
   }

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ComicBackdrop from './common/ComicBackdrop';
+import { createTeaserMusic, type TeaserMusic } from './teaserMusic';
 
 // Página de "obras" mostrada quando VITE_MAINTENANCE=1 (deploy público enquanto o jogo é construído).
 // Sem Firebase, sem login: só o clima do jogo e um bloco para minerar. O pai entra no app com ?dev=minerar.
@@ -9,6 +10,7 @@ const HITS_TO_BREAK = 5;
 // Aniversário do Heitor (18/09/2026, fuso de Brasília): dia da primeira versão jogável.
 const OPENING_AT = new Date('2026-09-18T00:00:00-03:00').getTime();
 const STORAGE_KEY = 'mm_teaser_diamonds';
+const MUSIC_KEY = 'mm_teaser_music'; // '0' = ele desligou de propósito
 
 const COMING = [
   { icon: `${UI}/miner.webp`, title: 'Seu minerador', text: 'Crie o personagem, escolha roupa, capacete e picareta.' },
@@ -118,7 +120,29 @@ const Teaser: React.FC = () => {
   const [broken, setBroken] = useState(false);
   const [diamonds, setDiamonds] = useState(0);
   const [shake, setShake] = useState(false);
+  const [music, setMusic] = useState(false);
   const sfx = useRef<Sfx | null>(null);
+  const track = useRef<TeaserMusic | null>(null);
+
+  const musicOn = () => {
+    if (!track.current) track.current = createTeaserMusic();
+    track.current.start();
+    setMusic(track.current.playing());
+  };
+  const musicOff = () => {
+    track.current?.stop();
+    setMusic(false);
+  };
+  const toggleMusic = () => {
+    if (music) {
+      musicOff();
+      try { localStorage.setItem(MUSIC_KEY, '0'); } catch { /* sem armazenamento */ }
+    } else {
+      musicOn();
+      try { localStorage.removeItem(MUSIC_KEY); } catch { /* sem armazenamento */ }
+    }
+  };
+  useEffect(() => () => track.current?.stop(), []);
 
   useEffect(() => {
     try {
@@ -132,6 +156,9 @@ const Teaser: React.FC = () => {
     if (broken) return;
     if (!sfx.current) sfx.current = createSfx();
     sfx.current.hit();
+    let wantsMusic = true;
+    try { wantsMusic = localStorage.getItem(MUSIC_KEY) !== '0'; } catch { /* sem armazenamento */ }
+    if (wantsMusic && !music) musicOn();
     setShake(true);
     window.setTimeout(() => setShake(false), 200);
     const next = hits + 1;
@@ -164,6 +191,16 @@ const Teaser: React.FC = () => {
           <div className="relative h-36 sm:h-48 overflow-hidden border-b-4 border-[#17130f]">
             <img src={`${UI}/banner.webp`} alt="" className="absolute inset-0 w-full h-full object-cover mc-pixel" draggable={false} />
             <div className="absolute inset-0 bg-gradient-to-t from-[#2f2a27] via-[#2f2a27]/30 to-transparent" />
+            <button
+              type="button"
+              onClick={toggleMusic}
+              aria-pressed={music}
+              className="mc-btn mc-btn-dark absolute top-3 right-3 z-10 flex items-center gap-2 text-xs"
+              style={{ minHeight: 44, padding: '0 14px' }}
+            >
+              <img src={`${UI}/${music ? 'torch' : 'moon'}.webp`} alt="" className="w-5 h-5 mc-pixel" draggable={false} />
+              {music ? 'Som ligado' : 'Ligar som'}
+            </button>
             <div className="absolute inset-x-0 bottom-0 px-5 pb-4 flex items-end gap-3">
               <img src={`${UI}/pickaxe.webp`} alt="" className="w-14 h-14 sm:w-16 sm:h-16 mc-pixel" draggable={false} />
               <div>

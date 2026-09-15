@@ -10,7 +10,6 @@ import RewardManager from './RewardManager';
 import LoadingSpinner from '../common/LoadingSpinner';
 import NotificationSender from './NotificationSender';
 import AdminControls from './AdminControls';
-import FlashReminderManager from './FlashReminderManager';
 import AchievementManager from './AchievementManager';
 import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 import BirthdayManager from './BirthdayManager';
@@ -21,8 +20,10 @@ import EnglishProgressPanel from './EnglishProgressPanel';
 import EnglishBaseManager from './EnglishBaseManager';
 import NotesManager from './NotesManager';
 import GoldHistory from './GoldHistory';
+import VillageManager from './VillageManager';
+import PlacaManager from './PlacaManager';
 
-type TabType = 'dashboard' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz' | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system';
+type TabType = 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz' | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -40,10 +41,11 @@ const ParentPanel: React.FC = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: 'chart' },
+    { id: 'village', label: 'Vila', icon: 'home' },
     { id: 'tasks', label: 'Gerenciar Tarefas', icon: 'notes' },
     { id: 'rewards', label: 'Recompensas', icon: 'gift' },
     { id: 'achievements', label: 'Conquistas', icon: 'trophy' },
-    { id: 'reminders', label: 'Lembretes Flash', icon: 'bolt' },
+    { id: 'reminders', label: 'Placa', icon: 'bolt' },
     { id: 'surprise', label: 'Missão Surpresa', icon: 'target' },
     { id: 'quiz', label: 'Quiz Diário', icon: 'brain' },
     { id: 'english', label: 'Inglês', icon: 'gamepad' },
@@ -95,6 +97,9 @@ const ParentPanel: React.FC = () => {
           {activeTab === 'dashboard' && (
             <ProgressDashboard tasks={tasks} progress={progress} />
           )}
+          {activeTab === 'village' && (
+            <VillageManager />
+          )}
           {activeTab === 'tasks' && (
             <TaskManager tasks={tasks} />
           )}
@@ -105,7 +110,7 @@ const ParentPanel: React.FC = () => {
             <AchievementManager />
           )}
           {activeTab === 'reminders' && (
-            <FlashReminderManager />
+            <PlacaManager />
           )}
           {activeTab === 'surprise' && (
             <SurpriseMissionConfigComponent />

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Save, Gift, Type, FileText } from 'lucide-react';
-import { IconPicker } from '../../icons';
 import { useData } from '../../contexts/DataContext';
 import { Reward } from '../../types';
+import { REWARD_ICONS } from '../../config/rewardIcons';
 import toast from 'react-hot-toast';
 
 export interface RewardFormInitialData {
@@ -29,7 +29,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
     title: '',
     description: '',
     goldCost: 50,
-    icon: 'gift',
+    icon: 'reward:doce',
     category: 'custom' as Reward['category'],
     requiredLevel: 1,
     isActive: true,
@@ -44,7 +44,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
         title: initialData.title || '',
         description: initialData.description || '',
         goldCost: initialData.costGold || 50,
-        icon: initialData.emoji || 'gift',
+        icon: initialData.emoji || 'reward:doce',
         category: initialData.category || 'custom',
         requiredLevel: initialData.requiredLevel || 1,
         isActive: initialData.isActive !== false,

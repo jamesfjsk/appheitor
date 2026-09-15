@@ -1,13 +1,31 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { LogOut, Save } from 'lucide-react';
 import { BrandMark } from '../../icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
+import { subscribeSettings } from '../../services/settingsService';
+import type { TestChildSettings } from '../../types/village';
 
 const ParentHeader: React.FC = () => {
-  const { logout, user, childUid, syncData } = useAuth();
+  const { logout, user, childUid, syncData, setViewChildUid } = useAuth();
   const { playClick } = useSound();
+  const heitorUid = useRef<string | null>(null);
+  const [testChild, setTestChild] = useState<TestChildSettings & { email?: string }>({ uid: null });
+
+  useEffect(() => {
+    if (childUid && !heitorUid.current) heitorUid.current = childUid;
+  }, [childUid]);
+
+  useEffect(() => {
+    return subscribeSettings(
+      'testChild',
+      { uid: null } as unknown as Record<string, unknown>,
+      (v) => setTestChild(v as TestChildSettings & { email?: string })
+    );
+  }, []);
+
+  const viewingTest = Boolean(testChild.uid && childUid === testChild.uid);
 
   return (
     <motion.header
@@ -19,7 +37,7 @@ const ParentHeader: React.FC = () => {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
         <div className="flex items-center gap-4 mb-4 md:mb-0">
           <BrandMark className="w-12 h-12" />
-          
+
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               Painel Administrativo
@@ -31,6 +49,25 @@ const ParentHeader: React.FC = () => {
               <p className="text-sm text-blue-600">
                 Gerenciando filho: {childUid}
               </p>
+            )}
+            {testChild.uid && heitorUid.current && (
+              <div className="mt-2 flex gap-2">
+                <span className="text-sm text-gray-700">Ver como:</span>
+                <button
+                  type="button"
+                  className={`text-sm px-2 py-1 rounded ${!viewingTest ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+                  onClick={() => heitorUid.current && setViewChildUid(heitorUid.current)}
+                >
+                  Heitor
+                </button>
+                <button
+                  type="button"
+                  className={`text-sm px-2 py-1 rounded ${viewingTest ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+                  onClick={() => testChild.uid && setViewChildUid(testChild.uid)}
+                >
+                  Conta de teste
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -49,7 +86,7 @@ const ParentHeader: React.FC = () => {
             <Save className="w-4 h-4" />
             Sincronizar
           </motion.button>
-          
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

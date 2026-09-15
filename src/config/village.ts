@@ -264,5 +264,6 @@ export const DISTRICT_LABELS: Record<string, string> = {
   tower: 'Torre / Tower',
   map: 'Mapa / Map',
   timer: 'Ampulheta / Hourglass',
+  chest: 'Baú do Dia / Daily chest',
 };
 

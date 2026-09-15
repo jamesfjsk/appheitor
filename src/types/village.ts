@@ -109,6 +109,7 @@ export interface PauseDaysSettings {
 
 export interface TestChildSettings {
   uid: string | null;
+  email?: string;
 }
 
 export interface HealthDoc {

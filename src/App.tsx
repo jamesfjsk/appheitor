@@ -16,7 +16,10 @@ import OfflineBanner from './components/common/OfflineBanner';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ChatFlashGPT from './components/common/ChatFlashGPT';
 import { AI_CHAT_ENABLED } from './config/rules';
+import { installErrorLog } from './services/observability';
 import './index.css';
+
+installErrorLog();
 
 // Component to handle role-based redirect for root path
 const RoleBasedRedirect: React.FC = () => {

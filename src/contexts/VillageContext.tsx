@@ -11,6 +11,7 @@ import {
   confirmHabit,
   craftGear,
   dismissAutoNotice,
+  ensureVillage,
   openDailyChest,
   saveCharacter,
   subscribeNotices,
@@ -85,6 +86,7 @@ export const VillageProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   useEffect(() => {
     if (!uid) return;
+    if (user?.role === 'child') void ensureVillage(uid);
     const unsubs = [
       subscribeVillage(uid, (v) => { setVillage(v); setLoading(false); }, () => setLoading(false)),
       subscribeBase(uid, (b) => { setMaterials(b.materials); setBuildings(b.buildings); }),
