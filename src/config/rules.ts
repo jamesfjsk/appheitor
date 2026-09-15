@@ -51,3 +51,6 @@ export const DAILY_RULES_DEFAULTS = {
 /** Foto da criança usada no login, cabeçalho e celebrações */
 export const CHILD_PHOTO_URL =
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThmdGPdw5KIVi5gQ-UWFdptTPziXMRjk6phx4Noy3Toh9Nu_nbnP-YZGe9sdfP0jrVakc&usqp=CAU';
+
+/** Família única nesta fase; coleções novas da Etapa 2 gravem este id */
+export const FAMILY_ID = 'heitor';

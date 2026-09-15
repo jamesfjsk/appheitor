@@ -132,7 +132,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress, compact = false }) 
               <div className="mc-bar-fill" style={{ width: `${levelSystem.progressPercentage}%` }} />
             </div>
             <span className="mc-num text-white shrink-0 text-[10px] sm:text-[12px]">
-              {xpNoNivel}/{xpDoNivel}
+              {levelSystem.isMaxLevel ? 'máx' : `${xpNoNivel}/${xpDoNivel}`}
             </span>
             {dailyXP > 0 && (
               <span className="mc-font text-[8px] mc-good shrink-0">+{dailyXP}</span>

@@ -4,6 +4,7 @@ import { usePunishment } from '../../contexts/PunishmentContext';
 import { useData } from '../../contexts/DataContext';
 import { FirestoreService } from '../../services/firestoreService';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { ReadyBoot } from '../common/useDismissBoot';
 import { PunishmentTaskCompletion, Task } from '../../types';
 
 const CREEPER = '/assets/english/ui/creeper.webp';
@@ -109,6 +110,7 @@ const PunishmentModeScreen: React.FC = () => {
 
   return (
     <>
+      <ReadyBoot />
       <div className="mn-page overflow-auto">
         <div className="relative z-10 min-h-screen flex items-start justify-center p-4 py-8">
           <div className="max-w-4xl w-full space-y-4">

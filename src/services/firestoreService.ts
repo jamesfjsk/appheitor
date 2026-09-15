@@ -19,11 +19,17 @@ import {
   type FirestoreError,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { getTodayBrazil, getYesterdayBrazil, getBrazilDate } from '../utils/timezone';
+import { addDays, getTodayBrazil, getYesterdayBrazil, nowBrazil } from '../utils/clock';
 import { format } from 'date-fns';
 import { getLevelFromXP } from '../utils/levelSystem';
 import { processPendingDays } from './dailyRulesService';
 import { initialBaseDoc } from '../config/englishBase';
+import { DEFAULT_ECONOMY } from '../config/village';
+import { periodAllowedAt } from './village/schedule';
+import { lateTaskReward, lateWindow } from './village/late';
+import { getSettings } from './settingsService';
+import { getVillage } from './villageService';
+import type { EconomySettings } from '../types/village';
 import type { Material } from '../types/english';
 import {
   User,
@@ -365,7 +371,7 @@ export class FirestoreService {
     if (typeof data.lastStreakDate === 'string' && data.lastStreakDate) return data.lastStreakDate;
     const legacy = data.lastActivityDate as { toDate?: () => Date } | undefined;
     const d = legacy?.toDate?.();
-    return d ? getBrazilDate(d).toISOString().split('T')[0] : null;
+    return d ? nowBrazil(d.getTime()).date : null;
   }
 
   private static yesterdayString(): string {
@@ -456,10 +462,26 @@ export class FirestoreService {
     userId: string,
     xpReward: number,
     goldReward: number,
-    loot?: { material: Material; qty: number }
+    loot?: { material: Material; qty: number },
+    opts?: { late?: boolean; focus?: boolean }
   ): Promise<void> {
     try {
       const today = getTodayBrazil();
+      const hour = nowBrazil().hour;
+      const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
+      const village = await getVillage(userId);
+      const late = opts?.late === true;
+      const date = late ? addDays(today, -1) : today;
+      if (late && !lateWindow(hour, economy)) {
+        throw new Error('A janela de recuperar já fechou');
+      }
+      if (late) {
+        const daily = await getDoc(doc(db, 'dailyProgress', `${userId}_${date}`));
+        if (!daily.exists() || daily.data().summaryProcessed !== true) {
+          throw new Error('Ontem ainda não fechou');
+        }
+      }
+      const latePay = late ? lateTaskReward({ gold: goldReward, xp: xpReward }, economy) : null;
       const progressRef = doc(db, 'progress', userId);
       const taskRef = doc(db, 'tasks', taskId);
       const baseRef = doc(db, 'englishBase', userId);
@@ -469,19 +491,35 @@ export class FirestoreService {
         const taskDoc = await tx.get(taskRef);
         if (!taskDoc.exists()) throw new Error('Task not found');
         const taskData = taskDoc.data();
-        if (taskData.lastCompletedDate === today) throw new Error('Task already completed today');
+        if (taskData.status === 'proposed') throw new Error('Essa missão ainda não foi aprovada');
+        if (taskData.lastCompletedDate === date) throw new Error('Task already completed today');
+        if (!late && !periodAllowedAt(taskData.period || 'morning', hour, economy)) {
+          throw new Error('PERIOD_LOCKED');
+        }
 
         const progressDoc = await tx.get(progressRef);
         if (!progressDoc.exists()) throw new Error('Progress document not found');
         const baseDoc = await tx.get(baseRef);
 
+        const childOwn = taskData.origin === 'child';
+        let goldPay = latePay ? latePay.gold : goldReward;
+        const xpPay = latePay ? latePay.xp : xpReward;
+        if (childOwn) goldPay = 0;
+        let lootPay = late ? undefined : loot;
+        if (lootPay && lootPay.qty > 0) {
+          let qty = lootPay.qty;
+          if (taskData.optional === true) qty *= 2;
+          if (opts?.focus && village.plan.date === today && village.plan.focusTaskId === taskId) qty *= 2;
+          lootPay = { material: lootPay.material, qty };
+        }
+
         const goldBefore = Number(progressDoc.data()?.availableGold) || 0;
-        const goldAfter = goldBefore + goldReward;
+        const goldAfter = goldBefore + goldPay;
         const taskTitle = taskData.title || 'Tarefa Sem Título';
 
         tx.update(taskRef, {
           status: 'done',
-          lastCompletedDate: today,
+          lastCompletedDate: date,
           updatedAt: serverTimestamp(),
         });
 
@@ -490,30 +528,32 @@ export class FirestoreService {
           taskId,
           userId,
           taskTitle,
-          date: today,
-          xpEarned: xpReward,
-          goldEarned: goldReward,
-          materialsEarned: loot && loot.qty > 0 ? { [loot.material]: loot.qty } : {},
+          date,
+          xpEarned: xpPay,
+          goldEarned: goldPay,
+          materialsEarned: lootPay && lootPay.qty > 0 ? { [lootPay.material]: lootPay.qty } : {},
           completedAt: serverTimestamp(),
           createdAt: serverTimestamp(),
+          late: late || undefined,
+          focus: opts?.focus === true || undefined,
         }));
 
         tx.update(progressRef, {
-          totalXP: increment(xpReward),
+          totalXP: increment(xpPay),
           availableGold: goldAfter,
-          totalGoldEarned: increment(Math.max(0, goldReward)),
+          totalGoldEarned: increment(Math.max(0, goldPay)),
           totalTasksCompleted: increment(1),
           updatedAt: serverTimestamp(),
         });
 
-        if (loot && loot.qty > 0) {
+        if (lootPay && lootPay.qty > 0) {
           if (!baseDoc.exists()) {
             const initial = initialBaseDoc(userId, now);
-            initial.materials[loot.material] = (initial.materials[loot.material] || 0) + loot.qty;
+            initial.materials[lootPay.material] = (initial.materials[lootPay.material] || 0) + lootPay.qty;
             tx.set(baseRef, initial);
           } else {
             tx.update(baseRef, {
-              [`materials.${loot.material}`]: increment(loot.qty),
+              [`materials.${lootPay.material}`]: increment(lootPay.qty),
               updatedAt: now,
             });
           }
@@ -521,23 +561,23 @@ export class FirestoreService {
           tx.set(baseRef, initialBaseDoc(userId, now));
         }
 
-        if (goldReward !== 0) {
+        if (goldPay !== 0) {
           tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
             userId,
-            amount: goldReward,
+            amount: goldPay,
             type: 'earned' as const,
-            source: 'task_completion' as const,
-            description: `Tarefa concluída: ${taskTitle}`,
+            source: late ? 'late_task' : 'task_completion',
+            description: late ? `Missão recuperada: ${taskTitle}` : `Tarefa concluída: ${taskTitle}`,
             relatedId: taskId,
             relatedTitle: taskTitle,
-            metadata: { xpEarned: xpReward, period: taskData.period, materialsEarned: loot ?? null },
+            metadata: { xpEarned: xpPay, period: taskData.period, materialsEarned: lootPay ?? null, late, focus: opts?.focus === true },
             balanceBefore: goldBefore,
             balanceAfter: goldAfter,
             createdAt: serverTimestamp(),
           }));
         }
       });
-      console.log('✅ Task completed with validated rewards:', { taskId, xpReward, goldReward, loot });
+      console.log('✅ Task completed with validated rewards:', { taskId, xpReward, goldReward, loot, late });
     } catch (error) {
       console.error('❌ FirestoreService: Error completing task with rewards:', error);
       throw error;
@@ -1356,7 +1396,9 @@ export class FirestoreService {
               lastCompletedDate: data.lastCompletedDate,
               createdAt: data.createdAt?.toDate() || new Date(),
               updatedAt: data.updatedAt?.toDate() || new Date(),
-              createdBy: data.createdBy || ''
+              createdBy: data.createdBy || '',
+              optional: data.optional === true,
+              origin: data.origin === 'child' || data.origin === 'agenda' ? data.origin : 'admin',
             };
           });
           onUpdate(tasks);
@@ -1396,7 +1438,8 @@ export class FirestoreService {
               active: data.active !== false,
               requiredLevel: data.requiredLevel || 1,
               createdAt: data.createdAt?.toDate() || new Date(),
-              updatedAt: data.updatedAt?.toDate() || new Date()
+              updatedAt: data.updatedAt?.toDate() || new Date(),
+              goalOnly: data.goalOnly === true,
             };
           });
           onUpdate(rewards);

@@ -13,6 +13,7 @@ import {
   ensureVillage,
   openDailyChest,
   saveCharacter,
+  seeItems,
   subscribeNotices,
   subscribeVillage,
   tradeMaterials,
@@ -57,6 +58,7 @@ interface VillageContextValue {
   ackNotice: (id: string) => Promise<void>;
   dismissNotice: (key: string) => Promise<void>;
   confirmHabit: (habitId: string) => Promise<void>;
+  seeItems: () => Promise<void>;
 }
 
 const VillageContext = createContext<VillageContextValue | undefined>(undefined);
@@ -129,6 +131,7 @@ export const VillageProvider: React.FC<{ children: ReactNode }> = ({ children })
     ackNotice: (id) => wrap(() => ackNotice(id), 'Combinado'),
     dismissNotice: (key) => wrap(() => dismissAutoNotice(uid!, key), 'Recado dispensado'),
     confirmHabit: (habitId) => wrap(() => confirmHabit(uid!, habitId, getTodayBrazil()), 'Hábito feito'),
+    seeItems: () => (uid ? seeItems(uid) : Promise.resolve()),
   }), [village, materials, buildings, settings, economy, modules, pauseDays, notices, loading, uid, wrap]);
 
   return <VillageContext.Provider value={value}>{children}</VillageContext.Provider>;

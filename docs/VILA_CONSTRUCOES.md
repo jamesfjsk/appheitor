@@ -8,9 +8,9 @@ Na Vila, **construção é lugar**. Cada construção tem uma função própria,
 
 Cada nível de uma construção tem que **mudar algo que a criança sente no dia seguinte**: um material a mais, uma proteção, uma porta que abre. Nada de "efeito chega na Etapa 2" na tela: se o efeito ainda não existe em código, a construção mostra o texto do efeito e a etiqueta "em breve", e o nível não pode ser comprado até existir.
 
-Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone (só na Mina e, com a Fornalha nível 3, uma vez por dia). Custos: os de `config/englishBase.ts` com o multiplicador 2 da economia v2 em madeira, pedra e ferro (redstone x1). Ritmo alvo: Fornalha e Baú nível 1 na primeira semana; todas as sete no nível 1 até a semana 3; base completa (21 níveis) em 8 a 10 semanas.
+Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone (só na Mina e, com a Fornalha nível 3, uma vez por dia). Custos: os de `config/englishBase.ts` com o multiplicador 2 da economia v2 em madeira, pedra e ferro (redstone x1). Ritmo alvo: Fornalha e Baú nível 1 na primeira semana; as obras principais no nível 1 até a semana 3.
 
-## As construções (sete que se constroem e a Casa)
+## As construções (nove que se constroem e a Casa)
 
 ### 1. Fornalha (Furnace): o motor de materiais
 
@@ -50,13 +50,13 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 - **Ao tocar**: cartão com abas Conquistas, Recordes, Troféus, Habilidades (as que o nível liberou; as outras com cadeado e o nível necessário).
 - **Visual**: `buildings/torre-1..3.png`; luz no topo à noite.
 
-### 5. Mesa de Encantamento (Enchanting Table): o saber
+### 5. Biblioteca (Library): o saber (id `mesa`)
 
-- **Para que serve**: escolher o que vai aprender e guardar o que aprendeu. É a casa do Sábio.
-- **Nível 1**: escolher o **tema da história de amanhã** na Mina (já existe na Base).
-- **Nível 2**: **Estante de erros**: as perguntas que errou na prova voltam 3 e 10 dias depois (Etapa 3) e o **Diário** (reflexões) fica aqui.
+- **Para que serve**: a prova do dia e o que ele vai aprender. É a casa do Sábio.
+- **Nível 1**: abre a **prova do dia** e o **tema da história de amanhã** na Mina. Sem este nível, a prova não aparece.
+- **Nível 2**: **Estante de erros** e o **Diário** (Etapa 3).
 - **Nível 3**: **1 dica grátis por dia** no Recado da Mina e o Sábio responde ao Diário no dia seguinte (Etapa 3).
-- **Ao tocar**: cartão com "Tema de amanhã" (seletor), atalho "Biblioteca (prova do dia)" e, quando existirem, Estante e Diário.
+- **Ao tocar**: nível 0 abre o cartão Construir; nível 1+ abre a prova. O cartão também guarda o tema de amanhã.
 - **Visual**: `buildings/mesa-1..3.png` (roxa de propósito, é magia); partículas roxas no nível 3.
 
 ### 6. Campinho (Football Field): o lazer
@@ -71,15 +71,30 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 ### 7. Cofre (Vault): a poupança (Etapa 2)
 
 - **Para que serve**: guardar gold para algo grande e aprender paciência.
-- **Nível 1**: abre o **Cofrinho** com 1 meta.
-- **Nível 2**: 2 metas e o **bônus de paciência** (juros semanais com teto).
-- **Nível 3**: libera a faixa **prêmio da temporada** (50 dias de renda) e o Extrato mensal comparando com a poupança de verdade.
-- **Ao tocar**: Cofrinho e Extrato.
-- **Visual**: `buildings/cofre-1..3.png` (arte a gerar); o sprite muda também com o total guardado.
-- Sétimo lote da cena (`anchors.json`, `cofre`); antes da Etapa 2 o lote mostra a placa "Cofre: em breve".
+- **Nível 1**: abre o **Cofrinho** com 1 meta e **5%** de paciência.
+- **Nível 2**: 2 metas e **8%** de bônus de paciência (juros semanais com teto).
+- **Nível 3**: **12%** de paciência, faixa **prêmio da temporada** e o Extrato mensal.
+- **Ao tocar**: nível 0 = Construir; nível 1+ abre o Cofrinho.
+- **Visual**: `buildings/cofre-1..3.png`.
+- Precisa do Armazém nível 1.
 
+### 8. Agenda: o calendário da Vila
 
-### 8. Casa do Minerador (Home): onde as missões moram (pedido do pai em 15/09)
+- **Para que serve**: provas, treinos, eventos, lembretes e Foco.
+- **Só nível 1**: constrói e abre. Não tem melhorar.
+- **Ao tocar**: nível 0 = placa Construir; nível 1 abre a Agenda.
+- **Visual**: `buildings/agenda-1.png` (quiosque de avisos).
+- Sem pré-requisito.
+
+### 9. Mercado: a barraca
+
+- **Para que serve**: Prêmios de verdade, Loja da Vila e o Comerciante.
+- **Só nível 1** por agora: constrói e abre as três abas. Não usa ícone de dinheiro.
+- **Ao tocar**: nível 0 = Construir; nível 1 abre o Mercado. O Comerciante na cena também abre, depois de construído.
+- **Visual**: `buildings/mercado-1.png` (barraca com toldo). Na cena atual a barraca já está pintada no fundo; o sprite não se sobrepõe depois de construída.
+- Precisa de Fornalha e Armazém nível 1.
+
+### 10. Casa do Minerador (Home): onde as missões moram (pedido do pai em 15/09)
 
 - **Para que serve**: é a casa dele. As missões de casa acontecem em casa; hoje a lista fica solta abaixo da cena, "fora da vila". A Casa é o lugar da rotina: **Missões do dia** (manhã, tarde, noite, como hoje), **Plano do turno** (de manhã), **Fechar o dia** (à noite, com o check-in) e, na Etapa 3, o **Diário**.
 - **Não se constrói**: já existe desde o primeiro acesso. Cresce por temporada (estrela): temporada 1 cabana, 2 casa, 3 sobrado (`buildings/casa-1..3.png`, arte a gerar). À noite a janela acende; com todas as missões feitas, a fumaça da chaminé sobe.
@@ -88,13 +103,23 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 - **Âncora na cena**: `house` no `anchors.json`, canto direito acima do lago (`{ "x": 1030, "y": 300, "w": 200, "h": 100 }`); o Comerciante passa para perto do lago (`{ "x": 990, "y": 445 }`) para não ficar na porta.
 - **Libera**: nada; é a raiz do laço (missões alimentam tudo). Recebe da Agenda (missões de estudo) e do Plano do turno; entrega para gold, XP, material, Baú do Dia, tochas, desafios.
 
-## Pré-requisitos e ordem
+### 9. Barraca do Comerciante (Mercado) e 10. Sino da Vila (Agenda): lugares que se constroem (decisão do pai em 15/09, 15h45)
+
+O pai preferiu que o Mercado e a Agenda também sejam construções, para tudo ser encontrado na vila em vez de em botões. Vale, com três condições:
+
+- **Baratas e do primeiro dia**: custo de nível 1 igual ao da Fornalha (com o multiplicador da economia), sem pré-requisito além do primeiro acesso, para a criança construir as duas nos dois primeiros dias. Enquanto a Barraca não existe, a hotbar "Mercado" abre o cartão dela com "Construir" e a frase do Comerciante ("Me ajuda a montar a barraca e a gente faz negócio"); os prêmios de verdade e os pedidos ficam visíveis (só leitura) nesse cartão, para o gold nunca parecer inútil.
+- **Nível 1 só**, por enquanto: a Barraca abre o Mercado (prêmios, Loja em breve, Comerciante); o Sino abre a Agenda e é onde o alarme "toca" na cena (o sino balança na hora do lembrete). Níveis 2 e 3 ficam para depois, com efeito de verdade (Barraca 2: Comerciante compra 3 vendas por dia; Sino 2: lembrete também para o pai; e assim por diante), nunca "em breve" comprável.
+- **Sem furar as regras**: os dois entram em `BUILDINGS`/`fromBaseDoc` com os campos declarados (o doc de `englishBase` é reescrito inteiro por `fromBaseDoc`, então campo novo precisa estar lá), aparecem na Ferraria aba Obras e no cartão da construção como qualquer outra, e têm sprite próprio (barraca de madeira com toldo; poste com sino), arte a gerar.
+
+A Casa do Minerador continua fixa (não se constrói). Com isso a vila tem oito construções que se constroem (Fornalha, Armazém, Cerca, Torre, Mesa, Campinho, Cofre, Barraca, Sino: nove) mais a Casa.
+
 
 - Fornalha e Baú: sem pré-requisito.
 - Cerca: Fornalha nível 1.
-- Torre, Mesa, Campinho: Fornalha e Baú nível 1 (já existe).
+- Torre, Biblioteca, Campinho, Mercado: Fornalha e Baú nível 1.
 - Cofre: Baú nível 1.
-- Nível 2 de qualquer uma: nível 1 de Fornalha, Baú e Cerca. Nível 3: base com todas no nível 2 ou o nível de minerador 20 (economia v2).
+- Agenda: sem pré-requisito; máximo 1.
+- Nível 2 de qualquer uma com níveis: nível 1 de Fornalha, Baú e Cerca. Nível 3: base com todas no nível 2 ou o nível de minerador 20 (economia v2).
 
 ## O que o cartão da construção mostra (sempre, nesta ordem)
 

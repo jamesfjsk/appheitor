@@ -10,7 +10,10 @@ import type {
   GearDef,
   HabitDef,
   ModuleSettings,
+  NpcId,
+  NpcState,
   Period,
+  PriceBand,
   VillageCharacter,
   VillageDoc,
   VillageGear,
@@ -35,9 +38,10 @@ export const DEFAULT_VILLAGE_SETTINGS: VillageSettings = {
 
 export const DEFAULT_ECONOMY: EconomySettings = {
   materialsPerTask: 1,
-  dailyChestGold: [5, 15],
+  dailyChestGold: [10, 15],
   rareEveryNDays: 3,
   gameGoldDailyCap: 35,
+  gameGoldWeeklyCap: 100,
   redeemMinTasks: 5,
   taskDefaultXp: 10,
   taskDefaultGold: 5,
@@ -45,7 +49,56 @@ export const DEFAULT_ECONOMY: EconomySettings = {
   periodGating: true,
   chestOpenHour: 18,
   minDueForChest: 3,
+  incomeDayGold: 45,
+  quizGoldPerHit: 2,
+  quizXpPerHit: 6,
+  challengeGoldWeeklyCap: 60,
+  achievementGoldCap: 40,
+  buildCostMultiplier: 2,
+  merchantBuy: { materials: 10, gold: 3, dailyCap: 2 },
+  savingsTargetPct: 20,
+  interestRatePct: 5,
+  interestCapGold: 20,
+  maxOpenGoals: 2,
+  lateMissionUntilHour: 12,
+  lateMissionGoldPct: 50,
+  repairRefundPct: 50,
+  seasonWeeks: 13,
+  levelCap: 40,
 };
+
+export const PRICE_BANDS: PriceBand[] = [
+  { id: 'mimo', days: 0.5 },
+  { id: 'pequeno', days: 1 },
+  { id: 'medio', days: 3 },
+  { id: 'grande', days: 7 },
+  { id: 'enorme', days: 20, onlyGoal: true },
+  { id: 'temporada', days: 50, onlyGoal: true },
+];
+
+export const LEVEL_REWARDS: Record<number, { rare?: 'esmeralda' | 'diamante'; cosmeticId?: string }> = {
+  5: { rare: 'esmeralda' },
+  10: { rare: 'diamante', cosmeticId: 'milestone_10' },
+  15: { rare: 'esmeralda' },
+  20: { rare: 'diamante', cosmeticId: 'milestone_20' },
+  25: { rare: 'esmeralda' },
+  30: { rare: 'diamante', cosmeticId: 'milestone_30' },
+  35: { rare: 'esmeralda' },
+  40: { rare: 'diamante', cosmeticId: 'milestone_40' },
+};
+
+export function emptyNpcState(): NpcState {
+  return { points: 0, tier: 0, lastTalkDate: null, seen: [], quest: { chapter: 0, progress: 0, doneAt: null } };
+}
+
+export function emptyNpcs(): Record<NpcId, NpcState> {
+  return {
+    sabio: emptyNpcState(),
+    comerciante: emptyNpcState(),
+    ferreiro: emptyNpcState(),
+    olheiro: emptyNpcState(),
+  };
+}
 
 export const DEFAULT_MODULES: ModuleSettings = {
   shop: true,
@@ -102,6 +155,12 @@ export function initialVillageDoc(userId: string, nowIso: string): VillageDoc {
     noticesDismissed: [],
     habits: {},
     season: 0,
+    npcs: emptyNpcs(),
+    cracks: [],
+    stars: [],
+    trophies: {},
+    plan: { date: '', order: [], focusTaskId: null },
+    newItems: [],
   };
 }
 
@@ -114,6 +173,7 @@ export const GEAR: GearDef[] = [
     effect: '+1 material na primeira missão do dia',
     cost: { pedra: 6, madeira: 2 },
     rare: {},
+    minLevel: 5,
   },
   {
     id: 'pickaxe_iron',
@@ -123,6 +183,7 @@ export const GEAR: GearDef[] = [
     effect: '+1 material na primeira missão de cada período',
     cost: { ferro: 8, pedra: 4 },
     rare: {},
+    minLevel: 10,
   },
   {
     id: 'pickaxe_gold',
@@ -132,6 +193,7 @@ export const GEAR: GearDef[] = [
     effect: '+1 na primeira missão de cada período; Baú do Dia com +1 material',
     cost: { ferro: 10, redstone: 6 },
     rare: { esmeralda: 1 },
+    minLevel: 20,
   },
   {
     id: 'pickaxe_diamond',
@@ -141,6 +203,7 @@ export const GEAR: GearDef[] = [
     effect: '+1 material em toda missão',
     cost: { ferro: 12, redstone: 8 },
     rare: { diamante: 2 },
+    minLevel: 30,
   },
   {
     id: 'boots',
@@ -150,33 +213,37 @@ export const GEAR: GearDef[] = [
     effect: '+20% XP nas missões (arredondado)',
     cost: { madeira: 5, ferro: 3 },
     rare: {},
+    minLevel: 10,
   },
   {
     id: 'helmet',
     slot: 'helmet',
     level: 1,
     label: 'Capacete',
-    effect: 'Visual nesta etapa (absorve missão perdida na Etapa 2)',
+    effect: 'Absorve 1 missão perdida por semana',
     cost: { ferro: 6, pedra: 3 },
     rare: {},
+    minLevel: 15,
   },
   {
     id: 'lamp',
     slot: 'lamp',
     level: 1,
     label: 'Lanterna',
-    effect: 'Visual nesta etapa',
+    effect: 'Mostra contratos e prova de amanhã; 1 dica grátis por dia',
     cost: { redstone: 4, ferro: 2 },
     rare: {},
+    minLevel: 15,
   },
   {
     id: 'cape',
     slot: 'cape',
     level: 1,
     label: 'Capa',
-    effect: 'Visual nesta etapa',
+    effect: 'Visual (estilo conta)',
     cost: { madeira: 6, redstone: 4 },
     rare: { esmeralda: 1 },
+    minLevel: 25,
   },
 ];
 
@@ -188,8 +255,17 @@ const cosmetic = (
   label: string,
   basePrice: number,
   free = false,
-  premium = false
-): CosmeticItem => ({ id, slot, label, basePrice, free, premium });
+  premium = false,
+  minLevel = 0
+): CosmeticItem => ({
+  id,
+  slot,
+  label,
+  basePrice,
+  free,
+  premium,
+  minLevel: free ? 0 : minLevel,
+});
 
 export const COSMETICS: CosmeticItem[] = [
   cosmetic('skin_1', 'skin', 'Pele clara', 0, true),
@@ -197,9 +273,9 @@ export const COSMETICS: CosmeticItem[] = [
   cosmetic('skin_3', 'skin', 'Pele morena', 0, true),
   cosmetic('skin_4', 'skin', 'Pele escura', 0, true),
   cosmetic('hair_1', 'hair', 'Cabelo curto', 0, true),
-  cosmetic('hair_2', 'hair', 'Cabelo com franja', 20),
-  cosmetic('hair_3', 'hair', 'Cabelo cacheado', 20),
-  cosmetic('hair_4', 'hair', 'Cabelo comprido', 20),
+  cosmetic('hair_2', 'hair', 'Cabelo com franja', 20, false, false, 5),
+  cosmetic('hair_3', 'hair', 'Cabelo cacheado', 20, false, false, 5),
+  cosmetic('hair_4', 'hair', 'Cabelo comprido', 20, false, false, 5),
   cosmetic('shirt_1', 'shirt', 'Camisa marrom', 0, true),
   cosmetic('shirt_2', 'shirt', 'Camisa verde', 0, true),
   cosmetic('shirt_3', 'shirt', 'Camisa azul', 0, true),
@@ -208,7 +284,7 @@ export const COSMETICS: CosmeticItem[] = [
   cosmetic('shirt_6', 'shirt', 'Camisa amarela', 0, true),
   cosmetic('shirt_7', 'shirt', 'Camisa branca', 0, true),
   cosmetic('shirt_8', 'shirt', 'Camisa preta', 0, true),
-  cosmetic('shirt_team', 'shirt', 'Camisa do time', 40),
+  cosmetic('shirt_team', 'shirt', 'Camisa do time', 40, false, false, 5),
   cosmetic('pants_1', 'pants', 'Calça marrom', 0, true),
   cosmetic('pants_2', 'pants', 'Calça azul', 0, true),
   cosmetic('pants_3', 'pants', 'Calça verde', 0, true),
@@ -217,14 +293,14 @@ export const COSMETICS: CosmeticItem[] = [
   cosmetic('pants_6', 'pants', 'Calça bege', 0, true),
   cosmetic('pants_7', 'pants', 'Calça vermelha', 0, true),
   cosmetic('pants_8', 'pants', 'Calça branca', 0, true),
-  cosmetic('hat_cap', 'hat', 'Boné', 30),
-  cosmetic('hat_deco', 'hat', 'Capacete decorativo', 60),
-  cosmetic('hat_crown', 'hat', 'Coroa', 200, false, true),
-  cosmetic('cape_red', 'cape', 'Capa vermelha', 80),
-  cosmetic('cape_blue', 'cape', 'Capa azul', 120, false, true),
-  cosmetic('pet_wolf', 'pet', 'Lobo', 120),
-  cosmetic('pet_cat', 'pet', 'Gato', 120),
-  cosmetic('pet_parrot', 'pet', 'Papagaio', 150),
+  cosmetic('hat_cap', 'hat', 'Boné', 30, false, false, 5),
+  cosmetic('hat_deco', 'hat', 'Capacete decorativo', 60, false, false, 10),
+  cosmetic('hat_crown', 'hat', 'Coroa', 200, false, true, 25),
+  cosmetic('cape_red', 'cape', 'Capa vermelha', 80, false, false, 20),
+  cosmetic('cape_blue', 'cape', 'Capa azul', 120, false, true, 25),
+  cosmetic('pet_wolf', 'pet', 'Lobo', 120, false, false, 15),
+  cosmetic('pet_cat', 'pet', 'Gato', 120, false, false, 15),
+  cosmetic('pet_parrot', 'pet', 'Papagaio', 150, false, false, 15),
 ];
 
 export const COSMETIC_BY_ID: Record<string, CosmeticItem> = Object.fromEntries(COSMETICS.map((c) => [c.id, c]));
@@ -352,19 +428,37 @@ export const DISTRICT_ICONS: Record<string, string> = {
   mine: '/assets/village/items/lantern.png',
   library: '/assets/village/rewards/livro.png',
   workshop: '/assets/village/items/iron-helmet.png',
-  market: '/assets/village/rewards/dinheiro.png',
+  market: '/assets/village/buildings/mercado-1.png',
   tower: '/assets/village/buildings/torre-1.png',
-  map: '/assets/village/buildings/placa.png',
-  timer: '/assets/village/items/lantern.png',
+  bank: '/assets/village/buildings/cofre-1.png',
+  pack: '/assets/village/items/mochila.png',
+  agenda: '/assets/english/ui/clock.webp',
+  house: '/assets/village/buildings/casa-1.png',
   chest: '/assets/village/buildings/bau-1.png',
+  arena: '/assets/english/ui/sword.webp',
 };
+
+export function houseTier(season: number): 1 | 2 | 3 {
+  const n = Math.max(1, Math.floor(Number(season) || 1));
+  return (n >= 3 ? 3 : n) as 1 | 2 | 3;
+}
+
+export function houseSprite(season: number): string {
+  return `/assets/village/buildings/casa-${houseTier(season)}.png`;
+}
+
+export function houseTitle(season: number): string {
+  const t = houseTier(season);
+  return t === 1 ? 'Cabana' : t === 2 ? 'Casa' : 'Sobrado';
+}
 
 export const HOTBAR_ICONS: Record<string, string> = {
   Vila: ISO_MINER,
-  Missões: '/assets/village/items/pickaxe-ferro.png',
+  Missões: '/assets/village/buildings/casa-1.png',
   Mina: '/assets/village/items/lantern.png',
   Oficina: '/assets/village/items/iron-helmet.png',
-  Mercado: '/assets/village/rewards/dinheiro.png',
+  Mochila: '/assets/village/items/mochila.png',
+  Ferraria: '/assets/village/items/iron-helmet.png',
 };
 
 /** Cosméticos sem sprite próprio não entram na Loja nem no editor. */
@@ -409,11 +503,43 @@ export function characterSpriteSrc(gear: VillageGear, shirt: string, skin = 'ski
 export const DISTRICT_LABELS: Record<string, string> = {
   mine: 'Mina / Mine',
   library: 'Biblioteca / Library',
-  workshop: 'Oficina / Workshop',
+  workshop: 'Ferraria / Forge',
   market: 'Mercado / Market',
   tower: 'Torre / Tower',
-  map: 'Mapa / Map',
-  timer: 'Ampulheta / Hourglass',
+  bank: 'Banco / Bank',
+  pack: 'Mochila / Pack',
+  agenda: 'Agenda / Agenda',
+  house: 'Casa / House',
   chest: 'Baú do Dia / Daily chest',
+  arena: 'Arena / Arena',
 };
+
+/** Nome na cena: o mesmo da antiga grade, no lugar certo. */
+export const LOT_SCENE_LABEL: Record<string, string> = {
+  fornalha: 'Ferraria',
+  bau: 'Armazém',
+  cerca: 'Cerca',
+  torre: 'Torre',
+  mesa: 'Biblioteca',
+  campinho: 'Campinho',
+  cofre: 'Cofre',
+  agenda: 'Agenda',
+  mercado: 'Mercado',
+};
+
+export type SceneProp = {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  sprite: string;
+  label: string;
+  badge?: string;
+};
+
+export const SCENE_PROPS: SceneProp[] = [
+  { id: 'pack', x: 548, y: 378, w: 40, h: 40, sprite: '/assets/village/items/mochila.png', label: 'Mochila' },
+  { id: 'arena', x: 1018, y: 68, w: 44, h: 44, sprite: '/assets/english/ui/sword.webp', label: 'Arena' },
+];
 

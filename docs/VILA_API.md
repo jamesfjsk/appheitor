@@ -68,7 +68,169 @@ Módulos sem Firebase, React ou `import.meta.env`. Testes: `npm run test:village
 ## Decisões
 
 - Esmeralda do baú usa `fullDays + 1` (o dia atual ainda não passou por `closeDay`).
-- Materiais comuns do baú: madeira, pedra ou ferro (não redstone), dois sorteios independentes.
+- Materiais comuns do baú: madeira, pedra ou ferro (não redstone); o tipo é o mais escasso no estoque (empate: hash entre madeira/pedra/ferro).
 - Craft da picareta exige o nível anterior (`currentLevel === def.level - 1`).
 - Cosméticos grátis não entram em `owned` e `canBuy` recusa (`reason: 'free'`).
 - `dueTasksOn` devolve a lista (não a contagem); o serviço usa `.length`.
+
+---
+
+# Etapa 2 — Lote 1 (acréscimos)
+
+Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts` reexporta `getTodayBrazil` / `addDays` de `clock.ts`. `isoWeek.ts` reexporta `isoWeekOf`.
+
+## `src/utils/clock.ts`
+
+- `BRAZIL_TZ` — `America/Sao_Paulo`.
+- `BrazilNow` — `date`, `hour` (`hourCycle: h23`, nunca 24), `minute`, `weekday`, `period`, `isNight`, `iso`.
+- `setServerOffsetMs` / `getServerOffsetMs` — correção pelo servidor (`serverNow` vs relógio local).
+- `setClockDevOverride` / `getClockDevOverride` / `resetClockForTests` — DEV `?h=` / `?d=`.
+- `nowBrazil(instantMs?)` — instante em Brasília + offset + override.
+- `getTodayBrazil()` / `getYesterdayBrazil()` / `addDays` / `weekdayOf` / `isoWeekOf` / `periodOfHour` / `isNightHour`.
+- `utcMsFromBrazil` / `msUntilNextMidnight` / `formatBrazilDate`.
+- `clockDriftWarning(driftMs)` — texto se o PC diverge mais de 2 min.
+
+## `src/contexts/ClockContext.tsx`
+
+- `ClockProvider` / `useClock()` — `date`, `hour`, `period`, `isNight`, `isDev`, `driftMs`, `now`.
+- `DAY_CHANGED_EVENT` (`dayChanged`) no `window` na virada da meia-noite de Brasília.
+
+## `src/config/village.ts` (acréscimo)
+
+- `DEFAULT_ECONOMY` — chaves v2 (`incomeDayGold`, `quizGoldPerHit`, tetos, `buildCostMultiplier` 2, `merchantBuy`, juros, `maxOpenGoals`, `lateMissionUntilHour`, `repairRefundPct`, `seasonWeeks`, `levelCap`).
+- `PRICE_BANDS` — mimo 0,5 D … temporada 50 D (`enorme` e `temporada` com `onlyGoal`).
+- `LEVEL_REWARDS` — raro e cosmético de marco; material à escolha em todo nível.
+- `GEAR[].minLevel` / `COSMETICS[].minLevel`.
+- `houseTier` / `houseSprite` / `houseTitle` — casa 1–3 pela temporada.
+- `DISTRICT_ICONS` / `DISTRICT_LABELS` / `HOTBAR_ICONS` — inclui Arena (em breve).
+
+## `src/config/rules.ts`
+
+- `FAMILY_ID` — `'heitor'` (coleções novas da etapa).
+
+## `src/config/items.ts` / `src/types/items.ts`
+
+- `ITEMS` / `ITEM_BY_ID` — cosméticos com sprite, gear, materiais, gold, raros, ícones de prêmio, marcos.
+- `itemFrame(rarity)` / `itemState(...)` / `SLOT_LABEL`.
+
+## `src/config/englishBase.ts` (acréscimo)
+
+- `buildingCost(id, level, multiplier)` — madeira/pedra/ferro × multiplicador; redstone ×1.
+- Mesa `liveMaxLevel: 1`, `opensIn: Etapa 3`.
+- Cerca só destrava com Fornalha n1.
+
+## `src/services/village/bank.ts`
+
+- `validateDeposit(goal, amount, availableGold)` — recusa amount, gold, closed, target.
+- `weeklyInterest(goals, weekIso, settings)` — 5% do `savedGold` já guardado, teto, rateio, ignora semana já paga.
+- `weeklyStatement(transactions, weekIso)` — ganhou, gastou, guardou, juros, taxa.
+- `savingsRate(transactionsMonth)`.
+
+## `src/services/village/challenges.ts`
+
+- `applyEvent(challenge, event, date)` → `{ challenge, justCompleted }`.
+- `challengeState(challenge, today)` — `active | done | expired | upcoming`.
+- `extendForPunishment(challenges, days)`.
+
+## `src/services/village/income.ts`
+
+- `referenceIncome(transactions7d, fallback)` — R7 (média 7 dias; fallback `incomeDayGold`).
+- `priceForDays(r7, days)` — arredonda a 5.
+- `daysToAfford(price, gold, r7)`.
+
+## `src/services/village/caps.ts`
+
+- `GAME_GOLD_SOURCES` / `isGameGoldSource`.
+- `gameGoldRoom(transactionsToday, transactionsWeek, settings)` — folga diária e semanal.
+- `capGold(amount, room)` — `{ paid, capped }`. Fontes de jogo (não missão/prova/Mina).
+
+## `src/services/village/repair.ts`
+
+- `DEFAULT_LOTS_BY_PERIOD`.
+- `cracksAfterClose(cracks, missedTaskIds, lotsByPeriod)`.
+- `canRepair` / `repairRefund`.
+
+## `src/services/village/late.ts`
+
+- `lateWindow(hourBrazil, settings)`.
+- `lateTaskReward(task, settings)` — metade do gold (chão), sem material, XP inteiro.
+
+## `src/services/village/levels.ts`
+
+- `levelGift(level, season)` — material à escolha, raro, cosmético de marco.
+- `minLevelFor(itemId)`.
+
+## `src/services/village/agenda.ts`
+
+- `occurrencesBetween` / `nextEvents` / `reminderDue`.
+- `studyPlanFor` / `organizationXp` / `weekOrganized` / `plannedAheadDays`.
+
+## `src/services/village/chest.ts` (alterado)
+
+- `dailyChestContents(uid, date, village, settings?, stock?, bauLevel?)` — gold = `min(teto, base + tochas)`; 2 do mais escasso (+1 se Armazém n2); esmeralda a cada `rareEveryNDays` (a cada 2 se Armazém n3).
+
+## `src/services/village/shop.ts` (alterado)
+
+- `canBuy(..., level?)` — `reason: 'level'` + `minLevel`.
+- `canCraft(..., minerLevel?)` — idem.
+- `tradePreview` recusa redstone como destino.
+
+## Serviços Firebase
+
+### `src/services/goldTx.ts`
+
+- `mapGoldTransaction` / `listGoldTransactions` / `txsOnDate` / `txsInWeek` / `roomForGameGold`.
+
+### `src/services/goalsService.ts`
+
+- `subscribeGoals` / `listGoals` / `createGoal` (`familyId`, recusa se já há `maxOpenGoals`).
+- `depositGoal` — transação `availableGold` + `savedGold` + linha `goal_deposit` tipo `saved`.
+- `requestCancel` / `applyWeeklyInterest` (ao abrir o app; `goal_interest` com `balanceBefore == balanceAfter`; respeita teto de gold do jogo).
+- `finishGoal(id, 'achieved' | 'cancelled', adminUid)` — alcançada zera e cria `redemptions`; cancelada devolve com `goal_withdraw`.
+
+### `src/services/challengesService.ts`
+
+- `subscribeChallenges` / `createChallenge` / `approveChallenge`.
+- `bumpChallenge(uid, kind, value, absolute?)` — missões, streak, prova, contratos, tochas.
+- `completeChallenge` — uma vez (`completedAt` + `claimed['challenge:<id>']`); linha `challenge`.
+- `extendActiveChallenges`.
+
+### `src/services/agendaService.ts`
+
+- `subscribeAgenda` / `createAgendaItem` / `updateAgendaItem` / `deleteAgendaItem`.
+- `markAgendaDone` — XP de organização, nunca gold.
+- `acceptStudyPlan` — cria missões extras nos dias do plano.
+
+### `src/services/villageService.ts` (acréscimo)
+
+- `grantRare` / `openStreakChest` / `sellMaterials` / `repairLot` / `seeItems` / `burnWood`.
+- Craft e compra passam `newItems` e conferem `minLevel` / nível do minerador.
+- Fundição exige Fornalha n2.
+- Baú usa nível do Armazém.
+
+### `src/services/aiQuiz.ts` / `src/services/englishTts.ts`
+
+- `callOpenAI` e TTS via `httpsCallable(functions, 'openai')` (`southamerica-east1`).
+- `isAIConfigured()` sempre `true` (a função recusa se o módulo estiver desligado ou o teto estourar).
+
+## Cloud Functions (`functions/src/index.ts`)
+
+- `openai` `onCall` — auth, `settings/modules.aiGeneration|tts`, teto `AI_MONTHLY_CALL_CAP` 800, `kind: 'chat' | 'tts'`. TTS grava `english/tts/{hash}.mp3`.
+- `agendaReminders` `onSchedule` a cada 5 min — FCM para itens vencendo.
+
+## Telas (criança)
+
+- `Cofrinho` — abas Cofrinho / Extrato / Paciência; placa se `modules.bank === false`.
+- `Extrato` — 5 semanas; `embedded` quando dentro do Banco.
+- `Agenda` / `DesafiosCard` / `Mochila` / `ItemSlot` / `ItemCard` / `Casa`.
+- Ferraria (`Oficina.tsx`) — Forjar, Fundição (Fornalha n2), Obras só leitura.
+- Mercado — Loja com `ItemSlot`, Prêmios de verdade embutidos, Comerciante.
+- Cena — sprite da Casa, fumaça da chaminé, rachadura (PNG ou 3 linhas).
+
+## Painel
+
+- `GoalsPanel` / `ChallengeManager` / `Balanca` / `RewardForm` (R7, faixas, `goalOnly`).
+
+## Simulador
+
+- `scripts/econ-sim.mjs` — 91 dias, perfis típico / misto / perfeito.

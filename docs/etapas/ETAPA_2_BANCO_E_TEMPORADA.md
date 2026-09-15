@@ -26,7 +26,7 @@ Dois lotes, dois relatórios. O Lote 1 é o que muda dinheiro e regras; o Lote 2
 
 ## 2. Modelo de dados
 
-Datas sempre `YYYY-MM-DD` no fuso do Brasil (`getTodayBrazil`, `isoWeekOf`). Nunca gravar `undefined` (`stripUndefined` de `villageService`).
+Datas sempre `YYYY-MM-DD` no fuso do Brasil (`getTodayBrazil`, `isoWeekOf`). Nunca gravar `undefined` (`stripUndefined` de `villageService`). **Toda coleção nova desta etapa nasce com `userId` e `familyId` (por enquanto sempre `'heitor'`, constante `FAMILY_ID` em `config/rules.ts`), e as regras conferem os dois; toda leitura de `settings/*` passa por `settingsService`** (roadmap, "Visão de produto": não fechar a porta para várias famílias).
 
 `goals/{id}` (Cofrinho):
 ```
@@ -108,7 +108,7 @@ Cada função com pelo menos um teste de caso normal e um de borda (semana viran
 - **Cofre** (7º lote da cena, `buildings/cofre-1..3.png` conforme o total guardado: 0 a 99, 100 a 299, 300 ou mais; placa quando `bank` desligado) abre `Cofrinho.tsx`: metas abertas com barra (`mc-bar`), "Guardar" com valor (botões 5, 10, 20, 50 e campo), "Bônus de paciência" explicado em uma linha ("5% por semana do que está guardado, até 20 gold"), meta batida mostra "Avise seu pai" e a estrela; "Pedir para cancelar" com motivo. Máximo 2 metas; criar meta pede título e valor, ou vem pronta do atalho.
 - **Extrato** (`Extrato.tsx`, aba dentro do Cofre): semana atual e as 4 anteriores: ganhou, gastou, guardou, juros, "guardou X% do que ganhou" (alvo `savingsTargetPct`) e uma frase do Sábio; uma vez por mês, a comparação honesta ("na poupança de verdade, 100 reais rendem menos de 1 real por mês; aqui o bônus é maior de propósito, para você treinar").
 - **Atalho "Criar meta no Cofrinho"**: na Loja e nos Prêmios de verdade, quando falta gold, o botão vira esse atalho com o valor e o título já preenchidos; prêmios `goalOnly` só têm esse botão.
-- **Desafios** (`DesafiosCard.tsx`, abaixo das missões na Vila): desafios ativos com prazo ("até sábado"), progresso e prêmio; desafio concluído mostra o carimbo e some em 7 dias; "Propor desafio" abre um formulário curto (título, meta, prazo) que vai para o pai.
+- **Desafios** (`DesafiosCard.tsx`, abaixo das missões na Vila): desafios ativos com prazo ("até sábado"), progresso e prêmio; desafio concluído mostra o carimbo e some em 7 dias. **"Propor desafio" fica fora da tela da criança** (decisão do pai em 15/09): um botão solto com título e número não tem valor; volta só com a Torre nível 3 e um desenho próprio (modelos prontos para a criança escolher, prêmio fixo e visível, prazo em dias da semana), no Lote 2 ou depois. O serviço com `status: 'proposed'` e a aprovação no painel podem existir sem entrada na tela.
 - **Baú do Dia** (já existe): escada por tochas visível ("Baú de hoje: 10 + 3 tochas = 13 gold"); **Baú das 7 tochas** aparece na cena ao lado do Baú do Dia quando `fullDays` bate 7, 14, 21 (ícone `chest_streak`), com animação `mc-build`, som `unlock`, conteúdo mostrado.
 - **Conserto**: lote rachado na cena (overlay `fx_rachadura.png` com `mc-shake` uma vez ao carregar); "Conserte hoje" no resumo de ontem (duas linhas: o que aconteceu, o que fazer hoje; sem ridicularizar); ao fazer todas as missões de hoje, a rachadura some com `mc-pop` e o toast diz quanto voltou.
 - **Missão recuperada**: até `lateMissionUntilHour`, a missão perdida de ontem aparece no topo das missões com "Recuperar" (metade do gold, sem material) e some depois.
@@ -188,7 +188,7 @@ Verificação obrigatória ao final de cada lote: `npx tsc --noEmit -p tsconfig.
 
 Lote 1: (0) Relógio da Vila (seção 16: `clock.ts`, `ClockProvider`, migração dos 24 pontos, correção pelo servidor, virada do dia); (1) tipos, `DEFAULT_ECONOMY`, `PRICE_BANDS`, `LEVEL_REWARDS`, `minLevel`; (2) módulos puros com testes (`bank`, `challenges`, `income`, `caps`, `repair`, `late`, `levels`, `chest` alterado); (3) regras e índices publicados; (4) serviços: `goalsService`, `challengesService`, `villageService` (rare, streak chest, sell, repair), `firestoreService` (portão, late, optional, revert de dia fechado), `dailyRulesService` (capacete, cracks, punição); (5) telas: Cofre, Cofrinho, Extrato, atalho "Criar meta", Desafios, Baú das 7 tochas, Conserto, Recuperar, Comerciante, Loja com nível; (5b) Agenda do Minerador (seção 13; arquivos disjuntos, pode correr em paralelo); (5d) Sistema de itens v1 (seção 17 e `docs/VILA_ITENS.md`: Mochila, Loja, editor e Ferraria no mesmo padrão); (5e) Mapa da Vila (seção 18 e `docs/VILA_MAPA.md`: cabeçalho, grade final, Mercado com prêmios embutidos, Banco com Extrato); (5f) Casa do Minerador (`docs/VILA_CONSTRUCOES.md`, construção 8: as missões saem da página da Vila e entram na Casa, com a faixa "Hoje" compacta; âncora `house` e sprites `casa-1..3` entregues pelo líder; Plano do turno e Fechar o dia moram lá); (5c) efeitos das construções conforme `docs/VILA_CONSTRUCOES.md` (Fundição e Queima na Fornalha, Baú 2 e 3, Cerca 1 a 3, Torre 2 e 3, Cofre, pré-requisitos e custos x2); (6) painel: GoalsPanel, ChallengeManager, RewardForm com faixas, Balança; (7) função `openai` e troca do cliente; (8) simulador; (9) aceite e relatório.
 
-Lote 2: (1) `season`, `checkin` puros com testes; (2) serviços: plan, checkin, trophy, closeSeason, learning; (3) telas: Plano do turno, Fechar o dia, Missão própria e extras, Dia fechado, Torre (recordes, troféus, mapa de habilidades), LevelUpModal com marco; (3b) Vida dos personagens v1 (seção 14) e Diálogos que evoluem (seção 15; as falas em si são entregues pelo líder em `src/data/dialogue/`); (3c) "Vila que cresce v1" e cerimônia de obra (`docs/VILA_CONSTRUCOES.md`, "Progressão visual": camadas `scene/growth-1..3.png` pela soma dos níveis, poeira e martelo ao subir de nível, luz por nível à noite); (4) painel: cartão Hoje, abas reagrupadas, Nova temporada, relatório semanal, Saúde; (5) aceite e relatório.
+Lote 2: (1) `season`, `checkin` puros com testes; (2) serviços: plan, checkin, trophy, closeSeason, learning; (3) telas: Plano do turno, Fechar o dia, Missão própria e extras, Dia fechado, Torre (recordes, troféus, mapa de habilidades), LevelUpModal com marco; (3b) Vida dos personagens v1 (seção 14) e Diálogos que evoluem (seção 15; as falas em si são entregues pelo líder em `src/data/dialogue/`); (3d) Conquistas do jogo (seção 19 e `docs/VILA_CONQUISTAS.md`: contadores, catálogo de 72, Torre); (3c) "Vila que cresce v1" e cerimônia de obra (`docs/VILA_CONSTRUCOES.md`, "Progressão visual": camadas `scene/growth-1..3.png` pela soma dos níveis, poeira e martelo ao subir de nível, luz por nível à noite); (4) painel: cartão Hoje, abas reagrupadas, Nova temporada, relatório semanal, Saúde; (5) aceite e relatório.
 
 Não fazer: mexer em `src/index.css`, `ComicBackdrop.tsx`, `src/components/hero/english/**` além dos pontos citados (lanterna em `ContractBoard`, `completeContract` chamando `bumpChallenge`, TTS pela função); mudar regras de punição além do descrito; criar custo obrigatório em gold; restilizar o painel; commit.
 
@@ -224,7 +224,22 @@ Tela `src/components/hero/village/Agenda.tsx` (modal `mc-panel`, abre pelo cart�
 
 Painel: aba "Agenda" no grupo Jogo: lista e formulário iguais aos da criança (itens do pai marcados "do pai"), botão "Calendário da escola" (colar várias datas de uma vez, uma por linha "2026-10-03 Prova de história"); no cartão "Hoje": provas nos próximos 3 dias sem plano de estudo aceito.
 
-Remover: `FlashTimer` como modal e o cartão "Ampulheta"; `onOpenTimer` sai de `HeroPanel`/`VillageHome`; `CalendarModal` passa a ser a aba Mês (pode virar componente interno da Agenda). Aceite: criar uma prova para daqui a 3 dias com plano de estudo cria 3 missões extras nos dias certos; marcar feito paga 5 XP uma vez (chave em `claimed`); push chega no Chrome do PC no horário (foto da notificação); Placa mostra o item de amanhã; aba Mês mostra passado e futuro; sem gold em nenhuma linha de `goldTransactions` vinda da agenda.
+**Calendário e Agenda são a mesma coisa** (pedido do pai em 15/09): o que ele agenda aparece no calendário, e o calendário é a aba Mês da Agenda. Nos dias passados, o que já existe (verde completo, amarelo parcial, vermelho perdido, "+10" de gold); nos dias futuros, um ponto por compromisso e o ícone do tipo (prova, treino, evento, aniversário); clicar num dia abre o detalhe: missões daquele dia e compromissos, com "Feito" nos que já passaram.
+
+**Lembrar no dia e na hora, sem ser chato** (o "sistema agradável de lembrete"):
+
+1. **Ao abrir o app no dia**: a Placa da Vila ganha o bloco **"Hoje você tem"** no topo, antes de tudo: cada compromisso do dia com hora, ícone e o botão "Feito" ("17h Treino de futebol", "Prova de matemática, estudar 15 min"); se não houver nada, o bloco não aparece. Abaixo, "Amanhã: prova de história" quando houver. É a primeira coisa que ele vê ao entrar.
+2. **Na hora marcada, com o app aberto**: `remindMinutesBefore` antes, o item da Placa pisca em `mc-pop`, toca `createMineSfx.checkpoint` (um som só, nada de repetir), aparece um toast com o texto e "Ok"; o Olheiro fala uma linha na cena ("Treino daqui a pouco. Chuteira pronta?"). Marcar "Feito" ou "Ok" encerra.
+3. **Na hora marcada, com o app fechado**: push no Chrome do PC pela Cloud Function `agendaReminders` (seção anterior); clicar na notificação abre a Agenda no item.
+4. **Na véspera, à noite**: no "Fechar o dia", a última linha é "Amanhã você tem: ..." com os compromissos de amanhã, para ele dormir sabendo.
+5. **No fim de semana**: domingo à noite, "A semana que vem" na Placa (provas e eventos dos próximos 7 dias) e um push para o pai com o mesmo resumo.
+
+**Linha do dia** (o espaço dos compromissos): na Casa do Minerador (`docs/VILA_CONSTRUCOES.md`, construção 8), a aba Hoje mostra **uma linha só com o dia inteiro**, por horário: missões da manhã, compromissos com hora, missões da tarde, blocos de Foco do plano de estudo, missões da noite, Fechar o dia. Missão e compromisso no mesmo lugar, na ordem em que acontecem, cada um com o seu botão (Concluir, Feito, Foco). Assim o Heitor lê o dia como uma história, não como três listas.
+
+**Tudo alimentado pela mesma fonte**: `agenda/{id}` + `tasks` + `village.plan`, lidos pelo módulo puro `dayTimeline(items, tasks, plan, date)` em `agenda.ts` (com testes de ordenação: item sem hora vai para o período informado ou para o fim do dia).
+
+
+Remover: `FlashTimer` como modal e o cartão "Ampulheta"; `onOpenTimer` sai de `HeroPanel`/`VillageHome`; `CalendarModal` passa a ser a aba Mês (pode virar componente interno da Agenda). Aceite: um compromisso de hoje aparece em "Hoje você tem" ao abrir, pisca e toca na hora marcada com o app aberto, e chega por push com o app fechado; a aba Mês mostra o ponto no dia futuro e o detalhe ao clicar; a Linha do dia da Casa mostra missões e compromissos na ordem do horário; criar uma prova para daqui a 3 dias com plano de estudo cria 3 missões extras nos dias certos; marcar feito paga 5 XP uma vez (chave em `claimed`); push chega no Chrome do PC no horário (foto da notificação); Placa mostra o item de amanhã; aba Mês mostra passado e futuro; sem gold em nenhuma linha de `goldTransactions` vinda da agenda.
 
 
 ## 14. Vida dos personagens v1 (Lote 2; pedido do pai em 15/09)
@@ -334,12 +349,26 @@ Aceite: o de `docs/VILA_ITENS.md`.
 Pedido do pai em 15/09: "Baú de recompensas", Mercado, Baú do Dia, construção Baú e o Banco que vem: está tudo desconexo. O desenho está em `docs/VILA_MAPA.md` (glossário de uma palavra por conceito, cabeçalho final, grade final de 8 distritos, circuito do gold: entra, sai, fica guardado). Nesta etapa entra:
 
 - Cabeçalho: chips com ação (gold abre o Extrato; nível abre a Torre; avatar abre a Mochila), botões "Baú de recompensas" e calendário removidos.
-- Grade final: Mina, Biblioteca, Ferraria, Mercado, Banco, Mochila, Torre, Agenda; hotbar Vila, Missões, Mina, Mercado, Mochila (teclas 1 a 5).
+- **A grade de distritos sai** (decisão do pai em 15/09, à noite; `docs/VILA_MAPA.md`, "A Vila é a interface"): tudo abre tocando na cena (hotspots com rótulo e cadeado), a hotbar de cinco atalhos é a única navegação fora da cena, o cabeçalho vira uma faixa e a Placa vira balão no canto da cena mais a placa de madeira dentro dela; Mercado e Agenda são construções baratas do primeiro dia (Barraca do Comerciante e Sino da Vila, `docs/VILA_CONSTRUCOES.md` 9 e 10, decisão do pai em 15/09); Placa e Arena são objetos fixos da cena com âncoras `spots`; arte do líder. Substitui o texto seguinte sobre a grade. Antiga grade: Casa, Mina, Biblioteca, Ferraria, Mercado, Banco, Mochila, Torre, Agenda e **Arena** (cartão "Em breve" com o ícone de espada, sem tela; ao clicar, o Olheiro fala "Quando a Arena abrir, eu quero ver você ganhar do seu pai no xadrez"; a Arena de verdade é a Etapa 4B do roadmap); hotbar Vila, Missões, Mina, Mercado, Mochila (teclas 1 a 5).
 - Mercado com `RewardsPanel` embutido como aba (nunca por cima), "Meus pedidos" com estado, aba Comerciante.
 - Banco da Vila com Cofrinho, Extrato (recebe o histórico de gold, que sai da tela de prêmios) e Paciência.
 - Renomeações: Oficina para Ferraria, construção Baú para Armazém (id `bau` continua), Ampulheta e Mapa para Agenda; "Baú" só em "Baú do Dia".
 
 Aceite: o de `docs/VILA_MAPA.md`.
+
+## 19. Conquistas do jogo (Lote 2, junto com a Torre)
+
+Pedido do pai em 15/09: conquistas padrão do próprio jogo, em quantidade (progresso, realizações, missões), separadas das especiais da vida real que ele cria. O desenho completo, com o catálogo inicial de 72, está em `docs/VILA_CONQUISTAS.md` (fonte de verdade). Nesta etapa entra:
+
+- `village.stats` (contadores incrementados nas transações existentes: missão, fechamento do dia, obra, forja, fundição, contrato, prova, reflexão, depósito, juros, agenda, Foco, conversa, Baú, temporada), `village.achievementsUnlocked`, `village.newAchievements`.
+- Módulo puro `src/services/village/achievements.ts` com o catálogo tipado (`src/data/achievements.ts`), `evaluateAchievements` e `progressOf`, testes (destrava no alvo e não antes; escondidas; nunca gold).
+- Pagamento por transação com chave `ach:<id>` (XP, material, raro ou cosmético; nunca gold); toast com ícone e som; fala do NPC dono da categoria.
+- Torre, aba Conquistas: categorias, `ItemSlot` com moldura por camada, progresso, "Quase lá", "Novo", escondidas como "?"; aba "Da vida real" com as do pai e "Pedir para o pai confirmar".
+- O pacote de 12 criado pela "nova fase" sai; as de nível e temporada viram parte do catálogo e reiniciam com a estrela. As da vida real continuam em `achievements` com `kind: 'real'`.
+- Painel: aba de conquistas só para as da vida real; as do jogo em lista só leitura com o progresso.
+- Arte: ícones por categoria e por camada gerados pelo líder (bronze, prata, ouro, exclusiva), cosméticos "capacete de mestre de obras" e "cachecol da vila".
+
+Aceite: concluir a primeira missão destrava "Primeira picaretada" com toast e +10 XP +1 material, uma vez; a Torre mostra "Mão na massa 1/10" logo abaixo; nenhuma linha de `goldTransactions` vem de conquista do jogo; uma conquista da vida real criada pelo pai continua funcionando como hoje.
 
 ## 12. Prompt para colar no Cursor
 

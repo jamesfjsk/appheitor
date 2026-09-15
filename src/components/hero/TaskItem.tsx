@@ -4,8 +4,9 @@ import { FlashIcon, CheckMark } from '../../icons';
 import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import { useVillage } from '../../contexts/VillageContext';
+import { useClock } from '../../contexts/ClockContext';
 import { periodAllowedAt } from '../../services/village/schedule';
-import { getTodayBrazil } from '../../utils/timezone';
+import { getTodayBrazil } from '../../utils/clock';
 import toast from 'react-hot-toast';
 
 const CLOCK = '/assets/english/ui/clock.webp';
@@ -60,8 +61,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
       toast('Missão já feita hoje. Volta amanhã.', {
         duration: 3000,
         style: {
-          background: '#10B981',
-          color: '#FFFFFF',
+          background: '#2f2a27',
+          color: '#f6f2ec',
+          border: '3px solid #17130f',
+          fontFamily: 'Fredoka, Segoe UI, system-ui, sans-serif',
         },
       });
       return;
@@ -69,11 +72,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
 
     // Prevent multiple clicks while completing
     if (isCompleting) {
-      console.log('⚠️ Task completion already in progress, ignoring click');
       return;
     }
 
-    console.log('🎯 Starting task completion:', { taskId: task.id, title: task.title });
     setIsCompleting(true);
 
     try {
@@ -91,9 +92,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
 
       // Complete the task immediately
       await onComplete(task.id, true);
-      
-      console.log('✅ Task completed successfully:', task.id);
-      
+
       setTimeout(() => {
         setShowSuccess(false);
       }, 800);
@@ -109,11 +108,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
   };
 
   const { economy } = useVillage();
-  const hourBrazil = Number(new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'America/Sao_Paulo',
-    hour: 'numeric',
-    hour12: false,
-  }).format(new Date()));
+  const { hour: hourBrazil, minute } = useClock();
   const periodOpen = periodAllowedAt(task.period, hourBrazil, economy);
   const abreHora = task.period === 'afternoon'
     ? economy.periodStartHours.afternoon
@@ -128,11 +123,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
 
   let timeOverdue = false;
   if (task.time && !done) {
-    const now = new Date();
     const [hours, minutes] = task.time.split(':').map(Number);
-    const dueTime = new Date();
-    dueTime.setHours(hours, minutes, 0, 0);
-    timeOverdue = now > dueTime && task.status !== 'done';
+    const dueMinutes = hours * 60 + minutes;
+    const nowMinutes = hourBrazil * 60 + minute;
+    timeOverdue = nowMinutes > dueMinutes && task.status !== 'done';
   }
 
   return (
@@ -187,8 +181,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
           type="button"
           onClick={handleToggle}
           disabled={isCompleting}
-          className={`mc-btn text-white shrink-0 min-h-[44px] font-bold ${guidedMode ? 'px-6 text-[17px]' : 'px-4 text-[15px]'}`}
-          style={{ backgroundColor: 'var(--mc-wood)' }}
+          className={`mc-btn mc-btn-wood shrink-0 min-h-[44px] font-bold ${guidedMode ? 'px-6 text-[17px]' : 'px-4 text-[15px]'}`}
         >
           {isCompleting ? '...' : 'Concluir'}
         </button>

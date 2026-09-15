@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { BuildingId } from '../../../types/english';
-import { buildingSprite, ISO_MINER, ISO_NPC, NPC_LABEL, PET_SPRITE } from '../../../config/village';
+import { buildingSprite, houseSprite, ISO_MINER, ISO_NPC, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, type SceneProp } from '../../../config/village';
 import type { VillageDoc } from '../../../types/village';
 import { paintCharacterLook } from './drawCharacter';
 
-const BACKDROP = '/assets/village/scene/backdrop-day.png';
+const BACKDROP = '/assets/village/scene/backdrop-day.png?v=hover1';
 const CLOUDS = '/assets/village/scene/clouds.png';
+const MOON = '/assets/english/ui/moon.webp';
 const ANCHORS_URL = '/assets/village/scene/anchors.json';
+const SKY_H = 86;
 
 type Lot = { id: string; x: number; y: number; w: number; h: number };
 type Actor = { x: number; y: number; h: number };
@@ -23,37 +25,45 @@ export type SceneAnchors = {
   lights: Light[];
   water: { x: number; y: number; w: number; h: number };
   smokeOffset: { dx: number; dy: number };
+  house?: Lot;
+  props?: SceneProp[];
 };
 
 const FALLBACK: SceneAnchors = {
   size: { w: 1280, h: 640 },
-  spriteScale: 1.5,
+  spriteScale: 1,
   lots: [
-    { id: 'fornalha', x: 170, y: 178, w: 160, h: 88 },
-    { id: 'bau', x: 365, y: 178, w: 155, h: 88 },
-    { id: 'cerca', x: 205, y: 315, w: 165, h: 86 },
-    { id: 'torre', x: 410, y: 315, w: 160, h: 86 },
-    { id: 'mesa', x: 245, y: 450, w: 170, h: 82 },
-    { id: 'campinho', x: 455, y: 450, w: 170, h: 82 },
-    { id: 'cofre', x: 750, y: 548, w: 170, h: 84 },
+    { id: 'fornalha', x: 147, y: 198, w: 102, h: 78 },
+    { id: 'bau', x: 144, y: 348, w: 105, h: 78 },
+    { id: 'cerca', x: 468, y: 234, w: 90, h: 63 },
+    { id: 'torre', x: 1064, y: 48, w: 90, h: 112 },
+    { id: 'mesa', x: 723, y: 234, w: 90, h: 63 },
+    { id: 'cofre', x: 472, y: 422, w: 104, h: 80 },
+    { id: 'agenda', x: 584, y: 412, w: 112, h: 92 },
+    { id: 'mercado', x: 708, y: 414, w: 112, h: 90 },
+    { id: 'campinho', x: 940, y: 334, w: 168, h: 112 },
   ],
-  character: { x: 700, y: 445, h: 96 },
+  character: { x: 640, y: 365, h: 80 },
   npcs: {
-    sabio: { x: 800, y: 215, h: 96 },
-    comerciante: { x: 1090, y: 385, h: 96 },
-    ferreiro: { x: 125, y: 505, h: 96 },
-    olheiro: { x: 1180, y: 130, h: 96 },
+    sabio: { x: 848, y: 268, h: 74 },
+    comerciante: { x: 838, y: 468, h: 74 },
+    ferreiro: { x: 78, y: 250, h: 74 },
+    olheiro: { x: 1114, y: 79, h: 52 },
   },
-  hotspots: { mine: { x: 500, y: 0, w: 170, h: 150 } },
+  hotspots: { mine: { x: 545, y: 32, w: 210, h: 138 } },
   lights: [
-    { id: 'mina', x: 585, y: 75, r: 90 },
-    { id: 'fogueira', x: 890, y: 400, r: 70 },
+    { id: 'mina', x: 640, y: 95, r: 90 },
+    { id: 'fogueira', x: 1045, y: 198, r: 70 },
+    { id: 'casa', x: 986, y: 148, r: 55 },
+    { id: 'forja', x: 90, y: 230, r: 50 },
   ],
-  water: { x: 1040, y: 455, w: 210, h: 135 },
-  smokeOffset: { dx: 100, dy: -70 },
+  water: { x: 1125, y: 345, w: 145, h: 125 },
+  smokeOffset: { dx: 51, dy: 8 },
+  house: { id: 'casa', x: 938, y: 110, w: 96, h: 74 },
+  props: SCENE_PROPS,
 };
 
-type Hotspot = { id: string; x: number; y: number; w: number; h: number };
+type Hotspot = { id: string; x: number; y: number; w: number; h: number; label?: string };
 type Smoke = { x: number; y: number; r: number; a: number; vy: number };
 type Layer = {
   id: string;
@@ -108,23 +118,23 @@ function drawSpeechBubble(
   const bw = Math.min(268, Math.ceil(textW + padX * 2));
   const bh = 12 + lines.length * lineH;
   const tail = 12;
-  const gap = 8;
   const margin = 8;
   const headX = npc.x;
   const headY = npc.y - npc.h * 0.88;
 
   let side: 'bottom' | 'left' | 'right' = 'bottom';
   let bx = headX - bw / 2;
-  let by = headY - bh - tail - gap;
+  let by = headY - bh - tail - 8;
 
   if (by < margin) {
     by = Math.max(margin, Math.min(sceneH - bh - margin, headY - bh / 2));
+    const spriteHalf = npc.h * 0.5;
     if (headX > sceneW * 0.55) {
       side = 'right';
-      bx = headX - 28 - tail - gap - bw;
+      bx = headX - spriteHalf - tail - 4 - bw;
     } else {
       side = 'left';
-      bx = headX + 28 + tail + gap;
+      bx = headX + spriteHalf + tail + 4;
     }
   }
 
@@ -138,6 +148,7 @@ function drawSpeechBubble(
   ctx.translate(pivotX, pivotY);
   ctx.scale(scale, scale);
   ctx.translate(-pivotX, -pivotY);
+  ctx.globalAlpha = Math.max(0.35, scale);
 
   ctx.fillStyle = '#f6f2ec';
   ctx.strokeStyle = '#17130f';
@@ -145,42 +156,39 @@ function drawSpeechBubble(
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
 
-  const radius = 12;
-  const balloon = () => {
-    ctx.beginPath();
-    if (typeof ctx.roundRect === 'function') ctx.roundRect(bx, by, bw, bh, radius);
-    else ctx.rect(bx, by, bw, bh);
-  };
-  const tailPath = () => {
-    ctx.beginPath();
-    if (side === 'bottom') {
-      ctx.moveTo(pivotX - 9, by + bh - 2);
-      ctx.lineTo(pivotX, by + bh + tail);
-      ctx.lineTo(pivotX + 9, by + bh - 2);
-    } else if (side === 'right') {
-      ctx.moveTo(bx + bw - 2, pivotY - 9);
-      ctx.lineTo(bx + bw + tail, pivotY);
-      ctx.lineTo(bx + bw - 2, pivotY + 9);
-    } else {
-      ctx.moveTo(bx + 2, pivotY - 9);
-      ctx.lineTo(bx - tail, pivotY);
-      ctx.lineTo(bx + 2, pivotY + 9);
-    }
-    ctx.closePath();
-  };
+  const r = Math.min(12, bw / 2, bh / 2);
+  ctx.beginPath();
+  ctx.moveTo(bx + r, by);
+  ctx.arcTo(bx + bw, by, bx + bw, by + bh, r);
+  ctx.arcTo(bx + bw, by + bh, bx, by + bh, r);
+  ctx.arcTo(bx, by + bh, bx, by, r);
+  ctx.arcTo(bx, by, bx + bw, by, r);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
 
-  balloon();
+  ctx.beginPath();
+  if (side === 'bottom') {
+    ctx.moveTo(pivotX - 9, by + bh - 1);
+    ctx.lineTo(pivotX, by + bh + tail);
+    ctx.lineTo(pivotX + 9, by + bh - 1);
+  } else if (side === 'right') {
+    ctx.moveTo(bx + bw - 1, pivotY - 9);
+    ctx.lineTo(bx + bw + tail, pivotY);
+    ctx.lineTo(bx + bw - 1, pivotY + 9);
+  } else {
+    ctx.moveTo(bx + 1, pivotY - 9);
+    ctx.lineTo(bx - tail, pivotY);
+    ctx.lineTo(bx + 1, pivotY + 9);
+  }
+  ctx.closePath();
   ctx.fill();
-  tailPath();
-  ctx.fill();
-  tailPath();
   ctx.stroke();
-  balloon();
-  ctx.stroke();
+
   ctx.fillStyle = '#f6f2ec';
-  if (side === 'bottom') ctx.fillRect(pivotX - 8, by + bh - 5, 16, 8);
-  else if (side === 'right') ctx.fillRect(bx + bw - 5, pivotY - 8, 8, 16);
-  else ctx.fillRect(bx - 3, pivotY - 8, 8, 16);
+  if (side === 'bottom') ctx.fillRect(pivotX - 8, by + bh - 4, 16, 6);
+  else if (side === 'right') ctx.fillRect(bx + bw - 4, pivotY - 8, 6, 16);
+  else ctx.fillRect(bx - 2, pivotY - 8, 6, 16);
 
   ctx.fillStyle = '#1f1a17';
   ctx.textAlign = 'left';
@@ -239,6 +247,49 @@ function lockIcon(ctx: CanvasRenderingContext2D, x: number, y: number) {
   ctx.restore();
 }
 
+function spriteBox(
+  lot: { id?: string; x: number; y: number; w: number; h: number },
+  empty: boolean,
+  kind: 'lot' | 'campinho' | 'house' = 'lot',
+): { destW: number; destH: number; dx: number; dy: number } {
+  if (kind === 'campinho') {
+    const destW = empty ? 88 : 120;
+    return {
+      destW,
+      destH: destW,
+      dx: lot.x + lot.w / 2 - destW / 2,
+      dy: lot.y + lot.h / 2 - destW / 2,
+    };
+  }
+  if (kind === 'house') {
+    const destW = 104;
+    return {
+      destW,
+      destH: destW,
+      dx: lot.x + lot.w / 2 - destW / 2,
+      dy: lot.y + lot.h - destW,
+    };
+  }
+  if (lot.id === 'agenda' || lot.id === 'mercado') {
+    const destW = empty ? 72 : 100;
+    return {
+      destW,
+      destH: destW,
+      dx: lot.x + lot.w / 2 - destW / 2,
+      dy: lot.y + lot.h - destW,
+    };
+  }
+  const destW = empty
+    ? Math.min(76, Math.max(64, lot.w - 14))
+    : Math.min(112, Math.max(92, lot.w + 6));
+  return {
+    destW,
+    destH: destW,
+    dx: lot.x + lot.w / 2 - destW / 2,
+    dy: empty ? lot.y + lot.h / 2 - destW / 2 : lot.y + lot.h - destW,
+  };
+}
+
 function label(ctx: CanvasRenderingContext2D, text: string, cx: number, y: number) {
   ctx.save();
   ctx.font = '700 13px Fredoka, system-ui, sans-serif';
@@ -285,6 +336,8 @@ function nightLamps(
   anchors.lights.forEach((l) => {
     if (l.id === 'mina') lamps.push({ x: l.x, y: l.y, r: 56, rgb: [255, 210, 140], base: 0.34, flicker: 0.04 });
     if (l.id === 'fogueira') lamps.push({ x: l.x, y: l.y, r: 42, rgb: [255, 150, 70], base: 0.38, flicker: 0.12 });
+    if (l.id === 'casa') lamps.push({ x: l.x, y: l.y, r: 68, rgb: [255, 196, 90], base: 0.44, flicker: 0.05 });
+    if (l.id === 'forja') lamps.push({ x: l.x, y: l.y, r: 40, rgb: [255, 130, 50], base: 0.3, flicker: 0.1 });
   });
   const furnace = anchors.lots.find((l) => l.id === 'fornalha');
   if (furnace && (buildings.fornalha || 0) >= 1) {
@@ -325,6 +378,85 @@ function paintLamp(ctx: CanvasRenderingContext2D, lamp: Lamp, elapsed: number, r
   ctx.fill();
 }
 
+function skyPair(hour: number): [string, string] {
+  if (hour >= 6 && hour < 10) return ['#9fd3ff', '#e8f4ff'];
+  if (hour >= 10 && hour < 16) return ['#79bdf2', '#cfe9ff'];
+  if (hour >= 16 && hour < 19) return ['#f5a463', '#ffd9a3'];
+  return ['#0e1a3a', '#243a6b'];
+}
+
+function paintSky(
+  ctx: CanvasRenderingContext2D,
+  W: number,
+  night: boolean,
+  hour: number,
+  elapsed: number,
+  reduced: boolean,
+  moon: HTMLImageElement | null,
+) {
+  const [top, bot] = skyPair(hour);
+  const g = ctx.createLinearGradient(0, 0, 0, SKY_H);
+  g.addColorStop(0, top);
+  g.addColorStop(1, bot);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, SKY_H);
+  if (night) {
+    ctx.fillStyle = '#f4f0c8';
+    for (let i = 0; i < 30; i++) {
+      const x = ((i * 97) % (W - 24)) + 12;
+      const y = ((i * 53) % (SKY_H - 28)) + 8;
+      const tw = reduced ? 0.7 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(elapsed * 2.1 + i));
+      ctx.globalAlpha = tw;
+      ctx.fillRect(x, y, i % 5 === 0 ? 2 : 1, i % 5 === 0 ? 2 : 1);
+    }
+    ctx.globalAlpha = 1;
+    if (moon) ctx.drawImage(moon, W - 88, 12, 48, 48);
+  } else if (!reduced) {
+    ctx.fillStyle = 'rgba(255, 220, 90, 0.95)';
+    ctx.beginPath();
+    ctx.arc(W - 70, 42, 16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 230, 140, 0.18)';
+    ctx.beginPath();
+    ctx.arc(W - 70, 42, 28, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function paintBirds(ctx: CanvasRenderingContext2D, W: number, elapsed: number) {
+  for (let i = 0; i < 2; i++) {
+    const x = ((elapsed * (28 + i * 10) + i * 420) % (W + 80)) - 40;
+    const y = 36 + i * 22 + Math.sin(elapsed * 1.4 + i) * 8;
+    ctx.strokeStyle = '#17130f';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x - 7, y);
+    ctx.lineTo(x, y - 4);
+    ctx.lineTo(x + 7, y);
+    ctx.stroke();
+  }
+}
+
+function paintCampfire(ctx: CanvasRenderingContext2D, x: number, y: number, elapsed: number, reduced: boolean) {
+  const glow = ctx.createRadialGradient(x, y, 2, x, y, 38);
+  glow.addColorStop(0, `rgba(255, 170, 50, ${reduced ? 0.28 : 0.34 + 0.08 * Math.sin(elapsed * 6)})`);
+  glow.addColorStop(1, 'rgba(255, 120, 20, 0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(x, y, 38, 0, Math.PI * 2);
+  ctx.fill();
+  const n = reduced ? 3 : 7;
+  for (let i = 0; i < n; i++) {
+    const t = elapsed * (2.8 + i * 0.15) + i;
+    const fx = x + Math.sin(t) * (4 + i);
+    const fy = y - 6 - (i * 3 + (t % 10));
+    ctx.fillStyle = i % 2 ? `rgba(255, 210, 80, ${0.5 - i * 0.05})` : `rgba(255, 90, 20, ${0.55 - i * 0.04})`;
+    ctx.beginPath();
+    ctx.arc(fx, fy, reduced ? 3 : 2 + (i % 3), 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
 interface Props {
   village: VillageDoc;
   buildings: Record<BuildingId, number>;
@@ -334,16 +466,25 @@ interface Props {
   speech: Speech | null;
   onClickSpot: (id: string) => void;
   onDismissSpeech: () => void;
+  houseSmoke?: boolean;
   className?: string;
 }
 
 const VillageScene: React.FC<Props> = ({
-  village, buildings, hour, gated, reducedMotion, speech, onClickSpot, onDismissSpeech, className = '',
+  village, buildings, hour, gated, reducedMotion, speech, onClickSpot, onDismissSpeech, houseSmoke = false, className = '',
 }) => {
   const ref = useRef<HTMLCanvasElement>(null);
   const spots = useRef<Hotspot[]>([]);
   const hover = useRef<Hotspot | undefined>(undefined);
   const smoke = useRef<Smoke[]>([]);
+  const chimney = useRef<Smoke[]>([]);
+  const embers = useRef<Smoke[]>([]);
+  const dust = useRef<Smoke[]>([]);
+  const flies = useRef(Array.from({ length: 10 }, (_, i) => ({
+    x: 200 + i * 90,
+    y: 180 + (i % 4) * 70,
+    p: i * 0.7,
+  })));
   const t0 = useRef(performance.now());
   const last = useRef(0);
   const speechAt = useRef(0);
@@ -355,9 +496,13 @@ const VillageScene: React.FC<Props> = ({
 
   useEffect(() => {
     let alive = true;
-    fetch(ANCHORS_URL)
+        fetch(`${ANCHORS_URL}?v=hover4`)
       .then((r) => r.json())
-      .then((j: SceneAnchors) => { if (alive && j?.size?.w) setAnchors(j); })
+      .then((j: SceneAnchors) => {
+        if (alive && j?.size?.w) {
+          setAnchors({ ...FALLBACK, ...j, props: j.props?.length ? j.props : FALLBACK.props });
+        }
+      })
       .catch(() => undefined);
     return () => { alive = false; };
   }, []);
@@ -420,24 +565,30 @@ const VillageScene: React.FC<Props> = ({
 
       ctx.clearRect(0, 0, W, H);
 
-      if (!night && !reducedMotion) {
+      const moon = img(MOON, bump);
+      paintSky(ctx, W, night, hour, elapsed, reducedMotion, moon);
+
+      if (!reducedMotion) {
         const clouds = img(CLOUDS, bump);
         if (clouds) {
-          const x1 = ((elapsed * 12) % (W + 512)) - 512;
-          const x2 = ((elapsed * 8 + 400) % (W + 512)) - 512;
-          ctx.globalAlpha = 0.5;
-          ctx.drawImage(clouds, x1, 8, 512, 128);
-          ctx.globalAlpha = 0.3;
-          ctx.drawImage(clouds, x2, 40, 512, 128);
-          ctx.globalAlpha = 1;
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(0, 0, W, SKY_H);
+          ctx.clip();
+          if (!night) {
+            const x1 = ((elapsed * 12) % (W + 512)) - 512;
+            const x2 = ((elapsed * 8 + 400) % (W + 512)) - 512;
+            ctx.globalAlpha = 0.55;
+            ctx.drawImage(clouds, x1, 8, 512, 128);
+            ctx.globalAlpha = 0.32;
+            ctx.drawImage(clouds, x2, 40, 512, 128);
+          } else {
+            ctx.globalAlpha = 0.18;
+            ctx.drawImage(clouds, 80, 10, 512, 128);
+          }
+          ctx.restore();
         }
-      } else if (night && !reducedMotion) {
-        const clouds = img(CLOUDS, bump);
-        if (clouds) {
-          ctx.globalAlpha = 0.15;
-          ctx.drawImage(clouds, 80, 10, 512, 128);
-          ctx.globalAlpha = 1;
-        }
+        if (!night) paintBirds(ctx, W, elapsed);
       }
 
       const ground = img(BACKDROP, bump);
@@ -451,27 +602,65 @@ const VillageScene: React.FC<Props> = ({
       const hits: Hotspot[] = [];
 
       anchors.lots.forEach((lot) => {
-        const level = lot.id === 'cofre' ? 0 : (buildings[lot.id as BuildingId] || 0);
-        const src = buildingSprite(lot.id === 'cofre' ? 'bau' : lot.id as BuildingId, lot.id === 'cofre' ? 0 : level);
+        const bid = lot.id as BuildingId;
+        const level = buildings[bid] || 0;
+        const src = buildingSprite(bid, level);
         const sprite = img(src, bump);
-        const destW = level === 0 ? lot.w * 0.6 : lot.w;
-        const destH = destW;
-        const dx = lot.x + lot.w / 2 - destW / 2;
-        const dy = lot.y + lot.h - destH;
-        const hit: Hotspot = { id: `build:${lot.id}`, x: lot.x, y: lot.y, w: lot.w, h: lot.h };
+        const kind = lot.id === 'campinho' ? 'campinho' : 'lot';
+        const { destW, destH, dx, dy } = spriteBox(lot, level === 0, kind);
+        const name = LOT_SCENE_LABEL[lot.id];
+        const skipSprite = lot.id === 'torre';
+        const hit: Hotspot = skipSprite || level === 0
+          ? { id: `build:${lot.id}`, x: lot.x, y: lot.y, w: lot.w, h: lot.h, label: name }
+          : { id: `build:${lot.id}`, x: dx, y: dy, w: destW, h: destH, label: name };
         hits.push(hit);
         layers.push({
           id: hit.id,
           y: lot.y + lot.h,
           hit,
           draw: (c) => {
-            if (!sprite) return;
-            const drawn = gated ? graySprite(sprite, destW, destH) : sprite;
-            c.drawImage(drawn, dx, dy, destW, destH);
-            if (gated) lockIcon(c, lot.x + lot.w / 2 - 14, lot.y + 8);
+            if (sprite && !skipSprite) {
+              const drawn = gated ? graySprite(sprite, destW, destH) : sprite;
+              c.drawImage(drawn, dx, dy, destW, destH);
+              if (gated) lockIcon(c, dx + destW / 2 - 14, dy + 8);
+            }
+            if (village.cracks.includes(lot.id)) {
+              c.strokeStyle = '#17130f';
+              c.lineWidth = 2;
+              c.beginPath();
+              c.moveTo(dx + destW * 0.2, dy + destH * 0.3);
+              c.lineTo(dx + destW * 0.55, dy + destH * 0.7);
+              c.moveTo(dx + destW * 0.35, dy + destH * 0.25);
+              c.lineTo(dx + destW * 0.8, dy + destH * 0.6);
+              c.moveTo(dx + destW * 0.15, dy + destH * 0.55);
+              c.lineTo(dx + destW * 0.7, dy + destH * 0.85);
+              c.stroke();
+            }
           },
         });
       });
+
+      const houseLot = anchors.house;
+      let chimneyX = 0;
+      let chimneyY = 0;
+      if (houseLot) {
+        const sprite = img(houseSprite(village.season), bump);
+        const { destW, destH, dx, dy } = spriteBox(houseLot, false, 'house');
+        chimneyX = dx + destW * 0.32;
+        chimneyY = dy + destH * 0.26;
+        const hit: Hotspot = { id: 'house', x: dx, y: dy, w: destW, h: destH, label: 'Casa' };
+        hits.push(hit);
+        layers.push({
+          id: 'house',
+          y: houseLot.y + houseLot.h,
+          hit,
+          draw: (c) => {
+            if (!sprite) return;
+            groundShadow(c, houseLot.x + houseLot.w / 2, houseLot.y + houseLot.h - 6, destW * 1.1, night);
+            c.drawImage(sprite, dx, dy, destW, destH);
+          },
+        });
+      }
 
       const miner = img(ISO_MINER, bump);
       const petSrc = village.character.pet ? PET_SPRITE[village.character.pet] : null;
@@ -480,7 +669,14 @@ const VillageScene: React.FC<Props> = ({
       const charH = ch.h;
       const charW = charH;
       const charBob = bob(0);
-      const charHit: Hotspot = { id: 'character', x: ch.x - charW / 2, y: ch.y - charH + charBob, w: charW, h: charH };
+      const charHit: Hotspot = {
+        id: 'character',
+        x: ch.x - charW / 2,
+        y: ch.y - charH + charBob,
+        w: charW,
+        h: charH,
+        label: village.characterName || 'Heitor',
+      };
       hits.push(charHit);
       layers.push({
         id: 'character',
@@ -499,7 +695,6 @@ const VillageScene: React.FC<Props> = ({
             }
           }
           if (off) c.drawImage(off, ch.x - charW / 2, ch.y - charH + charBob, charW, charH);
-          label(c, village.characterName || 'Heitor', ch.x, ch.y - charH - 6 + charBob);
         },
       });
 
@@ -509,7 +704,14 @@ const VillageScene: React.FC<Props> = ({
         const nBob = bob(220 * (i + 1));
         const nW = a.h;
         const nH = a.h;
-        const hit: Hotspot = { id: `npc:${npc}`, x: a.x - nW / 2, y: a.y - nH + nBob, w: nW, h: nH };
+        const hit: Hotspot = {
+          id: `npc:${npc}`,
+          x: a.x - nW / 2,
+          y: a.y - nH + nBob,
+          w: nW,
+          h: nH,
+          label: NPC_LABEL[npc] || npc,
+        };
         hits.push(hit);
         layers.push({
           id: hit.id,
@@ -518,15 +720,44 @@ const VillageScene: React.FC<Props> = ({
           draw: (c) => {
             groundShadow(c, a.x, a.y - 2, nW, night);
             if (spr) c.drawImage(spr, a.x - nW / 2, a.y - nH + nBob, nW, nH);
-            label(c, NPC_LABEL[npc] || npc, a.x, a.y + 16);
           },
         });
       });
 
       const mine = anchors.hotspots?.mine;
       if (mine) {
-        hits.push({ id: 'mine', x: mine.x, y: mine.y, w: mine.w, h: mine.h });
+        const hit: Hotspot = { id: 'mine', x: mine.x, y: mine.y, w: mine.w, h: mine.h, label: 'Mina' };
+        hits.push(hit);
+        layers.push({
+          id: 'mine',
+          y: mine.y + mine.h,
+          hit,
+          draw: (c) => {
+            if (gated) lockIcon(c, mine.x + mine.w / 2 - 14, mine.y + mine.h - 36);
+          },
+        });
       }
+
+      const props = anchors.props?.length ? anchors.props : SCENE_PROPS;
+      props.forEach((prop) => {
+        const sprite = img(prop.sprite, bump);
+        const badge = prop.badge ? img(prop.badge, bump) : null;
+        const hit: Hotspot = { id: prop.id, x: prop.x, y: prop.y, w: prop.w, h: prop.h, label: prop.label };
+        hits.push(hit);
+        layers.push({
+          id: prop.id,
+          y: prop.y + prop.h,
+          hit,
+          draw: (c) => {
+            groundShadow(c, prop.x + prop.w / 2, prop.y + prop.h - 4, prop.w * 1.15, night);
+            if (sprite) c.drawImage(sprite, prop.x, prop.y, prop.w, prop.h);
+            if (badge) {
+              const bw = Math.round(prop.w * 0.42);
+              c.drawImage(badge, prop.x + prop.w / 2 - bw / 2, prop.y + prop.h * 0.22, bw, bw);
+            }
+          },
+        });
+      });
 
       layers.sort((a, b) => a.y - b.y);
       layers.forEach((layer) => layer.draw(ctx));
@@ -556,6 +787,38 @@ const VillageScene: React.FC<Props> = ({
         });
       }
 
+      if (houseLot && houseSmoke) {
+        if (reducedMotion) {
+          ctx.fillStyle = 'rgba(214, 206, 196, 0.38)';
+          ctx.beginPath();
+          ctx.arc(chimneyX, chimneyY - 8, 7, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          if (chimney.current.length < 7 && Math.random() < 0.14) {
+            chimney.current.push({
+              x: chimneyX + (Math.random() - 0.5) * 6,
+              y: chimneyY,
+              r: 3.2,
+              a: 0.5,
+              vy: 16 + Math.random() * 8,
+            });
+          }
+          chimney.current = chimney.current.filter((p) => p.a > 0.04);
+          chimney.current.forEach((p) => {
+            p.y -= p.vy / 30;
+            p.x += Math.sin((elapsed + p.y) * 0.9) * 0.18;
+            p.r += 0.07;
+            p.a -= 0.007;
+            ctx.fillStyle = `rgba(214, 206, 196, ${p.a})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+      } else {
+        chimney.current = [];
+      }
+
       const water = anchors.water;
       if (water) {
         const wa = night
@@ -563,17 +826,73 @@ const VillageScene: React.FC<Props> = ({
           : (reducedMotion ? 0.12 : 0.1 + 0.1 * Math.sin(elapsed * 1.4));
         ctx.fillStyle = night ? `rgba(140,170,210,${wa})` : `rgba(180,220,255,${wa})`;
         ctx.fillRect(water.x, water.y + water.h * 0.45, water.w, water.h * 0.2);
+        if (!reducedMotion) {
+          for (let i = 0; i < 6; i++) {
+            const sx = water.x + 18 + ((i * 37 + elapsed * 12) % (water.w - 36));
+            const sy = water.y + water.h * 0.5 + Math.sin(elapsed * 2 + i) * 6;
+            ctx.fillStyle = `rgba(255,255,255,${0.18 + 0.18 * (0.5 + 0.5 * Math.sin(elapsed * 3 + i))})`;
+            ctx.fillRect(sx, sy, 2, 2);
+          }
+        }
+      }
+
+      const camp = anchors.lights.find((l) => l.id === 'fogueira');
+      if (camp) paintCampfire(ctx, camp.x, camp.y, elapsed, reducedMotion);
+      if (camp && !reducedMotion) {
+        if (embers.current.length < 10 && Math.random() < 0.2) {
+          embers.current.push({
+            x: camp.x + (Math.random() - 0.5) * 16,
+            y: camp.y - 4,
+            r: 1.6,
+            a: 0.7,
+            vy: 18 + Math.random() * 14,
+          });
+        }
+        embers.current = embers.current.filter((p) => p.a > 0.05);
+        embers.current.forEach((p) => {
+          p.y -= p.vy / 30;
+          p.x += Math.sin((elapsed + p.y) * 1.4) * 0.4;
+          p.a -= 0.012;
+          ctx.fillStyle = `rgba(255, 160, 50, ${p.a})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      const mineHole = anchors.hotspots?.mine;
+      if (mineHole && !reducedMotion) {
+        if (dust.current.length < 6 && Math.random() < 0.07) {
+          dust.current.push({
+            x: mineHole.x + mineHole.w * 0.45 + (Math.random() - 0.5) * 24,
+            y: mineHole.y + mineHole.h * 0.7,
+            r: 3,
+            a: 0.28,
+            vy: 8,
+          });
+        }
+        dust.current = dust.current.filter((p) => p.a > 0.04);
+        dust.current.forEach((p) => {
+          p.y -= p.vy / 30;
+          p.x += 0.3;
+          p.r += 0.05;
+          p.a -= 0.006;
+          ctx.fillStyle = `rgba(160, 140, 110, ${p.a})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
       }
 
       ctx.save();
       if (hour >= 6 && hour < 10) {
-        ctx.fillStyle = 'rgba(255,240,210,0.12)';
+        ctx.fillStyle = 'rgba(255,240,210,0.16)';
         ctx.fillRect(0, 0, W, H);
       } else if (hour >= 16 && hour < 19) {
-        ctx.fillStyle = 'rgba(255,150,80,0.16)';
+        ctx.fillStyle = 'rgba(255,130,60,0.2)';
         ctx.fillRect(0, 0, W, H);
       } else if (night) {
-        ctx.fillStyle = 'rgba(8, 14, 32, 0.48)';
+        ctx.fillStyle = 'rgba(8, 14, 32, 0.5)';
         ctx.fillRect(0, 0, W, H);
       }
       ctx.restore();
@@ -581,33 +900,33 @@ const VillageScene: React.FC<Props> = ({
       if (night) {
         nightLamps(anchors, buildings).forEach((lamp) => paintLamp(ctx, lamp, elapsed, reducedMotion));
         if (!reducedMotion) {
-          const camp = anchors.lights.find((l) => l.id === 'fogueira');
-          if (camp) {
-            for (let i = 0; i < 5; i++) {
-              const x = camp.x + Math.sin(elapsed * 0.35 + i * 1.7) * 18 + (i - 2) * 4;
-              const y = camp.y - 16 + Math.cos(elapsed * 0.5 + i * 0.9) * 8;
-              const a = 0.18 + 0.18 * (0.5 + 0.5 * Math.sin(elapsed * 3.6 + i));
-              ctx.fillStyle = `rgba(255, 220, 120, ${a})`;
-              ctx.beginPath();
-              ctx.arc(x, y, 1.6, 0, Math.PI * 2);
-              ctx.fill();
-            }
-          }
+          flies.current.forEach((f, i) => {
+            const x = f.x + Math.sin(elapsed * 0.8 + f.p) * 28;
+            const y = f.y + Math.cos(elapsed * 0.6 + i) * 16;
+            const a = 0.15 + 0.55 * (0.5 + 0.5 * Math.sin(elapsed * 4.2 + i));
+            ctx.fillStyle = `rgba(255, 230, 120, ${a})`;
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, Math.PI * 2);
+            ctx.fill();
+          });
         }
       }
 
       const over = hover.current;
       if (over) {
         outline(ctx, over.x, over.y, over.w, over.h, night);
-        if (gated && (over.id.startsWith('build:') || over.id === 'mine')) {
-          ctx.save();
-          ctx.font = '700 13px Fredoka, system-ui, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillStyle = '#17130f';
-          ctx.fillRect(over.x + over.w / 2 - 90, over.y - 28, 180, 22);
-          ctx.fillStyle = '#f6f2ec';
-          ctx.fillText('Faça a prova do dia', over.x + over.w / 2, over.y - 12);
-          ctx.restore();
+        if (!reducedMotion) {
+          for (let i = 0; i < 3; i++) {
+            const ang = elapsed * 2.4 + i * 2.1;
+            const sx = over.x + over.w / 2 + Math.cos(ang) * (over.w * 0.38);
+            const sy = over.y + over.h / 2 + Math.sin(ang) * (over.h * 0.38);
+            ctx.fillStyle = night ? 'rgba(255, 210, 90, 0.7)' : 'rgba(255,255,255,0.8)';
+            ctx.fillRect(sx, sy, 2, 2);
+          }
+        }
+        if (over.label) {
+          const below = over.y + over.h + 16;
+          label(ctx, over.label, over.x + over.w / 2, below > 628 ? over.y - 8 : below);
         }
       }
 
@@ -622,6 +941,7 @@ const VillageScene: React.FC<Props> = ({
       if (!hidden && !reducedMotion) raf = requestAnimationFrame(draw);
     };
 
+    last.current = 0;
     draw(performance.now());
     const onVis = () => { if (!document.hidden) { last.current = 0; draw(performance.now()); } };
     document.addEventListener('visibilitychange', onVis);
@@ -631,7 +951,7 @@ const VillageScene: React.FC<Props> = ({
       document.removeEventListener('visibilitychange', onVis);
       io.disconnect();
     };
-  }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick]);
+  }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick, houseSmoke]);
 
   const hitAt = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = ref.current;
@@ -654,7 +974,9 @@ const VillageScene: React.FC<Props> = ({
       }}
       onMouseMove={(e) => {
         const next = hitAt(e);
+        const prev = hover.current;
         hover.current = next;
+        if (prev?.id !== next?.id) setTick((n) => n + 1);
         const cur = next ? 'pointer' : 'default';
         if (cur !== cursor) setCursor(cur);
       }}

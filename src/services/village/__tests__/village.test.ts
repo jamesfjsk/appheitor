@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { DEFAULT_ECONOMY, EMPTY_GEAR, MATERIAL_BY_PERIOD } from '../../../config/village';
+import { DEFAULT_ECONOMY, DISTRICT_ICONS, EMPTY_GEAR, houseSprite, houseTier, houseTitle, LOT_SCENE_LABEL, MATERIAL_BY_PERIOD, SCENE_PROPS } from '../../../config/village';
 import { isoWeekOf } from '../../../utils/isoWeek';
 import { getLevelFromXP, getLevelTitle, getXPForLevel } from '../../../utils/levelSystem';
 import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from '../claims';
@@ -163,21 +163,32 @@ test('rangeCoversDate compara no fuso do Brasil', () => {
   expect(rangeCoversDate(start, end, 'data-ruim')).toBe(false);
 });
 
-test('baú determinístico, esmeralda a cada N dias e teto de gold', () => {
+test('baú: gold = base + tochas até o teto; 2 do material mais escasso; esmeralda a cada N', () => {
   const v0 = { fullDays: 0, gear: gear() };
   const a = dailyChestContents('uid-a', '2026-09-15', v0);
   const b = dailyChestContents('uid-a', '2026-09-15', v0);
   expect(a).toEqual(b);
-  const otherDay = dailyChestContents('uid-a', '2026-09-16', v0);
-  expect(JSON.stringify(otherDay) === JSON.stringify(a)).toBe(false);
+  expect(a.gold).toBe(10);
+
+  const withTorches = dailyChestContents('uid-a', '2026-09-15', { fullDays: 3, gear: gear() });
+  expect(withTorches.gold).toBe(13);
+
+  const capped = dailyChestContents('uid-a', '2026-09-15', { fullDays: 20, gear: gear() });
+  expect(capped.gold).toBe(15);
 
   const day3 = dailyChestContents('uid-a', '2026-09-15', { fullDays: 2, gear: gear() }, DEFAULT_ECONOMY);
   expect(day3.esmeralda).toBe(1);
   const day2 = dailyChestContents('uid-a', '2026-09-15', { fullDays: 1, gear: gear() }, DEFAULT_ECONOMY);
   expect(day2.esmeralda).toBe(0);
 
-  const capped = dailyChestContents('uid-a', '2026-09-15', v0, { ...DEFAULT_ECONOMY, dailyChestGold: [40, 50], gameGoldDailyCap: 35 });
-  expect(capped.gold).toBeLessThanOrEqual(35);
+  const scarce = dailyChestContents(
+    'uid-a',
+    '2026-09-15',
+    v0,
+    DEFAULT_ECONOMY,
+    { madeira: 8, pedra: 1, ferro: 5 }
+  );
+  expect(scarce.materials.pedra).toBe(2);
 
   const allowed = chestAllowed({
     hourBrazil: 18,
@@ -249,6 +260,9 @@ test('priceOf com multiplicador e canCraft recusa sem ferro', () => {
   expect(canBuy({ owned: [] }, 30, 'hat_cap').ok).toBe(true);
   expect(tradePreview('madeira', 'pedra')).toEqual({ ok: true, fromQty: 3, toQty: 1, from: 'madeira', to: 'pedra' });
   expect(tradePreview('ferro', 'ferro').ok).toBe(false);
+  expect(tradePreview('madeira', 'redstone').ok).toBe(false);
+  expect(canBuy({ owned: [] }, 30, 'hat_cap', undefined, 1).reason).toBe('level');
+  expect(canCraft({ madeira: 10, pedra: 10, ferro: 8, redstone: 10 }, rare, 'pickaxe_iron', 1, 5).reason).toBe('level');
 });
 
 test('isoWeekOf em viradas de ano', () => {
@@ -293,6 +307,25 @@ test('noticesForNow e habitsForNow e pickLine sem repetir 14 dias', () => {
   const recent = ['l0', 'l1', 'l2', 'l3'];
   expect(pickLine(lines, recent).id).toBe('l4');
   expect(pickLine(lines, ['l0', 'l1', 'l2', 'l3', 'l4']).id).toBe('l0');
+});
+
+test('casa cresce por temporada e os ícones da grade não se repetem', () => {
+  expect(houseTier(0)).toBe(1);
+  expect(houseTier(1)).toBe(1);
+  expect(houseSprite(2)).toBe('/assets/village/buildings/casa-2.png');
+  expect(houseTitle(3)).toBe('Sobrado');
+  expect(houseTitle(9)).toBe('Sobrado');
+  expect(DISTRICT_ICONS.house).toBe('/assets/village/buildings/casa-1.png');
+  expect(DISTRICT_ICONS.pack).toBe('/assets/village/items/mochila.png');
+  expect(DISTRICT_ICONS.bank).toBe('/assets/village/buildings/cofre-1.png');
+  expect(DISTRICT_ICONS.arena).toBe('/assets/english/ui/sword.webp');
+  expect(new Set(Object.values(DISTRICT_ICONS)).size).toBe(Object.keys(DISTRICT_ICONS).length);
+  expect(SCENE_PROPS.map((p) => p.id).sort()).toEqual(['arena', 'pack']);
+  expect(LOT_SCENE_LABEL.fornalha).toBe('Ferraria');
+  expect(LOT_SCENE_LABEL.mesa).toBe('Biblioteca');
+  expect(LOT_SCENE_LABEL.cofre).toBe('Cofre');
+  expect(LOT_SCENE_LABEL.agenda).toBe('Agenda');
+  expect(LOT_SCENE_LABEL.mercado).toBe('Mercado');
 });
 
 void run();

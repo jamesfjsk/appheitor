@@ -1,6 +1,8 @@
 import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 import Teaser from './components/Teaser.tsx';
+import LoadingSpinner from './components/common/LoadingSpinner';
+import { dismissBoot, primeBoot } from './components/common/bootOverlay';
 import './index.css';
 import './styles/miner.css';
 
@@ -29,12 +31,18 @@ function maintenanceActive(): boolean {
   }
 }
 
-createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root')!;
+const maintenance = maintenanceActive();
+
+if (maintenance) dismissBoot();
+else primeBoot();
+
+createRoot(root).render(
   <StrictMode>
-    {maintenanceActive() ? (
+    {maintenance ? (
       <Teaser />
     ) : (
-      <Suspense fallback={<div className="mn-page" />}>
+      <Suspense fallback={<LoadingSpinner />}>
         <App />
       </Suspense>
     )}

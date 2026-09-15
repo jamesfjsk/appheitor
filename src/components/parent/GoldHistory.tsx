@@ -28,7 +28,7 @@ import { getTodayStartBrazil } from '../../utils/timezone';
 import toast from 'react-hot-toast';
 
 type PeriodFilter = 'today' | '7days' | '30days' | 'all';
-type TypeFilter = 'all' | 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment';
+type TypeFilter = 'all' | 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment' | 'saved';
 type SourceFilter = 'all' | GoldTransaction['source'];
 
 function sinceForPeriod(period: PeriodFilter): Date | null {
@@ -127,7 +127,17 @@ const GoldHistory: React.FC = () => {
       village_shop: <Store className="w-5 h-5" />,
       chest: <Star className="w-5 h-5" />,
       task_reversal: <RefreshCw className="w-5 h-5" />,
-      level_gift: <Trophy className="w-5 h-5" />
+      level_gift: <Trophy className="w-5 h-5" />,
+      goal_deposit: <Target className="w-5 h-5" />,
+      goal_withdraw: <RefreshCw className="w-5 h-5" />,
+      goal_interest: <TrendingUp className="w-5 h-5" />,
+      goal_achieved: <Star className="w-5 h-5" />,
+      challenge: <Trophy className="w-5 h-5" />,
+      repair: <RefreshCw className="w-5 h-5" />,
+      merchant_sale: <Store className="w-5 h-5" />,
+      streak_chest: <Star className="w-5 h-5" />,
+      trophy: <Trophy className="w-5 h-5" />,
+      late_task: <Target className="w-5 h-5" />,
     };
 
     return iconMap[transaction.source] || <DollarSign className="w-5 h-5" />;
@@ -167,7 +177,17 @@ const GoldHistory: React.FC = () => {
       village_shop: 'Loja da Vila',
       chest: 'Baú do Dia',
       task_reversal: 'Missão revertida',
-      level_gift: 'Presente de nível'
+      level_gift: 'Presente de nível',
+      goal_deposit: 'Cofrinho: depósito',
+      goal_withdraw: 'Cofrinho: devolução',
+      goal_interest: 'Bônus de paciência',
+      goal_achieved: 'Meta alcançada',
+      challenge: 'Desafio',
+      repair: 'Conserto',
+      merchant_sale: 'Comerciante',
+      streak_chest: 'Baú das tochas',
+      trophy: 'Troféu da semana',
+      late_task: 'Missão recuperada',
     };
 
     return labels[source] || source;

@@ -30,9 +30,11 @@ const CLOCK = '/assets/english/ui/clock.webp';
 interface RewardsPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  embedded?: boolean;
+  onCreateGoal?: (title: string, gold: number, rewardId?: string) => void;
 }
 
-const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
+const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, onCreateGoal }) => {
   const { rewards, redemptions, progress, redeemReward, tasks } = useData();
   const { childUid } = useAuth();
   const { playClick } = useSound();
@@ -212,39 +214,26 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   const missingGold = (reward: Reward) => Math.max(0, (reward.costGold || 0) - (progress.availableGold || 0));
   const gateOpen = dailyTasksCompleted >= REDEEM_MIN_TASKS;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="mc-panel rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white"
-      >
+  const inner = (
+    <>
+        {!embedded && (
         <div className="p-4 border-b-4 border-[#17130f] flex items-start gap-3">
           <div className="flex-1 min-w-0">
             <h2 className="mc-h">
               <img src={CHEST} alt="" className="mc-pixel" draggable={false} />
-              Baú de recompensas
+              Prêmios de verdade
             </h2>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <img src={GOLD} alt="" className="w-[22px] h-[22px] mc-pixel" draggable={false} />
               <span className="mc-num text-[#ffd83d]" style={{ fontSize: 16 }}>{progress.availableGold || 0}</span>
               <span className="text-xs font-semibold mc-muted">gold disponível</span>
             </div>
-            {progress.totalGoldSpent > 0 && (
-              <p className="mc-lbl mt-1">ganho {progress.totalGoldEarned || 0} · gasto {progress.totalGoldSpent || 0}</p>
-            )}
           </div>
           <button type="button" onClick={onClose} className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0" aria-label="Fechar">
             <X className="w-5 h-5" />
           </button>
         </div>
+        )}
 
         <div className="p-4 space-y-3">
           <div className="mc-hotbar">
@@ -335,7 +324,8 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                         <span className="mc-lbl">gold</span>
                         {!isUnlocked && <span className="text-xs font-semibold mc-muted">Nível {requiredLevel}</span>}
                         {justUnlocked && <span className="mc-font text-[8px] mc-good">Novo</span>}
-                        {pendingRedemption && <span className="mc-lbl mc-warn">Aguardando</span>}
+                        {pendingRedemption && <span className="mc-lbl mc-warn">Aguardando o pai</span>}
+                        {reward.goalOnly && <span className="mc-lbl">Só pelo Cofrinho</span>}
                       </div>
                       {isConfirming && (
                         <div className="mc-card rounded p-3 mt-2">
@@ -363,13 +353,21 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                       )}
                     </div>
                     {!isConfirming && (
-                      !isUnlocked ? (
+                      reward.goalOnly || missingGold(reward) > 0 ? (
+                        <button
+                          type="button"
+                          className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto"
+                          onClick={() => { playClick(); onCreateGoal?.(reward.title, reward.costGold || 0, reward.id); }}
+                        >
+                          Criar meta no Banco
+                        </button>
+                      ) : !isUnlocked ? (
                         <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
                           Nível {requiredLevel}
                         </button>
                       ) : pendingRedemption ? (
                         <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
-                          Aguardando
+                          Aguardando o pai
                         </button>
                       ) : canRedeemReward ? (
                         <button
@@ -377,7 +375,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           onClick={() => { playClick(); setConfirming(reward); }}
                           className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto"
                         >
-                          Trocar
+                          Pedir
                         </button>
                       ) : dailyTasksCompleted < REDEEM_MIN_TASKS ? (
                         <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
@@ -426,7 +424,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
           <div className="p-4 border-t-4 border-[#17130f]">
             <h3 className="mc-h mb-3">
               <img src={CLOCK} alt="" className="mc-pixel" draggable={false} />
-              Minhas trocas ({redemptions.length})
+              Meus pedidos ({redemptions.length})
             </h3>
             <div className="space-y-2">
               {redemptions.slice(0, 10).map((redemption) => {
@@ -463,6 +461,26 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
         )}
+    </>
+  );
+
+  if (embedded) return <div className="text-white">{inner}</div>;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="mc-panel rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white"
+      >
+        {inner}
       </motion.div>
     </motion.div>
   );

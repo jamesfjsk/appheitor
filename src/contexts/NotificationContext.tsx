@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getNotificationToken, onMessageListener } from '../config/firebase';
+import { db } from '../config/firebase';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 import { NotificationPayload } from '../types';
@@ -83,10 +85,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const token = await getNotificationToken();
         if (token) {
           setFcmToken(token);
-          console.log('📱 Token FCM obtido:', token);
-          
-          // Aqui você pode salvar o token no Firestore para o usuário
-          // await saveTokenToFirestore(token);
+          if (user?.userId) {
+            void updateDoc(doc(db, 'users', user.userId), { fcmTokens: arrayUnion(token) }).catch(() => undefined);
+          }
         }
         
         toast.success('🔔 Notificações ativadas! Você receberá lembretes das missões.', {

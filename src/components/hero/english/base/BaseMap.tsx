@@ -113,7 +113,7 @@ const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, 
 
       {/* Grade 3x2 */}
       <div className="grid grid-cols-3 gap-2 mb-3" data-testid="lots">
-        {BUILDINGS.map((b) => {
+        {BUILDINGS.filter((b) => !b.hideOnBaseMap).map((b) => {
           const lvl = base.buildings[b.id] ?? 0;
           if (!isBuildingUnlocked(b.id, base.buildings)) {
             return (

@@ -8,6 +8,7 @@ import ProgressDashboard from './ProgressDashboard';
 import TaskHistory from './TaskHistory';
 import RewardManager from './RewardManager';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { ReadyBoot } from '../common/useDismissBoot';
 import NotificationSender from './NotificationSender';
 import AdminControls from './AdminControls';
 import AchievementManager from './AchievementManager';
@@ -22,26 +23,24 @@ import NotesManager from './NotesManager';
 import GoldHistory from './GoldHistory';
 import VillageManager from './VillageManager';
 import PlacaManager from './PlacaManager';
+import GoalsPanel from './GoalsPanel';
+import ChallengeManager from './ChallengeManager';
+import Balanca from './Balanca';
 
-type TabType = 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz' | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system';
+type TabType = 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz' | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system' | 'goals' | 'challenges' | 'balanca';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner message="Carregando painel administrativo..." />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner message="Carregando painel administrativo..." />;
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: 'chart' },
     { id: 'village', label: 'Vila', icon: 'home' },
+    { id: 'goals', label: 'Cofrinho', icon: 'gold' },
+    { id: 'challenges', label: 'Desafios', icon: 'trophy' },
+    { id: 'balanca', label: 'Balança', icon: 'gold' },
     { id: 'tasks', label: 'Gerenciar Tarefas', icon: 'notes' },
     { id: 'rewards', label: 'Recompensas', icon: 'gift' },
     { id: 'achievements', label: 'Conquistas', icon: 'trophy' },
@@ -59,6 +58,7 @@ const ParentPanel: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ReadyBoot />
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <ParentHeader />
@@ -99,6 +99,15 @@ const ParentPanel: React.FC = () => {
           )}
           {activeTab === 'village' && (
             <VillageManager />
+          )}
+          {activeTab === 'goals' && (
+            <GoalsPanel />
+          )}
+          {activeTab === 'challenges' && (
+            <ChallengeManager />
+          )}
+          {activeTab === 'balanca' && (
+            <Balanca />
           )}
           {activeTab === 'tasks' && (
             <TaskManager tasks={tasks} />

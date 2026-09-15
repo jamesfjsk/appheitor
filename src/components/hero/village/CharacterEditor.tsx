@@ -45,7 +45,7 @@ function slotThumb(id: string, slot: keyof VillageCharacter): React.ReactNode {
   return null;
 }
 
-const CharacterEditor: React.FC<{ onClose: () => void; onBuy: () => void }> = ({ onClose, onBuy }) => {
+const CharacterEditor: React.FC<{ onClose: () => void; onBuy: () => void; embedded?: boolean }> = ({ onClose, onBuy, embedded }) => {
   const { village, saveCharacter } = useVillage();
   const { playClick } = useSound();
   const modules = useModules();
@@ -59,13 +59,14 @@ const CharacterEditor: React.FC<{ onClose: () => void; onBuy: () => void }> = ({
     return true;
   });
 
-  return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="mc-modal rounded-lg max-w-lg w-full p-4 text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between mb-3">
-          <h2 className="mc-title text-sm">Personagem</h2>
-          <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
-        </div>
+  const inner = (
+    <>
+        {!embedded && (
+          <div className="flex justify-between mb-3">
+            <h2 className="mc-title text-sm">Personagem</h2>
+            <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
+          </div>
+        )}
         <div className="flex gap-4 items-start mb-3">
           <div className="mc-slot w-28 h-28 p-1 shrink-0 flex items-center justify-center">
             <CharacterPreview character={draft} gear={village.gear} size={96} />
@@ -95,10 +96,7 @@ const CharacterEditor: React.FC<{ onClose: () => void; onBuy: () => void }> = ({
                 title={c.label}
                 onClick={() => {
                   playClick();
-                  if (!owned) {
-                    if (shopOpen) onBuy();
-                    return;
-                  }
+                  if (!owned) return;
                   setDraft({ ...draft, [tab]: c.id });
                 }}
               >
@@ -110,7 +108,20 @@ const CharacterEditor: React.FC<{ onClose: () => void; onBuy: () => void }> = ({
             );
           })}
         </div>
-        <button type="button" className="mc-btn mc-btn-green w-full h-12 font-bold" onClick={() => { playClick(); void saveCharacter(draft); onClose(); }}>Salvar</button>
+        <div className="flex gap-2">
+          <button type="button" className="mc-btn mc-btn-green flex-1 h-12 font-bold" onClick={() => { playClick(); void saveCharacter(draft); if (!embedded) onClose(); }}>Salvar</button>
+          {!options.every((c) => c.free || FREE_COSMETIC_IDS.includes(c.id) || village.owned.includes(c.id)) && shopOpen && (
+            <button type="button" className="mc-btn mc-btn-gold h-12 px-3 font-bold" onClick={() => { playClick(); onBuy(); }}>Ver na loja</button>
+          )}
+        </div>
+    </>
+  );
+
+  if (embedded) return <div>{inner}</div>;
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="mc-modal rounded-lg max-w-lg w-full p-4 text-white" onClick={(e) => e.stopPropagation()}>
+        {inner}
       </div>
     </div>
   );

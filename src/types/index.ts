@@ -128,11 +128,13 @@ export interface Task {
   time?: string;
   frequency: 'daily' | 'weekday' | 'weekend';
   active: boolean;
-  status: 'pending' | 'done';
+  status: 'pending' | 'done' | 'proposed';
   lastCompletedDate?: string; // YYYY-MM-DD format
   createdAt: Date;
   updatedAt: Date;
   createdBy: string; // Admin UID
+  optional?: boolean;
+  origin?: 'admin' | 'child' | 'agenda';
 }
 
 export interface Reward {
@@ -147,6 +149,7 @@ export interface Reward {
   requiredLevel: number;
   createdAt: Date;
   updatedAt: Date;
+  goalOnly?: boolean;
 }
 
 export interface RewardRedemption {
@@ -323,8 +326,33 @@ export interface GoldTransaction {
   id: string;
   userId: string; // Child UID
   amount: number; // Positive for gain, negative for spend
-  type: 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment';
-  source: 'task_completion' | 'reward_redemption' | 'daily_bonus' | 'daily_penalty' | 'admin_adjustment' | 'birthday' | 'quiz' | 'surprise_mission' | 'achievement' | 'redemption_refund' | 'english_game' | 'village_shop' | 'chest' | 'task_reversal' | 'level_gift';
+  type: 'earned' | 'spent' | 'bonus' | 'penalty' | 'refund' | 'adjustment' | 'saved';
+  source:
+    | 'task_completion'
+    | 'reward_redemption'
+    | 'daily_bonus'
+    | 'daily_penalty'
+    | 'admin_adjustment'
+    | 'birthday'
+    | 'quiz'
+    | 'surprise_mission'
+    | 'achievement'
+    | 'redemption_refund'
+    | 'english_game'
+    | 'village_shop'
+    | 'chest'
+    | 'task_reversal'
+    | 'level_gift'
+    | 'goal_deposit'
+    | 'goal_withdraw'
+    | 'goal_interest'
+    | 'goal_achieved'
+    | 'challenge'
+    | 'repair'
+    | 'merchant_sale'
+    | 'streak_chest'
+    | 'trophy'
+    | 'late_task';
   description: string; // Human-readable description
   relatedId?: string; // Task ID, Reward ID, Achievement ID, etc.
   relatedTitle?: string; // Title of related item for quick reference

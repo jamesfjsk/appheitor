@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useData } from '../../../../contexts/DataContext';
 import { useSound } from '../../../../contexts/SoundContext';
-import { getTodayBrazil } from '../../../../utils/timezone';
+import { addDays, getTodayBrazil } from '../../../../utils/clock';
 import type { BaseDoc, BuildingId, Contract, DailyPlan } from '../../../../types/english';
 import { BUILDING_BY_ID, CONTRACT_ICONS, CONTRACT_TYPES } from '../../../../config/englishBase';
 import {
@@ -39,12 +39,6 @@ type View = 'loading' | 'map' | 'board' | 'contract';
 const BANNER = '/assets/english/ui/banner.webp';
 const PICKAXE = '/assets/english/ui/pickaxe.webp';
 const TOTAL_CONTRACTS = 5;
-
-/** Soma dias a uma data YYYY-MM-DD sem depender de fuso */
-const addDays = (date: string, n: number): string => {
-  const [y, m, d] = date.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
-};
 
 const copyContract = (c: Contract): Contract => JSON.parse(JSON.stringify(c)) as Contract;
 

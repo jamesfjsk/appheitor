@@ -11,11 +11,41 @@
     <meta name="theme-color" content="#2f2a27" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Press Start 2P: títulos, rótulos curtos e números do tema Miner Missions -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preload" as="image" href="/assets/english/ui/banner.webp" />
+    <link rel="preload" as="image" href="/assets/village/char/miner-iso.png" />
+    <link rel="preload" as="image" href="/assets/english/ui/minecart.webp" />
+    <link rel="stylesheet" href="/src/styles/boot.css" />
+    <style>
+      html, body, #root { margin: 0; height: 100%; background: #100e0c; }
+    </style>
+    <script>window.__mmBootT0 = performance.now();</script>
   </head>
   <body>
     <div id="root"></div>
+    <div id="mm-boot-root" class="mn-boot is-preboot" role="status" aria-live="polite" aria-busy="true">
+      <div class="mn-boot-world" aria-hidden="true">
+        <img src="/assets/english/ui/banner.webp" alt="" class="mn-boot-cave" draggable="false" />
+        <div class="mn-boot-glow mn-boot-glow-l"></div>
+        <div class="mn-boot-glow mn-boot-glow-r"></div>
+        <div class="mn-boot-vignette"></div>
+      </div>
+      <div class="mn-boot-lockup">
+        <img src="/assets/village/char/miner-iso.png" alt="" class="mn-boot-hero" draggable="false" />
+        <div class="mn-boot-plaque">
+          <h1 class="mn-boot-title">Miner Missions</h1>
+          <div class="mn-boot-gauge">
+            <div class="mn-boot-cart-wrap">
+              <img src="/assets/english/ui/minecart.webp" alt="" class="mn-boot-cart" draggable="false" />
+              <img src="/assets/english/ui/gold.webp" alt="" class="mn-boot-loot" draggable="false" />
+            </div>
+            <div class="mn-boot-bar"><div class="mn-boot-bar-fill mn-boot-fill-wait"></div></div>
+          </div>
+          <p class="mn-boot-status">Abrindo a vila</p>
+          <p class="mn-boot-tip">A tocha da entrada já está acesa.</p>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

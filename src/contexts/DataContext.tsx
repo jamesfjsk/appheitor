@@ -5,7 +5,8 @@ import { useVacation } from './VacationContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus, Note } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp, calculateLevelSystem, emitMinerLevelUp } from '../utils/levelSystem';
-import { getTodayBrazil } from '../utils/timezone';
+import { getTodayBrazil, nowBrazil } from '../utils/clock';
+import { DAY_CHANGED_EVENT } from './ClockContext';
 import { getErrorMessage, getErrorCode } from '../utils/errors';
 import toast from 'react-hot-toast';
 import { useOffline } from './OfflineContext';
@@ -15,6 +16,8 @@ import { DEFAULT_ECONOMY, DEFAULT_MODULES, DEFAULT_VILLAGE_SETTINGS } from '../c
 import { computeTaskLoot, xpWithBoots } from '../services/village/loot';
 import { dueTasksOn, periodAllowedAt } from '../services/village/schedule';
 import type { EconomySettings, ModuleSettings, Period, VillageSettings } from '../types/village';
+import { bumpChallenge } from '../services/challengesService';
+import { applyWeeklyInterest } from '../services/goalsService';
 
 interface DataContextType {
   tasks: Task[];
@@ -36,6 +39,7 @@ interface DataContextType {
   updateTask: (taskId: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   completeTask: (taskId: string) => Promise<void>;
+  completeLateTask: (taskId: string) => Promise<void>;
 
   // Reward methods
   addReward: (reward: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
@@ -314,11 +318,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         throw new Error('offline');
       }
 
-      const hour = Number(new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'America/Sao_Paulo',
-        hour: 'numeric',
-        hour12: false,
-      }).format(new Date()));
+      const hour = nowBrazil().hour;
       const [village, economyRaw, villageSetRaw, modulesRaw] = await Promise.all([
         getVillage(childUid),
         getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>),
@@ -362,16 +362,29 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         )
       );
 
+      const focus = village.plan.date === today && village.plan.focusTaskId === taskId;
       await FirestoreService.completeTaskWithRewards(
         taskId,
         childUid,
         xpReward,
         goldReward,
-        loot.qty > 0 ? loot : undefined
+        loot.qty > 0 ? loot : undefined,
+        { focus }
       );
 
       try {
+        await bumpChallenge(childUid, 'tasks_count', 1);
+      } catch (e) {
+        console.warn('desafio tasks_count', e);
+      }
+
+      try {
         const streakResult = await FirestoreService.updateStreak(childUid);
+        try {
+          await bumpChallenge(childUid, 'streak_days', streakResult.streak, true);
+        } catch (e) {
+          console.warn('desafio streak_days', e);
+        }
 
         if (streakResult.streakIncreased) {
           setTimeout(() => {
@@ -440,6 +453,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   }, [childUid, tasks, rewards, progress.totalXP, playLevelUp, checkAchievements, vacationApplyXP, vacationApplyGold, isOffline]);
 
+  const completeLateTask = useCallback(async (taskId: string) => {
+    if (!childUid) throw new Error('Child UID não definido');
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) throw new Error('Tarefa não encontrada');
+    await FirestoreService.completeTaskWithRewards(taskId, childUid, task.xp || 10, task.gold || 5, undefined, { late: true });
+    toast.success('Missão recuperada (metade do gold, sem material)');
+  }, [childUid, tasks]);
+
   const addReward = useCallback(async (rewardData: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid) throw new Error('Child UID não definido');
     
@@ -451,7 +472,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       emoji: rewardData.emoji || 'gift',
       requiredLevel: rewardData.requiredLevel || 1,
       active: rewardData.active !== false,
-      ownerId: childUid
+      ownerId: childUid,
+      goalOnly: rewardData.goalOnly === true,
     };
     
     try {
@@ -1226,6 +1248,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             // Then process any unprocessed daily summaries (penalties/bonuses)
             return FirestoreService.processUnprocessedDays(childUid);
           })
+          .then(() => applyWeeklyInterest(childUid).catch(() => 0))
           .then(() => {
             console.log('✅ DataContext: Daily summaries processed');
 
@@ -1430,45 +1453,28 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   useEffect(() => {
     if (!childUid) return;
 
-    console.log('🕐 DataContext: Starting day change monitor...');
+    const run = (currentDate: string) => {
+      if (currentDate === lastResetDate) return;
+      FirestoreService.processUnprocessedDays(childUid)
+        .then(() => applyWeeklyInterest(childUid).catch(() => 0))
+        .then(() => FirestoreService.resetOutdatedTasks(childUid))
+        .then(() => {
+          setLastResetDate(currentDate);
+        })
+        .catch((error) => {
+          console.error('Erro ao processar novo dia', error);
+        });
+    };
 
-    // Check every minute if the date has changed
-    const intervalId = setInterval(() => {
-      const currentDate = getTodayBrazil();
+    const onDay = () => run(getTodayBrazil());
+    window.addEventListener(DAY_CHANGED_EVENT, onDay);
 
-      if (currentDate !== lastResetDate) {
-        console.log(`📅 DAY CHANGE DETECTED! Was: ${lastResetDate}, Now: ${currentDate}`);
-        console.log('🔄 Triggering automatic daily processing...');
-
-        // Process daily summaries (penalties/bonuses) FIRST
-        FirestoreService.processUnprocessedDays(childUid)
-          .then(() => {
-            console.log('✅ Daily summaries processed (penalties/bonuses applied)');
-
-            // Then reset tasks for the new day
-            return FirestoreService.resetOutdatedTasks(childUid);
-          })
-          .then(resetCount => {
-            console.log(`✅ AUTO-RESET: ${resetCount} tasks reset for new day`);
-            toast.success(`Novo dia: ${resetCount} missões prontas para hoje.`);
-            setLastResetDate(currentDate);
-          })
-          .catch(error => {
-            console.error('❌ AUTO-RESET ERROR:', error);
-            toast.error('Erro ao processar novo dia');
-          });
-      }
-    }, 60000); // Check every 60 seconds
-
-    // Also check immediately on mount
+    const intervalId = setInterval(() => run(getTodayBrazil()), 60_000);
     const currentDate = getTodayBrazil();
-    if (currentDate !== lastResetDate) {
-      console.log(`📅 Initial date check (Brazil GMT-3) - resetting from ${lastResetDate} to ${currentDate}`);
-      setLastResetDate(currentDate);
-    }
+    if (currentDate !== lastResetDate) setLastResetDate(currentDate);
 
     return () => {
-      console.log('🧹 DataContext: Cleaning up day change monitor');
+      window.removeEventListener(DAY_CHANGED_EVENT, onDay);
       clearInterval(intervalId);
     };
   }, [childUid, lastResetDate]);
@@ -1495,6 +1501,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     updateTask,
     deleteTask,
     completeTask,
+    completeLateTask,
     addReward,
     updateReward,
     deleteReward,
@@ -1537,6 +1544,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     updateTask,
     deleteTask,
     completeTask,
+    completeLateTask,
     addReward,
     updateReward,
     deleteReward,

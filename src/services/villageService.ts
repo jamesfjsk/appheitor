@@ -26,6 +26,11 @@ import type {
   VillageGear,
   VillageRare,
   VillageSettings,
+  NpcId,
+  NpcState,
+  SeasonStar,
+  TrophyTier,
+  VillagePlan,
 } from '../types/village';
 import {
   CATALOG_VERSION,
@@ -36,6 +41,7 @@ import {
   FREE_COSMETIC_IDS,
   GEAR_BY_ID,
   cosmeticHasSprite,
+  emptyNpcs,
   initialVillageDoc,
 } from '../config/village';
 import { MATERIALS, initialBaseDoc } from '../config/englishBase';
@@ -45,10 +51,13 @@ import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from './villa
 import { chestAllowed, dailyChestContents } from './village/chest';
 import { canBuy, canCraft, priceOf, tradePreview } from './village/shop';
 import { dueTasksOn } from './village/schedule';
-import { getTodayBrazil } from '../utils/timezone';
+import { canRepair, repairRefund } from './village/repair';
+import { capGold } from './village/caps';
+import { getTodayBrazil, nowBrazil } from '../utils/clock';
 import { getSettings } from './settingsService';
 import { touchHealth } from './observability';
 import { getLegacyLevelFromXP } from '../utils/levelSystem';
+import { roomForGameGold } from './goldTx';
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const str = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : fallback);
@@ -84,6 +93,59 @@ function clampPickaxe(n: number): VillageGear['pickaxe'] {
 
 function flag01(n: number): 0 | 1 {
   return n >= 1 ? 1 : 0;
+}
+
+function parseNpcs(raw: unknown): Record<NpcId, NpcState> {
+  const base = emptyNpcs();
+  if (!isRecord(raw)) return base;
+  const ids: NpcId[] = ['sabio', 'comerciante', 'ferreiro', 'olheiro'];
+  for (const id of ids) {
+    const n = raw[id];
+    if (!isRecord(n)) continue;
+    const quest = isRecord(n.quest) ? n.quest : {};
+    base[id] = {
+      points: Math.max(0, num(n.points)),
+      tier: Math.max(0, num(n.tier)),
+      lastTalkDate: strOrNull(n.lastTalkDate),
+      seen: strArray(n.seen),
+      quest: {
+        chapter: Math.max(0, num(quest.chapter)),
+        progress: Math.max(0, num(quest.progress)),
+        doneAt: strOrNull(quest.doneAt),
+      },
+    };
+  }
+  return base;
+}
+
+function parseStars(raw: unknown): SeasonStar[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(isRecord)
+    .map((s) => ({
+      season: num(s.season),
+      level: num(s.level),
+      endedOn: str(s.endedOn),
+    }))
+    .filter((s) => s.endedOn);
+}
+
+function parseTrophies(raw: unknown): Record<string, TrophyTier> {
+  if (!isRecord(raw)) return {};
+  const out: Record<string, TrophyTier> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (v === 'bronze' || v === 'prata' || v === 'ouro') out[k] = v;
+  }
+  return out;
+}
+
+function parsePlan(raw: unknown): VillagePlan {
+  if (!isRecord(raw)) return { date: '', order: [], focusTaskId: null };
+  return {
+    date: str(raw.date),
+    order: strArray(raw.order),
+    focusTaskId: strOrNull(raw.focusTaskId),
+  };
 }
 
 export function fromVillageDoc(uid: string, data: Record<string, unknown>): VillageDoc {
@@ -140,6 +202,12 @@ export function fromVillageDoc(uid: string, data: Record<string, unknown>): Vill
     noticesDismissed: strArray(data.noticesDismissed),
     habits,
     season: Math.max(0, num(data.season)),
+    npcs: parseNpcs(data.npcs),
+    cracks: strArray(data.cracks),
+    stars: parseStars(data.stars),
+    trophies: parseTrophies(data.trophies),
+    plan: parsePlan(data.plan),
+    newItems: strArray(data.newItems),
   };
 }
 
@@ -248,7 +316,8 @@ export async function buyCosmetic(uid: string, itemId: string): Promise<void> {
     };
     if (!settings.shopEnabled || modules.shop === false) throw new Error('A loja da Vila está desligada');
     const gold = Number(pSnap.data()?.availableGold) || 0;
-    const check = canBuy(village, gold, item, settings);
+    const minerLevel = getLegacyLevelFromXP(Number(pSnap.data()?.totalXP) || 0);
+    const check = canBuy(village, gold, item, settings, minerLevel);
     if (!check.ok) {
       if (check.reason === 'owned') throw new Error('Você já tem este item');
       if (check.reason === 'gold') throw new Error('Gold insuficiente');
@@ -258,14 +327,15 @@ export async function buyCosmetic(uid: string, itemId: string): Promise<void> {
     const after = gold - price;
     if (after < 0) throw new Error('Gold insuficiente');
     const owned = village.owned.includes(itemId) ? village.owned : [...village.owned, itemId];
+    const newItems = village.newItems.includes(itemId) ? village.newItems : [...village.newItems, itemId];
     const character = { ...village.character };
     if (item.slot === 'hat' || item.slot === 'cape' || item.slot === 'pet') {
       character[item.slot] = itemId;
     } else {
       character[item.slot] = itemId;
     }
-    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, owned, character, updatedAt: nowIso() }));
-    else tx.update(villageRef(uid), stripUndefined({ owned, character, updatedAt: nowIso() }));
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, owned, character, newItems, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ owned, character, newItems, updatedAt: nowIso() }));
     tx.update(progressRef(uid), {
       availableGold: after,
       totalGoldSpent: increment(price),
@@ -296,11 +366,13 @@ export async function craftGear(uid: string, gearId: string): Promise<void> {
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
     const current = village.gear[def.slot];
-    const check = canCraft(base.materials, village.rare, gearId, current);
+    const minerLevel = getLegacyLevelFromXP(Number((await tx.get(progressRef(uid))).data()?.totalXP) || 0);
+    const check = canCraft(base.materials, village.rare, gearId, current, minerLevel);
     if (!check.ok) {
       if (check.reason === 'materials' || check.reason === 'rare') throw new Error('Faltam materiais');
       if (check.reason === 'already') throw new Error('Você já craftou este item');
       if (check.reason === 'order') throw new Error('Crafta a picareta anterior primeiro');
+      if (check.reason === 'level') throw new Error(`Nível ${check.minLevel}`);
       throw new Error('Não foi possível craftar');
     }
     const materials = { ...base.materials };
@@ -310,8 +382,9 @@ export async function craftGear(uid: string, gearId: string): Promise<void> {
       esmeralda: Math.max(0, village.rare.esmeralda - (def.rare.esmeralda ?? 0)),
     };
     const nextGear = { ...village.gear, [def.slot]: def.level };
-    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, gear: nextGear, rare, updatedAt: nowIso() }));
-    else tx.update(villageRef(uid), stripUndefined({ gear: nextGear, rare, updatedAt: nowIso() }));
+    const newItems = village.newItems.includes(gearId) ? village.newItems : [...village.newItems, gearId];
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, gear: nextGear, rare, newItems, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ gear: nextGear, rare, newItems, updatedAt: nowIso() }));
     if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
     else tx.update(baseRef(uid), stripUndefined({ materials, updatedAt: nowIso() }));
   });
@@ -323,6 +396,7 @@ export async function tradeMaterials(uid: string, from: Material, to: Material):
   await runTransaction(db, async (tx) => {
     const bSnap = await tx.get(baseRef(uid));
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    if ((base.buildings.fornalha || 0) < 2) throw new Error('A Fornalha nível 2 libera a Fundição');
     if ((base.materials[from] ?? 0) < preview.fromQty) throw new Error('Faltam materiais para a troca');
     const materials = { ...base.materials };
     materials[from] -= preview.fromQty;
@@ -334,7 +408,7 @@ export async function tradeMaterials(uid: string, from: Material, to: Material):
 
 export async function openDailyChest(uid: string, date: string): Promise<ReturnType<typeof dailyChestContents>> {
   const today = date || getTodayBrazil();
-  const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }).format(new Date()));
+  const hour = nowBrazil().hour;
   const [economy, tasksSnap, doneSnap] = await Promise.all([
     getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as Promise<EconomySettings>,
     getDocs(query(collection(db, 'tasks'), where('ownerId', '==', uid))),
@@ -348,10 +422,12 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
       frequency: data.frequency || 'daily',
       period: data.period || 'morning',
       createdAt: data.createdAt?.toDate?.() ?? null,
+      optional: data.optional === true,
     };
   });
   const due = dueTasksOn(tasks, today).length;
   const done = doneSnap.docs.filter((d) => d.data().reverted !== true).length;
+  const goldRoom = await roomForGameGold(uid, economy, today);
 
   let contents = dailyChestContents(uid, today, { fullDays: 0, gear: initialVillageDoc(uid, nowIso()).gear }, economy);
 
@@ -367,7 +443,10 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
       if (gate.reason === 'min_due') throw new Error('Hoje não tem missões suficientes');
       throw new Error(`Faltam ${due - done} missões`);
     }
-    contents = dailyChestContents(uid, today, village, economy);
+    const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    contents = dailyChestContents(uid, today, village, economy, base.materials, base.buildings.bau || 0);
+    const cut = capGold(contents.gold, goldRoom.room);
+    contents = { ...contents, gold: cut.paid };
     const gold = Number(pSnap.data()?.availableGold) || 0;
     const after = gold + contents.gold;
     const claimed = { ...village.claimed, [claimKey('daily', today)]: nowIso() };
@@ -375,7 +454,6 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
       diamante: village.rare.diamante,
       esmeralda: village.rare.esmeralda + contents.esmeralda,
     };
-    const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
     const materials = { ...base.materials };
     for (const m of MATERIALS) materials[m] += contents.materials[m] ?? 0;
 
@@ -395,7 +473,7 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
         type: 'earned' as const,
         source: 'chest' as const,
         description: 'Baú do Dia',
-        metadata: { due, done, contents, date: today },
+        metadata: { due, done, contents, date: today, capped: cut.paid < (economy.dailyChestGold[0] + village.fullDays) },
         balanceBefore: gold,
         balanceAfter: after,
         createdAt: serverTimestamp(),
@@ -588,3 +666,215 @@ export async function listDayCompletions(uid: string, date: string): Promise<Arr
 }
 
 export { stripUndefined };
+
+export async function grantRare(
+  uid: string,
+  kind: 'esmeralda' | 'diamante',
+  key: string
+): Promise<boolean> {
+  let granted = false;
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(villageRef(uid));
+    const village = snap.exists() ? fromVillageDoc(uid, snap.data()) : initialVillageDoc(uid, nowIso());
+    if (hasClaim(village, key)) return;
+    granted = true;
+    const claimed = { ...village.claimed, [key]: nowIso() };
+    const rare = {
+      diamante: village.rare.diamante + (kind === 'diamante' ? 1 : 0),
+      esmeralda: village.rare.esmeralda + (kind === 'esmeralda' ? 1 : 0),
+    };
+    if (!snap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, updatedAt: nowIso() }));
+  });
+  return granted;
+}
+
+export async function openStreakChest(uid: string): Promise<{ gold: number; diamante: number } | null> {
+  const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
+  const goldRoom = await roomForGameGold(uid, economy);
+  let out: { gold: number; diamante: number } | null = null;
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const pSnap = await tx.get(progressRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    const n = village.fullDays >= 21 ? 21 : village.fullDays >= 14 ? 14 : village.fullDays >= 7 ? 7 : 0;
+    if (!n) throw new Error('Ainda não tem 7 tochas seguidas');
+    const key = claimKey('streak', n, village.fullDaysStart || getTodayBrazil());
+    if (hasClaim(village, key)) throw new Error('Esse baú das tochas já foi aberto');
+    const cut = capGold(20, goldRoom.room);
+    const gold = Number(pSnap.data()?.availableGold) || 0;
+    const after = gold + cut.paid;
+    const claimed = { ...village.claimed, [key]: nowIso() };
+    const rare = { ...village.rare, diamante: village.rare.diamante + 1 };
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, updatedAt: nowIso() }));
+    if (pSnap.exists() && cut.paid > 0) {
+      tx.update(progressRef(uid), {
+        availableGold: after,
+        totalGoldEarned: increment(cut.paid),
+        updatedAt: serverTimestamp(),
+      });
+      tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
+        userId: uid,
+        amount: cut.paid,
+        type: 'earned' as const,
+        source: 'streak_chest' as const,
+        description: `Baú das ${n} tochas`,
+        metadata: { n, fullDaysStart: village.fullDaysStart, capped: cut.capped },
+        balanceBefore: gold,
+        balanceAfter: after,
+        createdAt: serverTimestamp(),
+      }));
+    }
+    out = { gold: cut.paid, diamante: 1 };
+  });
+  return out;
+}
+
+export async function sellMaterials(uid: string, material: Material, lots: number): Promise<number> {
+  if (material === 'redstone') throw new Error('Redstone não se vende');
+  const n = Math.floor(lots);
+  if (n < 1) throw new Error('Escolha quantos lotes vender');
+  const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
+  const buy = economy.merchantBuy;
+  const today = getTodayBrazil();
+  const goldRoom = await roomForGameGold(uid, economy);
+  let paid = 0;
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const pSnap = await tx.get(progressRef(uid));
+    const bSnap = await tx.get(baseRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    let used = 0;
+    for (let i = 1; i <= (buy.dailyCap || 2); i += 1) {
+      if (hasClaim(village, claimKey('merchant', today, i))) used += 1;
+    }
+    if (used + n > (buy.dailyCap || 2)) throw new Error('Só 2 vendas por dia');
+    const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    const need = n * buy.materials;
+    if ((base.materials[material] ?? 0) < need) throw new Error('Falta material');
+    const want = n * buy.gold;
+    const cut = capGold(want, goldRoom.room);
+    const gold = Number(pSnap.data()?.availableGold) || 0;
+    const after = gold + cut.paid;
+    const materials = { ...base.materials, [material]: base.materials[material] - need };
+    const claimed = { ...village.claimed };
+    for (let i = 1; i <= n; i += 1) claimed[claimKey('merchant', today, used + i)] = nowIso();
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, updatedAt: nowIso() }));
+    if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
+    else tx.update(baseRef(uid), stripUndefined({ materials, updatedAt: nowIso() }));
+    if (pSnap.exists() && cut.paid > 0) {
+      tx.update(progressRef(uid), {
+        availableGold: after,
+        totalGoldEarned: increment(cut.paid),
+        updatedAt: serverTimestamp(),
+      });
+      tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
+        userId: uid,
+        amount: cut.paid,
+        type: 'earned' as const,
+        source: 'merchant_sale' as const,
+        description: `Vendeu ${need} ${material}`,
+        metadata: { material, lots: n, capped: cut.capped },
+        balanceBefore: gold,
+        balanceAfter: after,
+        createdAt: serverTimestamp(),
+      }));
+    }
+    paid = cut.paid;
+  });
+  return paid;
+}
+
+export async function repairLot(uid: string, date: string): Promise<number> {
+  const today = getTodayBrazil();
+  const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
+  const [tasksSnap, doneSnap, dailySnap, goldRoom] = await Promise.all([
+    getDocs(query(collection(db, 'tasks'), where('ownerId', '==', uid))),
+    getDocs(query(collection(db, 'taskCompletions'), where('userId', '==', uid), where('date', '==', today))),
+    getDoc(doc(db, 'dailyProgress', `${uid}_${date}`)),
+    roomForGameGold(uid, economy),
+  ]);
+  const tasks = tasksSnap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      active: data.active !== false,
+      frequency: data.frequency || 'daily',
+      period: data.period || 'morning',
+      createdAt: data.createdAt?.toDate?.() ?? null,
+      optional: data.optional === true,
+    };
+  });
+  const due = dueTasksOn(tasks, today).length;
+  const done = doneSnap.docs.filter((d) => d.data().reverted !== true).length;
+  const penalty = Number(dailySnap.data()?.goldPenalty) || 0;
+  let refunded = 0;
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const pSnap = await tx.get(progressRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    if (!canRepair(village.cracks, due, done)) throw new Error('Faça todas as missões de hoje para consertar');
+    const key = claimKey('repair', date);
+    if (hasClaim(village, key)) throw new Error('Esse conserto já foi feito');
+    const want = repairRefund(penalty, economy);
+    const cut = capGold(want, goldRoom.room);
+    const gold = Number(pSnap.data()?.availableGold) || 0;
+    const after = gold + cut.paid;
+    const claimed = { ...village.claimed, [key]: nowIso() };
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, cracks: [], claimed, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ cracks: [], claimed, updatedAt: nowIso() }));
+    if (pSnap.exists() && cut.paid > 0) {
+      tx.update(progressRef(uid), {
+        availableGold: after,
+        totalGoldEarned: increment(cut.paid),
+        updatedAt: serverTimestamp(),
+      });
+      tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
+        userId: uid,
+        amount: cut.paid,
+        type: 'refund' as const,
+        source: 'repair' as const,
+        description: 'Conserto do lote',
+        metadata: { date, capped: cut.capped },
+        balanceBefore: gold,
+        balanceAfter: after,
+        createdAt: serverTimestamp(),
+      }));
+    }
+    tx.set(doc(db, 'dailyProgress', `${uid}_${today}`), { repaired: true, updatedAt: serverTimestamp() }, { merge: true });
+    refunded = cut.paid;
+  });
+  return refunded;
+}
+
+export async function seeItems(uid: string, ids?: string[]): Promise<void> {
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(villageRef(uid));
+    const village = snap.exists() ? fromVillageDoc(uid, snap.data()) : initialVillageDoc(uid, nowIso());
+    const next = ids?.length ? village.newItems.filter((id) => !ids.includes(id)) : [];
+    if (!snap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, newItems: next, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), { newItems: next, updatedAt: nowIso() });
+  });
+}
+
+export async function burnWood(uid: string): Promise<void> {
+  const today = getTodayBrazil();
+  const key = claimKey('burn', today);
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const bSnap = await tx.get(baseRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    if ((base.buildings.fornalha || 0) < 3) throw new Error('A Queima abre na Fornalha nível 3');
+    if (hasClaim(village, key)) throw new Error('A queima de hoje já foi feita');
+    if ((base.materials.madeira || 0) < 5) throw new Error('Faltam 5 madeira');
+    const materials = { ...base.materials, madeira: base.materials.madeira - 5, redstone: (base.materials.redstone || 0) + 1 };
+    const claimed = { ...village.claimed, [key]: nowIso() };
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), { claimed, updatedAt: nowIso() });
+    if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
+    else tx.update(baseRef(uid), { materials, updatedAt: nowIso() });
+  });
+}

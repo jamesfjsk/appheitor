@@ -8,7 +8,7 @@ import type { EnglishGameId } from './index';
 
 export type Material = 'madeira' | 'pedra' | 'ferro' | 'redstone';
 export type ContractType = 'merchant' | 'letter' | 'note' | 'forge';
-export type BuildingId = 'fornalha' | 'bau' | 'cerca' | 'torre' | 'mesa' | 'campinho';
+export type BuildingId = 'fornalha' | 'bau' | 'cerca' | 'torre' | 'mesa' | 'campinho' | 'cofre' | 'agenda' | 'mercado';
 export type Relation = 'on' | 'in' | 'under' | 'next_to';
 export type ContractStatus = 'open' | 'done';
 export type LetterGenre = 'letter' | 'scout_report' | 'dialogue' | 'notice' | 'list';

@@ -13,12 +13,14 @@ import {
   buildingSprite,
   initialBaseDoc,
 } from '../../../config/englishBase';
-import { COSMETIC_BY_ID, COSMETIC_ICON, GEAR, GEAR_SPRITE } from '../../../config/village';
+import { COSMETIC_BY_ID, COSMETIC_ICON, DEFAULT_ECONOMY, GEAR, GEAR_SPRITE } from '../../../config/village';
 import type { CosmeticItem } from '../../../types/village';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { buildUpgrade, canBuild, setThemeRequest } from '../../../services/englishBaseService';
+import { burnWood } from '../../../services/villageService';
+import { getTodayBrazil } from '../../../utils/clock';
 import type { BuildingId } from '../../../types/english';
 
 const THEME_MAX = 30;
@@ -31,10 +33,14 @@ interface Props {
   onOpenTower: () => void;
   onOpenWorkshop: () => void;
   onOpenQuiz: () => void;
+  onOpenBank?: () => void;
+  onOpenAgenda?: () => void;
+  onOpenMarket?: () => void;
 }
 
 const BuildingCard: React.FC<Props> = ({
   id, onClose, onOpenMine, onOpenChest, onOpenTower, onOpenWorkshop, onOpenQuiz,
+  onOpenBank, onOpenAgenda, onOpenMarket,
 }) => {
   const { childUid } = useAuth();
   const { village, materials, buildings } = useVillage();
@@ -48,19 +54,25 @@ const BuildingCard: React.FC<Props> = ({
   const level = buildings[id] || 0;
   const fakeBase = { ...initialBaseDoc(childUid || 'x', new Date().toISOString()), materials, buildings };
   const info = canBuild(fakeBase, id);
-  const cost = buildingCost(id, info.nextLevel);
+  const cost = buildingCost(id, info.nextLevel, DEFAULT_ECONOMY.buildCostMultiplier);
   const nextText = buildingEffectNext(id, level);
   const missingText = MATERIALS.filter((m) => (info.missing[m] || 0) > 0)
     .map((m) => `${info.missing[m]} ${MATERIAL_LABELS[m]}`)
     .join(', ');
+  const pipCount = !def.opensIn && (def.liveMaxLevel ?? 3) === 1 ? 1 : 3;
+  const atCap = pipCount === 1 ? level >= 1 : level >= BUILDING_MAX_LEVEL;
 
   const actionLabel = level === 0 ? 'Construir' : 'Melhorar';
   const lockLabel = info.later
-    ? `Abre na ${info.later}`
+    ? (info.later === 'Em breve' && atCap ? null : `Abre na ${info.later}`)
     : !info.unlocked
-      ? 'Precisa de Fornalha e Baú nível 1'
+      ? id === 'cerca'
+        ? 'Precisa da Fornalha nível 1'
+        : id === 'cofre'
+          ? 'Precisa do Armazém nível 1'
+          : 'Precisa de Fornalha e Armazém nível 1'
       : null;
-  const btnLabel = level >= BUILDING_MAX_LEVEL
+  const btnLabel = atCap
     ? 'Nível máximo'
     : lockLabel || actionLabel;
 
@@ -114,8 +126,8 @@ const BuildingCard: React.FC<Props> = ({
             </div>
             <div className="min-w-0">
               <h2 className="mc-h mb-1">{def.label} / {def.labelEn}</h2>
-              <div className="flex gap-1 mt-1" aria-label={`Nível ${level} de 3`}>
-                {([1, 2, 3] as const).map((n) => (
+              <div className="flex gap-1 mt-1" aria-label={`Nível ${level} de ${pipCount}`}>
+                {Array.from({ length: pipCount }, (_, i) => i + 1).map((n) => (
                   <span
                     key={n}
                     className={`mc-slot w-8 h-8 flex items-center justify-center mc-num text-[10px] ${level >= n ? 'mc-slot-good text-white' : 'mc-muted'}`}
@@ -139,7 +151,7 @@ const BuildingCard: React.FC<Props> = ({
 
           <section>
             <p className="mc-lbl mb-1">Próximo nível</p>
-            {level >= BUILDING_MAX_LEVEL ? (
+            {atCap ? (
               <p className="text-sm">Nível máximo.</p>
             ) : (
               <>
@@ -174,9 +186,34 @@ const BuildingCard: React.FC<Props> = ({
           </section>
 
           {id === 'fornalha' && (
-            <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenMine(); }}>
-              Ir para a Mina
-            </button>
+            <>
+              {level >= 2 && (
+                <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenWorkshop(); }}>
+                  Fundir
+                </button>
+              )}
+              {level >= 3 && (
+                <button
+                  type="button"
+                  className="mc-btn mc-btn-gold w-full min-h-[44px] font-bold"
+                  onClick={async () => {
+                    if (!childUid) return;
+                    playClick();
+                    try {
+                      await burnWood(childUid);
+                      toast.success('5 madeira viraram 1 redstone');
+                    } catch (e) {
+                      toast.error(e instanceof Error ? e.message : 'Não deu para queimar');
+                    }
+                  }}
+                >
+                  Queimar 5 madeira
+                </button>
+              )}
+              <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenMine(); }}>
+                Ir para a Mina
+              </button>
+            </>
           )}
 
           {id === 'bau' && (
@@ -281,23 +318,61 @@ const BuildingCard: React.FC<Props> = ({
                   </div>
                 </div>
               ) : (
-                <p className="text-sm mc-muted">Construa a Mesa para escolher o tema de amanhã.</p>
+                <p className="text-sm mc-muted">Construa a Biblioteca para abrir a prova do dia.</p>
               )}
-              <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenMine(); }}>
+              {level >= 1 && (
+                <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
+                  Prova do dia
+                </button>
+              )}
+              <button type="button" className="mc-btn mc-btn-dark w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenMine(); }}>
                 Ir para a Mina
-              </button>
-              <button type="button" className="mc-btn mc-btn-dark w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
-                Biblioteca (prova do dia)
               </button>
             </>
           )}
 
           {id === 'cerca' && (
-            <p className="text-sm mc-muted">A Cerca protege as tochas. O capacete (equipamento) absorve 1 missão por semana.</p>
+            <p className="text-sm">
+              Proteção deste mês: {village.claimed[`fence:${getTodayBrazil().slice(0, 7)}`] ? 'usada' : 'disponível'}.
+              O capacete absorve 1 missão por semana; a Cerca protege as tochas.
+            </p>
           )}
 
           {id === 'campinho' && (
             <p className="text-sm mc-muted">Campinho abre na Etapa 4. Não gaste material nisso ainda.</p>
+          )}
+
+          {id === 'cofre' && (
+            <button
+              type="button"
+              disabled={level < 1}
+              className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
+              onClick={() => { playClick(); onOpenBank?.(); }}
+            >
+              {level < 1 ? 'Construa o Cofre para abrir' : 'Abrir o Cofrinho'}
+            </button>
+          )}
+
+          {id === 'agenda' && (
+            <button
+              type="button"
+              disabled={level < 1}
+              className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
+              onClick={() => { playClick(); onOpenAgenda?.(); }}
+            >
+              {level < 1 ? 'Construa a Agenda para abrir' : 'Abrir a Agenda'}
+            </button>
+          )}
+
+          {id === 'mercado' && (
+            <button
+              type="button"
+              disabled={level < 1}
+              className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
+              onClick={() => { playClick(); onOpenMarket?.(); }}
+            >
+              {level < 1 ? 'Construa o Mercado para abrir' : 'Abrir o Mercado'}
+            </button>
           )}
 
           <button type="button" className="w-full text-center text-sm underline mc-muted min-h-[44px]" onClick={() => { playClick(); onOpenWorkshop(); }}>

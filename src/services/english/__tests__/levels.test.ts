@@ -14,6 +14,7 @@ import {
 } from '../../../config/englishLevels';
 import {
   BUILDINGS,
+  BUILDING_BY_ID,
   BUILDING_MAX_LEVEL,
   CONTRACT_ICONS,
   INITIAL_MATERIALS,
@@ -122,8 +123,8 @@ test('tabela dos níveis: maxWords, Carta, glossário, moldes e temas', () => {
 
 const pub = join(process.cwd(), 'public');
 
-test('6 construções: custos somam 3/5/8 com ferro >= 1; ícones existem', () => {
-  expect(BUILDINGS).toHaveLength(6);
+test('9 construções: custos somam 3/5/8 com ferro >= 1; ícones existem', () => {
+  expect(BUILDINGS).toHaveLength(9);
   for (const b of BUILDINGS) {
     b.costs.forEach((c, i) => {
       const total = MATERIALS.reduce((s, m) => s + c[m], 0);
@@ -134,26 +135,37 @@ test('6 construções: custos somam 3/5/8 com ferro >= 1; ícones existem', () =
   }
   expect(existsSync(join(pub, TERRAIN_ICON))).toBeTruthy();
   expect(buildingCost('fornalha', 1)).toEqual({ madeira: 1, pedra: 1, ferro: 1, redstone: 0 });
+  expect(buildingCost('fornalha', 1, 2)).toEqual({ madeira: 2, pedra: 2, ferro: 2, redstone: 0 });
   expect(buildingCost('fornalha', 4)).toBe(null);
   expect(buildingIcon('fornalha', 0)).toBe('/assets/village/buildings/fornalha-1.png');
   expect(buildingIcon('bau', 2)).toBe('/assets/village/buildings/bau-2.png');
   expect(BUILDING_MAX_LEVEL).toBe(3);
 });
 
-test('desbloqueio: torre/mesa/campinho só com fornalha e baú >= 1', () => {
-  const none = { fornalha: 0, bau: 0, cerca: 0, torre: 0, mesa: 0, campinho: 0 };
+test('desbloqueio: torre/mesa/campinho só com fornalha e baú >= 1; cofre precisa do armazém; agenda livre', () => {
+  const none = { fornalha: 0, bau: 0, cerca: 0, torre: 0, mesa: 0, campinho: 0, cofre: 0, agenda: 0, mercado: 0 };
   expect(isBuildingUnlocked('torre', none)).toBeFalsy();
-  expect(isBuildingUnlocked('cerca', none)).toBeTruthy();
+  expect(isBuildingUnlocked('cerca', none)).toBeFalsy();
+  expect(isBuildingUnlocked('cerca', { ...none, fornalha: 1 })).toBeTruthy();
   expect(isBuildingUnlocked('mesa', { ...none, fornalha: 1 })).toBeFalsy();
   expect(isBuildingUnlocked('campinho', { ...none, fornalha: 1, bau: 1 })).toBeTruthy();
+  expect(isBuildingUnlocked('cofre', none)).toBeFalsy();
+  expect(isBuildingUnlocked('cofre', { ...none, bau: 1 })).toBeTruthy();
+  expect(isBuildingUnlocked('agenda', none)).toBeTruthy();
+  expect(isBuildingUnlocked('mercado', { ...none, fornalha: 1, bau: 1 })).toBeTruthy();
   expect(baseLevel({ ...none, fornalha: 2, bau: 1 })).toBe(3);
 });
 
-test('Campinho não se constrói antes da Etapa 4; textos de efeito no presente', () => {
+test('Campinho não se constrói antes da Etapa 4; Agenda e Mercado param no nível 1; prova na Biblioteca', () => {
   expect(buildingOpensLater('campinho', 1)).toBe('Etapa 4');
   expect(buildingOpensLater('fornalha', 1)).toBe(null);
+  expect(buildingOpensLater('agenda', 2)).toBe('Em breve');
+  expect(buildingOpensLater('mercado', 2)).toBe('Em breve');
+  expect(buildingOpensLater('agenda', 1)).toBe(null);
   expect(buildingEffectNow('fornalha', 0)).toBe('Ainda não construída.');
   expect(buildingEffectNow('torre', 1)).toMatch(/conquistas/i);
+  expect(buildingEffectNow('mesa', 1)).toMatch(/prova do dia/i);
+  expect(BUILDING_BY_ID.mesa.label).toBe('Biblioteca');
   for (const b of BUILDINGS) {
     expect(b.effects).toHaveLength(3);
     expect(b.labelEn.length >= 3).toBeTruthy();

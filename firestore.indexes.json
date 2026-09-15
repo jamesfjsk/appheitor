@@ -215,6 +215,48 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "goals",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "challenges",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "endsOn",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "agenda",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

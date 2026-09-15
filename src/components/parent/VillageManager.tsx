@@ -35,8 +35,8 @@ import { INITIAL_MATERIALS } from '../../config/englishBase';
 const MODULE_HELP: Record<keyof ModuleSettings, string> = {
   shop: 'Desligado: a Loja da Vila recusa compras.',
   effects: 'Desligado: equipamentos não dão bônus (ainda dá para craftar).',
-  bank: 'Reservado para a próxima etapa.',
-  interest: 'Reservado para a próxima etapa.',
+  bank: 'Cofrinho, juros e metas da criança.',
+  interest: 'Bônus de paciência (5% por semana).',
   logic: 'Reservado para a próxima etapa.',
   lines: 'Reservado para a próxima etapa.',
   dilemmas: 'Reservado para a próxima etapa.',

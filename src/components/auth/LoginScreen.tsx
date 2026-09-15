@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { FlashIcon } from '../../icons';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { ReadyBoot } from '../common/useDismissBoot';
 import { useOffline } from '../../contexts/OfflineContext';
 import toast from 'react-hot-toast';
 
@@ -68,6 +69,7 @@ const LoginScreen: React.FC = () => {
 
   return (
     <div className="mn-page flex items-center justify-center p-4">
+      <ReadyBoot />
       <div className="mc-panel mc-pop rounded-lg overflow-hidden w-full max-w-[440px]">
         <div className="relative h-[140px] overflow-hidden border-b-4 border-[#17130f]">
           <img src={BANNER} alt="" className="absolute inset-0 w-full h-full object-cover mc-pixel" draggable={false} />

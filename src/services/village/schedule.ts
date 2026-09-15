@@ -24,6 +24,7 @@ export function dueTasksOn(tasks: readonly ScheduleTask[], date: string): Schedu
   const dayEnd = Date.parse(`${date}T23:59:59.999-03:00`);
   return tasks.filter((task) => {
     if (task.active === false) return false;
+    if (task.optional) return false;
     const created = createdAtMs(task.createdAt);
     if (created != null && Number.isFinite(dayEnd) && created > dayEnd) return false;
     if (task.frequency === 'weekday') return dow >= 1 && dow <= 5;
