@@ -24,36 +24,34 @@ export interface InterestLine {
   savedAfter: number;
 }
 
-export function vaultInterestRatePct(vaultLevel: number): number {
-  if (vaultLevel >= 3) return 12;
-  if (vaultLevel >= 2) return 8;
-  if (vaultLevel >= 1) return 5;
-  return 0;
-}
-
 export function vaultGoalCap(vaultLevel: number): number {
   if (vaultLevel >= 2) return 2;
   if (vaultLevel >= 1) return 1;
   return 0;
 }
 
+export function vaultInterestRatePct(): number {
+  return DEFAULT_ECONOMY.interestRatePct ?? 5;
+}
+
 export function weeklyInterest(
   goals: Array<Pick<GoalDoc, 'id' | 'status' | 'savedGold' | 'lastInterestWeek'>>,
   weekIso: string,
   settings: Pick<EconomySettings, 'interestRatePct' | 'interestCapGold'> = DEFAULT_ECONOMY,
-  vaultLevel?: number
+  vaultLevel?: number,
+  depositedThisWeek: Record<string, number> = {},
 ): InterestLine[] {
-  if (vaultLevel === 0) return [];
-  const fromVault = typeof vaultLevel === 'number' ? vaultInterestRatePct(vaultLevel) : null;
-  const rate = Math.max(0, fromVault ?? settings.interestRatePct ?? 5) / 100;
+  if (typeof vaultLevel === 'number' && vaultLevel < 2) return [];
+  const rate = Math.max(0, settings.interestRatePct ?? 5) / 100;
   const cap = Math.max(0, settings.interestCapGold ?? 20);
   const eligible = goals.filter(
     (g) => g.status === 'open' && g.lastInterestWeek !== weekIso && (g.savedGold || 0) > 0
   );
   const raw = eligible.map((g) => {
-    const savedBefore = Math.max(0, Math.floor(g.savedGold));
+    const deposited = Math.max(0, Math.floor(depositedThisWeek[g.id] || 0));
+    const savedBefore = Math.max(0, Math.floor(g.savedGold) - deposited);
     return { goalId: g.id, savedBefore, interest: Math.floor(savedBefore * rate) };
-  });
+  }).filter((r) => r.savedBefore > 0);
   const total = raw.reduce((s, r) => s + r.interest, 0);
   const scaled =
     total <= cap

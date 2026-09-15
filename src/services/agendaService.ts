@@ -3,6 +3,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   increment,
   onSnapshot,
   query,
@@ -17,7 +18,7 @@ import { FAMILY_ID } from '../config/rules';
 import { initialVillageDoc } from '../config/village';
 import type { AgendaItem, AgendaKind } from '../types/village';
 import { addDays, getTodayBrazil, nowBrazil } from '../utils/clock';
-import { organizationXp, plannedAheadDays, studyPlanFor } from './village/agenda';
+import { organizationXp, plannedAheadDays, studyPlanFor, weekOrganized } from './village/agenda';
 import { claimKey, hasClaim } from './village/claims';
 import { fromVillageDoc, stripUndefined } from './villageService';
 
@@ -50,6 +51,8 @@ export function fromAgendaDoc(id: string, data: Record<string, unknown>): Agenda
     plannedAheadDays: Math.max(0, Number(data.plannedAheadDays) || 0),
     doneAt: typeof data.doneAt === 'string' ? data.doneAt : undefined,
     remindedAt: typeof data.remindedAt === 'string' ? data.remindedAt : undefined,
+    remindedFor: typeof data.remindedFor === 'string' ? data.remindedFor : undefined,
+    studyPlanAccepted: data.studyPlanAccepted === true,
     createdAt: asIso(data.createdAt),
     updatedAt: asIso(data.updatedAt),
   };
@@ -173,6 +176,32 @@ export async function acceptStudyPlan(uid: string, itemId: string): Promise<stri
   }
   await updateDoc(aRef, { studyPlanAccepted: true, updatedAt: nowBrazil().iso });
   return created;
+}
+
+export async function weeklyOrganizedBonus(uid: string, week: string): Promise<boolean> {
+  const snap = await getDocs(query(collection(db, 'agenda'), where('userId', '==', uid)));
+  const items = snap.docs.map((d) => fromAgendaDoc(d.id, d.data() as Record<string, unknown>));
+  if (!weekOrganized(items, week)) return false;
+  let granted = false;
+  await runTransaction(db, async (tx) => {
+    const vRef = doc(db, 'village', uid);
+    const bRef = doc(db, 'englishBase', uid);
+    const vSnap = await tx.get(vRef);
+    const bSnap = await tx.get(bRef);
+    const village = vSnap.exists()
+      ? fromVillageDoc(uid, vSnap.data() as Record<string, unknown>)
+      : initialVillageDoc(uid, nowBrazil().iso);
+    const key = claimKey('agenda', 'week', week);
+    if (hasClaim(village, key)) return;
+    const claimed = { ...village.claimed, [key]: nowBrazil().iso };
+    if (vSnap.exists()) tx.update(vRef, stripUndefined({ claimed, updatedAt: nowBrazil().iso }));
+    else tx.set(vRef, stripUndefined({ ...village, claimed, updatedAt: nowBrazil().iso }));
+    if (bSnap.exists()) {
+      tx.update(bRef, { 'materials.madeira': increment(1), updatedAt: nowBrazil().iso });
+    }
+    granted = true;
+  });
+  return granted;
 }
 
 export { addDays };

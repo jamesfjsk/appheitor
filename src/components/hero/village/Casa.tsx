@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { houseSprite, houseTitle } from '../../../config/village';
-import type { Period } from '../../../types/village';
+import type { AgendaItem, Period } from '../../../types/village';
 import DailyChecklist from '../DailyChecklist';
 import CharacterPreview from './CharacterPreview';
+import { dayTimeline, occurrencesBetween } from '../../../services/village/agenda';
+import { markAgendaDone } from '../../../services/agendaService';
+import { addDays, getTodayBrazil } from '../../../utils/clock';
 
 const SUN = '/assets/english/ui/sun.webp';
 const MOON = '/assets/english/ui/moon.webp';
@@ -27,12 +32,14 @@ const Casa: React.FC<{
   due: number;
   chestReady?: boolean;
   onOpenChest?: () => void;
+  agendaItems?: AgendaItem[];
 }> = ({
   onClose, selectedPeriod, onPeriodChange, guidedMode, onToggleGuidedMode,
-  hour, done, due, chestReady, onOpenChest,
+  hour, done, due, chestReady, onOpenChest, agendaItems = [],
 }) => {
   const { village, economy } = useVillage();
-  const { tasks } = useData();
+  const { tasks, completeTask } = useData();
+  const { childUid } = useAuth();
   const { playClick } = useSound();
   const [tab, setTab] = useState<Tab>('missoes');
   const night = hour >= 19 || hour < 6;
@@ -40,6 +47,9 @@ const Casa: React.FC<{
   const name = village.characterName || 'Heitor';
   const title = houseTitle(village.season);
   const src = houseSprite(village.season);
+  const today = getTodayBrazil();
+  const line = dayTimeline(agendaItems, tasks, village.plan, today);
+  const tomorrow = occurrencesBetween(agendaItems, addDays(today, 1), addDays(today, 1));
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -93,6 +103,31 @@ const Casa: React.FC<{
                   Baú do Dia
                 </button>
               )}
+              {line.length > 0 && (
+                <div className="mc-card p-3 mb-3 space-y-2">
+                  <p className="text-sm font-bold">Linha do dia</p>
+                  {line.map((row) => (
+                    <div key={row.id} className="flex justify-between items-center gap-2">
+                      <p className="text-sm">
+                        {row.time || (row.period === 'morning' ? 'Manhã' : row.period === 'afternoon' ? 'Tarde' : row.period === 'evening' ? 'Noite' : '')}
+                        {' · '}{row.title}
+                      </p>
+                      {row.kind === 'mission' && row.taskId && (
+                        <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => { playClick(); void completeTask(row.taskId!); }}>Concluir</button>
+                      )}
+                      {row.kind === 'focus' && row.taskId && (
+                        <button type="button" className="mc-btn mc-btn-gold min-h-[36px] px-2" onClick={() => { playClick(); void completeTask(row.taskId!); }}>Foco</button>
+                      )}
+                      {row.kind === 'agenda' && row.agendaId && childUid && (
+                        <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => {
+                          playClick();
+                          void markAgendaDone(childUid, row.agendaId!).then((xp) => toast.success(xp >= 10 ? '+10 XP, planejou com antecedência' : '+5 XP'));
+                        }}>Feito</button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
               <DailyChecklist
                 tasks={tasks}
                 selectedPeriod={selectedPeriod}
@@ -128,6 +163,9 @@ const Casa: React.FC<{
               <p className="text-sm mc-muted">
                 Fechar o dia abre daqui em breve. Por agora, conclua as missões e, às {economy.chestOpenHour}h, abra o Baú do Dia.
               </p>
+              {tomorrow.length > 0 && (
+                <p className="text-sm">Amanhã você tem: {tomorrow.map((i) => i.title).join(', ')}</p>
+              )}
             </div>
           )}
         </div>

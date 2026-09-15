@@ -11,7 +11,6 @@ import { NOTE_ERROR_TAGS, buildJudgePrompt } from './english/prompts';
 import { missingInfos, wordDistance } from './english/notePrecheck';
 import { noteScore } from './english/scoring';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
-import { recordUsage } from './aiUsage';
 
 const JUDGE_MODEL = 'gpt-4.1-mini';
 const JUDGE_TEMPERATURE = 0.2;
@@ -110,13 +109,12 @@ export async function judgeNote(input: JudgeInput): Promise<NoteJudgement> {
   const timer = setTimeout(() => controller.abort(), JUDGE_TIMEOUT_MS);
   let raw: unknown;
   try {
-    const { json, usage } = await callOpenAI(prompt.system, prompt.user, prompt.maxTokens, {
+    const { json } = await callOpenAI(prompt.system, prompt.user, prompt.maxTokens, {
       model: JUDGE_MODEL,
       temperature: JUDGE_TEMPERATURE,
       withUsage: true,
       signal: controller.signal,
     });
-    void recordUsage({ model: JUDGE_MODEL, calls: 1, inputTokens: usage.inputTokens, outputTokens: usage.outputTokens });
     raw = json;
   } catch (error) {
     console.warn('englishJudge: falha na IA', error);

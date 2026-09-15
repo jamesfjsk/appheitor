@@ -162,8 +162,16 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 
 ## `src/services/village/agenda.ts`
 
-- `occurrencesBetween` / `nextEvents` / `reminderDue`.
+- `occurrencesBetween` / `nextEvents` / `reminderDue` / `dayTimeline`.
 - `studyPlanFor` / `organizationXp` / `weekOrganized` / `plannedAheadDays`.
+
+## `src/services/village/balance.ts`
+
+- `txsLastDays` / `balancaTotals` — ganhos, gastos (sem depósito), guardado, R7 e % de jogo.
+
+## `src/services/village/claims.ts` (acréscimo)
+
+- `levelGiftClaimKey` / `rareGiftForLevel`.
 
 ## `src/services/village/chest.ts` (alterado)
 
@@ -199,7 +207,8 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 
 - `subscribeAgenda` / `createAgendaItem` / `updateAgendaItem` / `deleteAgendaItem`.
 - `markAgendaDone` — XP de organização, nunca gold.
-- `acceptStudyPlan` — cria missões extras nos dias do plano.
+- `acceptStudyPlan` — cria missões extras nos dias do plano (`date` + `gold: 0`).
+- `weeklyOrganizedBonus` — 1 madeira, chave `agenda:week:<semana>`.
 
 ### `src/services/villageService.ts` (acréscimo)
 
@@ -215,8 +224,8 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 
 ## Cloud Functions (`functions/src/index.ts`)
 
-- `openai` `onCall` — auth, `settings/modules.aiGeneration|tts`, teto `AI_MONTHLY_CALL_CAP` 800, `kind: 'chat' | 'tts'`. TTS grava `english/tts/{hash}.mp3`.
-- `agendaReminders` `onSchedule` a cada 5 min — FCM para itens vencendo.
+- `openai` `onCall` — auth, `settings/modules.aiGeneration|tts`, teto `AI_MONTHLY_CALL_CAP` 800, `kind: 'chat' | 'tts'`. TTS grava `english/tts/{hash}.mp3` e devolve URL com token de download (`getDownloadURL`). TTS não conta em `calls`.
+- `agendaReminders` `onSchedule` a cada 5 min — FCM; semanal grava `remindedFor`.
 
 ## Telas (criança)
 
@@ -229,7 +238,7 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 
 ## Painel
 
-- `GoalsPanel` / `ChallengeManager` / `Balanca` / `RewardForm` (R7, faixas, `goalOnly`).
+- `GoalsPanel` / `ChallengeManager` / `Balanca` / `AgendaManager` / `RewardForm` (R7, faixas, `goalOnly`).
 
 ## Simulador
 

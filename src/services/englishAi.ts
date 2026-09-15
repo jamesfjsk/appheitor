@@ -29,7 +29,7 @@ import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
 import { validateForge, validateLetter, validateMerchant, validateNote, type MerchantValidation, type ValidationResult } from './english/validators';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
-import { AI_MONTHLY_CALL_CAP, currentUsageMonth, getUsage, isOverCap, recordUsage, textCallsOf } from './aiUsage';
+import { AI_MONTHLY_CALL_CAP, currentUsageMonth, getUsage, isOverCap, textCallsOf } from './aiUsage';
 import { addDays } from './dailyQuizService';
 import { getTodayBrazil } from '../utils/timezone';
 
@@ -133,13 +133,12 @@ async function ask(prompt: BuiltPrompt): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CONTRACT_TIMEOUT_MS);
   try {
-    const { json, usage } = await callOpenAI(prompt.system, prompt.user, prompt.maxTokens, {
+    const { json } = await callOpenAI(prompt.system, prompt.user, prompt.maxTokens, {
       model: AI_MODEL,
       temperature: AI_TEMPERATURE,
       withUsage: true,
       signal: controller.signal,
     });
-    void recordUsage({ model: AI_MODEL, calls: 1, inputTokens: usage.inputTokens, outputTokens: usage.outputTokens });
     return json;
   } finally {
     clearTimeout(timer);

@@ -1,5 +1,32 @@
 import { addDays, isoWeekOf, type BrazilNow } from '../../utils/clock';
-import type { AgendaItem } from '../../types/village';
+import { dueTasksOn, extraVisibleOn } from './schedule';
+import type { AgendaItem, Period, ScheduleTask, VillagePlan } from '../../types/village';
+
+export type DayTimelineKind = 'mission' | 'agenda' | 'focus' | 'close';
+
+export interface DayTimelineEntry {
+  id: string;
+  kind: DayTimelineKind;
+  title: string;
+  time?: string;
+  period?: Period;
+  sortMin: number;
+  taskId?: string;
+  agendaId?: string;
+}
+
+const PERIOD_MIN: Record<Period, number> = {
+  morning: 8 * 60,
+  afternoon: 12 * 60,
+  evening: 18 * 60,
+};
+
+function parseHm(time?: string): number | null {
+  if (!time) return null;
+  const [h, m] = time.split(':').map(Number);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+  return h * 60 + m;
+}
 
 export function occurrencesBetween(items: AgendaItem[], from: string, to: string): AgendaItem[] {
   const out: AgendaItem[] = [];
@@ -25,8 +52,67 @@ export function nextEvents(items: AgendaItem[], today: string, n: number): Agend
     .slice(0, Math.max(0, n));
 }
 
+export function dayTimeline(
+  items: AgendaItem[],
+  tasks: Array<ScheduleTask & { title?: string; origin?: string; date?: string; time?: string; status?: string }>,
+  plan: Pick<VillagePlan, 'date' | 'focusTaskId'> | null | undefined,
+  date: string
+): DayTimelineEntry[] {
+  const byId = new Map(tasks.map((t) => [t.id, t]));
+  const entries: DayTimelineEntry[] = [];
+  for (const t of dueTasksOn(tasks, date)) {
+    const full = byId.get(t.id);
+    const time = full?.time;
+    const period = (full?.period || t.period || 'morning') as Period;
+    entries.push({
+      id: `task:${t.id}`,
+      kind: 'mission',
+      title: full?.title || 'Missão',
+      time,
+      period,
+      sortMin: parseHm(time) ?? PERIOD_MIN[period],
+      taskId: t.id,
+    });
+  }
+  for (const t of tasks) {
+    if (!extraVisibleOn(t, date)) continue;
+    const period = (t.period || 'afternoon') as Period;
+    const focus = t.origin === 'agenda' || (plan?.date === date && plan.focusTaskId === t.id);
+    entries.push({
+      id: `focus:${t.id}`,
+      kind: focus ? 'focus' : 'mission',
+      title: t.title || 'Foco',
+      time: t.time,
+      period,
+      sortMin: parseHm(t.time) ?? PERIOD_MIN[period],
+      taskId: t.id,
+    });
+  }
+  for (const item of occurrencesBetween(items, date, date)) {
+    if (!item.title.trim()) continue;
+    entries.push({
+      id: `agenda:${item.id}:${item.date}`,
+      kind: 'agenda',
+      title: item.title,
+      time: item.time,
+      sortMin: parseHm(item.time) ?? (21 * 60),
+      agendaId: item.id,
+    });
+  }
+  entries.push({
+    id: `close:${date}`,
+    kind: 'close',
+    title: 'Fechar o dia',
+    time: '21:00',
+    period: 'evening',
+    sortMin: 21 * 60 + 1,
+  });
+  return entries.sort((a, b) => a.sortMin - b.sortMin || a.title.localeCompare(b.title, 'pt-BR'));
+}
+
 export function reminderDue(item: AgendaItem, now: BrazilNow): boolean {
-  if (item.remindedAt) return false;
+  if (item.remindedFor && item.remindedFor === item.date) return false;
+  if (item.remindedAt && item.repeat !== 'weekly') return false;
   const minutes = item.remindMinutesBefore ?? 0;
   if (!item.time) {
     const prev = addDays(item.date, -1);

@@ -135,6 +135,7 @@ export interface Task {
   createdBy: string; // Admin UID
   optional?: boolean;
   origin?: 'admin' | 'child' | 'agenda';
+  date?: string;
 }
 
 export interface Reward {
@@ -156,11 +157,13 @@ export interface RewardRedemption {
   id: string;
   userId: string; // Child UID
   rewardId: string;
+  rewardTitle?: string;
   costGold: number;
   status: 'pending' | 'approved' | 'rejected' | 'delivered';
   createdAt: Date;
   updatedAt: Date;
   approvedBy?: string; // Admin UID
+  metadata?: Record<string, unknown>;
 }
 
 export interface Notification {

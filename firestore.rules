@@ -47,15 +47,23 @@ service cloud.firestore {
         signedIn()
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.gold == 0
+        && request.resource.data.xp is int
+        && request.resource.data.xp <= 10
         && (
           (request.resource.data.origin == 'child' && request.resource.data.status == 'proposed')
-          || (request.resource.data.origin == 'agenda' && request.resource.data.optional == true)
+          || (
+            request.resource.data.origin == 'agenda'
+            && request.resource.data.optional == true
+            && request.resource.data.gold == 0
+            && request.resource.data.date is string
+          )
         )
       );
       allow delete: if isAdmin();
       allow update: if isAdmin() || (
         signedIn()
         && resource.data.ownerId == request.auth.uid
+        && resource.data.status != 'proposed'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'lastCompletedDate', 'updatedAt'])
       );
 
@@ -272,7 +280,8 @@ service cloud.firestore {
       allow read, write: if signedIn();
     }
     match /aiUsage/{month} {
-      allow read, write: if signedIn();
+      allow read: if signedIn();
+      allow write: if isAdmin();
     }
 
     // ---------- SETTINGS (modo férias, regras do dia) ----------
@@ -330,7 +339,17 @@ service cloud.firestore {
 
     match /challenges/{id} {
       allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
-      allow create: if familyHeitor() && (isAdmin() || (signedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.status == 'proposed'));
+      allow create: if familyHeitor() && (isAdmin() || (
+        signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'proposed'
+        && request.resource.data.goldReward is int
+        && request.resource.data.goldReward <= 20
+        && request.resource.data.xpReward is int
+        && request.resource.data.xpReward <= 20
+        && request.resource.data.target is int
+        && request.resource.data.target >= 5
+      ));
       allow update: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['progress', 'completedAt', 'extendedDays', 'endsOn', 'updatedAt']));
       allow delete: if isAdmin();

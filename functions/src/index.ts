@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase-admin/app';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
-import { getStorage } from 'firebase-admin/storage';
+import { getDownloadURL, getStorage } from 'firebase-admin/storage';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { defineSecret } from 'firebase-functions/params';
@@ -13,6 +13,10 @@ const db = getFirestore();
 const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
 const AI_MONTHLY_CALL_CAP = 800;
 const REGION = 'southamerica-east1';
+const CHAT_MODELS = new Set(['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini']);
+const TTS_MODELS = new Set(['gpt-4o-mini-tts']);
+const TTS_MAX_CHARS = 300;
+const CHAT_MAX_TOKENS = 4000;
 
 type Payload = {
   kind?: 'chat' | 'tts';
@@ -117,15 +121,17 @@ export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, asyn
   }
 
   if (kind === 'chat') {
-    await bumpUsage(body.model || 'gpt-4o-mini', 1);
+    const model = CHAT_MODELS.has(body.model || '') ? (body.model as string) : 'gpt-4o-mini';
+    await bumpUsage(model, 1);
     const input = typeof body.input === 'string' ? { system: '', user: body.input, maxTokens: 800 } : (body.input || {});
+    const maxTokens = Math.min(CHAT_MAX_TOKENS, Math.max(16, Math.floor(Number(input.maxTokens) || 800)));
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
       body: JSON.stringify({
-        model: body.model || 'gpt-4o-mini',
+        model,
         temperature: body.temperature ?? 0.9,
-        max_tokens: input.maxTokens ?? 800,
+        max_tokens: maxTokens,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: input.system || '' },
@@ -148,18 +154,20 @@ export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, asyn
       throw new HttpsError('internal', 'A IA não devolveu JSON válido');
     }
     const usage = { inputTokens: data.usage?.prompt_tokens ?? 0, outputTokens: data.usage?.completion_tokens ?? 0 };
-    await bumpUsage(body.model || 'gpt-4o-mini', 0, usage.inputTokens, usage.outputTokens);
+    await bumpUsage(model, 0, usage.inputTokens, usage.outputTokens);
     return body.withUsage ? { json, usage } : { json };
   }
 
   const text = typeof body.input === 'string' ? body.input : String((body.input as { user?: string } | undefined)?.user || '');
   if (!text.trim()) throw new HttpsError('invalid-argument', 'Texto vazio para a voz.');
-  await bumpUsage(body.model || 'gpt-4o-mini-tts', 1, 0, 0, text.length);
+  if (text.length > TTS_MAX_CHARS) throw new HttpsError('invalid-argument', `A voz aceita no máximo ${TTS_MAX_CHARS} caracteres.`);
+  const ttsModel = TTS_MODELS.has(body.model || '') ? (body.model as string) : 'gpt-4o-mini-tts';
+  await bumpUsage(ttsModel, 0, 0, 0, text.length);
   const speech = await fetch('https://api.openai.com/v1/audio/speech', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: body.model || 'gpt-4o-mini-tts',
+      model: ttsModel,
       voice: body.voice || 'nova',
       speed: 0.95,
       input: text,
@@ -171,11 +179,11 @@ export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, asyn
     throw new HttpsError('internal', `OpenAI TTS ${speech.status}: ${detail.slice(0, 180)}`);
   }
   const buf = Buffer.from(await speech.arrayBuffer());
-  const hash = createHash('sha256').update(`gpt-4o-mini-tts|${body.voice || 'nova'}|0.95|${text}`).digest('hex');
+  const hash = createHash('sha256').update(`${ttsModel}|${body.voice || 'nova'}|0.95|${text}`).digest('hex');
   const path = `english/tts/${hash}.mp3`;
   const file = getStorage().bucket().file(path);
   await file.save(buf, { contentType: 'audio/mpeg', metadata: { cacheControl: 'public, max-age=31536000, immutable' } });
-  const [url] = await file.getSignedUrl({ action: 'read', expires: '03-01-2490' });
+  const url = await getDownloadURL(file);
   await db.doc(`englishAudio/${hash}`).set({ text, url, createdAt: new Date().toISOString() }, { merge: true });
   return { url };
 });
@@ -207,23 +215,34 @@ export const agendaReminders = onSchedule({ region: REGION, schedule: 'every 5 m
       time?: string;
       remindMinutesBefore?: number;
       remindedAt?: string;
+      remindedFor?: string;
       repeat?: string;
     };
+    const occDate = data.repeat === 'weekly'
+      ? (() => {
+          let cursor = data.date;
+          while (cursor < today) cursor = addDays(cursor, 7);
+          return cursor;
+        })()
+      : data.date;
     const item = {
-      date: data.repeat === 'weekly' && data.date < today ? today : data.date,
+      date: occDate,
       time: data.time,
       remindMinutesBefore: data.remindMinutesBefore,
-      remindedAt: data.remindedAt,
+      remindedAt: data.remindedFor === occDate ? data.remindedAt : undefined,
     };
     if (!reminderDue(item, now)) continue;
     const title = String(data.title || 'Compromisso');
-    const when = data.time ? `${data.date === tomorrow ? 'Amanhã' : 'Hoje'} ${data.time}` : (data.date === tomorrow ? 'Amanhã' : 'Hoje');
+    const when = data.time ? `${occDate === tomorrow ? 'Amanhã' : 'Hoje'} ${data.time}` : (occDate === tomorrow ? 'Amanhã' : 'Hoje');
     const body = `${when}: ${title}. Já revisou?`;
     const childTokens = data.userId ? await tokensOf(data.userId) : [];
     await sendPush(childTokens, 'Agenda da Vila', body);
     if (data.kind === 'prova' || data.kind === 'compromisso') {
       await sendPush(adminTokens, 'Agenda da Vila', body);
     }
-    await snap.ref.update({ remindedAt: `${now.date}T${String(now.hour).padStart(2, '0')}:${String(now.minute).padStart(2, '0')}` });
+    await snap.ref.update({
+      remindedAt: `${now.date}T${String(now.hour).padStart(2, '0')}:${String(now.minute).padStart(2, '0')}`,
+      remindedFor: occDate,
+    });
   }
 });

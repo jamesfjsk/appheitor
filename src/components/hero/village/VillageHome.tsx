@@ -4,15 +4,22 @@ import toast from 'react-hot-toast';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { DAY_CHANGED_EVENT, useClock } from '../../../contexts/ClockContext';
 import { HOTBAR_ICONS, houseSprite } from '../../../config/village';
 import { BUILDING_BY_ID, MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
-import { dueTasksOn } from '../../../services/village/schedule';
+import { dueTasksOn, periodAllowedAt } from '../../../services/village/schedule';
 import { chestAllowed } from '../../../services/village/chest';
 import { noticesForNow, habitTipForNow, pickLine } from '../../../services/village/notices';
+import { nextEvents, occurrencesBetween, reminderDue } from '../../../services/village/agenda';
+import { markAgendaDone, subscribeAgenda, weeklyOrganizedBonus } from '../../../services/agendaService';
+import { createMineSfx } from '../english/mine/sfx';
 import { CHILD_BIRTHDAY_MMDD } from '../../../config/rules';
 import { VILLAGE_LINES } from '../../../data/villageLines';
 import { HABIT_LINES } from '../../../data/habitLines';
+import { addDays, clockDriftWarning, isoWeekOf } from '../../../utils/clock';
+import { usePunishment } from '../../../contexts/PunishmentContext';
+import type { AgendaItem } from '../../../types/village';
 import HeroHeader from '../HeroHeader';
 import Casa from './Casa';
 import VacationBanner from '../VacationBanner';
@@ -42,21 +49,29 @@ interface Props {
   guidedMode: boolean;
   onToggleGuidedMode: () => void;
   onOpenQuiz: () => void;
+  quizLocked: boolean;
+  punished?: boolean;
 }
 
 const VillageHome: React.FC<Props> = ({
   selectedPeriod, onPeriodChange, guidedMode, onToggleGuidedMode,
-  onOpenQuiz,
+  onOpenQuiz, quizLocked, punished = false,
 }) => {
   const { village, materials, buildings, economy, pauseDays, notices, ackNotice } = useVillage();
   const { tasks, progress, completeTask } = useData();
   const { playClick } = useSound();
-  const { hour, today } = useClock();
+  const { hour, minute, today, now, driftMs } = useClock();
+  const { isPunished } = usePunishment();
+  const lockedShop = punished || isPunished;
+  const driftLine = clockDriftWarning(driftMs);
   const [district, setDistrict] = useState<District>(null);
   const [lot, setLot] = useState<BuildingId | null>(null);
   const [dockTab, setDockTab] = useState<'vila' | 'missoes'>('vila');
   const [speech, setSpeech] = useState<{ npc: string; text: string } | null>(null);
   const [goalPreset, setGoalPreset] = useState<{ title: string; targetGold: number; rewardId?: string } | undefined>();
+  const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
+  const [agendaFlash, setAgendaFlash] = useState<string | null>(null);
+  const { childUid } = useAuth();
   const dismissSpeech = useCallback(() => setSpeech(null), []);
   const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -71,7 +86,14 @@ const VillageHome: React.FC<Props> = ({
       if (e.key === 'Escape') { setDistrict(null); setLot(null); return; }
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const k = e.key.toLowerCase();
-      if (k === 'm') { setDistrict('house'); setLot(null); setDockTab('missoes'); }
+      if (k === '1') { setDistrict(null); setLot(null); setDockTab('vila'); }
+      if (k === '2' || k === 'm') { setDistrict('house'); setLot(null); setDockTab('missoes'); }
+      if (k === '3') setDistrict('mine');
+      if (k === '4') {
+        if ((buildings.mercado || 0) >= 1) setDistrict('market');
+        else setLot('mercado');
+      }
+      if (k === '5' || k === 'i') setDistrict('pack');
       if (k === 'b') setDistrict('chest');
       if (k === 'a') {
         if ((buildings.agenda || 0) >= 1) setDistrict('agenda');
@@ -99,6 +121,49 @@ const VillageHome: React.FC<Props> = ({
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, [district, lot]);
+
+  useEffect(() => {
+    if (!childUid) return;
+    return subscribeAgenda(childUid, setAgendaItems);
+  }, [childUid]);
+
+  useEffect(() => {
+    if (!childUid) return;
+    const week = isoWeekOf(today);
+    if (now.weekday !== 0 || now.hour < 18) return;
+    void weeklyOrganizedBonus(childUid, week).then((ok) => {
+      if (ok) {
+        toast.success('Semana organizada: +1 madeira');
+        setSpeech({ npc: 'sabio', text: 'Semana organizada. Um material a mais, minerador.' });
+      }
+    }).catch(() => undefined);
+  }, [childUid, today, now.weekday, now.hour]);
+
+  useEffect(() => {
+    const sfx = createMineSfx(() => {
+      const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      return AC ? new AC() : null;
+    }, () => true);
+    const tick = () => {
+      for (const item of occurrencesBetween(agendaItems, addDays(today, -1), addDays(today, 1))) {
+        if (!reminderDue(item, now)) continue;
+        if (agendaFlash === item.id) continue;
+        setAgendaFlash(item.id);
+        sfx.checkpoint();
+        toast((t) => (
+          <span className="flex items-center gap-2">
+            {item.time ? `${item.time} · ` : ''}{item.title}
+            <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => { toast.dismiss(t.id); setAgendaFlash(null); }}>Ok</button>
+          </span>
+        ), { duration: 20000 });
+        setSpeech({ npc: 'olheiro', text: `${item.title} daqui a pouco. Já está pronto?` });
+        break;
+      }
+    };
+    tick();
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
+  }, [agendaItems, today, now, agendaFlash]);
 
   const due = useMemo(() => dueTasksOn(tasks, today), [tasks, today]);
   const done = due.filter((t) => {
@@ -142,40 +207,45 @@ const VillageHome: React.FC<Props> = ({
   const ticker = board.find((item) => item.kind === 'father') || board[0];
   const turnMin = done >= Math.min(due.length, 1);
   const turnFull = due.length > 0 && done >= due.length && gate.reason === 'already';
+  const todayAgenda = occurrencesBetween(agendaItems, today, today);
+  const tomorrowAgenda = occurrencesBetween(agendaItems, addDays(today, 1), addDays(today, 1));
+  const upcoming = nextEvents(agendaItems, today, 1)[0];
+  const nextEventLabel = upcoming && upcoming.date <= addDays(today, 7)
+    ? `${upcoming.date === today ? 'Hoje' : upcoming.date === addDays(today, 1) ? 'Amanhã' : upcoming.date.slice(8)}: ${upcoming.title}`
+    : undefined;
 
   const openDistrict = (id: string) => {
     playClick();
+    if (lockedShop && (id === 'market' || id === 'npc:comerciante' || id === 'chest' || id === 'pack')) {
+      toast.error('Em punição: Mercado, Baú e Loja fechados. Prova e Mina continuam abertas.');
+      return;
+    }
     const lv = (bid: BuildingId) => buildings[bid] || 0;
     if (id === 'character') { setDistrict('editor'); return; }
     if (id === 'mine') { setDistrict('mine'); return; }
     if (id === 'pack') { setDistrict('pack'); return; }
-    if (id === 'agenda' || id === 'build:agenda') {
-      if (lv('agenda') >= 1) setDistrict('agenda');
-      else setLot('agenda');
-      return;
-    }
-    if (id === 'market' || id === 'npc:comerciante' || id === 'build:mercado') {
+    if (id === 'market') {
       if (lv('mercado') >= 1) setDistrict('market');
       else setLot('mercado');
       return;
     }
-    if (id === 'npc:ferreiro' || id === 'build:fornalha') {
+    if (id === 'agenda') {
+      if (lv('agenda') >= 1) setDistrict('agenda');
+      else setLot('agenda');
+      return;
+    }
+    if (id === 'npc:comerciante') {
+      if (lv('mercado') >= 1) setDistrict('market');
+      else setLot('mercado');
+      return;
+    }
+    if (id === 'npc:ferreiro') {
       if (lv('fornalha') >= 1) setDistrict('workshop');
       else setLot('fornalha');
       return;
     }
-    if (id === 'build:cofre') {
-      if (lv('cofre') >= 1) setDistrict('bank');
-      else setLot('cofre');
-      return;
-    }
-    if (id === 'build:torre') { setDistrict('tower'); return; }
-    if (id === 'build:mesa') {
-      if (lv('mesa') >= 1) onOpenQuiz();
-      else setLot('mesa');
-      return;
-    }
-    if (id === 'house' || id === 'build:casa') { setDistrict('house'); return; }
+    if (id === 'chest_streak') { setDistrict('chest'); return; }
+    if (id === 'build:bau' && lv('bau') >= 1) { setDistrict('pack'); return; }
     if (id === 'arena') {
       setSpeech({ npc: 'olheiro', text: 'Quando a Arena abrir, eu quero ver você ganhar do seu pai no xadrez.' });
       return;
@@ -206,6 +276,7 @@ const VillageHome: React.FC<Props> = ({
         onOpenGold={() => setDistrict('extrato')}
         onOpenPack={() => setDistrict('pack')}
         onOpenTower={() => setDistrict('tower')}
+        nextEventLabel={nextEventLabel}
         hour={hour}
         avatar={<CharacterPreview character={village.character} gear={village.gear} size={52} />}
         subtitle={`${village.characterName} · ${village.name}`}
@@ -219,21 +290,46 @@ const VillageHome: React.FC<Props> = ({
         }
       />
       <VacationBanner />
+      {lockedShop && (
+        <p className="text-sm mc-warn mt-2">Punição: Mercado, Baú e Loja fechados. Prova e Mina continuam abertas, sem gold extra.</p>
+      )}
       <YesterdaySummary />
       <div className="mn-stage mt-2">
         <VillageScene
           village={village}
           buildings={buildings}
           hour={hour}
-          gated={false}
+          gated={quizLocked}
           reducedMotion={reduced}
           speech={speech}
           onClickSpot={openDistrict}
           onDismissSpeech={dismissSpeech}
           houseSmoke={due.length > 0 && done >= due.length}
         />
-        {(ticker || habitLine.text) && (
+        {(todayAgenda.length > 0 || tomorrowAgenda.length > 0 || ticker || habitLine.text || driftLine) && (
           <div className="mn-ticker">
+            {driftLine && <p className="text-xs mc-warn mb-2">{driftLine}</p>}
+            {todayAgenda.length > 0 && (
+              <div className="space-y-1 mb-2">
+                <p className="text-sm font-bold">Hoje você tem</p>
+                {todayAgenda.map((item) => (
+                  <div key={item.id + item.date} className={`flex justify-between gap-2 items-center ${agendaFlash === item.id ? 'mc-pop' : ''}`}>
+                    <p className="text-sm text-white">{item.time ? `${item.time} ` : ''}{item.title}</p>
+                    {!item.doneAt && childUid && (
+                      <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2 shrink-0" onClick={() => {
+                        void markAgendaDone(childUid, item.id).then((xp) => {
+                          toast.success(xp >= 10 ? '+10 XP, planejou com antecedência' : '+5 XP');
+                          setAgendaFlash(null);
+                        }).catch((e) => toast.error(e instanceof Error ? e.message : 'Não deu certo'));
+                      }}>Feito</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {tomorrowAgenda.length > 0 && (
+              <p className="text-sm text-white mb-1">Amanhã: {tomorrowAgenda.map((i) => i.title).join(', ')}</p>
+            )}
             {ticker && (
               <div className="flex justify-between gap-2 items-center">
                 <p className="text-sm text-white">{ticker.text}</p>
@@ -259,10 +355,16 @@ const VillageHome: React.FC<Props> = ({
           });
           const full = next ? tasks.find((x) => x.id === next.id) : undefined;
           if (!full) return <span className="text-sm mc-muted">Missões do dia em dia.</span>;
+          const open = periodAllowedAt(full.period, hour, economy);
+          const abre = full.period === 'afternoon' ? economy.periodStartHours.afternoon : economy.periodStartHours.evening;
           return (
             <>
               <span className="text-sm truncate max-w-[14rem]">{full.title}</span>
-              <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-3" onClick={() => { playClick(); void completeTask(full.id); }}>Concluir</button>
+              {open ? (
+                <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-3" onClick={() => { playClick(); void completeTask(full.id); }}>Concluir</button>
+              ) : (
+                <span className="text-sm mc-muted">Próxima às {abre}h</span>
+              )}
             </>
           );
         })()}
@@ -277,9 +379,9 @@ const VillageHome: React.FC<Props> = ({
         <div className="mn-dock-inner">
           <div className="mn-dock-meta">
             <span className="mc-num text-white">{done}/{due.length}</span>
-            <span className="text-sm">{turnFull ? 'Turno completo' : turnMin ? 'Turno mínimo' : 'Turno em andamento'}</span>
+            <span className="text-sm">{turnFull ? 'Dia completo' : turnMin ? 'Mínimo do dia' : 'Dia em andamento'}</span>
         <span className="text-sm mc-muted">
-          Baú: {gate.ok ? `${economy.dailyChestGold[0]} + ${village.fullDays} tochas = ${Math.min(economy.dailyChestGold[1], economy.dailyChestGold[0] + village.fullDays)} gold` : gate.reason === 'already' ? 'aberto' : gate.reason === 'hour' ? `abre às ${economy.chestOpenHour}h` : 'faltam missões'}
+          Baú: {gate.ok ? `${economy.dailyChestGold[0]} + ${village.fullDays} tochas = ${Math.min(economy.dailyChestGold[1], economy.dailyChestGold[0] + village.fullDays)} gold` : gate.reason === 'already' ? 'aberto' : gate.reason === 'hour' ? `abre às ${economy.chestOpenHour}h (faltam ${Math.max(0, economy.chestOpenHour - hour)}h${String(Math.max(0, hour >= economy.chestOpenHour ? 0 : 60 - minute)).padStart(2, '0')})` : 'faltam missões'}
         </span>
             <div className="mn-dock-mats">
               {(Object.keys(MATERIAL_LABELS) as Array<keyof typeof MATERIAL_LABELS>).map((m) => (
@@ -295,6 +397,11 @@ const VillageHome: React.FC<Props> = ({
               ['Vila', 'vila', () => { setDistrict(null); setLot(null); setDockTab('vila'); }],
               ['Missões', 'missoes', () => { setDistrict('house'); setLot(null); setDockTab('missoes'); }],
               ['Mina', 'mine', () => setDistrict('mine')],
+              ['Mercado', 'market', () => {
+                if (lockedShop) { toast.error('Em punição: Mercado fechado'); return; }
+                if ((buildings.mercado || 0) >= 1) setDistrict('market');
+                else setLot('mercado');
+              }],
               ['Mochila', 'pack', () => setDistrict('pack')],
             ] as Array<[string, string, () => void]>).map(([label, id, fn]) => {
               const on = id === 'vila'
@@ -335,7 +442,13 @@ const VillageHome: React.FC<Props> = ({
         />
       )}
       {district === 'chest' && <DailyChest hour={hour} onClose={() => setDistrict(null)} />}
-      {district === 'workshop' && <Oficina onClose={() => setDistrict(null)} onOpenPack={() => setDistrict('pack')} />}
+      {district === 'workshop' && (
+        <Oficina
+          onClose={() => setDistrict(null)}
+          onOpenPack={() => setDistrict('pack')}
+          onOpenLot={(bid) => { setDistrict(null); setLot(bid as BuildingId); }}
+        />
+      )}
       {district === 'market' && (
         <Mercado
           onClose={() => setDistrict(null)}
@@ -375,6 +488,7 @@ const VillageHome: React.FC<Props> = ({
           due={due.length}
           chestReady={gate.ok}
           onOpenChest={() => setDistrict('chest')}
+          agendaItems={agendaItems}
         />
       )}
       {district === 'tower' && (

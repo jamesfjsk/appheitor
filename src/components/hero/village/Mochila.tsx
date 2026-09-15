@@ -2,11 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
+import { useData } from '../../../contexts/DataContext';
 import { GEAR } from '../../../config/village';
 import { ITEMS, ITEM_BY_ID, itemState, SLOT_LABEL } from '../../../config/items';
 import { MATERIAL_LABELS } from '../../../config/englishBase';
 import type { Material } from '../../../types/english';
 import type { ItemSlot as SlotId } from '../../../types/items';
+import { calculateLevelSystem } from '../../../utils/levelSystem';
 import CharacterEditor from './CharacterEditor';
 import ItemSlot from './ItemSlot';
 import CharacterPreview from './CharacterPreview';
@@ -19,8 +21,10 @@ const Mochila: React.FC<{
   onOpenMarket: () => void;
   startTab?: 'equip' | 'clothes' | 'gear' | 'mats';
 }> = ({ onClose, onOpenWorkshop, onOpenMarket, startTab = 'equip' }) => {
-  const { village, materials, seeItems } = useVillage();
+  const { village, materials, seeItems, saveCharacter } = useVillage();
+  const { progress } = useData();
   const { playClick } = useSound();
+  const level = calculateLevelSystem(progress.totalXP || 0).currentLevel;
   const [tab, setTab] = useState(startTab);
   const newSet = useMemo(() => new Set(village.newItems || []), [village.newItems]);
 
@@ -91,8 +95,25 @@ const Mochila: React.FC<{
                   level: 99,
                   forSale: false,
                 })}
+                onClick={() => {
+                  if (!item.slot) return;
+                  playClick();
+                  const slot = item.slot;
+                  const cur = equippedId(slot);
+                  const next = { ...village.character };
+                  if (slot === 'hat' || slot === 'cape' || slot === 'pet') {
+                    (next as Record<string, unknown>)[slot] = cur === item.id ? null : item.id;
+                  } else {
+                    (next as Record<string, unknown>)[slot] = item.id;
+                  }
+                  void saveCharacter(next);
+                }}
               />
             ))}
+            <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3 col-span-2" onClick={() => {
+              playClick();
+              void saveCharacter({ ...village.character, hat: null, cape: null, pet: null });
+            }}>Nenhum chapéu, capa ou pet</button>
           </div>
         )}
         {tab === 'gear' && (
@@ -101,7 +122,12 @@ const Mochila: React.FC<{
               {gearItems.map((item) => {
                 const current = item.slot === 'pickaxe' ? village.gear.pickaxe : village.gear[item.slot as 'helmet' | 'boots' | 'lamp' | 'cape'];
                 const owned = item.slot === 'pickaxe' ? current >= (GEAR.find((g) => g.id === item.id)?.level ?? 99) : current >= 1;
-                return <ItemSlot key={item.id} item={item} state={owned ? 'seu' : 'em_breve'} />;
+                const state = owned
+                  ? 'seu'
+                  : item.id === 'lamp'
+                    ? 'em_breve'
+                    : (item.minLevel && level < item.minLevel ? 'bloqueado' : 'a_venda');
+                return <ItemSlot key={item.id} item={item} state={state} />;
               })}
             </div>
             <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-4" onClick={() => { playClick(); onOpenWorkshop(); }}>Ir para a Ferraria</button>
@@ -112,7 +138,7 @@ const Mochila: React.FC<{
             {(Object.keys(MATERIAL_LABELS) as Material[]).map((m) => {
               const item = ITEM_BY_ID[m];
               if (!item) return null;
-              return <ItemSlot key={m} item={item} qty={materials[m] || 0} state="seu" />;
+              return <ItemSlot key={m} item={item} qty={materials[m] || 0} state={newSet.has(m) ? 'novo' : 'seu'} />;
             })}
             <ItemSlot item={ITEM_BY_ID.esmeralda} qty={village.rare.esmeralda} state="seu" />
             <ItemSlot item={ITEM_BY_ID.diamante} qty={village.rare.diamante} state="seu" />

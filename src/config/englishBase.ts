@@ -155,11 +155,11 @@ export const BUILDINGS: BuildingDef[] = [
     labelEn: 'Library',
     description: 'A casa do Sábio e da prova do dia.',
     effects: [
-      'Abre a prova do dia e você escolhe o tema da história de amanhã na Mina.',
+      'Você escolhe o tema da história de amanhã na Mina.',
       'Estante de erros e Diário.',
       '1 dica grátis por dia no Recado; o Sábio responde ao Diário.',
     ],
-    effect: 'Abre a prova do dia e você escolhe o tema da história de amanhã na Mina.',
+    effect: 'Você escolhe o tema da história de amanhã na Mina.',
     icon: '/assets/village/buildings/mesa-1.png',
     costs: [cost(1, 0, 1, 1), cost(1, 1, 1, 2), cost(2, 1, 2, 3)],
     requiresCore: true,
@@ -189,11 +189,11 @@ export const BUILDINGS: BuildingDef[] = [
     labelEn: 'Vault',
     description: 'A poupança da Vila.',
     effects: [
-      'Abre o Cofrinho com 1 meta e 5% de paciência.',
-      '2 metas e 8% de bônus de paciência por semana.',
-      '12% de paciência, prêmio da temporada e Extrato mensal.',
+      'Abre o Cofrinho com 1 meta.',
+      '2 metas e o bônus de paciência (5% por semana, teto 20).',
+      'Faixa prêmio da temporada e Extrato mensal.',
     ],
-    effect: 'Abre o Cofrinho com 1 meta e 5% de paciência.',
+    effect: 'Abre o Cofrinho com 1 meta.',
     icon: '/assets/village/buildings/cofre-1.png',
     costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
     requiresCore: false,
@@ -228,8 +228,8 @@ export const BUILDINGS: BuildingDef[] = [
     ],
     effect: 'Abre o Mercado: prêmios, Loja da Vila e Comerciante.',
     icon: '/assets/village/buildings/mercado-1.png',
-    costs: [cost(2, 0, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
-    requiresCore: true,
+    costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
+    requiresCore: false,
     liveMaxLevel: 1,
     hideOnBaseMap: true,
   },
@@ -269,7 +269,7 @@ export function buildingSprite(id: BuildingId, level: number): string {
 export function isBuildingUnlocked(id: BuildingId, buildings: Record<BuildingId, number>): boolean {
   if (id === 'cerca') return (buildings.fornalha || 0) >= 1;
   if (id === 'cofre') return (buildings.bau || 0) >= 1;
-  if (id === 'agenda') return true;
+  if (id === 'agenda' || id === 'mercado') return true;
   if (!BUILDING_BY_ID[id].requiresCore) return true;
   return (buildings.fornalha || 0) >= 1 && (buildings.bau || 0) >= 1;
 }

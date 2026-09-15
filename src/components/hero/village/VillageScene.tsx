@@ -496,7 +496,7 @@ const VillageScene: React.FC<Props> = ({
 
   useEffect(() => {
     let alive = true;
-        fetch(`${ANCHORS_URL}?v=hover4`)
+        fetch(`${ANCHORS_URL}?v=pack2`)
       .then((r) => r.json())
       .then((j: SceneAnchors) => {
         if (alive && j?.size?.w) {
@@ -625,20 +625,43 @@ const VillageScene: React.FC<Props> = ({
               if (gated) lockIcon(c, dx + destW / 2 - 14, dy + 8);
             }
             if (village.cracks.includes(lot.id)) {
-              c.strokeStyle = '#17130f';
-              c.lineWidth = 2;
-              c.beginPath();
-              c.moveTo(dx + destW * 0.2, dy + destH * 0.3);
-              c.lineTo(dx + destW * 0.55, dy + destH * 0.7);
-              c.moveTo(dx + destW * 0.35, dy + destH * 0.25);
-              c.lineTo(dx + destW * 0.8, dy + destH * 0.6);
-              c.moveTo(dx + destW * 0.15, dy + destH * 0.55);
-              c.lineTo(dx + destW * 0.7, dy + destH * 0.85);
-              c.stroke();
+              const crack = img('/assets/village/tiles/fx_rachadura.png', bump);
+              if (crack) {
+                c.drawImage(crack, dx, dy + destH * 0.35, destW, destH * 0.55);
+              } else {
+                c.strokeStyle = '#17130f';
+                c.lineWidth = 2;
+                c.beginPath();
+                c.moveTo(dx + destW * 0.2, dy + destH * 0.3);
+                c.lineTo(dx + destW * 0.55, dy + destH * 0.7);
+                c.moveTo(dx + destW * 0.35, dy + destH * 0.25);
+                c.lineTo(dx + destW * 0.8, dy + destH * 0.6);
+                c.moveTo(dx + destW * 0.15, dy + destH * 0.55);
+                c.lineTo(dx + destW * 0.7, dy + destH * 0.85);
+                c.stroke();
+              }
             }
           },
         });
       });
+
+      if ((village.fullDays || 0) >= 7) {
+        const bau = anchors.lots.find((l) => l.id === 'bau');
+        if (bau) {
+          const src = '/assets/village/items/chest_streak.png';
+          const sprite = img(src, bump);
+          const hit: Hotspot = { id: 'chest_streak', x: bau.x + bau.w + 4, y: bau.y, w: 48, h: 48, label: 'Baú das tochas' };
+          hits.push(hit);
+          layers.push({
+            id: 'chest_streak',
+            y: bau.y + bau.h,
+            hit,
+            draw: (c) => {
+              if (sprite) c.drawImage(sprite, hit.x, hit.y, hit.w, hit.h);
+            },
+          });
+        }
+      }
 
       const houseLot = anchors.house;
       let chimneyX = 0;

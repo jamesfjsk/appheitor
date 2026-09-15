@@ -6,6 +6,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { CalendarDay, Task } from '../../types';
+import type { AgendaItem } from '../../types/village';
+import { occurrencesBetween } from '../../services/village/agenda';
+import { getTodayBrazil } from '../../utils/clock';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -16,9 +19,22 @@ const MAP = '/assets/english/ui/map.webp';
 interface CalendarModalProps {
   isOpen: boolean;
   onClose: () => void;
+  embedded?: boolean;
+  agendaItems?: AgendaItem[];
+  onMarkAgenda?: (id: string) => void;
 }
 
-const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
+const KIND_DOT: Record<string, string> = {
+  prova: '●',
+  trabalho: '●',
+  treino: '▲',
+  evento: '◆',
+  aniversario: '★',
+  compromisso: '●',
+  outro: '●',
+};
+
+const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose, embedded = false, agendaItems = [], onMarkAgenda }) => {
   const { progress, tasks } = useData();
   const { childUid } = useAuth();
   const { playClick } = useSound();
@@ -133,13 +149,19 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
 
   const monthTitle = format(currentDate, 'MMMM yyyy', { locale: ptBR });
   const monthTitleCap = monthTitle.charAt(0).toUpperCase() + monthTitle.slice(1);
+  const todayBr = getTodayBrazil();
+  const monthFrom = format(monthStart, 'yyyy-MM-dd');
+  const monthTo = format(monthEnd, 'yyyy-MM-dd');
+  const agendaByDay = new Map<string, AgendaItem[]>();
+  for (const item of occurrencesBetween(agendaItems, monthFrom, monthTo)) {
+    const list = agendaByDay.get(item.date) || [];
+    list.push(item);
+    agendaByDay.set(item.date, list);
+  }
 
-  return (
-    <div
-      className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="mc-panel rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto text-white mc-pop">
+  const inner = (
+        <>
+        {!embedded && (
         <div className="border-b-4 border-[#17130f] p-4 flex items-start gap-3">
           <img src={CLOCK} alt="" className="w-10 h-10 mc-pixel shrink-0" draggable={false} />
           <div className="flex-1 min-w-0">
@@ -154,6 +176,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
             <X className="w-5 h-5" />
           </button>
         </div>
+        )}
 
         <div className="p-4">
           {loading && <p className="mc-lbl mb-3">Carregando...</p>}
@@ -188,8 +211,10 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
             {allDays.map((date, index) => {
               const dayData = getDayData(date);
               const isCurrentMonth = date.getMonth() === currentDate.getMonth();
-              const isToday = date.toDateString() === new Date().toDateString();
+              const isToday = format(date, 'yyyy-MM-dd') === todayBr;
               const selected = selectedDay && dayData && selectedDay.date.toDateString() === dayData.date.toDateString();
+              const dayKey = format(date, 'yyyy-MM-dd');
+              const dayAgenda = agendaByDay.get(dayKey) || [];
 
               let slotClass = 'mc-slot';
               const extraStyle: React.CSSProperties = {};
@@ -220,6 +245,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
                   style={extraStyle}
                 >
                   <span className="mc-num">{date.getDate()}</span>
+                  {dayAgenda[0] && <span className="text-[10px] leading-none">{KIND_DOT[dayAgenda[0].kind] || '●'}</span>}
                   {dayData && dayData.pointsEarned > 0 && (
                     <span className="mc-font text-[8px] mc-warn">+{dayData.pointsEarned}</span>
                   )}
@@ -271,10 +297,24 @@ const CalendarModal: React.FC<CalendarModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
               )}
+              {agendaByDay.get(format(selectedDay.date, 'yyyy-MM-dd'))?.map((item) => (
+                <div key={item.id} className="flex justify-between items-center mt-2">
+                  <span className="text-sm">{item.time ? `${item.time} · ` : ''}{item.title}</span>
+                  {!item.doneAt && onMarkAgenda && (
+                    <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => onMarkAgenda(item.id)}>Feito</button>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>
-      </div>
+  </>
+  );
+
+  if (embedded) return <div className="text-white">{inner}</div>;
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="mc-panel rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto text-white mc-pop">{inner}</div>
     </div>
   );
 };

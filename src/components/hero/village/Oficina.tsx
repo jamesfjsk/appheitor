@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { BUILDINGS, buildingCost, buildingEffectNow, MATERIAL_ICONS, MATERIAL_LABELS, MATERIALS } from '../../../config/englishBase';
-import { DEFAULT_ECONOMY, GEAR } from '../../../config/village';
+import { GEAR } from '../../../config/village';
 import { ITEMS } from '../../../config/items';
 import { canCraft, tradePreview } from '../../../services/village/shop';
 import { useVillage } from '../../../contexts/VillageContext';
@@ -15,10 +16,9 @@ import ItemSlot from './ItemSlot';
 import CharacterPreview from './CharacterPreview';
 
 const FORGE = '/assets/english/ui/base/c_forge.webp';
-const MULT = DEFAULT_ECONOMY.buildCostMultiplier;
 
-const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | 'works'; onOpenPack?: () => void }> = ({ onClose, initialTab = 'gear', onOpenPack }) => {
-  const { village, materials, buildings, craftGear, tradeMaterials } = useVillage();
+const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | 'works'; onOpenPack?: () => void; onOpenLot?: (id: string) => void }> = ({ onClose, initialTab = 'gear', onOpenPack, onOpenLot }) => {
+  const { village, materials, buildings, economy, craftGear, tradeMaterials } = useVillage();
   const { progress } = useData();
   const { playClick } = useSound();
   const [tab, setTab] = useState<'gear' | 'trade' | 'works'>(initialTab);
@@ -28,6 +28,7 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
   const speech = useMemo(() => VILLAGE_LINES.ferreiro[Math.abs(Date.now()) % VILLAGE_LINES.ferreiro.length].text, []);
   const level = calculateLevelSystem(progress.totalXP || 0).currentLevel;
   const furnace = buildings.fornalha || 0;
+  const MULT = economy.buildCostMultiplier ?? 1;
   const preview = tradePreview(from, to);
   const selected = GEAR.find((g) => g.id === picked) || GEAR[0];
   const selectedItem = ITEMS.find((i) => i.id === selected.id);
@@ -93,17 +94,25 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
               {selected && (() => {
                 const current = selected.slot === 'pickaxe' ? village.gear.pickaxe : village.gear[selected.slot];
                 const check = canCraft(materials, village.rare, selected.id, current, level);
-                const label = check.reason === 'already'
-                  ? 'Feito'
-                  : check.reason === 'order'
-                    ? `Precisa da picareta anterior`
-                    : check.reason === 'level'
-                      ? `Nível ${check.minLevel}`
-                      : check.ok
-                        ? 'Forjar'
-                        : 'Faltam materiais';
+                const label = check.reason === 'soon'
+                  ? 'Abre quando a Lanterna funcionar'
+                  : check.reason === 'already'
+                    ? 'Feito'
+                    : check.reason === 'order'
+                      ? `Precisa da picareta anterior`
+                      : check.reason === 'level'
+                        ? `Nível ${check.minLevel}`
+                        : check.ok
+                          ? 'Forjar'
+                          : 'Faltam materiais';
                 return (
-                  <button type="button" disabled={!check.ok} className="mc-btn mc-btn-green min-h-[44px] px-4 font-bold" onClick={() => { playClick(); void craftGear(selected.id); }}>
+                  <button type="button" disabled={!check.ok} className="mc-btn mc-btn-green min-h-[44px] px-4 font-bold" onClick={() => {
+                    playClick();
+                    void craftGear(selected.id).catch((e) => {
+                      const msg = e instanceof Error ? e.message : 'Não deu para forjar';
+                      toast.error(msg);
+                    });
+                  }}>
                     {label}
                   </button>
                 );
@@ -148,7 +157,7 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
                         <p className="text-xs mc-muted mt-1">Próximo: {MATERIALS.filter((m) => (cost[m] || 0) > 0).map((m) => `${cost[m]} ${MATERIAL_LABELS[m]}`).join(' · ')}</p>
                       )}
                     </div>
-                    <span className="text-xs mc-muted">{bLevel >= 3 ? 'Máximo' : bLevel === 0 ? 'No lote' : 'Melhora no lote'}</span>
+                    <button type="button" className="mc-btn mc-btn-stone min-h-[36px] px-2" onClick={() => { playClick(); onOpenLot?.(b.id); }}>{bLevel === 0 ? 'Construir' : 'Melhorar'}</button>
                   </div>
                 );
               })}

@@ -480,6 +480,15 @@ export class FirestoreService {
         if (!daily.exists() || daily.data().summaryProcessed !== true) {
           throw new Error('Ontem ainda não fechou');
         }
+        const existingLate = await getDocs(query(
+          collection(db, 'taskCompletions'),
+          where('taskId', '==', taskId),
+          where('date', '==', date),
+          where('userId', '==', userId)
+        ));
+        if (existingLate.docs.some((d) => d.data().reverted !== true)) {
+          throw new Error('Missão já recuperada');
+        }
       }
       const latePay = late ? lateTaskReward({ gold: goldReward, xp: xpReward }, economy) : null;
       const progressRef = doc(db, 'progress', userId);
@@ -492,7 +501,16 @@ export class FirestoreService {
         if (!taskDoc.exists()) throw new Error('Task not found');
         const taskData = taskDoc.data();
         if (taskData.status === 'proposed') throw new Error('Essa missão ainda não foi aprovada');
-        if (taskData.lastCompletedDate === date) throw new Error('Task already completed today');
+        if (!late && taskData.date && taskData.date !== today) {
+          throw new Error('Essa extra não é de hoje');
+        }
+        const completionRef = doc(db, 'taskCompletions', `${userId}_${taskId}_${date}`);
+        const existingCompletion = await tx.get(completionRef);
+        if (existingCompletion.exists() && existingCompletion.data().reverted !== true) {
+          throw new Error(late ? 'Missão já recuperada' : 'Task already completed today');
+        }
+        if (!late && taskData.lastCompletedDate === today) throw new Error('Task already completed today');
+        if (late && taskData.lastCompletedDate === date) throw new Error('Task already completed today');
         if (!late && !periodAllowedAt(taskData.period || 'morning', hour, economy)) {
           throw new Error('PERIOD_LOCKED');
         }
@@ -504,7 +522,7 @@ export class FirestoreService {
         const childOwn = taskData.origin === 'child';
         let goldPay = latePay ? latePay.gold : goldReward;
         const xpPay = latePay ? latePay.xp : xpReward;
-        if (childOwn) goldPay = 0;
+        if (childOwn || taskData.origin === 'agenda') goldPay = 0;
         let lootPay = late ? undefined : loot;
         if (lootPay && lootPay.qty > 0) {
           let qty = lootPay.qty;
@@ -517,13 +535,13 @@ export class FirestoreService {
         const goldAfter = goldBefore + goldPay;
         const taskTitle = taskData.title || 'Tarefa Sem Título';
 
+        const keepToday = taskData.lastCompletedDate === today;
         tx.update(taskRef, {
           status: 'done',
-          lastCompletedDate: date,
+          lastCompletedDate: keepToday ? today : date,
           updatedAt: serverTimestamp(),
         });
 
-        const completionRef = doc(collection(db, 'taskCompletions'));
         tx.set(completionRef, omitUndefined({
           taskId,
           userId,
@@ -1359,6 +1377,58 @@ export class FirestoreService {
     }
   }
 
+  static async getCompletedTaskIdsOn(userId: string, date: string): Promise<string[]> {
+    const snap = await getDocs(query(
+      collection(db, 'taskCompletions'),
+      where('userId', '==', userId),
+      where('date', '==', date)
+    ));
+    const ids: string[] = [];
+    for (const d of snap.docs) {
+      if (d.data().reverted === true) continue;
+      if (d.data().taskId) ids.push(String(d.data().taskId));
+    }
+    return ids;
+  }
+
+  static async payQuizRewards(userId: string, date: string, xp: number, gold: number): Promise<void> {
+    const key = `quiz:${date}`;
+    await runTransaction(db, async (tx) => {
+      const vRef = doc(db, 'village', userId);
+      const pRef = doc(db, 'progress', userId);
+      const vSnap = await tx.get(vRef);
+      const pSnap = await tx.get(pRef);
+      const claimed = (vSnap.data()?.claimed || {}) as Record<string, string>;
+      if (claimed[key]) return;
+      const goldBefore = Number(pSnap.data()?.availableGold) || 0;
+      const goldPay = Math.max(0, Math.floor(gold));
+      const xpPay = Math.max(0, Math.floor(xp));
+      const goldAfter = goldBefore + goldPay;
+      tx.update(vRef, { [`claimed.${key}`]: new Date().toISOString(), updatedAt: serverTimestamp() });
+      if (pSnap.exists()) {
+        tx.update(pRef, {
+          totalXP: increment(xpPay),
+          availableGold: goldAfter,
+          totalGoldEarned: increment(goldPay),
+          updatedAt: serverTimestamp(),
+        });
+      }
+      if (goldPay > 0) {
+        tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
+          userId,
+          amount: goldPay,
+          type: 'earned' as const,
+          source: 'quiz' as const,
+          description: `Prova do dia ${date}`,
+          metadata: { date, key },
+          balanceBefore: goldBefore,
+          balanceAfter: goldAfter,
+          createdAt: serverTimestamp(),
+        }));
+      }
+    });
+  }
+
   // ========================================
   // 🔥 DAILY PROCESSING (PENALTIES/BONUSES)
   // ========================================
@@ -1386,10 +1456,11 @@ export class FirestoreService {
               ownerId: data.ownerId,
               title: data.title,
               description: data.description,
-              xp: data.xp || 10,
-              gold: data.gold || 5,
+              xp: data.xp ?? 10,
+              gold: data.gold ?? 5,
               period: data.period,
               time: data.time,
+              date: typeof data.date === 'string' ? data.date : undefined,
               frequency: data.frequency || 'daily',
               active: data.active !== false,
               status: data.status || 'pending',

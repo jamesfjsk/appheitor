@@ -22,10 +22,17 @@ export function gameGoldRoom(
   transactionsWeek: GoldTransaction[],
   settings: Pick<EconomySettings, 'gameGoldDailyCap' | 'gameGoldWeeklyCap'> = DEFAULT_ECONOMY
 ): { day: number; week: number; room: number } {
-  const sum = (list: GoldTransaction[]) =>
-    list
-      .filter((t) => isGameGoldSource(t.source) && t.amount > 0)
-      .reduce((s, t) => s + t.amount, 0);
+  const goldOf = (t: GoldTransaction): number => {
+    if (!isGameGoldSource(t.source)) return 0;
+    if (t.source === 'goal_interest') {
+      const meta = t.metadata as { savedAfter?: number; savedBefore?: number } | undefined;
+      if (typeof meta?.savedAfter === 'number' && typeof meta?.savedBefore === 'number') {
+        return Math.max(0, meta.savedAfter - meta.savedBefore);
+      }
+    }
+    return t.amount > 0 ? t.amount : 0;
+  };
+  const sum = (list: GoldTransaction[]) => list.reduce((s, t) => s + goldOf(t), 0);
   const dayUsed = sum(transactionsToday);
   const weekUsed = sum(transactionsWeek);
   const day = Math.max(0, (settings.gameGoldDailyCap ?? 35) - dayUsed);

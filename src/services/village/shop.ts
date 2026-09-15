@@ -38,9 +38,10 @@ export function canCraft(
   gearId: string,
   currentLevel = 0,
   minerLevel?: number
-): { ok: boolean; reason: 'ok' | 'unknown' | 'materials' | 'rare' | 'already' | 'order' | 'level'; minLevel?: number } {
+): { ok: boolean; reason: 'ok' | 'unknown' | 'materials' | 'rare' | 'already' | 'order' | 'level' | 'soon'; minLevel?: number } {
   const def = GEAR_BY_ID[gearId];
   if (!def) return { ok: false, reason: 'unknown' };
+  if (gearId === 'lamp') return { ok: false, reason: 'soon' };
   const need = def.minLevel ?? 0;
   if (typeof minerLevel === 'number' && minerLevel < need) return { ok: false, reason: 'level', minLevel: need };
   if (def.slot === 'pickaxe') {

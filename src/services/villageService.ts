@@ -50,13 +50,13 @@ import { fromBaseDoc } from './englishBaseService';
 import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from './village/claims';
 import { chestAllowed, dailyChestContents } from './village/chest';
 import { canBuy, canCraft, priceOf, tradePreview } from './village/shop';
-import { dueTasksOn } from './village/schedule';
+import { dueCompletionsCount, dueTasksOn } from './village/schedule';
 import { canRepair, repairRefund } from './village/repair';
 import { capGold } from './village/caps';
 import { getTodayBrazil, nowBrazil } from '../utils/clock';
 import { getSettings } from './settingsService';
 import { touchHealth } from './observability';
-import { getLegacyLevelFromXP } from '../utils/levelSystem';
+import { getLegacyLevelFromXP, getLevelFromXP } from '../utils/levelSystem';
 import { roomForGameGold } from './goldTx';
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -316,7 +316,7 @@ export async function buyCosmetic(uid: string, itemId: string): Promise<void> {
     };
     if (!settings.shopEnabled || modules.shop === false) throw new Error('A loja da Vila está desligada');
     const gold = Number(pSnap.data()?.availableGold) || 0;
-    const minerLevel = getLegacyLevelFromXP(Number(pSnap.data()?.totalXP) || 0);
+    const minerLevel = getLevelFromXP(Number(pSnap.data()?.totalXP) || 0);
     const check = canBuy(village, gold, item, settings, minerLevel);
     if (!check.ok) {
       if (check.reason === 'owned') throw new Error('Você já tem este item');
@@ -366,9 +366,10 @@ export async function craftGear(uid: string, gearId: string): Promise<void> {
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
     const current = village.gear[def.slot];
-    const minerLevel = getLegacyLevelFromXP(Number((await tx.get(progressRef(uid))).data()?.totalXP) || 0);
+    const minerLevel = getLevelFromXP(Number((await tx.get(progressRef(uid))).data()?.totalXP) || 0);
     const check = canCraft(base.materials, village.rare, gearId, current, minerLevel);
     if (!check.ok) {
+      if (check.reason === 'soon') throw new Error('A Lanterna ainda não funciona');
       if (check.reason === 'materials' || check.reason === 'rare') throw new Error('Faltam materiais');
       if (check.reason === 'already') throw new Error('Você já craftou este item');
       if (check.reason === 'order') throw new Error('Crafta a picareta anterior primeiro');
@@ -426,7 +427,10 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
     };
   });
   const due = dueTasksOn(tasks, today).length;
-  const done = doneSnap.docs.filter((d) => d.data().reverted !== true).length;
+  const done = dueCompletionsCount(tasks, today, doneSnap.docs.map((d) => ({
+    taskId: String(d.data().taskId || ''),
+    reverted: d.data().reverted === true,
+  })));
   const goldRoom = await roomForGameGold(uid, economy, today);
 
   let contents = dailyChestContents(uid, today, { fullDays: 0, gear: initialVillageDoc(uid, nowIso()).gear }, economy);
@@ -456,9 +460,18 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
     };
     const materials = { ...base.materials };
     for (const m of MATERIALS) materials[m] += contents.materials[m] ?? 0;
+    const gained: string[] = [];
+    for (const m of MATERIALS) {
+      if ((contents.materials[m] ?? 0) > 0) gained.push(m);
+    }
+    if (contents.esmeralda > 0) gained.push('esmeralda');
+    const newItems = [...village.newItems];
+    for (const id of gained) {
+      if (!newItems.includes(id)) newItems.push(id);
+    }
 
-    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, updatedAt: nowIso() }));
-    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, updatedAt: nowIso() }));
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, newItems, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, newItems, updatedAt: nowIso() }));
     if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
     else tx.update(baseRef(uid), stripUndefined({ materials, updatedAt: nowIso() }));
     if (pSnap.exists() && contents.gold > 0) {
@@ -689,26 +702,35 @@ export async function grantRare(
   return granted;
 }
 
-export async function openStreakChest(uid: string): Promise<{ gold: number; diamante: number } | null> {
+export async function openStreakChest(uid: string): Promise<{ gold: number; diamante: number; n: number } | null> {
   const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
   const goldRoom = await roomForGameGold(uid, economy);
-  let out: { gold: number; diamante: number } | null = null;
+  let out: { gold: number; diamante: number; n: number } | null = null;
   await runTransaction(db, async (tx) => {
     const vSnap = await tx.get(villageRef(uid));
     const pSnap = await tx.get(progressRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
-    const n = village.fullDays >= 21 ? 21 : village.fullDays >= 14 ? 14 : village.fullDays >= 7 ? 7 : 0;
-    if (!n) throw new Error('Ainda não tem 7 tochas seguidas');
-    const key = claimKey('streak', n, village.fullDaysStart || getTodayBrazil());
-    if (hasClaim(village, key)) throw new Error('Esse baú das tochas já foi aberto');
+    const start = village.fullDaysStart || getTodayBrazil();
+    const tiers = [7, 14, 21] as const;
+    const n = tiers.find((t) => village.fullDays >= t && !hasClaim(village, claimKey('streak', t, start))) || 0;
+    if (!n) throw new Error(village.fullDays < 7 ? 'Ainda não tem 7 tochas seguidas' : 'Esse baú das tochas já foi aberto');
+    if (goldRoom.room <= 0) throw new Error('Teto de hoje atingido; abra amanhã');
+    const key = claimKey('streak', n, start);
     const cut = capGold(20, goldRoom.room);
+    if (cut.paid <= 0) throw new Error('Teto de hoje atingido; abra amanhã');
     const gold = Number(pSnap.data()?.availableGold) || 0;
     const after = gold + cut.paid;
     const claimed = { ...village.claimed, [key]: nowIso() };
     const rare = { ...village.rare, diamante: village.rare.diamante + 1 };
-    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, updatedAt: nowIso() }));
-    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, updatedAt: nowIso() }));
-    if (pSnap.exists() && cut.paid > 0) {
+    const trophy = n >= 21 ? 'trophy_ouro' : n >= 14 ? 'trophy_prata' : 'trophy_bronze';
+    const extra = ['diamante', trophy];
+    const newItems = [...village.newItems];
+    for (const id of extra) {
+      if (!newItems.includes(id)) newItems.push(id);
+    }
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, newItems, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, newItems, updatedAt: nowIso() }));
+    if (pSnap.exists()) {
       tx.update(progressRef(uid), {
         availableGold: after,
         totalGoldEarned: increment(cut.paid),
@@ -720,13 +742,13 @@ export async function openStreakChest(uid: string): Promise<{ gold: number; diam
         type: 'earned' as const,
         source: 'streak_chest' as const,
         description: `Baú das ${n} tochas`,
-        metadata: { n, fullDaysStart: village.fullDaysStart, capped: cut.capped },
+        metadata: { n, fullDaysStart: start, capped: cut.capped },
         balanceBefore: gold,
         balanceAfter: after,
         createdAt: serverTimestamp(),
       }));
     }
-    out = { gold: cut.paid, diamante: 1 };
+    out = { gold: cut.paid, diamante: 1, n };
   });
   return out;
 }
@@ -755,6 +777,7 @@ export async function sellMaterials(uid: string, material: Material, lots: numbe
     if ((base.materials[material] ?? 0) < need) throw new Error('Falta material');
     const want = n * buy.gold;
     const cut = capGold(want, goldRoom.room);
+    if (cut.paid <= 0) throw new Error('Teto de hoje atingido; venda amanhã');
     const gold = Number(pSnap.data()?.availableGold) || 0;
     const after = gold + cut.paid;
     const materials = { ...base.materials, [material]: base.materials[material] - need };
@@ -808,16 +831,19 @@ export async function repairLot(uid: string, date: string): Promise<number> {
     };
   });
   const due = dueTasksOn(tasks, today).length;
-  const done = doneSnap.docs.filter((d) => d.data().reverted !== true).length;
+  const done = dueCompletionsCount(tasks, today, doneSnap.docs.map((d) => ({
+    taskId: String(d.data().taskId || ''),
+    reverted: d.data().reverted === true,
+  })));
   const penalty = Number(dailySnap.data()?.goldPenalty) || 0;
   let refunded = 0;
   await runTransaction(db, async (tx) => {
     const vSnap = await tx.get(villageRef(uid));
     const pSnap = await tx.get(progressRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
-    if (!canRepair(village.cracks, due, done)) throw new Error('Faça todas as missões de hoje para consertar');
     const key = claimKey('repair', date);
     if (hasClaim(village, key)) throw new Error('Esse conserto já foi feito');
+    if (!canRepair(village.cracks, due, done)) throw new Error('Faça todas as missões de hoje para consertar');
     const want = repairRefund(penalty, economy);
     const cut = capGold(want, goldRoom.room);
     const gold = Number(pSnap.data()?.availableGold) || 0;

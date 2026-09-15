@@ -2,14 +2,32 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVillage } from '../../../contexts/VillageContext';
-import { addDays, getTodayBrazil, isoWeekOf } from '../../../utils/clock';
+import { useClock } from '../../../contexts/ClockContext';
+import { addDays, isoWeekOf } from '../../../utils/clock';
 import { listGoldTransactions } from '../../../services/goldTx';
 import { weeklyStatement } from '../../../services/village/bank';
 import type { GoldTransaction } from '../../../types';
 
+const SOURCE_LABEL: Record<string, string> = {
+  task_completion: 'Missão',
+  quiz: 'Prova',
+  chest: 'Baú do Dia',
+  streak_chest: 'Baú das tochas',
+  challenge: 'Desafio',
+  merchant_sale: 'Comerciante',
+  goal_deposit: 'Guardou no Cofrinho',
+  goal_withdraw: 'Devolveu do Cofrinho',
+  goal_interest: 'Bônus de paciência',
+  repair: 'Conserto',
+  late_task: 'Missão recuperada',
+  reward_redemption: 'Prêmio',
+  shop: 'Loja',
+};
+
 const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ onClose, embedded }) => {
   const { childUid } = useAuth();
   const { economy } = useVillage();
+  const { today } = useClock();
   const [txs, setTxs] = useState<GoldTransaction[]>([]);
 
   useEffect(() => {
@@ -18,7 +36,6 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ onClo
   }, [childUid]);
 
   const weeks = useMemo(() => {
-    const today = getTodayBrazil();
     const current = isoWeekOf(today);
     const list = [current];
     let cursor = today;
@@ -28,21 +45,38 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ onClo
       if (!list.includes(w)) list.push(w);
     }
     return list;
-  }, []);
+  }, [today]);
 
   const rows = weeks.map((w) => weeklyStatement(txs, w));
-  const monthHonest = new Date().getDate() <= 7;
+  const dayNum = Number(today.slice(8, 10));
+  const monthHonest = dayNum <= 7;
+  const currentWeek = isoWeekOf(today);
+  const weekLines = txs.filter((t) => {
+    const d = t.createdAt instanceof Date ? t.createdAt : new Date(t.createdAt);
+    const ymd = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+    return isoWeekOf(ymd) === currentWeek;
+  }).slice(0, 20);
 
   const body = (
     <div className="space-y-3">
       {rows.map((r) => (
         <div key={r.weekIso} className="mc-card p-3 text-sm space-y-1">
-          <p className="font-bold">{r.weekIso}</p>
+          <p className="font-bold">Semana {r.weekIso.replace('W', '')}</p>
           <p>Ganhou <span className="mc-num" style={{ fontSize: 12 }}>{r.earned}</span> · Gastou <span className="mc-num" style={{ fontSize: 12 }}>{r.spent}</span></p>
           <p>Guardou <span className="mc-num" style={{ fontSize: 12 }}>{r.saved}</span> · Juros <span className="mc-num" style={{ fontSize: 12 }}>{r.interest}</span>{r.interest > 0 ? ' · paciência rendeu +' + r.interest : ''}</p>
           <p>Guardou {r.savingsRatePct}% do que ganhou (alvo {economy.savingsTargetPct}%).</p>
         </div>
       ))}
+      <div className="mc-card p-3 space-y-1">
+        <p className="font-bold text-sm">Movimentos desta semana</p>
+        {weekLines.length === 0 && <p className="text-sm mc-muted">Ainda não teve movimento nesta semana.</p>}
+        {weekLines.map((t) => (
+          <p key={t.id} className="text-sm flex justify-between gap-2">
+            <span>{SOURCE_LABEL[t.source] || t.description || t.source}</span>
+            <span className="mc-num" style={{ fontSize: 12 }}>{t.amount > 0 ? '+' : ''}{t.amount}</span>
+          </p>
+        ))}
+      </div>
       {monthHonest && (
         <p className="text-sm mc-muted">Na poupança de verdade, 100 reais rendem menos de 1 real por mês; aqui o bônus é maior de propósito, para você treinar.</p>
       )}

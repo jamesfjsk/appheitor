@@ -1,11 +1,13 @@
 import React from 'react';
 import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
 import TaskItem from './TaskItem';
 import { useClock } from '../../contexts/ClockContext';
 import { addDays } from '../../utils/clock';
-import { dueTasksOn } from '../../services/village/schedule';
+import { dueTasksOn, extraVisibleOn } from '../../services/village/schedule';
 import { lateWindow } from '../../services/village/late';
+import { FirestoreService } from '../../services/firestoreService';
 
 const MAP = '/assets/english/ui/map.webp';
 const SUN = '/assets/english/ui/sun.webp';
@@ -46,7 +48,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   onToggleGuidedMode
 }) => {
   const { completeTask, completeLateTask } = useData();
+  const { childUid } = useAuth();
   const { hour, weekday, today, period: clockPeriod } = useClock();
+  const [yesterdayDone, setYesterdayDone] = React.useState<string[]>([]);
 
   const getCurrentPeriod = (): 'morning' | 'afternoon' | 'evening' => clockPeriod;
 
@@ -71,7 +75,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     !task.optional &&
     isTaskAvailableToday(task, weekday)
   );
-  const extraTasks = tasks.filter((task) => task.optional && task.active && task.status !== 'proposed' && isTaskAvailableToday(task, weekday));
+  React.useEffect(() => {
+    if (!childUid) return;
+    const yesterday = addDays(today, -1);
+    void FirestoreService.getCompletedTaskIdsOn(childUid, yesterday).then(setYesterdayDone).catch(() => setYesterdayDone([]));
+  }, [childUid, today]);
+
+  const extraTasks = tasks.filter((task) => extraVisibleOn(task, today) && isTaskAvailableToday(task, weekday));
 
   const completedTasks = filteredTasks.filter(task => isTaskCompletedToday(task, today)).length;
   const totalTasks = filteredTasks.length;
@@ -188,10 +198,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
         </div>
       )}
 
-      {lateWindow(hour) && dueTasksOn(tasks, addDays(today, -1)).filter((t) => {
-        const full = tasks.find((x) => x.id === t.id);
-        return full && full.lastCompletedDate !== addDays(today, -1);
-      }).map((t) => {
+      {lateWindow(hour) && dueTasksOn(tasks, addDays(today, -1)).filter((t) => !yesterdayDone.includes(t.id)).map((t) => {
         const full = tasks.find((x) => x.id === t.id);
         if (!full) return null;
         return (

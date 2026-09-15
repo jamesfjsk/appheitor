@@ -152,7 +152,7 @@ test('desbloqueio: torre/mesa/campinho só com fornalha e baú >= 1; cofre preci
   expect(isBuildingUnlocked('cofre', none)).toBeFalsy();
   expect(isBuildingUnlocked('cofre', { ...none, bau: 1 })).toBeTruthy();
   expect(isBuildingUnlocked('agenda', none)).toBeTruthy();
-  expect(isBuildingUnlocked('mercado', { ...none, fornalha: 1, bau: 1 })).toBeTruthy();
+  expect(isBuildingUnlocked('mercado', none)).toBeTruthy();
   expect(baseLevel({ ...none, fornalha: 2, bau: 1 })).toBe(3);
 });
 
@@ -164,7 +164,7 @@ test('Campinho não se constrói antes da Etapa 4; Agenda e Mercado param no ní
   expect(buildingOpensLater('agenda', 1)).toBe(null);
   expect(buildingEffectNow('fornalha', 0)).toBe('Ainda não construída.');
   expect(buildingEffectNow('torre', 1)).toMatch(/conquistas/i);
-  expect(buildingEffectNow('mesa', 1)).toMatch(/prova do dia/i);
+  expect(buildingEffectNow('mesa', 1)).toMatch(/tema/i);
   expect(BUILDING_BY_ID.mesa.label).toBe('Biblioteca');
   for (const b of BUILDINGS) {
     expect(b.effects).toHaveLength(3);

@@ -26,8 +26,9 @@ import PlacaManager from './PlacaManager';
 import GoalsPanel from './GoalsPanel';
 import ChallengeManager from './ChallengeManager';
 import Balanca from './Balanca';
+import AgendaManager from './AgendaManager';
 
-type TabType = 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz' | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system' | 'goals' | 'challenges' | 'balanca';
+type TabType = 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz' | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system' | 'goals' | 'challenges' | 'balanca' | 'agenda';
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -41,6 +42,7 @@ const ParentPanel: React.FC = () => {
     { id: 'goals', label: 'Cofrinho', icon: 'gold' },
     { id: 'challenges', label: 'Desafios', icon: 'trophy' },
     { id: 'balanca', label: 'Balança', icon: 'gold' },
+    { id: 'agenda', label: 'Agenda', icon: 'notes' },
     { id: 'tasks', label: 'Gerenciar Tarefas', icon: 'notes' },
     { id: 'rewards', label: 'Recompensas', icon: 'gift' },
     { id: 'achievements', label: 'Conquistas', icon: 'trophy' },
@@ -108,6 +110,9 @@ const ParentPanel: React.FC = () => {
           )}
           {activeTab === 'balanca' && (
             <Balanca />
+          )}
+          {activeTab === 'agenda' && (
+            <AgendaManager />
           )}
           {activeTab === 'tasks' && (
             <TaskManager tasks={tasks} />

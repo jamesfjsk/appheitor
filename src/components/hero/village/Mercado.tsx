@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { COSMETICS, cosmeticHasSprite } from '../../../config/village';
 import { ITEMS, itemState } from '../../../config/items';
 import { canBuy, priceOf } from '../../../services/village/shop';
-import { daysToAfford } from '../../../services/village/income';
+import { daysToAfford, referenceIncome } from '../../../services/village/income';
+import { listGoldTransactions } from '../../../services/goldTx';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
@@ -41,12 +42,21 @@ const Mercado: React.FC<{
   const modules = useModules();
   const shopOpen = modules.shop !== false && settings.shopEnabled;
   const [picked, setPicked] = useState<'real' | 'shop' | 'merchant' | null>(null);
+  const [confirmBuy, setConfirmBuy] = useState(false);
+  const [askEquip, setAskEquip] = useState(false);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]['id']>('all');
   const [cardId, setCardId] = useState<string | null>(null);
   const tab = picked ?? (shopOpen ? 'shop' : 'real');
   const level = calculateLevelSystem(progress.totalXP || 0).currentLevel;
   const gold = progress.availableGold || 0;
-  const r7 = economy.incomeDayGold;
+  const [r7, setR7] = useState(economy.incomeDayGold);
+  useEffect(() => {
+    if (!childUid) return;
+    void listGoldTransactions(childUid, 200).then((txs) => {
+      const week = txs.filter((t) => Date.now() - t.createdAt.getTime() < 7 * 86400000);
+      setR7(referenceIncome(week, economy.incomeDayGold));
+    });
+  }, [childUid, economy.incomeDayGold]);
   const shopItems = COSMETICS.filter((c) => !c.free && cosmeticHasSprite(c.id)).filter((c) => {
     if (filter === 'all') return true;
     if (filter === 'premium') return c.premium;
@@ -129,7 +139,17 @@ const Mercado: React.FC<{
                 <p className="mc-lbl mb-1">Só se ganha</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {exclusive.slice(0, 8).map((item) => (
-                    <ItemSlot key={item.id} item={item} state="em_breve" />
+                      <ItemSlot
+                      key={item.id}
+                      item={item}
+                      state={
+                        (item.id === 'esmeralda' && village.rare.esmeralda > 0)
+                        || (item.id === 'diamante' && village.rare.diamante > 0)
+                        || village.owned.includes(item.id)
+                          ? 'seu'
+                          : 'em_breve'
+                      }
+                    />
                   ))}
                 </div>
               </div>
@@ -145,14 +165,41 @@ const Mercado: React.FC<{
                     onClick={() => {
                       playClick();
                       const gate = canBuy(village, gold, selected, settings, level);
-                      if (gate.reason === 'gold') onCreateGoal?.(selected.label, priceOf(selected, settings));
-                      else void buyCosmetic(selected.id).then(() => { toast.success('Equipar agora?'); onOpenPack?.(); });
+                      const price = priceOf(selected, settings);
+                      if (gate.reason === 'gold') {
+                        toast.error(`Faltam ${Math.max(0, price - gold)} gold`);
+                        return;
+                      }
+                      setConfirmBuy(true);
                     }}
                   >
                     {village.owned.includes(selected.id) ? 'Seu' : canBuy(village, gold, selected, settings, level).reason === 'level' ? `Nível ${selected.minLevel}` : 'Comprar'}
                   </button>
-                  <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3" onClick={() => setCardId(null)}>Só olhar</button>
+                  <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3" onClick={() => { setCardId(null); setConfirmBuy(false); }}>Só olhar</button>
                 </div>
+                {confirmBuy && !village.owned.includes(selected.id) && (
+                  <div className="mc-paper text-gray-900 rounded p-3 mt-2 space-y-2">
+                    <p className="text-sm">Com {priceOf(selected, settings)} gold você leva {selected.label}. Sobram {gold - priceOf(selected, settings)}.</p>
+                    <div className="flex gap-2">
+                      <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" onClick={() => {
+                        void buyCosmetic(selected.id).then(() => {
+                          setConfirmBuy(false);
+                          setAskEquip(true);
+                        }).catch((e) => toast.error(e instanceof Error ? e.message : 'Não deu certo'));
+                      }}>Sim</button>
+                      <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3" onClick={() => setConfirmBuy(false)}>Não</button>
+                    </div>
+                  </div>
+                )}
+                {askEquip && (
+                  <div className="mc-paper text-gray-900 rounded p-3 mt-2 space-y-2">
+                    <p className="text-sm">Equipar agora?</p>
+                    <div className="flex gap-2">
+                      <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" onClick={() => { setAskEquip(false); onOpenPack?.(); }}>Sim</button>
+                      <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3" onClick={() => setAskEquip(false)}>Não</button>
+                    </div>
+                  </div>
+                )}
               </ItemCard>
             )}
           </div>
@@ -165,7 +212,7 @@ const Mercado: React.FC<{
               <div key={m} className="mc-row rounded p-3 flex items-center gap-3">
                 <img src={MATERIAL_ICONS[m]} alt="" className="w-8 h-8 mc-pixel" />
                 <span className="flex-1">{MATERIAL_LABELS[m]} · <span className="mc-num" style={{ fontSize: 12 }}>{materials[m] || 0}</span></span>
-                <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" onClick={() => void sell(m)}>Vender 10</button>
+                <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" disabled={(materials[m] || 0) < 10} onClick={() => void sell(m)}>Vender 10</button>
               </div>
             ))}
           </div>

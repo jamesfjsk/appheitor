@@ -19,6 +19,29 @@ function createdAtMs(value: Date | string | null | undefined): number | null {
 }
 
 /** Missões devidas na data (frequência, ativa, createdAt até o fim do dia). */
+export function extraVisibleOn(
+  task: { optional?: boolean; date?: string; active?: boolean; status?: string },
+  date: string
+): boolean {
+  if (task.active === false || task.status === 'proposed') return false;
+  if (!task.optional) return false;
+  return !task.date || task.date === date;
+}
+
+export function dueCompletionsCount(
+  tasks: readonly ScheduleTask[],
+  date: string,
+  completions: Array<{ taskId?: string; reverted?: boolean }>
+): number {
+  const dueIds = new Set(dueTasksOn(tasks, date).map((t) => t.id));
+  const seen = new Set<string>();
+  for (const c of completions) {
+    if (c.reverted === true || !c.taskId) continue;
+    if (dueIds.has(c.taskId)) seen.add(c.taskId);
+  }
+  return seen.size;
+}
+
 export function dueTasksOn(tasks: readonly ScheduleTask[], date: string): ScheduleTask[] {
   const dow = weekdayFromDate(date);
   const dayEnd = Date.parse(`${date}T23:59:59.999-03:00`);

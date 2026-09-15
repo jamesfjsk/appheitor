@@ -24,6 +24,8 @@ const VillageGate: React.FC<{
   guidedMode: boolean;
   onToggleGuidedMode: () => void;
   onOpenQuiz: () => void;
+  quizLocked: boolean;
+  punished?: boolean;
 }> = (props) => {
   const { village } = useVillage();
   const forceOnboard = import.meta.env.DEV && new URLSearchParams(window.location.search).get('onboard') === '1';
@@ -35,12 +37,6 @@ const VillageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const { loading } = useVillage();
   if (loading) return <LoadingSpinner />;
   return <>{children}</>;
-};
-
-const VillageQuiz: React.FC<{ onComplete: () => void; openRequested: number }> = ({ onComplete, openRequested }) => {
-  const { buildings } = useVillage();
-  if ((buildings.mesa || 0) < 1) return null;
-  return <DailyQuiz onComplete={onComplete} openRequested={openRequested} />;
 };
 
 const AfterOnboard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -58,11 +54,19 @@ const HeroPanel: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'morning' | 'afternoon' | 'evening'>(clockPeriod);
   const [guidedMode, setGuidedMode] = useState(false);
   const [showSurpriseMission, setShowSurpriseMission] = useState(false);
+  const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizRequestId, setQuizRequestId] = useState(0);
+  const [punishOpen, setPunishOpen] = useState(false);
 
   useEffect(() => {
     setSelectedPeriod(clockPeriod);
   }, [clockPeriod]);
+
+  useEffect(() => {
+    if (!progress.userId) return;
+    const quizKey = `quiz_completed_${progress.userId}_${getTodayBrazil()}`;
+    setQuizCompleted(Boolean(localStorage.getItem(quizKey)));
+  }, [progress.userId, clockToday]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -74,11 +78,13 @@ const HeroPanel: React.FC = () => {
   const markQuizDone = useCallback(() => {
     if (!progress.userId) return;
     localStorage.setItem(`quiz_completed_${progress.userId}_${getTodayBrazil()}`, '1');
+    setQuizCompleted(true);
   }, [progress.userId]);
 
   if (loading) return <LoadingSpinner size="lg" />;
-  if (isPunished) return <PunishmentModeScreen />;
 
+  const quizLocked = (Boolean(progress.quizRequired) && !quizCompleted)
+    || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('quiz') === 'lock');
   const todayString = clockToday.slice(5);
 
   return (
@@ -94,6 +100,8 @@ const HeroPanel: React.FC = () => {
                 guidedMode={guidedMode}
                 onToggleGuidedMode={() => setGuidedMode((v) => !v)}
                 onOpenQuiz={() => setQuizRequestId((n) => n + 1)}
+                quizLocked={quizLocked}
+                punished={isPunished}
               />
             </div>
             {todayString === CHILD_BIRTHDAY_MMDD && (
@@ -103,13 +111,19 @@ const HeroPanel: React.FC = () => {
             )}
           </div>
           <AfterOnboard>
-            <VillageQuiz onComplete={markQuizDone} openRequested={quizRequestId} />
+            <DailyQuiz onComplete={markQuizDone} openRequested={quizRequestId} />
             <LevelUpModal />
           </AfterOnboard>
         </VillageShell>
       </VillageProvider>
 
       <BirthdayCelebration onComplete={() => undefined} />
+      {isPunished && !punishOpen && (
+        <button type="button" className="fixed top-24 right-4 z-50 mc-btn mc-btn-stone min-h-[44px] px-3" onClick={() => setPunishOpen(true)}>
+          Tarefas da punição
+        </button>
+      )}
+      {punishOpen && <PunishmentModeScreen onClose={() => setPunishOpen(false)} />}
       <AnimatePresence>
         {showSurpriseMission && (
           <SurpriseMissionQuiz isOpen={showSurpriseMission} onClose={() => setShowSurpriseMission(false)} onComplete={() => setShowSurpriseMission(false)} />

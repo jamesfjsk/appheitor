@@ -8,14 +8,17 @@ const CLOCK = '/assets/english/ui/clock.webp';
 interface FlashTimerProps {
   isOpen: boolean;
   onClose: () => void;
+  embedded?: boolean;
+  minutes?: number;
+  onFinished?: () => void;
 }
 
-const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
+const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = false, minutes, onFinished }) => {
   const { isSoundEnabled } = useSound();
   
   // Timer state
-  const [totalSeconds, setTotalSeconds] = useState(300); // 5 minutes default
-  const [remainingSeconds, setRemainingSeconds] = useState(300);
+  const [totalSeconds, setTotalSeconds] = useState(minutes ? minutes * 60 : 300);
+  const [remainingSeconds, setRemainingSeconds] = useState(minutes ? minutes * 60 : 300);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -39,7 +42,14 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
     { label: '1 hora', seconds: 3600 }
   ];
 
-  // Initialize audio context
+  useEffect(() => {
+    if (!minutes) return;
+    const sec = minutes * 60;
+    setTotalSeconds(sec);
+    setRemainingSeconds(sec);
+    setIsFinished(false);
+    setIsRunning(false);
+  }, [minutes]);
   useEffect(() => {
     const initAudio = () => {
       if (!audioContextRef.current) {
@@ -60,6 +70,7 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
             setIsRunning(false);
             setIsFinished(true);
             playFinishSound();
+            onFinished?.();
             return 0;
           }
           return prev - 1;
@@ -187,20 +198,8 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="mc-panel rounded-lg w-full max-w-lg overflow-hidden text-white relative"
-      >
+  const body = (
+        <div className="text-white relative">
         <div className="p-4 border-b-4 border-[#17130f] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <img src={CLOCK} alt="" className="w-10 h-10 mc-pixel" draggable={false} />
@@ -339,6 +338,26 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose }) => {
             </motion.div>
           )}
         </AnimatePresence>
+  </div>
+  );
+
+  if (embedded) return <div className="mc-card rounded overflow-hidden">{body}</div>;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="mc-panel rounded-lg w-full max-w-lg overflow-hidden text-white relative"
+      >
+        {body}
       </motion.div>
     </motion.div>
   );

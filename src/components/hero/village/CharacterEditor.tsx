@@ -85,6 +85,15 @@ const CharacterEditor: React.FC<{ onClose: () => void; onBuy: () => void; embedd
           </div>
         </div>
         <div className="grid grid-cols-4 gap-2 mb-4">
+          {(tab === 'hat' || tab === 'cape' || tab === 'pet') && (
+            <button
+              type="button"
+              className={`mc-slot aspect-square ${draft[tab] == null ? 'mc-slot-selected' : ''}`}
+              onClick={() => { playClick(); setDraft({ ...draft, [tab]: null }); }}
+            >
+              Nenhum
+            </button>
+          )}
           {options.map((c) => {
             const owned = c.free || FREE_COSMETIC_IDS.includes(c.id) || village.owned.includes(c.id);
             const selected = draft[tab] === c.id;

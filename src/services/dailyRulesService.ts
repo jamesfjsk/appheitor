@@ -182,17 +182,18 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       : initialVillageDoc(userId, new Date().toISOString());
     const cerca = Number((baseSnap.data()?.buildings as { cerca?: number } | undefined)?.cerca) || 0;
 
-    let missed = Math.max(0, due - done.count);
+    let missed = missedTasks.length;
     let helmetUsed = false;
     const week = isoWeekOf(date);
-    if (missed >= 1 && village.gear.helmet >= 1 && village.shield.helmetWeek !== week) {
-      missed -= 1;
+    if (!vacation && !paused && missed === 1 && village.gear.helmet >= 1 && village.shield.helmetWeek !== week) {
+      missed = 0;
       helmetUsed = true;
     }
+    const dueDone = Math.max(0, due - missed);
 
     let penaltyWanted = r.enabled && !skipPenalty ? missed * r.penaltyPerMissedTask : 0;
     if (cerca >= 3 && penaltyWanted > 1) penaltyWanted = 1;
-    const bonus = r.enabled && !skipPenalty && due > 0 && done.count >= due ? r.allDoneBonus : 0;
+    const bonus = r.enabled && !skipPenalty && due > 0 && dueDone >= due ? r.allDoneBonus : 0;
 
     const gold = Number(progressSnap.data()?.availableGold) || 0;
     const penalty = Math.min(penaltyWanted, gold);
@@ -203,7 +204,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       userId,
       date,
       totalTasksAvailable: due,
-      tasksCompleted: done.count,
+      tasksCompleted: dueDone,
       xpEarned: done.xp,
       goldEarned: done.gold,
       goldPenalty: penalty,
@@ -235,7 +236,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
         type: 'penalty',
         source: 'daily_penalty',
         description: `${missed} ${missed === 1 ? 'missão perdida' : 'missões perdidas'} em ${date.split('-').reverse().slice(0, 2).join('/')}`,
-        metadata: { date, tasksCompleted: done.count, totalTasksAvailable: due, incompleteTasks: missed },
+        metadata: { date, tasksCompleted: dueDone, totalTasksAvailable: due, incompleteTasks: missed },
         balanceBefore: gold,
         balanceAfter: afterPenalty,
         createdAt: serverTimestamp(),
@@ -248,15 +249,20 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
         type: 'bonus',
         source: 'daily_bonus',
         description: `Dia completo em ${date.split('-').reverse().slice(0, 2).join('/')}: todas as missões feitas`,
-        metadata: { date, tasksCompleted: done.count, totalTasksAvailable: due },
+        metadata: { date, tasksCompleted: dueDone, totalTasksAvailable: due },
         balanceBefore: afterPenalty,
         balanceAfter: finalGold,
         createdAt: serverTimestamp(),
       });
     }
 
-    const missedIds = helmetUsed ? missedTasks.slice(1).map((t) => t.id) : missedTasks.map((t) => t.id);
-    let cracks = cracksAfterClose(village.cracks, missedIds, DEFAULT_LOTS_BY_PERIOD, firstMissedPeriod);
+    const missedIds = (vacation || paused)
+      ? []
+      : helmetUsed
+        ? missedTasks.slice(1).map((t) => t.id)
+        : missedTasks.map((t) => t.id);
+    const crackPeriod = (missedTasks.find((t) => missedIds.includes(t.id))?.period || firstMissedPeriod) as Period;
+    let cracks = cracksAfterClose(village.cracks, missedIds, DEFAULT_LOTS_BY_PERIOD, crackPeriod);
     if (cerca >= 2) {
       const previous = new Set(village.cracks);
       cracks = cracks.filter((lot) => !previous.has(lot));
@@ -267,7 +273,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       claimed[punishKey] = new Date().toISOString();
       extendPunish = true;
     }
-    const lost = !skipPenalty && due > 0 && done.count < due;
+    const lost = !skipPenalty && due > 0 && dueDone < due;
     const fenceKey = claimKey('fence', date.slice(0, 7));
     let keepTorches = false;
     if (lost && cerca >= 1 && !hasClaim(village, fenceKey)) {
@@ -277,7 +283,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
     const shield = helmetUsed ? { ...village.shield, helmetWeek: week } : village.shield;
     const torches = nextFullDays({
       due,
-      done: done.count,
+      done: dueDone,
       fullDays: village.fullDays,
       fullDaysStart: village.fullDaysStart,
       date,
@@ -298,7 +304,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
     applied = {
       date,
       totalTasksAvailable: due,
-      tasksCompleted: done.count,
+      tasksCompleted: dueDone,
       xpEarned: done.xp,
       goldEarned: done.gold,
       goldPenalty: penalty,

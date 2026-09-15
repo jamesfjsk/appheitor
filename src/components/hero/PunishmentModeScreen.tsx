@@ -11,7 +11,7 @@ const CREEPER = '/assets/english/ui/creeper.webp';
 const CLOCK = '/assets/english/ui/clock.webp';
 const MAP = '/assets/english/ui/map.webp';
 
-const PunishmentModeScreen: React.FC = () => {
+const PunishmentModeScreen: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const {
     punishment,
     isPunished,
@@ -115,6 +115,9 @@ const PunishmentModeScreen: React.FC = () => {
         <div className="relative z-10 min-h-screen flex items-start justify-center p-4 py-8">
           <div className="max-w-4xl w-full space-y-4">
             <div className="mc-panel rounded-lg p-5 text-center">
+              {onClose && (
+                <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3 mb-3" onClick={onClose}>Voltar à Vila</button>
+              )}
               <img src={CREEPER} alt="" className="w-20 h-20 mx-auto mb-3 mc-pixel" draggable={false} />
               <h1 className="mc-title text-base sm:text-lg mb-3">Modo punição</h1>
               <div className="mc-card rounded p-4 mb-3">

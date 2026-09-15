@@ -11,10 +11,10 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { FAMILY_ID } from '../config/rules';
-import { DEFAULT_ECONOMY } from '../config/village';
-import type { EconomySettings, GoalDoc, GoalStatus } from '../types/village';
+import { DEFAULT_ECONOMY, DEFAULT_MODULES } from '../config/village';
+import type { EconomySettings, GoalDoc, GoalStatus, ModuleSettings } from '../types/village';
 import { getTodayBrazil, isoWeekOf, nowBrazil } from '../utils/clock';
-import { validateDeposit, vaultGoalCap, vaultInterestRatePct, weeklyInterest } from './village/bank';
+import { validateDeposit, vaultGoalCap, weeklyInterest } from './village/bank';
 import { ensureBase } from './englishBaseService';
 import { capGold } from './village/caps';
 import { getSettings } from './settingsService';
@@ -76,7 +76,11 @@ export async function createGoal(
   uid: string,
   input: { title: string; targetGold: number; rewardId?: string }
 ): Promise<string> {
-  const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
+  const [economy, modules] = await Promise.all([
+    getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as Promise<EconomySettings>,
+    getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as Promise<ModuleSettings>,
+  ]);
+  if (modules.bank === false) throw new Error('O Banco da Vila está desligado');
   const base = await ensureBase(uid);
   const cap = Math.min(economy.maxOpenGoals ?? 2, vaultGoalCap(base.buildings.cofre || 0));
   const open = (await listGoals(uid)).filter((g) => g.status === 'open' || g.status === 'cancel_requested');
@@ -99,6 +103,7 @@ export async function createGoal(
     status: 'open',
     rewardId: input.rewardId || null,
     interestPaid: 0,
+    lastInterestWeek: isoWeekOf(getTodayBrazil()),
     createdAt: now,
     updatedAt: now,
   }));
@@ -106,6 +111,8 @@ export async function createGoal(
 }
 
 export async function depositGoal(uid: string, goalId: string, amount: number): Promise<void> {
+  const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
+  if (modules.bank === false) throw new Error('O Banco da Vila está desligado');
   await runTransaction(db, async (tx) => {
     const goalRef = doc(db, 'goals', goalId);
     const progressRef = doc(db, 'progress', uid);
@@ -162,11 +169,22 @@ export async function requestCancel(uid: string, goalId: string, reason: string)
 
 export async function applyWeeklyInterest(uid: string): Promise<number> {
   const week = isoWeekOf(getTodayBrazil());
-  const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
+  const [economy, modules] = await Promise.all([
+    getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as Promise<EconomySettings>,
+    getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as Promise<ModuleSettings>,
+  ]);
+  if (modules.interest === false) return 0;
   const base = await ensureBase(uid);
   const vaultLevel = base.buildings.cofre || 0;
   const goals = (await listGoals(uid)).filter((g) => g.status === 'open');
-  const lines = weeklyInterest(goals, week, { ...economy, interestRatePct: vaultInterestRatePct(vaultLevel) }, vaultLevel);
+  const weekTxs = txsInWeek(await listGoldTransactions(uid), week);
+  const depositedThisWeek: Record<string, number> = {};
+  for (const t of weekTxs) {
+    if (t.source === 'goal_deposit' && t.relatedId) {
+      depositedThisWeek[t.relatedId] = (depositedThisWeek[t.relatedId] || 0) + Math.abs(t.amount);
+    }
+  }
+  const lines = weeklyInterest(goals, week, economy, vaultLevel, depositedThisWeek);
   if (lines.length === 0) return 0;
   const room = await roomForGameGold(uid, economy);
   let remaining = room.room;
@@ -270,12 +288,13 @@ export async function finishGoal(
     tx.set(redemptionRef, omitUndefined({
       userId: goal.userId,
       rewardId: goal.rewardId || goalId,
+      rewardTitle: goal.title,
       costGold: 0,
       status: 'approved',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       approvedBy: adminUid,
-      metadata: { fromGoal: true, goalId, title: goal.title },
+      metadata: { fromGoal: true, goalId, title: goal.title, icon: 'reward:cofre' },
     }));
     tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
       userId: goal.userId,
@@ -297,5 +316,5 @@ export async function finishGoal(
 export async function weeklyStatementsFor(uid: string, weeks: string[]) {
   const txs = await listGoldTransactions(uid);
   const { weeklyStatement } = await import('./village/bank');
-  return weeks.map((w) => weeklyStatement(txsInWeek(txs, w).length ? txs : txs, w));
+  return weeks.map((w) => weeklyStatement(txsInWeek(txs, w), w));
 }

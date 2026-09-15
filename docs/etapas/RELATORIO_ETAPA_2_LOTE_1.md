@@ -1,72 +1,35 @@
-# Relatório — Etapa 2 Lote 1 (Banco, desafios, itens, mapa, casa, função)
+# Relatório — Etapa 2 Lote 1 (revisão da seção 7)
 
-Sem commit. O pai revisa e commita.
+Branch `etapa-2`. WIP anterior: `f02ba5c`. Este relatório cobre a execução da `REVISAO_ETAPA_2_LOTE_1.md` seção 7. **Lote 2 não começou.**
 
-Data: 15/09/2026. Escopo: Lote 1 de `docs/etapas/ETAPA_2_BANCO_E_TEMPORADA.md`. Lote 2 não começou.
-
-## O que entrou
-
-Relógio único de Brasília (`clock.ts` + `ClockProvider`), economia v2, Cofrinho com bônus de paciência, desafios, tetos de gold do jogo, conserto e missão recuperada, Agenda (no lugar do cronômetro solto), sistema de itens v1, mapa com distritos, Casa do Minerador com as missões, efeitos de Fornalha/Armazém/Cerca, painel (metas, desafios, faixas, Balança), Cloud Function `openai` e simulador de 91 dias.
-
-## Arquivos principais
-
-### Novos (código)
-
-- `src/utils/clock.ts`, `src/utils/__tests__/clock.test.ts`
-- `src/contexts/ClockContext.tsx`
-- `src/types/items.ts`, `src/config/items.ts`
-- `src/services/village/{bank,challenges,income,caps,repair,late,levels,agenda}.ts`
-- `src/services/village/__tests__/etapa2.test.ts`
-- `src/services/{goalsService,challengesService,agendaService,goldTx}.ts`
-- `src/components/hero/village/{Cofrinho,Extrato,Agenda,DesafiosCard,Mochila,ItemSlot,ItemCard,Casa}.tsx`
-- `src/components/parent/{GoalsPanel,ChallengeManager,Balanca}.tsx`
-- `functions/` (`openai`, `agendaReminders`, relógio duplicado só no runtime da função)
-- `scripts/econ-sim.mjs`
-
-### Alterados (entre outros)
-
-- `src/config/{village,englishBase,rules,firebase}.ts`, `src/types/village.ts`
-- `src/services/{villageService,firestoreService,dailyRulesService,dailyQuizService,aiQuiz,englishTts,englishBaseService,observability}.ts`
-- `src/services/village/{chest,shop,schedule}.ts`
-- `src/components/hero/{HeroHeader,HeroPanel,RewardsPanel,YesterdaySummary}.tsx`
-- `src/components/hero/village/{VillageHome,VillageScene,Oficina,Mercado,DailyChest,BuildingCard,CharacterEditor}.tsx`
-- `src/components/parent/{ParentPanel,RewardForm,GoldHistory}.tsx`
-- `src/contexts/{DataContext,VillageContext,NotificationContext}.tsx`
-- `firestore.rules`, `firestore.indexes.json`, `firebase.json`, `.env.example`
-- `docs/VILA_API.md`
-
-Não tocados de propósito: `src/index.css`, `ComicBackdrop.tsx`, pasta `english/**` além de `completeContract` → `bumpChallenge` e TTS pela função. Lanterna no `ContractBoard` (contratos de amanhã) ainda falta.
-
-Arte consumida (feita pelo líder): `casa-1..3`, `cofre-1..3`, `chest_streak*`, troféus, `fx_rachadura`, frames da Mochila, marcos.
+Data: 15/09/2026.
 
 ## Decisões
 
-1. **Regras de create do Cofrinho:** o texto da seção 8 não deixa o admin criar meta para o filho. A regra publicada aceita `isAdmin()` **ou** criança com `status == 'open'` e `savedGold == 0`. Sem isso o atalho “Criar meta no Cofrinho” pelo painel quebraria.
-2. **`familyId`:** constante `FAMILY_ID = 'heitor'` em `config/rules.ts`; gravado em `goals`, `challenges` e `agenda`; create nas regras exige `familyId == 'heitor'`. Documentos velhos sem o campo ainda leem (parser usa fallback).
-3. **`learning/{uid}`:** a spec manda um doc por uid (não por semana). O Lote 1 não grava relatório semanal (é Lote 2). Quem implementar precisa de `learning/{uid}/weeks/{week}` ou equivalente; senão a semana nova apaga a anterior.
-4. **Pré-requisito n3:** Fornalha, Armazém e Cerca no n2 (não “todas as sete no n2” nem minerador 20). Escolha mais simples; a Mesa continua `liveMaxLevel: 1`.
-5. **Empate no Baú:** o material mais escasso; se empatar, o hash escolhe entre madeira/pedra/ferro (nessa ordem de varredura).
-6. **ChatFlashGPT:** a função só devolve JSON de chat. O chat livre ainda lê chave no cliente, mas `AI_CHAT_ENABLED` continua `false`. Não foi migrado para não quebrar o formato.
-7. **`modules.bank`:** padrão `false` — o Cofre mostra placa até o pai ligar o módulo.
-8. **Casa / Plano / Fechar o dia:** as abas existem com texto “em breve”; a lógica (plano, check-in, Sábio) fica no Lote 2. Missões já moram na Casa.
-9. **Ferraria Obras:** só leitura; construir continua no lote da cena (`BuildingCard`).
-10. **Agenda `onSchedule`:** além do intervalo `[hoje, amanhã]` da spec, a função também busca `repeat == 'weekly'` para não perder treino semanal fora da janela de datas.
-11. **Cofre na cena:** não há `BuildingId` `cofre`. Clique no lote `build:cofre` e o distrito Banco abrem o Cofrinho; placa se o módulo estiver desligado.
-12. **Item temporada no simulador:** o perfil **misto** alerta que 50 D é inalcançável em 13 semanas (ele gasta em vez de guardar). Típico e perfeito não disparam alerta de saldo parado. Constantes **não** foram mexidas: o perfil misto não é o alvo da faixa temporada.
-13. **`clockDriftWarning`:** vive em `clock.ts` (módulo puro), não no contexto React, para o eslint continuar só com os 6 avisos de `icons/index.tsx`.
-14. **Gold no catálogo:** item `gold` em `ITEMS` para o Baú usar `ItemSlot`.
+1. **A4, A6, A7 desfeitos; A5 ficou.** Prova volta a ser portão (`quizLocked`) e abre com `onboardedAt`. Clique no lote abre sempre o `BuildingCard`; atalho só por NPC e hotbar. Juros únicos de `settings/economy` (5%, teto 20). Cofre 1 = 1 meta, 2 = 2 metas + bônus, 3 = faixa temporada. Mercado e Agenda continuam construções: custo n1 igual ao da Fornalha, sem pré-requisito, hotbar Mercado de volta, sprites `buildings/mercado-1.png` e `buildings/agenda-1.png`.
+2. **Exceção A6 × VILA_MAPA (M33):** o lote do Armazém (`build:bau`) com nível ≥ 1 abre a Mochila, porque o mapa pede isso; o cartão da obra continua no nível 0 e pelo atalho Obras da Ferraria.
+3. **`modules.bank` padrão `true` (A10).** Extrato e Paciência sempre abrem; o Cofrinho some se o módulo estiver desligado ou o Cofre não existir.
+4. **Lanterna (A9):** `canCraft` devolve `soon` até existir efeito. Capacete continua forjável (já absorve 1 perda).
+5. **Punição (M24):** a Vila permanece visível, com Mercado/Baú/Loja travados; prova e Mina abertas. Tarefas extras ficam num botão “Tarefas da punição”, não no lugar da Vila.
+6. **R7:** Mercado e RewardForm leem `referenceIncome` dos 7 dias. Sem movimento (conta resetada) cai na reserva 45 — o aceite mostrou 45 por isso.
+7. **Reversão de dia fechado (M15):** não implementada. Bloqueante do Lote 2.
+8. **ChatFlashGPT:** continua desligado e ainda lê chave no cliente. Não migrado.
+9. **Item temporada no simulador:** o perfil misto alerta 50 D inalcançável. Constantes não mexidas.
+10. **`learning/{uid}`:** Lote 2. Quem implementar precisa de subcoleção por semana.
+11. **Aceite:** `reset-test-account.cjs` não reconstroi obras; para as fotos o script `scripts/patch-test-etapa2.cjs` ligou Fornalha, Armazém, Cofre 2, Mercado e Agenda. Reset de novo no fim.
+12. **Compromissos vazios** na conta de teste (Agenda antiga) não entram mais na Linha do dia.
 
-## Verificação (seção 10)
+## Saídas dos comandos
 
 | Comando | Resultado |
 |---|---|
 | `npx tsc --noEmit -p tsconfig.app.json` | ok (exit 0) |
 | `npx eslint src --max-warnings 6` | 6 avisos pré-existentes em `src/icons/index.tsx` |
-| `npm run test:english` | 11 arquivos, todos passaram (inclui `village/etapa2.test.ts` e `utils/clock.test.ts`) |
-| `npx vite build` | ok; bundle sem `sk-` |
+| `npm run test:english` | 11 arquivos, todos passaram (inclui `village/etapa2.test.ts` 14 casos e `utils/clock.test.ts`) |
+| `npx vite build` | ok; bundle sem `sk-` (`dist/assets/App-BdiZJLGm.js`) |
 | `node scripts/econ-sim.mjs` | ver abaixo |
-| Regras / índices / função | Regras e índices **publicados** em `app-heitor`. Função **não publicada**: Secret Manager API desligada no projeto (403). O líder liga a API, cria o secret `OPENAI_API_KEY` e roda `npx firebase-tools deploy --only functions --project app-heitor`. |
-| Aceite no navegador `teste@flash.com` | **não rodado** — não há Playwright neste `package.json` nem sessão de browser nesta passagem; fotos em `docs/exemplos/telas/etapa2/` **não geradas** |
+| `npx firebase-tools deploy --only firestore:rules,firestore:indexes,functions --project app-heitor` | **Deploy complete.** `openai` e `agendaReminders` atualizados em `southamerica-east1`. |
+| TTS real (conta de teste, `kind: tts`, “Hello miner.”) | **HTTP 200**, URL `https://firebasestorage.googleapis.com/v0/b/app-heitor.firebasestorage.app/o/eng...` (token de download, M8) |
 
 ### Simulador (91 dias)
 
@@ -74,7 +37,7 @@ Arte consumida (feita pelo líder): `casa-1..3`, `cofre-1..3`, `chest_streak*`, 
 == típico ==
 ganho 2912  gasto 728  guardado 507  saldo 1840  xp 6916
 materiais madeira 91 pedra 91 ferro 0
-nível por semana: S1:Nv3 … S13:Nv32
+nível por semana: S1:Nv3 S2:Nv5 S3:Nv8 S4:Nv10 S5:Nv13 S6:Nv15 S7:Nv17 S8:Nv20 S9:Nv22 S10:Nv25 S11:Nv27 S12:Nv30 S13:Nv32
 
 == misto ==
 ganho 2093  gasto 1365  guardado 122  saldo 657  xp 4914
@@ -88,33 +51,67 @@ materiais madeira 91 pedra 91 ferro 91
 nível por semana: S1:Nv4 … S13:Nv40
 ```
 
-Função: 2 milhões de invocações grátis/mês no plano Blaze; teto interno 800 chamadas/mês. Custo estimado efetivo: zero neste uso.
+## Fotos (`docs/exemplos/telas/etapa2/`)
 
-O líder ainda precisa: `npx firebase-tools functions:secrets:set OPENAI_API_KEY` (se ainda não existir).
+Conta `teste@flash.com`, Vite `http://localhost:5174`, `?h=14` e `?h=19`. Script `docs/exemplos/telas/etapa2/_shot_aceite.mjs`. Reset antes e depois.
 
-## Problemas e melhorias (avisar o pai)
+| Arquivo | O que mostra |
+|---|---|
+| `01-vila.png` | Cena, relógio 14:00, hotbar com Mercado, Placa “Hoje você tem”, Cofre/Agenda/Barraca no mapa |
+| `02-casa.png` / `03-casa-linha.png` | Casa com Linha do dia (missões + Fechar o dia 21:00) |
+| `04-mercado.png` | Mercado com prêmios embutidos; R7 reserva 45 (sem ganhos na semana) |
+| `05-agenda.png` | Formulário com lembrete, repetir, nota, Foco 15/25, abas Hoje/Semana/Mês |
+| `06-banco.png` | Chip de gold abre Extrato (sem depender do Cofrinho) |
+| `07-meta-criada.png` / `08-deposito.png` | Meta “Pizza”, depósito 20, saldo 100→80, toast “Guardou 20 gold” / “Meta criada” |
+| `09-extrato.png` | Semana guardou 20; poupança 0% porque o gold semeado não é ganho (não explode para 400%) |
+| `10-vila-noite.png` | Cena com `?h=19` |
 
-### Problemas
+Aceite da seção 10, o que foi conferido de verdade: (1) depósito 20 com saldo caindo; (8) Mercado/Comerciante visíveis. O restante (juros forçando `lastInterestWeek`, desafio 20, Baú das tochas, capacete, prova 6/8 e 8/8, terceira venda, punição, missão recuperada, conserto, desligar `aiGeneration`) **não teve foto nesta passagem** — o roteiro automático cobriu Vila, Casa, Mercado, Agenda, Banco e o depósito.
 
-- Aceite dos 12 itens da seção 10 **não conferido** no Firestore nem com foto. Sem isso o Lote 1 não está “fechado” para começar o Lote 2.
-- Lanterna: `ContractBoard` / prova ainda **não** mostram o conteúdo de amanhã. TTS e `bumpChallenge` nos contratos já entram.
-- `LevelUpModal` ainda não usa `ItemSlot` no presente de nível.
-- Cerimônia de forja (quadros do Ferreiro por inpaint) não existe — arte do líder.
-- `savePlan` / `submitCheckin` / `claimTrophy` / `closeSeason` / `computeWeeklyLearning` **não** foram feitos (Lote 2).
-- `HeroHeader` perdeu o atalho do Baú/calendário/timer; Baú entra pela Casa ou pelo lote. Conferir se o Heitor acha o Baú.
+## Fora do escopo (já estava; só registrado)
 
-### Melhorias possíveis (não feitas)
+- Tela de abertura “Abrindo a vila”: `index.html`, `src/main.tsx`, `src/App.tsx`, `src/styles/boot.css`, `src/components/common/bootOverlay.ts`, `useDismissBoot.tsx`, `LoadingSpinner.tsx`, `ReadyBoot` no painel e no `HeroPanel`, trechos de `miner.css`.
+- `src/components/hero/english/base/BaseMap.tsx` (mapa da Mina).
+- `DailyChecklist` com `mc-inv` no lugar de `mc-panel`.
+- Lanterna ainda sem efeito em contratos/prova de amanhã (A9 trava a forja até isso existir).
 
-- `learning` por semana, não um doc só.
-- Pré-requisito n3 alinhado ao texto longo de construções, se o pai quiser o caminho mais duro.
-- Migrar ChatFlashGPT para a função quando o chat voltar a ligar.
-- Ligar `modules.bank` no seed da conta de teste, senão o aceite 1–3 do Cofrinho cai na placa.
-- ItemSlot também no Comerciante da loja de prêmios, se ainda faltar em algum chip.
+## Conferência de conexões (recebe de / entrega para)
 
-## Pendências para o líder
+| Fluxo | Recebe de | Entrega para |
+|---|---|---|
+| Missão paga | `DataContext.completeTask` `src/contexts/DataContext.tsx:304` | `FirestoreService.completeTaskWithRewards`; `bumpChallenge(..., 'tasks_count')` `:376`; streak `:382`; `repairLot` automático `:436` |
+| Prova | `HeroPanel` `DailyQuiz` `src/components/hero/HeroPanel.tsx:114` com `quizLocked` `:86`; porta na cena `VillageHome.tsx:283` `gated={quizLocked}` | `payQuizRewards` `DailyQuiz.tsx:150` → `firestoreService.ts:1394` chave `quiz:<date>`; `bumpChallenge` quiz em `dailyQuizService.ts:156` |
+| Mina / contrato | `englishBaseService.completeContract` `:504` | `bumpChallenge(..., 'english_contracts')` `:593`; TTS pela função `englishTts.ts:57` |
+| Fechar o dia | `dailyRulesService.ts` | capacete, tochas, `punished`, `bumpChallenge` `full_days` `:322`, rachaduras |
+| Conserto | `repairLot` `villageService.ts:813`; também `DataContext.tsx:436` quando o dia fica completo | linha `repair`, chave `repair:<date>` |
+| Missão recuperada | `firestoreService` caminho `late`; `DailyChecklist` lista por completion de ontem | linha `late_task`; não sobrescreve `lastCompletedDate` de hoje |
+| Baú do Dia | `openDailyChest` `villageService.ts:410` (`dueCompletionsCount`) | `chest`, `newItems`, teto `caps.ts` |
+| Baú das tochas | `openStreakChest` `villageService.ts:705`; hotspot `VillageScene.tsx:648` | `streak_chest`, diamante |
+| Comerciante | `sellMaterials` `villageService.ts:756` | recusa se teto 0; `merchant_sale` |
+| Cofrinho | `goalsService` depósito/juros; `bank.ts` `weeklyInterest` `:37` | `goal_deposit` tipo `saved`; `goal_interest` amount 0 + metadata; `applyWeeklyInterest` no boot `DataContext.tsx:1273` |
+| Tetos | `caps.gameGoldRoom` `src/services/village/caps.ts:20` | chest, streak, challenge, interest (metadata), merchant, repair |
+| Agenda → Placa | `VillageHome.tsx:198-203` `todayAgenda` / `tomorrowAgenda` | bloco “Hoje você tem” / “Amanhã” |
+| Agenda → cabeçalho | `nextEvents` `VillageHome.tsx:200` | `HeroHeader` `nextEventLabel` `:263` |
+| Agenda → alarme | intervalo 60 s `VillageHome.tsx:149` `reminderDue` | som checkpoint, toast Ok, `agendaFlash`, fala do Olheiro |
+| Agenda → Casa | `dayTimeline` `agenda.ts:55` usado em `Casa.tsx:51` | Linha do dia |
+| Semana organizada | `weeklyOrganizedBonus` `agendaService.ts:181` chamado `VillageHome.tsx:134` | +1 madeira, chave `agenda:week:<semana>` |
+| Relógio | `ClockContext.tsx:103` dispara `dayChanged` | `DataContext.tsx:1492` e `VillageHome.tsx:80` |
+| Chip gold | `HeroHeader.tsx:140` | `VillageHome` distrito `extrato` (Banco na aba Extrato) |
+| Chip nível | `HeroHeader` | Torre |
+| Avatar | `HeroHeader` | Mochila |
 
-1. Ligar Secret Manager em `app-heitor`, criar `OPENAI_API_KEY` (`npx firebase-tools functions:secrets:set OPENAI_API_KEY`) e publicar a função. Node 20 na função está em depreciação (desliga em 30/10/2026); a spec pede 20, então ficou 20.
-2. Ligar `modules.bank` na conta de teste.
-3. Rodar o aceite da seção 10 com `teste@flash.com`, guardar fotos em `docs/exemplos/telas/etapa2/`, conferir `goldTransactions` e `claimed`.
-4. Revisar este relatório; só então Lote 2.
-5. Não commitar daqui — o pai commita.
+Não existem ainda (Lote 2 ou depois): efeito da Lanterna em contratos/prova; reversão de dia fechado; conquista do jogo `achievement` em transação; ChatFlashGPT pela função; vida dos NPCs (seção 14).
+
+## O que a revisão pediu e ficou feito
+
+- A1–A3, A11, A12, A9, A10; A8 seção 13 (timeline, Placa, chip, alarme, Foco/`FlashTimer`, formulário, Mês/`CalendarModal`, plano + Não, editar/apagar, bônus semanal).
+- M1–M18 e M29–M38 (dinheiro, regras, função TTS `getDownloadURL`, tetos, Balança 7 dias, R7).
+- M19–M28 e baixos: confirmação da Loja, Mochila equipa/tira, Extrato com linhas, punição sem sumir a Vila, conserto ao concluir, aba Agenda no painel, teclas 1–5, “Vender 10” desligado sem material, `VILA_API.md` atualizado.
+- M26: botão “Propor desafio” fora da tela da criança.
+
+## Pendências honestas
+
+- Aceite 2–7 e 9–12 da seção 10 sem foto (juros forçados, desafio, Baú/esmeralda/tochas, capacete, prova, terceira venda, punição, recuperar, conserto, desligar IA).
+- Compromissos antigos da conta de teste (títulos vazios) ainda aparecem na Agenda até o reset/apagar.
+- `FlashTimer` e `CalendarModal` continuam arquivos próprios, agora só usados pela Agenda (não órfãos).
+- Node 20 das functions está deprecado (aviso do Firebase no deploy).

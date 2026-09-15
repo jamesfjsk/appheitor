@@ -30,7 +30,7 @@
   "smokeOffset": { "dx": 51, "dy": 8 },
   "house": { "id": "casa", "x": 938, "y": 110, "w": 96, "h": 74 },
   "props": [
-    { "id": "pack", "x": 548, "y": 378, "w": 40, "h": 40, "sprite": "/assets/village/items/mochila.png", "label": "Mochila" },
+    { "id": "pack", "x": 592, "y": 336, "w": 48, "h": 48, "sprite": "/assets/village/items/mochila.png", "label": "Mochila" },
     { "id": "arena", "x": 1018, "y": 68, "w": 44, "h": 44, "sprite": "/assets/english/ui/sword.webp", "label": "Arena" }
   ]
 }

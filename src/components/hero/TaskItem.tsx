@@ -154,8 +154,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
               {!done && timeOverdue && <FlashIcon name="warning" className="w-3 h-3" />}
             </span>
           )}
-          <span className="mc-font text-[8px] mc-good">+{task.xp || TASK_DEFAULT_XP} XP</span>
-          <span className="mc-font text-[8px] mc-warn">+{task.gold || TASK_DEFAULT_GOLD} GOLD</span>
+          <span className="mc-font text-[8px] mc-good">+{task.xp ?? TASK_DEFAULT_XP} XP</span>
+          {(task.gold ?? TASK_DEFAULT_GOLD) > 0 && (
+            <span className="mc-font text-[8px] mc-warn">+{task.gold ?? TASK_DEFAULT_GOLD} GOLD</span>
+          )}
         </div>
       </div>
 

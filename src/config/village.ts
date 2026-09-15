@@ -103,8 +103,8 @@ export function emptyNpcs(): Record<NpcId, NpcState> {
 export const DEFAULT_MODULES: ModuleSettings = {
   shop: true,
   effects: true,
-  bank: false,
-  interest: false,
+  bank: true,
+  interest: true,
   logic: false,
   lines: false,
   dilemmas: false,
@@ -457,6 +457,7 @@ export const HOTBAR_ICONS: Record<string, string> = {
   Missões: '/assets/village/buildings/casa-1.png',
   Mina: '/assets/village/items/lantern.png',
   Oficina: '/assets/village/items/iron-helmet.png',
+  Mercado: '/assets/village/buildings/mercado-1.png',
   Mochila: '/assets/village/items/mochila.png',
   Ferraria: '/assets/village/items/iron-helmet.png',
 };
@@ -539,7 +540,7 @@ export type SceneProp = {
 };
 
 export const SCENE_PROPS: SceneProp[] = [
-  { id: 'pack', x: 548, y: 378, w: 40, h: 40, sprite: '/assets/village/items/mochila.png', label: 'Mochila' },
+  { id: 'pack', x: 592, y: 336, w: 48, h: 48, sprite: '/assets/village/items/mochila.png', label: 'Mochila' },
   { id: 'arena', x: 1018, y: 68, w: 44, h: 44, sprite: '/assets/english/ui/sword.webp', label: 'Arena' },
 ];
 

@@ -1,22 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useVillage } from '../../../contexts/VillageContext';
-import { useSound } from '../../../contexts/SoundContext';
 import { addDays, getTodayBrazil } from '../../../utils/clock';
 import type { ChallengeDoc } from '../../../types/village';
 import { challengeState } from '../../../services/village/challenges';
-import { createChallenge, subscribeChallenges } from '../../../services/challengesService';
+import { subscribeChallenges } from '../../../services/challengesService';
+
+const WEEKDAYS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 
 const DesafiosCard: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ onClose, embedded }) => {
   const { childUid } = useAuth();
-  const { playClick } = useSound();
-  const { economy } = useVillage();
   const [items, setItems] = useState<ChallengeDoc[]>([]);
-  const [openForm, setOpenForm] = useState(false);
-  const [title, setTitle] = useState('');
-  const [target, setTarget] = useState(5);
   const today = getTodayBrazil();
 
   useEffect(() => {
@@ -31,52 +25,26 @@ const DesafiosCard: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ 
     return st === 'active' || st === 'done' || st === 'upcoming';
   }), [items, today]);
 
-  const propose = async () => {
-    if (!childUid) return;
-    playClick();
-    try {
-      await createChallenge({
-        userId: childUid,
-        title,
-        kind: 'tasks_count',
-        target,
-        startsOn: today,
-        endsOn: addDays(today, 7),
-        xpReward: 20,
-        goldReward: Math.min(20, economy.challengeGoldWeeklyCap),
-        createdBy: 'child',
-      });
-      toast.success('Proposta enviada ao seu pai');
-      setOpenForm(false);
-      setTitle('');
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Não deu certo');
-    }
-  };
-
   const body = (
     <div className="space-y-2">
       {visible.length === 0 && <p className="text-sm mc-muted">Nenhum desafio aberto.</p>}
       {visible.map((c) => {
         const st = challengeState(c, today);
+        const pct = c.target > 0 ? Math.min(100, Math.round((c.progress / c.target) * 100)) : 0;
+        const weekday = WEEKDAYS[new Date(`${c.endsOn}T12:00:00-03:00`).getDay()];
         return (
           <div key={c.id} className="mc-card p-3">
             <p className="font-bold">{c.title}</p>
-            <p className="text-sm mc-muted">até {c.endsOn.split('-').reverse().slice(0, 2).join('/')}</p>
-            <p className="text-sm"><span className="mc-num" style={{ fontSize: 12 }}>{c.progress}</span> / {c.target} · {c.goldReward} gold</p>
+            <p className="text-sm mc-muted">até {weekday}</p>
+            <div className="mc-bar h-2 my-1 rounded overflow-hidden bg-black/40">
+              <div className="h-full bg-[#e8b923]" style={{ width: `${pct}%` }} />
+            </div>
+            <p className="text-sm"><span className="mc-num" style={{ fontSize: 12 }}>{c.progress}</span> / {c.target} · +{c.goldReward} gold · +{c.xpReward} XP</p>
             {st === 'done' && <p className="text-sm mc-good">Concluído</p>}
             {st === 'upcoming' && c.status === 'proposed' && <p className="text-sm mc-warn">Aguardando o pai</p>}
           </div>
         );
       })}
-      <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-4" onClick={() => { playClick(); setOpenForm(true); }}>Propor desafio</button>
-      {openForm && (
-        <div className="mc-card p-3 space-y-2">
-          <input className="mc-input w-full text-black px-2 py-2" maxLength={40} placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} />
-          <input className="mc-input w-full text-black px-2 py-2" type="number" min={1} value={target} onChange={(e) => setTarget(Number(e.target.value) || 1)} />
-          <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-4" onClick={() => void propose()}>Enviar</button>
-        </div>
-      )}
     </div>
   );
 

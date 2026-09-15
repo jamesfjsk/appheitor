@@ -289,6 +289,8 @@ export interface AgendaItem {
   plannedAheadDays: number;
   doneAt?: string;
   remindedAt?: string;
+  remindedFor?: string;
+  studyPlanAccepted?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -381,6 +383,8 @@ export interface NoticeContext {
   vacation: boolean;
   fatherNotices: FatherNotice[];
   dismissed: string[];
+  agendaToday?: Array<{ title: string; time?: string }>;
+  agendaTomorrow?: Array<{ title: string }>;
 }
 
 export interface LineDef {

@@ -10,7 +10,7 @@ import { DAY_CHANGED_EVENT } from './ClockContext';
 import { getErrorMessage, getErrorCode } from '../utils/errors';
 import toast from 'react-hot-toast';
 import { useOffline } from './OfflineContext';
-import { getVillage } from '../services/villageService';
+import { getVillage, repairLot } from '../services/villageService';
 import { getSettings } from '../services/settingsService';
 import { DEFAULT_ECONOMY, DEFAULT_MODULES, DEFAULT_VILLAGE_SETTINGS } from '../config/village';
 import { computeTaskLoot, xpWithBoots } from '../services/village/loot';
@@ -259,7 +259,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       title: taskData.title,
       description: taskData.description || '',
       xp: taskData.xp || 10,
-      gold: taskData.gold || 5,
+      gold: taskData.gold ?? 5,
       period: taskData.period,
       time: taskData.time,
       frequency: taskData.frequency || 'daily',
@@ -349,8 +349,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         effectsEnabled: effectsOn,
       });
 
-      const baseXP = task.xp || 10;
-      const baseGold = task.gold || 5;
+      const baseXP = task.xp ?? 10;
+      const baseGold = task.gold ?? 5;
       const xpReward = xpWithBoots(vacationApplyXP(baseXP), village.gear, effectsOn);
       const goldReward = vacationApplyGold(baseGold);
 
@@ -431,16 +431,38 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }, 1500);
 
       const matLabel = loot.qty > 0 ? `, +${loot.qty} ${loot.material}` : '';
-      toast.success(`+${goldReward} gold${matLabel}, +${xpReward} XP`);
+      const goldLabel = goldReward > 0 ? `+${goldReward} gold` : 'sem gold';
+      toast.success(`${goldLabel}${matLabel}, +${xpReward} XP`);
+
+      try {
+        if ((village.cracks || []).length > 0) {
+          const dueNow = dueTasksOn(tasks, today);
+          const doneNow = dueNow.filter((t) => {
+            if (t.id === taskId) return true;
+            const full = tasks.find((x) => x.id === t.id);
+            return full?.status === 'done' && full.lastCompletedDate === today;
+          }).length;
+          if (doneNow >= dueNow.length) {
+            const refund = await repairLot(childUid, today);
+            if (refund > 0) toast.success(`Lote consertado: +${refund} gold`);
+          }
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : '';
+        if (msg && !msg.includes('já foi feito') && !msg.includes('Faça todas')) {
+          console.warn('conserto automático', e);
+        }
+      }
     } catch (error) {
       console.error('❌ Erro ao completar tarefa:', error);
       const msg = getErrorMessage(error);
       if (msg === 'Task already completed today') {
         toast('Missão já feita hoje. Volta amanhã.');
+        return;
       } else if (msg === 'offline' || msg === 'PERIOD_LOCKED') {
-        /* toast já mostrado */
+        return;
       } else {
-        toast.error('Sem internet: a missão não foi salva');
+        toast.error(msg === 'Essa extra não é de hoje' ? msg : 'Sem internet: a missão não foi salva');
         setTasks(prevTasks => 
           prevTasks.map(t => 
             t.id === taskId 
@@ -457,7 +479,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     if (!childUid) throw new Error('Child UID não definido');
     const task = tasks.find((t) => t.id === taskId);
     if (!task) throw new Error('Tarefa não encontrada');
-    await FirestoreService.completeTaskWithRewards(taskId, childUid, task.xp || 10, task.gold || 5, undefined, { late: true });
+    await FirestoreService.completeTaskWithRewards(taskId, childUid, task.xp ?? 10, task.gold ?? 5, undefined, { late: true });
     toast.success('Missão recuperada (metade do gold, sem material)');
   }, [childUid, tasks]);
 
@@ -522,7 +544,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const todayCompletions = tasks.filter((task) =>
         dueIds.has(task.id) && task.status === 'done' && task.lastCompletedDate === today
       );
-      const minTasks = economy.redeemMinTasks ?? 5;
+      const minTasks = Math.min(economy.redeemMinTasks ?? 5, Math.max(1, due.length));
 
       if (todayCompletions.length < minTasks) {
         throw new Error(`Você precisa completar pelo menos ${minTasks} missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/${minTasks}`);
@@ -1071,7 +1093,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           id: task.id,
           title: task.title,
           xp: task.xp || 10,
-          gold: task.gold || 5,
+          gold: task.gold ?? 5,
           completedAt: date
         }))];
         

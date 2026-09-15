@@ -3,7 +3,7 @@ import { useVillage } from '../../../contexts/VillageContext';
 import { chestAllowed } from '../../../services/village/chest';
 import { dueTasksOn } from '../../../services/village/schedule';
 import { useData } from '../../../contexts/DataContext';
-import { getTodayBrazil } from '../../../utils/clock';
+import { useClock } from '../../../contexts/ClockContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { createMineSfx } from '../english/mine/sfx';
 import type { ChestContents } from '../../../types/village';
@@ -23,7 +23,7 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
   const { tasks } = useData();
   const { playClick, isSoundEnabled } = useSound();
   const [loot, setLoot] = useState<ChestContents | null>(null);
-  const today = getTodayBrazil();
+  const { minute, today } = useClock();
   const due = dueTasksOn(tasks, today);
   const done = due.filter((t) => {
     const full = tasks.find((x) => x.id === t.id);
@@ -31,6 +31,8 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
   }).length;
   const gate = chestAllowed({ hourBrazil: hour, settings: economy, due: due.length, done, village, date: today });
   const already = gate.reason === 'already';
+  const leftMin = Math.max(0, economy.chestOpenHour * 60 - (hour * 60 + minute));
+  const leftLabel = `${Math.floor(leftMin / 60)}h${String(leftMin % 60).padStart(2, '0')}`;
 
   const open = async () => {
     playClick();
@@ -52,7 +54,7 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
             : already
               ? 'Aberto hoje'
               : gate.reason === 'hour'
-                ? `Abre às ${economy.chestOpenHour}h`
+                ? `Abre às ${economy.chestOpenHour}h (faltam ${leftLabel})`
                 : gate.reason === 'min_due'
                   ? 'Hoje não tem missões suficientes'
                   : gate.reason === 'incomplete'

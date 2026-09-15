@@ -2,14 +2,15 @@ import { expect, run, test } from '../../english/__tests__/harness';
 import { addDays, nowBrazil, resetClockForTests } from '../../../utils/clock';
 import type { GoldTransaction } from '../../../types';
 import type { AgendaItem, ChallengeDoc, GoalDoc } from '../../../types/village';
-import { validateDeposit, vaultGoalCap, vaultInterestRatePct, weeklyInterest, weeklyStatement, savingsRate } from '../bank';
+import { validateDeposit, vaultGoalCap, weeklyInterest, weeklyStatement, savingsRate } from '../bank';
 import { applyEvent, challengeState, extendForPunishment } from '../challenges';
 import { daysToAfford, priceForDays, referenceIncome } from '../income';
+import { txsLastDays, balancaTotals } from '../balance';
 import { capGold, gameGoldRoom } from '../caps';
 import { canRepair, cracksAfterClose, DEFAULT_LOTS_BY_PERIOD, repairRefund } from '../repair';
 import { lateTaskReward, lateWindow } from '../late';
 import { levelGift, minLevelFor } from '../levels';
-import { occurrencesBetween, organizationXp, reminderDue, studyPlanFor, weekOrganized } from '../agenda';
+import { occurrencesBetween, organizationXp, reminderDue, studyPlanFor, weekOrganized, dayTimeline } from '../agenda';
 
 const tx = (over: Partial<GoldTransaction> & Pick<GoldTransaction, 'amount' | 'source' | 'type'>): GoldTransaction => ({
   id: over.id || 't',
@@ -79,21 +80,21 @@ test('juros 5% com teto e ignora semana já paga; virada de ano', () => {
   expect(again).toHaveLength(0);
 });
 
-test('juros do Cofre sobem com o nível e somem se não foi construído; Agenda não tem nível 2', () => {
-  expect(vaultInterestRatePct(0)).toBe(0);
-  expect(vaultInterestRatePct(1)).toBe(5);
-  expect(vaultInterestRatePct(2)).toBe(8);
-  expect(vaultInterestRatePct(3)).toBe(12);
+test('juros do Cofre: nível 1 não paga bônus; nível 2 usa 5% de settings/economy', () => {
   expect(vaultGoalCap(0)).toBe(0);
   expect(vaultGoalCap(1)).toBe(1);
   expect(vaultGoalCap(2)).toBe(2);
   const week = '2026-W02';
   const g = goal({ savedGold: 100, lastInterestWeek: '2026-W01' });
   expect(weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 0)).toHaveLength(0);
+  expect(weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 1)).toHaveLength(0);
   const n2 = weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 2);
-  expect(n2[0].interest).toBe(8);
+  expect(n2[0].interest).toBe(5);
   const n3 = weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 3);
-  expect(n3[0].interest).toBe(12);
+  expect(n3[0].interest).toBe(5);
+  const afterDeposit = weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 2, { g1: 80 });
+  expect(afterDeposit[0].savedBefore).toBe(20);
+  expect(afterDeposit[0].interest).toBe(1);
 });
 
 test('extrato da semana e taxa de poupança', () => {
@@ -142,14 +143,44 @@ test('R7, faixa de preço e dias para alcançar', () => {
   expect(daysToAfford(20, 30, 45)).toBe(0);
 });
 
-test('teto de gold do jogo', () => {
+test('teto de gold do jogo conta juros pelo metadata', () => {
   const today = [tx({ amount: 30, type: 'earned', source: 'chest' })];
-  const week = [...today, tx({ amount: 80, type: 'earned', source: 'challenge' })];
+  const week = [
+    ...today,
+    tx({ amount: 80, type: 'earned', source: 'challenge' }),
+    tx({ amount: 0, type: 'saved', source: 'goal_interest', metadata: { savedBefore: 10, savedAfter: 15 } }),
+  ];
   const room = gameGoldRoom(today, week, { gameGoldDailyCap: 35, gameGoldWeeklyCap: 100 });
   expect(room.day).toBe(5);
   expect(room.week).toBe(0);
   expect(room.room).toBe(0);
   expect(capGold(10, 5)).toEqual({ paid: 5, capped: true });
+});
+
+test('linha do dia ordena missão, compromisso sem hora no fim e fechar o dia', () => {
+  const item: AgendaItem = {
+    id: 'a1',
+    userId: 'u',
+    familyId: 'heitor',
+    title: 'Treino',
+    kind: 'treino',
+    date: '2026-09-15',
+    createdBy: 'child',
+    plannedAheadDays: 1,
+    createdAt: '2026-09-15',
+    updatedAt: '2026-09-15',
+  };
+  const timed: AgendaItem = { ...item, id: 'a2', title: 'Prova', kind: 'prova', time: '14:00' };
+  const tasks = [
+    { id: 'm1', title: 'Cama', active: true, frequency: 'daily' as const, period: 'morning' as const, time: '08:00' },
+    { id: 'm2', title: 'Leitura', active: true, frequency: 'daily' as const, period: 'evening' as const },
+  ];
+  const line = dayTimeline([item, timed], tasks, null, '2026-09-15');
+  expect(line[0].title).toBe('Cama');
+  expect(line.some((e) => e.title === 'Prova' && e.sortMin === 14 * 60)).toBe(true);
+  expect(line[line.length - 1].kind).toBe('close');
+  const untimed = line.find((e) => e.title === 'Treino');
+  expect(untimed?.sortMin).toBe(21 * 60);
 });
 
 test('rachadura do período da primeira missão perdida e conserto', () => {
@@ -199,6 +230,19 @@ test('agenda: repetição semanal, plano de estudo e XP de antecedência', () =>
     nowBrazil(Date.parse('2026-09-16T00:00:00.000Z'))
   );
   expect(due).toBe(true);
+});
+
+test('balança de 7 dias não conta depósito como gasto', () => {
+  const list = [
+    tx({ amount: 30, type: 'earned', source: 'task_completion' }),
+    tx({ amount: -20, type: 'saved', source: 'goal_deposit' }),
+  ];
+  const cut = txsLastDays(list, 7, Date.parse('2026-09-15T18:00:00.000Z'));
+  const tot = balancaTotals(cut, 45);
+  expect(tot.earned).toBe(30);
+  expect(tot.spent).toBe(0);
+  expect(tot.saved).toBe(20);
+  expect(tot.rate).toBe(67);
 });
 
 void run();

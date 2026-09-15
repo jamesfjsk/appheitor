@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
-import { getTodayBrazil } from '../../utils/timezone';
+import { getTodayBrazil } from '../../utils/clock';
 import { DailyQuiz as DailyQuizDoc } from '../../types';
 import { addDays, completeDailyQuiz, ensureDailyQuiz, quizRewards, saveReflection, subscribeDailyQuiz } from '../../services/dailyQuizService';
 import { isQuizSnoozed, snoozeQuiz } from '../../services/aiQuiz';
@@ -26,7 +26,7 @@ const QUIZ_DONE_KEY = (uid: string, date: string) => `quiz_completed_${uid}_${da
 
 const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const { childUid } = useAuth();
-  const { progress, adjustUserXP, adjustUserGold } = useData();
+  const { progress } = useData();
   const { playTaskComplete, playLevelUp, playError, playClick } = useSound();
 
   const today = getTodayBrazil();
@@ -147,11 +147,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
       setReward(r);
 
       await completeDailyQuiz(childUid, today, { score: correct, totalQuestions: total, xpEarned: r.xp, goldEarned: r.gold, answers: finalAnswers });
-      await adjustUserXP(r.xp);
-      await adjustUserGold(r.gold);
-      await FirestoreService.createGoldTransaction(childUid, r.gold, 'earned', 'quiz', `Quiz diário: ${correct} de ${total} acertos`, {
-        metadata: { score: correct, totalQuestions: total, xpEarned: r.xp, date: today, theme: quiz.theme.title },
-      });
+      await FirestoreService.payQuizRewards(childUid, today, r.xp, r.gold);
       if (correct / total >= 0.75) playLevelUp();
       else playTaskComplete();
       setPhase('results');

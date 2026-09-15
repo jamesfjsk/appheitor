@@ -13,7 +13,7 @@ import {
   buildingSprite,
   initialBaseDoc,
 } from '../../../config/englishBase';
-import { COSMETIC_BY_ID, COSMETIC_ICON, DEFAULT_ECONOMY, GEAR, GEAR_SPRITE } from '../../../config/village';
+import { COSMETIC_BY_ID, COSMETIC_ICON, GEAR, GEAR_SPRITE } from '../../../config/village';
 import type { CosmeticItem } from '../../../types/village';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVillage } from '../../../contexts/VillageContext';
@@ -22,6 +22,7 @@ import { buildUpgrade, canBuild, setThemeRequest } from '../../../services/engli
 import { burnWood } from '../../../services/villageService';
 import { getTodayBrazil } from '../../../utils/clock';
 import type { BuildingId } from '../../../types/english';
+import RewardsPanel from '../RewardsPanel';
 
 const THEME_MAX = 30;
 
@@ -43,7 +44,7 @@ const BuildingCard: React.FC<Props> = ({
   onOpenBank, onOpenAgenda, onOpenMarket,
 }) => {
   const { childUid } = useAuth();
-  const { village, materials, buildings } = useVillage();
+  const { village, materials, buildings, economy } = useVillage();
   const { playClick, playLevelUp } = useSound();
   const [busy, setBusy] = useState(false);
   const [inv, setInv] = useState(false);
@@ -54,7 +55,7 @@ const BuildingCard: React.FC<Props> = ({
   const level = buildings[id] || 0;
   const fakeBase = { ...initialBaseDoc(childUid || 'x', new Date().toISOString()), materials, buildings };
   const info = canBuild(fakeBase, id);
-  const cost = buildingCost(id, info.nextLevel, DEFAULT_ECONOMY.buildCostMultiplier);
+  const cost = buildingCost(id, info.nextLevel, economy.buildCostMultiplier);
   const nextText = buildingEffectNext(id, level);
   const missingText = MATERIALS.filter((m) => (info.missing[m] || 0) > 0)
     .map((m) => `${info.missing[m]} ${MATERIAL_LABELS[m]}`)
@@ -365,14 +366,17 @@ const BuildingCard: React.FC<Props> = ({
           )}
 
           {id === 'mercado' && (
-            <button
-              type="button"
-              disabled={level < 1}
-              className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
-              onClick={() => { playClick(); onOpenMarket?.(); }}
-            >
-              {level < 1 ? 'Construa o Mercado para abrir' : 'Abrir o Mercado'}
-            </button>
+            <>
+              <button
+                type="button"
+                disabled={level < 1}
+                className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
+                onClick={() => { playClick(); onOpenMarket?.(); }}
+              >
+                {level < 1 ? 'Construa o Mercado para abrir' : 'Abrir o Mercado'}
+              </button>
+              <RewardsPanel isOpen onClose={() => undefined} embedded />
+            </>
           )}
 
           <button type="button" className="w-full text-center text-sm underline mc-muted min-h-[44px]" onClick={() => { playClick(); onOpenWorkshop(); }}>
