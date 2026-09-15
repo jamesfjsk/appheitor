@@ -11,7 +11,8 @@
     "firebase": "firebase",
     "lint:fix": "eslint . --fix",
     "prebuild": "npm run typecheck",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:english": "node scripts/run-english-tests.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

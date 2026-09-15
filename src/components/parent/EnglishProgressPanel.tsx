@@ -64,7 +64,7 @@ const EnglishProgressPanel: React.FC = () => {
               {progress!.recent.map((s, i) => (
                 <li key={i} className="py-2 flex items-center gap-3">
                   <span className="w-12 text-gray-500">{s.date.slice(5).split('-').reverse().join('/')}</span>
-                  <span className="flex-1">{GAME_INFO[s.game]?.title ?? s.game} · {s.correct}/{s.total}</span>
+                  <span className="flex-1">{(GAME_INFO as Partial<Record<string, { title: string }>>)[s.game]?.title ?? s.game} · {s.correct}/{s.total}</span>
                   <span className={s.rewarded ? 'text-green-700 font-semibold' : 'text-gray-400'}>{s.rewarded ? `+${s.xpEarned} XP, +${s.goldEarned} gold` : 'treino'}</span>
                 </li>
               ))}

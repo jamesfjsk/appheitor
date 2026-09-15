@@ -18,6 +18,7 @@ import DailyQuizManager from './DailyQuizManager';
 import DailyRulesManager from './DailyRulesManager';
 import VacationModeControl from './VacationModeControl';
 import EnglishProgressPanel from './EnglishProgressPanel';
+import EnglishBaseManager from './EnglishBaseManager';
 import NotesManager from './NotesManager';
 import GoldHistory from './GoldHistory';
 
@@ -110,7 +111,10 @@ const ParentPanel: React.FC = () => {
             <SurpriseMissionConfigComponent />
           )}
           {activeTab === 'english' && (
-            <EnglishProgressPanel />
+            <div className="space-y-6">
+              <EnglishBaseManager />
+              <EnglishProgressPanel />
+            </div>
           )}
           {activeTab === 'quiz' && (
             <DailyQuizManager />

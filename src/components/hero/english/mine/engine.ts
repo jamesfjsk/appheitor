@@ -1,13 +1,23 @@
 // ========================================
 // Mine Rush: motor puro da corrida (sem React, sem DOM; roda em Node)
 // Único import: ./types. A tela chama createRun -> start -> tick a cada quadro,
-// chooseLane no gesto do jogador, drainEvents para som/HUD e summarize no fim.
+// chooseLane no gesto do jogador, releaseRow quando o áudio do pedido termina,
+// drainEvents para som/HUD e summarize no fim.
 //
-// Decisões de tempo:
-// - Uma fileira julgada por vez: a próxima nasce quando não há fileira viva
-//   (e respeitando spawnGapMs desde o último nascimento). Assim o tempo de
-//   decisão é a janela inteira (4,0 -> 2,0 s) e 40 blocos duram ~100 s.
-// - Após um erro, highlightMs mostra o bloco certo e nada nasce nesse período.
+// Ritmo (Fase 2):
+// - Uma fileira julgada por vez. Ela nasce PARADA no fundo do túnel ('announce')
+//   e o motor emite 'prompt'; a tela mostra o pedido, toca o áudio e chama
+//   releaseRow(). A fileira só começa a descer ('moving', evento 'go') depois de
+//   announceMinMs parada e, por segurança, sozinha ao atingir announceMaxMs.
+//   A janela de tempo (4,0 -> 2,0 s) conta só a partir do 'go'.
+// - Depois de um acerto a próxima nasce no mesmo tick (fica anunciando, sem pressa
+//   visual); depois de um erro, highlightMs mostra o bloco certo e nada nasce.
+// - O motor nunca toca nada: acerto/erro saem como evento 'audio' (reason + modo julgado) e a
+//   tela enfileira antes do pedido seguinte (a fileira espera parada).
+// - Palavra nova (nível 0) é apresentada no próprio pedido (modo 'intro') e julgada
+//   como qualquer outra; não há mais placa "quebre qualquer bloco". depth = acertos.
+// - spawnGapMs não é consultado: o intervalo entre nascimentos é janela + anúncio,
+//   sempre maior que ele.
 // Partículas: x em 0..1 ao longo da largura do trilho (centro da pista = (pista + 0,5) / 3),
 // y em 0..1 a partir da linha de impacto (positivo = para cima), vx/vy por segundo, size em px.
 // ========================================
@@ -29,10 +39,8 @@ import {
 
 const MAX_PARTICLES = 40;
 const PARTICLES_PER_HIT = 12;
-const PARTICLES_PER_LEARN = 8;
 const PARTICLE_LIFE_MS = 600;
 const CART_LERP_MS = 150;
-const MAX_ALIVE_ROWS = 3;
 
 const STRATUM_COLORS: Record<Stratum, string[]> = {
   surface: ['#7cb342', '#9ccc65', '#8d6e63', '#a1887f'],
@@ -87,7 +95,10 @@ function pictureFace(word: MineWord): BlockFace {
 
 const textFace = (word: MineWord): BlockFace => ({ kind: 'text', word, text: word.word });
 
-/** Sorteia `count` distratores do pool, diferentes da alvo e entre si, preferindo a mesma categoria */
+/**
+ * Sorteia até `count` distratores do pool, diferentes da alvo e entre si, preferindo a
+ * mesma categoria. Pode devolver menos que `count` quando o pool não tem candidatos.
+ */
 function pickDistractors(
   state: MineState,
   target: MineWord,
@@ -105,54 +116,45 @@ function pickDistractors(
   const cat = categoryOf(target);
   const same = shuffleInPlace(state, candidates.filter((w) => categoryOf(w) === cat));
   const others = shuffleInPlace(state, candidates.filter((w) => categoryOf(w) !== cat));
-  const picked = [...same, ...others].slice(0, count);
-  // Pool degenerado (menos de 3 palavras): repete o que houver para manter 3 faces
-  while (picked.length < count) picked.push(picked.length > 0 ? picked[0] : target);
-  return picked;
+  return [...same, ...others].slice(0, count);
 }
 
 function nextRowIndex(state: MineState): number {
   return state.spawned + state.queue.length + state.rows.length;
 }
 
-function buildLearnRow(state: MineState, word: MineWord): BlockRow {
-  const face = pictureFace(word);
-  return {
-    index: nextRowIndex(state),
-    target: word,
-    mode: 'learn',
-    faces: [face, { ...face }, { ...face }],
-    correctLane: 1,
-    z: 1,
-    windowMs: state.config.windowStartMs,
-    ageMs: 0,
-    resolved: null,
-    retry: false,
-  };
+/** Modo e dica para a k-ésima aparição (0-based) de uma palavra com o nível dado */
+function modeFor(level: number, occurrence: number): { mode: PromptMode; hint: boolean } {
+  if (level <= 0 && occurrence === 0) return { mode: 'intro', hint: true };
+  // Depois da apresentação, a palavra nova segue o roteiro de nível 1 (começando pela tradução)
+  const k = level <= 0 ? occurrence - 1 : occurrence;
+  return { mode: k % 2 === 0 ? 'translation_to_word' : 'word_to_image', hint: level <= 1 };
 }
 
-function buildJudgedRow(state: MineState, word: MineWord, wanted: PromptMode, retry: boolean): BlockRow {
+function buildRow(state: MineState, word: MineWord, wanted: PromptMode, hint: boolean, retry: boolean): BlockRow {
   let mode: PromptMode = wanted;
-  let distractorWords: MineWord[];
+  let distractors: MineWord[] = [];
   if (mode === 'word_to_image') {
-    distractorWords = hasPicture(word) ? pickDistractors(state, word, 2, hasPicture) : [];
-    if (distractorWords.length < 2 || distractorWords.some((w) => !hasPicture(w))) {
-      mode = 'translation_to_word';
-      distractorWords = pickDistractors(state, word, 2, () => true);
-    }
-  } else {
-    if (mode === 'image_to_word' && !word.image) mode = 'translation_to_word';
-    distractorWords = pickDistractors(state, word, 2, () => true);
+    if (hasPicture(word)) distractors = pickDistractors(state, word, 2, hasPicture);
+    // Sem alvo ou distratores com figura: pede a palavra escrita a partir da tradução
+    if (distractors.length < 2) mode = 'translation_to_word';
   }
+  if (mode !== 'word_to_image') distractors = pickDistractors(state, word, 2, () => true);
+  // Pool degenerado (menos de 3 palavras): repete o que houver para manter 3 faces
+  while (distractors.length < 2) distractors.push(distractors.length > 0 ? distractors[0] : word);
   const mk = mode === 'word_to_image' ? pictureFace : textFace;
-  const faces = shuffleInPlace(state, [mk(word), mk(distractorWords[0]), mk(distractorWords[1])]);
+  const faces = shuffleInPlace(state, [mk(word), mk(distractors[0]), mk(distractors[1])]);
   const correctLane = faces.findIndex((f) => f.word.id === word.id) as Lane;
   return {
     index: nextRowIndex(state),
     target: word,
     mode,
+    hint,
     faces: [faces[0], faces[1], faces[2]],
     correctLane,
+    phase: 'announce',
+    announceMs: 0,
+    released: false,
     z: 1,
     windowMs: state.config.windowStartMs,
     ageMs: 0,
@@ -164,12 +166,6 @@ function buildJudgedRow(state: MineState, word: MineWord, wanted: PromptMode, re
 function levelOf(state: MineState, id: string): number {
   const entry = state.plan.words.find((x) => x.word.id === id);
   return entry ? entry.level : 1;
-}
-
-/** Modo desejado para a k-ésima aparição (0-based) de uma palavra com o nível dado */
-function modeFor(word: MineWord, level: number, occurrence: number): PromptMode {
-  if (level <= 1) return word.image ? 'image_to_word' : 'translation_to_word';
-  return occurrence % 2 === 0 ? 'translation_to_word' : 'word_to_image';
 }
 
 /** Ordem intercalada de palavras: rodadas embaralhadas, sem repetir a mesma palavra em posições consecutivas */
@@ -225,8 +221,8 @@ export function createRun(plan: RunPlan, config: Partial<MineConfig> = {}): Mine
     const { word, level } = plan.words[wi];
     const k = occurrences.get(wi) ?? 0;
     occurrences.set(wi, k + 1);
-    if (level <= 0 && k === 0) state.queue.push(buildLearnRow(state, word));
-    state.queue.push(buildJudgedRow(state, word, modeFor(word, level, k), false));
+    const { mode, hint } = modeFor(level, k);
+    state.queue.push(buildRow(state, word, mode, hint, false));
   }
   return state;
 }
@@ -250,7 +246,14 @@ export function chooseLane(state: MineState, lane: Lane): void {
   if (lane === state.lane) return;
   state.lane = lane;
   const active = activeRow(state);
-  if (active) state.choiceAgeMs = active.ageMs;
+  // Escolher durante o anúncio conta como resposta imediata
+  state.choiceAgeMs = active && active.phase === 'moving' ? active.ageMs : 0;
+}
+
+/** A tela terminou o áudio do pedido: libera a fileira parada (ela desce após announceMinMs) */
+export function releaseRow(state: MineState): void {
+  const active = activeRow(state);
+  if (active && active.phase === 'announce') active.released = true;
 }
 
 export function drainEvents(state: MineState): MineState['events'] {
@@ -275,10 +278,7 @@ function updateActive(state: MineState): void {
   const idx = active ? active.index : null;
   if (idx === state.activeRowIndex) return;
   state.activeRowIndex = idx;
-  if (active) {
-    state.choiceAgeMs = active.ageMs;
-    if (active.mode === 'learn') state.events.push({ type: 'audio', word: active.target });
-  }
+  if (active) state.choiceAgeMs = active.ageMs;
 }
 
 export function pickaxeFor(combo: number): number {
@@ -324,7 +324,7 @@ function updateParticles(state: MineState, dtMs: number): void {
 }
 
 function pendingOriginals(state: MineState): number {
-  const isOriginal = (r: BlockRow) => !r.retry && r.mode !== 'learn' && !r.resolved;
+  const isOriginal = (r: BlockRow) => !r.retry && !r.resolved;
   return state.queue.filter(isOriginal).length + state.rows.filter(isOriginal).length;
 }
 
@@ -343,26 +343,22 @@ function checkpointIfDue(state: MineState): void {
 
 // ---------- Nascimento e resolução ----------
 
-/** Lança a próxima fileira da fila (se houver). Devolve a fileira ou null. */
+/** Lança a próxima fileira da fila (se houver), parada no fundo, e emite 'prompt'. Devolve a fileira ou null. */
 export function spawnNext(state: MineState): BlockRow | null {
   const row = state.queue.shift();
   if (!row) return null;
-  const fresh = levelOf(state, row.target.id) <= 0;
-  row.windowMs = row.mode === 'learn' || fresh ? state.config.windowStartMs : state.windowMs;
+  // Apresentação e palavra nova nunca aceleram: janela cheia
+  const fresh = row.mode === 'intro' || levelOf(state, row.target.id) <= 0;
+  row.windowMs = fresh ? state.config.windowStartMs : state.windowMs;
+  row.phase = 'announce';
+  row.announceMs = 0;
+  row.released = false;
   row.ageMs = 0;
   row.z = 1;
   state.rows.push(row);
   state.spawned += 1;
+  state.events.push({ type: 'prompt', row });
   return row;
-}
-
-function resolveLearn(state: MineState, row: BlockRow): void {
-  row.resolved = 'learned';
-  state.depth += 1;
-  spawnParticles(state, state.lane, PARTICLES_PER_LEARN);
-  state.events.push({ type: 'learn', word: row.target });
-  state.events.push({ type: 'audio', word: row.target });
-  checkpointIfDue(state);
 }
 
 function resolveHit(state: MineState, row: BlockRow): void {
@@ -374,16 +370,18 @@ function resolveHit(state: MineState, row: BlockRow): void {
   const level = pickaxeFor(state.combo);
   const points = cfg.basePoints * PICKAXES[level].multiplier + (fast ? cfg.fastBonus : 0);
   state.score += points;
+  // Palavra nova não aperta a janela global
   if (levelOf(state, row.target.id) > 0) {
     state.windowMs = Math.max(cfg.windowMinMs, state.windowMs - cfg.windowStepMs);
   }
-  state.depth += 1;
+  // Profundidade = acertos nos 40 blocos originais; retry vale pontos e combo, mas não avança a mina
+  if (!row.retry) state.depth += 1;
   state.results.push({ id: row.target.id, correct: true });
   spawnParticles(state, row.correctLane, PARTICLES_PER_HIT);
   state.events.push({ type: 'hit', word: row.target, points, fast, combo: state.combo, pickaxe: level });
   setPickaxe(state, level);
-  state.events.push({ type: 'audio', word: row.target });
-  checkpointIfDue(state);
+  state.events.push({ type: 'audio', word: row.target, reason: 'hit', mode: row.mode });
+  if (!row.retry) checkpointIfDue(state);
 }
 
 function resolveMiss(state: MineState, row: BlockRow): void {
@@ -396,18 +394,17 @@ function resolveMiss(state: MineState, row: BlockRow): void {
   state.results.push({ id: row.target.id, correct: false });
   const chosen = row.faces[state.lane].word;
   state.events.push({ type: 'miss', word: row.target, chosen: chosen.id === row.target.id ? null : chosen });
-  state.events.push({ type: 'audio', word: row.target });
+  state.events.push({ type: 'audio', word: row.target, reason: 'miss', mode: row.mode });
   state.highlightRow = row;
   state.highlightMs = cfg.highlightMs;
-  // Reinsere a palavra 5 a 8 blocos à frente (ou no fim da fila, se ela for menor)
-  const retry = buildJudgedRow(state, row.target, row.mode, true);
+  // Reinsere a palavra 5 a 8 blocos à frente (ou no fim da fila, se ela for menor), no mesmo modo e dica
+  const retry = buildRow(state, row.target, row.mode, row.hint, true);
   const at = Math.min(state.queue.length, Math.max(0, randInt(state, cfg.retryAfterMin, cfg.retryAfterMax) - 1));
   state.queue.splice(at, 0, retry);
 }
 
 function resolveAtImpact(state: MineState, row: BlockRow): void {
-  if (row.mode === 'learn') resolveLearn(state, row);
-  else if (state.lane === row.correctLane) resolveHit(state, row);
+  if (state.lane === row.correctLane) resolveHit(state, row);
   else resolveMiss(state, row);
 }
 
@@ -415,6 +412,7 @@ function resolveAtImpact(state: MineState, row: BlockRow): void {
 
 export function tick(state: MineState, dtMs: number): void {
   if (state.status !== 'running' || dtMs <= 0) return;
+  const cfg = state.config;
   state.elapsedMs += dtMs;
 
   // Carrinho desliza até a pista escolhida (~150 ms)
@@ -429,13 +427,29 @@ export function tick(state: MineState, dtMs: number): void {
     if (state.highlightMs === 0) state.highlightRow = null;
   }
 
-  // Fileiras avançam e são julgadas no impacto (da mais próxima para a mais distante)
+  // Fileira parada espera a liberação; em movimento, avança até o impacto
   for (const row of state.rows) {
     if (row.resolved) continue;
+    if (row.phase === 'announce') {
+      row.announceMs += dtMs;
+      const releasedEnough = row.released && row.announceMs >= cfg.announceMinMs;
+      const timedOut = cfg.announceMaxMs > 0 && row.announceMs >= cfg.announceMaxMs;
+      if (releasedEnough || timedOut) {
+        // A pista escolhida durante o anúncio vale como resposta imediata
+        row.phase = 'moving';
+        row.ageMs = 0;
+        row.z = 1;
+        state.choiceAgeMs = 0;
+        state.events.push({ type: 'go', row });
+      }
+      continue;
+    }
     row.ageMs += dtMs;
     row.z = Math.max(0, 1 - row.ageMs / row.windowMs);
   }
-  const due = state.rows.filter((r) => !r.resolved && r.z <= 0).sort((a, b) => a.ageMs - b.ageMs);
+  const due = state.rows
+    .filter((r) => !r.resolved && r.phase === 'moving' && r.z <= 0)
+    .sort((a, b) => a.ageMs - b.ageMs);
   for (const row of due) {
     resolveAtImpact(state, row);
     if (state.hearts === 0) {
@@ -448,14 +462,9 @@ export function tick(state: MineState, dtMs: number): void {
   if (state.status === 'running') {
     if (state.queue.length === 0 && state.rows.length === 0) {
       finish(state, 'complete');
-    } else if (
-      state.highlightMs === 0 &&
-      state.queue.length > 0 &&
-      state.rows.length < MAX_ALIVE_ROWS &&
-      state.rows.every((r) => r.resolved)
-    ) {
-      // Uma fileira julgada por vez: a próxima nasce assim que a anterior sai do trilho
-      // (o intervalo desde o último nascimento é a janela inteira, sempre >= spawnGapMs)
+    } else if (state.highlightMs === 0 && state.queue.length > 0 && state.rows.length === 0) {
+      // Uma fileira julgada por vez: após acerto nasce já neste tick (parada, anunciando);
+      // após erro, só quando o destaque do bloco certo termina
       spawnNext(state);
     }
   }

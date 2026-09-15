@@ -1,18 +1,20 @@
 // ========================================
-// Mine Rush: tela da corrida (input, HUD, ciclo de vida)
+// Mine Rush: tela da corrida (input, HUD, áudio e ciclo de vida)
 // O motor (engine.ts) cuida das regras, o render.ts desenha e o sfx.ts faz os sons.
 // Nenhuma animação do framer-motion roda durante a corrida.
 // Fluxo: 'Descer na mina' (destrava o AudioContext e pré-carrega as imagens) -> corrida
 // -> overlay de 1,5 s com profundidade e melhor combo -> onFinish (o resultado é do EnglishArena).
+// Ritmo (Fase 2): a fileira nasce parada; o áudio do pedido passa por uma fila sequencial
+// (nunca dois áudios juntos) e a tela chama releaseRow() quando ele termina.
 // ========================================
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Heart, Volume2 } from 'lucide-react';
 import { EnglishCategory, EnglishWord } from '../../../../data/englishVocabulary';
-import { EnglishProgressDoc, RoundResult, pickWords, playWord, shuffle, wordsOf } from '../../../../services/englishGameService';
+import { EnglishProgressDoc, RoundResult, pickWords, playWord, playWordAsync, shuffle, speakAsync, wordsOf } from '../../../../services/englishGameService';
 import { useSound } from '../../../../contexts/SoundContext';
-import { Lane, MineEvent, MineState, MineWord, PICKAXES, PromptMode, RenderAssets, RenderOptions, RunPlan } from './types';
-import { chooseLane, createRun, drainEvents, pause, resume, start, summarize, tick } from './engine';
+import { BlockRow, Lane, MineEvent, MineState, MineWord, PICKAXES, PromptMode, RenderAssets, RenderOptions, RowPhase, RunPlan } from './types';
+import { chooseLane, createRun, drainEvents, pause, releaseRow, resume, start, summarize, tick } from './engine';
 import { createRenderer } from './render';
 import { createMineSfx } from './sfx';
 
@@ -25,6 +27,14 @@ interface Props {
 
 type Phase = 'intro' | 'loading' | 'running';
 
+interface HudPrompt {
+  mode: PromptMode;
+  phase: RowPhase;
+  word: MineWord;
+  retry: boolean;
+  hint: boolean;
+}
+
 /** Cópia leve do estado para o HUD (atualizada só em eventos e a cada 200 ms) */
 interface Hud {
   hearts: number;
@@ -34,7 +44,16 @@ interface Hud {
   total: number;
   combo: number;
   score: number;
-  prompt: { mode: PromptMode; word: MineWord; retry: boolean } | null;
+  prompt: HudPrompt | null;
+}
+
+type AudioTask = () => Promise<void>;
+
+interface AudioQueue {
+  push: (task: AudioTask) => void;
+  /** esvazia e recusa novas tarefas (desmontar, sair, fim da corrida) */
+  cancel: () => void;
+  cancelled: () => boolean;
 }
 
 const RUN_WORDS = 12;
@@ -50,7 +69,7 @@ const titleFont = { fontFamily: 'Comic Neue, cursive' } as const;
 
 const toMineWord = (w: EnglishWord): MineWord => ({ id: w.id, word: w.word, translation: w.translation, image: w.image, audio: w.audio, hex: w.hex });
 
-/** Nível da palavra pela regra da Fase 1: nunca vista = 0 (placa), streak 0-1 = 1, senão 2 */
+/** Nível da palavra: nunca vista = 0 (modo 'intro'), streak 0-1 = 1, senão 2 */
 function levelOf(w: EnglishWord, progress: EnglishProgressDoc | null): number {
   const s = progress?.words[w.id];
   if (!s || s.seen === 0) return 0;
@@ -104,22 +123,107 @@ function preloadImages(urls: string[]): Promise<Map<string, HTMLImageElement>> {
   });
 }
 
+/**
+ * Fila sequencial de áudio: uma tarefa por vez, a próxima só começa quando a anterior resolve.
+ * Depois de cancel() nada mais entra; a tarefa em curso termina sozinha e o laço para.
+ */
+function createAudioQueue(): AudioQueue {
+  const tasks: AudioTask[] = [];
+  let busy = false;
+  let cancelled = false;
+  const run = async () => {
+    busy = true;
+    while (!cancelled) {
+      const task = tasks.shift();
+      if (!task) break;
+      try {
+        await task();
+      } catch {
+        // áudio nunca trava a corrida
+      }
+    }
+    busy = false;
+  };
+  return {
+    push: (task) => {
+      if (cancelled) return;
+      tasks.push(task);
+      if (!busy) void run();
+    },
+    cancel: () => {
+      cancelled = true;
+      tasks.length = 0;
+    },
+    cancelled: () => cancelled,
+  };
+}
+
+const cancelSpeech = () => {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+};
+
 const clampLane = (n: number): Lane => (n <= 0 ? 0 : n >= 2 ? 2 : 1);
 
-/** total = blocos julgados + placas de aprendizado (depth conta as placas, então o contador nunca passa do total) */
-function snapshot(st: MineState, maxHearts: number, total: number): Hud {
+/** total = blocos julgados; retries não contam, então o contador nunca passa do total */
+function snapshot(st: MineState, maxHearts: number): Hud {
   const row = st.activeRowIndex === null ? undefined : st.rows.find((r) => r.index === st.activeRowIndex);
   return {
     hearts: st.hearts,
     maxHearts,
     pickaxe: st.pickaxe,
     depth: st.depth,
-    total,
+    total: st.totalBlocks,
     combo: st.combo,
     score: st.score,
-    prompt: row ? { mode: row.mode, word: row.target, retry: row.retry } : null,
+    prompt: row ? { mode: row.mode, phase: row.phase, word: row.target, retry: row.retry, hint: row.hint } : null,
   };
 }
+
+/** Figura da palavra: imagem, quadrado da cor, ou nada */
+const Figure: React.FC<{ word: MineWord; size: string }> = ({ word, size }) => {
+  if (word.image) {
+    return <img src={word.image} alt="" className={`${size} shrink-0 object-contain`} style={{ imageRendering: 'pixelated' }} draggable={false} />;
+  }
+  if (word.hex) return <span className={`${size} shrink-0 inline-block rounded border-2 border-white/60`} style={{ backgroundColor: word.hex }} />;
+  return null;
+};
+
+/** Conteúdo do pedido nos dois tamanhos: grande (fileira parada, ouvindo) e compacto (em movimento) */
+const PromptBody: React.FC<{ prompt: HudPrompt; big: boolean }> = ({ prompt, big }) => {
+  const { mode, word, retry, hint } = prompt;
+  const main = big ? 'block text-2xl sm:text-3xl font-bold leading-tight break-words' : 'block text-xl font-bold leading-tight';
+  const sub = big ? 'block text-base text-white/85 mt-1' : 'block text-sm text-white/80';
+  const ask = big ? 'block text-sm text-white/70 mt-1' : 'block text-xs text-white/80';
+  const note = 'block text-[10px] uppercase tracking-wide mt-1';
+  return (
+    <div className={big ? 'flex flex-col items-center gap-2' : 'flex items-center gap-3 min-w-0'}>
+      {mode === 'intro' && <Figure word={word} size={big ? 'w-24 h-24' : 'w-12 h-12'} />}
+      {mode === 'translation_to_word' && hint && <Figure word={word} size={big ? 'w-16 h-16' : 'w-10 h-10'} />}
+      <span className={`min-w-0 ${big ? 'text-center' : 'text-left'}`}>
+        {mode === 'intro' && (
+          <>
+            <span className={main}>{word.word}</span>
+            <span className={sub}>{word.translation}</span>
+            <span className={`${note} text-emerald-300`}>Palavra nova</span>
+          </>
+        )}
+        {mode === 'word_to_image' && (
+          <>
+            <span className={main}>{word.word}</span>
+            <span className={ask}>Qual é a figura?</span>
+          </>
+        )}
+        {mode === 'translation_to_word' && (
+          <>
+            <span className={main}>{word.translation}</span>
+            <span className={ask}>Ache a palavra em inglês</span>
+          </>
+        )}
+        {retry && <span className={`${note} text-amber-300`}>De novo</span>}
+      </span>
+    </div>
+  );
+};
 
 const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => {
   const { isSoundEnabled } = useSound();
@@ -143,9 +247,9 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
   const lastActiveRef = useRef<number | null>(null);
   const finishedRef = useRef(false);
   const endTimerRef = useRef(0);
-  const totalRef = useRef(0);
   const gestureRef = useRef<{ x: number; laneBefore: Lane; swiped: boolean } | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const audioQueueRef = useRef<AudioQueue | null>(null);
   const prevPickaxeRef = useRef(0);
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
@@ -175,9 +279,22 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
     }
   };
 
-  const speak = (word: MineWord) => {
+  /** Palavra em inglês (mp3, ou fala en-US se ela não estiver no banco) */
+  const wordAudio = (word: MineWord): Promise<void> => {
     const ew = wordById.current.get(word.id);
+    return ew ? playWordAsync(ew) : speakAsync(word.word, 'en-US');
+  };
+
+  /** Áudio do pedido: sempre a palavra em inglês (o pai não quis a tradução falada em português) */
+  const promptAudio = (row: BlockRow): Promise<void> => wordAudio(row.target);
+
+  /** Repetição manual do pedido (botão do alto-falante): fora da fila, não segura a fileira */
+  const replay = (p: HudPrompt) => {
+    // durante o anúncio o pedido ainda está tocando
+    if (p.phase === 'announce') return;
+    const ew = wordById.current.get(p.word.id);
     if (ew) playWord(ew);
+    else void speakAsync(p.word.word, 'en-US');
   };
 
   // ---------- Início: destrava o áudio, monta a corrida e pré-carrega as imagens ----------
@@ -194,8 +311,7 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
     stateRef.current = st;
     finishedRef.current = false;
     prevPickaxeRef.current = st.pickaxe;
-    totalRef.current = st.totalBlocks + st.queue.filter((r) => r.mode === 'learn').length;
-    setHud(snapshot(st, maxHearts, totalRef.current));
+    setHud(snapshot(st, maxHearts));
     setPhase('running');
   };
 
@@ -241,10 +357,14 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
     rendererRef.current = renderer;
     if (optsRef.current.width > 0) renderer.resize(optsRef.current);
     const sfx = getSfx();
+    const audio = createAudioQueue();
+    audioQueueRef.current = audio;
 
     const finishRun = (state: MineState) => {
       if (finishedRef.current) return;
       finishedRef.current = true;
+      // o áudio da última palavra (já em curso) termina sozinho; nada mais entra
+      audio.cancel();
       const sum = summarize(state);
       setEnding({ depth: sum.depth, maxCombo: sum.maxCombo });
       endTimerRef.current = window.setTimeout(() => {
@@ -263,16 +383,31 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
       }, END_OVERLAY_MS);
     };
 
+    /** Toca o pedido da fileira parada e, quando termina, libera a fileira */
+    const announce = (row: BlockRow) => {
+      audio.push(async () => {
+        await promptAudio(row);
+        const state = stateRef.current;
+        if (audio.cancelled() || !state || state.status === 'finished' || state.status === 'ready') return;
+        // pausada também libera: o motor não anda parado e a fileira sai ao continuar
+        const current = state.rows.find((r) => r.index === row.index);
+        if (current && current.phase === 'announce') releaseRow(state);
+      });
+    };
+
     const handleEvent = (ev: MineEvent, state: MineState) => {
       switch (ev.type) {
+        case 'prompt':
+          announce(ev.row);
+          break;
+        case 'go':
+          // o HUD já sincroniza por ter havido evento; o renderer cuida do movimento
+          break;
         case 'hit':
           sfx.hit(ev.pickaxe);
           break;
         case 'miss':
           sfx.miss();
-          break;
-        case 'learn':
-          sfx.learn();
           break;
         case 'pickaxe':
           // o motor avisa subida e queda; só a subida tem som
@@ -283,7 +418,7 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
           sfx.checkpoint();
           break;
         case 'audio':
-          speak(ev.word);
+          // sem repetição no impacto (pedido do pai): só os sons de quebra/batida; um erro volta como retry e é anunciado de novo
           break;
         case 'gameover':
           if (ev.reason === 'complete') sfx.unlock();
@@ -304,7 +439,7 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
       if (events.length > 0 || now - lastHudRef.current >= HUD_SYNC_MS || state.activeRowIndex !== lastActiveRef.current) {
         lastHudRef.current = now;
         lastActiveRef.current = state.activeRowIndex;
-        setHud(snapshot(state, maxHearts, totalRef.current));
+        setHud(snapshot(state, maxHearts));
       }
       rafRef.current = requestAnimationFrame(loop);
     };
@@ -317,6 +452,9 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.clearTimeout(endTimerRef.current);
+      audio.cancel();
+      cancelSpeech();
+      audioQueueRef.current = null;
       renderer.destroy();
       rendererRef.current = null;
     };
@@ -389,6 +527,8 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
   const quit = () => {
     cancelAnimationFrame(rafRef.current);
     window.clearTimeout(endTimerRef.current);
+    audioQueueRef.current?.cancel();
+    cancelSpeech();
     onQuit();
   };
 
@@ -399,7 +539,7 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
       <div className="text-center py-4 text-white">
         <img src="/assets/english/ui/minecart.webp" alt="" className="w-28 h-28 mx-auto" style={{ imageRendering: 'pixelated' }} draggable={false} />
         <h3 className="mc-title text-base sm:text-xl mt-2">Mine Rush</h3>
-        <p className="text-white/85 mt-3">Troque de pista e quebre o bloco certo antes do carrinho bater.</p>
+        <p className="text-white/85 mt-3">Ouça o pedido, troque de pista e quebre o bloco certo antes do carrinho bater.</p>
         <p className="text-sm text-white/60 mt-1">Toque nos lados da tela, deslize, ou use A, S, D e as setas.</p>
         {bestDepth > 0 && (
           <p className="mc-font text-[10px] mc-diamond mt-4">Recorde: {bestDepth} blocos</p>
@@ -463,46 +603,41 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
           </div>
         )}
 
-        {/* Pedido da fileira ativa */}
-        {prompt && (
+        {/* Pedido grande: fileira parada no fundo, ouvindo o áudio. Fica na base para não cobrir a fileira parada */}
+        {prompt && prompt.phase === 'announce' && (
+          <div className="absolute inset-0 flex items-end justify-center p-4 pointer-events-none">
+            <div className="w-full max-w-xs bg-black/75 border border-white/15 rounded-2xl px-5 py-4 text-white text-center shadow-2xl">
+              <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-wide text-emerald-300">
+                <Volume2 className="w-4 h-4 animate-pulse" />
+                <span>Ouça</span>
+              </div>
+              <div className="mt-3">
+                <PromptBody prompt={prompt} big />
+              </div>
+              {/* desabilitado enquanto o pedido toca */}
+              <button
+                onClick={() => replay(prompt)}
+                disabled
+                aria-disabled="true"
+                className="pointer-events-auto mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/15 text-sm font-semibold opacity-40 cursor-not-allowed"
+                aria-label="Ouvir o pedido de novo"
+              >
+                <Volume2 className="w-5 h-5" />
+                Ouvir de novo
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Pedido compacto: fileira descendo */}
+        {prompt && prompt.phase === 'moving' && (
           <div className="absolute bottom-3 inset-x-3 flex justify-center pointer-events-none">
             <div className="flex items-center gap-3 bg-black/60 text-white rounded-xl px-3 py-2 max-w-full">
-              {(prompt.mode === 'learn' || prompt.mode === 'image_to_word') && (
-                prompt.word.image ? (
-                  <img src={prompt.word.image} alt="" className="w-12 h-12 object-contain" style={{ imageRendering: 'pixelated' }} draggable={false} />
-                ) : prompt.word.hex ? (
-                  <span className="w-12 h-12 rounded border-2 border-white/60" style={{ backgroundColor: prompt.word.hex }} />
-                ) : (
-                  <span className="text-lg font-bold">{prompt.word.word}</span>
-                )
-              )}
-              <span className="min-w-0 text-left">
-                {prompt.mode === 'learn' && (
-                  <>
-                    <span className="block text-xl font-bold leading-tight">{prompt.word.word}</span>
-                    <span className="block text-sm text-white/80">{prompt.word.translation}</span>
-                    <span className="block text-[10px] text-emerald-300 uppercase">Palavra nova: quebre qualquer bloco</span>
-                  </>
-                )}
-                {prompt.mode === 'image_to_word' && <span className="block text-xs text-white/80">Qual é a palavra?</span>}
-                {prompt.mode === 'translation_to_word' && (
-                  <>
-                    <span className="block text-xl font-bold leading-tight">{prompt.word.translation}</span>
-                    <span className="block text-xs text-white/80">Como se diz em inglês?</span>
-                  </>
-                )}
-                {prompt.mode === 'word_to_image' && (
-                  <>
-                    <span className="block text-xl font-bold leading-tight">{prompt.word.word}</span>
-                    <span className="block text-xs text-white/80">Qual é a figura?</span>
-                  </>
-                )}
-                {prompt.retry && prompt.mode !== 'learn' && <span className="block text-[10px] text-amber-300 uppercase">De novo</span>}
-              </span>
+              <PromptBody prompt={prompt} big={false} />
               <button
-                onClick={() => speak(prompt.word)}
+                onClick={() => replay(prompt)}
                 className="pointer-events-auto shrink-0 p-2 rounded-lg bg-white/15 hover:bg-white/30"
-                aria-label="Ouvir a palavra"
+                aria-label="Ouvir o pedido de novo"
               >
                 <Volume2 className="w-5 h-5" />
               </button>

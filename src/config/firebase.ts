@@ -6,6 +6,7 @@ import {
   type FirestoreSettings
 } from 'firebase/firestore';
 import { getMessaging, getToken, onMessage, type Messaging, type MessagePayload } from 'firebase/messaging';
+import { getStorage } from 'firebase/storage';
 
 // ========================================
 // 🔥 VALIDAÇÃO DAS VARIÁVEIS ENV
@@ -58,6 +59,9 @@ const firebaseConfig = {
 export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
+
+// Storage: áudios de TTS da Arena de Inglês (english/tts/{hash}.mp3)
+export const storage = getStorage(app);
 
 // Inicializar Firestore com opções otimizadas
 export const db = initializeFirestore(app, {

@@ -232,6 +232,31 @@ service cloud.firestore {
       allow write: if signedIn() && (isAdmin() || uid == request.auth.uid);
     }
 
+    // ---------- A BASE (Arena de Inglês, Etapa 1) ----------
+    // Plano do dia: englishPlans/{uid_date}; gerado pela própria criança ou pelo responsável
+    match /englishPlans/{planId} {
+      // get: documento pode não existir ainda (resource == null); list: só os do próprio usuário
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+    // Base da criança: englishBase/{uid}
+    match /englishBase/{baseId} {
+      allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create, update: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+    // Índice do cache de TTS (englishAudio/{hash}) e contadores de uso de IA por mês (aiUsage/{yyyy-mm}):
+    // compartilhados pela família, sem dono
+    match /englishAudio/{hash} {
+      allow read, write: if signedIn();
+    }
+    match /aiUsage/{month} {
+      allow read, write: if signedIn();
+    }
+
     // ---------- SETTINGS (modo férias, regras do dia) ----------
     match /settings/{settingId} {
       allow read: if signedIn();

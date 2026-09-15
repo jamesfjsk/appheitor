@@ -75,7 +75,7 @@ export type MineEvent =
   | { type: 'pickaxe'; level: number }               // trocou de picareta (subiu ou caiu)
   | { type: 'checkpoint'; index: number; heartsAfter: number; stratum: Stratum }
   | { type: 'gameover'; reason: 'hearts' | 'complete' }
-  | { type: 'audio'; word: MineWord; reason: 'hit' | 'miss' };  // a tela deve tocar a palavra em inglês (enfileirado, nunca sobreposto)
+  | { type: 'audio'; word: MineWord; reason: 'hit' | 'miss'; mode: PromptMode };  // a tela deve tocar a palavra em inglês (enfileirado, nunca sobreposto); mode = modo da fileira recém-julgada
 
 export type Stratum = 'surface' | 'stone';
 

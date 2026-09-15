@@ -706,20 +706,44 @@ body {
   z-index: 0;
 }
 
-.hq-backdrop-art {
+.hq-backdrop-art,
+.hq-backdrop-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.hq-backdrop-art {
+  z-index: 0;
   animation: hq-drift 28s ease-in-out infinite alternate;
 }
 
+.hq-tiktok-bleed {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hq-tiktok-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 325px;
+  height: 580px;
+  border: 0;
+  background: transparent;
+}
+
 .hq-backdrop-wash {
+  z-index: 2;
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(90, 8, 20, 0.22) 0%, rgba(107, 10, 24, 0.38) 100%);
+    linear-gradient(180deg, rgba(90, 8, 20, 0.18) 0%, rgba(107, 10, 24, 0.36) 100%);
 }
 
 @keyframes hq-drift {
@@ -788,7 +812,8 @@ body {
   .shimmer,
   .particles-bg::before,
   .float,
-  .hq-backdrop-art {
+  .hq-backdrop-art,
+  .hq-backdrop-video {
     animation: none !important;
   }
 

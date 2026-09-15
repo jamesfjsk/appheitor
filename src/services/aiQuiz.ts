@@ -103,7 +103,28 @@ export function sanitizeQuestions(raw: unknown, avoid: string[] = []): SurpriseM
   return out;
 }
 
-export async function callOpenAI(system: string, user: string, maxTokens: number, signal?: AbortSignal): Promise<unknown> {
+export interface OpenAIUsage {
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export interface CallOpenAIOptions {
+  signal?: AbortSignal;
+  /** Modelo diferente do padrão (gpt-4o-mini) */
+  model?: string;
+  temperature?: number;
+  /** Devolve { json, usage } em vez do JSON puro (contabilidade de tokens) */
+  withUsage?: true;
+}
+
+const isAbortSignal = (v: unknown): v is AbortSignal => typeof AbortSignal !== 'undefined' && v instanceof AbortSignal;
+
+// Chamadores antigos passam só o AbortSignal e recebem o JSON; a Arena de Inglês passa opções e recebe { json, usage }
+export function callOpenAI(system: string, user: string, maxTokens: number, opts: CallOpenAIOptions & { withUsage: true }): Promise<{ json: unknown; usage: OpenAIUsage }>;
+export function callOpenAI(system: string, user: string, maxTokens: number, opts?: AbortSignal | CallOpenAIOptions): Promise<unknown>;
+export async function callOpenAI(system: string, user: string, maxTokens: number, opts?: AbortSignal | CallOpenAIOptions): Promise<unknown> {
+  const options: CallOpenAIOptions = isAbortSignal(opts) ? { signal: opts } : opts ?? {};
+  const signal = options.signal;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const onAbort = () => controller.abort();
@@ -113,8 +134,8 @@ export async function callOpenAI(system: string, user: string, maxTokens: number
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${OPENAI_API_KEY}` },
       body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.9,
+        model: options.model ?? MODEL,
+        temperature: options.temperature ?? 0.9,
         max_tokens: maxTokens,
         response_format: { type: 'json_object' },
         messages: [
@@ -128,10 +149,15 @@ export async function callOpenAI(system: string, user: string, maxTokens: number
       const text = await response.text().catch(() => '');
       throw new Error(`OpenAI ${response.status}: ${text.slice(0, 200)}`);
     }
-    const data = (await response.json()) as { choices?: { message?: { content?: string } }[] };
+    const data = (await response.json()) as {
+      choices?: { message?: { content?: string } }[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+    };
     const content = data.choices?.[0]?.message?.content;
     if (!content) throw new Error('Resposta vazia da IA');
-    return JSON.parse(content) as unknown;
+    const json = JSON.parse(content) as unknown;
+    if (!options.withUsage) return json;
+    return { json, usage: { inputTokens: data.usage?.prompt_tokens ?? 0, outputTokens: data.usage?.completion_tokens ?? 0 } };
   } finally {
     clearTimeout(timer);
     signal?.removeEventListener('abort', onAbort);

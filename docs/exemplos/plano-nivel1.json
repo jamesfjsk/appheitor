@@ -1,0 +1,498 @@
+{
+  "plan": {
+    "id": "exemplo_2026-09-14",
+    "userId": "exemplo",
+    "date": "2026-09-14",
+    "level": 1,
+    "status": "ready",
+    "generatingAt": null,
+    "order": [
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "c5"
+    ],
+    "contracts": {
+      "c1": {
+        "id": "c1",
+        "type": "merchant",
+        "material": "madeira",
+        "theme": "a mina",
+        "title": "Pedido do Comerciante",
+        "version": 1,
+        "status": "open",
+        "result": null,
+        "retryUsed": false,
+        "content": {
+          "spots": [
+            {
+              "id": "window",
+              "label": "window",
+              "image": "/assets/english/ui/base/s_window.webp",
+              "relations": [
+                "next_to",
+                "under"
+              ]
+            },
+            {
+              "id": "table",
+              "label": "table",
+              "image": "/assets/english/images/object_table.webp",
+              "relations": [
+                "on",
+                "under",
+                "next_to"
+              ]
+            },
+            {
+              "id": "barrel",
+              "label": "barrel",
+              "image": "/assets/english/ui/base/s_barrel.webp",
+              "relations": [
+                "in",
+                "on",
+                "next_to"
+              ]
+            },
+            {
+              "id": "fence",
+              "label": "fence",
+              "image": "/assets/english/ui/base/s_fence.webp",
+              "relations": [
+                "next_to",
+                "under"
+              ]
+            }
+          ],
+          "items": [
+            {
+              "id": "book",
+              "stock": 2
+            },
+            {
+              "id": "sword",
+              "stock": 3
+            },
+            {
+              "id": "cake",
+              "stock": 1
+            }
+          ],
+          "steps": [
+            {
+              "item": "book",
+              "qty": 2,
+              "relation": "under",
+              "spot": "window"
+            },
+            {
+              "item": "sword",
+              "qty": 3,
+              "relation": "under",
+              "spot": "table"
+            }
+          ],
+          "sentences": [
+            "Please put two books under the window.",
+            "Now put three swords under the table."
+          ],
+          "gapped": [
+            "Please put two ___ under the ___.",
+            "Now put three ___ under the ___."
+          ],
+          "translation": [
+            "Por favor, coloque dois livros embaixo da janela.",
+            "Agora coloque três espadas embaixo da mesa."
+          ]
+        }
+      },
+      "c2": {
+        "id": "c2",
+        "type": "letter",
+        "material": "pedra",
+        "theme": "o campinho de futebol",
+        "title": "Carta",
+        "version": 1,
+        "status": "open",
+        "result": null,
+        "retryUsed": false,
+        "content": null
+      },
+      "c3": {
+        "id": "c3",
+        "type": "note",
+        "material": "ferro",
+        "theme": "a mina",
+        "title": "Recado para o ferreiro",
+        "version": 1,
+        "status": "open",
+        "result": null,
+        "retryUsed": false,
+        "content": {
+          "brief": "Peça três lanternas e uma picareta azul para a equipe da mina.",
+          "mustInclude": [
+            {
+              "pt": "três lanternas",
+              "en": [
+                "three lanterns",
+                "3 lanterns"
+              ]
+            },
+            {
+              "pt": "uma picareta azul",
+              "en": [
+                "one blue pickaxe",
+                "a blue pickaxe"
+              ]
+            },
+            {
+              "pt": "para a equipe da mina",
+              "en": [
+                "for the mine team",
+                "to the mine team"
+              ]
+            }
+          ],
+          "templates": [
+            "I need ___ and ___.",
+            "I have ___. It is for ___.",
+            "There is ___ in the ___.",
+            "Please give me ___ for ___.",
+            "I want ___ and ___ for ___."
+          ],
+          "wordBank": [
+            "need",
+            "lanterns",
+            "blue",
+            "pickaxe",
+            "for",
+            "mine",
+            "team",
+            "give",
+            "take",
+            "on",
+            "and",
+            "but"
+          ],
+          "model": "I need three lanterns. One blue pickaxe is for the mine team.",
+          "hint": ""
+        }
+      },
+      "c4": {
+        "id": "c4",
+        "type": "forge",
+        "material": "redstone",
+        "theme": "o campinho de futebol",
+        "title": "Ordem do pedido (Put the X on the Y)",
+        "version": 1,
+        "status": "open",
+        "result": null,
+        "retryUsed": false,
+        "content": {
+          "target": "Ordem do pedido (Put the X on the Y)",
+          "items": [
+            {
+              "kind": "scramble",
+              "words": [
+                "the",
+                "goal",
+                "the",
+                "in",
+                "ball",
+                "put"
+              ],
+              "answer": "Put the ball in the goal.",
+              "rule": "Coloque a palavra 'put' no começo e depois o objeto e o lugar."
+            },
+            {
+              "kind": "scramble",
+              "words": [
+                "the",
+                "bench",
+                "shoes",
+                "my",
+                "under",
+                "put"
+              ],
+              "answer": "Put my shoes under the bench.",
+              "rule": "Diga primeiro 'put', depois o que e onde."
+            },
+            {
+              "kind": "scramble",
+              "words": [
+                "to",
+                "the",
+                "goal",
+                "flags",
+                "put",
+                "next"
+              ],
+              "answer": "Put the flags next to goal.",
+              "rule": "Use 'put' para dizer onde colocar algo."
+            },
+            {
+              "kind": "scramble",
+              "words": [
+                "field",
+                "five",
+                "on",
+                "cones",
+                "put",
+                "the"
+              ],
+              "answer": "Put five cones on the field.",
+              "rule": "Conte antes o objeto e depois onde colocar."
+            },
+            {
+              "kind": "scramble",
+              "words": [
+                "ball",
+                "put",
+                "shoes",
+                "to",
+                "the",
+                "next"
+              ],
+              "answer": "Put the ball next to shoes.",
+              "rule": "Fale primeiro 'put', depois o objeto e o lugar."
+            },
+            {
+              "kind": "scramble",
+              "words": [
+                "the",
+                "water",
+                "on",
+                "my",
+                "put",
+                "bottle",
+                "bench"
+              ],
+              "answer": "Put my water bottle on the bench.",
+              "rule": "Diga 'put' e depois o que e onde colocar."
+            }
+          ]
+        }
+      },
+      "c5": {
+        "id": "c5",
+        "type": "letter",
+        "material": "pedra",
+        "theme": "a mina",
+        "title": "Mine Report for Base",
+        "version": 1,
+        "status": "open",
+        "result": null,
+        "retryUsed": false,
+        "content": {
+          "genre": "scout_report",
+          "title": "Mine Report for Base",
+          "sender": "Scout Lila",
+          "text": "There is a mine next to the base. There are two tunnels. One tunnel has five ladders. The other has a lantern. A brave player uses a pickaxe. The player has a rope and five emeralds. The player wants to sell the rope. The price is three emeralds. The base is near the river.",
+          "glossary": [
+            {
+              "en": "mine",
+              "pt": "mina"
+            },
+            {
+              "en": "tunnel",
+              "pt": "túnel"
+            },
+            {
+              "en": "ladders",
+              "pt": "escada"
+            },
+            {
+              "en": "lantern",
+              "pt": "lanterna"
+            },
+            {
+              "en": "pickaxe",
+              "pt": "picareta"
+            },
+            {
+              "en": "rope",
+              "pt": "corda"
+            }
+          ],
+          "questions": [
+            {
+              "kind": "decision",
+              "question": "You have three emeralds. What do you buy?",
+              "options": [
+                "the rope",
+                "a lantern",
+                "a pickaxe",
+                "the ladder"
+              ],
+              "answer": 0,
+              "evidence": "The player wants to sell the rope. The price is three emeralds.",
+              "explanation": "O texto diz que a corda custa três esmeraldas e está à venda."
+            },
+            {
+              "kind": "comprehension",
+              "question": "How many ladders are there?",
+              "options": [
+                "three",
+                "five",
+                "two",
+                "one"
+              ],
+              "answer": 1,
+              "evidence": "One tunnel has five ladders.",
+              "explanation": "Um túnel tem cinco escadas."
+            },
+            {
+              "kind": "comprehension",
+              "question": "Where is the lantern?",
+              "options": [
+                "at the base",
+                "in the tunnel",
+                "under the rope",
+                "on the river"
+              ],
+              "answer": 1,
+              "evidence": "The other has a lantern.",
+              "explanation": "A lanterna está em um túnel diferente."
+            }
+          ],
+          "translation": "Há uma mina ao lado da base. Existem dois túneis. Um túnel tem cinco escadas. O outro tem uma lanterna. Um jogador corajoso usa uma picareta. O jogador tem uma corda e cinco esmeraldas. O jogador quer vender a corda. O preço é três esmeraldas. A base está perto do rio."
+        }
+      }
+    },
+    "rewardedIds": [],
+    "generatedAt": "2026-09-14T19:39:19.309Z",
+    "source": "mixed",
+    "reviewedByParent": false,
+    "themeRequest": null
+  },
+  "generation": {
+    "c1": {
+      "source": "ai",
+      "problems": [],
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "cleanOk": true,
+          "replaced": [],
+          "latencyMs": 1691,
+          "inputTokens": 669,
+          "outputTokens": 46,
+          "finish": "stop",
+          "problems": []
+        }
+      ]
+    },
+    "c2": {
+      "source": "offline",
+      "problems": [
+        "pergunta 1: anti-cola, só a opção certa aparece literalmente no texto",
+        "pergunta 3: anti-cola, só a opção certa aparece literalmente no texto",
+        "pergunta 4: opção certa é a mais longa",
+        "pergunta 5: anti-cola, só a opção certa aparece literalmente no texto",
+        "só 1 pergunta(s) válida(s) (mínimo 2)"
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": false,
+          "cleanOk": false,
+          "replaced": [],
+          "latencyMs": 7186,
+          "inputTokens": 1244,
+          "outputTokens": 661,
+          "finish": "stop",
+          "problems": [
+            "pergunta 1: anti-cola, só a opção certa aparece literalmente no texto",
+            "pergunta 2: anti-cola, só a opção certa aparece literalmente no texto",
+            "pergunta 3: opção certa é a mais longa",
+            "pergunta 4: anti-cola, só a opção certa aparece literalmente no texto",
+            "só 1 pergunta(s) válida(s) (mínimo 2)"
+          ]
+        },
+        {
+          "attempt": 2,
+          "ok": false,
+          "cleanOk": false,
+          "replaced": [],
+          "latencyMs": 6890,
+          "inputTokens": 1339,
+          "outputTokens": 656,
+          "finish": "stop",
+          "problems": [
+            "pergunta 1: anti-cola, só a opção certa aparece literalmente no texto",
+            "pergunta 3: anti-cola, só a opção certa aparece literalmente no texto",
+            "pergunta 4: opção certa é a mais longa",
+            "pergunta 5: anti-cola, só a opção certa aparece literalmente no texto",
+            "só 1 pergunta(s) válida(s) (mínimo 2)"
+          ]
+        }
+      ]
+    },
+    "c3": {
+      "source": "ai",
+      "problems": [
+        "banco com dígitos, números ou repetições; removidos"
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "cleanOk": true,
+          "replaced": [],
+          "latencyMs": 3048,
+          "inputTokens": 933,
+          "outputTokens": 179,
+          "finish": "stop",
+          "problems": [
+            "banco com dígitos, números ou repetições; removidos"
+          ]
+        }
+      ]
+    },
+    "c4": {
+      "source": "ai",
+      "problems": [],
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "cleanOk": true,
+          "replaced": [],
+          "latencyMs": 3992,
+          "inputTokens": 828,
+          "outputTokens": 374,
+          "finish": "stop",
+          "problems": []
+        }
+      ]
+    },
+    "c5": {
+      "source": "ai",
+      "problems": [
+        "pergunta 2: opção certa é a mais longa",
+        "pergunta 4: opção certa é a mais longa"
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "ok": true,
+          "cleanOk": true,
+          "replaced": [],
+          "latencyMs": 7117,
+          "inputTokens": 1247,
+          "outputTokens": 670,
+          "finish": "stop",
+          "problems": [
+            "pergunta 2: opção certa é a mais longa",
+            "pergunta 4: opção certa é a mais longa"
+          ]
+        }
+      ]
+    }
+  },
+  "model": "gpt-4.1-mini",
+  "temperature": 0.8,
+  "seed": 1238031645
+}

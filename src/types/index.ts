@@ -78,11 +78,14 @@ export interface DailyQuiz {
 // ARENA DE INGLÊS (jogos de vocabulário)
 // ========================================
 export type EnglishGameId = 'mine_rush' | 'block_memory' | 'creeper_quiz' | 'crafting_words';
+/** Jogos antigos + contratos da Base (Etapa 1); definido em ./english para manter os módulos puros */
+import type { EnglishSessionGame } from './english';
+export type { EnglishSessionGame } from './english';
 
 export interface EnglishGameSession {
   id: string;
   userId: string;
-  game: EnglishGameId;
+  game: EnglishSessionGame;   // jogos antigos ou tipo de contrato da Base
   category: string;       // fruits | animals | ... | mixed
   date: string;           // YYYY-MM-DD
   correct: number;

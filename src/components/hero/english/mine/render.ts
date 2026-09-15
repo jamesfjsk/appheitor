@@ -8,6 +8,8 @@
 //   Particle.y: altura acima da linha de impacto em frações da altura (positivo = para cima); size em px CSS.
 // - BlockRow.z: 1 = fundo do túnel, 0 = linha de impacto (frente do carrinho). Valores < 0 continuam
 //   sendo desenhados um pouco abaixo da linha até sumirem.
+// - BlockRow.phase 'announce': a fileira está parada em z = 1 esperando o áudio do pedido. Aqui ela
+//   balança de leve, recebe pouca névoa e ganha um ícone "ouvindo" por cima; em 'moving' o ícone some.
 // ========================================
 
 import { BlockFace, BlockRow, Lane, MineState, PICKAXES, RenderAssets, RenderOptions, Stratum } from './types';
@@ -22,7 +24,7 @@ export interface MineRenderer {
 const VP_X = 0.5;             // ponto de fuga
 const VP_Y = 0.14;
 const IMPACT_Y = 0.8;         // linha de impacto (z = 0)
-const DEPTH = 2.2;            // quanto maior, menor o bloco no fundo (escala = 1 / (1 + DEPTH * z))
+const DEPTH = 1.2;            // quanto maior, menor o bloco no fundo (escala = 1 / (1 + DEPTH * z)); 1.2 deixa a fileira parada (z = 1) com ~45% do tamanho, legível
 const LANE_X0: readonly number[] = [0.2, 0.5, 0.8];   // centro das pistas em z = 0
 const TRACK_HALF = 0.42;      // meia largura do leito do trilho em z = 0
 const RAIL_HALF = 0.075;      // meia distância entre os dois trilhos de uma pista em z = 0
@@ -34,6 +36,11 @@ const STRATUM_FADE_MS = 900;
 
 const TILE = 16;
 const TILE_SCALE = 4;         // cada pixel da textura vira 4 px CSS
+
+// fileira parada ('announce')
+const ANNOUNCE_BOB_PX = 2.5;   // amplitude do balanço vertical
+const FAR_FOG_MAX = 0.25;      // névoa máxima sobre uma fileira (legível no fundo e sem salto de brilho no "go")
+const LISTEN_STEP_MS = 220;    // ritmo das ondas do ícone "ouvindo"
 
 // ---------- cores ----------
 const FOG: Record<Stratum, string> = { surface: '#1b1408', stone: '#0b0b10' };
@@ -50,8 +57,6 @@ const PAL_FLOOR = ['#3a332c', '#433a31', '#302a24', '#4a4037'];
 const PAL_ORE_BASE = ['#7a7a7a', '#868686', '#6b6b6b', '#929292', '#808080'];
 const ORE_NORMAL = ['#e7c34a', '#d9a92c', '#f4d874'];   // ouro
 const ORE_RETRY = ['#e03a2f', '#c42a20', '#ff6a5c'];    // redstone: palavra que voltou
-const GOLD_FRAME = '#f2c94c';
-const GOLD_FRAME_LIGHT = '#fff1a8';
 const GREEN_GLOW = '#5cff5c';
 const SIGN_BG = '#f1e3bf';
 const SIGN_EDGE = '#8a6a3a';
@@ -60,6 +65,24 @@ const TEXT_STROKE = '#1b1208';
 const RAIL = '#9c9c9c';
 const RAIL_DARK = '#4a4a4a';
 const SLEEPER = '#5a3d20';
+const LISTEN = '#ffd83d';       // ícone "ouvindo": alto-falante e ondas acesas
+const LISTEN_OFF = '#6e5a1e';   // ondas apagadas (mantêm a silhueta)
+const TRANSPARENT = 'rgba(0,0,0,0)';
+
+// ---------- ícone "ouvindo" (pixel art) ----------
+// Alto-falante ('S') com três ondas ('1', '2', '3'); '.' é transparente. O contorno escuro é calculado.
+const LISTEN_ICON: readonly string[] = [
+  '..........3...',
+  '...S...2...3..',
+  '..SS.1..2...3.',
+  'SSSS..1..2...3',
+  'SSSS..1..2...3',
+  'SSSS..1..2...3',
+  '..SS.1..2...3.',
+  '...S...2...3..',
+  '..........3...',
+];
+const LISTEN_PAD = 1;         // margem de 1 px para o contorno
 
 // ---------- ruído determinístico ----------
 function hash(x: number, y: number, seed: number): number {
@@ -80,7 +103,7 @@ function makeCanvas(w: number, h: number): HTMLCanvasElement | null {
   return c;
 }
 
-/** Textura em pixels: paint(x, y) devolve a cor de cada pixel */
+/** Textura em pixels: paint(x, y) devolve a cor de cada pixel (alpha 0 deixa o pixel transparente) */
 function makeTexture(w: number, h: number, paint: (x: number, y: number) => string): HTMLCanvasElement | null {
   const c = makeCanvas(w, h);
   const g = c?.getContext('2d');
@@ -132,6 +155,33 @@ function makeOre(ore: readonly string[], seed: number): HTMLCanvasElement | null
   });
 }
 
+/** Caractere do ícone "ouvindo" na posição (x, y); fora do desenho conta como transparente */
+function listenPixel(x: number, y: number): string {
+  if (y < 0 || y >= LISTEN_ICON.length) return '.';
+  const row = LISTEN_ICON[y];
+  return x < 0 || x >= row.length ? '.' : row.charAt(x);
+}
+
+/** Sprite do ícone com `lit` ondas acesas (0..3), 1 px por unidade; é escalado na hora de desenhar */
+function makeListenSprite(lit: number): HTMLCanvasElement | null {
+  const w = LISTEN_ICON[0].length + LISTEN_PAD * 2;
+  const h = LISTEN_ICON.length + LISTEN_PAD * 2;
+  return makeTexture(w, h, (x, y) => {
+    const ix = x - LISTEN_PAD;
+    const iy = y - LISTEN_PAD;
+    const c = listenPixel(ix, iy);
+    if (c === 'S') return LISTEN;
+    if (c !== '.') return Number(c) <= lit ? LISTEN : LISTEN_OFF;
+    // contorno: pixel vazio encostado (8 direções) em algum pixel do ícone
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if ((dx !== 0 || dy !== 0) && listenPixel(ix + dx, iy + dy) !== '.') return TEXT_STROKE;
+      }
+    }
+    return TRANSPARENT;
+  });
+}
+
 // ---------- utilidades ----------
 const clamp01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v);
 const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
@@ -176,7 +226,6 @@ interface Layout {
 }
 
 interface BlockStyle {
-  learn: boolean;
   retry: boolean;
   dim: boolean;
   glow: boolean;
@@ -197,6 +246,8 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
   const texFloor = makeTexture(TILE, TILE, paintFloor);
   const oreNormal = makeOre(ORE_NORMAL, 41);
   const oreRetry = makeOre(ORE_RETRY, 51);
+  // ícone "ouvindo": um sprite por quantidade de ondas acesas (0..3)
+  const listenSprites = [0, 1, 2, 3].map(makeListenSprite);
 
   let patSurface: CanvasPattern | null = null;
   let patStone: CanvasPattern | null = null;
@@ -409,7 +460,7 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
     g.restore();
   }
 
-  function drawFace(g: CanvasRenderingContext2D, face: BlockFace, assets: RenderAssets, x: number, y: number, size: number, learn: boolean): void {
+  function drawFace(g: CanvasRenderingContext2D, face: BlockFace, assets: RenderAssets, x: number, y: number, size: number): void {
     const inset = size * 0.1;
     const inner = size - inset * 2;
     const ix = x + inset;
@@ -423,47 +474,34 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
       const b = Math.max(1, size * 0.03);
       g.fillStyle = word.hex;
       g.fillRect(Math.round(ix + b), Math.round(iy + b), Math.round(inner - b * 2), Math.round(inner - b * 2));
-      if (learn) drawWordStrip(g, word.word, x, y, size);
       return;
     }
 
     if (kind === 'image' && word.image) {
       const img = assets.images.get(word.image);
       if (imageReady(img)) {
-        const area = learn ? inner * 0.66 : inner;
         const ratio = img.naturalWidth / img.naturalHeight;
-        let dw = area;
-        let dh = area;
-        if (ratio > 1) dh = area / ratio;
-        else dw = area * ratio;
+        let dw = inner;
+        let dh = inner;
+        if (ratio > 1) dh = inner / ratio;
+        else dw = inner * ratio;
         const dx = ix + (inner - dw) / 2;
-        const dy = iy + (learn ? 0 : (inner - dh) / 2);
+        const dy = iy + (inner - dh) / 2;
         g.drawImage(img, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
-        if (learn) drawWordStrip(g, word.word, x, y, size);
         return;
       }
       // imagem ainda não carregou: cai para a palavra escrita
     }
 
-    // placa de madeira com a palavra
+    // placa de madeira com a palavra (modos 'intro' e 'translation_to_word' usam sempre esta face)
     const text = face.text ?? word.word;
     g.fillStyle = SIGN_EDGE;
     g.fillRect(Math.round(ix), Math.round(iy), Math.round(inner), Math.round(inner));
     const b = Math.max(1, size * 0.03);
     g.fillStyle = SIGN_BG;
     g.fillRect(Math.round(ix + b), Math.round(iy + b), Math.round(inner - b * 2), Math.round(inner - b * 2));
-    const px = fitFont(g, text, inner * 0.9, size * 0.24, 7);
+    const px = fitFont(g, text, inner * 0.9, size * 0.28, 7);
     drawOutlinedText(g, text, x + size / 2, y + size / 2, px);
-  }
-
-  /** Faixa com a palavra na parte de baixo do bloco (placa de aprendizado) */
-  function drawWordStrip(g: CanvasRenderingContext2D, text: string, x: number, y: number, size: number): void {
-    const stripH = size * 0.24;
-    const sy = y + size - size * 0.1 - stripH;
-    g.fillStyle = 'rgba(20,12,4,0.72)';
-    g.fillRect(Math.round(x + size * 0.1), Math.round(sy), Math.round(size * 0.8), Math.round(stripH));
-    const px = fitFont(g, text, size * 0.74, stripH * 0.7, 7);
-    drawOutlinedText(g, text, x + size / 2, sy + stripH / 2, px);
   }
 
   function drawBlock(g: CanvasRenderingContext2D, face: BlockFace, assets: RenderAssets, cx: number, bottomY: number, size: number, st: BlockStyle): void {
@@ -495,14 +533,8 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
     g.fillRect(x, y + s - bev, s, bev);
     g.fillRect(x + s - bev, y, bev, s);
 
-    drawFace(g, face, assets, x, y, s, st.learn);
+    drawFace(g, face, assets, x, y, s);
 
-    if (st.learn) {
-      const lw = Math.max(2, s * 0.07);
-      g.lineWidth = lw;
-      g.strokeStyle = st.pulse > 0.5 ? GOLD_FRAME_LIGHT : GOLD_FRAME;
-      g.strokeRect(x + lw / 2, y + lw / 2, s - lw, s - lw);
-    }
     if (st.glow) {
       const lw = Math.max(2, s * 0.08);
       g.lineWidth = lw;
@@ -525,14 +557,30 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
     }
   }
 
-  function drawRow(g: CanvasRenderingContext2D, row: BlockRow, assets: RenderAssets, state: MineState, timeMs: number, highlighted: boolean): void {
+  /** Ícone "ouvindo" acima da fileira parada: as ondas acendem uma a uma (todas acesas com reduceEffects) */
+  function drawListenIndicator(g: CanvasRenderingContext2D, cx: number, topY: number, blockSize: number, timeMs: number): void {
+    const lit = opts.reduceEffects ? 3 : Math.floor(timeMs / LISTEN_STEP_MS) % 4;
+    const sprite = listenSprites[lit];
+    if (!sprite) return;
+    // unidade de pixel proporcional ao bloco, entre 2 e 5 px para ficar legível sem cobrir o túnel
+    const u = Math.max(2, Math.min(5, Math.round(blockSize / 10)));
+    const w = sprite.width * u;
+    const h = sprite.height * u;
+    g.drawImage(sprite, Math.round(cx - w / 2), Math.round(topY - u * 2 - h), w, h);
+  }
+
+  function drawRow(g: CanvasRenderingContext2D, row: BlockRow, assets: RenderAssets, timeMs: number, highlighted: boolean): void {
     const z = row.z;
     if (z < -0.2 || z > 1.05) return;
     const s = scaleAt(z);
     const size = layout.block0 * s;
-    const bottomY = yAt(z);
-    const learn = row.mode === 'learn';
-    const fog = opts.reduceEffects ? 0 : 0.6 * Math.pow(clamp01(z), 1.6);
+    const waiting = row.phase === 'announce';
+    // parada no fundo: balanço leve (só visual) para dizer que está esperando o áudio
+    const bob = waiting && !opts.reduceEffects ? Math.sin(timeMs / 400) * ANNOUNCE_BOB_PX : 0;
+    const bottomY = yAt(z) + bob;
+    const depthFog = opts.reduceEffects ? 0 : 0.6 * Math.pow(clamp01(z), 1.6);
+    // limita a névoa no fundo: a fileira parada precisa ser lida e não pode escurecer de repente ao descer
+    const fog = Math.min(FAR_FOG_MAX, depthFog);
     const pulse = opts.reduceEffects ? 1 : 0.5 + 0.5 * Math.sin(timeMs / 110);
     const slowPulse = opts.reduceEffects ? 1 : 0.5 + 0.5 * Math.sin(timeMs / 260);
     const resolved = row.resolved;
@@ -541,11 +589,9 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
       const lane = l as Lane;
       // bloco já quebrado: não desenha (as partículas mostram a quebra)
       if (resolved === 'hit' && lane === row.correctLane) continue;
-      if (resolved === 'learned' && lane === state.lane) continue;
       const isCorrect = lane === row.correctLane;
       const style: BlockStyle = {
-        learn,
-        retry: row.retry && !learn,
+        retry: row.retry,
         dim: highlighted && !isCorrect,
         glow: highlighted && isCorrect,
         pulse: highlighted ? pulse : slowPulse,
@@ -554,6 +600,8 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
       };
       drawBlock(g, row.faces[l], assets, xAt(LANE_X0[l], z), bottomY, size, style);
     }
+
+    if (waiting) drawListenIndicator(g, xAt(LANE_X0[1], z), bottomY - size, size, timeMs);
   }
 
   function drawParticles(g: CanvasRenderingContext2D, state: MineState): void {
@@ -635,8 +683,8 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
       // fileiras: do fundo para a frente
       const hl = state.highlightRow;
       const rows = state.rows.filter((r) => !hl || (r !== hl && r.index !== hl.index)).sort((a, b) => b.z - a.z);
-      for (const row of rows) drawRow(g, row, assets, state, timeMs, false);
-      if (hl && state.highlightMs > 0) drawRow(g, hl, assets, state, timeMs, true);
+      for (const row of rows) drawRow(g, row, assets, timeMs, false);
+      if (hl && state.highlightMs > 0) drawRow(g, hl, assets, timeMs, true);
 
       drawCart(g, state, timeMs);
       drawParticles(g, state);

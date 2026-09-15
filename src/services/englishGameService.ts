@@ -131,29 +131,163 @@ export function shuffle<T>(arr: T[]): T[] {
 }
 
 // ---------- Áudio da palavra (arquivo do projeto antigo; fala do navegador como reserva) ----------
+export type SpeechLang = 'en-US' | 'pt-BR';
+
+/** Nenhuma reprodução automática segura o jogo por mais que isso (mp3 travado, fala que não termina) */
+const AUDIO_GUARD_MS = 4000;
+/** Sem síntese de voz: tempo para a criança ler o pedido */
+const READ_FALLBACK_MS = 900;
+/** Espera máxima pela lista de vozes no primeiro acesso (o Chrome carrega assíncrono) */
+const VOICES_WAIT_MS = 300;
+
 const audioCache = new Map<string, HTMLAudioElement>();
+/** O Chrome perde o onend se a utterance for coletada pelo GC: guarda referência à fala atual */
+let activeUtterance: SpeechSynthesisUtterance | null = null;
+
+const hasSpeech = (): boolean => typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+
+function audioFor(url: string): HTMLAudioElement {
+  let el = audioCache.get(url);
+  if (!el) {
+    el = new Audio(url);
+    audioCache.set(url, el);
+  }
+  return el;
+}
+
+/** Voz do idioma pedido; idioma exato e engines Google/Microsoft soam melhor que as genéricas */
+function pickVoice(voices: SpeechSynthesisVoice[], lang: SpeechLang): SpeechSynthesisVoice | null {
+  const norm = (l: string) => l.toLowerCase().replace('_', '-');
+  const want = norm(lang);
+  const prefix = want.slice(0, 2);
+  let best: SpeechSynthesisVoice | null = null;
+  let bestScore = -1;
+  for (const v of voices) {
+    const vl = norm(v.lang);
+    if (!vl.startsWith(prefix)) continue;
+    const score = (vl === want ? 2 : 0) + (/google|microsoft/i.test(v.name) ? 1 : 0);
+    if (score > bestScore) {
+      best = v;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+/** getVoices() vem vazio no primeiro acesso em alguns navegadores: espera o voiceschanged por pouco tempo */
+function loadVoices(synth: SpeechSynthesis): Promise<SpeechSynthesisVoice[]> {
+  const now = synth.getVoices();
+  if (now.length > 0) return Promise.resolve(now);
+  return new Promise((resolve) => {
+    let done = false;
+    let timer = 0;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      window.clearTimeout(timer);
+      synth.removeEventListener('voiceschanged', finish);
+      resolve(synth.getVoices());
+    };
+    timer = window.setTimeout(finish, VOICES_WAIT_MS);
+    synth.addEventListener('voiceschanged', finish);
+  });
+}
+
 export function playWord(word: EnglishWord): void {
   if (word.audio) {
-    let el = audioCache.get(word.audio);
-    if (!el) {
-      el = new Audio(word.audio);
-      audioCache.set(word.audio, el);
-    }
+    const el = audioFor(word.audio);
     el.currentTime = 0;
     el.play().catch(() => speak(word.word));
     return;
   }
   speak(word.word);
 }
-function speak(text: string): void {
-  if (!('speechSynthesis' in window)) return;
+
+function speak(text: string, lang: SpeechLang = 'en-US'): void {
+  if (!hasSpeech()) return;
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US';
+  u.lang = lang;
   u.rate = 0.9;
+  const voice = pickVoice(window.speechSynthesis.getVoices(), lang);
+  if (voice) u.voice = voice;
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(u);
 }
 
+/**
+ * Fala o texto e resolve quando termina (onend/onerror). Cancela a fala anterior.
+ * Guarda de AUDIO_GUARD_MS; sem speechSynthesis resolve após READ_FALLBACK_MS. Nunca rejeita.
+ */
+export function speakAsync(text: string, lang: SpeechLang): Promise<void> {
+  if (!hasSpeech()) return new Promise((resolve) => window.setTimeout(resolve, READ_FALLBACK_MS));
+  const synth = window.speechSynthesis;
+  return new Promise<void>((resolve) => {
+    let settled = false;
+    let guard = 0;
+    let utterance: SpeechSynthesisUtterance | null = null;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(guard);
+      if (activeUtterance === utterance) activeUtterance = null;
+      resolve();
+    };
+    guard = window.setTimeout(settle, AUDIO_GUARD_MS);
+    void loadVoices(synth).then((voices) => {
+      if (settled) return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang;
+      u.rate = 0.9;
+      const voice = pickVoice(voices, lang);
+      if (voice) u.voice = voice;
+      u.onend = settle;
+      u.onerror = settle;
+      utterance = u;
+      activeUtterance = u;
+      synth.cancel();
+      synth.speak(u);
+      // Chrome às vezes fica "pausado" depois de um cancel e não toca nada sem resume
+      if (synth.paused) synth.resume();
+    });
+  });
+}
+
+/**
+ * Toca o mp3 da palavra e resolve no 'ended'. Sem mp3 (ou com erro/autoplay negado) usa a fala en-US.
+ * Guarda de AUDIO_GUARD_MS contada desde o início, inclusive na reserva. Nunca rejeita.
+ */
+export function playWordAsync(word: EnglishWord): Promise<void> {
+  if (!word.audio) return speakAsync(word.word, 'en-US');
+  const el = audioFor(word.audio);
+  return new Promise<void>((resolve) => {
+    let settled = false;
+    let guard = 0;
+    const detach = () => {
+      el.removeEventListener('ended', settle);
+      el.removeEventListener('error', fallback);
+    };
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(guard);
+      detach();
+      resolve();
+    };
+    const fallback = () => {
+      if (settled) return;
+      detach();
+      // a guarda continua contando desde o início: a reserva não estica o tempo total
+      void speakAsync(word.word, 'en-US').then(settle);
+    };
+    guard = window.setTimeout(settle, AUDIO_GUARD_MS);
+    el.addEventListener('ended', settle);
+    el.addEventListener('error', fallback);
+    // nunca dois áudios juntos: derruba uma fala manual (replay em pt-BR) que ainda esteja no ar
+    if (hasSpeech()) window.speechSynthesis.cancel();
+    el.currentTime = 0;
+    el.play().catch(fallback);
+  });
+}
 // ---------- Fim de rodada ----------
 export interface RoundResult {
   game: EnglishGameId;

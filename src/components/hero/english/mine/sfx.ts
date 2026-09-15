@@ -8,8 +8,6 @@ export interface MineSfx {
   hit: (pickaxeLevel: number) => void;
   /** batida no bloco errado: onda quadrada grave descendo */
   miss: () => void;
-  /** placa de aprendizado: toque suave */
-  learn: () => void;
   /** baú de checkpoint: fanfarra de 3 notas */
   checkpoint: () => void;
   /** troca de picareta: arpejo curto, meio tom acima por nível */
@@ -108,12 +106,6 @@ export function createMineSfx(getContext: () => AudioContext | null, enabled: ()
       withCtx((ctx, now) => {
         tone(ctx, 'square', 110, now, 0.18, 0.22, 55);
         noiseBurst(ctx, now, 0.12, 0.2, 300);
-      });
-    },
-    learn: () => {
-      withCtx((ctx, now) => {
-        tone(ctx, 'sine', semi(0), now, 0.12, 0.16);
-        tone(ctx, 'sine', semi(4), now + 0.1, 0.16, 0.14);
       });
     },
     checkpoint: () => {
