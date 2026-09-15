@@ -25,6 +25,8 @@ import {
   baseLevel,
   buildingCost,
   buildingIcon,
+  buildingEffectNow,
+  buildingOpensLater,
   canAfford,
   initialBaseDoc,
   isBuildingUnlocked,
@@ -133,7 +135,8 @@ test('6 construções: custos somam 3/5/8 com ferro >= 1; ícones existem', () =
   expect(existsSync(join(pub, TERRAIN_ICON))).toBeTruthy();
   expect(buildingCost('fornalha', 1)).toEqual({ madeira: 1, pedra: 1, ferro: 1, redstone: 0 });
   expect(buildingCost('fornalha', 4)).toBe(null);
-  expect(buildingIcon('fornalha', 0)).toBe(TERRAIN_ICON);
+  expect(buildingIcon('fornalha', 0)).toBe('/assets/village/buildings/fornalha-1.png');
+  expect(buildingIcon('bau', 2)).toBe('/assets/village/buildings/bau-2.png');
   expect(BUILDING_MAX_LEVEL).toBe(3);
 });
 
@@ -144,6 +147,17 @@ test('desbloqueio: torre/mesa/campinho só com fornalha e baú >= 1', () => {
   expect(isBuildingUnlocked('mesa', { ...none, fornalha: 1 })).toBeFalsy();
   expect(isBuildingUnlocked('campinho', { ...none, fornalha: 1, bau: 1 })).toBeTruthy();
   expect(baseLevel({ ...none, fornalha: 2, bau: 1 })).toBe(3);
+});
+
+test('Campinho não se constrói antes da Etapa 4; textos de efeito no presente', () => {
+  expect(buildingOpensLater('campinho', 1)).toBe('Etapa 4');
+  expect(buildingOpensLater('fornalha', 1)).toBe(null);
+  expect(buildingEffectNow('fornalha', 0)).toBe('Ainda não construída.');
+  expect(buildingEffectNow('torre', 1)).toMatch(/conquistas/i);
+  for (const b of BUILDINGS) {
+    expect(b.effects).toHaveLength(3);
+    expect(b.labelEn.length >= 3).toBeTruthy();
+  }
 });
 
 test('estado inicial: Fornalha pela metade (faltam 1 pedra + 1 madeira)', () => {

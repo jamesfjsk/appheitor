@@ -231,12 +231,35 @@ export const COSMETIC_BY_ID: Record<string, CosmeticItem> = Object.fromEntries(C
 
 export const FREE_COSMETIC_IDS: string[] = COSMETICS.filter((c) => c.free).map((c) => c.id);
 
-/** Sprite de pele (inpaint no rosto). skin_1 = clara, skin_2 = base original. */
+/** Câmera canônica do minerador (low top-down). Retrato, HUD, cena e editor. */
+export const ISO_MINER = '/assets/village/char/miner-iso.png';
+export const ISO_NPC: Record<string, string> = {
+  sabio: '/assets/village/npc/sabio-iso.png',
+  comerciante: '/assets/village/npc/comerciante-iso.png',
+  ferreiro: '/assets/village/npc/ferreiro-iso.png',
+  olheiro: '/assets/village/npc/olheiro-iso.png',
+};
+
+export const NPC_LABEL: Record<string, string> = {
+  sabio: 'Sábio',
+  comerciante: 'Comerciante',
+  ferreiro: 'Ferreiro',
+  olheiro: 'Olheiro',
+};
+
+/** Sprite de pele (inpaint no rosto, vista lateral — só fallback). */
 export const SKIN_SPRITE: Record<string, string> = {
   skin_1: '/assets/village/char/miner-skin-4.png',
   skin_2: '/assets/village/char/miner-base.png',
   skin_3: '/assets/village/char/miner-skin-2.png',
   skin_4: '/assets/village/char/miner-skin-3.png',
+};
+
+export const SKIN_HEX: Record<string, string> = {
+  skin_1: '#F0C49A',
+  skin_2: '#D4A06A',
+  skin_3: '#A0673A',
+  skin_4: '#6B3D22',
 };
 
 export const SHIRT_HEX: Record<string, string> = {
@@ -248,6 +271,24 @@ export const SHIRT_HEX: Record<string, string> = {
   shirt_6: '#D4B03A',
   shirt_7: '#E8E0D4',
   shirt_8: '#2A2420',
+};
+
+export const HAIR_HEX: Record<string, string> = {
+  hair_1: '#3D2918',
+  hair_2: '#6B4423',
+  hair_3: '#8B5A2B',
+  hair_4: '#1A120C',
+};
+
+export const HAT_HEX: Record<string, string> = {
+  hat_cap: '#3D6EA8',
+  hat_deco: '#8B8B8B',
+  hat_crown: '#E8B923',
+};
+
+export const CAPE_HEX: Record<string, string> = {
+  cape_red: '#B33A2B',
+  cape_blue: '#3D6EA8',
 };
 
 export const PANTS_HEX: Record<string, string> = {
@@ -279,10 +320,10 @@ export const PET_SPRITE: Record<string, string> = {
 };
 
 export const NPC_PORTRAIT: Record<string, string> = {
-  ferreiro: '/assets/village/npc/ferreiro.png',
-  comerciante: '/assets/village/npc/comerciante.png',
-  sabio: '/assets/village/npc/sabio.png',
-  olheiro: '/assets/village/npc/olheiro.png',
+  ferreiro: ISO_NPC.ferreiro,
+  comerciante: ISO_NPC.comerciante,
+  sabio: ISO_NPC.sabio,
+  olheiro: ISO_NPC.olheiro,
 };
 
 export const GEAR_SPRITE: Record<string, string> = {
@@ -296,29 +337,41 @@ export const GEAR_SPRITE: Record<string, string> = {
   cape: '/assets/village/items/cape.png',
 };
 
+export const COSMETIC_ICON: Record<string, string> = {
+  hat_cap: '/assets/village/items/cap.png',
+  hat_deco: '/assets/village/items/helmet-deco.png',
+  hat_crown: '/assets/village/items/crown.png',
+  cape_red: '/assets/village/items/cape.png',
+  cape_blue: '/assets/village/items/cape.png',
+  pet_wolf: '/assets/village/pets/lobo.png',
+  pet_cat: '/assets/village/pets/gato.png',
+  pet_parrot: '/assets/village/pets/papagaio.png',
+};
+
 export const DISTRICT_ICONS: Record<string, string> = {
-  mine: '/assets/english/ui/minecart.webp',
-  library: '/assets/english/ui/book.webp',
-  workshop: '/assets/english/ui/crafting.webp',
-  market: '/assets/english/ui/gold.webp',
-  tower: '/assets/english/ui/trophy.webp',
-  map: '/assets/english/ui/map.webp',
-  timer: '/assets/english/ui/clock.webp',
-  chest: '/assets/english/ui/chest.webp',
+  mine: '/assets/village/items/lantern.png',
+  library: '/assets/village/rewards/livro.png',
+  workshop: '/assets/village/items/iron-helmet.png',
+  market: '/assets/village/rewards/dinheiro.png',
+  tower: '/assets/village/buildings/torre-1.png',
+  map: '/assets/village/buildings/placa.png',
+  timer: '/assets/village/items/lantern.png',
+  chest: '/assets/village/buildings/bau-1.png',
 };
 
 export const HOTBAR_ICONS: Record<string, string> = {
-  Vila: '/assets/english/ui/miner.webp',
-  Missões: '/assets/english/ui/pickaxe.webp',
-  Mina: '/assets/english/ui/minecart.webp',
-  Oficina: '/assets/english/ui/crafting.webp',
-  Mercado: '/assets/english/ui/gold.webp',
+  Vila: ISO_MINER,
+  Missões: '/assets/village/items/pickaxe-ferro.png',
+  Mina: '/assets/village/items/lantern.png',
+  Oficina: '/assets/village/items/iron-helmet.png',
+  Mercado: '/assets/village/rewards/dinheiro.png',
 };
 
 /** Cosméticos sem sprite próprio não entram na Loja nem no editor. */
 export function cosmeticHasSprite(id: string): boolean {
   if (SKIN_SPRITE[id] || SHIRT_HEX[id] || PANTS_HEX[id] || HAT_SPRITE[id] || PET_SPRITE[id]) return true;
-  if (id === 'shirt_team' || id === 'hair_1' || id === 'cape_red') return true;
+  if (HAIR_HEX[id] || CAPE_HEX[id] || HAT_HEX[id]) return true;
+  if (id === 'shirt_team') return true;
   return false;
 }
 

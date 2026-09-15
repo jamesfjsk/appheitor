@@ -96,7 +96,7 @@ const HeroPanel: React.FC = () => {
     <>
       <VillageProvider>
         <div className="mn-page relative overflow-hidden min-h-screen">
-          <ComicBackdrop />
+          <ComicBackdrop className="is-quiet" />
           <div className="relative z-10">
             <VillageGate
               selectedPeriod={selectedPeriod}

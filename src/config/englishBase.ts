@@ -62,15 +62,22 @@ export const CONTRACT_MATERIAL: Record<ContractType, Material> = {
 export interface BuildingDef {
   id: BuildingId;
   label: string;
+  labelEn: string;
   /** PT, o que a construção é */
   description: string;
-  /** PT, o que ela faz (Etapa 1 ou aviso de Etapa 2) */
+  /** Efeito dos níveis 1, 2 e 3 (fonte: docs/VILA_CONSTRUCOES.md) */
+  effects: [string, string, string];
+  /** Resumo de uma linha (nível 1), para listas */
   effect: string;
   icon: string;
   /** Custo para chegar ao nível 1, 2 e 3 (índice = nível - 1) */
   costs: [MaterialCost, MaterialCost, MaterialCost];
   /** Só aparece quando Fornalha e Baú estão no nível 1 */
   requiresCore: boolean;
+  /** Níveis que já existem em código (0 = nada comprável). Padrão 3. */
+  liveMaxLevel?: number;
+  /** Quando liveMaxLevel impede a compra */
+  opensIn?: string;
 }
 
 export const BUILDING_MAX_LEVEL = 3;
@@ -83,56 +90,94 @@ export const BUILDINGS: BuildingDef[] = [
   {
     id: 'fornalha',
     label: 'Fornalha',
-    description: 'Derrete minério e aquece a base.',
-    effect: 'Nível 1: +1 material no primeiro contrato do dia.',
-    icon: '/assets/english/ui/base/b_fornalha.webp',
+    labelEn: 'Furnace',
+    description: 'O motor de materiais da Vila.',
+    effects: [
+      'Seu primeiro contrato do dia rende +1 material.',
+      'Fundição: troca 3 por 1 de madeira, pedra e ferro aqui.',
+      'Queima: 5 madeira viram 1 redstone uma vez por dia.',
+    ],
+    effect: 'Seu primeiro contrato do dia rende +1 material.',
+    icon: '/assets/village/buildings/fornalha-1.png',
     costs: [cost(1, 1, 1, 0), cost(1, 2, 1, 1), cost(2, 3, 2, 1)],
     requiresCore: false,
   },
   {
     id: 'bau',
     label: 'Baú',
-    description: 'Guarda os materiais da base.',
-    effect: 'Nível 1: libera a Torre, a Mesa e o Campinho.',
-    icon: '/assets/english/ui/base/b_bau.webp',
+    labelEn: 'Chest',
+    description: 'O armazém da Vila.',
+    effects: [
+      'Você vê o inventário e libera Torre, Mesa e Campinho.',
+      'O Baú do Dia dá +1 material.',
+      'A esmeralda do Baú do Dia vem a cada 2 dias completos.',
+    ],
+    effect: 'Você vê o inventário e libera Torre, Mesa e Campinho.',
+    icon: '/assets/village/buildings/bau-1.png',
     costs: [cost(2, 0, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
     requiresCore: false,
   },
   {
     id: 'cerca',
     label: 'Cerca',
-    description: 'Protege o terreno dos monstros.',
-    effect: 'Efeito chega na Etapa 2.',
-    icon: '/assets/english/ui/base/b_cerca.webp',
+    labelEn: 'Fence',
+    description: 'Protege as tochas num dia ruim.',
+    effects: [
+      'Uma vez por mês, um dia perdido não zera as tochas.',
+      'A rachadura do conserto some sozinha depois de 1 dia.',
+      'A penalidade por missão perdida nunca passa de 1 gold por dia.',
+    ],
+    effect: 'Uma vez por mês, um dia perdido não zera as tochas.',
+    icon: '/assets/village/buildings/cerca-1.png',
     costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
     requiresCore: false,
   },
   {
     id: 'torre',
     label: 'Torre',
-    description: 'Vigia a mina e o campinho.',
-    effect: 'Efeito chega na Etapa 2.',
-    icon: '/assets/english/ui/base/b_torre.webp',
+    labelEn: 'Tower',
+    description: 'O lugar do progresso.',
+    effects: [
+      'Abre as conquistas e a estrela de temporada.',
+      'Recordes e Troféu da semana.',
+      'Você pode propor desafios e vê o Mapa de habilidades.',
+    ],
+    effect: 'Abre as conquistas e a estrela de temporada.',
+    icon: '/assets/village/buildings/torre-1.png',
     costs: [cost(0, 2, 1, 0), cost(1, 2, 1, 1), cost(1, 3, 2, 2)],
     requiresCore: true,
   },
   {
     id: 'mesa',
     label: 'Mesa de Encantamento',
-    description: 'Encanta os contratos do dia seguinte.',
-    effect: 'Nível 1: você escolhe o tema da história de amanhã.',
-    icon: '/assets/english/ui/base/b_mesa.webp',
+    labelEn: 'Enchanting Table',
+    description: 'A casa do Sábio.',
+    effects: [
+      'Você escolhe o tema da história de amanhã na Mina.',
+      'Estante de erros e Diário.',
+      '1 dica grátis por dia no Recado; o Sábio responde ao Diário.',
+    ],
+    effect: 'Você escolhe o tema da história de amanhã na Mina.',
+    icon: '/assets/village/buildings/mesa-1.png',
     costs: [cost(1, 0, 1, 1), cost(1, 1, 1, 2), cost(2, 1, 2, 3)],
     requiresCore: true,
   },
   {
     id: 'campinho',
     label: 'Campinho',
-    description: 'Campo de futebol da vila.',
-    effect: 'Efeito chega na Etapa 2 (distrito de futebol).',
-    icon: '/assets/english/ui/base/b_campinho.webp',
+    labelEn: 'Pitch',
+    description: 'O campo de futebol da Vila.',
+    effects: [
+      'Libera o pet do Campinho e o Gol de Placa.',
+      'No sábado e domingo, missões pagam +1 material.',
+      'Torneio mensal do Gol de Placa, com recorde na Torre.',
+    ],
+    effect: 'Libera o pet do Campinho e o Gol de Placa.',
+    icon: '/assets/village/buildings/campinho-1.png',
     costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(2, 2, 2, 2)],
     requiresCore: true,
+    liveMaxLevel: 0,
+    opensIn: 'Etapa 4',
   },
 ];
 
@@ -146,9 +191,10 @@ export function buildingCost(id: BuildingId, targetLevel: number): MaterialCost 
   return { ...BUILDING_BY_ID[id].costs[targetLevel - 1] };
 }
 
-/** Ícone do lote: terreno vazio no nível 0 */
+/** Ícone do lote: fantasma do n1 no nível 0 (cinza na UI), sprite próprio nos níveis 1-3. */
 export function buildingIcon(id: BuildingId, level: number): string {
-  return level >= 1 ? BUILDING_BY_ID[id].icon : TERRAIN_ICON;
+  const n = level <= 0 ? 1 : Math.min(BUILDING_MAX_LEVEL, level);
+  return `/assets/village/buildings/${id}-${n}.png`;
 }
 
 export const BUILDING_PLACA = '/assets/village/buildings/placa.png';
@@ -162,6 +208,25 @@ export function buildingSprite(id: BuildingId, level: number): string {
 export function isBuildingUnlocked(id: BuildingId, buildings: Record<BuildingId, number>): boolean {
   if (!BUILDING_BY_ID[id].requiresCore) return true;
   return buildings.fornalha >= 1 && buildings.bau >= 1;
+}
+
+/** Nível 0 = ainda não construída. */
+export function buildingEffectNow(id: BuildingId, level: number): string {
+  if (level <= 0) return 'Ainda não construída.';
+  return BUILDING_BY_ID[id].effects[Math.min(BUILDING_MAX_LEVEL, level) - 1];
+}
+
+export function buildingEffectNext(id: BuildingId, level: number): string | null {
+  if (level >= BUILDING_MAX_LEVEL) return null;
+  return BUILDING_BY_ID[id].effects[level];
+}
+
+/** Motivo se este nível ainda não pode ser comprado; null se a etapa já entrega. */
+export function buildingOpensLater(id: BuildingId, targetLevel: number): string | null {
+  const def = BUILDING_BY_ID[id];
+  const max = def.liveMaxLevel ?? BUILDING_MAX_LEVEL;
+  if (targetLevel <= max) return null;
+  return def.opensIn || 'Em breve';
 }
 
 export function canAfford(materials: MaterialCost, costToPay: MaterialCost): boolean {

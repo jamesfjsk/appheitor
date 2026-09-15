@@ -127,7 +127,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     selectedPeriod === 'afternoon' ? 'Tarde' : 'Noite';
 
   return (
-    <section className="mc-inv rounded-lg p-4 sm:p-5">
+    <section className="mc-panel rounded-lg p-4 sm:p-5 text-white">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 flex-wrap">
           <h2 className="mc-h">

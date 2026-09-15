@@ -7,7 +7,7 @@ import { useOffline } from '../../contexts/OfflineContext';
 import toast from 'react-hot-toast';
 
 const BANNER = '/assets/english/ui/banner.webp';
-const MINER = '/assets/english/ui/miner.webp';
+const MINER = '/assets/village/char/miner-iso.png';
 
 const LoginScreen: React.FC = () => {
   const { user, login, loading } = useAuth();

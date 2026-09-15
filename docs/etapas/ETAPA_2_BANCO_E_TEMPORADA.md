@@ -45,6 +45,7 @@ status: 'active' | 'proposed' | 'rejected', completedAt?, extendedDays (dias de 
 ```
 `village/{uid}` ganha:
 ```
+npcs: Record<'sabio' | 'comerciante' | 'ferreiro' | 'olheiro', { points: number; tier: number; lastTalkDate: string | null; seen: string[]; quest: { chapter: number; progress: number; doneAt: string | null } }>   // amizade e pedidos (seção 15)
 cracks: string[]                       // ids de lotes rachados (conserto), ex.: ['fornalha']
 records: Record<string, number>        // já existe: 'weekGold', 'fullDays', 'quizBest', 'mineShift' (Etapa 4)
 stars: Array<{ season: number; level: number; endedOn: string }>   // uma por temporada fechada
@@ -185,12 +186,161 @@ Verificação obrigatória ao final de cada lote: `npx tsc --noEmit -p tsconfig.
 
 ## 11. Ordem de construção
 
-Lote 1: (1) tipos, `DEFAULT_ECONOMY`, `PRICE_BANDS`, `LEVEL_REWARDS`, `minLevel`; (2) módulos puros com testes (`bank`, `challenges`, `income`, `caps`, `repair`, `late`, `levels`, `chest` alterado); (3) regras e índices publicados; (4) serviços: `goalsService`, `challengesService`, `villageService` (rare, streak chest, sell, repair), `firestoreService` (portão, late, optional, revert de dia fechado), `dailyRulesService` (capacete, cracks, punição); (5) telas: Cofre, Cofrinho, Extrato, atalho "Criar meta", Desafios, Baú das 7 tochas, Conserto, Recuperar, Comerciante, Loja com nível; (6) painel: GoalsPanel, ChallengeManager, RewardForm com faixas, Balança; (7) função `openai` e troca do cliente; (8) simulador; (9) aceite e relatório.
+Lote 1: (0) Relógio da Vila (seção 16: `clock.ts`, `ClockProvider`, migração dos 24 pontos, correção pelo servidor, virada do dia); (1) tipos, `DEFAULT_ECONOMY`, `PRICE_BANDS`, `LEVEL_REWARDS`, `minLevel`; (2) módulos puros com testes (`bank`, `challenges`, `income`, `caps`, `repair`, `late`, `levels`, `chest` alterado); (3) regras e índices publicados; (4) serviços: `goalsService`, `challengesService`, `villageService` (rare, streak chest, sell, repair), `firestoreService` (portão, late, optional, revert de dia fechado), `dailyRulesService` (capacete, cracks, punição); (5) telas: Cofre, Cofrinho, Extrato, atalho "Criar meta", Desafios, Baú das 7 tochas, Conserto, Recuperar, Comerciante, Loja com nível; (5b) Agenda do Minerador (seção 13; arquivos disjuntos, pode correr em paralelo); (5d) Sistema de itens v1 (seção 17 e `docs/VILA_ITENS.md`: Mochila, Loja, editor e Ferraria no mesmo padrão); (5e) Mapa da Vila (seção 18 e `docs/VILA_MAPA.md`: cabeçalho, grade final, Mercado com prêmios embutidos, Banco com Extrato); (5f) Casa do Minerador (`docs/VILA_CONSTRUCOES.md`, construção 8: as missões saem da página da Vila e entram na Casa, com a faixa "Hoje" compacta; âncora `house` e sprites `casa-1..3` entregues pelo líder; Plano do turno e Fechar o dia moram lá); (5c) efeitos das construções conforme `docs/VILA_CONSTRUCOES.md` (Fundição e Queima na Fornalha, Baú 2 e 3, Cerca 1 a 3, Torre 2 e 3, Cofre, pré-requisitos e custos x2); (6) painel: GoalsPanel, ChallengeManager, RewardForm com faixas, Balança; (7) função `openai` e troca do cliente; (8) simulador; (9) aceite e relatório.
 
-Lote 2: (1) `season`, `checkin` puros com testes; (2) serviços: plan, checkin, trophy, closeSeason, learning; (3) telas: Plano do turno, Fechar o dia, Missão própria e extras, Dia fechado, Torre (recordes, troféus, mapa de habilidades), LevelUpModal com marco; (4) painel: cartão Hoje, abas reagrupadas, Nova temporada, relatório semanal, Saúde; (5) aceite e relatório.
+Lote 2: (1) `season`, `checkin` puros com testes; (2) serviços: plan, checkin, trophy, closeSeason, learning; (3) telas: Plano do turno, Fechar o dia, Missão própria e extras, Dia fechado, Torre (recordes, troféus, mapa de habilidades), LevelUpModal com marco; (3b) Vida dos personagens v1 (seção 14) e Diálogos que evoluem (seção 15; as falas em si são entregues pelo líder em `src/data/dialogue/`); (3c) "Vila que cresce v1" e cerimônia de obra (`docs/VILA_CONSTRUCOES.md`, "Progressão visual": camadas `scene/growth-1..3.png` pela soma dos níveis, poeira e martelo ao subir de nível, luz por nível à noite); (4) painel: cartão Hoje, abas reagrupadas, Nova temporada, relatório semanal, Saúde; (5) aceite e relatório.
 
 Não fazer: mexer em `src/index.css`, `ComicBackdrop.tsx`, `src/components/hero/english/**` além dos pontos citados (lanterna em `ContractBoard`, `completeContract` chamando `bumpChallenge`, TTS pela função); mudar regras de punição além do descrito; criar custo obrigatório em gold; restilizar o painel; commit.
 
+
+## 13. Agenda do Minerador (frente nova do Lote 1; substitui o Cronômetro)
+
+Pedido do pai em 15/09: o cronômetro solto não serve para nada; vira uma agenda com alarmes e lembretes que o Heitor configura sozinho (provas, eventos, aniversários, treinos), para ensinar organização. O botão "Ampulheta" e o `FlashTimer` como modal somem; o cronômetro continua existindo só como ferramenta "Foco" dentro da Agenda. O "Mapa" (calendário de histórico) vira a aba Mês da Agenda: um lugar só para passado e futuro.
+
+Regras (não reabrir): organização paga **XP e material, nunca gold**; a criança cria e edita os próprios itens; o pai vê tudo e pode criar; lembrete de verdade chega por push (o app já tem FCM: `NotificationContext`, `firebase-messaging-sw.js`, `users/{uid}.fcmTokens`) disparado por uma Cloud Function agendada, além do alarme dentro do app quando ele está aberto.
+
+Dados, `agenda/{id}`:
+```
+userId, title (<= 40), kind: 'prova' | 'trabalho' | 'evento' | 'aniversario' | 'treino' | 'compromisso' | 'outro',
+date: 'YYYY-MM-DD', time?: 'HH:MM', remindMinutesBefore?: number (0, 30, 60, 1440),
+repeat?: 'none' | 'weekly', notes?: string (<= 140), createdBy: 'child' | 'admin',
+plannedAheadDays: number (dias entre criação e a data), doneAt?: string, remindedAt?: string, createdAt, updatedAt
+```
+Regras do Firestore: criança cria/lê/atualiza/apaga os próprios (`userId == uid`, `createdBy == 'child'` na criação); admin tudo. Índice `agenda(userId, date)`.
+
+Módulo puro `src/services/village/agenda.ts` (com testes): `occurrencesBetween(items, from, to)` (expande `repeat: 'weekly'`), `nextEvents(items, today, n)`, `reminderDue(item, nowBrazil)`, `studyPlanFor(item)` (para `prova` e `trabalho`: 3 blocos "Foco" de 15 min em D-3, D-2, D-1, ou os dias que faltarem se for mais perto), `organizationXp(item)` (5 XP ao marcar feito; +5 se `plannedAheadDays >= 2`), `weekOrganized(items, weekIso)` (todos os itens da semana marcados feitos até domingo).
+
+Serviço `src/services/agendaService.ts`: `subscribeAgenda(uid)`, `createItem`, `updateItem`, `deleteItem`, `markDone(uid, id)` (transação: grava `doneAt` e paga XP em `progress.totalXP`, chave `agenda:<id>` em `village.claimed`), `acceptStudyPlan(uid, itemId)` (cria até 3 `tasks` `optional: true`, `origin: 'agenda'`, título "Foco: <prova> (15 min)", XP 10, gold 0, material 1, `date` fixa em cada dia; nunca contam como perdidas), `weeklyOrganizedBonus(uid, week)` (chave `agenda:week:<semana>`: 1 material e fala do Sábio).
+
+Cloud Function `agendaReminders` (`onSchedule('every 5 minutes')`, `southamerica-east1`): consulta `agenda` com `date` hoje/amanhã e `time`, calcula o instante do lembrete no fuso do Brasil e, se ainda não `remindedAt`, envia push para `users/{uid}.fcmTokens` ("Amanhã 14h: prova de matemática. Já revisou?") e grava `remindedAt`. Sem `time`: lembrete às 19h do dia anterior. Também avisa o pai (tokens do admin) para provas e compromissos.
+
+Tela `src/components/hero/village/Agenda.tsx` (modal `mc-panel`, abre pelo cartão "Agenda" da grade, no lugar de "Ampulheta", ícone `ui/clock.webp`; atalho A):
+- Abas **Hoje**, **Semana**, **Mês**. Hoje: itens de hoje com hora e botão "Feito"; o próximo evento grande em destaque ("Prova de matemática em 2 dias"). Semana: 7 colunas com os itens. Mês: o `CalendarModal` atual absorvido: dias passados com tochas e gold (como hoje) e dias futuros com os itens.
+- **Novo item**: formulário curto (tipo com ícone, título, data, hora opcional, lembrete, repetir toda semana, nota). Ao salvar uma prova ou trabalho, pergunta "Quer um plano de estudo?" e mostra os 3 blocos de Foco; aceitar cria as missões extras.
+- **Foco** (o cronômetro transformado): botão dentro do item de estudo ou no topo da aba Hoje: 15 ou 25 min, barra `mc-bar`, som ao terminar, e ao terminar dentro de uma missão "Foco" marca a missão como feita (fluxo normal de conclusão).
+- **Alarme no app**: enquanto o app está aberto, `reminderDue` roda a cada minuto: som `createMineSfx.checkpoint`, toast e linha na Placa; o item fica piscando até "Ok".
+- **Recompensa visível**: "+5 XP, planejou com antecedência" ao marcar feito; domingo à noite, "Semana organizada" com 1 material.
+- Placa da Vila: "Hoje: treino às 17h", "Amanhã: prova de matemática" (vem da agenda); cabeçalho: chip com o próximo evento grande quando faltam 7 dias ou menos.
+
+Painel: aba "Agenda" no grupo Jogo: lista e formulário iguais aos da criança (itens do pai marcados "do pai"), botão "Calendário da escola" (colar várias datas de uma vez, uma por linha "2026-10-03 Prova de história"); no cartão "Hoje": provas nos próximos 3 dias sem plano de estudo aceito.
+
+Remover: `FlashTimer` como modal e o cartão "Ampulheta"; `onOpenTimer` sai de `HeroPanel`/`VillageHome`; `CalendarModal` passa a ser a aba Mês (pode virar componente interno da Agenda). Aceite: criar uma prova para daqui a 3 dias com plano de estudo cria 3 missões extras nos dias certos; marcar feito paga 5 XP uma vez (chave em `claimed`); push chega no Chrome do PC no horário (foto da notificação); Placa mostra o item de amanhã; aba Mês mostra passado e futuro; sem gold em nenhuma linha de `goldTransactions` vinda da agenda.
+
+
+## 14. Vida dos personagens v1 (Lote 2; pedido do pai em 15/09)
+
+O balão de fala ficou certo; o que falta é o personagem **reagir**. Um NPC parado com balão é placa com desenho. Nesta etapa a vida vem por código sobre os sprites parados (sem animação desenhada); a animação desenhada de verdade fica para a Etapa 4 (`docs/MINER_MISSIONS_ROADMAP.md`, Etapa 4, "Vida v2").
+
+Regras: nada disso muda dados nem economia; tudo em `VillageScene.tsx` e num módulo puro `src/services/village/npcBehavior.ts` (máquina de estados testável: entrada = hora, evento, tempo; saída = estado e alvo). `prefers-reduced-motion` desliga deslocamento e gestos, mantém só a troca de quadro.
+
+O que cada personagem faz:
+
+1. **Reação ao toque** (todos): ao clicar, o NPC "pula" (2 px para cima por 120 ms), vira para o personagem do Heitor (espelhar o sprite no eixo X quando o Heitor está do outro lado) e o balão nasce da boca dele; enquanto o balão está aberto, o sprite alterna dois quadros a cada 250 ms (quadro base e quadro "falando": o mesmo sprite com a boca aberta, gerado pelo líder por inpaint na máscara do rosto). Ao fechar o balão, acena (quadro "acenando", também por inpaint no braço) por 400 ms.
+2. **Piscar e respirar** (todos): a cada 3 a 6 s, quadro "olhos fechados" por 120 ms; balanço de respiração já existe.
+3. **Rotina por hora** (Comerciante e Sábio, `npcBehavior.ts`): o Comerciante fica ao lado do lago de manhã, perto da fogueira à tarde e some às 21h ("fechou a barraca", placa "volta às 7h" no lugar); o Sábio fica perto da entrada da mina de dia e sentado junto à fogueira à noite (quadro "sentado" por inpaint). Trocar de lugar é **andar**: deslocamento linear de 24 px por segundo entre âncoras (`anchors.json` ganha `npcSpots`), alternando dois quadros de passo (inpaint nas pernas) a cada 200 ms.
+4. **Reação a eventos do jogo** (via prop `event` que `VillageHome` passa): missão concluída, o Heitor faz um gesto de picareta (quadro "cavando", 3 vezes); nível novo, salto duplo e estrelas em partículas; Baú aberto, o Comerciante aplaude; dia completo, o Sábio levanta o cajado; missão perdida (resumo de ontem), o Sábio balança a cabeça uma vez. Nada punitivo além disso.
+5. **Olhar**: o Heitor vira para o lote ou NPC que está sob o mouse (espelhar no X). Barato e dá muita vida.
+6. **Falas com contexto** (junto com `villageLines.ts` da Etapa 3, mas já aqui em versão simples): antes das 12h, saudação de manhã; depois das 20h, boa noite; dia completo, elogio; 3 dias sem missão perdida, comentário sobre constância; se está chovendo na Placa (folga), fala de descanso. Escolha por `pickLine` sem repetir 14 dias.
+
+Arte que o líder entrega (inpaint sobre os sprites existentes, 64 px, mesmas máscaras de `masks/`): para `miner-base`, `sabio` e `comerciante`, os quadros `*-talk.png` (boca aberta), `*-blink.png`, `*-wave.png`, `*-step1.png`, `*-step2.png`; para o Heitor, `miner-dig1..3.png`; para o Sábio, `sabio-sit.png`. Se um quadro faltar, o código usa o base.
+
+Aceite: vídeo curto ou 6 fotos (toque no Comerciante com balão e boca alternando; Sábio sentado à noite; Comerciante andando; Heitor cavando após concluir missão; Heitor olhando para o lote sob o mouse; placa "volta às 7h"); `npcBehavior.test.ts` cobrindo horários e transições.
+
+
+## 15. Diálogos que evoluem com o progresso (Lote 2, junto com a seção 14)
+
+Pedido do pai em 15/09: a vida dos personagens precisa de diálogos e interações novas conforme o Heitor progride. Regra de desenho: **um NPC nunca repete a mesma fala para um jogador que mudou**. O que ele diz depende de quem o Heitor é hoje (nível, base, tochas, o que fez ontem) e de quanto os dois já se conhecem (amizade).
+
+### Amizade (por NPC)
+
+`village.npcs.<id> = { points, tier, lastTalkDate, seen: string[] }` para `sabio`, `comerciante`, `ferreiro`, `olheiro`.
+
+- Pontos: +1 na primeira conversa do dia; +2 por ação no domínio do NPC (Comerciante: contrato da Mina concluído ou compra na Loja; Sábio: prova feita ou reflexão escrita; Ferreiro: craft, troca ou construção; Olheiro: desafio concluído ou dia completo). Teto de 5 pontos por dia por NPC. Nunca gold.
+- Níveis de amizade (tier): 0 = Desconhecido (0), 1 = Conhecido (5), 2 = Colega (15), 3 = Amigo (30), 4 = Parceiro (50), 5 = Lenda da Vila (80). Corações no cabeçalho do balão (5 corações pixel, `ui/heart.webp`, a gerar).
+- Subir de nível abre uma **conversa especial** (3 balões seguidos, com "Continuar"), um **pedido** e, no nível 3 e 5, um **presente** (cosmético exclusivo do NPC ou 1 raro; nunca gold).
+
+### Pedidos (a história de cada um)
+
+Cada NPC tem 5 capítulos curtos (um por nível de amizade), cada um com um pedido concreto e cumprível em 1 a 3 dias, sem gold:
+
+- Comerciante (pão-duro e engraçado): 1 "Traga 5 pedra, minha barraca está caindo"; 2 "Faça 3 contratos numa semana"; 3 "Compre algo e não se arrependa" (qualquer compra na Loja); 4 "Guarde 50 gold no Cofrinho" (Etapa 2); 5 "Uma semana sem missão perdida".
+- Sábio (só faz perguntas): 1 "Tire 6 ou mais na prova"; 2 "Escreva 3 reflexões"; 3 "Tire 8 de 8"; 4 "Escolha o tema de amanhã 5 vezes"; 5 "Responda à pergunta da semana" (Etapa 3).
+- Ferreiro (poucas palavras): 1 "Construa a Fornalha"; 2 "Crafte a picareta de pedra"; 3 "Leve a Fornalha ao nível 2"; 4 "Crafte o capacete"; 5 "Base completa".
+- Olheiro (fala de futebol e caráter): 1 "3 dias completos seguidos"; 2 "Complete um desafio"; 3 "7 tochas"; 4 "Um mês sem punição"; 5 "Nível 30".
+
+Pedido cumprido: fala de agradecimento, +5 pontos, XP (10) e o objeto do capítulo entra na coleção (Museu, Etapa 3; até lá, lista "Histórias" na Torre). Progresso do pedido avança nos mesmos pontos onde os eventos acontecem (`bumpChallenge` e o `npcBehavior` compartilham o mesmo barramento de eventos do `DataContext`).
+
+### Falas condicionais
+
+`src/data/dialogue/<npc>.ts`: lista de entradas `{ id, tier (mínimo), when: (ctx) => boolean, lines: string[], once?: boolean, priority }`, com `ctx` = `{ hour, weekday, level, tier, fullDays, baseLevels, gear, yesterday: { missed, complete }, today: { done, due, quizDone }, records, season, firstTime: Set<string> }`. Selector puro `pickDialogue(npc, ctx, seen, recent14)` em `src/services/village/dialogue.ts` (testes): pega a entrada de maior prioridade que casa com o contexto, evita as vistas nos últimos 14 dias, `once` só uma vez na vida (gravado em `seen`).
+
+Camadas obrigatórias por NPC (mínimo 60 entradas cada, escritas pelo líder com IA e revisadas pelo pai antes de entrar; sem gíria pesada, sem sermão):
+
+1. **Primeira vez** (`once`): primeiro encontro, primeira construção, primeiro craft, primeira prova 8/8, primeiro Baú, primeira compra, primeira meta, primeiro nível 10.
+2. **Estado do dia**: manhã, tarde, noite; dia completo; missão perdida ontem ("Ontem faltou uma. Hoje é outro dia."); folga; punição (só Sábio e Ferreiro, sem julgamento).
+3. **Progresso**: por patente (5 falas por patente), por construção nova, por equipamento novo, por recorde batido, por temporada nova.
+4. **Amizade**: 6 falas por nível, mais a conversa especial de cada subida.
+5. **Curiosidade e pergunta para pensar** (Etapa 3 amplia com os pacotes semanais): 1 por dia, sem repetir 60 dias.
+
+A tela: o balão ganha o cabeçalho com nome e corações; "Continuar" nas conversas de vários balões; o pedido ativo aparece como linha na Placa ("Comerciante: faltam 2 pedra") e na Torre.
+
+Painel: aba "Personagens" (grupo Conteúdo): amizade por NPC, pedido ativo, botão "Ver falas de hoje" (só depois de a criança ter visto) e "Aprovar pacote" para as falas novas geradas por IA (Etapa 3).
+
+Aceite: falar com o Comerciante 5 dias seguidos sobe para Conhecido e abre a conversa especial e o primeiro pedido; entregar 5 pedra cumpre o pedido, paga 10 XP e nunca gold; a mesma fala não repete em 14 dias (teste com 30 dias simulados); fala de "missão perdida ontem" aparece só nesse caso; `once` não repete após recarregar.
+
+
+## 16. Relógio da Vila: uma hora só, a de Brasília (Lote 1, primeiro item da fundação)
+
+Pedido do pai em 15/09: garantir que o jogo segue o fuso de São Paulo e que existe um horário dentro do jogo para tudo acontecer certo.
+
+Situação hoje (auditoria de 15/09): 24 pontos do código leem a hora direto do computador ou montam a data em UTC. `DailyChecklist`, `HeroHeader` e `HeroPanel` usam `new Date().getHours()` (hora do PC, seja qual for o fuso); `VillageHome`, `villageService`, `TaskItem` e `DataContext` usam `Intl` com `America/Sao_Paulo` (certo), mas com `hour12: false`, que devolve "24" à meia-noite; `utils/timezone.ts` soma um deslocamento fixo de 3 horas (funciona porque o Brasil não tem horário de verão desde 2019, mas quebra se voltar); `dailyQuizService`, `dailyRulesService` e `EnglishBase` montam datas com `toISOString().slice(0, 10)`. Nada corrige um relógio de PC errado, e a virada de meia-noite com o app aberto não é tratada de forma única.
+
+### Desenho
+
+- **Um módulo só**: `src/utils/clock.ts` (puro, testado). `nowBrazil(instantMs?)` devolve `{ iso, date: 'YYYY-MM-DD', hour (0-23), minute, weekday (0-6), period: 'morning' | 'afternoon' | 'evening', isNight }`, calculado com `Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', hourCycle: 'h23', ... }).formatToParts` (nunca "24"; horário de verão, se voltar, já vem certo). `addDays(date, n)`, `weekdayOf(date)`, `isoWeekOf(date)` (o de `utils/isoWeek.ts` passa para cá), `msUntilNextMidnight()`. `utils/timezone.ts` continua existindo com os mesmos nomes exportados, reimplementado por cima do `clock.ts`, para não quebrar chamadas antigas.
+- **Correção pelo servidor**: ao entrar, o app grava `health/{uid}.clockPing = serverTimestamp()` e lê de volta; `serverOffsetMs = servidor - Date.now()`, guardado na sessão e reaplicado em `nowBrazil()`. Se o desvio passar de 2 minutos, o painel mostra no cartão Saúde "Relógio do computador da criança está N min adiantado/atrasado; o jogo usa a hora certa" e a criança vê uma linha discreta na Placa. Quem manda é sempre o servidor.
+- **`ClockProvider` e `useClock()`**: contexto React que atualiza a cada 15 s e expõe `today`, `hour`, `minute`, `period`, `isNight`, `isDev`. Dispara o evento `dayChanged` quando `today` muda (meia-noite em Brasília): `DataContext` recarrega as missões (o "feito hoje" some), roda `processPendingDays` (fecha ontem), zera o portão da prova e os caches do dia; a Vila mostra o toast "Novo dia na Vila". Tudo sem recarregar a página.
+- **Só o relógio lê a hora**: os 24 pontos migram para `useClock()` (telas) ou `nowBrazil()` (serviços). Lista: `DailyChecklist.tsx:56,119`, `HeroHeader.tsx:34`, `HeroPanel.tsx:61`, `TaskItem.tsx:113`, `DataContext.tsx:318`, `VillageHome.tsx:46-49`, `villageService.ts:337`, `dailyQuizService.ts:22`, `dailyRulesService.ts:47`, `EnglishBase.tsx:46`, `PlacaManager.tsx` e o restante que o grep `getHours\|toISOString().slice(0, 10)\|hour12` apontar. Regra de lint: `no-restricted-syntax` para `new Date().getHours()` e `toISOString().slice(0, 10)` fora de `clock.ts`.
+- **Parâmetros de DEV**: `?h=22` e `?d=2026-09-20` só com `import.meta.env.DEV`, aplicados dentro do `ClockProvider` (todo mundo vê a mesma hora falsa: cena, portões, Baú, Placa).
+- **Servidor**: as Cloud Functions (`openai`, `agendaReminders`) usam `timeZone: 'America/Sao_Paulo'` em `onSchedule` e a mesma função `nowBrazil` (copiada em `functions/src/clock.ts`) para montar datas. As regras do Firestore não olham hora; quem impede ação fora de hora é a transação (`PERIOD_LOCKED`, `chestOpenHour`) usando o relógio corrigido.
+- **Relógio visível**: chip no cabeçalho da Vila, ao lado das tochas: hora "14:32" em `mc-num`, dia "ter 15/09" em Fredoka e o ícone do período (`ui/sun.webp`, `ui/sunset.webp`, `ui/moon.webp`); tooltip "Relógio da Vila, horário de Brasília". A cena usa a mesma hora (céu e luz); o Baú diz "Abre às 18h (faltam 2h10)".
+
+### Testes (`src/utils/__tests__/clock.test.ts`)
+
+Instantes fixos em UTC: 02:59:59Z e 03:00:00Z (meia-noite em Brasília vira a data); 03:00Z devolve hora 0, nunca 24; limites 12:00 e 18:00 dos períodos; `weekdayOf('2026-09-15') === 2`; `addDays` na virada de mês e de ano; `serverOffsetMs` de +3h faz `today` avançar quando o PC está atrasado; `msUntilNextMidnight` às 23:59:30 dá 30 s.
+
+### Aceite
+
+1. Com o relógio do PC adiantado 3 horas de propósito, o app mostra a hora de Brasília, o Baú não abre antes das 18h reais e o painel avisa o desvio.
+2. Com o app aberto às 23:59, à meia-noite as missões de ontem somem, o fechamento de ontem roda e a Placa muda para o dia novo, sem recarregar.
+3. Nenhum "24:" em lugar nenhum; `grep` não encontra `getHours()` nem `toISOString().slice(0, 10)` fora de `clock.ts`.
+4. `?h=22` em DEV muda cena, portões e Baú ao mesmo tempo.
+
+## 17. Sistema de itens v1: Mochila, Loja e editor no mesmo padrão (Lote 1)
+
+Pedido do pai em 15/09: Loja e editor sem padrão, sem inventário, sem resposta visual. O desenho completo está em `docs/VILA_ITENS.md` (fonte de verdade). Nesta etapa entra:
+
+- `src/types/items.ts` e `src/config/items.ts` (catálogo único; `COSMETICS`, `GEAR` e `REWARD_ICONS` passam a derivar dele), `village.newItems`.
+- Componente `src/components/hero/village/ItemSlot.tsx` (ícone, moldura de raridade, nome, estado, quantidade opcional, "Novo") e `ItemCard.tsx` (detalhe com preview no personagem).
+- `Mochila.tsx` com as quatro abas (Equipado com boneco de papel e slots, Roupas, Equipamentos, Materiais e raros); o `CharacterEditor` vira a aba Equipado; abre pelo cartão do Baú, pelo distrito "Mochila" e pela tecla I.
+- `Mercado.tsx` reescrito com filtros, grade de `ItemSlot`, cartão do item com "Experimentar", confirmação com antes e depois, animação do ícone voando para a Mochila, "Equipar agora?", faixa "Só se ganha".
+- A Oficina vira **Ferraria** (`docs/VILA_ITENS.md`, "Ferraria"): abas Forjar, Fundição (liberada pela Fornalha nível 2) e Obras (só leitura, abre os cartões); `ItemSlot` com chips tenho/preciso, preview do equipamento no minerador, cerimônia de forja (quadros do Ferreiro por inpaint, entregues pelo líder), capacete e lanterna bloqueados até o efeito existir; a aba Construir some. Presente de nível, Baú do Dia e Comerciante também passam a usar `ItemSlot`.
+- Arte: o líder entrega molduras, selo "Novo", contornos de slot, ícone da mochila e os ícones de cosmético que faltam; até lá, `hasSprite` continua escondendo o que não tem imagem.
+
+Aceite: o de `docs/VILA_ITENS.md`.
+
+## 18. Mapa da Vila: uma porta para cada coisa (Lote 1)
+
+Pedido do pai em 15/09: "Baú de recompensas", Mercado, Baú do Dia, construção Baú e o Banco que vem: está tudo desconexo. O desenho está em `docs/VILA_MAPA.md` (glossário de uma palavra por conceito, cabeçalho final, grade final de 8 distritos, circuito do gold: entra, sai, fica guardado). Nesta etapa entra:
+
+- Cabeçalho: chips com ação (gold abre o Extrato; nível abre a Torre; avatar abre a Mochila), botões "Baú de recompensas" e calendário removidos.
+- Grade final: Mina, Biblioteca, Ferraria, Mercado, Banco, Mochila, Torre, Agenda; hotbar Vila, Missões, Mina, Mercado, Mochila (teclas 1 a 5).
+- Mercado com `RewardsPanel` embutido como aba (nunca por cima), "Meus pedidos" com estado, aba Comerciante.
+- Banco da Vila com Cofrinho, Extrato (recebe o histórico de gold, que sai da tela de prêmios) e Paciência.
+- Renomeações: Oficina para Ferraria, construção Baú para Armazém (id `bau` continua), Ampulheta e Mapa para Agenda; "Baú" só em "Baú do Dia".
+
+Aceite: o de `docs/VILA_MAPA.md`.
+
 ## 12. Prompt para colar no Cursor
 
-"Leia `docs/etapas/ETAPA_2_BANCO_E_TEMPORADA.md` inteiro, depois `docs/MINER_MISSIONS_ROADMAP.md` (seções 'Lógica principal que nunca muda' e 'Economia interna v2'), `docs/VILA_API.md` e `docs/etapas/REVISAO_ETAPA_1.md`. Execute o Lote 1 na ordem da seção 11: módulos puros com testes primeiro, depois regras publicadas, serviços, telas, painel, função e simulador. Não invente regras: o que não estiver escrito, escolha o mais simples e registre em 'Decisões' do relatório. Ao terminar, rode as verificações da seção 10, faça o aceite na conta de teste com fotos e escreva `docs/etapas/RELATORIO_ETAPA_2_LOTE_1.md`. Não commite. Só depois da revisão do Lote 1 comece o Lote 2."
+"Leia `docs/etapas/ETAPA_2_BANCO_E_TEMPORADA.md` inteiro, depois `docs/MINER_MISSIONS_ROADMAP.md` (seções 'Lógica principal que nunca muda' e 'Economia interna v2'), `docs/VILA_API.md` e `docs/etapas/REVISAO_ETAPA_1.md`. Execute o Lote 1 na ordem da seção 11, começando pelo Relógio da Vila (seção 16), e incluindo a Agenda (seção 13), o Sistema de itens (seção 17, `docs/VILA_ITENS.md`), o Mapa da Vila (seção 18, `docs/VILA_MAPA.md`) e os efeitos de `docs/VILA_CONSTRUCOES.md`: módulos puros com testes primeiro, depois regras publicadas, serviços, telas, painel, função e simulador. Não invente regras: o que não estiver escrito, escolha o mais simples e registre em 'Decisões' do relatório. Ao terminar, rode as verificações da seção 10, faça o aceite na conta de teste com fotos e escreva `docs/etapas/RELATORIO_ETAPA_2_LOTE_1.md`. Não commite. Só depois da revisão do Lote 1 comece o Lote 2."

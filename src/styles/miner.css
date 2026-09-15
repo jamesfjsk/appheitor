@@ -3,8 +3,8 @@
    Complementa as classes mc-* de src/index.css (mc-panel, mc-card, mc-slot,
    mc-btn, mc-bar, mc-font, mc-title, mc-pixel, mc-good/warn/bad/diamond/muted,
    mc-paper). Regras: fonte pixel só em títulos e números; texto corrido em
-   Fredoka; painel escuro de pedra nas molduras, painel claro de inventário no
-   conteúdo do dia a dia. Sem emojis.
+   Fredoka; HUD de pedra/madeira na Vila; painel claro de inventário só em
+   papel (login, prova, prêmios). Sem emojis.
    ========================================================================== */
 
 :root {
@@ -129,18 +129,28 @@
 .mc-inv .mc-good { color: var(--mc-grass-lo); }
 .mc-inv .mc-warn { color: var(--mc-gold-lo); }
 
-/* linha de item dentro do inventário (missão, recompensa, lembrete) */
+/* linha de item no mundo do jogo (missão, oficina, mercado) */
 .mc-row {
+  background: #3a342f;
+  border: 3px solid #17130f;
+  box-shadow: inset 2px 2px 0 #574f49, inset -2px -2px 0 #1e1a17;
+  color: var(--mc-white);
+}
+
+.mc-row.is-done { background: #2f4a24; }
+.mc-row.is-locked { background: #2a2724; color: var(--mc-muted); }
+.mc-row.is-focus { box-shadow: inset 2px 2px 0 #574f49, inset -2px -2px 0 #1e1a17, 0 0 0 3px var(--mc-gold-hi); }
+
+/* papel de inventário (login, prova, baú de prêmios): linha clara */
+.mc-inv .mc-row {
   background: var(--mc-inv-row);
   border: 3px solid #373737;
   box-shadow: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #8d8d8d;
   color: var(--mc-inv-ink);
 }
-
-.mc-row.is-done { background: #bfd9ad; }
-.mc-row.is-locked { background: #bdbdbd; color: var(--mc-inv-muted); }
-/* missão em foco no modo guiado (o ring do Tailwind perdia para o box-shadow do mc-row) */
-.mc-row.is-focus { box-shadow: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #8d8d8d, 0 0 0 3px var(--mc-gold-hi); }
+.mc-inv .mc-row.is-done { background: #bfd9ad; }
+.mc-inv .mc-row.is-locked { background: #bdbdbd; color: var(--mc-inv-muted); }
+.mc-inv .mc-row.is-focus { box-shadow: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #8d8d8d, 0 0 0 3px var(--mc-gold-hi); }
 
 /* ---------- rótulos e números ---------- */
 .mc-lbl {
@@ -262,4 +272,81 @@
 @media (prefers-reduced-motion: reduce) {
   .mc-pop, .mc-build, .mc-shake, .mc-flicker { animation: none; }
   .mc-btn, .mc-card-hover { transition: none; }
+}
+
+/* fundo da Vila: pedra quieta, sem grade competindo com a cena pintada */
+.mn-backdrop.is-quiet {
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(120, 78, 36, 0.22), transparent 58%),
+    linear-gradient(180deg, #1a1613 0%, #12100e 100%);
+}
+.mn-backdrop.is-quiet .mn-backdrop-floor { opacity: 0.45; }
+
+/* moldura da cena: a pintura é o herói */
+.mn-stage {
+  position: relative;
+  border: 4px solid var(--mc-edge);
+  box-shadow: inset 0 0 0 3px var(--mc-wood), 0 8px 0 #0d0b0a;
+  background: #17130f;
+  overflow: hidden;
+}
+.mn-stage .mn-scene {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+
+/* recado fino sobre a pintura — não uma barra de produto */
+.mn-ticker {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: auto;
+  z-index: 2;
+  max-width: 22rem;
+  padding: 6px 10px;
+  background: rgba(23, 19, 15, 0.72);
+  border: 2px solid #17130f;
+  color: var(--mc-white);
+  pointer-events: none;
+}
+.mn-ticker button { pointer-events: auto; }
+.mn-ticker p { text-shadow: 1px 1px 0 #17130f; }
+@media (max-width: 480px) {
+  .mn-ticker {
+    right: 8px;
+    max-width: none;
+    padding: 4px 8px;
+  }
+  .mn-ticker p { font-size: 12px; line-height: 1.25; }
+  .mn-ticker p + p { display: none; }
+}
+
+/* placa única acima da cena (não três barras) */
+.mn-placa {
+  background: linear-gradient(180deg, #5a3d24 0%, #3d2918 100%);
+  border: 4px solid var(--mc-edge);
+  box-shadow: inset 3px 3px 0 #8a6240, inset -3px -3px 0 #24160c;
+  color: var(--mc-white);
+}
+.mn-placa p { text-shadow: 1px 1px 0 #17130f; }
+
+/* faixa de turno + atalhos, embaixo da cena */
+.mn-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* modal: 9-slice do quadro de madeira (ui/panel-frame.png) */
+.mc-modal {
+  background-color: #5c6370;
+  border: 22px solid transparent;
+  border-image-source: url('/assets/village/ui/panel-frame.png');
+  border-image-slice: 28 fill;
+  border-image-width: 22px;
+  border-image-repeat: stretch;
+  box-shadow: 0 12px 0 #0d0b0a;
+  color: var(--mc-white);
 }

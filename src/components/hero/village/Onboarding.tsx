@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { COSMETICS, DEFAULT_CHARACTER, PANTS_HEX, SHIRT_HEX, SKIN_SPRITE } from '../../../config/village';
+import { COSMETICS, DEFAULT_CHARACTER, PANTS_HEX, SHIRT_HEX, SKIN_HEX } from '../../../config/village';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
 import type { VillageCharacter } from '../../../types/village';
@@ -44,7 +44,7 @@ const Onboarding: React.FC = () => {
 
   return (
     <div className="mn-page min-h-screen flex items-center justify-center p-4 relative z-10">
-      <div className="mc-panel rounded-lg max-w-2xl w-full p-6 text-white">
+      <div className="mc-modal rounded-lg max-w-2xl w-full p-6 text-white">
         {step === 0 ? (
           <>
             <h1 className="mc-title text-sm mb-3">Crie seu minerador</h1>
@@ -69,11 +69,10 @@ const Onboarding: React.FC = () => {
                       type="button"
                       title={labelOf(id)}
                       aria-label={labelOf(id)}
-                      className={`mc-slot w-11 h-11 p-0.5 overflow-hidden ${character.skin === id ? 'mc-slot-selected' : ''}`}
+                      className={`mc-slot w-11 h-11 ${character.skin === id ? 'mc-slot-selected' : ''}`}
+                      style={{ background: SKIN_HEX[id] }}
                       onClick={() => pick({ skin: id })}
-                    >
-                      <img src={SKIN_SPRITE[id]} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
-                    </button>
+                    />
                   ))}
                 </div>
 
@@ -85,11 +84,10 @@ const Onboarding: React.FC = () => {
                       type="button"
                       title={labelOf(id)}
                       aria-label={labelOf(id)}
-                      className={`mc-slot w-11 h-11 p-0.5 overflow-hidden ${character.hair === id ? 'mc-slot-selected' : ''}`}
+                      className={`mc-slot w-11 h-11 ${character.hair === id ? 'mc-slot-selected' : ''}`}
+                      style={{ background: '#3d2918' }}
                       onClick={() => pick({ hair: id })}
-                    >
-                      <img src={SKIN_SPRITE[character.skin]} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
-                    </button>
+                    />
                   ))}
                 </div>
 

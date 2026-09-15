@@ -10,7 +10,7 @@
 import { arrayUnion, collection, doc, getDoc, onSnapshot, runTransaction, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { BaseDoc, BuildingId, Contract, ContractOutcome, ContractResult, DailyPlan, Material, MaterialCount, PlanSource, ScaffoldStage } from '../types/english';
-import { BUILDINGS, MATERIALS, baseLevel, buildingCost, canAfford, initialBaseDoc, isBuildingUnlocked, missingMaterials } from '../config/englishBase';
+import { BUILDINGS, MATERIALS, baseLevel, buildingCost, buildingOpensLater, canAfford, initialBaseDoc, isBuildingUnlocked, missingMaterials } from '../config/englishBase';
 import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, buildXp, rewardFor } from '../config/englishRewards';
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
@@ -618,15 +618,28 @@ export function baseLevelOf(base: BaseDoc): number {
 }
 
 /** Pode construir o próximo nível? Traz o que falta de cada material (só os > 0) */
-export function canBuild(base: BaseDoc, id: BuildingId): { ok: boolean; missing: Partial<Record<Material, number>>; nextLevel: number; unlocked: boolean } {
+export function canBuild(base: BaseDoc, id: BuildingId): {
+  ok: boolean;
+  missing: Partial<Record<Material, number>>;
+  nextLevel: number;
+  unlocked: boolean;
+  later: string | null;
+} {
   const nextLevel = (base.buildings[id] ?? 0) + 1;
   const unlocked = isBuildingUnlocked(id, base.buildings);
+  const later = buildingOpensLater(id, nextLevel);
   const cost = buildingCost(id, nextLevel);
-  if (!cost) return { ok: false, missing: {}, nextLevel, unlocked };
+  if (!cost) return { ok: false, missing: {}, nextLevel, unlocked, later };
   const gap = missingMaterials(base.materials, cost);
   const missing: Partial<Record<Material, number>> = {};
   for (const m of MATERIALS) if (gap[m] > 0) missing[m] = gap[m];
-  return { ok: unlocked && canAfford(base.materials, cost), missing, nextLevel, unlocked };
+  return {
+    ok: !later && unlocked && canAfford(base.materials, cost),
+    missing,
+    nextLevel,
+    unlocked,
+    later,
+  };
 }
 
 /** Valida custo e desbloqueio, debita os materiais e sobe o nível; o XP devolvido é aplicado pela tela */
@@ -637,6 +650,7 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
     const snap = await tx.get(ref);
     const base = snap.exists() ? fromBaseDoc(uid, snap.data()) : initialBaseDoc(uid, nowIso());
     const check = canBuild(base, buildingId);
+    if (check.later) throw new Error(`Abre na ${check.later}.`);
     if (!check.unlocked) throw new Error('Essa construção ainda está bloqueada: suba a Fornalha e o Baú ao nível 1 primeiro.');
     const cost = buildingCost(buildingId, check.nextLevel);
     if (!cost) throw new Error('Essa construção já está no nível máximo.');

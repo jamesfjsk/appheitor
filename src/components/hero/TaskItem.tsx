@@ -13,7 +13,7 @@ const BED = '/assets/english/ui/bed.webp';
 const APPLE = '/assets/english/ui/apple.webp';
 const BOOK = '/assets/english/ui/book.webp';
 const SWORD = '/assets/english/ui/sword.webp';
-const GRASS = '/assets/english/ui/grass.webp';
+const GRASS = '/assets/village/ui/plant.png';
 const MAP = '/assets/english/ui/map.webp';
 
 // Helper function to check if task is completed today

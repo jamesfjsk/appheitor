@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
-import { BUILDINGS, buildingCost, MATERIAL_LABELS, MATERIALS, initialBaseDoc } from '../../../config/englishBase';
+import { BUILDINGS, buildingCost, buildingEffectNow, MATERIAL_LABELS, MATERIALS, initialBaseDoc } from '../../../config/englishBase';
 import { GEAR, GEAR_SPRITE } from '../../../config/village';
 import { canCraft, tradePreview } from '../../../services/village/shop';
 import { canBuild as canBuildCheck, buildUpgrade } from '../../../services/englishBaseService';
@@ -14,11 +14,11 @@ import toast from 'react-hot-toast';
 
 const FORGE = '/assets/english/ui/base/c_forge.webp';
 
-const Oficina: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+const Oficina: React.FC<{ onClose: () => void; initialTab?: 'build' | 'gear' | 'trade' }> = ({ onClose, initialTab = 'build' }) => {
   const { childUid } = useAuth();
   const { village, materials, buildings, craftGear, tradeMaterials } = useVillage();
   const { playClick, playLevelUp } = useSound();
-  const [tab, setTab] = useState<'build' | 'gear' | 'trade'>('build');
+  const [tab, setTab] = useState<'build' | 'gear' | 'trade'>(initialTab);
   const [from, setFrom] = useState<Material>('madeira');
   const [to, setTo] = useState<Material>('pedra');
   const speech = useMemo(() => VILLAGE_LINES.ferreiro[Math.abs(Date.now()) % VILLAGE_LINES.ferreiro.length].text, []);
@@ -27,7 +27,7 @@ const Oficina: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="mc-panel rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
+      <div className="mc-modal rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
         <div className="p-4 border-b-4 border-[#17130f] flex justify-between">
           <h2 className="mc-h"><img src={FORGE} alt="" className="w-8 h-8 mc-pixel" />Oficina / Workshop</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
@@ -51,21 +51,23 @@ const Oficina: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             const missingText = MATERIALS.filter((m) => (info.missing[m] || 0) > 0)
               .map((m) => `${info.missing[m]} ${MATERIAL_LABELS[m]}`)
               .join(', ');
-            const btnLabel = level >= 3
-              ? 'Máximo'
-              : !info.unlocked
-                ? 'Bloqueada: precisa de Fornalha e Baú nível 1'
-                : info.ok
-                  ? 'Construir'
-                  : missingText
-                    ? `Falta ${missingText}`
-                    : 'Falta material';
+            const btnLabel = info.later
+              ? `Abre na ${info.later}`
+              : level >= 3
+                ? 'Máximo'
+                : !info.unlocked
+                  ? 'Bloqueada: precisa de Fornalha e Baú nível 1'
+                  : info.ok
+                    ? (level === 0 ? 'Construir' : 'Melhorar')
+                    : missingText
+                      ? `Falta ${missingText}`
+                      : 'Falta material';
             return (
               <div key={b.id} className="mc-row rounded p-3 flex items-center gap-3">
                 <img src={buildingSprite(b.id, Math.max(1, level))} alt="" className="w-12 h-12 mc-pixel" onError={(e) => { e.currentTarget.src = b.icon; }} />
                 <div className="flex-1">
                   <p className="font-bold">{b.label} · nível {level}</p>
-                  <p className="text-xs mc-muted">{b.effect}</p>
+                  <p className="text-xs mc-muted">{buildingEffectNow(b.id, level)}</p>
                   {costText && level < 3 && <p className="text-xs mc-muted mt-1">{costText}</p>}
                 </div>
                 <button

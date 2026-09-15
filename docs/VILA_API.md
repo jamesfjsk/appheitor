@@ -16,6 +16,9 @@ Módulos sem Firebase, React ou `import.meta.env`. Testes: `npm run test:village
 - `COSMETICS` / `COSMETIC_BY_ID` / `FREE_COSMETIC_IDS` — loja da vila.
 - `HABITS` / `HABIT_BY_ID` — catálogo de hábitos da placa.
 - `buildingSprite(id, level)` — PNG da Vila ou fallback da Base; placa no nível 0.
+- `buildingIcon(id, level)` na Base usa o mesmo sprite da Vila (n1 em cinza no nível 0).
+- Cena da Vila v2: `VillageScene` lê `public/assets/village/scene/backdrop-day.png` + `anchors.json` (1280×640). Sem tiles nem cubos. NPCs: Sábio, Comerciante, Ferreiro, Olheiro (sprites `*-iso.png`). Clique em lote abre `BuildingCard`.
+- Modais da criança: 9-slice `ui/panel-frame.png`.
 - `characterSpriteSrc(gear, shirt)` — sprite visível (diamante > capacete > camisa do time > base).
 - `DISTRICT_LABELS` — nomes bilíngues dos distritos.
 - `PLACA_SPRITE` — lote vazio.
@@ -23,6 +26,8 @@ Módulos sem Firebase, React ou `import.meta.env`. Testes: `npm run test:village
 ## `src/config/englishBase.ts` (acréscimo)
 
 - `buildingSprite(id, level)` / `BUILDING_PLACA` — mesma regra, fonte da Base.
+- `buildingEffectNow` / `buildingEffectNext` / `buildingOpensLater` — textos de `docs/VILA_CONSTRUCOES.md`; Campinho `opensIn: Etapa 4` (`liveMaxLevel: 0`).
+- Cartão da construção: `BuildingCard.tsx`, aberto pelo clique no lote (`build:<id>`). Oficina continua pela hotbar.
 
 ## `src/services/village/schedule.ts`
 

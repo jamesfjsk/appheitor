@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import {
   COSMETICS,
+  COSMETIC_ICON,
   FREE_COSMETIC_IDS,
-  HAT_SPRITE,
+  HAIR_HEX,
   PANTS_HEX,
-  PET_SPRITE,
   SHIRT_HEX,
-  SKIN_SPRITE,
+  SKIN_HEX,
   cosmeticHasSprite,
 } from '../../../config/village';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
+import { useModules } from '../../../hooks/useModules';
 import type { VillageCharacter } from '../../../types/village';
 import CharacterPreview from './CharacterPreview';
 
@@ -26,8 +27,8 @@ const TABS: Array<{ id: keyof VillageCharacter; label: string }> = [
 ];
 
 function slotThumb(id: string, slot: keyof VillageCharacter): React.ReactNode {
-  if (slot === 'skin' && SKIN_SPRITE[id]) {
-    return <img src={SKIN_SPRITE[id]} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />;
+  if (slot === 'skin') {
+    return <span className="block w-full h-full" style={{ background: SKIN_HEX[id] || '#D4A06A' }} />;
   }
   if (slot === 'shirt' && SHIRT_HEX[id]) {
     return <span className="block w-full h-full" style={{ background: SHIRT_HEX[id] }} />;
@@ -35,17 +36,11 @@ function slotThumb(id: string, slot: keyof VillageCharacter): React.ReactNode {
   if (slot === 'pants' && PANTS_HEX[id]) {
     return <span className="block w-full h-full" style={{ background: PANTS_HEX[id] }} />;
   }
-  if (slot === 'hat' && HAT_SPRITE[id]) {
-    return <img src={HAT_SPRITE[id]} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />;
-  }
-  if (slot === 'cape') {
-    return <img src="/assets/village/char/miner-cape.png" alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />;
-  }
-  if (slot === 'pet' && PET_SPRITE[id]) {
-    return <img src={PET_SPRITE[id]} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />;
-  }
   if (slot === 'hair') {
-    return <img src={SKIN_SPRITE.skin_2} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />;
+    return <span className="block w-full h-full" style={{ background: HAIR_HEX[id] || '#3d2918' }} />;
+  }
+  if (COSMETIC_ICON[id]) {
+    return <img src={COSMETIC_ICON[id]} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />;
   }
   return null;
 }
@@ -53,14 +48,20 @@ function slotThumb(id: string, slot: keyof VillageCharacter): React.ReactNode {
 const CharacterEditor: React.FC<{ onClose: () => void; onBuy: () => void }> = ({ onClose, onBuy }) => {
   const { village, saveCharacter } = useVillage();
   const { playClick } = useSound();
+  const modules = useModules();
+  const shopOpen = modules.shop !== false;
   const [tab, setTab] = useState<keyof VillageCharacter>('skin');
   const [draft, setDraft] = useState<VillageCharacter>(village.character);
 
-  const options = COSMETICS.filter((c) => c.slot === tab && cosmeticHasSprite(c.id));
+  const options = COSMETICS.filter((c) => {
+    if (c.slot !== tab || !cosmeticHasSprite(c.id)) return false;
+    if (!shopOpen) return c.free || FREE_COSMETIC_IDS.includes(c.id) || village.owned.includes(c.id);
+    return true;
+  });
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="mc-panel rounded-lg max-w-lg w-full p-4 text-white" onClick={(e) => e.stopPropagation()}>
+      <div className="mc-modal rounded-lg max-w-lg w-full p-4 text-white" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between mb-3">
           <h2 className="mc-title text-sm">Personagem</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
@@ -91,16 +92,19 @@ const CharacterEditor: React.FC<{ onClose: () => void; onBuy: () => void }> = ({
                 key={c.id}
                 type="button"
                 className={`mc-slot aspect-square p-0.5 overflow-hidden relative ${selected ? 'mc-slot-selected' : ''}`}
-                title={owned ? c.label : `${c.label} · ${c.basePrice}g`}
+                title={c.label}
                 onClick={() => {
                   playClick();
-                  if (!owned) { onBuy(); return; }
+                  if (!owned) {
+                    if (shopOpen) onBuy();
+                    return;
+                  }
                   setDraft({ ...draft, [tab]: c.id });
                 }}
               >
                 {slotThumb(c.id, tab)}
                 <span className="absolute bottom-0 inset-x-0 text-[9px] leading-tight bg-black/60 px-0.5">
-                  {owned ? c.label : `${c.basePrice}g`}
+                  {owned || !shopOpen ? c.label : `${c.basePrice}g`}
                 </span>
               </button>
             );

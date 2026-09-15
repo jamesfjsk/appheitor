@@ -126,7 +126,13 @@ const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, 
           const sel = selected === b.id;
           return (
             <button key={b.id} onClick={() => setSelected(b.id)} className={`mc-card mc-card-hover p-2 flex flex-col items-center min-h-[7rem] ${sel ? 'mc-slot-selected' : ''}`} data-testid={`lot-${b.id}`}>
-              <img src={buildingIcon(b.id, lvl)} alt="" className={`w-16 h-16 mc-pixel ${rising === b.id ? 'mcb-rising' : ''}`} draggable={false} />
+              <img
+                src={buildingIcon(b.id, lvl)}
+                alt=""
+                className={`w-16 h-16 mc-pixel ${rising === b.id ? 'mcb-rising' : ''}`}
+                style={lvl === 0 ? { filter: 'grayscale(1) brightness(0.55)', opacity: 0.9 } : undefined}
+                draggable={false}
+              />
               <span className="mc-font text-[8px] text-white mt-1 text-center leading-relaxed">{b.label}</span>
               <span className="flex gap-1 mt-1" aria-label={`Nível ${lvl}`}>
                 {[1, 2, 3].map((n) => (
@@ -142,7 +148,13 @@ const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, 
       {def && check && (
         <div className="mc-card p-3 mb-4" data-testid="building-detail">
           <div className="flex items-start gap-3">
-            <img src={buildingIcon(def.id, curLevel)} alt="" className="w-12 h-12 mc-pixel shrink-0" draggable={false} />
+            <img
+              src={buildingIcon(def.id, curLevel)}
+              alt=""
+              className="w-12 h-12 mc-pixel shrink-0"
+              style={curLevel === 0 ? { filter: 'grayscale(1) brightness(0.55)', opacity: 0.9 } : undefined}
+              draggable={false}
+            />
             <div className="min-w-0 flex-1">
               <p className="mc-font text-[10px] text-white leading-relaxed">{def.label} <span className="mc-muted">nível {curLevel}/{BUILDING_MAX_LEVEL}</span></p>
               <p className="text-xs text-white/85 mt-1">{def.description}</p>
@@ -171,7 +183,8 @@ const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, 
                 <button onClick={() => onBuild(def.id)} disabled={!check.ok || building !== null} className="mc-btn mc-btn-gold px-5 py-2.5 font-bold text-sm uppercase" data-testid="build-button">
                   {building === def.id ? 'Construindo...' : 'Construir'}
                 </button>
-                {!check.ok && missingList.length > 0 && <span className="text-xs mc-muted">Faltam: {missingList.join(', ')}</span>}
+                {!check.ok && check.later && <span className="text-xs mc-muted">Abre na {check.later}</span>}
+                {!check.ok && !check.later && missingList.length > 0 && <span className="text-xs mc-muted">Faltam: {missingList.join(', ')}</span>}
               </div>
             </div>
           )}

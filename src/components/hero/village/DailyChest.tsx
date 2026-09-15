@@ -10,8 +10,8 @@ import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import type { ChestContents } from '../../../types/village';
 import type { Material } from '../../../types/english';
 
-const CHEST = '/assets/english/ui/chest.webp';
-const GOLD = '/assets/english/ui/gold.webp';
+const CHEST = '/assets/village/buildings/bau-1.png';
+const GOLD = '/assets/village/rewards/dinheiro.png';
 const EMERALD = '/assets/english/ui/emerald.webp';
 
 const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onClose }) => {
@@ -52,7 +52,7 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="mc-panel rounded-lg p-6 max-w-md w-full text-white" onClick={(e) => e.stopPropagation()}>
+      <div className="mc-modal rounded-lg p-6 max-w-md w-full text-white" onClick={(e) => e.stopPropagation()}>
         <h2 className="mc-h mb-3"><img src={CHEST} alt="" className="mc-pixel w-8 h-8" />Baú do Dia</h2>
         <p className="text-sm mc-muted mb-4">{label}</p>
         {loot && (

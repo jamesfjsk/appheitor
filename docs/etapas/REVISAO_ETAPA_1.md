@@ -128,6 +128,10 @@ Regras para o Cursor: não recriar o que já está feito; não tocar em `index.c
 4. Cosméticos sem sprite (`hair_2`, `hair_3`, `hair_4`, `cape_blue`) **escondidos** da Loja e do editor por um filtro `hasSprite(id)`; voltam quando a arte existir.
 5. A economia v2 do roadmap foi toda aprovada (teto 40 por temporada, sem gold por patente, prova linear, Baú no lugar do bônus, prêmios enormes só pelo Cofrinho, curva nova na "nova fase" de 18/09, construções x2, Comerciante na Etapa 2). O que entra antes do dia 18 está na seção 12; o resto está em `ETAPA_2_BANCO_E_TEMPORADA.md`.
 
+## 14. Loja da Vila em "Em breve" (decisão do pai, 15/09, tarde; entra no pacote do dia 18)
+
+A Loja da Vila fica fechada até o Sistema de itens da Etapa 2 (`docs/VILA_ITENS.md`). Já desliguei o interruptor `settings/modules.shop = false` (o serviço já recusa compras com ele desligado). Falta na tela (Cursor, junto com a 1B): com `modules.shop === false`, a aba "Loja da Vila" do Mercado não lista item nenhum e mostra uma placa `mc-paper` com o Comerciante (`npc/comerciante.png`) e o texto "Em breve: o Comerciante está arrumando a barraca. Por enquanto, seu gold vale nos Prêmios de verdade e vai valer no Banco." O editor de personagem mostra só as peças grátis (peles e cores) e o boné já comprado; nada com preço. A grade de distritos e a hotbar continuam abrindo o Mercado na aba Prêmios de verdade. O painel continua com o interruptor para religar quando a Etapa 2 entrar.
+
 ## 13. Verificação das correções do Cursor (15/09, tarde)
 
 O Cursor entregou o pacote "até 18/09" (relatório atualizado em `RELATORIO_ETAPA_1.md`, seção "Seção 10"). Conferido por mim:

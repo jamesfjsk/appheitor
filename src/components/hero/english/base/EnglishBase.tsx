@@ -214,7 +214,7 @@ const EnglishBase: React.FC<Props> = ({ onClose }) => {
         initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         data-testid="english-base"
-        className="mc-panel rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white"
+        className="mc-modal rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white"
         style={{ fontFamily: 'var(--font-hero)' }}
       >
         {/* Cabeçalho: entrada da mina */}

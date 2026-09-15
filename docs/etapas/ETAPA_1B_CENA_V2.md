@@ -14,7 +14,7 @@ A cena atual (tile de grama repetido em grade, cubos flutuando nas laterais, pla
 4. Sprites atuais continuam (`buildings/*.png` 96 px, `char/*.png` e `npc/*.png` 64 px). Construção escala para a largura do lote (`w` da âncora), ancorada pelo **centro da base**; personagem e NPCs escalam para `character.h` do JSON (aprox. 96 px de altura na cena).
 5. Horário: um fundo só (dia) com **camada de luz** desenhada por cima; nada de três imagens.
 6. Sem emojis; textos em português; rótulos e balões em Fredoka (fonte do corpo), não na fonte pixel.
-7. Entrega mínima obrigatória para 18/09 é a seção 3. A seção 4 só se sobrar tempo, sem atrasar a entrega.
+7. Entrega mínima obrigatória para 18/09 são as seções 3, 3b e 3c. A seção 4 só se sobrar tempo, sem atrasar a entrega.
 
 ## 2. Arquivos que o líder entrega (a IA de código só consome)
 
@@ -73,6 +73,33 @@ Ordem de desenho em cada quadro:
 
 Remover: os tiles (`grass-path`, cubos `ui/grass`), as posições fixas dos cadeados, o `forEach` vazio e qualquer constante de grade em `VillageScene.tsx`/`config/village.ts` que só servia ao tile.
 
+
+## 3b. Cartão da construção (entra junto com a cena; pedido do pai em 15/09)
+
+Problema: clicar numa construção da cena abre a Oficina inteira (três abas, lista de todas as construções). Confuso: cada construção precisa ter a própria cara e a própria função, e tocar nela abre isso.
+
+Novo componente `src/components/hero/village/BuildingCard.tsx` (modal `mc-panel`, 560 px), aberto por `onClickSpot('build:<id>')` no lugar da Oficina (respeitando o portão da prova como hoje):
+
+- Cabeçalho: sprite do nível atual (ou `placa.png` no nível 0) em `mc-slot` 96 px, nome bilíngue, três marcadores de nível (1, 2, 3) com o atual aceso.
+- "O que faz agora": o efeito do nível atual (`BUILDINGS[id].effects[level]` de `config/englishBase.ts`); no nível 0, "Ainda não construída".
+- "Próximo nível": efeito do nível seguinte, custo com ícones de material (`MATERIAL_ICONS`) e o botão **Construir** (nível 0) ou **Melhorar** (1 e 2), com o mesmo fluxo e a mesma validação da aba Construir da Oficina (`canBuild`, `buildUpgrade`, toast "Fornalha chegou ao nível 2", som `playLevelUp`); desabilitado com "Falta 2 pedra" ou "Bloqueada: precisa de Fornalha e Baú nível 1". No nível 3: "Nível máximo".
+- **Ação própria** de cada construção (um botão grande `mc-btn-green` abaixo):
+  - Fornalha: "Ir para a Mina" (abre o distrito Mina; é lá que o efeito dela age).
+  - Baú: "Ver meu inventário": aba dentro do cartão com materiais, raros, equipamentos craftados e cosméticos comprados (só leitura; ícones existentes).
+  - Torre: "Abrir a Torre" (conquistas; recordes na Etapa 2).
+  - Mesa de Encantamento: "Escolher o tema de amanhã" (a mesma escolha que já existe na Base, seção da Mesa; se não houver tela própria, abrir a Mina no cartão da Mesa).
+  - Cerca e Campinho: sem ação ainda; texto "Efeito chega na Etapa 2" / "Campinho abre na Etapa 4" em `mc-muted`.
+  - Cofre (Etapa 2): "Abrir o Cofrinho".
+- Rodapé: "Ver todas as construções" abre a Oficina na aba Construir (a Oficina continua existindo pela grade de distritos e pela hotbar, com Equipamentos e Ferreiro).
+
+Aceite: fotos do cartão da Fornalha nível 1 (com "Melhorar" e custo), de um lote vazio (com "Construir") e do inventário do Baú; construir pelo cartão e pela Oficina dá o mesmo resultado no Firestore; portão da prova continua valendo no clique da cena.
+
+Os efeitos, textos e ações de cada construção estão em `docs/VILA_CONSTRUCOES.md` (fonte de verdade); reescrever os textos de `buildings.effects` em `config/englishBase.ts` com as frases de lá e deixar o Campinho não construível ("Abre na Etapa 4").
+
+## 3c. Loja da Vila em "Em breve" (obrigatório, pequeno)
+
+Decisão do pai em 15/09: a Loja da Vila só volta com o Sistema de itens da Etapa 2. `settings/modules.shop` já está `false`. Na aba "Loja da Vila" do Mercado, com `modules.shop === false`: nenhum item; placa `mc-paper` com `npc/comerciante.png` e "Em breve: o Comerciante está arrumando a barraca. Por enquanto, seu gold vale nos Prêmios de verdade." O editor de personagem mostra só peças grátis e as já compradas, sem preço nem "Ver na loja". Detalhe em `docs/etapas/REVISAO_ETAPA_1.md`, seção 14.
+
 ## 4. Se sobrar tempo (não atrasa a entrega)
 
 Parallax leve (fundo desloca 4 px ao mover o mouse), zoom suave no lote ao clicar (150 ms, escala 1,08 e volta), pássaro cruzando a tela a cada 40 a 90 s, Ferreiro e Olheiro na cena (`npc/ferreiro.png`, `npc/olheiro.png`, âncoras `npcs.ferreiro`/`npcs.olheiro` quando existirem no JSON), animação de construção (`mc-build` em canvas: 3 quadros de poeira quando o nível sobe).
@@ -83,4 +110,4 @@ Fotos em `docs/exemplos/telas/cena-v2/` a 1280 px com o parâmetro DEV `?h=9`, `
 
 ## 6. Prompt para colar no Cursor
 
-"Leia `docs/etapas/ETAPA_1B_CENA_V2.md` inteiro e `docs/MINER_MISSIONS_TEMA.md`. Reescreva `src/components/hero/village/VillageScene.tsx` conforme a seção 3, usando `public/assets/village/scene/backdrop-day.png` e `anchors.json` (se o JSON ainda não existir, use o exemplo da seção 2). Não toque em outros arquivos além de `VillageHome.tsx` (só para passar `speech` e tirar o cartão de fala) e `docs/VILA_API.md`. Ao final, tire as fotos da seção 5, rode as verificações e escreva `docs/etapas/RELATORIO_ETAPA_1B.md`. Sem commit."
+"Leia `docs/etapas/ETAPA_1B_CENA_V2.md` inteiro e `docs/MINER_MISSIONS_TEMA.md`. Reescreva `src/components/hero/village/VillageScene.tsx` conforme a seção 3 e crie o cartão da construção da seção 3b (leia também `docs/VILA_CONSTRUCOES.md`), usando `public/assets/village/scene/backdrop-day.png` e `anchors.json` (se o JSON ainda não existir, use o exemplo da seção 2). Além de `VillageScene.tsx`, toque só em `VillageHome.tsx` (passar `speech`, tirar o cartão de fala, abrir o `BuildingCard` no clique do lote), `BuildingCard.tsx` (novo), `config/englishBase.ts` (textos de efeito) e `docs/VILA_API.md`. Ao final, tire as fotos da seção 5, rode as verificações e escreva `docs/etapas/RELATORIO_ETAPA_1B.md`. Sem commit."

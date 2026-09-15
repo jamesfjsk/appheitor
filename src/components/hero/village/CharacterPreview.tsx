@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { PET_SPRITE, characterBaseSrc } from '../../../config/village';
+import { ISO_MINER, PET_SPRITE } from '../../../config/village';
 import type { VillageCharacter, VillageGear } from '../../../types/village';
-import { TORSO_MASK_SRC, paintCharacterLook } from './drawCharacter';
+import { paintCharacterLook } from './drawCharacter';
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -31,17 +31,14 @@ const CharacterPreview: React.FC<Props> = ({ character, gear, size = 96, classNa
     const petSrc = character.pet ? PET_SPRITE[character.pet] : null;
     void (async () => {
       try {
-        const [base, torso, pet] = await Promise.all([
-          loadImage(characterBaseSrc(character, gear)),
-          loadImage(TORSO_MASK_SRC).catch(() => null),
+        const [base, pet] = await Promise.all([
+          loadImage(ISO_MINER),
           petSrc ? loadImage(petSrc).catch(() => null) : Promise.resolve(null),
         ]);
         if (cancelled) return;
-        paintCharacterLook(ctx, base, torso, character, pet);
+        paintCharacterLook(ctx, base, null, character, pet, 'iso');
       } catch {
-        if (!cancelled) {
-          ctx.clearRect(0, 0, 64, 64);
-        }
+        if (!cancelled) ctx.clearRect(0, 0, 64, 64);
       }
     })();
     return () => {
@@ -56,7 +53,7 @@ const CharacterPreview: React.FC<Props> = ({ character, gear, size = 96, classNa
       height={64}
       className={`mc-pixel ${className}`}
       style={{ width: size, height: size, imageRendering: 'pixelated' }}
-      aria-label="Como o minerador vai ficar"
+      aria-label="Minerador"
     />
   );
 };

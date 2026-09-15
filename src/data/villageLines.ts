@@ -14,4 +14,9 @@ export const VILLAGE_LINES = {
     { id: 'f2', text: 'Picareta boa, missão mais rica.' },
     { id: 'f3', text: 'Sem ferro não sobe de nível. Simples.' },
   ],
+  olheiro: [
+    { id: 'o1', text: 'Eu olho o campo. Você olha as missões.' },
+    { id: 'o2', text: 'Quem observa bem escolhe o time certo.' },
+    { id: 'o3', text: 'A Torre mostra o que você já ganhou.' },
+  ],
 };

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ComicBackdrop from './common/ComicBackdrop';
 import { createTeaserMusic, type TeaserMusic } from './teaserMusic';
+import { ISO_MINER } from '../config/village';
 
 // Página de "obras" mostrada quando VITE_MAINTENANCE=1 (deploy público enquanto o jogo é construído).
 // Sem Firebase, sem login: só o clima do jogo e um bloco para minerar. O pai entra no app com ?dev=minerar.
@@ -13,11 +14,11 @@ const STORAGE_KEY = 'mm_teaser_diamonds';
 const MUSIC_KEY = 'mm_teaser_music'; // '0' = ele desligou de propósito
 
 const COMING = [
-  { icon: `${UI}/miner.webp`, title: 'Seu minerador', text: 'Crie o personagem, escolha roupa, capacete e picareta.' },
-  { icon: `${UI}/base/b_fornalha.webp`, title: 'A Vila', text: 'Cada missão do dia rende material para construir a sua base.' },
-  { icon: `${UI}/chest.webp`, title: 'Baú do Dia', text: 'Fechou todas as missões? O baú abre à noite.' },
-  { icon: `${UI}/minecart.webp`, title: 'A Mina', text: 'Contratos em inglês com o Comerciante, o Ferreiro e o Sábio.' },
-  { icon: `${UI}/gold.webp`, title: 'Cofrinho', text: 'Guarde gold para algo grande e veja ele render.' },
+  { icon: ISO_MINER, title: 'Seu minerador', text: 'Crie o personagem, escolha roupa, capacete e picareta.' },
+  { icon: '/assets/village/buildings/fornalha-1.png', title: 'A Vila', text: 'Cada missão do dia rende material para construir a sua base.' },
+  { icon: '/assets/village/buildings/bau-1.png', title: 'Baú do Dia', text: 'Fechou todas as missões? O baú abre à noite.' },
+  { icon: '/assets/village/items/lantern.png', title: 'A Mina', text: 'Contratos em inglês com o Comerciante, o Ferreiro e o Sábio.' },
+  { icon: '/assets/village/rewards/dinheiro.png', title: 'Cofrinho', text: 'Guarde gold para algo grande e veja ele render.' },
 ];
 
 type Sfx = { hit: () => void; win: () => void };
@@ -266,7 +267,7 @@ const Teaser: React.FC = () => {
                   </>
                 )}
               </button>
-              <img src={`${UI}/miner.webp`} alt="" className="w-16 h-16 mx-auto mt-2 mc-pixel mc-flicker" draggable={false} />
+              <img src={ISO_MINER} alt="" className="w-16 h-16 mx-auto mt-2 mc-pixel mc-flicker" draggable={false} />
               <p className="mt-2 text-sm mc-muted">{broken ? 'Diamante!' : `${HITS_TO_BREAK - hits} ${HITS_TO_BREAK - hits === 1 ? 'golpe' : 'golpes'} para quebrar`}</p>
               <p className="mc-num mc-diamond mt-2">{diamonds} {diamonds === 1 ? 'diamante' : 'diamantes'}</p>
               <p className="text-xs mc-muted mt-3">Eles vão contar quando a mina abrir.</p>

@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { ISO_MINER } from '../../config/village';
 import { FlashIcon } from '../../icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserProgress } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 
-const MINER = '/assets/english/ui/miner.webp';
-const CHEST = '/assets/english/ui/chest.webp';
-const TORCH = '/assets/english/ui/torch.webp';
-const GOLD = '/assets/english/ui/gold.webp';
+const MINER = ISO_MINER;
+const CHEST = '/assets/village/buildings/bau-1.png';
+const TORCH = '/assets/village/items/lantern.png';
+const GOLD = '/assets/village/rewards/dinheiro.png';
 const DIAMOND = '/assets/english/ui/diamond.webp';
 
 interface HeroHeaderProps {
@@ -22,41 +23,42 @@ interface HeroHeaderProps {
   subtitle?: string;
   extraButton?: React.ReactNode;
   fullDays?: number;
+  hour?: number;
 }
 
-const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer, avatarSrc, avatar, subtitle, extraButton, fullDays }) => {
+const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer, avatarSrc, avatar, subtitle, extraButton, fullDays, hour }) => {
   const { logout } = useAuth();
   const { playClick, isSoundEnabled, toggleSound } = useSound();
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
 
   const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Bom dia';
-    if (hour < 18) return 'Boa tarde';
+    const h = typeof hour === 'number' ? hour : new Date().getHours();
+    if (h < 12) return 'Bom dia';
+    if (h < 18) return 'Boa tarde';
     return 'Boa noite';
   };
 
-  const getMotivationalMessage = () => {
+  const [line] = useState(() => {
     const messages = [
       'Pronto para mais uma escavação?',
       'Cada missão rende um bloco a mais na base.',
       'Picareta na mão: as missões de hoje esperam.',
       'Quem minera todo dia acha diamante.',
-      'Vamos cavar fundo hoje.'
+      'Vamos cavar fundo hoje.',
     ];
     return messages[Math.floor(Math.random() * messages.length)];
-  };
+  });
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="mc-panel rounded-lg p-4 flex flex-col gap-4"
+      transition={{ duration: 0.35 }}
+      className="mc-panel rounded-lg px-3 py-2 flex flex-col gap-2"
     >
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-4 min-w-0">
-          <div className="mc-slot w-[72px] h-[72px] p-1 shrink-0 overflow-hidden flex items-center justify-center">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="mc-slot w-14 h-14 p-1 shrink-0 overflow-hidden flex items-center justify-center">
             {avatar || (
               <img
                 src={avatarSrc || MINER}
@@ -68,17 +70,17 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           </div>
 
           <div className="min-w-0">
-            <p className="mc-title text-[10px]">Miner Missions</p>
-            <h1 className="text-[28px] font-bold leading-tight text-white">
+            <p className="mc-title text-[9px]">Miner Missions</p>
+            <h1 className="text-[22px] sm:text-[26px] font-bold leading-tight text-white">
               {getGreeting()}, Heitor!
             </h1>
-            <p className="text-base mc-muted mt-1">
-              {subtitle || getMotivationalMessage()}
+            <p className="text-sm mc-muted truncate">
+              {subtitle || line}
             </p>
           </div>
         </div>
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-1.5 flex-wrap">
           <button
             type="button"
             onClick={() => { playClick(); onOpenRewards(); }}
@@ -123,9 +125,9 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         <div
-          className="mc-slot mc-chip"
+          className="mc-slot mc-chip py-1"
           title={`Dias completos na Vila: ${fullDays ?? 0}`}
         >
           <img src={TORCH} alt="" className="mc-pixel" draggable={false} />
@@ -134,14 +136,14 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
             <span className="mc-chip-l">{(fullDays ?? 0) === 1 ? 'dia completo' : 'dias completos'}</span>
           </div>
         </div>
-        <div className="mc-slot mc-chip">
+        <div className="mc-slot mc-chip py-1">
           <img src={GOLD} alt="" className="mc-pixel" draggable={false} />
           <div>
             <span className="mc-num mc-warn">{progress.availableGold || 0}</span>
             <span className="mc-chip-l">gold</span>
           </div>
         </div>
-        <div className="mc-slot mc-chip">
+        <div className="mc-slot mc-chip py-1">
           <img src={DIAMOND} alt="" className="mc-pixel" draggable={false} />
           <div>
             <span className="mc-num mc-diamond">Nível {levelSystem.currentLevel}</span>
