@@ -17,11 +17,12 @@ const GOLD = '/assets/english/ui/gold.webp';
 
 interface DailyQuizProps {
   onComplete: () => void;
+  openRequested?: boolean;
 }
 
 type Phase = 'prompt' | 'lesson' | 'questions' | 'results';
 
-const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete }) => {
+const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const { childUid } = useAuth();
   const { progress, adjustUserXP, adjustUserGold } = useData();
   const { playTaskComplete, playLevelUp, playError, playClick } = useSound();
@@ -81,13 +82,18 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete }) => {
     ensureDailyQuiz(childUid, addDays(today, 1), today, count).catch((e) => console.warn('DailyQuiz: prefetch de amanhã falhou', e));
   }, [loaded, childUid, enabled, quiz, prepare, today, count]);
 
-  // Decide se abre
+  // Decide se abre: prova obrigatória vira portão (não abre sozinha)
   useEffect(() => {
     if (!loaded || !childUid || !enabled || !quiz) return;
     if (quiz.completed) return;
+    if (required) return;
     if (!required && isQuizSnoozed('daily', childUid, today)) return;
     setOpen(true);
   }, [loaded, childUid, enabled, quiz, required, today]);
+
+  useEffect(() => {
+    if (openRequested) setOpen(true);
+  }, [openRequested]);
 
   const ready = Boolean(quiz && quiz.questions.length > 0 && !quiz.completed);
   const question = quiz?.questions[current];

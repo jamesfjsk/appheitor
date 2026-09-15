@@ -17,9 +17,12 @@ interface HeroHeaderProps {
   onOpenRewards: () => void;
   onOpenCalendar: () => void;
   onOpenTimer: () => void;
+  avatarSrc?: string;
+  subtitle?: string;
+  extraButton?: React.ReactNode;
 }
 
-const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer }) => {
+const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpenCalendar, onOpenTimer, avatarSrc, subtitle, extraButton }) => {
   const { logout } = useAuth();
   const { playClick, isSoundEnabled, toggleSound } = useSound();
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
@@ -55,7 +58,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
         <div className="flex items-center gap-4 min-w-0">
           <div className="mc-slot w-[72px] h-[72px] p-1 shrink-0 overflow-hidden">
             <img
-              src={MINER}
+              src={avatarSrc || MINER}
               alt=""
               className="w-full h-full object-contain mc-pixel"
               draggable={false}
@@ -68,7 +71,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
               {getGreeting()}, Heitor!
             </h1>
             <p className="text-base mc-muted mt-1">
-              {getMotivationalMessage()}
+              {subtitle || getMotivationalMessage()}
             </p>
           </div>
         </div>
@@ -106,6 +109,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenRewards, onOpen
           >
             <FlashIcon name={isSoundEnabled ? 'volume' : 'mute'} className="w-5 h-5" />
           </button>
+          {extraButton}
           <button
             type="button"
             onClick={() => { playClick(); logout(); }}

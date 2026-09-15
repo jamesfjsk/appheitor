@@ -6,6 +6,8 @@ import ComicBackdrop from './common/ComicBackdrop';
 
 const UI = '/assets/english/ui';
 const HITS_TO_BREAK = 5;
+// Aniversário do Heitor (18/09/2026, fuso de Brasília): dia da primeira versão jogável.
+const OPENING_AT = new Date('2026-09-18T00:00:00-03:00').getTime();
 const STORAGE_KEY = 'mm_teaser_diamonds';
 
 const COMING = [
@@ -17,6 +19,53 @@ const COMING = [
 ];
 
 type Sfx = { hit: () => void; win: () => void };
+
+function useCountdown(target: number) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  const total = Math.max(0, Math.floor((target - now) / 1000));
+  return {
+    done: target - now <= 0,
+    days: Math.floor(total / 86400),
+    hours: Math.floor((total % 86400) / 3600),
+    minutes: Math.floor((total % 3600) / 60),
+    seconds: total % 60,
+  };
+}
+
+const Countdown: React.FC = () => {
+  const cd = useCountdown(OPENING_AT);
+  if (cd.done) {
+    return (
+      <div className="mc-card rounded-lg p-4 text-center">
+        <p className="mc-title text-sm sm:text-base">A mina abriu. Feliz aniversário, Heitor!</p>
+      </div>
+    );
+  }
+  const cells: Array<[number, string]> = [
+    [cd.days, cd.days === 1 ? 'dia' : 'dias'],
+    [cd.hours, 'horas'],
+    [cd.minutes, 'min'],
+    [cd.seconds, 'seg'],
+  ];
+  return (
+    <div className="mc-card rounded-lg p-4 text-center">
+      <p className="mc-lbl">A mina abre no seu aniversário</p>
+      <div className="mt-3 flex justify-center gap-2 sm:gap-3">
+        {cells.map(([v, l]) => (
+          <div key={l} className="mc-slot rounded w-[66px] sm:w-[84px] py-2">
+            <div className="mc-num" style={{ fontSize: 22 }}>{String(v).padStart(2, '0')}</div>
+            <div className="text-xs mc-muted mt-1">{l}</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-sm text-white/85">18 de setembro: a primeira versão jogável é o seu presente.</p>
+    </div>
+  );
+};
 
 function createSfx(): Sfx {
   let ctx: AudioContext | null = null;
@@ -120,9 +169,13 @@ const Teaser: React.FC = () => {
               <div>
                 <p className="mc-lbl text-white/80">Flash Missions, nova versão</p>
                 <h1 className="mc-title text-base sm:text-xl mt-1">Miner Missions</h1>
-                <p className="text-sm sm:text-base text-white/85 mt-1">A mina está sendo escavada.</p>
+                <p className="text-sm sm:text-base text-white/85 mt-1">A mina está sendo escavada. Abre no dia 18.</p>
               </div>
             </div>
+          </div>
+
+          <div className="px-5 pt-5 sm:px-6">
+            <Countdown />
           </div>
 
           <div className="p-5 sm:p-6 grid gap-6 md:grid-cols-[1fr_260px] items-start">
