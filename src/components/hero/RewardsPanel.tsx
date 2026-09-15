@@ -2,7 +2,7 @@ import { REDEEM_MIN_TASKS } from '../../config/rules';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { FlashIcon } from '../../icons';
+import { FlashIcon, isIconKey } from '../../icons';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
@@ -10,6 +10,7 @@ import { Reward } from '../../types';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 import { isRewardUnlocked } from '../../utils/rewardLevels';
 import { getTodayBrazil } from '../../utils/timezone';
+import { rewardIconSrc } from '../../config/rewardIcons';
 const UI = '/assets/english/ui';
 /** Ícone pixel por categoria do prêmio (o campo emoji legado não tem equivalente pixel; a Etapa 1 traz ícones próprios) */
 const REWARD_CATEGORY_ICON: Record<string, string> = {
@@ -317,7 +318,13 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     className={`mc-row rounded p-3 flex flex-wrap items-center gap-3 ${locked ? 'is-locked' : ''}`}
                   >
                     <div className="mc-slot w-[52px] h-[52px] p-1 shrink-0 flex items-center justify-center">
-                      <img src={rewardIcon(reward.category)} alt="" draggable={false} className={`w-9 h-9 mc-pixel ${!isUnlocked ? 'grayscale opacity-60' : ''}`} />
+                      {rewardIconSrc(reward.emoji) ? (
+                        <img src={rewardIconSrc(reward.emoji)!} alt="" draggable={false} className={`w-9 h-9 mc-pixel ${!isUnlocked ? 'grayscale opacity-60' : ''}`} onError={(e) => { e.currentTarget.src = rewardIcon(reward.category); }} />
+                      ) : isIconKey(reward.emoji) ? (
+                        <FlashIcon name={reward.emoji} className={`w-8 h-8 ${!isUnlocked ? 'opacity-60' : ''}`} />
+                      ) : (
+                        <img src={rewardIcon(reward.category)} alt="" draggable={false} className={`w-9 h-9 mc-pixel ${!isUnlocked ? 'grayscale opacity-60' : ''}`} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-[17px] font-bold leading-tight">{reward.title}</h3>

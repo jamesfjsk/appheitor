@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { FlashIcon, CheckMark } from '../../icons';
 import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
+import { useVillage } from '../../contexts/VillageContext';
+import { periodAllowedAt } from '../../services/village/schedule';
 import { getTodayBrazil } from '../../utils/timezone';
 import toast from 'react-hot-toast';
 
@@ -106,6 +108,19 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
     }
   };
 
+  const { economy } = useVillage();
+  const hourBrazil = Number(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Sao_Paulo',
+    hour: 'numeric',
+    hour12: false,
+  }).format(new Date()));
+  const periodOpen = periodAllowedAt(task.period, hourBrazil, economy);
+  const abreHora = task.period === 'afternoon'
+    ? economy.periodStartHours.afternoon
+    : task.period === 'evening'
+      ? economy.periodStartHours.evening
+      : null;
+
   const done = isTaskCompletedToday(task);
   const periodLabel =
     task.period === 'morning' ? 'Manhã' :
@@ -158,6 +173,14 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
           style={{ opacity: 1 }}
         >
           Feita
+        </button>
+      ) : !periodOpen ? (
+        <button
+          type="button"
+          disabled
+          className="mc-btn mc-btn-stone shrink-0 min-h-[44px] px-4 font-bold text-[15px] w-full sm:w-auto"
+        >
+          Abre às {abreHora}h
         </button>
       ) : (
         <button

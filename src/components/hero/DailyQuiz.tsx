@@ -17,7 +17,7 @@ const GOLD = '/assets/english/ui/gold.webp';
 
 interface DailyQuizProps {
   onComplete: () => void;
-  openRequested?: boolean;
+  openRequested?: boolean | number;
 }
 
 type Phase = 'prompt' | 'lesson' | 'questions' | 'results';

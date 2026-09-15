@@ -66,7 +66,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
         title: '',
         description: '',
         goldCost: 50,
-        icon: 'gift',
+        icon: 'reward:doce',
         category: 'custom',
         requiredLevel: 1,
         isActive: true,
@@ -314,11 +314,31 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
               <Gift className="w-4 h-4" />
               <span>Ícone da Recompensa *</span>
             </label>
-            <IconPicker
-              value={formData.icon}
-              onChange={(key) => handleInputChange('icon', key)}
-              error={errors.icon}
-            />
+            <div className="grid grid-cols-5 sm:grid-cols-8 gap-2">
+              {REWARD_ICONS.map((icon) => {
+                const value = `reward:${icon.id}`;
+                const selected = formData.icon === value;
+                return (
+                  <button
+                    key={icon.id}
+                    type="button"
+                    title={icon.label}
+                    onClick={() => handleInputChange('icon', value)}
+                    className={`border rounded-lg p-2 flex flex-col items-center gap-1 hover:border-blue-400 ${selected ? 'border-blue-600 ring-2 ring-blue-200' : 'border-gray-200'}`}
+                  >
+                    <img
+                      src={icon.file}
+                      alt=""
+                      className="w-8 h-8"
+                      style={{ imageRendering: 'pixelated' }}
+                      onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                    />
+                    <span className="text-[10px] text-gray-600 leading-tight text-center">{icon.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {errors.icon && <p className="text-red-600 text-sm mt-1">{errors.icon}</p>}
           </div>
 
           {/* Status ativo */}

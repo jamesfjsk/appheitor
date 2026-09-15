@@ -4,10 +4,11 @@ Decisão de 15/09/2026: o site sai do bolt.new e passa a ser publicado pela Verc
 
 ## Como funciona o modo obras
 
-- `VITE_MAINTENANCE=1` no ambiente de build liga o teaser (`src/components/Teaser.tsx`, decidido em `src/main.tsx`). Sem a variável, o site é o app normal.
+- No site público (`flashmissons.com`, `www.flashmissons.com` e qualquer `*.vercel.app`) o teaser (`src/components/Teaser.tsx`) aparece por padrão, decidido em `src/main.tsx` pelo endereço. Não depende de variável na Vercel. Em `localhost` o site é o app normal.
+- `VITE_MAINTENANCE=1` força o teaser em qualquer endereço (usado nos testes locais). `VITE_MAINTENANCE=0` desliga o teaser: é o que você põe na Vercel quando o jogo estiver pronto (e faz um redeploy, porque a variável entra no build).
 - O teaser não carrega Firebase nem faz login: é uma página estática com o tema da mina, a barra "Obras: Etapa 1 de 5", a lista "O que vem por aí" e um bloco para minerar (5 golpes viram 1 diamante, contado só no navegador dele).
 - **Atalho do pai**: abrir `https://flashmissons.com/?dev=minerar` uma vez libera o app de verdade nesse navegador (fica salvo em `localStorage.mm_dev`). `?dev=sair` volta ao teaser. O atalho é só para você; não passe para o Heitor.
-- Quando o jogo estiver pronto: apagar a variável `VITE_MAINTENANCE` na Vercel e fazer um novo deploy.
+- Quando o jogo estiver pronto: criar `VITE_MAINTENANCE=0` na Vercel e fazer um novo deploy (Deployments > Redeploy). Depois disso pode-se apagar a lista `PUBLIC_HOSTS` do `main.tsx`.
 - Para mudar o texto "Etapa 1 de 5" e a lista de novidades, editar `src/components/Teaser.tsx` (constante `COMING` e a largura da barra).
 
 ## Passo a passo (uma vez)
@@ -15,7 +16,7 @@ Decisão de 15/09/2026: o site sai do bolt.new e passa a ser publicado pela Verc
 1. **Commit e push** do repositório (`git push origin main`). A Vercel publica a partir do GitHub.
 2. Em https://vercel.com: **Add New Project** > importar `jamesfjsk/appheitor`. Framework: Vite (detectado). Build: `npm run build`. Output: `dist`. O arquivo `vercel.json` já faz o rewrite para `index.html` (rotas `/login`, `/flash`, `/admin` funcionam ao recarregar).
 3. **Environment Variables** (Production e Preview), copiando os valores do seu `.env` local:
-   - `VITE_MAINTENANCE` = `1`
+   - (não precisa de `VITE_MAINTENANCE`: o teaser é automático no endereço público)
    - `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`
    - `VITE_FIREBASE_MEASUREMENT_ID`, `VITE_FIREBASE_VAPID_KEY` (opcionais)
    - `VITE_APP_ENV` = `production`
@@ -35,7 +36,7 @@ Se preferir publicar sem GitHub: `npx vercel --prod` na pasta do projeto (pede l
 ## Checklist rápido
 
 - [ ] Push feito
-- [ ] Variáveis no painel da Vercel (inclusive `VITE_MAINTENANCE=1`)
+- [ ] Variáveis `VITE_FIREBASE_*`, `VITE_APP_ENV` e `VITE_OPENAI_API_KEY` no painel da Vercel
 - [ ] Domínio apontado (A e CNAME)
 - [ ] Domínios autorizados no Firebase Auth
 - [ ] Teaser abre em `https://flashmissons.com`

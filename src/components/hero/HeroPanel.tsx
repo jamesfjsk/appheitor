@@ -47,7 +47,7 @@ const HeroPanel: React.FC = () => {
   const [guidedMode, setGuidedMode] = useState(false);
   const [showSurpriseMission, setShowSurpriseMission] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizRequested, setQuizRequested] = useState(false);
+  const [quizRequestId, setQuizRequestId] = useState(0);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -90,7 +90,7 @@ const HeroPanel: React.FC = () => {
             onOpenRewards={() => setShowRewards(true)}
             onOpenCalendar={() => setShowCalendar(true)}
             onOpenTimer={() => setShowTimer(true)}
-            onOpenQuiz={() => setQuizRequested(true)}
+            onOpenQuiz={() => setQuizRequestId((n) => n + 1)}
             quizLocked={quizLocked}
           />
         </VillageProvider>
@@ -102,8 +102,8 @@ const HeroPanel: React.FC = () => {
       </div>
 
       <DailyQuiz
-        onComplete={() => { setQuizCompleted(true); setQuizRequested(false); }}
-        openRequested={quizRequested}
+        onComplete={() => setQuizCompleted(true)}
+        openRequested={quizRequestId}
       />
       <BirthdayCelebration onComplete={() => undefined} />
       <LevelUpModal />

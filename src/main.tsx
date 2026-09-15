@@ -4,12 +4,19 @@ import Teaser from './components/Teaser.tsx';
 import './index.css';
 import './styles/miner.css';
 
-// Modo obras: com VITE_MAINTENANCE=1 o site público mostra o teaser do jogo.
+// Modo obras: no site público (flashmissons.com e *.vercel.app) o teaser do jogo aparece por padrão.
+// VITE_MAINTENANCE=1 força o teaser em qualquer endereço (testes locais); VITE_MAINTENANCE=0 desliga (jogo pronto).
 // O pai entra no app de verdade abrindo ?dev=minerar uma vez (fica salvo no navegador); ?dev=sair volta ao teaser.
 // O App (e o Firebase) só é carregado quando o teaser não está ativo.
 const App = lazy(() => import('./App.tsx'));
+const PUBLIC_HOSTS = ['flashmissons.com', 'www.flashmissons.com'];
+
 function maintenanceActive(): boolean {
-  if (import.meta.env.VITE_MAINTENANCE !== '1') return false;
+  const flag = import.meta.env.VITE_MAINTENANCE;
+  if (flag === '0') return false;
+  const host = window.location.hostname;
+  const isPublic = PUBLIC_HOSTS.includes(host) || host.endsWith('.vercel.app');
+  if (flag !== '1' && !isPublic) return false;
   try {
     const params = new URLSearchParams(window.location.search);
     const dev = params.get('dev');
