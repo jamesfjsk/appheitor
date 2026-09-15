@@ -43,17 +43,17 @@ export function getLevelFromXP(totalXP: number): number {
  * Retorna o título do nível baseado no número
  */
 export function getLevelTitle(level: number): string {
-  if (level >= 100) return " Lenda da Força de Aceleração";
-  if (level >= 90)  return " Mestre do Tempo";
-  if (level >= 80)  return " Guardião Multiversal";
-  if (level >= 70)  return " Velocista Elite de Central City";
-  if (level >= 60)  return " Barry Allen Ascendido";
-  if (level >= 50)  return " Discípulo do Flash Reverso";
-  if (level >= 40)  return " Wally West em Ação";
-  if (level >= 30)  return " Treinamento com STAR Labs";
-  if (level >= 20)  return " Iniciado na Força de Aceleração";
-  if (level >= 10)  return " Novato do Laboratório STAR";
-  return " Recruta da Liga da Velocidade";
+  if (level >= 100) return 'Lenda da Mina';
+  if (level >= 90)  return 'Mestre do Nether';
+  if (level >= 80)  return 'Engenheiro de Redstone';
+  if (level >= 70)  return 'Minerador de Esmeralda';
+  if (level >= 60)  return 'Minerador de Diamante';
+  if (level >= 50)  return 'Minerador de Ouro';
+  if (level >= 40)  return 'Minerador de Ferro';
+  if (level >= 30)  return 'Minerador de Pedra';
+  if (level >= 20)  return 'Minerador de Madeira';
+  if (level >= 10)  return 'Aprendiz da Mina';
+  return 'Novato da Mina';
 }
 
 /**
@@ -152,37 +152,37 @@ export function getNextMilestone(currentLevel: number): {
   if (currentLevel < 11) {
     return {
       level: 11,
-      title: "Flash Aprendiz",
-      description: "Torne-se um aprendiz do Flash!"
+      title: "Aprendiz da Mina",
+      description: "Torne-se aprendiz da mina."
     };
   } else if (currentLevel < 26) {
     return {
       level: 26,
-      title: "Flash Júnior",
-      description: "Evolua para Flash Júnior!"
+      title: "Minerador Júnior",
+      description: "Evolua para minerador júnior."
     };
   } else if (currentLevel < 51) {
     return {
       level: 51,
-      title: "Flash Responsável",
-      description: "Alcance o nível de Flash Responsável!"
+      title: "Minerador Responsável",
+      description: "Alcance o posto de minerador responsável."
     };
   } else if (currentLevel < 76) {
     return {
       level: 76,
-      title: "Flash Disciplinado",
-      description: "Torne-se um Flash Disciplinado!"
+      title: "Minerador Disciplinado",
+      description: "Torne-se um minerador disciplinado."
     };
   } else if (currentLevel < 91) {
     return {
       level: 91,
-      title: "Flash Master",
-      description: "Alcance o nível máximo: Flash Master!"
+      title: "Mestre da Mina",
+      description: "Alcance o posto de mestre da mina."
     };
   } else {
     return {
       level: 100,
-      title: "Flash Master Supremo",
+      title: "Lenda da Mina",
       description: "Você já é um mestre!"
     };
   }
