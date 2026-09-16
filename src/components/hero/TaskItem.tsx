@@ -162,12 +162,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
       </div>
 
       {done ? (
-        <button
-          type="button"
-          disabled
-          className="mc-btn mc-btn-green shrink-0 min-h-[44px] px-4 font-bold text-[15px] w-full sm:w-auto"
-          style={{ opacity: 1 }}
-        >
+        <button type="button" disabled className="mc-btn mc-btn-dark shrink-0 min-h-[44px] px-4 font-bold text-[15px] w-full sm:w-auto">
           Feita
         </button>
       ) : !periodOpen ? (

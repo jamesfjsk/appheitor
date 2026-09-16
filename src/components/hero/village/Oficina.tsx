@@ -2,14 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { BUILDINGS, buildingCost, buildingEffectNow, MATERIAL_ICONS, MATERIAL_LABELS, MATERIALS } from '../../../config/englishBase';
-import { GEAR } from '../../../config/village';
+import { GEAR, buildingSprite, visibleCracks } from '../../../config/village';
 import { ITEMS } from '../../../config/items';
 import { canCraft, tradePreview } from '../../../services/village/shop';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useData } from '../../../contexts/DataContext';
 import type { Material } from '../../../types/english';
-import { buildingSprite } from '../../../config/village';
 import { VILLAGE_LINES } from '../../../data/villageLines';
 import { calculateLevelSystem } from '../../../utils/levelSystem';
 import ItemSlot from './ItemSlot';
@@ -28,15 +27,16 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
   const speech = useMemo(() => VILLAGE_LINES.ferreiro[Math.abs(Date.now()) % VILLAGE_LINES.ferreiro.length].text, []);
   const level = calculateLevelSystem(progress.totalXP || 0).currentLevel;
   const furnace = buildings.fornalha || 0;
+  const furnaceDown = visibleCracks(village.cracks).includes('fornalha');
   const MULT = economy.buildCostMultiplier ?? 1;
   const preview = tradePreview(from, to);
   const selected = GEAR.find((g) => g.id === picked) || GEAR[0];
   const selectedItem = ITEMS.find((i) => i.id === selected.id);
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="mc-modal rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="p-4 border-b-4 border-[#17130f] flex justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-veil" onClick={onClose}>
+      <div className="mc-modal mc-pop rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center">
           <h2 className="mc-h"><img src={FORGE} alt="" className="w-8 h-8 mc-pixel" />Ferraria</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>
@@ -58,7 +58,19 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
               </span>
             ))}
           </div>
-          {tab === 'gear' && (
+          {furnaceDown && (tab === 'gear' || tab === 'trade') && (
+            <div className="space-y-2">
+              <p className="text-sm">A Ferraria está em ruínas. Arruma com material ou com as missões de hoje.</p>
+              <button
+                type="button"
+                className="mc-btn mc-btn-green w-full min-h-[44px] font-bold"
+                onClick={() => { playClick(); onOpenLot?.('fornalha'); }}
+              >
+                Arrumar a Ferraria
+              </button>
+            </div>
+          )}
+          {tab === 'gear' && !furnaceDown && (
             <>
               <div className="flex gap-3 items-start">
                 <CharacterPreview character={village.character} gear={village.gear} size={96} />
@@ -122,7 +134,7 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
               )}
             </>
           )}
-          {tab === 'trade' && (
+          {tab === 'trade' && !furnaceDown && (
             furnace < 2 ? (
               <p className="text-sm">A Fornalha nível 2 libera a Fundição.</p>
             ) : (
@@ -144,7 +156,7 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
           {tab === 'works' && (
             <>
               <p className="text-sm mc-muted">As obras sobem no lote da cena. Aqui você só vê o que já está de pé.</p>
-              {BUILDINGS.map((b) => {
+              {BUILDINGS.filter((b) => b.id !== 'campinho').map((b) => {
                 const bLevel = buildings[b.id] || 0;
                 const cost = bLevel < 3 ? buildingCost(b.id, bLevel + 1, MULT) : null;
                 return (

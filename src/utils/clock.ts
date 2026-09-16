@@ -113,6 +113,31 @@ export function isoWeekOf(ymd: string): string {
   return `${isoYear}-W${String(week).padStart(2, '0')}`;
 }
 
+/** Segunda da semana ISO (`2026-W38` → `2026-09-14`). */
+export function mondayOfIsoWeek(weekIso: string): string {
+  const m = /^(\d{4})-W(\d{2})$/.exec(weekIso);
+  if (!m) throw new Error(`semana ISO inválida: ${weekIso}`);
+  const y = Number(m[1]);
+  const w = Number(m[2]);
+  const jan4 = new Date(Date.UTC(y, 0, 4));
+  const jan4Day = jan4.getUTCDay() || 7;
+  const week1Monday = Date.UTC(y, 0, 4 - jan4Day + 1);
+  const monday = new Date(week1Monday + (w - 1) * 7 * 86400000);
+  return `${monday.getUTCFullYear()}-${pad(monday.getUTCMonth() + 1)}-${pad(monday.getUTCDate())}`;
+}
+
+/** Rótulo do Extrato: `Semana de 14 a 20/09`. */
+export function weekRangeLabel(weekIso: string): string {
+  const from = mondayOfIsoWeek(weekIso);
+  const to = addDays(from, 6);
+  const fd = Number(from.slice(8, 10));
+  const td = Number(to.slice(8, 10));
+  const fm = from.slice(5, 7);
+  const tm = to.slice(5, 7);
+  if (fm === tm) return `Semana de ${fd} a ${td}/${tm}`;
+  return `Semana de ${fd}/${fm} a ${td}/${tm}`;
+}
+
 export function periodOfHour(hour: number): ClockPeriod {
   const h = ((Math.trunc(hour) % 24) + 24) % 24;
   if (h < 12) return 'morning';
@@ -122,7 +147,7 @@ export function periodOfHour(hour: number): ClockPeriod {
 
 export function isNightHour(hour: number): boolean {
   const h = ((Math.trunc(hour) % 24) + 24) % 24;
-  return h >= 19 || h < 6;
+  return h >= 18 || h < 6;
 }
 
 /** Instante UTC em que o relógio de Brasília marca date+hora. */

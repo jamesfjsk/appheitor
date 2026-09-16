@@ -161,6 +161,9 @@ export function initialVillageDoc(userId: string, nowIso: string): VillageDoc {
     trophies: {},
     plan: { date: '', order: [], focusTaskId: null },
     newItems: [],
+    stats: {},
+    achievementsUnlocked: {},
+    newAchievements: [],
   };
 }
 
@@ -272,10 +275,10 @@ export const COSMETICS: CosmeticItem[] = [
   cosmetic('skin_2', 'skin', 'Pele média', 0, true),
   cosmetic('skin_3', 'skin', 'Pele morena', 0, true),
   cosmetic('skin_4', 'skin', 'Pele escura', 0, true),
-  cosmetic('hair_1', 'hair', 'Cabelo curto', 0, true),
-  cosmetic('hair_2', 'hair', 'Cabelo com franja', 20, false, false, 5),
-  cosmetic('hair_3', 'hair', 'Cabelo cacheado', 20, false, false, 5),
-  cosmetic('hair_4', 'hair', 'Cabelo comprido', 20, false, false, 5),
+  cosmetic('hair_1', 'hair', 'Cabelo castanho', 0, true),
+  cosmetic('hair_2', 'hair', 'Cabelo mel', 20, false, false, 5),
+  cosmetic('hair_3', 'hair', 'Cabelo cobre', 20, false, false, 5),
+  cosmetic('hair_4', 'hair', 'Cabelo preto', 20, false, false, 5),
   cosmetic('shirt_1', 'shirt', 'Camisa marrom', 0, true),
   cosmetic('shirt_2', 'shirt', 'Camisa verde', 0, true),
   cosmetic('shirt_3', 'shirt', 'Camisa azul', 0, true),
@@ -301,6 +304,12 @@ export const COSMETICS: CosmeticItem[] = [
   cosmetic('pet_wolf', 'pet', 'Lobo', 120, false, false, 15),
   cosmetic('pet_cat', 'pet', 'Gato', 120, false, false, 15),
   cosmetic('pet_parrot', 'pet', 'Papagaio', 150, false, false, 15),
+  cosmetic('milestone_10', 'hat', 'Capacete da Forja', 0, false, true, 10),
+  cosmetic('milestone_20', 'cape', 'Capa da Mina', 0, false, true, 20),
+  cosmetic('milestone_30', 'hat', 'Coroa de Diamante', 0, false, true, 30),
+  cosmetic('milestone_40', 'hat', 'Coroa de Lenda', 0, false, true, 40),
+  cosmetic('hat_mestre_obras', 'hat', 'Capacete de mestre de obras', 0, false, true, 1),
+  cosmetic('cape_vila', 'cape', 'Cachecol da vila', 0, false, true, 1),
 ];
 
 export const COSMETIC_BY_ID: Record<string, CosmeticItem> = Object.fromEntries(COSMETICS.map((c) => [c.id, c]));
@@ -309,11 +318,20 @@ export const FREE_COSMETIC_IDS: string[] = COSMETICS.filter((c) => c.free).map((
 
 /** Câmera canônica do minerador (low top-down). Retrato, HUD, cena e editor. */
 export const ISO_MINER = '/assets/village/char/miner-iso.png';
+/** Folha 8×64: walk cycle (PixelLab). Grama do chão removida. */
+export const ISO_MINER_WALK = '/assets/village/char/miner-walk.png?v=2';
+/** Folha 4×64: idle (pisca / peso). */
+export const ISO_MINER_IDLE = '/assets/village/char/miner-idle.png?v=1';
 export const ISO_NPC: Record<string, string> = {
   sabio: '/assets/village/npc/sabio-iso.png',
   comerciante: '/assets/village/npc/comerciante-iso.png',
   ferreiro: '/assets/village/npc/ferreiro-iso.png',
   olheiro: '/assets/village/npc/olheiro-iso.png',
+};
+/** Folha 8×64: walk cycle (PixelLab). Só quem troca de posto na cena. */
+export const ISO_NPC_WALK: Record<string, string> = {
+  sabio: '/assets/village/npc/sabio-walk.png?v=1',
+  comerciante: '/assets/village/npc/comerciante-walk.png?v=1',
 };
 
 export const NPC_LABEL: Record<string, string> = {
@@ -347,6 +365,7 @@ export const SHIRT_HEX: Record<string, string> = {
   shirt_6: '#D4B03A',
   shirt_7: '#E8E0D4',
   shirt_8: '#2A2420',
+  shirt_team: '#2E6B38',
 };
 
 export const HAIR_HEX: Record<string, string> = {
@@ -360,11 +379,17 @@ export const HAT_HEX: Record<string, string> = {
   hat_cap: '#3D6EA8',
   hat_deco: '#8B8B8B',
   hat_crown: '#E8B923',
+  milestone_10: '#8B8B8B',
+  milestone_30: '#E8B923',
+  milestone_40: '#E8B923',
+  hat_mestre_obras: '#8B8B8B',
 };
 
 export const CAPE_HEX: Record<string, string> = {
   cape_red: '#B33A2B',
   cape_blue: '#3D6EA8',
+  cape_vila: '#5B9B3A',
+  milestone_20: '#3D6B2A',
 };
 
 export const PANTS_HEX: Record<string, string> = {
@@ -378,15 +403,25 @@ export const PANTS_HEX: Record<string, string> = {
   pants_8: '#EDE6D9',
 };
 
+export function cosmeticSwatchHex(id: string): string | null {
+  return SKIN_HEX[id] || SHIRT_HEX[id] || PANTS_HEX[id] || HAIR_HEX[id] || CAPE_HEX[id] || null;
+}
+
 export const HAT_SPRITE: Record<string, string> = {
   hat_cap: '/assets/village/char/miner-cap.png',
   hat_deco: '/assets/village/char/miner-iron-helmet.png',
   hat_crown: '/assets/village/char/miner-crown.png',
+  milestone_10: '/assets/village/char/miner-iron-helmet.png',
+  milestone_30: '/assets/village/char/miner-crown.png',
+  milestone_40: '/assets/village/char/miner-crown.png',
+  hat_mestre_obras: '/assets/village/char/miner-iron-helmet.png',
 };
 
 export const CAPE_SPRITE: Record<string, string> = {
   cape_red: '/assets/village/char/miner-cape.png',
   cape_blue: '/assets/village/char/miner-cape.png',
+  milestone_20: '/assets/village/char/miner-cape.png',
+  cape_vila: '/assets/village/char/miner-cape.png',
 };
 
 export const PET_SPRITE: Record<string, string> = {
@@ -422,6 +457,12 @@ export const COSMETIC_ICON: Record<string, string> = {
   pet_wolf: '/assets/village/pets/lobo.png',
   pet_cat: '/assets/village/pets/gato.png',
   pet_parrot: '/assets/village/pets/papagaio.png',
+  milestone_10: '/assets/village/items/helmet-deco.png',
+  milestone_20: '/assets/village/items/cape.png',
+  milestone_30: '/assets/village/items/crown.png',
+  milestone_40: '/assets/village/items/crown.png',
+  hat_mestre_obras: '/assets/village/items/helmet-deco.png',
+  cape_vila: '/assets/village/items/cape.png',
 };
 
 export const DISTRICT_ICONS: Record<string, string> = {
@@ -435,7 +476,7 @@ export const DISTRICT_ICONS: Record<string, string> = {
   agenda: '/assets/english/ui/clock.webp',
   house: '/assets/village/buildings/casa-1.png',
   chest: '/assets/village/buildings/bau-1.png',
-  arena: '/assets/english/ui/sword.webp',
+  arena: '/assets/village/buildings/arena-1.png',
 };
 
 export function houseTier(season: number): 1 | 2 | 3 {
@@ -523,10 +564,64 @@ export const LOT_SCENE_LABEL: Record<string, string> = {
   torre: 'Torre',
   mesa: 'Biblioteca',
   campinho: 'Campinho',
+  arena: 'Arena',
   cofre: 'Cofre',
   agenda: 'Agenda',
   mercado: 'Mercado',
 };
+
+const CRACK_FEM: Record<string, true> = {
+  fornalha: true,
+  cerca: true,
+  torre: true,
+  mesa: true,
+  agenda: true,
+  arena: true,
+};
+
+export function crackedLabel(id: string, name = LOT_SCENE_LABEL[id] || 'lote'): string {
+  return `${name} em ruínas`;
+}
+
+export function crackedSentence(id: string): string {
+  const name = LOT_SCENE_LABEL[id] || 'lote';
+  return CRACK_FEM[id] ? `A ${name} caiu.` : `O ${name} caiu.`;
+}
+
+export function crackedListSentence(ids: string[]): string {
+  const clean = ids.filter(Boolean);
+  if (clean.length === 0) return '';
+  if (clean.length === 1) return crackedSentence(clean[0]);
+  return `${clean.length} obras cairam.`;
+}
+
+/** Em localhost, `?crack=fornalha` na primeira carga mostra o dano sem gravar no save. */
+const DEV_CRACK: string[] = (() => {
+  if (typeof window === 'undefined') return [];
+  if (!/localhost|127\.0\.0\.1/.test(window.location.hostname)) return [];
+  try {
+    const extra = new URLSearchParams(window.location.search).get('crack');
+    if (!extra || extra === '0' || extra === 'none') return [];
+    return extra.split(',').map((s) => s.trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
+})();
+
+const DEV_CRACK_CLEARED = new Set<string>();
+
+/** Só a prévia `?crack=`; o save real não entra. */
+export function dismissDevCrack(id: string): void {
+  if (!id) return;
+  DEV_CRACK_CLEARED.add(id);
+}
+
+export function visibleCracks(cracks: string[] | undefined): string[] {
+  const base = cracks || [];
+  const extra = DEV_CRACK.filter((id) => !DEV_CRACK_CLEARED.has(id) && !base.includes(id));
+  if (!extra.length) return base;
+  return [...base, ...extra];
+}
 
 export type SceneProp = {
   id: string;
@@ -541,6 +636,5 @@ export type SceneProp = {
 
 export const SCENE_PROPS: SceneProp[] = [
   { id: 'pack', x: 592, y: 336, w: 48, h: 48, sprite: '/assets/village/items/mochila.png', label: 'Mochila' },
-  { id: 'arena', x: 1018, y: 68, w: 44, h: 44, sprite: '/assets/english/ui/sword.webp', label: 'Arena' },
 ];
 

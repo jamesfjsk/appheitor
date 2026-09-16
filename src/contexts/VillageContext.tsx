@@ -127,7 +127,11 @@ export const VillageProvider: React.FC<{ children: ReactNode }> = ({ children })
     buyCosmetic: (itemId) => wrap(() => buyCosmetic(uid!, itemId), 'Item comprado'),
     craftGear: (gearId) => wrap(() => craftGear(uid!, gearId), 'Equipamento pronto'),
     tradeMaterials: (from, to) => wrap(() => tradeMaterials(uid!, from, to), 'Troca feita'),
-    openChest: () => wrap(() => openDailyChest(uid!, getTodayBrazil()), 'Baú aberto') as Promise<ChestContents>,
+    openChest: () => wrap(async () => {
+      const contents = await openDailyChest(uid!, getTodayBrazil());
+      window.dispatchEvent(new CustomEvent('village-event', { detail: { kind: 'chest_open' } }));
+      return contents;
+    }, 'Baú aberto') as Promise<ChestContents>,
     ackNotice: (id) => wrap(() => ackNotice(id), 'Combinado'),
     dismissNotice: (key) => wrap(() => dismissAutoNotice(uid!, key), 'Recado dispensado'),
     confirmHabit: (habitId) => wrap(() => confirmHabit(uid!, habitId, getTodayBrazil()), 'Hábito feito'),

@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useClock } from '../../../contexts/ClockContext';
-import { addDays, isoWeekOf } from '../../../utils/clock';
+import { addDays, isoWeekOf, weekRangeLabel } from '../../../utils/clock';
 import { listGoldTransactions } from '../../../services/goldTx';
 import { weeklyStatement } from '../../../services/village/bank';
 import type { GoldTransaction } from '../../../types';
@@ -61,10 +61,7 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: bo
     <div className="space-y-3">
       {rows.map((r) => (
         <div key={r.weekIso} className="mc-card p-3 text-sm space-y-1">
-          <p className="font-bold">Semana {(() => {
-            const [y, w] = r.weekIso.split('-W');
-            return `${Number(w)} de ${y}`;
-          })()}</p>
+          <p className="font-bold">{weekRangeLabel(r.weekIso)}</p>
           <p>Ganhou <span className="mc-num" style={{ fontSize: 12 }}>{r.earned}</span> · Gastou <span className="mc-num" style={{ fontSize: 12 }}>{r.spent}</span></p>
           <p>Guardou <span className="mc-num" style={{ fontSize: 12 }}>{r.saved}</span> · Juros <span className="mc-num" style={{ fontSize: 12 }}>{r.interest}</span>{r.interest > 0 ? ' · paciência rendeu +' + r.interest : ''}</p>
           <p>Guardou {r.savingsRatePct}% do que ganhou (alvo {economy.savingsTargetPct}%).</p>
@@ -95,9 +92,9 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: bo
   if (embedded) return body;
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-2" onClick={onClose}>
-      <div className="mc-modal rounded-lg w-full max-w-lg max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="p-4 border-b-4 border-[#17130f] flex justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 mn-veil" onClick={onClose}>
+      <div className="mc-modal mc-pop rounded-lg w-full max-w-lg max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center">
           <h2 className="mc-title text-sm">Extrato</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>

@@ -7,7 +7,7 @@ import { applyEvent, challengeState, extendForPunishment } from '../challenges';
 import { daysToAfford, priceForDays, referenceIncome } from '../income';
 import { txsLastDays, balancaTotals } from '../balance';
 import { capGold, gameGoldRoom } from '../caps';
-import { canRepair, cracksAfterClose, DEFAULT_LOTS_BY_PERIOD, repairRefund } from '../repair';
+import { applyMaterialRepair, canRepair, cracksAfterClose, isBroken, liveBuildingLevel, repairMaterialCost, repairRefund } from '../repair';
 import { lateTaskReward, lateWindow } from '../late';
 import { levelGift, minLevelFor } from '../levels';
 import { occurrencesBetween, organizationXp, reminderDue, studyPlanFor, weekOrganized, dayTimeline } from '../agenda';
@@ -183,12 +183,37 @@ test('linha do dia ordena missão, compromisso sem hora no fim e fechar o dia', 
   expect(untimed?.sortMin).toBe(21 * 60);
 });
 
-test('rachadura do período da primeira missão perdida e conserto', () => {
-  const cracks = cracksAfterClose([], ['t1'], DEFAULT_LOTS_BY_PERIOD, 'afternoon');
-  expect(cracks).toEqual(['cerca']);
+test('uma missão perdida derruba uma obra; conserto pede o dia de hoje completo', () => {
+  const built = { fornalha: 1, bau: 1, cerca: 1, torre: 1, mesa: 1, cofre: 1, agenda: 1, mercado: 1, campinho: 0, arena: 0 };
+  expect(cracksAfterClose([], [{ period: 'afternoon' }], built)).toEqual(['cerca']);
+  expect(cracksAfterClose([], [
+    { period: 'morning' },
+    { period: 'morning' },
+    { period: 'evening' },
+  ], built)).toEqual(['fornalha', 'bau', 'torre']);
+  expect(cracksAfterClose(['fornalha'], [{ period: 'morning' }], built)).toEqual(['fornalha', 'bau']);
+  expect(cracksAfterClose([], [{ period: 'afternoon' }], { fornalha: 1 })).toEqual(['fornalha']);
+  expect(cracksAfterClose([], [{ period: 'morning' }, { period: 'evening' }], {})).toEqual([]);
+  expect(liveBuildingLevel(built, ['fornalha'], 'fornalha')).toBe(0);
+  expect(liveBuildingLevel(built, ['fornalha'], 'bau')).toBe(1);
+  expect(isBroken(['cerca'], 'cerca')).toBe(true);
+  const cracks = cracksAfterClose([], [{ period: 'afternoon' }], built);
   expect(canRepair(cracks, 6, 6)).toBe(true);
   expect(canRepair(cracks, 6, 5)).toBe(false);
   expect(repairRefund(4)).toBe(2);
+});
+
+test('arrumar com material tira só aquela obra e cobra 1 do material do nível', () => {
+  expect(repairMaterialCost('fornalha', 1)).toEqual({ madeira: 1, pedra: 0, ferro: 0, redstone: 0 });
+  expect(repairMaterialCost('torre', 1)).toEqual({ madeira: 0, pedra: 1, ferro: 0, redstone: 0 });
+  expect(repairMaterialCost('bau', 2)).toEqual({ madeira: 1, pedra: 0, ferro: 0, redstone: 0 });
+  const mats = { madeira: 2, pedra: 1, ferro: 0, redstone: 0 };
+  const out = applyMaterialRepair(['fornalha', 'bau'], 'fornalha', mats, 1);
+  expect(out.cracks).toEqual(['bau']);
+  expect(out.materials.madeira).toBe(1);
+  expect(out.materials.pedra).toBe(1);
+  expect(() => applyMaterialRepair(['bau'], 'fornalha', mats, 1)).toThrow();
+  expect(() => applyMaterialRepair(['fornalha'], 'fornalha', { madeira: 0, pedra: 0, ferro: 0, redstone: 0 }, 1)).toThrow();
 });
 
 test('missão recuperada só até o horário e metade do gold', () => {

@@ -14,13 +14,15 @@ import {
   listDayCompletions,
   resetCharacter,
   resetOnboarding,
-  startNewSeason,
+  closeSeason,
   subscribeVillage,
 } from '../../services/villageService';
 import { subscribeBase } from '../../services/englishBaseService';
 import { FirestoreService } from '../../services/firestoreService';
 import { getAppVersion, subscribeClientErrors, subscribeHealth, type ClientErrorRow } from '../../services/observability';
 import { getTodayBrazil } from '../../utils/timezone';
+import { addDays } from '../../utils/clock';
+import { seasonEndsOn } from '../../services/village/season';
 import type {
   EconomySettings,
   HealthDoc,
@@ -293,14 +295,19 @@ const VillageManager: React.FC = () => {
       </section>
 
       <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Iniciar nova fase</h2>
-        <p className="text-sm text-gray-600 mb-3">Zera o XP (nível 1), guarda um retrato do progresso, desliga as conquistas antigas e cadastra o pacote Miner Missions. Gold, materiais, missões e prêmios não mudam.</p>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Fechar temporada</h2>
+        <p className="text-sm text-gray-600 mb-3">
+          Grava uma estrela, zera o XP, mantém o gold. As conquistas de nível reiniciam. Previsto: {seasonEndsOn(
+            village?.stars?.length ? addDays(village.stars[village.stars.length - 1].endedOn, 1) : getTodayBrazil(),
+            economy.seasonWeeks || 13
+          )}.
+        </p>
         {seasonStep === 0 && (
-          <button type="button" className="px-4 py-2 bg-amber-600 text-white rounded-lg" onClick={() => setSeasonStep(1)}>Iniciar nova fase</button>
+          <button type="button" className="px-4 py-2 bg-amber-600 text-white rounded-lg" disabled={seasonBusy} onClick={() => setSeasonStep(1)}>Fechar temporada</button>
         )}
         {seasonStep === 1 && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <p className="mb-3">Tem certeza? O nível volta para Novato da Mina.</p>
+            <p className="mb-3">Tem certeza? O nível volta para Novato da Mina. O gold não muda.</p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -309,20 +316,20 @@ const VillageManager: React.FC = () => {
                   if (!user || seasonBusy) return;
                   setSeasonBusy(true);
                   try {
-                    await startNewSeason(childUid, user.userId);
+                    await closeSeason(childUid, user.userId);
                     setSeasonStep(0);
-                    toast.success('Nova fase iniciada');
+                    toast.success('Temporada fechada');
                   } catch (e) {
-                    toast.error(e instanceof Error ? e.message : 'Não deu para iniciar a fase');
+                    toast.error(e instanceof Error ? e.message : 'Não deu para fechar a temporada');
                   } finally {
                     setSeasonBusy(false);
                   }
                 }}
                 disabled={seasonBusy}
               >
-                {seasonBusy ? 'Iniciando…' : 'Confirmar de novo'}
+                {seasonBusy ? 'Fechando…' : 'Confirmar de novo'}
               </button>
-              <button type="button" className="px-4 py-2 border rounded-lg" onClick={() => setSeasonStep(0)}>Cancelar</button>
+              <button type="button" className="px-4 py-2 border rounded-lg" disabled={seasonBusy} onClick={() => setSeasonStep(0)}>Cancelar</button>
             </div>
           </div>
         )}
@@ -336,6 +343,8 @@ const VillageManager: React.FC = () => {
             ['lastQuizGenerated', health?.lastQuizGenerated],
             ['lastPlanGenerated', health?.lastPlanGenerated],
             ['lastChestDate', health?.lastChestDate],
+            ['lastInterestWeek', health?.lastInterestWeek],
+            ['lastLearningWeek', health?.lastLearningWeek],
           ] as const).map(([k, v]) => (
             <span key={k} className={`px-3 py-1 rounded-full text-sm ${stale(v ?? null) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
               {k}: {v || 'nunca'}

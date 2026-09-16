@@ -279,12 +279,16 @@ export class FirestoreService {
   static async createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
       const taskRef = doc(collection(db, 'tasks'));
-      const completeTaskData = {
+      const completeTaskData: Record<string, unknown> = {
         ...taskData,
+        xp: Math.trunc(Number(taskData.xp) || 0),
+        gold: Math.trunc(Number(taskData.gold) || 0),
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
-      
+      for (const key of Object.keys(completeTaskData)) {
+        if (completeTaskData[key] === undefined) delete completeTaskData[key];
+      }
       await setDoc(taskRef, completeTaskData);
       return taskRef.id;
     } catch (error) {
@@ -1305,6 +1309,16 @@ export class FirestoreService {
           goldPenalty: data.goldPenalty || 0,
           allTasksBonusGold: data.allTasksBonusGold || 0,
           summaryProcessed: data.summaryProcessed || false,
+          checkin: data.checkin && typeof data.checkin === 'object' ? {
+            water: Boolean(data.checkin.water),
+            stretch: Boolean(data.checkin.stretch),
+            kindness: Boolean(data.checkin.kindness),
+            screen: Boolean(data.checkin.screen),
+            tomorrow: String(data.checkin.tomorrow || ''),
+            at: String(data.checkin.at || ''),
+          } : null,
+          repaired: data.repaired === true,
+          helmetUsed: data.helmetUsed === true,
           createdAt: data.createdAt?.toDate() || new Date(),
           updatedAt: data.updatedAt?.toDate() || new Date()
         };

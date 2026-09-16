@@ -80,9 +80,18 @@ export const ClockProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, []);
 
   useEffect(() => {
-    setClockDevOverride(readDevOverride());
-    tick();
-    return () => setClockDevOverride(null);
+    const apply = () => {
+      setClockDevOverride(readDevOverride());
+      tick();
+    };
+    apply();
+    window.addEventListener('popstate', apply);
+    window.addEventListener('clock-override', apply);
+    return () => {
+      window.removeEventListener('popstate', apply);
+      window.removeEventListener('clock-override', apply);
+      setClockDevOverride(null);
+    };
   }, [tick]);
 
   useEffect(() => {

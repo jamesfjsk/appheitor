@@ -494,7 +494,7 @@ const LevelCard = ({ current, selected, saving, disabled, onSelect, onSave }: Le
     <div className="bg-white rounded-2xl border border-gray-200 p-6">
       <h3 className="mb-1 text-lg font-bold text-gray-900">Nível do conteúdo</h3>
       <p className="mb-4 text-sm text-gray-500">
-        Define a gramática e o tamanho dos textos que a IA pode usar. Ele não vê este número: vê "Base nível N", a soma das construções.
+        Define a gramática e o tamanho dos textos que a IA pode usar. Ele não vê este número: a Vila mostra o nível de cada obra.
       </p>
       <div className="mb-4 flex gap-2">
         {([1, 2, 3] as LevelNumber[]).map((n) => (
@@ -749,16 +749,16 @@ const EnglishBaseManager: React.FC = () => {
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <div className="mb-1 flex items-center gap-3">
           <Hammer className="w-6 h-6 text-blue-600" />
-          <h2 className="text-xl font-bold text-gray-900">A Base</h2>
+          <h2 className="text-xl font-bold text-gray-900">Mina</h2>
         </div>
         <p className="mb-5 text-sm text-gray-500">
           Cinco contratos por dia gerados por IA no nível escolhido abaixo. O Recado é obrigatório e sempre paga XP e gold; ele escolhe mais
-          dois entre os outros. Os materiais viram construções na Base.
+          dois entre os outros. Depois do Recado, o circuito de Redstone do dia paga redstone e XP, sem gold. Os materiais se gastam nas obras da Vila.
         </p>
         {base ? (
           <>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Stat label="Base" value={`nível ${baseLevel(base.buildings)}`} />
+              <Stat label="Obras" value={`${baseLevel(base.buildings)} níveis`} />
               <Stat label="Contratos feitos" value={base.contractsDone} />
               <Stat label="Dias jogados" value={base.daysPlayed} />
               <Stat label="Dias seguidos" value={base.streakDays} />

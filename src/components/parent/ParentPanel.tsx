@@ -27,8 +27,61 @@ import GoalsPanel from './GoalsPanel';
 import ChallengeManager from './ChallengeManager';
 import Balanca from './Balanca';
 import AgendaManager from './AgendaManager';
+import HojeCard from './HojeCard';
+import WeeklyReport from './WeeklyReport';
+import CharactersPanel from './CharactersPanel';
 
-type TabType = 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz' | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system' | 'goals' | 'challenges' | 'balanca' | 'agenda';
+type TabType =
+  | 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz'
+  | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system'
+  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters';
+
+const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; label: string; icon: string }> }> = [
+  {
+    id: 'hoje',
+    label: 'Hoje',
+    tabs: [
+      { id: 'dashboard', label: 'Hoje', icon: 'chart' },
+    ],
+  },
+  {
+    id: 'jogo',
+    label: 'Jogo',
+    tabs: [
+      { id: 'village', label: 'Vila', icon: 'home' },
+      { id: 'goals', label: 'Cofrinho', icon: 'gold' },
+      { id: 'challenges', label: 'Desafios', icon: 'trophy' },
+      { id: 'rewards', label: 'Prêmios', icon: 'gift' },
+      { id: 'tasks', label: 'Missões', icon: 'notes' },
+      { id: 'surprise', label: 'Missão surpresa', icon: 'target' },
+      { id: 'agenda', label: 'Agenda', icon: 'notes' },
+    ],
+  },
+  {
+    id: 'conteudo',
+    label: 'Conteúdo',
+    tabs: [
+      { id: 'quiz', label: 'Prova', icon: 'brain' },
+      { id: 'reminders', label: 'Placa', icon: 'bolt' },
+      { id: 'english', label: 'Mina', icon: 'gamepad' },
+      { id: 'characters', label: 'Personagens', icon: 'home' },
+      { id: 'achievements', label: 'Vida real', icon: 'trophy' },
+    ],
+  },
+  {
+    id: 'ajustes',
+    label: 'Ajustes',
+    tabs: [
+      { id: 'balanca', label: 'Economia', icon: 'gold' },
+      { id: 'system', label: 'Módulos e Saúde', icon: 'settings' },
+      { id: 'birthday', label: 'Aniversário', icon: 'cake' },
+      { id: 'notifications', label: 'Notificações', icon: 'bell' },
+      { id: 'notes', label: 'Anotações', icon: 'notes' },
+      { id: 'history', label: 'Histórico tarefas', icon: 'history' },
+      { id: 'rewardsHistory', label: 'Histórico gold', icon: 'gold' },
+    ],
+  },
+];
 
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
@@ -36,123 +89,68 @@ const ParentPanel: React.FC = () => {
 
   if (loading) return <LoadingSpinner message="Carregando painel administrativo..." />;
 
-  const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'chart' },
-    { id: 'village', label: 'Vila', icon: 'home' },
-    { id: 'goals', label: 'Cofrinho', icon: 'gold' },
-    { id: 'challenges', label: 'Desafios', icon: 'trophy' },
-    { id: 'balanca', label: 'Balança', icon: 'gold' },
-    { id: 'agenda', label: 'Agenda', icon: 'notes' },
-    { id: 'tasks', label: 'Gerenciar Tarefas', icon: 'notes' },
-    { id: 'rewards', label: 'Recompensas', icon: 'gift' },
-    { id: 'achievements', label: 'Conquistas', icon: 'trophy' },
-    { id: 'reminders', label: 'Placa', icon: 'bolt' },
-    { id: 'surprise', label: 'Missão Surpresa', icon: 'target' },
-    { id: 'quiz', label: 'Quiz Diário', icon: 'brain' },
-    { id: 'english', label: 'Inglês', icon: 'gamepad' },
-    { id: 'birthday', label: 'Aniversário', icon: 'cake' },
-    { id: 'notifications', label: 'Notificações', icon: 'bell' },
-    { id: 'history', label: 'Histórico Tarefas', icon: 'history' },
-    { id: 'rewardsHistory', label: 'Histórico Gold', icon: 'gold' },
-    { id: 'notes', label: 'Anotações', icon: 'notes' },
-    { id: 'system', label: 'Ajustes', icon: 'settings' }
-  ] as const;
-
   return (
     <div className="min-h-screen bg-gray-50">
       <ReadyBoot />
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
         <ParentHeader />
-
-        {/* Navigation Tabs */}
-        <div className="mt-8 mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="flex flex-wrap gap-x-6 gap-y-1 -mb-px">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <span className="mr-2 inline-flex align-middle">
-                    <FlashIcon name={tab.icon} className="w-4 h-4" />
-                  </span>
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
+        <div className="mt-8 mb-6 space-y-4">
+          {GROUPS.map((g) => (
+            <div key={g.id}>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{g.label}</p>
+              <nav className="flex flex-wrap gap-x-6 gap-y-1 border-b border-gray-200">
+                {g.tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="mr-2 inline-flex align-middle">
+                      <FlashIcon name={tab.icon} className="w-4 h-4" />
+                    </span>
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
+            </div>
+          ))}
         </div>
 
-        {/* Tab Content */}
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           {activeTab === 'dashboard' && (
-            <ProgressDashboard tasks={tasks} progress={progress} />
+            <>
+              <HojeCard onOpen={(tab) => setActiveTab(tab as TabType)} />
+              <ProgressDashboard tasks={tasks} progress={progress} />
+              <WeeklyReport />
+            </>
           )}
-          {activeTab === 'village' && (
-            <VillageManager />
-          )}
-          {activeTab === 'goals' && (
-            <GoalsPanel />
-          )}
-          {activeTab === 'challenges' && (
-            <ChallengeManager />
-          )}
-          {activeTab === 'balanca' && (
-            <Balanca />
-          )}
-          {activeTab === 'agenda' && (
-            <AgendaManager />
-          )}
-          {activeTab === 'tasks' && (
-            <TaskManager tasks={tasks} />
-          )}
-          {activeTab === 'rewards' && (
-            <RewardManager />
-          )}
-          {activeTab === 'achievements' && (
-            <AchievementManager />
-          )}
-          {activeTab === 'reminders' && (
-            <PlacaManager />
-          )}
-          {activeTab === 'surprise' && (
-            <SurpriseMissionConfigComponent />
-          )}
+          {activeTab === 'village' && <VillageManager />}
+          {activeTab === 'goals' && <GoalsPanel />}
+          {activeTab === 'challenges' && <ChallengeManager />}
+          {activeTab === 'balanca' && <Balanca />}
+          {activeTab === 'agenda' && <AgendaManager />}
+          {activeTab === 'tasks' && <TaskManager tasks={tasks} />}
+          {activeTab === 'rewards' && <RewardManager />}
+          {activeTab === 'achievements' && <AchievementManager />}
+          {activeTab === 'reminders' && <PlacaManager />}
+          {activeTab === 'surprise' && <SurpriseMissionConfigComponent />}
           {activeTab === 'english' && (
             <div className="space-y-6">
               <EnglishBaseManager />
               <EnglishProgressPanel />
             </div>
           )}
-          {activeTab === 'quiz' && (
-            <DailyQuizManager />
-          )}
-          {activeTab === 'birthday' && (
-            <BirthdayManager />
-          )}
-          {activeTab === 'notifications' && (
-            <NotificationSender />
-          )}
-          {activeTab === 'history' && (
-            <TaskHistory tasks={tasks} />
-          )}
-          {activeTab === 'rewardsHistory' && (
-            <GoldHistory />
-          )}
-          {activeTab === 'notes' && (
-            <NotesManager />
-          )}
+          {activeTab === 'characters' && <CharactersPanel />}
+          {activeTab === 'quiz' && <DailyQuizManager />}
+          {activeTab === 'birthday' && <BirthdayManager />}
+          {activeTab === 'notifications' && <NotificationSender />}
+          {activeTab === 'history' && <TaskHistory tasks={tasks} />}
+          {activeTab === 'rewardsHistory' && <GoldHistory />}
+          {activeTab === 'notes' && <NotesManager />}
           {activeTab === 'system' && (
             <div className="space-y-6">
               <AdminControls />

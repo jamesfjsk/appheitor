@@ -22,7 +22,8 @@ const LoginScreen: React.FC = () => {
 
   // If user is already logged in, redirect to appropriate panel
   if (user && !loading) {
-    const redirectTo = user.role === 'admin' ? '/admin' : '/flash';
+    const qs = typeof window !== 'undefined' ? window.location.search : '';
+    const redirectTo = (user.role === 'admin' ? '/admin' : '/flash') + qs;
     return <Navigate to={redirectTo} replace />;
   }
 

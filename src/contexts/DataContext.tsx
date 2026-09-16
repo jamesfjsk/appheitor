@@ -10,7 +10,7 @@ import { DAY_CHANGED_EVENT } from './ClockContext';
 import { getErrorMessage, getErrorCode } from '../utils/errors';
 import toast from 'react-hot-toast';
 import { useOffline } from './OfflineContext';
-import { getVillage, repairLot } from '../services/villageService';
+import { applyVillageStats, getVillage, repairLot } from '../services/villageService';
 import { getSettings } from '../services/settingsService';
 import { DEFAULT_ECONOMY, DEFAULT_MODULES, DEFAULT_VILLAGE_SETTINGS } from '../config/village';
 import { computeTaskLoot, xpWithBoots } from '../services/village/loot';
@@ -255,19 +255,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
     
-    const completeTaskData = {
+    const completeTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> = {
       title: taskData.title,
       description: taskData.description || '',
-      xp: taskData.xp || 10,
-      gold: taskData.gold ?? 5,
+      xp: Math.trunc(taskData.origin === 'child' ? (taskData.xp || 5) : (taskData.xp || 10)),
+      gold: taskData.origin === 'child' ? 0 : (taskData.gold ?? 5),
       period: taskData.period,
-      time: taskData.time,
       frequency: taskData.frequency || 'daily',
       active: taskData.active !== false,
       status: taskData.status || 'pending',
       ownerId: childUid,
-      createdBy: user.userId
+      createdBy: user.userId,
     };
+    if (taskData.time) completeTaskData.time = taskData.time;
+    if (taskData.optional === true) completeTaskData.optional = true;
+    if (taskData.origin) completeTaskData.origin = taskData.origin;
+    if (taskData.date) completeTaskData.date = taskData.date;
     
     try {
       await FirestoreService.createTask(completeTaskData);
@@ -379,6 +382,21 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
 
       try {
+        const deltas: Record<string, number> = { missionsDone: 1 };
+        if (task.period === 'morning' && hour < 9) deltas.morningEarly = 1;
+        if (focus) deltas.focusBlocks = 1;
+        const ids = await applyVillageStats(childUid, deltas);
+        if (ids.includes('primeira_picaretada')) {
+          toast.success('Primeira picaretada · +10 XP, +1 madeira');
+        } else if (ids.length) {
+          toast.success('Conquista nova na Torre');
+        }
+        window.dispatchEvent(new CustomEvent('village-event', { detail: { kind: 'task_done' } }));
+      } catch (e) {
+        console.warn('stats da vila', e);
+      }
+
+      try {
         const streakResult = await FirestoreService.updateStreak(childUid);
         try {
           await bumpChallenge(childUid, 'streak_days', streakResult.streak, true);
@@ -445,6 +463,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           }).length;
           if (doneNow >= dueNow.length) {
             const refund = await repairLot(childUid, addDays(today, -1));
+            window.dispatchEvent(new CustomEvent('miner-repaired', {
+              detail: { gold: refund, lots: village.cracks || [] },
+            }));
             toast.success(refund > 0 ? `Lote consertado: +${refund} gold` : 'Lote consertado');
           }
         }
@@ -483,6 +504,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     try {
       await FirestoreService.completeTaskWithRewards(taskId, childUid, task.xp ?? 10, task.gold ?? 5, undefined, { late: true });
       toast.success('Missão recuperada (metade do gold, sem material)');
+      try {
+        await applyVillageStats(childUid, { recoveries: 1 });
+      } catch (e) {
+        console.warn('stats recuperação', e);
+      }
     } catch (error) {
       const msg = getErrorMessage(error);
       toast.error(msg === 'Missão já recuperada' ? msg : (msg || 'Não deu para recuperar'));

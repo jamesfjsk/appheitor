@@ -11,16 +11,23 @@ import {
   buildingEffectNext,
   buildingEffectNow,
   buildingSprite,
+  canAfford,
   initialBaseDoc,
+  missingMaterials,
 } from '../../../config/englishBase';
-import { COSMETIC_BY_ID, COSMETIC_ICON, GEAR, GEAR_SPRITE } from '../../../config/village';
+import { COSMETIC_BY_ID, COSMETIC_ICON, GEAR, GEAR_SPRITE, dismissDevCrack, visibleCracks } from '../../../config/village';
+import { RuinThumb } from './drawDamage';
 import type { CosmeticItem } from '../../../types/village';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
+import { useData } from '../../../contexts/DataContext';
+import { useClock } from '../../../contexts/ClockContext';
+import { dueTasksOn } from '../../../services/village/schedule';
 import { buildUpgrade, canBuild, setThemeRequest } from '../../../services/englishBaseService';
-import { burnWood } from '../../../services/villageService';
-import { getTodayBrazil } from '../../../utils/clock';
+import { burnWood, repairBuilding, repairLot } from '../../../services/villageService';
+import { repairMaterialCost } from '../../../services/village/repair';
+import { addDays, getTodayBrazil } from '../../../utils/clock';
 import type { BuildingId } from '../../../types/english';
 import RewardsPanel from '../RewardsPanel';
 
@@ -48,6 +55,8 @@ const BuildingCard: React.FC<Props> = ({
 }) => {
   const { childUid } = useAuth();
   const { village, materials, buildings, economy } = useVillage();
+  const { tasks } = useData();
+  const { today } = useClock();
   const { playClick } = useSound();
   const [busy, setBusy] = useState(false);
   const [inv, setInv] = useState(false);
@@ -64,7 +73,9 @@ const BuildingCard: React.FC<Props> = ({
     .map((m) => `${info.missing[m]} ${MATERIAL_LABELS[m]}`)
     .join(', ');
   const maxLive = def.liveMaxLevel ?? BUILDING_MAX_LEVEL;
-  const atCap = level >= maxLive;
+  const sealed = maxLive <= 0;
+  const atCap = !sealed && level >= maxLive;
+  const cracked = visibleCracks(village.cracks).includes(id);
 
   const actionLabel = level === 0 ? 'Construir' : `Melhorar · nível ${info.nextLevel}`;
   const lockLabel = info.later
@@ -81,7 +92,7 @@ const BuildingCard: React.FC<Props> = ({
     : lockLabel || actionLabel;
 
   const build = async () => {
-    if (!childUid || !info.ok) return;
+    if (!childUid || !info.ok || cracked) return;
     playClick();
     setBusy(true);
     try {
@@ -90,6 +101,66 @@ const BuildingCard: React.FC<Props> = ({
       onClose();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Não deu para construir');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const due = dueTasksOn(tasks, today);
+  const doneToday = due.filter((t) => {
+    const full = tasks.find((x) => x.id === t.id);
+    return full?.status === 'done' && full.lastCompletedDate === today;
+  }).length;
+  const missionsReady = due.length > 0 && doneToday >= due.length;
+  const matCost = repairMaterialCost(id, Math.max(1, level));
+  const savedRuin = (village.cracks || []).includes(id);
+  const canPay = !savedRuin || canAfford(materials, matCost);
+  const missPay = missingMaterials(materials, matCost);
+  const missPayText = MATERIALS.filter((m) => (missPay[m] || 0) > 0)
+    .map((m) => `${missPay[m]} ${MATERIAL_LABELS[m].toLowerCase()}`)
+    .join(', ');
+
+  const arrumarComMaterial = async () => {
+    if (!childUid || busy || (savedRuin && !canPay)) return;
+    playClick();
+    setBusy(true);
+    try {
+      if ((village.cracks || []).includes(id)) {
+        await repairBuilding(childUid, id);
+      }
+      dismissDevCrack(id);
+      window.dispatchEvent(new CustomEvent('miner-repaired', { detail: { lots: [id] } }));
+      toast.success('Arrumou');
+      onClose();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Não deu para arrumar');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const arrumarComMissoes = async () => {
+    if (!childUid || !missionsReady || busy) return;
+    playClick();
+    setBusy(true);
+    try {
+      const lots = visibleCracks(village.cracks);
+      const saved = village.cracks || [];
+      let gold = 0;
+      if (saved.length) {
+        try {
+          gold = await repairLot(childUid, addDays(today, -1));
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : '';
+          if (!msg.includes('já foi feito')) throw e;
+        }
+      }
+      lots.forEach(dismissDevCrack);
+      window.dispatchEvent(new CustomEvent('miner-repaired', { detail: { gold, lots } }));
+      toast.success(gold > 0 ? `Lote consertado: +${gold} gold` : 'Lote consertado');
+      onClose();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Não deu para arrumar');
     } finally {
       setBusy(false);
     }
@@ -117,22 +188,106 @@ const BuildingCard: React.FC<Props> = ({
     .map((cid) => COSMETIC_BY_ID[cid])
     .filter((c): c is CosmeticItem => Boolean(c));
 
+  if (cracked) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-obra-veil" onClick={onClose}>
+        <div className="mc-modal mc-pop rounded-lg w-full max-w-[560px] text-white" onClick={(e) => e.stopPropagation()}>
+          <div className="mn-obra-hero flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="mc-slot mn-obra-portrait p-1 shrink-0 flex items-center justify-center">
+                <RuinThumb src={buildingSprite(id, Math.max(1, level))} seed={id} size={88} className="w-full h-full" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold text-white leading-tight">{def.label}</h2>
+                <p className="mn-obra-lv mt-1">Em ruínas</p>
+              </div>
+            </div>
+            <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0 shrink-0" onClick={onClose} aria-label="Fechar">
+              <X />
+            </button>
+          </div>
+          <div className="p-4 space-y-4">
+            <p className="text-sm">O benefício desta obra está desligado.</p>
+
+            <section>
+              <p className="mc-lbl mb-1">Arrumar agora</p>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {MATERIALS.filter((m) => (matCost[m] || 0) > 0).map((m) => (
+                  <span key={m} className="mc-chip mc-slot px-2 py-1 flex items-center gap-1">
+                    <img src={MATERIAL_ICONS[m]} alt="" className="w-5 h-5 mc-pixel" />
+                    <span className="mc-num text-white">{matCost[m]}</span>
+                    <span className="mc-chip-l">{MATERIAL_LABELS[m]}</span>
+                  </span>
+                ))}
+              </div>
+              <button
+                type="button"
+                disabled={!canPay || busy}
+                className={`mc-btn w-full min-h-[48px] px-4 font-bold ${canPay ? 'mc-btn-green' : 'mc-btn-dark'}`}
+                onClick={() => void arrumarComMaterial()}
+              >
+                {busy ? 'Arrumando...' : 'Arrumar agora'}
+              </button>
+              {!canPay && missPayText ? (
+                <p className="text-sm mc-muted mt-1">Falta {missPayText}</p>
+              ) : null}
+            </section>
+
+            <section>
+              <p className="mc-lbl mb-1">Ou com as missões</p>
+              <p className="text-sm mb-2">
+                Termina as missões de hoje: reergue todas as ruínas e devolve metade do gold.
+              </p>
+              <button
+                type="button"
+                disabled={!missionsReady || busy}
+                className={`mc-btn w-full min-h-[48px] px-4 font-bold ${missionsReady ? 'mc-btn-green' : 'mc-btn-dark'}`}
+                onClick={() => void arrumarComMissoes()}
+              >
+                Arrumar com as missões
+              </button>
+              <p className="text-sm mc-muted mt-1">
+                {due.length === 0
+                  ? 'Sem missões hoje. Arruma com material.'
+                  : missionsReady
+                    ? 'Missões do dia feitas.'
+                    : `${doneToday}/${due.length} missões hoje`}
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const empty = level <= 0 && !sealed;
+  const portraitLv = Math.max(1, level);
+  const portraitClass = [
+    'mc-slot mn-obra-portrait p-1 shrink-0 flex items-center justify-center relative',
+    empty ? 'is-ghost' : 'mc-build',
+    id === 'fornalha' && level >= 1 ? 'is-fire' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-obra-veil" onClick={onClose}>
       <div
-        className="mc-modal rounded-lg w-full max-w-[560px] max-h-[96vh] overflow-y-auto text-white"
+        className="mc-modal mc-pop rounded-lg w-full max-w-[560px] max-h-[96vh] overflow-y-auto text-white"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-4 border-b-4 border-[#17130f] flex items-start justify-between gap-3">
+        <div className="mn-obra-hero flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="mc-slot w-24 h-24 p-1 shrink-0 flex items-center justify-center">
-              <img src={buildingSprite(id, Math.max(0, level))} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
+            <div className={portraitClass}>
+              <img
+                src={buildingSprite(id, portraitLv)}
+                alt=""
+                className="w-full h-full object-contain mc-pixel"
+                draggable={false}
+              />
             </div>
             <div className="min-w-0">
               <h2 className="text-xl font-bold text-white leading-tight">{def.label}</h2>
-              <p className="text-sm mc-muted">{def.labelEn}</p>
               <p className="mn-obra-lv mt-1">
-                {level <= 0 ? 'Ainda não construída' : atCap && maxLive <= 1 ? 'Pronta' : atCap ? `Nível ${level} · máxima` : `Nível ${level}`}
+                {sealed ? 'Em breve' : level <= 0 ? 'Ainda não construída' : atCap && maxLive <= 1 ? 'Pronta' : atCap ? `Nível ${level} · máxima` : `Nível ${level}`}
               </p>
               {maxLive >= 2 && (
                   <div className="mn-obra-stages" aria-label={`Nível ${level} de ${maxLive}`}>
@@ -167,12 +322,18 @@ const BuildingCard: React.FC<Props> = ({
         <div className="p-4 space-y-4">
           <section>
             <p className="mc-lbl mb-1">O que dá agora</p>
-            <p className="text-sm">{buildingEffectNow(id, level)}</p>
+            <p className="text-sm">
+              {id === 'arena' && level <= 0
+                ? 'O coliseu já está na vila. Os jogos ainda não abriram.'
+                : buildingEffectNow(id, level)}
+            </p>
           </section>
 
           <section>
-            <p className="mc-lbl mb-1">{level <= 0 ? 'Quando construir' : 'Próximo nível'}</p>
-            {atCap ? (
+            <p className="mc-lbl mb-1">{sealed ? 'Quando abre' : level <= 0 ? 'Quando construir' : 'Próximo nível'}</p>
+            {sealed ? (
+              <p className="text-sm">{lockLabel || (def.opensIn ? `Abre na ${def.opensIn}.` : 'Em breve.')}</p>
+            ) : atCap ? (
               <p className="text-sm">Nível máximo.</p>
             ) : (
               <div className="flex gap-3 items-start">
@@ -198,7 +359,7 @@ const BuildingCard: React.FC<Props> = ({
                   <button
                     type="button"
                     disabled={!info.ok || busy}
-                    className="mc-btn mc-btn-green w-full min-h-[48px] px-4 font-bold mt-3"
+                    className={`mc-btn w-full min-h-[48px] px-4 font-bold mt-3 ${info.ok ? 'mc-btn-green' : 'mc-btn-dark'}`}
                     onClick={() => void build()}
                   >
                     {busy ? 'Obra...' : btnLabel}
@@ -247,7 +408,7 @@ const BuildingCard: React.FC<Props> = ({
               <button
                 type="button"
                 disabled={level < 1}
-                className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
+                className={`mc-btn w-full min-h-[48px] font-bold ${level < 1 ? 'mc-btn-dark' : 'mc-btn-green'}`}
                 onClick={() => { playClick(); setInv((v) => !v); }}
               >
                 {level < 1 ? 'Inventário: construa o Baú' : inv ? 'Fechar inventário' : 'Ver meu inventário'}
@@ -366,11 +527,15 @@ const BuildingCard: React.FC<Props> = ({
             <p className="text-sm mc-muted">Campinho abre na Etapa 4. Não gaste material nisso ainda.</p>
           )}
 
+          {id === 'arena' && (
+            <p className="text-sm">A Arena ainda não abriu. Um dia você joga xadrez e Lig 4 com o pai aqui. O Olheiro já está de olho.</p>
+          )}
+
           {id === 'cofre' && (
             <button
               type="button"
               disabled={level < 1}
-              className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
+              className={`mc-btn w-full min-h-[48px] font-bold ${level < 1 ? 'mc-btn-dark' : 'mc-btn-green'}`}
               onClick={() => { playClick(); onOpenBank?.(); }}
             >
               {level < 1 ? 'Construa o Cofre para abrir' : 'Abrir o Cofrinho'}
@@ -381,7 +546,7 @@ const BuildingCard: React.FC<Props> = ({
             <button
               type="button"
               disabled={level < 1}
-              className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
+              className={`mc-btn w-full min-h-[48px] font-bold ${level < 1 ? 'mc-btn-dark' : 'mc-btn-green'}`}
               onClick={() => { playClick(); onOpenAgenda?.(); }}
             >
               {level < 1 ? 'Construa a Agenda para abrir' : 'Abrir a Agenda'}
@@ -393,7 +558,7 @@ const BuildingCard: React.FC<Props> = ({
               <button
                 type="button"
                 disabled={level < 1 || shopLocked}
-                className="mc-btn mc-btn-green w-full min-h-[48px] font-bold"
+                className={`mc-btn w-full min-h-[48px] font-bold ${level < 1 || shopLocked ? 'mc-btn-dark' : 'mc-btn-green'}`}
                 onClick={() => {
                   if (shopLocked) { toast.error('Em punição: Mercado fechado'); return; }
                   playClick();
@@ -406,8 +571,8 @@ const BuildingCard: React.FC<Props> = ({
             </>
           )}
 
-          <button type="button" className="w-full text-center text-sm underline mc-muted min-h-[44px]" onClick={() => { playClick(); onOpenWorkshop(); }}>
-            Ver todas as obras
+          <button type="button" className="mc-btn mc-btn-stone w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenWorkshop(); }}>
+            Oficina
           </button>
         </div>
       </div>

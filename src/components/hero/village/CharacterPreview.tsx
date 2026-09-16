@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { ISO_MINER, PET_SPRITE } from '../../../config/village';
 import type { VillageCharacter, VillageGear } from '../../../types/village';
-import { paintCharacterLook } from './drawCharacter';
+import { lookKey, paintCharacterLook } from './drawCharacter';
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -19,8 +19,9 @@ interface Props {
   className?: string;
 }
 
-const CharacterPreview: React.FC<Props> = ({ character, gear, size = 96, className = '' }) => {
+const CharacterPreview: React.FC<Props> = ({ character, size = 96, className = '' }) => {
   const ref = useRef<HTMLCanvasElement>(null);
+  const key = lookKey(character);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -44,7 +45,7 @@ const CharacterPreview: React.FC<Props> = ({ character, gear, size = 96, classNa
     return () => {
       cancelled = true;
     };
-  }, [character, gear]);
+  }, [character, key]);
 
   return (
     <canvas

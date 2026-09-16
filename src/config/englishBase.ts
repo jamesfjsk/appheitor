@@ -123,14 +123,14 @@ export const BUILDINGS: BuildingDef[] = [
     id: 'cerca',
     label: 'Cerca',
     labelEn: 'Fence',
-    description: 'Protege as tochas num dia ruim.',
+    description: 'Uma cerca simples. Protege as tochas num dia ruim.',
     effects: [
       'Uma vez por mês, um dia perdido não zera as tochas.',
       'A rachadura do conserto some sozinha depois de 1 dia.',
       'A penalidade por missão perdida nunca passa de 1 gold por dia.',
     ],
     effect: 'Uma vez por mês, um dia perdido não zera as tochas.',
-    icon: '/assets/village/buildings/cerca-1.png',
+    icon: '/assets/village/buildings/cerca-1.png?v=cerh3',
     costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
     requiresCore: false,
   },
@@ -182,6 +182,24 @@ export const BUILDINGS: BuildingDef[] = [
     requiresCore: true,
     liveMaxLevel: 0,
     opensIn: 'Etapa 4',
+  },
+  {
+    id: 'arena',
+    label: 'Arena',
+    labelEn: 'Arena',
+    description: 'O coliseu da Vila. Um dia você joga com o pai.',
+    effects: [
+      'O Olheiro cuida da Arena. Jogos com o pai: xadrez, Lig 4.',
+      'Melhor de 3 e recorde na Torre.',
+      'Troféu da Arena e partida na Placa.',
+    ],
+    effect: 'O Olheiro cuida da Arena. Jogos com o pai: xadrez, Lig 4.',
+    icon: '/assets/village/buildings/arena-1.png',
+    costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(2, 2, 2, 2)],
+    requiresCore: true,
+    liveMaxLevel: 0,
+    opensIn: 'Etapa 4B',
+    hideOnBaseMap: true,
   },
   {
     id: 'cofre',
@@ -255,14 +273,16 @@ export function buildingCost(id: BuildingId, targetLevel: number, multiplier = 1
 /** Ícone do lote: fantasma do n1 no nível 0 (cinza na UI), sprite próprio nos níveis 1-3. */
 export function buildingIcon(id: BuildingId, level: number): string {
   const n = level <= 0 ? 1 : Math.min(BUILDING_MAX_LEVEL, level);
-  return `/assets/village/buildings/${id}-${n}.png`;
+  const v = id === 'cerca' ? '?v=cerh3' : '';
+  return `/assets/village/buildings/${id}-${n}.png${v}`;
 }
 
 export const BUILDING_PLACA = '/assets/village/buildings/placa.png';
 
 export function buildingSprite(id: BuildingId, level: number): string {
   if (level <= 0) return BUILDING_PLACA;
-  return `/assets/village/buildings/${id}-${level}.png`;
+  const v = id === 'cerca' ? 'cerh3' : 'arena7';
+  return `/assets/village/buildings/${id}-${level}.png?v=${v}`;
 }
 
 /** Torre, Mesa e Campinho só aparecem com Fornalha e Baú no nível 1 ou mais */
@@ -322,6 +342,7 @@ export const INITIAL_BUILDINGS: Record<BuildingId, number> = {
   torre: 0,
   mesa: 0,
   campinho: 0,
+  arena: 0,
   cofre: 0,
   agenda: 0,
   mercado: 0,

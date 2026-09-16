@@ -14,6 +14,7 @@ import { BUILDINGS, MATERIALS, baseLevel, buildingCost, buildingOpensLater, canA
 import { DEFAULT_ECONOMY } from '../config/village';
 import { getSettings } from './settingsService';
 import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, buildXp, rewardFor } from '../config/englishRewards';
+import { cracksOf, isBroken, liveBuildingLevel, ruinUseError } from './village/repair';
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
 import { normalizedTokens } from './english/notePrecheck';
@@ -518,7 +519,11 @@ export async function completeContract(
   let out: CompleteResult | null = null;
 
   await runTransaction(db, async (tx) => {
-    const [planSnap, baseSnap] = await Promise.all([tx.get(pRef), tx.get(bRef)]);
+    const [planSnap, baseSnap, vSnap] = await Promise.all([
+      tx.get(pRef),
+      tx.get(bRef),
+      tx.get(doc(db, 'village', uid)),
+    ]);
     if (!planSnap.exists()) throw new Error('Plano do dia não encontrado.');
     const plan = fromPlanDoc(planSnap.id, planSnap.data());
     if (plan.status !== 'ready') throw new Error('O plano ainda está sendo gerado.');
@@ -528,8 +533,9 @@ export async function completeContract(
     if (contract.version !== version) throw new Error('Este contrato foi atualizado; abra o quadro de novo.');
     const base = baseSnap.exists() ? fromBaseDoc(uid, baseSnap.data()) : initialBaseDoc(uid, finishedAt);
 
+    const cracks = cracksOf(vSnap.data()?.cracks);
     const firstOfDay = !hasDone(plan);
-    const material = applyFurnaceBonus(clampMaterial(outcome.materialEarned), base.buildings.fornalha, firstOfDay);
+    const material = applyFurnaceBonus(clampMaterial(outcome.materialEarned), liveBuildingLevel(base.buildings, cracks, 'fornalha'), firstOfDay);
     const othersRewarded = plan.rewardedIds.filter((id) => plan.contracts[id]?.type !== 'note').length;
     const slotFree = contract.type === 'note' || othersRewarded < REWARDED_OTHER_SLOTS;
     const rewarded = material > 0 && !contract.retryUsed && slotFree;
@@ -594,6 +600,13 @@ export async function completeContract(
     await bumpChallenge(uid, 'english_contracts', 1);
   } catch (e) {
     console.warn('desafio english_contracts', e);
+  }
+  try {
+    const { bumpVillage, bumpFriend } = await import('./village/statsBump');
+    bumpVillage(uid, { contractsDone: 1 });
+    bumpFriend(uid, 'comerciante', 2);
+  } catch (e) {
+    console.warn('stats contrato', e);
   }
   return out;
 }
@@ -676,6 +689,8 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
     const base = snap.exists() ? fromBaseDoc(uid, snap.data()) : initialBaseDoc(uid, nowIso());
+    const vSnap = await tx.get(doc(db, 'village', uid));
+    if (isBroken(cracksOf(vSnap.data()?.cracks), buildingId)) throw ruinUseError(buildingId);
     const check = canBuild(base, buildingId, multiplier);
     if (check.later) throw new Error(/^(Precisa|Em breve)/.test(check.later) ? `${check.later}.` : `Abre na ${check.later}.`);
     if (!check.unlocked) {
@@ -702,6 +717,8 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
 
 /** Mesa n1: tema de amanhã (30 caracteres). Se o plano de amanhã já existe sem contrato concluído, regenera com o pedido. */
 export async function setThemeRequest(uid: string, text: string | null): Promise<void> {
+  const vSnap = await getDoc(doc(db, 'village', uid));
+  if (isBroken(cracksOf(vSnap.data()?.cracks), 'mesa')) throw ruinUseError('mesa');
   const value = (text ?? '').trim().slice(0, THEME_REQUEST_MAX);
   const themeRequest = value || null;
   await setDoc(baseRef(uid), { userId: uid, themeRequest, updatedAt: nowIso() }, { merge: true });

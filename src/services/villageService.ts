@@ -15,7 +15,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import type { Material } from '../types/english';
+import type { BuildingId, Material } from '../types/english';
 import type {
   EconomySettings,
   FatherNotice,
@@ -31,6 +31,8 @@ import type {
   SeasonStar,
   TrophyTier,
   VillagePlan,
+  DailyCheckinAnswers,
+  GameAchievement,
 } from '../types/village';
 import {
   CATALOG_VERSION,
@@ -52,13 +54,21 @@ import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from './villa
 import { chestAllowed, dailyChestContents } from './village/chest';
 import { canBuy, canCraft, priceOf, tradePreview } from './village/shop';
 import { dueCompletionsCount, dueTasksOn } from './village/schedule';
-import { canRepair, repairRefund } from './village/repair';
+import { applyMaterialRepair, canRepair, isBroken, liveBuildingLevel, repairRefund, ruinUseError } from './village/repair';
 import { capGold } from './village/caps';
-import { getTodayBrazil, nowBrazil } from '../utils/clock';
+import { getTodayBrazil, isoWeekOf, mondayOfIsoWeek, nowBrazil, addDays } from '../utils/clock';
 import { getSettings } from './settingsService';
 import { touchHealth } from './observability';
-import { getLegacyLevelFromXP, getLevelFromXP } from '../utils/levelSystem';
-import { roomForGameGold } from './goldTx';
+import { getLevelFromXP } from '../utils/levelSystem';
+import { roomForGameGold, listGoldTransactions } from './goldTx';
+import { weeklyStatement } from './village/bank';
+import { checkinXp } from './village/checkin';
+import { trophyOfWeek } from './village/season';
+import { currentOf, evaluateAchievements, seasonAchievementIds } from './village/achievements';
+import { friendTier, talkPointsToday } from './village/dialogue';
+import { levelGift } from './village/levels';
+import { GAME_ACHIEVEMENT_BY_ID } from '../data/achievements';
+import { NPC_QUESTS } from '../data/npcQuests';
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const str = (v: unknown, fallback = ''): string => (typeof v === 'string' ? v : fallback);
@@ -140,6 +150,23 @@ function parseTrophies(raw: unknown): Record<string, TrophyTier> {
   return out;
 }
 
+function parseNumMap(raw: unknown): Record<string, number> {
+  if (!isRecord(raw)) return {};
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    const n = Number(v);
+    if (Number.isFinite(n)) out[k] = n;
+  }
+  return out;
+}
+
+function parseStrMap(raw: unknown): Record<string, string> {
+  if (!isRecord(raw)) return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(raw)) if (typeof v === 'string') out[k] = v;
+  return out;
+}
+
 function parsePlan(raw: unknown): VillagePlan {
   if (!isRecord(raw)) return { date: '', order: [], focusTaskId: null };
   return {
@@ -209,6 +236,9 @@ export function fromVillageDoc(uid: string, data: Record<string, unknown>): Vill
     trophies: parseTrophies(data.trophies),
     plan: parsePlan(data.plan),
     newItems: strArray(data.newItems),
+    stats: parseNumMap(data.stats),
+    achievementsUnlocked: parseStrMap(data.achievementsUnlocked),
+    newAchievements: strArray(data.newAchievements),
   };
 }
 
@@ -316,6 +346,7 @@ export async function buyCosmetic(uid: string, itemId: string): Promise<void> {
       ...(mSnap.exists() ? (mSnap.data() as Partial<ModuleSettings>) : {}),
     };
     if (!settings.shopEnabled || modules.shop === false) throw new Error('A loja da Vila está desligada');
+    if (isBroken(village.cracks, 'mercado')) throw ruinUseError('mercado');
     const gold = Number(pSnap.data()?.availableGold) || 0;
     const minerLevel = getLevelFromXP(Number(pSnap.data()?.totalXP) || 0);
     const check = canBuy(village, gold, item, settings, minerLevel);
@@ -356,6 +387,8 @@ export async function buyCosmetic(uid: string, itemId: string): Promise<void> {
       createdAt: serverTimestamp(),
     }));
   });
+  void applyVillageStats(uid, { shopBuys: 1 });
+  void talkToNpc(uid, 'comerciante', getTodayBrazil(), 2);
 }
 
 export async function craftGear(uid: string, gearId: string): Promise<void> {
@@ -366,6 +399,7 @@ export async function craftGear(uid: string, gearId: string): Promise<void> {
     const bSnap = await tx.get(baseRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    if (isBroken(village.cracks, 'fornalha')) throw ruinUseError('fornalha');
     const current = village.gear[def.slot];
     const minerLevel = getLevelFromXP(Number((await tx.get(progressRef(uid))).data()?.totalXP) || 0);
     const check = canCraft(base.materials, village.rare, gearId, current, minerLevel);
@@ -390,14 +424,19 @@ export async function craftGear(uid: string, gearId: string): Promise<void> {
     if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
     else tx.update(baseRef(uid), stripUndefined({ materials, updatedAt: nowIso() }));
   });
+  void applyVillageStats(uid, { craftsDone: 1 });
+  void talkToNpc(uid, 'ferreiro', getTodayBrazil(), 2);
 }
 
 export async function tradeMaterials(uid: string, from: Material, to: Material): Promise<void> {
   const preview = tradePreview(from, to);
   if (!preview.ok) throw new Error('Escolha dois materiais diferentes');
   await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
     const bSnap = await tx.get(baseRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    if (isBroken(village.cracks, 'fornalha')) throw ruinUseError('fornalha');
     if ((base.buildings.fornalha || 0) < 2) throw new Error('A Fornalha nível 2 libera a Fundição');
     if ((base.materials[from] ?? 0) < preview.fromQty) throw new Error('Faltam materiais para a troca');
     const materials = { ...base.materials };
@@ -406,6 +445,8 @@ export async function tradeMaterials(uid: string, from: Material, to: Material):
     if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
     else tx.update(baseRef(uid), stripUndefined({ materials, updatedAt: nowIso() }));
   });
+  void applyVillageStats(uid, { tradesDone: 1 });
+  void talkToNpc(uid, 'ferreiro', getTodayBrazil(), 2);
 }
 
 export async function openDailyChest(uid: string, date: string): Promise<ReturnType<typeof dailyChestContents>> {
@@ -448,8 +489,9 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
       if (gate.reason === 'min_due') throw new Error('Hoje não tem missões suficientes');
       throw new Error(`Faltam ${due - done} missões`);
     }
+    if (isBroken(village.cracks, 'bau')) throw ruinUseError('bau');
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
-    contents = dailyChestContents(uid, today, village, economy, base.materials, base.buildings.bau || 0);
+    contents = dailyChestContents(uid, today, village, economy, base.materials, liveBuildingLevel(base.buildings, village.cracks, 'bau'));
     const cut = capGold(contents.gold, goldRoom.room);
     contents = { ...contents, gold: cut.paid };
     const gold = Number(pSnap.data()?.availableGold) || 0;
@@ -495,6 +537,7 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
     }
   });
   void touchHealth(uid, 'lastChestDate', today);
+  void applyVillageStats(uid, { chestsOpened: 1 });
   return contents;
 }
 
@@ -514,7 +557,15 @@ export async function grantLevelGift(
     const key = levelGiftClaimKey(village.season, level);
     if (hasClaim(village, key)) return;
     granted = true;
+    const gift = levelGift(level, village.season);
+    const owned = [...village.owned];
+    const newItems = [...village.newItems];
+    if (gift.cosmeticId && !owned.includes(gift.cosmeticId)) {
+      owned.push(gift.cosmeticId);
+      if (cosmeticHasSprite(gift.cosmeticId) && !newItems.includes(gift.cosmeticId)) newItems.push(gift.cosmeticId);
+    }
     const claimed = { ...village.claimed, [key]: nowIso() };
+    if (gift.cosmeticId) claimed[claimKey('milestone', `${village.season}:${level}`)] = nowIso();
     const rareKind = rareGiftForLevel(level);
     const rare: VillageRare = {
       diamante: village.rare.diamante + (rareKind === 'diamante' ? 1 : 0),
@@ -522,8 +573,8 @@ export async function grantLevelGift(
     };
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
     const materials = { ...base.materials, [material]: base.materials[material] + 1 };
-    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, updatedAt: nowIso() }));
-    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, updatedAt: nowIso() }));
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, owned, newItems, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, rare, owned, newItems, updatedAt: nowIso() }));
     if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
     else tx.update(baseRef(uid), { [`materials.${material}`]: increment(1), updatedAt: nowIso() });
   });
@@ -604,18 +655,11 @@ export async function deleteNotice(id: string): Promise<void> {
   await deleteDoc(doc(db, 'notices', id));
 }
 
-export async function startNewSeason(uid: string, adminUid: string): Promise<void> {
+export async function closeSeason(uid: string, adminUid: string): Promise<void> {
+  const today = getTodayBrazil();
   const achSnap = await getDocs(query(collection(db, 'achievements'), where('ownerId', '==', uid)));
   const packTitles = new Set(MINER_MISSIONS_ACHIEVEMENTS.map((a) => a.title));
-  const packAlreadyActive = achSnap.docs.some((d) => {
-    const data = d.data();
-    return data.isActive !== false && packTitles.has(String(data.title || ''));
-  });
-  if (packAlreadyActive) throw new Error('A fase Miner Missions já está ativa.');
-  const activeTitles = achSnap.docs
-    .filter((d) => d.data().isActive !== false)
-    .map((d) => String(d.data().title || ''))
-    .filter(Boolean);
+  const packDocs = achSnap.docs.filter((d) => packTitles.has(String(d.data().title || '')));
 
   await runTransaction(db, async (tx) => {
     const pSnap = await tx.get(progressRef(uid));
@@ -623,14 +667,19 @@ export async function startNewSeason(uid: string, adminUid: string): Promise<voi
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const progress = pSnap.data() || {};
     const totalXP = Number(progress.totalXP) || 0;
+    const gold = Number(progress.availableGold) || 0;
+    const level = getLevelFromXP(totalXP);
+    const endedSeason = village.season > 0 ? village.season : 1;
     tx.set(doc(collection(db, 'progressSnapshots')), {
       userId: uid,
       totalXP,
+      availableGold: gold,
       streak: progress.streak || 0,
-      level: getLegacyLevelFromXP(totalXP),
-      achievements: activeTitles,
+      level,
+      season: endedSeason,
       createdAt: serverTimestamp(),
-      reason: 'Nova fase: Miner Missions',
+      reason: 'Fechar temporada',
+      createdBy: adminUid,
     });
     if (pSnap.exists()) {
       tx.update(progressRef(uid), { totalXP: 0, updatedAt: serverTimestamp() });
@@ -638,30 +687,31 @@ export async function startNewSeason(uid: string, adminUid: string): Promise<voi
     tx.set(doc(collection(db, 'xpAdjustments')), {
       userId: uid,
       amount: -totalXP,
-      reason: 'Nova fase: Miner Missions',
+      reason: 'Fechar temporada',
       createdBy: adminUid,
       createdAt: serverTimestamp(),
     });
-    const nextSeason = village.season > 0 ? village.season + 1 : 1;
-    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, season: nextSeason, updatedAt: nowIso() }));
-    else tx.update(villageRef(uid), { season: nextSeason, updatedAt: nowIso() });
+    const stars = [...village.stars, { season: endedSeason, level, endedOn: today }];
+    const reset = new Set(seasonAchievementIds());
+    const achievementsUnlocked = { ...village.achievementsUnlocked };
+    for (const id of reset) delete achievementsUnlocked[id];
+    const stats = { ...village.stats, seasonsDone: (village.stats.seasonsDone || 0) + 1, level: 0 };
+    const nextSeason = endedSeason + 1;
+    const payload = { season: nextSeason, stars, achievementsUnlocked, stats, updatedAt: nowIso() };
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, ...payload }));
+    else tx.update(villageRef(uid), stripUndefined(payload));
   });
 
-  const batch = writeBatch(db);
-  for (const d of achSnap.docs) {
-    batch.update(d.ref, { isActive: false, updatedAt: nowIso() });
+  if (packDocs.length) {
+    const batch = writeBatch(db);
+    for (const d of packDocs) batch.update(d.ref, { isActive: false, updatedAt: nowIso() });
+    await batch.commit();
   }
-  for (const a of MINER_MISSIONS_ACHIEVEMENTS) {
-    const ref = doc(collection(db, 'achievements'));
-    batch.set(ref, {
-      ...a,
-      ownerId: uid,
-      createdBy: adminUid,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-  }
-  await batch.commit();
+}
+
+/** @deprecated use closeSeason */
+export async function startNewSeason(uid: string, adminUid: string): Promise<void> {
+  return closeSeason(uid, adminUid);
 }
 
 export async function listDayCompletions(uid: string, date: string): Promise<Array<{ taskId: string; taskTitle: string; date: string }>> {
@@ -711,6 +761,7 @@ export async function openStreakChest(uid: string): Promise<{ gold: number; diam
     const vSnap = await tx.get(villageRef(uid));
     const pSnap = await tx.get(progressRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    if (isBroken(village.cracks, 'bau')) throw ruinUseError('bau');
     const start = village.fullDaysStart || getTodayBrazil();
     const tiers = [7, 14, 21] as const;
     const n = tiers.find((t) => village.fullDays >= t && !hasClaim(village, claimKey('streak', t, start))) || 0;
@@ -723,18 +774,19 @@ export async function openStreakChest(uid: string): Promise<{ gold: number; diam
     const after = gold + cut.paid;
     const claimed = { ...village.claimed, [key]: nowIso() };
     const rare = { ...village.rare, diamante: village.rare.diamante + 1 };
-    const trophy = n >= 21 ? 'trophy_ouro' : n >= 14 ? 'trophy_prata' : 'trophy_bronze';
-    const extra = ['diamante', trophy];
+    const extra = ['diamante'];
     const owned = [...(village.owned || [])];
     if (n >= 21) {
-      const gift = COSMETICS.find((c) => !c.free && !owned.includes(c.id) && cosmeticHasSprite(c.id));
-      if (gift && !extra.includes(gift.id)) {
-        extra.push(gift.id);
-        owned.push(gift.id);
+      const gift = COSMETICS.find((c) => !c.free && !owned.includes(c.id) && cosmeticHasSprite(c.id) && (c.basePrice || 0) === 0);
+      const pick = gift || COSMETICS.find((c) => c.id.startsWith('milestone') && !owned.includes(c.id));
+      if (pick && !extra.includes(pick.id)) {
+        extra.push(pick.id);
+        owned.push(pick.id);
       }
     }
     const newItems = [...village.newItems];
     for (const id of extra) {
+      if (id.startsWith('trophy_')) continue;
       if (!newItems.includes(id)) newItems.push(id);
     }
     if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, rare, newItems, owned, updatedAt: nowIso() }));
@@ -776,6 +828,7 @@ export async function sellMaterials(uid: string, material: Material, lots: numbe
     const pSnap = await tx.get(progressRef(uid));
     const bSnap = await tx.get(baseRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    if (isBroken(village.cracks, 'mercado')) throw ruinUseError('mercado');
     let used = 0;
     for (let i = 1; i <= (buy.dailyCap || 2); i += 1) {
       if (hasClaim(village, claimKey('merchant', today, i))) used += 1;
@@ -884,6 +937,22 @@ export async function repairLot(uid: string, date: string): Promise<number> {
   return refunded;
 }
 
+/** Arruma só esta obra pagando material. Sem reembolso de gold. */
+export async function repairBuilding(uid: string, id: BuildingId): Promise<void> {
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const bSnap = await tx.get(baseRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    const level = Math.max(1, base.buildings?.[id] || 1);
+    const next = applyMaterialRepair(village.cracks || [], id, base.materials, level);
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, cracks: next.cracks, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ cracks: next.cracks, updatedAt: nowIso() }));
+    if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials: next.materials, updatedAt: nowIso() }));
+    else tx.update(baseRef(uid), stripUndefined({ materials: next.materials, updatedAt: nowIso() }));
+  });
+}
+
 export async function seeItems(uid: string, ids?: string[]): Promise<void> {
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(villageRef(uid));
@@ -902,6 +971,7 @@ export async function burnWood(uid: string): Promise<void> {
     const bSnap = await tx.get(baseRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    if (isBroken(village.cracks, 'fornalha')) throw ruinUseError('fornalha');
     if ((base.buildings.fornalha || 0) < 3) throw new Error('A Queima abre na Fornalha nível 3');
     if (hasClaim(village, key)) throw new Error('A queima de hoje já foi feita');
     if ((base.materials.madeira || 0) < 5) throw new Error('Faltam 5 madeira');
@@ -911,5 +981,257 @@ export async function burnWood(uid: string): Promise<void> {
     else tx.update(villageRef(uid), { claimed, updatedAt: nowIso() });
     if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
     else tx.update(baseRef(uid), { materials, updatedAt: nowIso() });
+  });
+}
+
+export async function savePlan(uid: string, plan: VillagePlan): Promise<void> {
+  const now = nowBrazil();
+  if (now.hour >= 12) throw new Error('O plano do turno fecha ao meio-dia');
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(villageRef(uid));
+    const village = snap.exists() ? fromVillageDoc(uid, snap.data()) : initialVillageDoc(uid, nowIso());
+    if (village.plan.date === plan.date && village.plan.order.length) {
+      throw new Error('O plano de hoje já foi gravado');
+    }
+    const next = {
+      date: plan.date,
+      order: plan.order.slice(0, 40),
+      focusTaskId: plan.focusTaskId,
+    };
+    const stats = { ...village.stats, plansSaved: (village.stats.plansSaved || 0) + 1 };
+    if (!snap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, plan: next, stats, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ plan: next, stats, updatedAt: nowIso() }));
+  });
+  void applyVillageStats(uid, {});
+}
+
+export async function submitCheckin(uid: string, date: string, answers: DailyCheckinAnswers): Promise<number> {
+  const xp = checkinXp(answers);
+  if (xp <= 0) throw new Error('Escreva o que você quer amanhã, em pelo menos três palavras');
+  await runTransaction(db, async (tx) => {
+    const dailyRef = doc(db, 'dailyProgress', `${uid}_${date}`);
+    const dailySnap = await tx.get(dailyRef);
+    const existing = dailySnap.exists() ? dailySnap.data().checkin : null;
+    if (existing) throw new Error('O dia já foi fechado');
+    const pSnap = await tx.get(progressRef(uid));
+    const vSnap = await tx.get(villageRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    const checkin = {
+      water: Boolean(answers.water),
+      stretch: Boolean(answers.stretch),
+      kindness: Boolean(answers.kindness),
+      screen: Boolean(answers.screen),
+      tomorrow: answers.tomorrow.trim(),
+      at: nowIso(),
+    };
+    tx.set(dailyRef, {
+      userId: uid,
+      date,
+      checkin,
+      updatedAt: serverTimestamp(),
+      createdAt: dailySnap.exists() ? dailySnap.data().createdAt ?? serverTimestamp() : serverTimestamp(),
+    }, { merge: true });
+    if (pSnap.exists()) tx.update(progressRef(uid), { totalXP: increment(xp), updatedAt: serverTimestamp() });
+    const stats = { ...village.stats, checkins: (village.stats.checkins || 0) + 1 };
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, stats, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ stats, updatedAt: nowIso() }));
+  });
+  void applyVillageStats(uid, {});
+  return xp;
+}
+
+export async function claimTrophy(uid: string, week: string): Promise<TrophyTier> {
+  const now = nowBrazil();
+  const sat = addDays(mondayOfIsoWeek(week), 5);
+  if (now.date < sat || (now.date === sat && now.hour < 18)) {
+    throw new Error('O troféu abre sábado à noite');
+  }
+  const txs = await listGoldTransactions(uid, 800);
+  const thisW = weeklyStatement(txs, week);
+  const lastW = weeklyStatement(txs, isoWeekOf(addDays(mondayOfIsoWeek(week), -1)));
+  const villagePreview = await getVillage(uid);
+  const fullDays = Number(villagePreview.records.fullDays || villagePreview.fullDays || 0);
+  const tier = trophyOfWeek(
+    { earned: thisW.earned, fullDays },
+    { earned: lastW.earned, fullDays: 0 }
+  );
+  if (!tier) throw new Error('Esta semana ainda não rendeu troféu');
+  const key = claimKey('trophy', week);
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    if (hasClaim(village, key)) throw new Error('Troféu já reivindicado');
+    const claimed = { ...village.claimed, [key]: nowIso() };
+    const trophies = { ...village.trophies, [week]: tier };
+    const rare = { ...village.rare };
+    if (tier === 'ouro') rare.esmeralda += 1;
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, trophies, rare, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, trophies, rare, updatedAt: nowIso() }));
+  });
+  return tier;
+}
+
+export async function applyVillageStats(
+  uid: string,
+  deltas: Record<string, number>,
+  extra?: { level?: number; buildings?: Record<string, number>; npcTiers?: Record<string, number>; owned?: string[] }
+): Promise<string[]> {
+  const unlocked: string[] = [];
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const pSnap = await tx.get(progressRef(uid));
+    const bSnap = await tx.get(baseRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    const stats = { ...village.stats };
+    for (const [k, v] of Object.entries(deltas)) {
+      if (!v) continue;
+      stats[k] = Math.max(0, (stats[k] || 0) + v);
+    }
+    const level = extra?.level ?? getLevelFromXP(Number(pSnap.data()?.totalXP) || 0);
+    const buildings = extra?.buildings;
+    const npcTiers = extra?.npcTiers ?? Object.fromEntries(
+      Object.entries(village.npcs).map(([id, n]) => [id, n.tier])
+    );
+    const fresh = evaluateAchievements(stats, village.achievementsUnlocked, {
+      level,
+      buildings,
+      gear: village.gear,
+      npcTiers,
+      owned: extra?.owned ?? village.owned,
+    });
+    const achievementsUnlocked = { ...village.achievementsUnlocked };
+    const newAchievements = [...village.newAchievements];
+    const claimed = { ...village.claimed };
+    const rare = { ...village.rare };
+    const owned = [...village.owned];
+    let xpGain = 0;
+    const mats: Record<string, number> = {};
+    for (const ach of fresh) {
+      const ck = claimKey('ach', ach.id);
+      if (claimed[ck]) continue;
+      claimed[ck] = nowIso();
+      achievementsUnlocked[ach.id] = getTodayBrazil();
+      if (!newAchievements.includes(ach.id)) newAchievements.push(ach.id);
+      unlocked.push(ach.id);
+      const def = GAME_ACHIEVEMENT_BY_ID[ach.id] ?? ach;
+      xpGain += def.reward.xp || 0;
+      if (def.reward.material) mats.madeira = (mats.madeira || 0) + def.reward.material;
+      if (def.reward.rare === 'esmeralda') rare.esmeralda += 1;
+      if (def.reward.rare === 'diamante') rare.diamante += 1;
+      if (def.reward.cosmetic && !owned.includes(def.reward.cosmetic)) owned.push(def.reward.cosmetic);
+    }
+    let npcs = village.npcs;
+    const bag = { stats, level, buildings, gear: village.gear, npcTiers, owned };
+    const dummy = (stat: string): GameAchievement => ({
+      id: '_', category: 'amizade', tier: 'bronze', title: '', description: '', icon: '', stat, target: 1, reward: { xp: 0 },
+    });
+    for (const npc of (['sabio', 'comerciante', 'ferreiro', 'olheiro'] as NpcId[])) {
+      const state = npcs[npc];
+      const q = NPC_QUESTS[npc][state.quest.chapter];
+      if (!q) continue;
+      if (currentOf(dummy(q.stat), bag) < q.target) continue;
+      const points = state.points + 5;
+      npcs = {
+        ...npcs,
+        [npc]: {
+          ...state,
+          points,
+          tier: friendTier(points),
+          quest: { chapter: Math.min(5, state.quest.chapter + 1), progress: 0, doneAt: getTodayBrazil() },
+        },
+      };
+      xpGain += 10;
+    }
+    if (!vSnap.exists()) {
+      tx.set(villageRef(uid), stripUndefined({ ...village, stats, achievementsUnlocked, newAchievements, claimed, rare, owned, npcs, updatedAt: nowIso() }));
+    } else {
+      tx.update(villageRef(uid), stripUndefined({ stats, achievementsUnlocked, newAchievements, claimed, rare, owned, npcs, updatedAt: nowIso() }));
+    }
+    if (pSnap.exists() && xpGain > 0) {
+      tx.update(progressRef(uid), { totalXP: increment(xpGain), updatedAt: serverTimestamp() });
+    }
+    if (bSnap.exists() && mats.madeira) {
+      tx.update(baseRef(uid), { 'materials.madeira': increment(mats.madeira), updatedAt: nowIso() });
+    }
+  });
+  return unlocked;
+}
+
+export async function seeAchievements(uid: string): Promise<void> {
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(villageRef(uid));
+    const village = snap.exists() ? fromVillageDoc(uid, snap.data()) : initialVillageDoc(uid, nowIso());
+    if (!village.newAchievements.length) return;
+    if (!snap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, newAchievements: [], updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), { newAchievements: [], updatedAt: nowIso() });
+  });
+}
+
+export async function talkToNpc(uid: string, npc: NpcId, date: string, domainBonus = 0, seenId?: string): Promise<{ points: number; tier: number; leveled: boolean }> {
+  let out = { points: 0, tier: 0, leveled: false };
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    const state = village.npcs[npc];
+    const first = state.lastTalkDate !== date;
+    const already = first ? 0 : Number((village.stats[`talks_${npc}_${date}`] || 0));
+    const add = talkPointsToday(already, first, domainBonus) - already;
+    const points = state.points + add;
+    const tier = friendTier(points);
+    const leveled = tier > state.tier;
+    const seen = seenId && !state.seen.includes(seenId) ? [...state.seen, seenId].slice(-80) : state.seen;
+    const npcs = {
+      ...village.npcs,
+      [npc]: {
+        ...state,
+        points,
+        tier,
+        lastTalkDate: date,
+        seen,
+      },
+    };
+    const stats = {
+      ...village.stats,
+      npcTalks: (village.stats.npcTalks || 0) + (first ? 1 : 0),
+      [`talks_${npc}_${date}`]: already + add,
+    };
+    const rare = { ...village.rare };
+    const owned = [...village.owned];
+    const claimed = { ...village.claimed };
+    if (leveled && (tier === 3 || tier === 5)) {
+      const ck = claimKey('friend', `${npc}:${tier}`);
+      if (!claimed[ck]) {
+        claimed[ck] = nowIso();
+        if (tier === 5) rare.diamante += 1;
+        else rare.esmeralda += 1;
+      }
+    }
+    out = { points, tier, leveled };
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, npcs, stats, rare, owned, claimed, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ npcs, stats, rare, owned, claimed, updatedAt: nowIso() }));
+  });
+  void applyVillageStats(uid, {}).catch(() => undefined);
+  return out;
+}
+
+export async function completeNpcQuest(uid: string, npc: NpcId): Promise<void> {
+  await runTransaction(db, async (tx) => {
+    const vSnap = await tx.get(villageRef(uid));
+    const pSnap = await tx.get(progressRef(uid));
+    const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
+    const state = village.npcs[npc];
+    const nextChapter = Math.min(5, state.quest.chapter + 1);
+    const npcs = {
+      ...village.npcs,
+      [npc]: {
+        ...state,
+        points: state.points + 5,
+        tier: friendTier(state.points + 5),
+        quest: { chapter: nextChapter, progress: 0, doneAt: getTodayBrazil() },
+      },
+    };
+    if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, npcs, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ npcs, updatedAt: nowIso() }));
+    if (pSnap.exists()) tx.update(progressRef(uid), { totalXP: increment(10), updatedAt: serverTimestamp() });
   });
 }

@@ -59,10 +59,10 @@ export const ITEMS: Item[] = [
     slot: c.slot as ItemSlot,
     icon: cosmeticIcon(c.id, c.slot),
     rarity: cosmeticRarity(c.id, c.premium, c.slot),
-    description: c.free ? 'Peça inicial do minerador.' : `Custa ${c.basePrice} gold.`,
-    price: c.free ? undefined : c.basePrice,
+    description: c.free ? 'Peça inicial do minerador.' : c.id.startsWith('milestone') || c.id === 'hat_mestre_obras' || c.id === 'cape_vila' ? 'Peça de marco. Não se compra.' : `Custa ${c.basePrice} gold.`,
+    price: c.free || c.id.startsWith('milestone') || c.id === 'hat_mestre_obras' || c.id === 'cape_vila' ? undefined : c.basePrice,
     minLevel: c.minLevel,
-    source: c.free ? 'gratis' : 'loja',
+    source: c.free ? 'gratis' : (c.id.startsWith('milestone') || c.id === 'hat_mestre_obras' || c.id === 'cape_vila' ? 'marco' : 'loja'),
   })),
   ...GEAR.map((g): Item => ({
     id: g.id,

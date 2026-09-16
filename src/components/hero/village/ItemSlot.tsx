@@ -1,6 +1,8 @@
 import React from 'react';
 import type { Item, ItemState } from '../../../types/items';
 import { itemFrame } from '../../../config/items';
+import { cosmeticSwatchHex } from '../../../config/village';
+import GarmentIcon from './GarmentIcon';
 
 const STATE_LABEL: Record<ItemState, string> = {
   bloqueado: 'Bloqueado',
@@ -10,6 +12,17 @@ const STATE_LABEL: Record<ItemState, string> = {
   novo: 'Novo',
   em_breve: 'Em breve',
 };
+
+function thumb(item: Item): React.ReactNode {
+  if (item.slot === 'shirt' || item.slot === 'pants') {
+    return <GarmentIcon kind={item.slot} hex={cosmeticSwatchHex(item.id) || undefined} />;
+  }
+  const hex = item.kind === 'cosmetic' ? cosmeticSwatchHex(item.id) : null;
+  if (hex && item.slot !== 'cape') {
+    return <span className="mn-item-swatch" style={{ background: hex }} />;
+  }
+  return <img src={item.icon} alt="" className="w-8 h-8 mc-pixel" draggable={false} onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} />;
+}
 
 const ItemSlot: React.FC<{
   item: Item;
@@ -28,7 +41,7 @@ const ItemSlot: React.FC<{
       onClick={onClick}
       title={item.description}
     >
-      <img src={item.icon} alt="" className="w-8 h-8 mc-pixel" draggable={false} onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} />
+      {thumb(item)}
       <span className="text-[10px] leading-tight truncate w-full">{item.name}</span>
       {typeof qty === 'number' && (
         <span className="mc-num text-white" style={{ fontSize: 12 }}>{qty}</span>

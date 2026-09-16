@@ -392,6 +392,15 @@ export interface PunishmentTaskCompletion {
   taskId: string; // ID of the task that was completed
   taskTitle: string; // Title of the task for quick reference
 }
+export interface DailyCheckin {
+  water: boolean;
+  stretch: boolean;
+  kindness: boolean;
+  screen: boolean;
+  tomorrow: string;
+  at: string;
+}
+
 export interface DailyProgress {
   userId: string;
   date: string; // YYYY-MM-DD format
@@ -404,4 +413,7 @@ export interface DailyProgress {
   summaryProcessed: boolean;
   createdAt: Date;
   updatedAt: Date;
+  checkin?: DailyCheckin | null;
+  repaired?: boolean;
+  helmetUsed?: boolean;
 }

@@ -1,31 +1,33 @@
 // ========================================
-// A Base: quadro do dia com os 5 contratos (ícone c_*, tema, material, chip premiado
-// ou só material, "Recado: obrigatório", resultado e "Refazer só por material").
+// Mina: quadro do dia com os contratos (jogo vivo da mina).
 // ========================================
 
 import React, { useState } from 'react';
 import type { BaseDoc, Contract, DailyPlan } from '../../../../types/english';
 import { CONTRACT_ICONS, CONTRACT_LABELS, MATERIAL_ICONS, MATERIAL_LABELS } from '../../../../config/englishBase';
 import { REWARDED_OTHER_SLOTS } from '../../../../config/englishRewards';
+import { visibleCracks } from '../../../../config/village';
+import { useVillage } from '../../../../contexts/VillageContext';
 
 interface Props {
   plan: DailyPlan;
   base: BaseDoc;
   onOpen: (contractId: string) => void;
   onRedo: (contractId: string) => Promise<void>;
-  onBack: () => void;
+  onGoVillage?: () => void;
 }
 
 const canRedo = (c: Contract): boolean =>
   c.status === 'done' && c.result !== null && c.result.materialEarned === 0 && !c.retryUsed && (c.type === 'merchant' || c.type === 'letter');
 
-const ContractBoard: React.FC<Props> = ({ plan, base, onOpen, onRedo, onBack }) => {
+const ContractBoard: React.FC<Props> = ({ plan, base, onOpen, onRedo, onGoVillage }) => {
   const [redoing, setRedoing] = useState<string | null>(null);
+  const { village } = useVillage();
 
   const otherRewarded = plan.rewardedIds.filter((id) => plan.contracts[id]?.type !== 'note').length;
   const slotsLeft = Math.max(0, REWARDED_OTHER_SLOTS - otherRewarded);
   const doneCount = plan.order.filter((id) => plan.contracts[id]?.status === 'done').length;
-  const furnaceBonus = doneCount === 0 && base.buildings.fornalha >= 1;
+  const furnaceBonus = doneCount === 0 && base.buildings.fornalha >= 1 && !visibleCracks(village.cracks).includes('fornalha');
 
   /** Premiado: Recado sempre; os outros enquanto houver vaga e não for refazimento */
   const willReward = (c: Contract): boolean => {
@@ -45,8 +47,7 @@ const ContractBoard: React.FC<Props> = ({ plan, base, onOpen, onRedo, onBack }) 
 
   return (
     <div data-testid="contract-board">
-      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-        <button onClick={onBack} className="mc-btn mc-btn-stone px-4 py-2 text-sm font-bold">Mapa</button>
+      <div className="flex items-center justify-end gap-2 mb-3 flex-wrap">
         <div className="text-right">
           <p className="mc-font text-[10px] text-white">{doneCount}/{plan.order.length} <span className="mc-muted">feitos hoje</span></p>
           <p className="text-[11px] mc-muted">Vagas com XP e gold: Recado + {slotsLeft} de {REWARDED_OTHER_SLOTS}</p>
@@ -114,6 +115,17 @@ const ContractBoard: React.FC<Props> = ({ plan, base, onOpen, onRedo, onBack }) 
           );
         })}
       </div>
+
+      {doneCount >= plan.order.length && plan.order.length > 0 && (
+        <div className="mt-4 mc-card p-3 text-center">
+          <p className="text-sm text-white/90">Os materiais estão na Vila. Toque numa obra para melhorar.</p>
+          {onGoVillage && (
+            <button type="button" onClick={onGoVillage} className="mc-btn mc-btn-stone mt-3 px-4 py-2 text-sm font-bold">
+              Ir para a Vila
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };

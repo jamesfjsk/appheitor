@@ -11,6 +11,7 @@ import { DailyQuiz as DailyQuizDoc } from '../../types';
 import { addDays, completeDailyQuiz, ensureDailyQuiz, quizRewards, saveReflection, subscribeDailyQuiz } from '../../services/dailyQuizService';
 import { isQuizSnoozed, snoozeQuiz } from '../../services/aiQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
+import { visibleCracks } from '../../config/village';
 
 const BOOK = '/assets/english/ui/book.webp';
 const STAR = '/assets/english/ui/star.webp';
@@ -28,12 +29,13 @@ const QUIZ_DONE_KEY = (uid: string, date: string) => `quiz_completed_${uid}_${da
 const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const { childUid } = useAuth();
   const { progress } = useData();
-  const { economy } = useVillage();
+  const { economy, village, buildings } = useVillage();
   const { playTaskComplete, playLevelUp, playError, playClick } = useSound();
 
   const today = getTodayBrazil();
   const enabled = progress.quizEnabled ?? true;
   const required = progress.quizRequired ?? false;
+  const mesaDown = (buildings.mesa || 0) >= 1 && visibleCracks(village.cracks).includes('mesa');
   const count = progress.quizQuestionCount || DAILY_QUIZ_QUESTIONS;
 
   const [quiz, setQuiz] = useState<DailyQuizDoc | null>(null);
@@ -90,14 +92,15 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   useEffect(() => {
     if (!loaded || !childUid || !enabled || !quiz) return;
     if (quiz.completed) return;
+    if (mesaDown) return;
     if (required) return;
     if (!required && isQuizSnoozed('daily', childUid, today)) return;
     setOpen(true);
-  }, [loaded, childUid, enabled, quiz, required, today]);
+  }, [loaded, childUid, enabled, quiz, required, today, mesaDown]);
 
   useEffect(() => {
-    if (openRequested) setOpen(true);
-  }, [openRequested]);
+    if (openRequested && !mesaDown) setOpen(true);
+  }, [openRequested, mesaDown]);
 
   useEffect(() => {
     if (!quiz?.completed || !childUid) return;

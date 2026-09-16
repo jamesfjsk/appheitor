@@ -108,7 +108,11 @@ export function subscribeClientErrors(uid: string, onChange: (rows: ClientErrorR
             uid: String(data.uid || ''),
             route: String(data.route || ''),
             appVersion: String(data.appVersion || ''),
-            createdAt: String(data.createdAt || ''),
+            createdAt: typeof data.createdAt === 'string'
+              ? data.createdAt
+              : data.createdAt && typeof data.createdAt === 'object' && 'toDate' in data.createdAt
+                ? (data.createdAt as { toDate: () => Date }).toDate().toISOString()
+                : '',
           };
         })
         .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))

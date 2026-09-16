@@ -48,11 +48,13 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   guidedMode = false,
   onToggleGuidedMode
 }) => {
-  const { completeTask, completeLateTask } = useData();
+  const { completeTask, completeLateTask, addTask } = useData();
   const { childUid } = useAuth();
   const { hour, weekday, today, period: clockPeriod } = useClock();
   const { economy } = useVillage();
   const [yesterdayDone, setYesterdayDone] = React.useState<string[]>([]);
+  const [ownTitle, setOwnTitle] = React.useState('');
+  const [ownBusy, setOwnBusy] = React.useState(false);
 
   const getCurrentPeriod = (): 'morning' | 'afternoon' | 'evening' => clockPeriod;
 
@@ -130,7 +132,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     selectedPeriod === 'afternoon' ? 'Tarde' : 'Noite';
 
   return (
-    <section className="mc-inv rounded-lg p-4 sm:p-5">
+    <section className="mn-casa-sheet p-4 sm:p-5">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 flex-wrap">
           <h2 className="mc-h">
@@ -223,6 +225,43 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           ))}
         </div>
       )}
+
+      <div className="mc-card p-3 mb-3 space-y-2">
+        <p className="text-sm font-bold">Criar missão</p>
+        <p className="text-xs mc-muted">O papai aprova. Paga XP e material, nunca gold.</p>
+        <div className="flex gap-2">
+          <input
+            value={ownTitle}
+            maxLength={40}
+            onChange={(e) => setOwnTitle(e.target.value)}
+            placeholder="título"
+            className="mc-slot flex-1 min-w-0 text-white text-sm px-3 py-2"
+          />
+          <button
+            type="button"
+            data-testid="enviar-missao-propria"
+            className="mc-btn mc-btn-wood min-h-[44px] px-3"
+            disabled={ownBusy || ownTitle.trim().length < 3}
+            onClick={() => {
+              setOwnBusy(true);
+              void addTask({
+                title: ownTitle.trim(),
+                xp: 5,
+                gold: 0,
+                period: selectedPeriod,
+                frequency: 'daily',
+                active: true,
+                status: 'proposed',
+                origin: 'child',
+              }).then(() => {
+                setOwnTitle('');
+              }).catch(() => undefined).finally(() => setOwnBusy(false));
+            }}
+          >
+            Enviar
+          </button>
+        </div>
+      </div>
 
       <div className="space-y-2">
         {tasksToShow.length > 0 ? (

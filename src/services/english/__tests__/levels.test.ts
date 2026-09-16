@@ -123,8 +123,8 @@ test('tabela dos níveis: maxWords, Carta, glossário, moldes e temas', () => {
 
 const pub = join(process.cwd(), 'public');
 
-test('9 construções: custos somam 3/5/8 com ferro >= 1; ícones existem', () => {
-  expect(BUILDINGS).toHaveLength(9);
+test('10 construções: custos somam 3/5/8 com ferro >= 1; ícones existem', () => {
+  expect(BUILDINGS).toHaveLength(10);
   for (const b of BUILDINGS) {
     b.costs.forEach((c, i) => {
       const total = MATERIALS.reduce((s, m) => s + c[m], 0);
@@ -143,12 +143,14 @@ test('9 construções: custos somam 3/5/8 com ferro >= 1; ícones existem', () =
 });
 
 test('desbloqueio: torre/mesa/campinho só com fornalha e baú >= 1; cofre precisa do armazém; agenda livre', () => {
-  const none = { fornalha: 0, bau: 0, cerca: 0, torre: 0, mesa: 0, campinho: 0, cofre: 0, agenda: 0, mercado: 0 };
+  const none = { fornalha: 0, bau: 0, cerca: 0, torre: 0, mesa: 0, campinho: 0, arena: 0, cofre: 0, agenda: 0, mercado: 0 };
   expect(isBuildingUnlocked('torre', none)).toBeFalsy();
   expect(isBuildingUnlocked('cerca', none)).toBeFalsy();
   expect(isBuildingUnlocked('cerca', { ...none, fornalha: 1 })).toBeTruthy();
   expect(isBuildingUnlocked('mesa', { ...none, fornalha: 1 })).toBeFalsy();
   expect(isBuildingUnlocked('campinho', { ...none, fornalha: 1, bau: 1 })).toBeTruthy();
+  expect(isBuildingUnlocked('arena', none)).toBeFalsy();
+  expect(isBuildingUnlocked('arena', { ...none, fornalha: 1, bau: 1 })).toBeTruthy();
   expect(isBuildingUnlocked('cofre', none)).toBeFalsy();
   expect(isBuildingUnlocked('cofre', { ...none, bau: 1 })).toBeTruthy();
   expect(isBuildingUnlocked('agenda', none)).toBeTruthy();
@@ -158,6 +160,7 @@ test('desbloqueio: torre/mesa/campinho só com fornalha e baú >= 1; cofre preci
 
 test('Campinho não se constrói antes da Etapa 4; Agenda e Mercado param no nível 1; prova na Biblioteca', () => {
   expect(buildingOpensLater('campinho', 1)).toBe('Etapa 4');
+  expect(buildingOpensLater('arena', 1)).toBe('Etapa 4B');
   expect(buildingOpensLater('fornalha', 1)).toBe(null);
   expect(buildingOpensLater('agenda', 2)).toBe('Em breve');
   expect(buildingOpensLater('mercado', 2)).toBe('Em breve');

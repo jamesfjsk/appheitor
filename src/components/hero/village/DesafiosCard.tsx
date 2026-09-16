@@ -49,8 +49,9 @@ const DesafiosCard: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ 
   );
 
   if (embedded) {
+    if (visible.length === 0) return null;
     return (
-      <section className="mc-panel rounded-lg p-3 mb-3">
+      <section className="mn-placa p-3 mt-3">
         <h2 className="mc-h mb-2">
           <img src="/assets/english/ui/trophy.webp" alt="" className="mc-pixel" draggable={false} />
           Desafios
@@ -61,13 +62,13 @@ const DesafiosCard: React.FC<{ onClose?: () => void; embedded?: boolean }> = ({ 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-2" onClick={onClose}>
-      <div className="mc-modal rounded-lg w-full max-w-lg p-4 text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between mb-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 mn-veil" onClick={onClose}>
+      <div className="mc-modal mc-pop rounded-lg w-full max-w-lg text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center">
           <h2 className="mc-title text-sm">Desafios</h2>
           {onClose && <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>}
         </div>
-        {body}
+        <div className="p-4">{body}</div>
       </div>
     </div>
   );

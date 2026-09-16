@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -21,6 +22,7 @@ import { getSettings } from './settingsService';
 import { listGoldTransactions, roomForGameGold, txsInWeek } from './goldTx';
 import { stripUndefined } from './villageService';
 import { touchHealth } from './observability';
+import { cracksOf, isBroken, ruinUseError } from './village/repair';
 
 function omitUndefined<T extends Record<string, unknown>>(data: T): T {
   return Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined)) as T;
@@ -81,6 +83,8 @@ export async function createGoal(
     getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as Promise<ModuleSettings>,
   ]);
   if (modules.bank === false) throw new Error('O Banco da Vila está desligado');
+  const villageSnap = await getDoc(doc(db, 'village', uid));
+  if (isBroken(cracksOf(villageSnap.data()?.cracks), 'cofre')) throw ruinUseError('cofre');
   const base = await ensureBase(uid);
   const cap = Math.min(economy.maxOpenGoals ?? 2, vaultGoalCap(base.buildings.cofre || 0));
   const open = (await listGoals(uid)).filter((g) => g.status === 'open' || g.status === 'cancel_requested');
@@ -118,6 +122,8 @@ export async function depositGoal(uid: string, goalId: string, amount: number): 
     const progressRef = doc(db, 'progress', uid);
     const gSnap = await tx.get(goalRef);
     const pSnap = await tx.get(progressRef);
+    const vSnap = await tx.get(doc(db, 'village', uid));
+    if (isBroken(cracksOf(vSnap.data()?.cracks), 'cofre')) throw ruinUseError('cofre');
     if (!gSnap.exists()) throw new Error('Meta não encontrada');
     const goal = fromGoalDoc(gSnap.id, gSnap.data() as Record<string, unknown>);
     if (goal.userId !== uid) throw new Error('Meta de outro minerador');
@@ -149,6 +155,7 @@ export async function depositGoal(uid: string, goalId: string, amount: number): 
       createdAt: serverTimestamp(),
     }));
   });
+  void import('./village/statsBump').then((m) => m.bumpVillage(uid, { deposits: 1, savedGold: amount }));
 }
 
 export async function requestCancel(uid: string, goalId: string, reason: string): Promise<void> {
@@ -174,6 +181,8 @@ export async function applyWeeklyInterest(uid: string): Promise<number> {
     getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as Promise<ModuleSettings>,
   ]);
   if (modules.interest === false) return 0;
+  const villageSnap = await getDoc(doc(db, 'village', uid));
+  if (isBroken(cracksOf(villageSnap.data()?.cracks), 'cofre')) return 0;
   const base = await ensureBase(uid);
   const vaultLevel = base.buildings.cofre || 0;
   const goals = (await listGoals(uid)).filter((g) => g.status === 'open');

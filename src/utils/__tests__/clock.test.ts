@@ -36,6 +36,8 @@ test('limites 12:00 e 18:00 dos períodos', () => {
   expect(nowBrazil(Date.parse('2026-09-15T20:59:59.000Z')).period).toBe('afternoon');
   expect(nowBrazil(Date.parse('2026-09-15T21:00:00.000Z')).period).toBe('evening');
   expect(periodOfHour(18)).toBe('evening');
+  expect(nowBrazil(Date.parse('2026-09-15T21:00:00.000Z')).isNight).toBe(true);
+  expect(nowBrazil(Date.parse('2026-09-15T20:59:59.000Z')).isNight).toBe(false);
   expect(nowBrazil(Date.parse('2026-09-16T02:00:00.000Z')).isNight).toBe(true);
 });
 

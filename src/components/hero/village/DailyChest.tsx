@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import { useVillage } from '../../../contexts/VillageContext';
 import { chestAllowed } from '../../../services/village/chest';
 import { dueTasksOn } from '../../../services/village/schedule';
@@ -45,9 +46,13 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="mc-modal rounded-lg p-6 max-w-md w-full text-white" onClick={(e) => e.stopPropagation()}>
-        <h2 className="mc-h mb-3"><img src={CHEST} alt="" className="mc-pixel w-8 h-8" />Baú do Dia</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-veil" onClick={onClose}>
+      <div className="mc-modal mc-pop rounded-lg max-w-md w-full text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center">
+          <h2 className="mc-h"><img src={CHEST} alt="" className="mc-pixel w-8 h-8" />Baú do Dia</h2>
+          <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
+        </div>
+        <div className="p-6">
         <p className="text-sm mc-muted mb-4">
           {loot
             ? 'Você abriu o Baú do Dia'
@@ -92,6 +97,7 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
           </button>
         )}
         <button type="button" onClick={onClose} className="mc-btn mc-btn-stone w-full h-11">Fechar</button>
+        </div>
       </div>
     </div>
   );

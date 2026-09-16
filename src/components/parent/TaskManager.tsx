@@ -73,11 +73,11 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks }) => {
   };
 
   // Memoize filtered tasks to prevent unnecessary recalculations
-  const { activeTasks, inactiveTasks } = useMemo(() => {
-    const active = tasks.filter(task => task.active === true);
-    const inactive = tasks.filter(task => task.active === false);
-    
-    return { activeTasks: active, inactiveTasks: inactive };
+  const { activeTasks, inactiveTasks, proposedTasks } = useMemo(() => {
+    const proposed = tasks.filter((task) => task.status === 'proposed');
+    const active = tasks.filter((task) => task.active === true && task.status !== 'proposed');
+    const inactive = tasks.filter((task) => task.active === false && task.status !== 'proposed');
+    return { activeTasks: active, inactiveTasks: inactive, proposedTasks: proposed };
   }, [tasks]);
   
   console.log('🔥 TaskManager: Tasks filtering:', {
@@ -118,6 +118,36 @@ const TaskManager: React.FC<TaskManagerProps> = ({ tasks }) => {
           Nova Tarefa
         </motion.button>
       </div>
+
+      {proposedTasks.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Missões propostas ({proposedTasks.length})</h3>
+          {proposedTasks.map((task) => (
+            <div key={task.id} className="flex justify-between items-center gap-2 py-2 border-b border-amber-100">
+              <div>
+                <p className="font-medium">{task.title}</p>
+                <p className="text-sm text-gray-600">{periodLabels[task.period]} · sem gold</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="px-3 py-1 bg-green-600 text-white rounded"
+                  onClick={() => void updateTask(task.id, { status: 'pending', gold: 0, optional: false })}
+                >
+                  Aprovar
+                </button>
+                <button
+                  type="button"
+                  className="px-3 py-1 border rounded"
+                  onClick={() => void updateTask(task.id, { status: 'pending', active: false })}
+                >
+                  Recusar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Tarefas Ativas */}
       <motion.div

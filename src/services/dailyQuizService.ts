@@ -166,6 +166,16 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
       console.warn('quiz 8/8 esmeralda', e);
     }
   }
+  try {
+    const { bumpVillage, bumpFriend } = await import('./village/statsBump');
+    const deltas: Record<string, number> = { quizzesDone: 1 };
+    if (result.score >= 6) deltas.quizScore = result.score;
+    if (result.score >= 8) deltas.quizPerfect = 1;
+    bumpVillage(userId, deltas);
+    bumpFriend(userId, 'sabio', 2);
+  } catch (e) {
+    console.warn('stats prova', e);
+  }
 }
 
 export async function saveReflection(userId: string, date: string, reflection: string): Promise<void> {

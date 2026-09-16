@@ -26,7 +26,10 @@ export type ClaimKind =
   | 'agenda'
   | 'punish'
   | 'burn'
-  | 'fence';
+  | 'fence'
+  | 'ach'
+  | 'friend'
+  | 'redstone';
 export type NoticeType = 'compromisso' | 'regra' | 'viagem' | 'visita' | 'recado';
 export type HabitId = 'agua' | 'postura' | 'alongar' | 'tela' | 'arrumar' | 'sono' | 'gentileza';
 
@@ -87,6 +90,9 @@ export interface VillageDoc {
   trophies: Record<string, TrophyTier>;
   plan: VillagePlan;
   newItems: string[];
+  stats: VillageStats;
+  achievementsUnlocked: Record<string, string>;
+  newAchievements: string[];
 }
 
 export interface VillageSettings {
@@ -256,6 +262,70 @@ export interface VillagePlan {
   order: string[];
   focusTaskId: string | null;
 }
+
+export type VillageStats = Record<string, number>;
+
+export type AchievementTier = 'bronze' | 'prata' | 'ouro' | 'exclusiva';
+
+export interface GameAchievementReward {
+  xp: number;
+  material?: number;
+  rare?: 'esmeralda' | 'diamante';
+  cosmetic?: string;
+}
+
+export interface GameAchievement {
+  id: string;
+  category: string;
+  tier: AchievementTier;
+  title: string;
+  description: string;
+  icon: string;
+  stat: string;
+  target: number;
+  hidden?: boolean;
+  resetOnSeason?: boolean;
+  reward: GameAchievementReward;
+}
+
+export interface DailyCheckinAnswers {
+  water: boolean;
+  stretch: boolean;
+  kindness: boolean;
+  screen: boolean;
+  tomorrow: string;
+}
+
+export interface LearningDoc {
+  week: string;
+  quizAccuracyByCategory: Record<string, number>;
+  wordsMastered: number;
+  reflections: number;
+  savingsRatePct: number;
+  goldEarned: number;
+  goldSpent: number;
+  goldSaved: number;
+  fullDays: number;
+  challengesDone: number;
+  updatedAt: string;
+}
+
+export type VillageSceneEventKind =
+  | 'task_done'
+  | 'level_up'
+  | 'chest_open'
+  | 'full_day'
+  | 'missed_yesterday'
+  | 'build';
+
+export interface VillageSceneEvent {
+  kind: VillageSceneEventKind;
+  at: number;
+  lot?: string;
+}
+
+export const FRIEND_TIER_MIN = [0, 5, 15, 30, 50, 80] as const;
+export const FRIEND_TIER_NAME = ['Desconhecido', 'Conhecido', 'Colega', 'Amigo', 'Parceiro', 'Lenda da Vila'] as const;
 
 export type TrophyTier = 'bronze' | 'prata' | 'ouro';
 

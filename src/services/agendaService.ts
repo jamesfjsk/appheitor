@@ -141,6 +141,9 @@ export async function markAgendaDone(uid: string, id: string): Promise<number> {
       tx.update(pRef, { totalXP: increment(xp), updatedAt: serverTimestamp() });
     }
   });
+  if (xp > 0) {
+    void import('./village/statsBump').then((m) => m.bumpVillage(uid, { agendaDone: 1 }));
+  }
   return xp;
 }
 

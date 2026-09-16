@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer-core';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const BASE = 'http://localhost:5174';
+const BASE = 'http://localhost:5175';
 
 const browser = await puppeteer.launch({
   executablePath: CHROME,
@@ -23,7 +23,7 @@ const clickLabel = async (text) => page.evaluate((label) => {
 }, text);
 
 try {
-  await page.goto(`${BASE}/login?dev=minerar&h=22`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`${BASE}/login?dev=minerar&h=18`, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('[data-testid="login-teste"]', { timeout: 40000 });
   const teste = await page.$('[data-testid="login-teste"]');
   if (teste) {
@@ -46,11 +46,11 @@ try {
   await new Promise((r) => setTimeout(r, 800));
   const canvas = await page.$('canvas[aria-label="Vila"]');
   if (canvas) {
-    await canvas.screenshot({ path: path.join(dir, 'vila-h22.png') });
-    console.log('vila-h22-canvas');
+    await canvas.screenshot({ path: path.join(dir, 'vila-h18.png') });
+    console.log('vila-h18-canvas');
   }
-  await page.screenshot({ path: path.join(dir, 'vila-h22-pagina.png') });
-  console.log('vila-h22');
+  await page.screenshot({ path: path.join(dir, 'vila-h18-pagina.png') });
+  console.log('vila-h18');
 } catch (err) {
   console.error(err);
   process.exitCode = 1;

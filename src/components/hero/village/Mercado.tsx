@@ -57,10 +57,10 @@ const Mercado: React.FC<{
       setR7(referenceIncome(week, economy.incomeDayGold));
     });
   }, [childUid, economy.incomeDayGold]);
-  const shopItems = COSMETICS.filter((c) => !c.free && cosmeticHasSprite(c.id)).filter((c) => {
+  const shopItems = COSMETICS.filter((c) => !c.free && cosmeticHasSprite(c.id) && (c.basePrice || 0) > 0 && c.slot !== 'skin' && c.slot !== 'hair').filter((c) => {
     if (filter === 'all') return true;
     if (filter === 'premium') return c.premium;
-    if (filter === 'clothes') return c.slot === 'shirt' || c.slot === 'pants' || c.slot === 'hair';
+    if (filter === 'clothes') return c.slot === 'shirt' || c.slot === 'pants';
     return c.slot === filter;
   }).sort((a, b) => {
     const ga = canBuy(village, gold, a, settings, level);
@@ -83,9 +83,9 @@ const Mercado: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-40 flex items-center justify-center p-2" onClick={onClose}>
-      <div className="mc-modal rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="p-4 border-b-4 border-[#17130f] flex justify-between">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-2 mn-veil" onClick={onClose}>
+      <div className="mc-modal mc-pop rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center">
           <div>
             <h2 className="mc-title text-sm">Mercado</h2>
             <p className="text-xs mc-muted">Você ganha cerca de {r7} gold por dia</p>

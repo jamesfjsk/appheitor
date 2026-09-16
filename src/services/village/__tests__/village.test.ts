@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { DEFAULT_ECONOMY, DISTRICT_ICONS, EMPTY_GEAR, houseSprite, houseTier, houseTitle, LOT_SCENE_LABEL, MATERIAL_BY_PERIOD, SCENE_PROPS } from '../../../config/village';
+import { crackedLabel, crackedListSentence, crackedSentence, DEFAULT_ECONOMY, DISTRICT_ICONS, EMPTY_GEAR, houseSprite, houseTier, houseTitle, LOT_SCENE_LABEL, MATERIAL_BY_PERIOD, SCENE_PROPS } from '../../../config/village';
 import { isoWeekOf } from '../../../utils/isoWeek';
 import { getLevelFromXP, getLevelTitle, getXPForLevel } from '../../../utils/levelSystem';
 import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from '../claims';
@@ -318,10 +318,15 @@ test('casa cresce por temporada e os ícones da grade não se repetem', () => {
   expect(DISTRICT_ICONS.house).toBe('/assets/village/buildings/casa-1.png');
   expect(DISTRICT_ICONS.pack).toBe('/assets/village/items/mochila.png');
   expect(DISTRICT_ICONS.bank).toBe('/assets/village/buildings/cofre-1.png');
-  expect(DISTRICT_ICONS.arena).toBe('/assets/english/ui/sword.webp');
+  expect(DISTRICT_ICONS.arena).toBe('/assets/village/buildings/arena-1.png');
   expect(new Set(Object.values(DISTRICT_ICONS)).size).toBe(Object.keys(DISTRICT_ICONS).length);
-  expect(SCENE_PROPS.map((p) => p.id).sort()).toEqual(['arena', 'pack']);
+  expect(SCENE_PROPS.map((p) => p.id).sort()).toEqual(['pack']);
   expect(LOT_SCENE_LABEL.fornalha).toBe('Ferraria');
+  expect(crackedLabel('fornalha')).toBe('Ferraria em ruínas');
+  expect(crackedLabel('bau')).toBe('Armazém em ruínas');
+  expect(crackedSentence('fornalha')).toBe('A Ferraria caiu.');
+  expect(crackedSentence('cofre')).toBe('O Cofre caiu.');
+  expect(crackedListSentence(['fornalha', 'bau'])).toBe('2 obras cairam.');
   expect(LOT_SCENE_LABEL.mesa).toBe('Biblioteca');
   expect(LOT_SCENE_LABEL.cofre).toBe('Cofre');
   expect(LOT_SCENE_LABEL.agenda).toBe('Agenda');

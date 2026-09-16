@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useVillage } from '../../../contexts/VillageContext';
@@ -6,14 +6,16 @@ import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { houseSprite, houseTitle } from '../../../config/village';
-import type { AgendaItem, Period } from '../../../types/village';
+import type { AgendaItem, DailyCheckinAnswers, Period } from '../../../types/village';
 import DailyChecklist from '../DailyChecklist';
 import FlashTimer from '../FlashTimer';
 import CharacterPreview from './CharacterPreview';
 import { dayTimeline, occurrencesBetween } from '../../../services/village/agenda';
 import { markAgendaDone } from '../../../services/agendaService';
-import { periodAllowedAt } from '../../../services/village/schedule';
-import { addDays, getTodayBrazil } from '../../../utils/clock';
+import { dueTasksOn, periodAllowedAt } from '../../../services/village/schedule';
+import { addDays, getTodayBrazil, isNightHour } from '../../../utils/clock';
+import { savePlan, submitCheckin } from '../../../services/villageService';
+import { FirestoreService } from '../../../services/firestoreService';
 
 const SUN = '/assets/english/ui/sun.webp';
 const MOON = '/assets/english/ui/moon.webp';
@@ -46,7 +48,13 @@ const Casa: React.FC<{
   const [tab, setTab] = useState<Tab>('missoes');
   const [focusMin, setFocusMin] = useState<number | null>(null);
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null);
-  const night = hour >= 19 || hour < 6;
+  const [order, setOrder] = useState<string[]>([]);
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const [planBusy, setPlanBusy] = useState(false);
+  const [check, setCheck] = useState<DailyCheckinAnswers>({ water: false, stretch: false, kindness: false, screen: false, tomorrow: '' });
+  const [closed, setClosed] = useState(false);
+  const [closeBusy, setCloseBusy] = useState(false);
+  const night = isNightHour(hour);
   const allDone = due > 0 && done >= due;
   const name = village.characterName || 'Heitor';
   const title = houseTitle(village.season);
@@ -54,10 +62,68 @@ const Casa: React.FC<{
   const today = getTodayBrazil();
   const line = dayTimeline(agendaItems, tasks, village.plan, today);
   const tomorrow = occurrencesBetween(agendaItems, addDays(today, 1), addDays(today, 1));
+  const dueToday = useMemo(() => dueTasksOn(tasks, today), [tasks, today]);
+  const planned = village.plan.date === today && village.plan.order.length > 0;
+
+  useEffect(() => {
+    if (planned) {
+      setOrder(village.plan.order);
+      setFocusId(village.plan.focusTaskId);
+      return;
+    }
+    setOrder(dueToday.map((t) => t.id));
+  }, [planned, village.plan.order, village.plan.focusTaskId, dueToday]);
+
+  useEffect(() => {
+    if (!childUid) return;
+    void FirestoreService.getDailyProgress(childUid, today).then((d) => {
+      if (d?.checkin) setClosed(true);
+    });
+  }, [childUid, today]);
+
+  const move = (id: string, dir: -1 | 1) => {
+    setOrder((prev) => {
+      const i = prev.indexOf(id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      const tmp = next[i];
+      next[i] = next[j];
+      next[j] = tmp;
+      return next;
+    });
+  };
+
+  const startTurn = async () => {
+    if (!childUid || planBusy || hour >= 12 || planned) return;
+    setPlanBusy(true);
+    try {
+      await savePlan(childUid, { date: today, order, focusTaskId: focusId });
+      toast.success('Turno começado');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Não deu para gravar o plano');
+    } finally {
+      setPlanBusy(false);
+    }
+  };
+
+  const closeDay = async () => {
+    if (!childUid || closeBusy || closed) return;
+    setCloseBusy(true);
+    try {
+      const xp = await submitCheckin(childUid, today, check);
+      setClosed(true);
+      toast.success(`Dia fechado · +${xp} XP`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Não deu para fechar o dia');
+    } finally {
+      setCloseBusy(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="mc-modal mn-casa rounded-lg w-full max-w-4xl max-h-[96vh] overflow-hidden text-white" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-veil" onClick={onClose}>
+      <div className="mc-modal mn-casa mc-pop rounded-lg w-full max-w-4xl max-h-[96vh] overflow-hidden text-white" onClick={(e) => e.stopPropagation()}>
         <div className="mn-casa-hero">
           <img src={src} alt="" className="mn-casa-sprite mc-pixel" draggable={false} />
           <CharacterPreview character={village.character} gear={village.gear} size={88} />
@@ -170,34 +236,101 @@ const Casa: React.FC<{
             </>
           )}
           {tab === 'plano' && (
-            <div className="mc-inv rounded-lg p-5 space-y-3">
+            <div className="mn-casa-sheet p-5 space-y-3">
               <h3 className="mc-h">
                 <img src={CLOCK} alt="" className="mc-pixel" draggable={false} />
                 Mesa da manhã
               </h3>
               <p className="text-sm">
-                De manhã, até o meio-dia, você monta o plano do turno: a ordem das missões e uma missão-foco.
+                Até o meio-dia, escolha a ordem das missões e uma missão-foco (material em dobro, uma vez).
               </p>
-              <p className="text-sm mc-muted">
-                A mesa ainda está sendo arrumada. Enquanto isso, as missões já estão na aba ao lado.
-              </p>
+              {hour >= 12 && !planned && (
+                <p className="text-sm mc-muted">O plano fecha ao meio-dia. As missões seguem a ordem do papai.</p>
+              )}
+              {planned && <p className="text-sm mc-good">Turno gravado. A missão-foco está marcada na lista.</p>}
+              {order.map((id) => {
+                const t = tasks.find((x) => x.id === id);
+                if (!t) return null;
+                return (
+                  <div key={id} className="mc-row rounded p-2 flex items-center gap-2">
+                    <div className="flex flex-col gap-1">
+                      <button type="button" className="mc-btn mc-btn-dark min-h-[32px] px-2" disabled={planned || hour >= 12} onClick={() => { playClick(); move(id, -1); }}>↑</button>
+                      <button type="button" className="mc-btn mc-btn-dark min-h-[32px] px-2" disabled={planned || hour >= 12} onClick={() => { playClick(); move(id, 1); }}>↓</button>
+                    </div>
+                    <p className="text-sm flex-1">{t.title}</p>
+                    <button
+                      type="button"
+                      className={`mc-btn min-h-[36px] px-3 ${focusId === id ? 'mc-btn-gold' : 'mc-btn-dark'}`}
+                      disabled={planned || hour >= 12}
+                      onClick={() => { playClick(); setFocusId(id); }}
+                    >
+                      Foco
+                    </button>
+                  </div>
+                );
+              })}
+              <button
+                type="button"
+                className="mc-btn mc-btn-green min-h-[44px] px-4"
+                disabled={planBusy || planned || hour >= 12 || order.length === 0 || !childUid}
+                onClick={() => { playClick(); void startTurn(); }}
+              >
+                Começar o turno
+              </button>
             </div>
           )}
           {tab === 'fechar' && (
-            <div className="mc-inv rounded-lg p-5 space-y-3">
+            <div className="mn-casa-sheet p-5 space-y-3">
               <h3 className="mc-h">
                 <img src={LANTERN} alt="" className="mc-pixel" draggable={false} />
                 Lanterna da noite
               </h3>
-              <p className="text-sm">
-                Quando o dia acaba, o Sábio anota o turno e você deixa um recado para o papai.
-              </p>
-              <p className="text-sm mc-muted">
-                Fechar o dia abre daqui em breve. Por agora, conclua as missões e, às {economy.chestOpenHour}h, abra o Baú do Dia.
-              </p>
+              {hour < 20 && !chestReady && (
+                <p className="text-sm mc-muted">Fecha o dia depois das 20h, ou depois de abrir o Baú.</p>
+              )}
+              {closed && <p className="text-sm mc-good">Dia fechado. O Sábio responde amanhã na Placa.</p>}
+              {([
+                ['water', 'Bebi água?'],
+                ['stretch', 'Alonguei?'],
+                ['kindness', 'Fui gentil?'],
+                ['screen', 'Tela no limite?'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`mc-row rounded p-2 flex items-center justify-between gap-2 w-full text-left ${check[key] ? 'is-done' : ''}`}
+                  disabled={closed}
+                  onClick={() => { playClick(); setCheck((c) => ({ ...c, [key]: !c[key] })); }}
+                >
+                  <span className="text-sm">{label}</span>
+                  <span className={`mc-slot w-10 h-10 p-0 shrink-0 flex items-center justify-center ${check[key] ? 'mc-slot-good' : ''}`} aria-hidden>
+                    {check[key] ? 'ok' : ''}
+                  </span>
+                </button>
+              ))}
+              <label className="block text-sm">
+                Amanhã eu...
+                <input
+                  value={check.tomorrow}
+                  disabled={closed}
+                  maxLength={80}
+                  onChange={(e) => setCheck((c) => ({ ...c, tomorrow: e.target.value }))}
+                  className="mc-slot w-full mt-1 px-3 py-2 text-white"
+                  placeholder="três palavras no mínimo"
+                />
+              </label>
               {tomorrow.length > 0 && (
                 <p className="text-sm">Amanhã você tem: {tomorrow.map((i) => i.title).join(', ')}</p>
               )}
+              <button
+                type="button"
+                data-testid="fechar-dia-btn"
+                className="mc-btn mc-btn-gold min-h-[44px] px-4"
+                disabled={closeBusy || closed || !childUid || (hour < 20 && !chestReady)}
+                onClick={() => { playClick(); void closeDay(); }}
+              >
+                Fechar
+              </button>
             </div>
           )}
         </div>

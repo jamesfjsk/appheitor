@@ -60,7 +60,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenGold, onOpenPac
       initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="mc-panel rounded-lg px-3 py-2 flex flex-col gap-2"
+      className="mn-hud px-3 py-2 flex flex-col gap-2"
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3 min-w-0 grow">
@@ -156,6 +156,17 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenGold, onOpenPac
             <span className="text-xs text-white">{nextEventLabel}</span>
           </div>
         )}
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="mc-lbl shrink-0">XP</span>
+        <div className="mc-bar flex-1">
+          <div className="mc-bar-fill" style={{ width: `${levelSystem.progressPercentage}%` }} />
+        </div>
+        <span className="mc-num text-white shrink-0" style={{ fontSize: 12 }}>
+          {levelSystem.isMaxLevel
+            ? 'máx'
+            : `${Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel)}/${Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel)}`}
+        </span>
       </div>
     </motion.header>
   );

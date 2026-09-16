@@ -24,7 +24,12 @@ function maintenanceActive(): boolean {
     const dev = params.get('dev');
     if (dev === 'minerar') localStorage.setItem('mm_dev', '1');
     if (dev === 'sair') localStorage.removeItem('mm_dev');
-    if (dev) window.history.replaceState(null, '', window.location.pathname);
+    if (dev) {
+      const keep = new URLSearchParams(params);
+      keep.delete('dev');
+      const q = keep.toString();
+      window.history.replaceState(null, '', `${window.location.pathname}${q ? `?${q}` : ''}${window.location.hash}`);
+    }
     return localStorage.getItem('mm_dev') !== '1';
   } catch {
     return true;

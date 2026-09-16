@@ -243,3 +243,73 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 ## Simulador
 
 - `scripts/econ-sim.mjs` — 91 dias, perfis típico / misto / perfeito.
+
+---
+
+# Etapa 2 — Lote 2 (acréscimos)
+
+Módulos novos continuam sem Firebase, React ou `import.meta.env` (exceto os serviços).
+
+## `src/utils/clock.ts` (acréscimo)
+
+- `mondayOfIsoWeek(weekIso)` / `weekRangeLabel(weekIso)` — `Semana de 14 a 20/09`.
+
+## `src/services/village/season.ts`
+
+- `seasonEndsOn(startedOn, weeks)` — último dia da temporada.
+- `trophyOfWeek(thisWeek, lastWeek)` — bronze ≥60% do gold da semana anterior; prata igualou; ouro +20% e 5 tochas.
+- `recordsAfterWeek` / `buildingLevelSum` / `villageGrowthStage` (1/2/3 em soma 7 e 14).
+
+## `src/services/village/checkin.ts`
+
+- `tomorrowValid` (≥3 palavras) / `checkinXp` (5 ou 0) / `sageReplyFor(answers, seed)`.
+
+## `src/services/village/achievements.ts`
+
+- `progressOf` / `currentOf` / `evaluateAchievements` / `visibleAchievements` / `almostThere` / `seasonAchievementIds` / `rewardHasGold` (sempre false).
+- Catálogo `src/data/achievements.ts`. Nunca gold.
+
+## `src/services/village/npcBehavior.ts`
+
+- `npcRoutine` / `npcTarget` / `npcWalk` (24 px/s) / `npcTouch` / `lookFacing`.
+
+## `src/services/village/dialogue.ts`
+
+- `pickDialogue` / `friendTier` / `talkPointsToday`.
+- Falas: `src/data/dialogue/` (arquivo do NPC + `fallback.ts`).
+
+## `src/services/village/redstone.ts`
+
+- Circuito diário da Mina (grade 8×5, sem gold). `puzzleFor` / `simulate` / `clickCell` / `isWon` / `solve` / `redstonePay`.
+- `dustArms` / `isDustLook` — fio visível e braços até a peça vizinha (tabuleiro vivo em `drawRedstone.ts`).
+
+## `src/services/villageService.ts` (acréscimo)
+
+- `savePlan` — só antes das 12h, uma vez por dia.
+- `submitCheckin` — recusa se já existe; +5 XP no mesmo `tx`.
+- `claimTrophy` — sábado 18h+; ouro dá 1 esmeralda.
+- `closeSeason` — estrela, XP 0, gold fica, `season+1`, conquistas `resetOnSeason` saem; pacote de 12 só desativa, não recria.
+- `applyVillageStats` — contadores, destrava conquistas (`ach:<id>`), avança pedidos de NPC (+10 XP, nunca gold).
+- `seeAchievements` / `talkToNpc` / `completeNpcQuest`.
+- `startNewSeason` vira alias de `closeSeason`.
+
+## `src/services/learningService.ts`
+
+- `computeWeeklyLearning(uid, week)` / `getLearning` — grava `learning/{uid}`, `health.lastLearningWeek`.
+
+## Telas
+
+- Casa: Plano do turno e Fechar o dia.
+- DailyChecklist: Criar missão (`proposed`, gold 0); faixa Extra.
+- Torre: Conquistas, Da vida real, Recordes, Troféus, Mapa, Histórias.
+- LevelUpModal: cosmético de marco.
+- VillageScene: `date`/`event`, `anchors.growth`, `anchors.npcSpots`, hotspots por tipo, cerimônia de obra, olhar/pulo.
+- Mina: Oficina de Redstone em Phaser tela cheia (`RedstoneBench`, `src/game/redstone/`); bandeja de peças; regras em `redstone.ts`; Contratos inalterados.
+- Clique no NPC abre diálogo (amizade). Mercado e Ferraria abrem pela construção, hotbar ou tecla `O`.
+
+## Painel
+
+- `HojeCard` / `WeeklyReport` / `CharactersPanel`.
+- Abas em quatro grupos: Hoje, Jogo, Conteúdo, Ajustes.
+- VillageManager: Fechar temporada; Saúde com `lastInterestWeek` e `lastLearningWeek`.
+

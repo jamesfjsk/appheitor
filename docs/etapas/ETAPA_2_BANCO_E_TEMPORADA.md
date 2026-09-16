@@ -375,9 +375,77 @@ Aceite: concluir a primeira missão destrava "Primeira picaretada" com toast e +
 
 Lote 1 aprovado em 15/09 (commit be66428, branch etapa-2). Entram no Lote 2, antes das frentes novas: "Novo" na Mochila (limpar `newItems` ao fechar a Mochila, não ao montar; StrictMode), painel de prêmios embutido no cartão do Mercado só leitura e sem "Trocas liberadas" na punição, Cofre nível 3 (faixa temporada e Extrato mensal), cosmético das 21 tochas e ids `trophy_*` fora de `newItems` até existirem no catálogo, gasto por ralo na Balança, `rewardTitle` lido nas telas de pedidos (criança e pai), Cerca 2 sem apagar rachadura repetida, `metadata.capped` correto em desafio e Baú, chip de tochas com `ui/torch.webp` e rótulo "tochas", "Foco" na Casa abrindo o cronômetro preso à missão (conclui só ao terminar), Linha do dia sem "Concluir" em missão feita ou período fechado, título vazio recusado na Agenda (botão e serviço) e filtrado na Placa, editar apagando hora e nota (`null`), `onFinished` do Foco fora do updater de estado, aba Obras sem "Melhorar" para Barraca e Sino, "Semana de 14 a 20/09" no Extrato em vez de código, percentual de poupança calculado só sobre gold ganho na semana, `settings/economy` também em `canBuild`/`buildUpgrade`, `vaultInterestRatePct` apagada, formulário da Agenda sem herdar lembrete e repetir do item anterior.
 
+## 20b. Regra de cena para o Lote 2 (16/09; `docs/MUNDO.md`, seção 5)
+
+O jogo vai ter várias cenas (Mina, Biblioteca, Fazenda, Arena...) ligadas por um mapa do mundo. No Lote 2, tudo que tocar a cena (camadas de crescimento, spots e rotina dos NPCs, cerimônia de obra, hotspot do Baú das tochas, rótulos) entra como **dado no `anchors.json`** e comportamento por tipo de âncora no canvas, nunca como `if` da Vila. Preparar a pasta `public/assets/scenes/vila/` (mover `scene/` para lá com um alias) e `SceneCanvas` recebendo o id da cena é opcional neste lote, mas a regra de aceite já vale: "daria para criar uma segunda cena só com um JSON e um PNG?". Registrar no relatório o que ainda é específico da Vila.
+
 ## 21. Prompt do Lote 2 para colar no Cursor
 
-"Leia `docs/etapas/ETAPA_2_BANCO_E_TEMPORADA.md` inteiro (seções 6, 7, 11 Lote 2, 13 a 15, 19 e 20), `docs/VILA_CONSTRUCOES.md`, `docs/VILA_ITENS.md`, `docs/VILA_MAPA.md`, `docs/VILA_CONQUISTAS.md` e a seção 'O universo conectado' do roadmap. Na branch etapa-2, execute o Lote 2 nesta ordem: (0) seção 20; (1) módulos puros com testes (season, checkin, achievements, npcBehavior, dialogue); (2) serviços (plan, checkin, trophy, closeSeason, learning, conquistas, amizade); (3) telas: Plano do turno e Fechar o dia na Casa, Missão própria e extras, Dia fechado, Torre com conquistas do jogo e da vida real, recordes, troféus e mapa de habilidades, LevelUpModal com marco, Vida dos personagens v1 e Diálogos que evoluem (as falas eu entrego em src/data/dialogue/; use as que existirem e o fallback), Vila que cresce v1 e cerimônia de obra; (4) painel: cartão Hoje, abas reagrupadas, Fechar temporada, relatório semanal, Saúde; (5) checagens, republicar, aceite na conta de teste com fotos em docs/exemplos/telas/etapa2-lote2/, relatório `RELATORIO_ETAPA_2_LOTE_2.md` com decisões e conferência de conexões. Todo módulo educacional novo com a ficha pedagógica (roadmap, Etapa 5B). Sem commit fora da etapa-2."
+"Leia `docs/etapas/ETAPA_2_BANCO_E_TEMPORADA.md` inteiro (seções 6, 7, 11 Lote 2, 13 a 15, 19 e 20), `docs/VILA_CONSTRUCOES.md`, `docs/VILA_ITENS.md`, `docs/VILA_MAPA.md`, `docs/VILA_CONQUISTAS.md` e a seção 'O universo conectado' do roadmap. Na branch etapa-2, execute o Lote 2 nesta ordem: (0) seção 20; (1) módulos puros com testes (season, checkin, achievements, npcBehavior, dialogue); (2) serviços (plan, checkin, trophy, closeSeason, learning, conquistas, amizade); (3) telas: Plano do turno e Fechar o dia na Casa, Missão própria e extras, Dia fechado, Torre com conquistas do jogo e da vida real, recordes, troféus e mapa de habilidades, LevelUpModal com marco, Vida dos personagens v1 e Diálogos que evoluem (as falas eu entrego em src/data/dialogue/; use as que existirem e o fallback), Vila que cresce v1 e cerimônia de obra; (4) painel: cartão Hoje, abas reagrupadas, Fechar temporada, relatório semanal, Saúde; (5) checagens, republicar, aceite na conta de teste com fotos em docs/exemplos/telas/etapa2-lote2/, relatório `RELATORIO_ETAPA_2_LOTE_2.md` com decisões e conferência de conexões. Todo módulo educacional novo com a ficha pedagógica (roadmap, Etapa 5B). Toda mudança na cena segue a seção 20b (dado no anchors.json, comportamento por tipo de âncora). Sem commit fora da etapa-2."
+
+## 22. Fichas pedagógicas (Lote 2; Etapa 5B)
+
+Módulos educacionais novos deste lote. Agenda, Banco e Prova já nasceram no Lote 1.
+
+### Plano do turno
+1. Aprende a ordenar o dia e escolher uma missão-foco.
+2. Cabe aos 10 anos: lista curta, setas, uma escolha.
+3. Mede: `village.plan` do dia; `taskCompletions.focus`; `stats.plansSaved`.
+4. Adapta: uma foco por dia; fecha ao meio-dia.
+5. Vê: ordem na Casa e material em dobro na foco.
+6. Pai: vê o plano no cartão Hoje; não precisa ajustar.
+7. IA: nenhuma.
+8. Impede emprego: sem gold; só XP/material da missão. Impede castigo: sem plano não há penalidade.
+
+### Fechar o dia
+1. Aprende a fechar o dia com 4 hábitos e uma intenção de amanhã.
+2. Quatro sim/não e três palavras; cabe em um minuto.
+3. Mede: `dailyProgress.checkin`; `stats.checkins`.
+4. Adapta: o Sábio responde na manhã seguinte conforme as respostas.
+5. Vê: 5 XP e a fala do Sábio na Placa.
+6. Pai: relatório semanal (hábitos) e Saúde (`lastCloseDay`).
+7. IA: nenhuma; frases em `habitLines` e `SAGE_REPLIES`.
+8. Impede emprego: 5 XP, nunca gold. Impede castigo: sem check-in não há penalidade.
+
+### Missão própria e extras
+1. Aprende a propor o próprio trabalho e a fazer um extra sem virar dívida.
+2. Título curto, período; o pai aprova.
+3. Mede: `tasks.origin==child` `status==proposed`; `optional` nas extras.
+4. Adapta: o pai aprova, recusa ou marca extra.
+5. Vê: “aguardando o pai”; extra com “2x material”.
+6. Pai: lista de propostas em Missões e no cartão Hoje.
+7. IA: nenhuma.
+8. Impede emprego: missão própria nunca gold. Extra não conta como perdida.
+
+### Conquistas, Torre e mapa de habilidades
+1. Aprende a ver o próprio progresso (jogo e vida real) sem virar ranking.
+2. Ícones e “37/50”; sem texto longo.
+3. Mede: `village.stats`, `achievementsUnlocked`, `learning/{uid}`.
+4. Adapta: camadas bronze/prata/ouro; escondidas só quando destravam.
+5. Vê: toast, “Quase lá”, mapa com barras.
+6. Pai: vida real editável; jogo só leitura; relatório Recalcular.
+7. IA: nenhuma nas conquistas do jogo.
+8. Impede emprego: conquista do jogo nunca gold. Impede castigo: escondidas não envergonham.
+
+### Diálogos e amizade
+1. Aprende que pessoas mudam o que dizem conforme o que você fez, e que pedido se cumpre com ação.
+2. Falas curtas, sem gíria pesada, sem sermão.
+3. Mede: `village.npcs.points/tier/seen/quest`; `stats.npcTalks`.
+4. Adapta: `pickDialogue` por hora, tochas, ontem, amizade; teto 5 pontos/dia.
+5. Vê: balão com corações, Continuar, pedido na Placa e na Torre.
+6. Pai: aba Personagens; não vê a fala do dia antes da criança.
+7. IA: pacote de falas entra só com aprovação (Etapa 3); agora fallback em código.
+8. Impede emprego: amizade e pedido pagam XP/raro/cosmético, nunca gold. Impede castigo: punição só Sábio e Ferreiro, sem julgamento.
+
+### Relatório semanal
+1. Aprende a ler o que treinou na semana (prova, inglês, hábitos, dinheiro).
+2. Quatro cartões; números grandes.
+3. Mede: `learning/{uid}` recalculado, idempotente por semana.
+4. Adapta: o conteúdo sobe com os dados reais, sem meta inventada.
+5. Vê: mapa na Torre; o pai vê os mesmos quatro cartões.
+6. Pai: Recalcular; Saúde `lastLearningWeek`.
+7. IA: nenhuma neste cálculo.
+8. Impede emprego: o relatório não paga. Impede castigo: não compara com outras crianças.
 
 ## 12. Prompt para colar no Cursor
 

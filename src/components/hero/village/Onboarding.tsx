@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { COSMETICS, DEFAULT_CHARACTER, PANTS_HEX, SHIRT_HEX, SKIN_HEX } from '../../../config/village';
+import { COSMETICS, DEFAULT_CHARACTER, PANTS_HEX, SHIRT_HEX } from '../../../config/village';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
 import type { VillageCharacter } from '../../../types/village';
 import CharacterPreview from './CharacterPreview';
+import GarmentIcon from './GarmentIcon';
 
-const SKINS = ['skin_1', 'skin_2', 'skin_3', 'skin_4'];
-const HAIR = ['hair_1'];
 const SHIRTS = ['shirt_1', 'shirt_2', 'shirt_3', 'shirt_4', 'shirt_5', 'shirt_6', 'shirt_7', 'shirt_8'];
 const PANTS = ['pants_1', 'pants_2', 'pants_3', 'pants_4', 'pants_5', 'pants_6', 'pants_7', 'pants_8'];
 
@@ -61,36 +60,6 @@ const Onboarding: React.FC = () => {
                 <label className="mc-lbl block mb-1">Nome da vila</label>
                 <input className="w-full h-11 px-3 mb-4 text-[#1f1a17] rounded-md" value={villageName} onChange={(e) => setVillageName(e.target.value)} maxLength={30} />
 
-                <p className="mc-lbl mb-1">Pele</p>
-                <div className="flex gap-2 mb-3 flex-wrap">
-                  {SKINS.map((id) => (
-                    <button
-                      key={id}
-                      type="button"
-                      title={labelOf(id)}
-                      aria-label={labelOf(id)}
-                      className={`mc-slot w-11 h-11 ${character.skin === id ? 'mc-slot-selected' : ''}`}
-                      style={{ background: SKIN_HEX[id] }}
-                      onClick={() => pick({ skin: id })}
-                    />
-                  ))}
-                </div>
-
-                <p className="mc-lbl mb-1">Cabelo</p>
-                <div className="flex gap-2 mb-3 flex-wrap">
-                  {HAIR.map((id) => (
-                    <button
-                      key={id}
-                      type="button"
-                      title={labelOf(id)}
-                      aria-label={labelOf(id)}
-                      className={`mc-slot w-11 h-11 ${character.hair === id ? 'mc-slot-selected' : ''}`}
-                      style={{ background: '#3d2918' }}
-                      onClick={() => pick({ hair: id })}
-                    />
-                  ))}
-                </div>
-
                 <p className="mc-lbl mb-1">Camisa</p>
                 <div className="flex gap-2 mb-3 flex-wrap">
                   {SHIRTS.map((id) => (
@@ -99,10 +68,11 @@ const Onboarding: React.FC = () => {
                       type="button"
                       title={labelOf(id)}
                       aria-label={labelOf(id)}
-                      className={`mc-slot w-11 h-11 ${character.shirt === id ? 'mc-slot-selected' : ''}`}
-                      style={{ background: SHIRT_HEX[id] }}
+                      className={`mc-slot w-11 h-11 flex items-center justify-center ${character.shirt === id ? 'mc-slot-selected' : ''}`}
                       onClick={() => pick({ shirt: id })}
-                    />
+                    >
+                      <GarmentIcon kind="shirt" hex={SHIRT_HEX[id]} size={28} />
+                    </button>
                   ))}
                 </div>
 
@@ -114,10 +84,11 @@ const Onboarding: React.FC = () => {
                       type="button"
                       title={labelOf(id)}
                       aria-label={labelOf(id)}
-                      className={`mc-slot w-11 h-11 ${character.pants === id ? 'mc-slot-selected' : ''}`}
-                      style={{ background: PANTS_HEX[id] }}
+                      className={`mc-slot w-11 h-11 flex items-center justify-center ${character.pants === id ? 'mc-slot-selected' : ''}`}
                       onClick={() => pick({ pants: id })}
-                    />
+                    >
+                      <GarmentIcon kind="pants" hex={PANTS_HEX[id]} size={28} />
+                    </button>
                   ))}
                 </div>
               </div>

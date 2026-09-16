@@ -88,9 +88,9 @@ const Cofrinho: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-2" onClick={onClose}>
-      <div className="mc-modal rounded-lg w-full max-w-lg max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="p-4 border-b-4 border-[#17130f] flex justify-between items-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 mn-veil" onClick={onClose}>
+      <div className="mc-modal mc-pop rounded-lg w-full max-w-lg max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center">
           <h2 className="mc-title text-sm">Banco da Vila</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>

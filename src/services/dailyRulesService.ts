@@ -18,7 +18,7 @@ import { fromVillageDoc } from './villageService';
 import { initialVillageDoc } from '../config/village';
 import { touchHealth } from './observability';
 import type { Period, ScheduleTask } from '../types/village';
-import { cracksAfterClose, DEFAULT_LOTS_BY_PERIOD } from './village/repair';
+import { cracksAfterClose, liveBuildingLevel } from './village/repair';
 import { claimKey, hasClaim } from './village/claims';
 import { bumpChallenge, extendActiveChallenges } from './challengesService';
 
@@ -162,7 +162,6 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
   const due = dueTasks.length;
   const skipPenalty = vacation || paused || punished;
   const missedTasks = dueTasks.filter((t) => !done.taskIds.includes(t.id));
-  const firstMissedPeriod = (missedTasks[0]?.period || 'morning') as Period;
 
   const progressRef = doc(db, 'progress', userId);
   const villageRef = doc(db, 'village', userId);
@@ -180,7 +179,8 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
     const village = villageSnap.exists()
       ? fromVillageDoc(userId, villageSnap.data() as Record<string, unknown>)
       : initialVillageDoc(userId, new Date().toISOString());
-    const cerca = Number((baseSnap.data()?.buildings as { cerca?: number } | undefined)?.cerca) || 0;
+    const buildings = (baseSnap.data()?.buildings || {}) as Record<string, number>;
+    const cerca = liveBuildingLevel(buildings, village.cracks, 'cerca');
 
     let missed = missedTasks.length;
     let helmetUsed = false;
@@ -261,8 +261,8 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       : helmetUsed
         ? missedTasks.slice(1).map((t) => t.id)
         : missedTasks.map((t) => t.id);
-    const crackPeriod = (missedTasks.find((t) => missedIds.includes(t.id))?.period || firstMissedPeriod) as Period;
-    const cracks = cracksAfterClose(cerca >= 2 ? [] : village.cracks, missedIds, DEFAULT_LOTS_BY_PERIOD, crackPeriod);
+    const missedForCrack = missedTasks.filter((t) => missedIds.includes(t.id)).map((t) => ({ period: t.period as Period }));
+    const cracks = cracksAfterClose(cerca >= 2 ? [] : village.cracks, missedForCrack, buildings);
     const punishKey = claimKey('punish', date);
     const claimed = { ...village.claimed };
     if (punished && !hasClaim(village, punishKey)) {
