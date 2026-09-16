@@ -64,7 +64,7 @@ const FALLBACK: SceneAnchors = {
 };
 
 type Hotspot = { id: string; x: number; y: number; w: number; h: number; label?: string };
-type Smoke = { x: number; y: number; r: number; a: number; vy: number };
+type Smoke = { x: number; y: number; r: number; a: number; vy: number; vx?: number };
 type Layer = {
   id: string;
   y: number;
@@ -288,6 +288,14 @@ function spriteBox(
     dx: lot.x + lot.w / 2 - destW / 2,
     dy: empty ? lot.y + lot.h / 2 - destW / 2 : lot.y + lot.h - destW,
   };
+}
+
+/** Boca da chaminé da Fornalha, no sprite sentado no lote (não no canto do pad). */
+function forgeChimney(lot: { x: number; y: number; w: number; h: number }, level: number): { x: number; y: number } {
+  const box = spriteBox(lot, level <= 0, 'lot');
+  const fx = level >= 3 ? 0.41 : level >= 2 ? 0.33 : 0.35;
+  const fy = level >= 2 ? 0.12 : 0.14;
+  return { x: box.dx + box.destW * fx, y: box.dy + box.destH * fy };
 }
 
 function label(ctx: CanvasRenderingContext2D, text: string, cx: number, y: number) {
@@ -628,11 +636,12 @@ interface Props {
   onClickSpot: (id: string) => void;
   onDismissSpeech: () => void;
   houseSmoke?: boolean;
+  buildFx?: { id: BuildingId; at: number } | null;
   className?: string;
 }
 
 const VillageScene: React.FC<Props> = ({
-  village, buildings, hour, gated, reducedMotion, speech, onClickSpot, onDismissSpeech, houseSmoke = false, className = '',
+  village, buildings, hour, gated, reducedMotion, speech, onClickSpot, onDismissSpeech, houseSmoke = false, buildFx = null, className = '',
 }) => {
   const ref = useRef<HTMLCanvasElement>(null);
   const spots = useRef<Hotspot[]>([]);
@@ -641,6 +650,8 @@ const VillageScene: React.FC<Props> = ({
   const chimney = useRef<Smoke[]>([]);
   const embers = useRef<Smoke[]>([]);
   const dust = useRef<Smoke[]>([]);
+  const rubble = useRef<Smoke[]>([]);
+  const lastBuildAt = useRef(0);
   const flies = useRef(Array.from({ length: 10 }, (_, i) => ({
     x: 200 + i * 90,
     y: 180 + (i % 4) * 70,
@@ -784,10 +795,22 @@ const VillageScene: React.FC<Props> = ({
           y: lot.y + lot.h,
           hit,
           draw: (c) => {
+            let dw = destW;
+            let dh = destH;
+            let ox = dx;
+            let oy = dy;
+            if (buildFx && buildFx.id === bid && !reducedMotion) {
+              const t = Math.min(1, Math.max(0, (now - buildFx.at) / 200));
+              const pop = 0.8 + 0.2 * t;
+              dw = destW * pop;
+              dh = destH * pop;
+              ox = dx + (destW - dw) / 2;
+              oy = dy + destH - dh;
+            }
             if (sprite && !skipSprite) {
-              const drawn = gated ? graySprite(sprite, destW, destH) : sprite;
-              c.drawImage(drawn, dx, dy, destW, destH);
-              if (gated) lockIcon(c, dx + destW / 2 - 14, dy + 8);
+              const drawn = gated ? graySprite(sprite, Math.max(1, Math.round(dw)), Math.max(1, Math.round(dh))) : sprite;
+              c.drawImage(drawn, ox, oy, dw, dh);
+              if (gated) lockIcon(c, ox + dw / 2 - 14, oy + 8);
             }
             if (village.cracks.includes(lot.id)) {
               const crack = img('/assets/village/tiles/fx_rachadura.png', bump);
@@ -953,26 +976,68 @@ const VillageScene: React.FC<Props> = ({
 
       const furnace = anchors.lots.find((l) => l.id === 'fornalha');
       const furnaceLv = buildings.fornalha || 0;
-      if (furnace && furnaceLv >= 1 && !reducedMotion) {
-        if (smoke.current.length < 5 && Math.random() < 0.08) {
-          smoke.current.push({
-            x: furnace.x + anchors.smokeOffset.dx,
-            y: furnace.y + anchors.smokeOffset.dy,
-            r: 4,
-            a: 0.5,
-            vy: 20,
+      let forgeMouth = { x: 0, y: 0 };
+      if (furnace && furnaceLv >= 1) {
+        forgeMouth = forgeChimney(furnace, furnaceLv);
+        if (!reducedMotion) {
+          if (smoke.current.length < 5 && Math.random() < 0.08) {
+            smoke.current.push({
+              x: forgeMouth.x + (Math.random() - 0.5) * 4,
+              y: forgeMouth.y,
+              r: 4,
+              a: 0.5,
+              vy: 20,
+            });
+          }
+          smoke.current = smoke.current.filter((p) => p.a > 0.04);
+          smoke.current.forEach((p) => {
+            p.y -= p.vy / 30;
+            p.x += Math.sin((elapsed + p.y) * 0.7) * 0.12;
+            p.r += 0.08;
+            p.a -= 0.008;
           });
         }
-        smoke.current = smoke.current.filter((p) => p.a > 0.04);
-        smoke.current.forEach((p) => {
+      } else {
+        smoke.current = [];
+      }
+
+      if (buildFx && lastBuildAt.current !== buildFx.at) {
+        lastBuildAt.current = buildFx.at;
+        smoke.current = [];
+        const fxLot = anchors.lots.find((l) => l.id === buildFx.id);
+        rubble.current = fxLot
+          ? Array.from({ length: reducedMotion ? 0 : 12 }, () => ({
+            x: fxLot.x + fxLot.w * (0.25 + Math.random() * 0.5),
+            y: fxLot.y + fxLot.h * (0.45 + Math.random() * 0.4),
+            r: 2 + Math.random() * 3.2,
+            a: 0.58,
+            vy: 10 + Math.random() * 22,
+            vx: (Math.random() - 0.5) * 28,
+          }))
+          : [];
+      }
+      if (buildFx && !reducedMotion) {
+        const fxLot = anchors.lots.find((l) => l.id === buildFx.id);
+        const age = (now - buildFx.at) / 1000;
+        if (fxLot && age < 0.85 && rubble.current.length < 18 && Math.random() < 0.4) {
+          rubble.current.push({
+            x: fxLot.x + fxLot.w * (0.3 + Math.random() * 0.4),
+            y: fxLot.y + fxLot.h * 0.7,
+            r: 2 + Math.random() * 2.5,
+            a: 0.45,
+            vy: 8 + Math.random() * 16,
+            vx: (Math.random() - 0.5) * 20,
+          });
+        }
+        rubble.current = rubble.current.filter((p) => p.a > 0.04);
+        rubble.current.forEach((p) => {
+          p.x += (p.vx || 0) / 30;
           p.y -= p.vy / 30;
-          p.r += 0.08;
-          p.a -= 0.008;
-          ctx.fillStyle = `rgba(200,200,200,${p.a})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
+          p.r += 0.1;
+          p.a -= 0.016;
         });
+      } else if (!buildFx) {
+        rubble.current = [];
       }
 
       if (houseLot && houseSmoke) {
@@ -1098,6 +1163,28 @@ const VillageScene: React.FC<Props> = ({
         }
       }
 
+      if (furnace && furnaceLv >= 1) {
+        if (reducedMotion) {
+          ctx.fillStyle = 'rgba(200,200,200,0.4)';
+          ctx.beginPath();
+          ctx.arc(forgeMouth.x, forgeMouth.y - 6, 6, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          smoke.current.forEach((p) => {
+            ctx.fillStyle = `rgba(200,200,200,${p.a})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+      }
+      rubble.current.forEach((p) => {
+        ctx.fillStyle = `rgba(170,150,120,${p.a})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
       const over = hover.current;
       if (over) {
         outline(ctx, over.x, over.y, over.w, over.h, night);
@@ -1137,7 +1224,7 @@ const VillageScene: React.FC<Props> = ({
       document.removeEventListener('visibilitychange', onVis);
       io.disconnect();
     };
-  }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick, houseSmoke]);
+  }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick, houseSmoke, buildFx]);
 
   const hitAt = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = ref.current;

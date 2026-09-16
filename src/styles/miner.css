@@ -545,3 +545,40 @@
     background: rgba(23, 19, 15, 0.92);
   }
 }
+
+/* cartão da obra: estágio visível, sem teclado 1 2 3 */
+.mn-obra-lv {
+  font-family: var(--mc-pixel);
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--mc-gold-hi);
+  text-shadow: 2px 2px 0 #3f2d00;
+}
+.mn-obra-stages {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.mn-obra-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 56px;
+  margin: 0;
+}
+.mn-obra-stage.is-next img,
+.mn-obra-stage.is-later img {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+.mn-obra-stage figcaption {
+  min-height: 1.2em;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--mc-muted);
+  text-align: center;
+}
+.mn-obra-stage.is-now figcaption {
+  color: var(--mc-gold-hi);
+}

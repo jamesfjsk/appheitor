@@ -172,3 +172,22 @@ Nota de desenvolvimento: o login navega para `/flash` e perde a query da URL, en
 O Lote 1 está a uma rodada curta de fechar. Bloqueiam: **D1** (conserto pagando 0), **D1b/A4** (portão da prova: mapear `quizRequired`, portão em `openDistrict`, hotbar, teclas e no clique da cena, cadeado da Mina, "Prova do dia" em qualquer nível da Mesa), **R1** (id fixo das conclusões barrando a criança ao refazer missão desfeita; seção 10), **D2** (punição contornável) e **D4/R2** (alarme repetindo). Junto: D3, D5, D7, D8, D9 e os parciais da seção 10 (Foco ativa para sempre, "Criar meta" com Cofre 0, Cofre nível 3, `rewardTitle` lido nas telas, `settings/economy` no serviço de construção, gasto por ralo na Balança, `trophy_*` em `newItems`, Cerca 2, `metadata.capped`, chip de tochas, "Foco" na Casa sem cronômetro, "Concluir" em missão feita, título vazio na Agenda, editar apagando hora, Mochila na punição, `onFinished` duplo, Obras oferecendo "Melhorar" para Barraca e Sino).
 
 Depois dessa rodada: checagens, republicar regras e função, aceite só dos pontos tocados (D1, D1b, D2, D4 com foto), relatório atualizado. Aí o Lote 1 fecha e o Lote 2 começa.
+
+
+## 13. Terceira conferência e veredito final do Lote 1 (15/09, 22h; commit be66428)
+
+Código lido e navegador na conta de teste (56 fotos e logs em `scratchpad/e2e4/`):
+
+- **D1 conserto**: ao completar a terceira missão, toast "Lote consertado: +3 gold", linha `repair +3` com a data de ontem, rachadura apagada, chave `repair:2026-09-14`. Passou.
+- **D1b prova como portão**: com `quizRequired` verdadeiro, cadeados em todos os lotes e na entrada da Mina, e os doze gatilhos (Mina, Ferreiro, Comerciante, lotes, hotbar Mina e Mercado, teclas E, O, L) abrem a prova, não o destino; a Mochila continua aberta (não é portão). Passou.
+- **R1 missão desfeita e refeita**: "Não foi feita" no painel, depois concluir de novo pela criança: paga certo, sem "Sem internet"; a conclusão antiga fica revertida e nasce uma nova. Passou.
+- **D2 punição**: teclas 4, L, B, I, hotbar Mercado e Mochila, Comerciante e Armazém travados com a linha da punição; cartão do Mercado com "Mercado fechado na punição" desabilitado; Mina e prova abrem; "Tarefas da punição" sem erro de permissão. Passou.
+- **D4 alarme**: um toast só na hora, Placa piscando, "Ok" encerra e não volta em 100 s, `remindedFor` gravado uma vez; item marcado "Feito" antes da hora não toca. Passou. (Em três tentativas outra sessão da conta de teste, aberta em outro lugar, lembrou primeiro e calou a minha; é o comportamento desenhado.)
+- Rápidos: "Trocas bloqueadas 0/3" com 3 devidas; rodapé do Baú "faltam 4h00"; "Recuperar" some e o segundo clique vira toast, sem `pageerror`. Passaram.
+- Console: nenhum `pageerror`.
+
+**Ficou para o Lote 2** (não bloqueia): "Novo" na Mochila não aparece em desenvolvimento (o cleanup do efeito roda na montagem com StrictMode e apaga `newItems` antes do primeiro render; em produção o StrictMode não dobra, mas o desenho certo é limpar ao fechar a Mochila, não ao montar); painel de prêmios embutido no cartão do Mercado mostra "Trocas liberadas" durante a punição; os parciais da seção 10 (Cofre nível 3, cosmético das 21 tochas e `trophy_*` em `newItems`, gasto por ralo na Balança, `rewardTitle` lido nas telas, Cerca 2 com rachadura repetida, `metadata.capped`, chip de tochas, "Foco" na Casa abrindo o cronômetro, título vazio na Agenda, editar apagando hora, `onFinished` duplo no Foco, Obras oferecendo "Melhorar" para Barraca e Sino, "Semana 2026-38" no Extrato, percentual de poupança com gold semeado).
+
+**Veredito: Lote 1 aprovado.** Dinheiro, regras, portão da prova, punição, Agenda e conserto fazem o que a especificação e os documentos de desenho pedem; o que sobrou é acabamento e vai na lista do Lote 2.
+
+Sobre a `main` e o dia 18: a `main` continua com a Etapa 1 e 1B, que é a versão testada para o aniversário. Recomendo entregar o dia 18 com ela e fundir a `etapa-2` na `main` no fim de semana seguinte, como "a vila cresceu" (Casa, Banco, Agenda, Mochila, Ferraria, Comerciante). Se o pai preferir o jogo mais completo já no dia 18, fundir agora dá dois dias de teste na conta real antes; é decisão dele.

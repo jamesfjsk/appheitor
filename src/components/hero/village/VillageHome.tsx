@@ -15,7 +15,7 @@ import { nextEvents, occurrencesBetween, reminderDue } from '../../../services/v
 import { markAgendaDone, subscribeAgenda, updateAgendaItem, weeklyOrganizedBonus } from '../../../services/agendaService';
 import { createMineSfx } from '../english/mine/sfx';
 import { CHILD_BIRTHDAY_MMDD } from '../../../config/rules';
-import { VILLAGE_LINES } from '../../../data/villageLines';
+import { VILLAGE_LINES, buildLine } from '../../../data/villageLines';
 import { HABIT_LINES } from '../../../data/habitLines';
 import { addDays, clockDriftWarning, isoWeekOf } from '../../../utils/clock';
 import { usePunishment } from '../../../contexts/PunishmentContext';
@@ -69,7 +69,7 @@ const VillageHome: React.FC<Props> = ({
 }) => {
   const { village, materials, buildings, economy, pauseDays, notices, ackNotice } = useVillage();
   const { tasks, progress, completeTask } = useData();
-  const { playClick } = useSound();
+  const { playClick, playHammer } = useSound();
   const { hour, minute, today, now, driftMs } = useClock();
   const { isPunished } = usePunishment();
   const lockedShop = punished || isPunished;
@@ -78,6 +78,7 @@ const VillageHome: React.FC<Props> = ({
   const [lot, setLot] = useState<BuildingId | null>(null);
   const [dockTab, setDockTab] = useState<'vila' | 'missoes'>('vila');
   const [speech, setSpeech] = useState<{ npc: string; text: string } | null>(null);
+  const [buildFx, setBuildFx] = useState<{ id: BuildingId; level: number; at: number } | null>(null);
   const [goalPreset, setGoalPreset] = useState<{ title: string; targetGold: number; rewardId?: string } | undefined>();
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [agendaFlash, setAgendaFlash] = useState<string | null>(null);
@@ -240,7 +241,6 @@ const VillageHome: React.FC<Props> = ({
       return;
     }
     if (id === 'chest_streak') { setDistrict('chest'); return; }
-    if (id === 'build:bau' && lv('bau') >= 1) { setDistrict('pack'); return; }
     if (id === 'arena') {
       setSpeech({ npc: 'olheiro', text: 'Quando a Arena abrir, eu quero ver você ganhar do seu pai no xadrez.' });
       return;
@@ -257,6 +257,18 @@ const VillageHome: React.FC<Props> = ({
       if (bid in BUILDING_BY_ID) setLot(bid as BuildingId);
     }
   }, [buildings, hour, lockedShop, onOpenQuiz, playClick, quizLocked]);
+
+  useEffect(() => {
+    if (!buildFx) return;
+    const speak = window.setTimeout(() => {
+      setSpeech({ npc: 'ferreiro', text: buildLine(buildFx.id, buildFx.level) });
+    }, reduced ? 0 : 420);
+    const end = window.setTimeout(() => setBuildFx(null), reduced ? 200 : 1200);
+    return () => {
+      window.clearTimeout(speak);
+      window.clearTimeout(end);
+    };
+  }, [buildFx, reduced]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -318,6 +330,7 @@ const VillageHome: React.FC<Props> = ({
           onClickSpot={openDistrict}
           onDismissSpeech={dismissSpeech}
           houseSmoke={due.length > 0 && done >= due.length}
+          buildFx={buildFx ? { id: buildFx.id, at: buildFx.at } : null}
         />
         {(todayAgenda.length > 0 || tomorrowAgenda.length > 0 || ticker || habitLine.text || driftLine) && (
           <div className="mn-ticker">
@@ -462,6 +475,12 @@ const VillageHome: React.FC<Props> = ({
             setDistrict('bank');
           }}
           shopLocked={lockedShop}
+          onBuilt={(id, newLevel) => {
+            setLot(null);
+            setDistrict(null);
+            playHammer();
+            setBuildFx({ id, level: newLevel, at: performance.now() });
+          }}
         />
       )}
       {district === 'chest' && <DailyChest hour={hour} onClose={() => setDistrict(null)} />}

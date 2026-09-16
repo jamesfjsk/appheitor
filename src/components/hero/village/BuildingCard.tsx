@@ -38,16 +38,17 @@ interface Props {
   onOpenAgenda?: () => void;
   onOpenMarket?: () => void;
   onCreateGoal?: (title: string, gold: number, rewardId?: string) => void;
+  onBuilt?: (id: BuildingId, newLevel: number) => void;
   shopLocked?: boolean;
 }
 
 const BuildingCard: React.FC<Props> = ({
   id, onClose, onOpenMine, onOpenChest, onOpenTower, onOpenWorkshop, onOpenQuiz,
-  onOpenBank, onOpenAgenda, onOpenMarket, onCreateGoal, shopLocked = false,
+  onOpenBank, onOpenAgenda, onOpenMarket, onCreateGoal, onBuilt, shopLocked = false,
 }) => {
   const { childUid } = useAuth();
   const { village, materials, buildings, economy } = useVillage();
-  const { playClick, playLevelUp } = useSound();
+  const { playClick } = useSound();
   const [busy, setBusy] = useState(false);
   const [inv, setInv] = useState(false);
   const [theme, setTheme] = useState('');
@@ -64,9 +65,8 @@ const BuildingCard: React.FC<Props> = ({
     .join(', ');
   const maxLive = def.liveMaxLevel ?? BUILDING_MAX_LEVEL;
   const atCap = level >= maxLive;
-  const pipCount = Math.max(1, maxLive || 1);
 
-  const actionLabel = level === 0 ? 'Construir' : 'Melhorar';
+  const actionLabel = level === 0 ? 'Construir' : `Melhorar · nível ${info.nextLevel}`;
   const lockLabel = info.later
     ? (info.later === 'Em breve' && atCap ? null : (/^(Precisa|Em breve)/.test(info.later) ? info.later : `Abre na ${info.later}`))
     : !info.unlocked
@@ -86,8 +86,8 @@ const BuildingCard: React.FC<Props> = ({
     setBusy(true);
     try {
       const { newLevel } = await buildUpgrade(childUid, id);
-      playLevelUp();
-      toast.success(`${def.label} chegou ao nível ${newLevel}`);
+      onBuilt?.(id, newLevel);
+      onClose();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Não deu para construir');
     } finally {
@@ -124,22 +124,39 @@ const BuildingCard: React.FC<Props> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 border-b-4 border-[#17130f] flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-start gap-3 min-w-0">
             <div className="mc-slot w-24 h-24 p-1 shrink-0 flex items-center justify-center">
               <img src={buildingSprite(id, Math.max(0, level))} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
             </div>
             <div className="min-w-0">
-              <h2 className="mc-h mb-1">{def.label} / {def.labelEn}</h2>
-              <div className="flex gap-1 mt-1" aria-label={`Nível ${level} de ${pipCount}`}>
-                {Array.from({ length: pipCount }, (_, i) => i + 1).map((n) => (
-                  <span
-                    key={n}
-                    className={`mc-slot w-8 h-8 flex items-center justify-center mc-num text-[10px] ${level >= n ? 'mc-slot-good text-white' : 'mc-muted'}`}
-                  >
-                    {n}
-                  </span>
-                ))}
-              </div>
+              <h2 className="text-xl font-bold text-white leading-tight">{def.label}</h2>
+              <p className="text-sm mc-muted">{def.labelEn}</p>
+              <p className="mn-obra-lv mt-1">
+                {level <= 0 ? 'Ainda não construída' : atCap && maxLive <= 1 ? 'Pronta' : atCap ? `Nível ${level} · máxima` : `Nível ${level}`}
+              </p>
+              {maxLive >= 2 && (
+                  <div className="mn-obra-stages" aria-label={`Nível ${level} de ${maxLive}`}>
+                    {Array.from({ length: maxLive }, (_, i) => i + 1).map((n) => {
+                      const now = level === n;
+                      const next = (level <= 0 && n === 1) || (level > 0 && n === level + 1);
+                      const owned = level >= n;
+                      const cap = n === maxLive && n > (level <= 0 ? 1 : level + 1);
+                      return (
+                        <figure
+                          key={n}
+                          className={`mn-obra-stage ${now ? 'is-now' : next ? 'is-next' : owned ? 'is-on' : 'is-later'}`}
+                        >
+                          <div className={`mc-slot w-12 h-12 p-0.5 ${now ? 'mc-slot-selected' : owned ? 'mc-slot-good' : ''}`}>
+                            <img src={buildingSprite(id, n)} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
+                          </div>
+                          <figcaption>
+                            {now ? 'agora' : next ? 'próximo' : cap ? 'depois' : '\u00a0'}
+                          </figcaption>
+                        </figure>
+                      );
+                    })}
+                  </div>
+              )}
             </div>
           </div>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0 shrink-0" onClick={onClose} aria-label="Fechar">
@@ -154,38 +171,43 @@ const BuildingCard: React.FC<Props> = ({
           </section>
 
           <section>
-            <p className="mc-lbl mb-1">Próximo nível</p>
+            <p className="mc-lbl mb-1">{level <= 0 ? 'Quando construir' : 'Próximo nível'}</p>
             {atCap ? (
               <p className="text-sm">Nível máximo.</p>
             ) : (
-              <>
-                <p className="text-sm">
-                  {nextText}
-                  {info.later ? <span className="mc-muted"> · em breve</span> : null}
-                </p>
-                {cost && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {MATERIALS.filter((m) => (cost[m] || 0) > 0).map((m) => (
-                      <span key={m} className="mc-chip mc-slot px-2 py-1 flex items-center gap-1">
-                        <img src={MATERIAL_ICONS[m]} alt="" className="w-5 h-5 mc-pixel" />
-                        <span className="mc-num text-white">{cost[m]}</span>
-                        <span className="mc-chip-l">{MATERIAL_LABELS[m]}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <button
-                  type="button"
-                  disabled={!info.ok || busy}
-                  className="mc-btn mc-btn-green min-h-[44px] px-4 font-bold mt-3"
-                  onClick={() => void build()}
-                >
-                  {busy ? '...' : btnLabel}
-                </button>
-                {!info.ok && missingText && !lockLabel && (
-                  <p className="text-sm mc-muted mt-1">Falta {missingText}</p>
-                )}
-              </>
+              <div className="flex gap-3 items-start">
+                <div className="mc-slot w-16 h-16 p-1 shrink-0">
+                  <img src={buildingSprite(id, Math.max(1, info.nextLevel))} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm">
+                    {nextText}
+                    {info.later ? <span className="mc-muted"> · em breve</span> : null}
+                  </p>
+                  {cost && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {MATERIALS.filter((m) => (cost[m] || 0) > 0).map((m) => (
+                        <span key={m} className="mc-chip mc-slot px-2 py-1 flex items-center gap-1">
+                          <img src={MATERIAL_ICONS[m]} alt="" className="w-5 h-5 mc-pixel" />
+                          <span className="mc-num text-white">{cost[m]}</span>
+                          <span className="mc-chip-l">{MATERIAL_LABELS[m]}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    disabled={!info.ok || busy}
+                    className="mc-btn mc-btn-green w-full min-h-[48px] px-4 font-bold mt-3"
+                    onClick={() => void build()}
+                  >
+                    {busy ? 'Obra...' : btnLabel}
+                  </button>
+                  {!info.ok && missingText && !lockLabel && (
+                    <p className="text-sm mc-muted mt-1">Falta {missingText}</p>
+                  )}
+                </div>
+              </div>
             )}
           </section>
 
