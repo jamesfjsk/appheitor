@@ -196,7 +196,7 @@ export const BUILDINGS: BuildingDef[] = [
     effect: 'O Olheiro cuida da Arena. Jogos com o pai: xadrez, Lig 4.',
     icon: '/assets/village/buildings/arena-1.png',
     costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(2, 2, 2, 2)],
-    requiresCore: true,
+    requiresCore: false,
     liveMaxLevel: 0,
     opensIn: 'Etapa 4B',
     hideOnBaseMap: true,
@@ -293,6 +293,7 @@ export function buildingSprite(id: BuildingId, level: number): string {
 
 /** Torre, Mesa e Campinho só aparecem com Fornalha e Baú no nível 1 ou mais */
 export function isBuildingUnlocked(id: BuildingId, buildings: Record<BuildingId, number>): boolean {
+  if (id === 'arena') return true;
   if (id === 'cerca') return (buildings.fornalha || 0) >= 1;
   if (id === 'cofre') return (buildings.bau || 0) >= 1;
   if (id === 'agenda' || id === 'mercado') return true;

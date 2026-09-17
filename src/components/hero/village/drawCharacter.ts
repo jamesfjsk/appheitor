@@ -219,6 +219,7 @@ function kitOf(extras?: CanvasImageSource | LookKit | null): LookKit {
 }
 
 export function lookKey(character: VillageCharacter, gear?: VillageGear | null): string {
+  const pickLv = Math.max(0, Math.min(4, gear?.pickaxe ?? 0));
   return [
     character.skin,
     character.hair,
@@ -228,6 +229,7 @@ export function lookKey(character: VillageCharacter, gear?: VillageGear | null):
     character.cape || '',
     character.pet || '',
     gear?.pickaxe ?? '',
+    PICK_OVERLAY[pickLv] || '',
     gear?.boots ?? '',
   ].join('|');
 }

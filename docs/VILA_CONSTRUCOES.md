@@ -25,7 +25,7 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 ### 2. Baú (Storage): o armazém
 
 - **Para que serve**: ver o que ele tem e melhorar o que o dia rende.
-- **Nível 1**: abre o **inventário** (materiais, raros, equipamentos, cosméticos) e libera Torre, Mesa e Campinho (já existe).
+- **Nível 1**: abre o **inventário** (materiais, raros, equipamentos, cosméticos) e libera Torre e Biblioteca (o Campinho saiu do texto em 17/09).
 - **Nível 2**: o Baú do Dia dá **+1 material**.
 - **Nível 3**: a esmeralda do Baú do Dia vem a cada **2** dias completos seguidos em vez de 3.
 - **Ao tocar**: cartão com o inventário em abas (Materiais, Raros, Equipamentos, Cosméticos) e o atalho "Abrir o Baú do Dia" (mesmo modal de hoje).
@@ -46,7 +46,7 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 - **Para que serve**: ver o que ele conquistou e para onde está indo.
 - **Nível 1**: abre a **Torre**: conquistas (pacote da nova fase) e a estrela de temporada.
 - **Nível 2**: **Recordes e Troféu da semana** (Etapa 2).
-- **Nível 3**: a criança pode **propor desafios** ao pai (Etapa 2) e vê o **Mapa de habilidades** (relatório semanal).
+- **Nível 3**: vê o **Mapa de habilidades** (acertos por matéria, da Memória da Prova) e as **Histórias** dos personagens (pedidos cumpridos). "Propor desafios" saiu da tela em 15/09 e sai do texto do nível em 17/09.
 - **Ao tocar**: cartão com abas Conquistas, Recordes, Troféus, Habilidades (as que o nível liberou; as outras com cadeado e o nível necessário).
 - **Visual**: `buildings/torre-1..3.png`; luz no topo à noite.
 
@@ -54,8 +54,8 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 
 - **Para que serve**: a prova do dia e o que ele vai aprender. É a casa do Sábio.
 - **Nível 1**: abre a **prova do dia** e o **tema da história de amanhã** na Mina. Sem este nível, a prova não aparece.
-- **Nível 2**: **Estante de erros** e o **Diário** (Etapa 3).
-- **Nível 3**: **1 dica grátis por dia** no Recado da Mina e o Sábio responde ao Diário no dia seguinte (Etapa 3).
+- **Nível 2** (decisão do pai em 17/09, vale desde o lançamento): abre **"Como você vai"** na Biblioteca (o acerto dele por matéria e por assunto, da Memória da Prova) e a **revisita**: uma das 8 perguntas da prova volta a um erro de 3 a 10 dias atrás por outro ângulo. Na Etapa 3 o nível 2 ganha também a **Estante de erros** e o **Diário**.
+- **Nível 3** (idem): **1 dica grátis por dia** no Recado da Mina e a **revisita paga o dobro** (gold e XP da pergunta de revisita x2, dentro dos tetos). Na Etapa 3, o Sábio responde ao Diário no dia seguinte.
 - **Ao tocar**: nível 0 abre o cartão Construir; nível 1+ abre a prova. O cartão também guarda o tema de amanhã.
 - **Visual**: `buildings/mesa-1..3.png` (roxa de propósito, é magia); partículas roxas no nível 3.
 
@@ -79,7 +79,7 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 - **Para que serve**: guardar gold para algo grande e aprender paciência.
 - **Nível 1**: abre o **Cofrinho** com 1 meta e **5%** de paciência.
 - **Nível 2**: 2 metas e **8%** de bônus de paciência (juros semanais com teto).
-- **Nível 3**: **12%** de paciência, faixa **prêmio da temporada** e o Extrato mensal.
+- **Nível 3**: **12%** de paciência, faixa **prêmio da temporada** e o Extrato mensal. **Decisão do pai em 17/09: o nível 3 fica trancado até a Etapa 3** (o cartão mostra "Abre na Etapa 3", botão desabilitado, sem custo cobrado), porque a faixa e o Extrato mensal ainda não existem.
 - **Ao tocar**: nível 0 = Construir; nível 1+ abre o Cofrinho.
 - **Visual**: `buildings/cofre-1..3.png`.
 - Precisa do Armazém nível 1.

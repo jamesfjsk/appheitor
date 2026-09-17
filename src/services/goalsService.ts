@@ -155,7 +155,8 @@ export async function depositGoal(uid: string, goalId: string, amount: number): 
       createdAt: serverTimestamp(),
     }));
   });
-  void import('./village/statsBump').then((m) => m.bumpVillage(uid, { deposits: 1, savedGold: amount }));
+  const { bumpVillage } = await import('./village/statsBump');
+  await bumpVillage(uid, { deposits: 1, savedGold: amount });
 }
 
 export async function requestCancel(uid: string, goalId: string, reason: string): Promise<void> {
@@ -240,7 +241,11 @@ export async function applyWeeklyInterest(uid: string): Promise<number> {
     });
     paid += cut.paid;
   }
-  if (paid > 0) void touchHealth(uid, 'lastInterestWeek', week);
+  if (paid > 0) {
+    void touchHealth(uid, 'lastInterestWeek', week);
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(uid, { interestWeeks: 1 });
+  }
   return paid;
 }
 
@@ -249,11 +254,15 @@ export async function finishGoal(
   outcome: 'achieved' | 'cancelled',
   adminUid: string
 ): Promise<void> {
+  let finishedUid = '';
+  let finishedTarget = 0;
   await runTransaction(db, async (tx) => {
     const goalRef = doc(db, 'goals', goalId);
     const gSnap = await tx.get(goalRef);
     if (!gSnap.exists()) throw new Error('Meta não encontrada');
     const goal = fromGoalDoc(gSnap.id, gSnap.data() as Record<string, unknown>);
+    finishedUid = goal.userId;
+    finishedTarget = goal.targetGold;
     if (goal.status === 'achieved' || goal.status === 'cancelled') throw new Error('Essa meta já fechou');
     const progressRef = doc(db, 'progress', goal.userId);
     const pSnap = await tx.get(progressRef);
@@ -320,6 +329,14 @@ export async function finishGoal(
       createdBy: adminUid,
     }));
   });
+  if (outcome === 'achieved' && finishedUid) {
+    const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
+    const dayGold = Number(economy.incomeDayGold) || DEFAULT_ECONOMY.incomeDayGold;
+    const deltas: Record<string, number> = { goalsAchieved: 1 };
+    if (finishedTarget >= dayGold * 20) deltas.bigGoals = 1;
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(finishedUid, deltas);
+  }
 }
 
 export async function weeklyStatementsFor(uid: string, weeks: string[]) {

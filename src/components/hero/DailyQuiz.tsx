@@ -9,9 +9,8 @@ import { FirestoreService } from '../../services/firestoreService';
 import { getTodayBrazil } from '../../utils/clock';
 import { DailyQuiz as DailyQuizDoc } from '../../types';
 import { addDays, completeDailyQuiz, ensureDailyQuiz, quizRewards, saveReflection, subscribeDailyQuiz } from '../../services/dailyQuizService';
-import { isQuizSnoozed, snoozeQuiz } from '../../services/aiQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
-import { visibleCracks } from '../../config/village';
+import { quizOpensOnRequest } from '../../services/village/quizGate';
 
 const BOOK = '/assets/english/ui/book.webp';
 const STAR = '/assets/english/ui/star.webp';
@@ -29,13 +28,12 @@ const QUIZ_DONE_KEY = (uid: string, date: string) => `quiz_completed_${uid}_${da
 const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const { childUid } = useAuth();
   const { progress } = useData();
-  const { economy, village, buildings } = useVillage();
+  const { economy } = useVillage();
   const { playTaskComplete, playLevelUp, playError, playClick } = useSound();
 
   const today = getTodayBrazil();
   const enabled = progress.quizEnabled ?? true;
-  const required = progress.quizRequired ?? false;
-  const mesaDown = (buildings.mesa || 0) >= 1 && visibleCracks(village.cracks).includes('mesa');
+  const required = Boolean(progress.quizRequired);
   const count = progress.quizQuestionCount || DAILY_QUIZ_QUESTIONS;
 
   const [quiz, setQuiz] = useState<DailyQuizDoc | null>(null);
@@ -88,19 +86,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
     ensureDailyQuiz(childUid, addDays(today, 1), today, count).catch((e) => console.warn('DailyQuiz: prefetch de amanhã falhou', e));
   }, [loaded, childUid, enabled, quiz, prepare, today, count]);
 
-  // Decide se abre: prova obrigatória vira portão (não abre sozinha)
   useEffect(() => {
-    if (!loaded || !childUid || !enabled || !quiz) return;
-    if (quiz.completed) return;
-    if (mesaDown) return;
-    if (required) return;
-    if (!required && isQuizSnoozed('daily', childUid, today)) return;
-    setOpen(true);
-  }, [loaded, childUid, enabled, quiz, required, today, mesaDown]);
-
-  useEffect(() => {
-    if (openRequested && !mesaDown) setOpen(true);
-  }, [openRequested, mesaDown]);
+    if (quizOpensOnRequest(openRequested)) setOpen(true);
+  }, [openRequested]);
 
   useEffect(() => {
     if (!quiz?.completed || !childUid) return;
@@ -118,7 +106,6 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   };
 
   const postpone = () => {
-    if (childUid) snoozeQuiz('daily', childUid, today);
     setOpen(false);
   };
 
@@ -208,31 +195,50 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
           <div className="p-5">
             {phase === 'prompt' && (
               <div className="text-center py-2">
-                <h3 className="text-xl font-bold text-white mb-2">
-                  {required ? 'Hoje tem prova antes de tudo' : 'A prova de hoje está pronta'}
-                </h3>
-                <p className="text-white/85 mb-6">
-                  {ready
-                    ? `Uma ideia para pensar e ${quiz.questions.length} perguntas. Cada acerto vale XP e gold.`
-                    : generating
-                      ? 'Preparando a prova de hoje. Leva alguns segundos.'
-                      : error ?? 'Ainda não há prova para hoje.'}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <button
-                    type="button"
-                    onClick={ready ? start : () => void prepare()}
-                    disabled={generating}
-                    className="mc-btn mc-btn-green px-6 py-3 font-bold"
-                  >
-                    {ready ? 'Começar' : generating ? 'Preparando...' : 'Tentar de novo'}
-                  </button>
-                  {!required && (
+                {quiz.completed ? (
+                  <>
+                    <h3 className="text-xl font-bold text-white mb-2">Prova de hoje feita</h3>
+                    <p className="text-white/85 mb-6">
+                      Prova de hoje feita: {quiz.score ?? score} de {quiz.totalQuestions || quiz.questions.length || count}
+                    </p>
                     <button type="button" onClick={postpone} className="mc-btn mc-btn-stone px-6 py-3 font-bold">
-                      Mais tarde
+                      Fechar
                     </button>
-                  )}
-                </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      {required ? 'Hoje tem prova antes de tudo' : 'A prova de hoje está pronta'}
+                    </h3>
+                    <p className="text-white/85 mb-6">
+                      {ready
+                        ? `Uma ideia para pensar e ${quiz.questions.length} perguntas. Cada acerto vale XP e gold.`
+                        : generating
+                          ? 'Preparando a prova de hoje. Leva alguns segundos.'
+                          : error ?? 'Ainda não há prova para hoje.'}
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button
+                        type="button"
+                        onClick={ready ? start : () => void prepare()}
+                        disabled={generating}
+                        className="mc-btn mc-btn-green px-6 py-3 font-bold"
+                      >
+                        {ready ? 'Começar' : generating ? 'Preparando...' : 'Tentar de novo'}
+                      </button>
+                      {!ready && (
+                        <button type="button" onClick={postpone} className="mc-btn mc-btn-stone px-6 py-3 font-bold">
+                          Voltar à Vila
+                        </button>
+                      )}
+                      {ready && !required && (
+                        <button type="button" onClick={postpone} className="mc-btn mc-btn-stone px-6 py-3 font-bold">
+                          Mais tarde
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 

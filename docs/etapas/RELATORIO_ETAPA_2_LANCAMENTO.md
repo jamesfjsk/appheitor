@@ -64,3 +64,177 @@ Não revertido: `public/assets/village/char/pick-*.png`, `src/config/village.ts`
 ### Dúvidas
 
 Nenhuma que tenha impedido o item. `coachOf` da oficina Phaser perdeu o argumento `Tool` não usado; a Vagoneta tem `coachOf` próprio em `cart.ts`.
+
+## P1 — bugs que bloqueiam o dia 1 (17/09)
+
+### O que mudou
+
+1. Portão da prova: `quizGate.ts` (`quizGate = quizLocked`, sem Mesa). Destinos `mine`, `npc:ferreiro`, `npc:comerciante`, mercado, ferraria e `build:*` voltam a abrir a prova. `openRequested` abre mesmo com Mesa caída. A prova não abre sozinha.
+2. Primeiro acesso: `BirthdayCelebration` desmontado; Onboarding com try/catch e botão reativo; `processPendingDays` só na criança logada (painel do pai só no botão); `checkAchievements` exige `isActive === true`.
+3. `closeSeasonState` recusa a segunda no mesmo dia (`stars`, `claimed['season:n']`, `endedOn === today`); apaga `claimed['ach:<id>']` e `newAchievements` com `resetOnSeason`.
+4. `statSources.ts` + teste em `GAME_ACHIEVEMENTS`/`NPC_QUESTS`. Contadores entram na transação do evento (ou `await` em sequência depois). Pedidos: Comerciante 1 = `merchantSales`; Sábio 5 = `quizStreak`; capítulo N só com `tier >= N`; presentes `npcgift:<npc>:<tier>` (esmeralda no 3, diamante no 5).
+5. Recordes: `ensureWeekRecords` na segunda (chave `week:<iso>`); `claimTrophy` usa tochas de `dailyProgress` e grava `recordsAfterWeek`.
+6. Aprendizado: acerto por categoria no `quizBank` (vazio até P5d); `wordsMastered` de `englishBase.vocab` com `seen >= 3`; semana em `learning/{uid}.weeks[<iso>]`. Recalcula na segunda e na aba Relatório.
+7. Plano: ordem por `plan.order`; selo "Foco · 2x material"; toast com loot real da transação.
+8. Torre: cadeados pelo nível da **construção**; minerador por `getLevelFromXP(progress.totalXP)`.
+9. `bumpVillage`/`bumpFriend` são `async` e sempre `await`. Stats do evento na mesma tx; conquista em seguida. Obra: `applyVillageStats` depois `talkToNpc`.
+10. `milestone_10` único; teste de ids no catálogo.
+11. Arena landmark (sem construir, clique = Olheiro); Campinho e Arena fora das Obras e de `BREAKABLE_LOTS`. Campinho já não estava nos lots do `anchors.json`.
+12. Regras: criança não altera `season`/`stars`/`launchedOn`; coleção `quizBank`. Publicadas em **17/09/2026 14:19 -03** (`firestore:rules` e `firestore:indexes`, projeto `app-heitor`).
+13. `closeDay`: `skipPenalty = férias || folga || punição || !enabled`; `cracks` vazio nesse caso.
+
+### Arquivos do pacote
+
+- `src/services/village/quizGate.ts` (novo) e `__tests__/quizGate.test.ts`
+- `src/services/village/statSources.ts` (novo) e `__tests__/statSources.test.ts`
+- `src/services/village/stats.ts`, `statsBump.ts`, `season.ts`, `repair.ts`
+- `src/services/village/__tests__/lote2.test.ts`, `etapa2.test.ts`, `village.test.ts`
+- `src/services/villageService.ts`, `firestoreService.ts`, `dailyRulesService.ts`, `dailyQuizService.ts`, `englishBaseService.ts`, `goalsService.ts`, `challengesService.ts`, `agendaService.ts`, `redstoneService.ts`, `learningService.ts`
+- `src/data/npcQuests.ts`, `src/data/achievements.ts`, `src/config/items.ts`, `src/config/englishBase.ts`
+- `src/components/hero/DailyQuiz.tsx`, `HeroPanel.tsx`, `DailyChecklist.tsx`, `TaskItem.tsx`
+- `src/components/hero/village/VillageHome.tsx`, `Torre.tsx`, `Oficina.tsx`
+- `src/contexts/DataContext.tsx`
+- `src/services/english/__tests__/levels.test.ts`
+- `firestore.rules`, `firestore.indexes.json`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (linha do `quizGate.ts` na §12)
+- este relatório
+
+### Como verificou
+
+| Comando | Resultado |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | 0 erros |
+| `npx eslint src --max-warnings 7` | 0 erros; 7 avisos: 6 em `src/icons/index.tsx` + `CharacterEditor.tsx:153` |
+| `npm run test:english` | 18 arquivos, todos passaram (`quizGate`, `statSources`, `closeSeason` idempotente, ids únicos, skipPenalty, Arena/Campinho fora de `BREAKABLE_LOTS`) |
+| `npx vite build` | ok; chunks `App-B7NwXFf7.js` + `CartBench-BQstcQ_c.js` + `statsBump-B4F0zA-I.js` |
+| chunk `phaser` em `dist/assets` | nenhum |
+| `npx firebase-tools deploy --only firestore:rules,firestore:indexes --project app-heitor` | Deploy complete, 17/09/2026 14:19 -03 |
+
+### O que ficou de fora e por quê
+
+- Gravação do `quizBank` na conclusão da prova: P5d, não P1. O relatório lê a coleção (pode estar vazia).
+- Conta de teste no navegador (Mesa caída + cadeado da Mina, fechar temporada duas vezes, Curioso, plano, 400, Torre): não rodei o app; só testes puros e o deploy das regras.
+- Cosmético específico de NPC no presente do tier 5: não existe no catálogo; entra diamante, como o documento permite.
+- Índice `quizBank` (`userId` asc, `date` desc) publicado; o deploy avisou que há 2 índices no projeto que não estão no arquivo (não apaguei).
+
+### Dúvidas
+
+- `GoalDoc` não tem duração. `bigGoals` sobe quando `targetGold >= incomeDayGold * 20` (vinte dias de renda da economia). Se a regra era outra, ajustar no P4.
+- Mesa caída: não achei bônus de gold da prova ligado à Mesa; só o portão deixa de bloquear a abertura.
+- `closeSeasonState` também recusa se alguma estrela tem `endedOn === today`, senão a temporada 2 (vazia) fecharia na mesma hora.
+
+## P1 — rodada da revisão (lista A 1–20 + B; 17/09)
+
+### O que mudou (A, na ordem)
+
+1. `DailyQuiz`: prova já feita mostra “Prova de hoje feita: X de N” e “Fechar”; se `!ready`, “Voltar à Vila” mesmo com `required`.
+2. `quizLockedFor` em `quizGate.ts`; o `HeroPanel` usa; teste cobre `quizEnabled` e `completed`.
+3. `organizedWeeks` só na transação de `weeklyOrganizedBonus` (`agenda:week:<iso>`).
+4. `merchantSales` = quantidade de pedra (`need`), não lotes.
+5. Apagadas `primeira_vagoneta`, `vagoneta_dias`, `vagoneta_perfeita`; `cart_*` só XP (e raros) conforme §12.
+6. `estante_10`/`estante_50` fora do catálogo; `shelfFixed` em `NO_SOURCE_YET`; teste exige `where` com arquivo/função.
+7. `tierGifts` em `friendship.ts`, usado na conversa e no pedido cumprido.
+8. `finishFocusBlock` na transação da vila; Agenda chama no `onFinished`; DataContext não incrementa mais.
+9. Aprendizado grava `weeks: { [week]: docData }` com merge; segunda recalcula a semana de ontem.
+10. `claimTrophy` não grava `week:<iso>`; `ensureWeekRecords` só na segunda, `hasClaim` primeiro; ignora domingo anterior a `launchedOn` e txs `metadata.launch`.
+11. `applyVillageStats` usa `englishBase.buildings` por padrão; `buildsDone` na tx de `buildUpgrade`.
+12. `completeNight(uid, date)` com chave `night:<date>`; o efeito da Vila só chama.
+13. Tochas: `skip: skipPenalty || keepTorches`; `noPunishDays` não sobe em skip; bump de desafio com `!skipPenalty`.
+14. `settleAfter` com try/catch; `statsBump` avisa no console.
+15. Pedido de notificação só no `AfterOnboard`, com `onboardedAt` e `permission === 'default'`.
+16. Relatório semanal calcula na montagem, em silêncio; o botão força.
+17. `themesSet` uma vez por dia e só se o tema mudou (`themeSetOn`).
+18. Painel do pai (`role === 'admin'`) não roda a cadeia diária da criança.
+19. Cadeado na Mina, Ferreiro, Comerciante e atalho “Mina” da hotbar quando o portão está ligado.
+20. `seeAchievements` ao fechar a Torre (Mochila já limpava ao fechar).
+
+### Lista B (entrou nesta rodada)
+
+1. Arena fora de `quizBlocksDest`; landmark não fica cinza.
+2. Onboarding sem `catch` (o wrap do contexto já avisa).
+3. “Prova do dia” no cartão da Biblioteca em ruínas.
+4. `contractsWeek` zera na virada ISO em `applyVillageStats`.
+5. `closeDay` zera `quizStreak` se o dia não teve prova (fora de férias e folga).
+6. Torre: `stats.fullDaysBest`; cadeados por `liveBuildingLevel`; ícone lucide; pedido trancado diz o nível de amizade que falta.
+7. `closeSeasonState`: mensagem própria se `endedOn` é hoje; teste no `lote2`.
+8. `bigGoals` lê `settings/economy`; `statOf` removido.
+9. Teste: Arena não constrói mesmo com materiais.
+10. Categorias da prova não herdam a semana anterior (`deleteField`); `fullDays` da semana.
+11. Spot de dia do Sábio afastado 60 px da boca da Mina (`anchors.json` e fallback da cena).
+12. “Linha do dia” vs `plan.order`: **não implementado**; fica para a Etapa 3.
+
+### Arquivos (além dos do P1 original)
+
+- `src/services/village/friendship.ts` (novo) e `__tests__/friendship.test.ts`
+- `src/services/village/quizGate.ts`, `statSources.ts`, testes
+- `src/services/agendaService.ts` (`finishFocusBlock`)
+- `src/services/villageService.ts` (`settleAfter`, `completeNight`)
+- `src/components/hero/DailyQuiz.tsx`, `HeroPanel.tsx`
+- `src/components/hero/village/VillageScene.tsx`, `VillageHome.tsx`, `Torre.tsx`, `Agenda.tsx`, `BuildingCard.tsx`
+- `src/components/parent/WeeklyReport.tsx`
+- `src/contexts/DataContext.tsx`
+- `src/services/dailyRulesService.ts`, `englishBaseService.ts`, `learningService.ts`, `goalsService.ts`, `season.ts`, `statsBump.ts`
+- `src/data/achievements.ts`
+- `public/assets/village/scene/anchors.json`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (linha do `friendship.ts` na §12)
+- este relatório
+
+### Como verificou
+
+| Comando | Resultado |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | 0 erros |
+| `npx eslint src --max-warnings 7` | 0 erros; 7 avisos: 6 em `src/icons/index.tsx` + `CharacterEditor.tsx:153` |
+| `npm run test:english` | 19 arquivos, todos passaram (`quizLockedFor`, `friendship`, `statSources` fonte real, `skipPenalty` nas tochas, Arena `canBuild.ok` falso) |
+| `npx vite build` | ok; chunks `App-DG2Z2lXU.js` + `CartBench-D_30wjtq.js` + `statsBump-Dw6aHasc.js` |
+| chunk `phaser` em `dist/assets` | nenhum |
+
+### O que ficou de fora e por quê
+
+- Conta de teste no navegador (A1, A2, A5, A11, A12): o líder retesta.
+- P3 (`launchedOn`) ainda não existe; `ensureWeekRecords` já ignora se o campo aparecer.
+- Linha do dia (B12): Etapa 3.
+
+### Dúvidas
+
+Nenhuma que tenha impedido o item.
+
+## P1 — rodada 2 (17/09)
+
+Cinco correções + guarda do `nightComplete`. Sem P3. Sem commit.
+
+### O que mudou
+
+1. Painel do pai: `ensureUserSetup` devolve `{ user, childUid }` e o Auth chama `setUser` + `setChildUid` juntos. O efeito do DataContext espera `user`, depende de `user?.role`, e a cadeia diária (streak inclusive) só roda se não for `admin`. O `run` da virada do dia espera `user` e pula `admin`.
+2. `computeWeeklyLearning` só grava os campos de topo na **semana ISO anterior** (a fechada). A semana corrente vai só em `weeks[week]`. Relatório: botão desligado enquanto a montagem calcula; falha mostra “Não deu para calcular”; o catch não lê o topo (isso é a semana fechada da Torre).
+3. Cadeado da Mina: placa `#f4e8c8` 28×32 com contorno `#17130f`. Hotbar: cadeado também no atalho Mercado (`quizBlocksDest`).
+4. Casa: `onFinished` do FlashTimer chama `finishFocusBlock(childUid)` como a Agenda.
+5. `nextQuizStreak(prev, done, skipped)`: `done || skipped` → `prev+1`. A prova lê férias/folga de ontem em `dailyProgress`. `closeDay` não zera `quizStreak` se `quizEnabled === false`. Teste puro 7 → férias → 8.
+6. `nightComplete`: `Set` de módulo `${childUid}:${today}` (sobrevive ao remount do StrictMode).
+
+`Onboarding.tsx` saiu das listas das rodadas anteriores: B2 não mexeu no arquivo.
+
+### Arquivos
+
+- `src/contexts/AuthContext.tsx`, `DataContext.tsx`
+- `src/services/learningService.ts`, `dailyQuizService.ts`, `dailyRulesService.ts`
+- `src/services/village/stats.ts`, `__tests__/etapa2.test.ts`
+- `src/components/parent/WeeklyReport.tsx`
+- `src/components/hero/village/VillageScene.tsx`, `VillageHome.tsx`, `Casa.tsx`
+- este relatório
+
+### Como verificou
+
+| Comando | Resultado |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | 0 erros |
+| `npx eslint src --max-warnings 7` | 0 erros; 7 avisos: 6 em `src/icons/index.tsx` + `CharacterEditor.tsx:153` |
+| `npm run test:english` | 19 arquivos, todos passaram (`nextQuizStreak` 7→férias→8) |
+| `npx vite build` | ok; chunks `App-Dgh149ns.js` + `CartBench-BAYKeIwl.js` + `statsBump-BV9-WN-e.js` |
+| chunk `phaser` em `dist/assets` | nenhum |
+
+### O que ficou de fora e por quê
+
+- P3 (`launchedOn`) e os itens do P4/Etapa 3 (`saleStatDeltas`, `rollContractsWeek`, `finishGoal` try/catch, teste da cadeia admin).
+- Conta de teste no navegador: o pai retesta depois do commit.
+

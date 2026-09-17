@@ -7,7 +7,9 @@ import { applyEvent, challengeState, extendForPunishment } from '../challenges';
 import { daysToAfford, priceForDays, referenceIncome } from '../income';
 import { txsLastDays, balancaTotals } from '../balance';
 import { capGold, gameGoldRoom } from '../caps';
-import { applyMaterialRepair, canRepair, cracksAfterClose, isBroken, liveBuildingLevel, repairMaterialCost, repairRefund } from '../repair';
+import { applyMaterialRepair, canRepair, cracksAfterClose, isBroken, liveBuildingLevel, repairMaterialCost, repairRefund, BREAKABLE_LOTS } from '../repair';
+import { nextQuizStreak, skipDayPenalty } from '../stats';
+import { nextFullDays } from '../schedule';
 import { lateTaskReward, lateWindow } from '../late';
 import { levelGift, minLevelFor } from '../levels';
 import { occurrencesBetween, organizationXp, reminderDue, studyPlanFor, weekOrganized, dayTimeline } from '../agenda';
@@ -270,6 +272,32 @@ test('balança de 7 dias não conta depósito como gasto', () => {
   expect(tot.spent).toBe(0);
   expect(tot.saved).toBe(20);
   expect(tot.rate).toBe(67);
+});
+
+test('ruína só com skipPenalty; Arena e Campinho não caem', () => {
+  expect(BREAKABLE_LOTS.includes('arena')).toBe(false);
+  expect(BREAKABLE_LOTS.includes('campinho')).toBe(false);
+  expect(skipDayPenalty({ vacation: true, paused: false, punished: false, enabled: true })).toBe(true);
+  expect(skipDayPenalty({ vacation: false, paused: true, punished: false, enabled: true })).toBe(true);
+  expect(skipDayPenalty({ vacation: false, paused: false, punished: true, enabled: true })).toBe(true);
+  expect(skipDayPenalty({ vacation: false, paused: false, punished: false, enabled: false })).toBe(true);
+  expect(skipDayPenalty({ vacation: false, paused: false, punished: false, enabled: true })).toBe(false);
+  const built = { fornalha: 1, bau: 1, cerca: 1, torre: 1, mesa: 1, cofre: 1, agenda: 1, mercado: 1, campinho: 1, arena: 1 };
+  expect(cracksAfterClose(['arena', 'campinho'], [], built)).toEqual([]);
+  expect(cracksAfterClose([], [], built)).toEqual([]);
+});
+
+test('skipPenalty: tochas não zeram no dia perdido', () => {
+  const base = { due: 4, done: 1, fullDays: 5, fullDaysStart: '2026-09-10', date: '2026-09-16', skip: false };
+  expect(nextFullDays({ ...base, skip: true })).toEqual({ fullDays: 5, fullDaysStart: '2026-09-10', changed: false });
+  expect(nextFullDays(base).fullDays).toBe(0);
+  expect(skipDayPenalty({ vacation: false, paused: false, punished: false, enabled: false })).toBe(true);
+});
+
+test('nextQuizStreak: férias não zeram a sequência', () => {
+  expect(nextQuizStreak(7, false, true)).toBe(8);
+  expect(nextQuizStreak(7, true, false)).toBe(8);
+  expect(nextQuizStreak(7, false, false)).toBe(1);
 });
 
 void run();

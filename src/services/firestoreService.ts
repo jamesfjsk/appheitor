@@ -24,11 +24,12 @@ import { format } from 'date-fns';
 import { getLevelFromXP } from '../utils/levelSystem';
 import { processPendingDays } from './dailyRulesService';
 import { initialBaseDoc } from '../config/englishBase';
-import { DEFAULT_ECONOMY } from '../config/village';
+import { DEFAULT_ECONOMY, initialVillageDoc } from '../config/village';
 import { periodAllowedAt } from './village/schedule';
 import { lateTaskReward, lateWindow } from './village/late';
 import { getSettings } from './settingsService';
-import { getVillage } from './villageService';
+import { fromVillageDoc } from './villageService';
+import { addVillageStats } from './village/stats';
 import type { EconomySettings } from '../types/village';
 import type { Material } from '../types/english';
 import {
@@ -485,13 +486,12 @@ export class FirestoreService {
     xpReward: number,
     goldReward: number,
     loot?: { material: Material; qty: number },
-    opts?: { late?: boolean; focus?: boolean }
-  ): Promise<void> {
+    opts?: { late?: boolean; focus?: boolean; morningEarly?: boolean }
+  ): Promise<{ xp: number; gold: number; loot?: { material: Material; qty: number } }> {
     try {
       const today = getTodayBrazil();
       const hour = nowBrazil().hour;
       const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
-      const village = await getVillage(userId);
       const late = opts?.late === true;
       const date = late ? addDays(today, -1) : today;
       if (late && !lateWindow(hour, economy)) {
@@ -516,7 +516,9 @@ export class FirestoreService {
       const progressRef = doc(db, 'progress', userId);
       const taskRef = doc(db, 'tasks', taskId);
       const baseRef = doc(db, 'englishBase', userId);
+      const vRef = doc(db, 'village', userId);
       const now = new Date().toISOString();
+      let paid: { xp: number; gold: number; loot?: { material: Material; qty: number } } = { xp: 0, gold: 0 };
 
       await runTransaction(db, async (tx) => {
         const taskDoc = await tx.get(taskRef);
@@ -544,6 +546,10 @@ export class FirestoreService {
         const progressDoc = await tx.get(progressRef);
         if (!progressDoc.exists()) throw new Error('Progress document not found');
         const baseDoc = await tx.get(baseRef);
+        const vSnap = await tx.get(vRef);
+        const vDoc = vSnap.exists()
+          ? fromVillageDoc(userId, vSnap.data() as Record<string, unknown>)
+          : initialVillageDoc(userId, now);
 
         const childOwn = taskData.origin === 'child';
         let goldPay = latePay ? latePay.gold : goldReward;
@@ -553,7 +559,7 @@ export class FirestoreService {
         if (lootPay && lootPay.qty > 0) {
           let qty = lootPay.qty;
           if (taskData.optional === true) qty *= 2;
-          if (opts?.focus && village.plan.date === today && village.plan.focusTaskId === taskId) qty *= 2;
+          if (opts?.focus && vDoc.plan.date === today && vDoc.plan.focusTaskId === taskId) qty *= 2;
           lootPay = { material: lootPay.material, qty };
         }
 
@@ -621,8 +627,18 @@ export class FirestoreService {
             createdAt: serverTimestamp(),
           }));
         }
+
+        const deltas: Record<string, number> = {};
+        if (late) deltas.recoveries = 1;
+        else deltas.missionsDone = 1;
+        if (opts?.morningEarly) deltas.morningEarly = 1;
+        const stats = addVillageStats(vDoc.stats, deltas);
+        if (vSnap.exists()) tx.update(vRef, { stats, updatedAt: now });
+        else tx.set(vRef, { ...vDoc, stats, updatedAt: now });
+        paid = { xp: xpPay, gold: goldPay, loot: lootPay };
       });
       console.log('✅ Task completed with validated rewards:', { taskId, xpReward, goldReward, loot, late });
+      return paid;
     } catch (error) {
       console.error('❌ FirestoreService: Error completing task with rewards:', error);
       throw error;

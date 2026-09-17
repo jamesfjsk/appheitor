@@ -21,6 +21,7 @@ import { addDays, getTodayBrazil, nowBrazil } from '../utils/clock';
 import { organizationXp, plannedAheadDays, studyPlanFor, weekOrganized } from './village/agenda';
 import { claimKey, hasClaim } from './village/claims';
 import { fromVillageDoc, stripUndefined } from './villageService';
+import { addVillageStats } from './village/stats';
 
 function asIso(value: unknown): string {
   if (typeof value === 'string') return value;
@@ -97,6 +98,10 @@ export async function createAgendaItem(
     createdAt: now,
     updatedAt: now,
   }));
+  if (plannedAheadDays(today, input.date) >= 2) {
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(uid, { agendaPlanned: 1 });
+  }
   return ref.id;
 }
 
@@ -135,15 +140,15 @@ export async function markAgendaDone(uid: string, id: string): Promise<number> {
     const today = getTodayBrazil();
     tx.update(aRef, { doneAt: today, updatedAt: nowBrazil().iso });
     const claimed = { ...village.claimed, [key]: nowBrazil().iso };
-    if (vSnap.exists()) tx.update(vRef, stripUndefined({ claimed, updatedAt: nowBrazil().iso }));
-    else tx.set(vRef, stripUndefined({ ...village, claimed, updatedAt: nowBrazil().iso }));
+    const stats = addVillageStats(village.stats, { agendaDone: 1 });
+    if (vSnap.exists()) tx.update(vRef, stripUndefined({ claimed, stats, updatedAt: nowBrazil().iso }));
+    else tx.set(vRef, stripUndefined({ ...village, claimed, stats, updatedAt: nowBrazil().iso }));
     if (pSnap.exists() && xp > 0) {
       tx.update(pRef, { totalXP: increment(xp), updatedAt: serverTimestamp() });
     }
   });
-  if (xp > 0) {
-    void import('./village/statsBump').then((m) => m.bumpVillage(uid, { agendaDone: 1 }));
-  }
+  const { bumpVillage } = await import('./village/statsBump');
+  await bumpVillage(uid, {});
   return xp;
 }
 
@@ -195,14 +200,34 @@ export async function weeklyOrganizedBonus(uid: string, week: string): Promise<b
     const key = claimKey('agenda', 'week', week);
     if (hasClaim(village, key)) return;
     const claimed = { ...village.claimed, [key]: nowBrazil().iso };
-    if (vSnap.exists()) tx.update(vRef, stripUndefined({ claimed, updatedAt: nowBrazil().iso }));
-    else tx.set(vRef, stripUndefined({ ...village, claimed, updatedAt: nowBrazil().iso }));
+    const stats = addVillageStats(village.stats, { organizedWeeks: 1 });
+    if (vSnap.exists()) tx.update(vRef, stripUndefined({ claimed, stats, updatedAt: nowBrazil().iso }));
+    else tx.set(vRef, stripUndefined({ ...village, claimed, stats, updatedAt: nowBrazil().iso }));
     if (bSnap.exists()) {
       tx.update(bRef, { 'materials.madeira': increment(1), updatedAt: nowBrazil().iso });
     }
     granted = true;
   });
+  if (granted) {
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(uid, {});
+  }
   return granted;
+}
+
+export async function finishFocusBlock(uid: string): Promise<void> {
+  await runTransaction(db, async (tx) => {
+    const vRef = doc(db, 'village', uid);
+    const vSnap = await tx.get(vRef);
+    const village = vSnap.exists()
+      ? fromVillageDoc(uid, vSnap.data() as Record<string, unknown>)
+      : initialVillageDoc(uid, nowBrazil().iso);
+    const stats = addVillageStats(village.stats, { focusBlocks: 1 });
+    if (vSnap.exists()) tx.update(vRef, stripUndefined({ stats, updatedAt: nowBrazil().iso }));
+    else tx.set(vRef, stripUndefined({ ...village, stats, updatedAt: nowBrazil().iso }));
+  });
+  const { bumpVillage } = await import('./village/statsBump');
+  await bumpVillage(uid, {});
 }
 
 export { addDays };

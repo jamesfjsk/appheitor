@@ -188,7 +188,7 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
           {tab === 'works' && (
             <>
               <p className="text-sm mc-muted">As obras sobem no lote da cena. Aqui você só vê o que já está de pé.</p>
-              {BUILDINGS.filter((b) => b.id !== 'campinho').map((b) => {
+              {BUILDINGS.filter((b) => b.id !== 'campinho' && b.id !== 'arena').map((b) => {
                 const bLevel = buildings[b.id] || 0;
                 const cost = bLevel < 3 ? buildingCost(b.id, bLevel + 1, MULT) : null;
                 return (

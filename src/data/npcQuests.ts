@@ -10,7 +10,7 @@ export interface NpcQuestChapter {
 
 export const NPC_QUESTS: Record<NpcId, NpcQuestChapter[]> = {
   comerciante: [
-    { chapter: 1, title: 'Barraca', ask: 'Traga 5 pedra, minha barraca está caindo', stat: 'pedraGift', target: 5 },
+    { chapter: 1, title: 'Barraca', ask: 'Venda 10 pedra ao Comerciante', stat: 'merchantSales', target: 10 },
     { chapter: 2, title: 'Contratos', ask: 'Faça 3 contratos numa semana', stat: 'contractsWeek', target: 3 },
     { chapter: 3, title: 'Compra', ask: 'Compre algo e não se arrependa', stat: 'shopBuys', target: 1 },
     { chapter: 4, title: 'Cofre', ask: 'Guarde 50 gold no Cofrinho', stat: 'savedGold', target: 50 },
@@ -21,7 +21,7 @@ export const NPC_QUESTS: Record<NpcId, NpcQuestChapter[]> = {
     { chapter: 2, title: 'Reflexões', ask: 'Escreva 3 reflexões', stat: 'reflections', target: 3 },
     { chapter: 3, title: 'Oito', ask: 'Tire 8 de 8', stat: 'quizPerfect', target: 1 },
     { chapter: 4, title: 'Tema', ask: 'Escolha o tema de amanhã 5 vezes', stat: 'themesSet', target: 5 },
-    { chapter: 5, title: 'Pergunta', ask: 'Responda à pergunta da semana', stat: 'weekQuestion', target: 1 },
+    { chapter: 5, title: 'Sequência', ask: 'Sete provas seguidas', stat: 'quizStreak', target: 7 },
   ],
   ferreiro: [
     { chapter: 1, title: 'Fornalha', ask: 'Construa a Fornalha', stat: 'building:fornalha', target: 1 },

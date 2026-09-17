@@ -120,7 +120,7 @@ const FALLBACK: SceneAnchors = {
   props: SCENE_PROPS,
   npcSpots: {
     comerciante: { morning: { x: 1172, y: 486 }, afternoon: { x: 996, y: 228 }, night: null },
-    sabio: { day: { x: 620, y: 180 }, night: { x: 1052, y: 228 } },
+    sabio: { day: { x: 620, y: 240 }, night: { x: 1052, y: 228 } },
   },
   hotspots: {
     mine: { x: 545, y: 32, w: 210, h: 138, type: 'district', label: 'Mina' },
@@ -314,10 +314,13 @@ function groundShadow(
 
 function lockIcon(ctx: CanvasRenderingContext2D, x: number, y: number) {
   ctx.save();
+  ctx.fillStyle = '#f4e8c8';
+  ctx.strokeStyle = '#17130f';
+  ctx.lineWidth = 2;
+  ctx.fillRect(x, y, 28, 32);
+  ctx.strokeRect(x, y, 28, 32);
   ctx.fillStyle = '#17130f';
   ctx.fillRect(x + 6, y + 14, 16, 14);
-  ctx.strokeStyle = '#17130f';
-  ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.arc(x + 14, y + 14, 6, Math.PI, 0);
   ctx.stroke();
@@ -1027,9 +1030,10 @@ const VillageScene: React.FC<Props> = ({
                 c.restore();
               }
             } else if (sprite && !skipSprite && !empty) {
-              const drawn = gated ? graySprite(sprite, Math.max(1, Math.round(dw)), Math.max(1, Math.round(dh))) : sprite;
+              const gateLot = gated && !reserved;
+              const drawn = gateLot ? graySprite(sprite, Math.max(1, Math.round(dw)), Math.max(1, Math.round(dh))) : sprite;
               c.drawImage(drawn, ox + shakeX, oy, dw, dh);
-              if (gated) lockIcon(c, ox + dw / 2 - 14, oy + 8);
+              if (gateLot) lockIcon(c, ox + dw / 2 - 14, oy + 8);
             }
           },
         });
@@ -1130,6 +1134,7 @@ const VillageScene: React.FC<Props> = ({
             } else if (kind === 'future') {
               paintEmptyLot(c, box.x + pulse.shakeX, box.y, box.w, box.h, night, '#7ecb4a');
             }
+            if (gated && id === 'mine') lockIcon(c, box.x + box.w / 2 - 14, box.y + 8);
           },
         });
       });
@@ -1220,7 +1225,7 @@ const VillageScene: React.FC<Props> = ({
           const capeImg = overlay.cape ? img(overlay.cape, bump) : null;
           const pickImg = overlay.pickaxe ? img(overlay.pickaxe, bump) : null;
           const kit: LookKit = { pet, cape: capeImg, pickaxe: pickImg, gear: village.gear, iso: isoMiner };
-          const key = `${bodySrc}|${posed ? 1 : 0}|${walkCols}|${idleCols}|${village.character.skin}|${village.character.hair}|${village.character.shirt}|${village.character.pants}|${village.character.hat || ''}|${village.character.cape || ''}|${village.character.pet || ''}|${village.gear.pickaxe}|${village.gear.boots}|${capeImg ? 1 : 0}|${pickImg ? 1 : 0}`;
+          const key = `${bodySrc}|${posed ? 1 : 0}|${walkCols}|${idleCols}|${village.character.skin}|${village.character.hair}|${village.character.shirt}|${village.character.pants}|${village.character.hat || ''}|${village.character.cape || ''}|${village.character.pet || ''}|${village.gear.pickaxe}|${overlay.pickaxe || ''}|${village.gear.boots}|${capeImg ? 1 : 0}|${pickImg ? 1 : 0}`;
           const walkOff = lookCanvas.current;
           const idleOff = idleCanvas.current;
           if (lookKey.current !== key) {
@@ -1367,6 +1372,7 @@ const VillageScene: React.FC<Props> = ({
               }, 'dust');
             }
             if (!useWalk) paintCharBlink(c, nx - nW / 2, oy, nW, nH, now, i + 2, face, reducedMotion, NPC_EYES[npc]);
+            if (gated && (npc === 'ferreiro' || npc === 'comerciante')) lockIcon(c, nx - 14, oy - 10);
           },
         });
       });

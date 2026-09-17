@@ -81,22 +81,21 @@ export const GAME_ACHIEVEMENTS: GameAchievement[] = [
   a('ferraria_20', 'mina', 'bronze', 'Ferraria', '20 contratos de ferraria.', 'book', 'contractsForge', 20),
   a('comerciante_20', 'mina', 'bronze', 'Comerciante', '20 contratos de comerciante.', 'book', 'contractsMerchant', 20),
 
-  a('primeira_vagoneta', 'mina', 'bronze', 'Primeira vagoneta', 'Acertou uma conta na oficina.', 'forge', 'redstoneDone', 1),
-  ...trio('vagoneta_dias', 'mina', 'Oficina', 'Dias com acerto na vagoneta', 'forge', 'redstoneDone', [10, 50, 100]),
-  ...trio('vagoneta_perfeita', 'mina', 'Vagoneta cheia', 'Dias 3 de 3 na oficina', 'forge', 'redstonePerfect', [1, 10, 50]),
+  a('cart_first', 'mina', 'bronze', 'Primeira carga', 'Carregou a primeira vagoneta.', 'forge', 'redstoneDone', 1, { reward: { xp: 10 } }),
+  a('cart_perfect', 'mina', 'bronze', 'Três de três', 'Três vagonetas no mesmo dia.', 'forge', 'redstonePerfect', 1, { reward: { xp: 15 } }),
+  a('cart_5', 'mina', 'bronze', 'Vagoneteiro', 'Cinco dias com vagoneta.', 'forge', 'redstoneDone', 5, { reward: { xp: 20 } }),
+  a('cart_stages_30', 'mina', 'prata', 'Trilho longo', 'Trinta vagonetas carregadas.', 'forge', 'redstoneStages', 30, { reward: { xp: 25 } }),
+  a('cart_perfect_5', 'mina', 'prata', 'Carga exata', 'Cinco dias 3 de 3.', 'forge', 'redstonePerfect', 5, { reward: { xp: 30, rare: 'esmeralda' } }),
+  a('cart_20', 'mina', 'ouro', 'Mestre da vagoneta', 'Vinte dias com vagoneta.', 'forge', 'redstoneDone', 20, { reward: { xp: 40 } }),
+  a('cart_perfect_15', 'mina', 'exclusiva', 'Sem tombar', 'Quinze dias 3 de 3.', 'forge', 'redstonePerfect', 15, { reward: { xp: 50, rare: 'diamante' } }),
 
   a('primeira_prova', 'biblioteca', 'bronze', 'Primeira prova', 'Fez a prova do dia.', 'book', 'quizzesDone', 1),
   ...trio('nota_maxima', 'biblioteca', 'Nota máxima', 'Provas 8 de 8', 'star', 'quizPerfect', [1, 10, 50]),
   ...trio('constancia', 'biblioteca', 'Constância', 'Provas seguidas', 'book', 'quizStreak', [7, 30, 100]),
   ...trio('pensador', 'biblioteca', 'Pensador', 'Reflexões escritas', 'book', 'reflections', [10, 50, 200]),
-  a('estante_10', 'biblioteca', 'bronze', 'Estante limpa', '10 erros corrigidos na Estante.', 'book', 'shelfFixed', 10),
-  a('estante_50', 'biblioteca', 'prata', 'Estante limpa', '50 erros corrigidos na Estante.', 'book', 'shelfFixed', 50),
-
   a('primeiro_deposito', 'banco', 'bronze', 'Primeiro depósito', 'Guardou gold no Cofrinho.', 'gold', 'deposits', 1),
   ...trio('meta_batida', 'banco', 'Meta batida', 'Metas alcançadas', 'gold', 'goalsAchieved', [1, 5, 20]),
   ...trio('paciente', 'banco', 'Paciente', 'Semanas com bônus de paciência', 'gold', 'interestWeeks', [4, 12, 26]),
-  a('poupador_4', 'banco', 'bronze', 'Poupador', 'Guardou 20% ou mais em 4 semanas.', 'gold', 'saverWeeks', 4),
-  a('poupador_12', 'banco', 'prata', 'Poupador', 'Guardou 20% ou mais em 12 semanas.', 'gold', 'saverWeeks', 12),
   a('grande_meta', 'banco', 'ouro', 'Grande meta', 'Uma meta de 20 dias de renda alcançada.', 'gold', 'bigGoals', 1),
 
   ...trio('organizado', 'agenda', 'Organizado', 'Itens da agenda feitos', 'clock', 'agendaDone', [5, 25, 100]),
@@ -133,7 +132,6 @@ export const GAME_ACHIEVEMENTS: GameAchievement[] = [
   a('curioso', 'segredos', 'bronze', 'Curioso', 'Falou com os quatro NPCs no mesmo dia.', 'heart', 'talksSameDay', 1, { hidden: true }),
   a('lua_da_vila', 'segredos', 'prata', 'Lua da Vila', 'Abriu a Vila depois das 21h num dia completo.', 'moon', 'nightComplete', 1, { hidden: true }),
   a('colecionador', 'segredos', 'ouro', 'Colecionador', 'Os quatro cosméticos de marco.', 'crown', 'milestonesOwned', 4, { hidden: true }),
-  a('creeper_amigo', 'segredos', 'bronze', 'Creeper amigo', 'Clicou 5 vezes no creeper do resumo.', 'emerald', 'creeperClicks', 5, { hidden: true }),
 ];
 
 export const GAME_ACHIEVEMENT_BY_ID: Record<string, GameAchievement> = Object.fromEntries(

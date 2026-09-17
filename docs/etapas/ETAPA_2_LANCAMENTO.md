@@ -31,6 +31,7 @@ Regras da semana:
 11. **Prova do dia obrigatória desde domingo**: o reset grava `progress.quizRequired = true`. A prova é portão, não modal: nunca abre sozinha; o Sábio explica o cadeado no Onboarding.
 12. Reset **zera o jogo e guarda o pedagógico**: obras, equipamentos, cosméticos, XP, streak e gold zeram; ficam missões e prêmios cadastrados, nível e vocabulário de inglês, histórico da prova (`dailyQuizzes` e `quizBank`) e o histórico de gold como registro.
 13. Módulos no dia 1: `shop` ligada, `bank` e `interest` ligados se P1 fechar (senão semana 2), `logic` conforme a decisão 5, `tts` e `aiGeneration` ligados.
+14. **Níveis de construção sem efeito** (revisão das construções, 17/09, 14h30): a Biblioteca ganha efeito real já no domingo (nível 2: "Como você vai" na Biblioteca e a revisita da prova; nível 3: dica grátis no Recado, que já existe, e revisita pagando o dobro); o Cofre nível 3 fica **trancado** ("Abre na Etapa 3", sem cobrar); os textos da Torre nível 3 (sai "propor desafios", entra "Mapa de habilidades e Histórias") e do Armazém nível 1 (sai o Campinho) são corrigidos. Entra como P4.12 e P5 (8.4).
 
 ## 2. Calendário
 
@@ -130,8 +131,9 @@ Aceite do P3: na conta de teste, no sábado: login mostra o Onboarding; gold 100
 9. `HojeCard.tsx:47`: "Meta batida" só para metas abertas; lista as que o pai precisa fechar.
 10. **"Como ele vai"** (aba Prova, `DailyQuizManager.tsx`): acerto por categoria e por assunto em 7 dias, 30 dias e total (de `learning/{uid}.profile`); lista das últimas 30 perguntas erradas com data (do `quizBank`); perguntas repetidas (mesmo `hash`) apontadas com as datas.
 11. `docs/MANUAL_DO_PAI.md` é do líder (não tocar).
+12. **Níveis de construção sem efeito** (decisão 14): (a) `config/englishBase.ts`, `effects` da Biblioteca: n2 "Você vê como vai em cada matéria e a prova revisita um erro antigo."; n3 "1 dica grátis no Recado e a revisita paga o dobro."; da Torre n3 "Mapa de habilidades e Histórias dos personagens."; do Armazém n1 "Você vê o inventário e libera Torre e Biblioteca."; (b) o cartão do Cofre no nível 2 mostra "Nível 3: abre na Etapa 3" com o botão desabilitado e sem custo (`BuildingCard.tsx`; `buildUpgrade` recusa `cofre` para o nível 3 com a mesma frase); (c) o cartão da Biblioteca no nível 2 ou mais ganha o botão "Como você vai" (tela `ComoVouIndo.tsx`, filha da Biblioteca: acerto por matéria em 7 e 30 dias, três fortes e três a treinar, de `learning/{uid}.profile`; no nível 1 o botão aparece com cadeado "Biblioteca nível 2"); (d) a revisita (8.4) só entra na prova com Biblioteca nível 2 ou mais, e com nível 3 a pergunta de revisita paga `quizGoldPerHit * 2` e `quizXpPerHit * 2` (dentro dos tetos diários; `quizRewards` recebe `reviewIndex` e `mesaLevel`; teste).
 
-Aceite do P4: fotos das abas; nenhum id cru na tela; missão nova com gold da economia e caixa "extra"; Placa sem formulário de notificação; Guia do dia 1 verde no sábado à noite.
+Aceite do P4: fotos das abas; nenhum id cru na tela; missão nova com gold da economia e caixa "extra"; Placa sem formulário de notificação; Guia do dia 1 verde no sábado à noite; Cofre nível 2 sem "Melhorar" cobrável; Biblioteca nível 2 abre "Como você vai" e a prova do dia seguinte traz a revisita.
 
 ## 8. P5: conteúdo vivo v1 (anti-repetição) e Memória da Prova
 
@@ -213,7 +215,7 @@ interface LearningProfile {
 
 É o que entra no prompt (8.3), no `RotationProfile` (8.2, `weak` e `strong`), no Mapa de habilidades da Torre e na aba "Como ele vai" (P4.10).
 
-**Revisita**: em `buildAndSave`, antes de gerar, buscar no `quizBank` uma pergunta com `correct == false`, `reviewedOk != true` e data entre `today - 10` e `today - 3`; a mais antiga vira a pergunta 8 (`kind: 'review'`, `reviewOf`). Ao concluir a prova, se a revisita acertou, o batch marca `reviewedOk: true, reviewedOn: date` no doc original. É a semente da Estante de erros (Etapa 3).
+**Revisita**: em `buildAndSave`, antes de gerar, **se a Biblioteca estiver no nível 2 ou mais** (`englishBase.buildings.mesa >= 2`; decisão 14), buscar no `quizBank` uma pergunta com `correct == false`, `reviewedOk != true` e data entre `today - 10` e `today - 3`; a mais antiga vira a pergunta 8 (`kind: 'review'`, `reviewOf`). Com Biblioteca nível 3 a revisita paga o dobro (P4.12d). Ao concluir a prova, se a revisita acertou, o batch marca `reviewedOk: true, reviewedOn: date` no doc original. É a semente da Estante de erros (Etapa 3).
 
 **Leituras** (`src/services/quizBankService.ts`): `listQuizBank(uid, { sinceDate, limit })` (query `userId ==` e `date >=`, ordenada por `date desc`; índice composto `userId asc, date desc` em `firestore.indexes.json`), `pendingReview(uid, today)`, `writeQuizBank(batch, items)`.
 
@@ -279,7 +281,10 @@ Não fazer nesta etapa: restilizar o painel; mexer na Vagoneta fora de bug do E2
 | `src/services/quiz/hash.ts`, `dedupe.ts`, `profile.ts` (+ testes) | P5 | `quizBank` | prompt da prova, Torre, painel | idem |
 | `src/services/quizBankService.ts`, coleção `quizBank` | P5 | conclusão da prova | rotação, revisita, perfil, painel, Expedição (Etapa 3) | idem |
 | `src/services/village/statSources.ts` (+ teste) | P1 | eventos do jogo | conquistas, pedidos | não ensina |
+| `src/services/village/stats.ts` (puro: `addVillageStats`, `nextQuizStreak`, `skipDayPenalty`) e `quizGate.ts` (+ testes) | P1 | deltas dos eventos; `closeDay`; `quizRequired` | `village.stats` na transação de cada evento; portão da prova | não ensina |
+| `src/services/village/friendship.ts` (+ teste) | P1 | degraus 3 e 5 | `talkToNpc`, pedidos em `applyVillageStats` | não ensina |
 | `src/components/parent/LaunchGuide.tsx` | P4 | settings, village, tasks, rewards, notices | pai | não ensina |
+| `src/components/hero/village/ComoVouIndo.tsx` (Biblioteca nível 2) | P4.12 | `learning/{uid}.profile` (Memória da Prova) | a criança vê o próprio acerto por matéria; puxa para a prova e a revisita | metacognição (ficha em `docs/AVALIACAO_MENSAL.md`, §9, mesma base) |
 | `scripts/export-user.cjs`, `launch-reset.cjs`, `clone-to-test.cjs`, `backfill-quizbank.cjs` | P3, P5 | Firestore | operação do domingo | não ensina |
 | `src/game/README.md` | P0 | `MUNDO.md` §5 | Etapa 3 | não ensina |
 | `src/components/hero/village/itemGlyphs.ts` | P0 | `ItemGlyph.tsx` | glifos do look | não ensina |

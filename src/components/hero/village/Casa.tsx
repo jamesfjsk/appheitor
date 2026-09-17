@@ -11,7 +11,7 @@ import DailyChecklist from '../DailyChecklist';
 import FlashTimer from '../FlashTimer';
 import CharacterPreview from './CharacterPreview';
 import { dayTimeline, occurrencesBetween } from '../../../services/village/agenda';
-import { markAgendaDone } from '../../../services/agendaService';
+import { finishFocusBlock, markAgendaDone } from '../../../services/agendaService';
 import { dueTasksOn, periodAllowedAt } from '../../../services/village/schedule';
 import { addDays, getTodayBrazil, isNightHour } from '../../../utils/clock';
 import { savePlan, submitCheckin } from '../../../services/villageService';
@@ -220,6 +220,7 @@ const Casa: React.FC<{
                   onClose={() => { setFocusMin(null); setFocusTaskId(null); }}
                   onFinished={() => {
                     if (focusTaskId) void completeTask(focusTaskId);
+                    if (childUid) void finishFocusBlock(childUid).catch((e) => console.warn('foco', e));
                     toast.success('Foco concluído');
                     setFocusMin(null);
                     setFocusTaskId(null);

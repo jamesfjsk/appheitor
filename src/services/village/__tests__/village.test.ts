@@ -1,5 +1,6 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import { crackedLabel, crackedListSentence, crackedSentence, DEFAULT_ECONOMY, DISTRICT_ICONS, EMPTY_GEAR, houseSprite, houseTier, houseTitle, LOT_SCENE_LABEL, MATERIAL_BY_PERIOD, SCENE_PROPS } from '../../../config/village';
+import { ITEMS } from '../../../config/items';
 import { isoWeekOf } from '../../../utils/isoWeek';
 import { getLevelFromXP, getLevelTitle, getXPForLevel } from '../../../utils/levelSystem';
 import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from '../claims';
@@ -359,6 +360,11 @@ test('casa cresce por temporada e os ícones da grade não se repetem', () => {
   expect(LOT_SCENE_LABEL.cofre).toBe('Cofre');
   expect(LOT_SCENE_LABEL.agenda).toBe('Agenda');
   expect(LOT_SCENE_LABEL.mercado).toBe('Mercado');
+});
+
+test('ids únicos no catálogo de itens', () => {
+  const ids = ITEMS.map((i) => i.id);
+  expect(new Set(ids).size).toBe(ids.length);
 });
 
 void run();

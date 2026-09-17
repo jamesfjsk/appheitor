@@ -150,7 +150,7 @@ test('desbloqueio: torre/mesa/campinho só com fornalha e baú >= 1; cofre preci
   expect(isBuildingUnlocked('cerca', { ...none, fornalha: 1 })).toBeTruthy();
   expect(isBuildingUnlocked('mesa', { ...none, fornalha: 1 })).toBeFalsy();
   expect(isBuildingUnlocked('campinho', { ...none, fornalha: 1, bau: 1 })).toBeTruthy();
-  expect(isBuildingUnlocked('arena', none)).toBeFalsy();
+  expect(isBuildingUnlocked('arena', none)).toBeTruthy();
   expect(isBuildingUnlocked('arena', { ...none, fornalha: 1, bau: 1 })).toBeTruthy();
   expect(isBuildingUnlocked('cofre', none)).toBeFalsy();
   expect(isBuildingUnlocked('cofre', { ...none, bau: 1 })).toBeTruthy();
@@ -213,6 +213,18 @@ test('12 lugares com relações permitidas e 17 itens sem id de lugar; imagens e
   expect(MERCHANT_ITEMS.find((i) => i.id === 'apple')?.image).toBe('/assets/english/ui/apple.webp');
   Object.values(MATERIAL_ICONS).forEach((p) => expect(existsSync(join(pub, publicFilePath(p)))).toBeTruthy());
   Object.values(CONTRACT_ICONS).forEach((p) => expect(existsSync(join(pub, publicFilePath(p)))).toBeTruthy());
+});
+
+test('canBuild arena.ok é false mesmo com materiais', () => {
+  const rich = initialBaseDoc('u', 't');
+  rich.materials = { madeira: 9999, pedra: 9999, ferro: 9999, redstone: 9999 };
+  const next = (rich.buildings.arena ?? 0) + 1;
+  const later = buildingOpensLater('arena', next);
+  const unlocked = isBuildingUnlocked('arena', rich.buildings);
+  const cost = buildingCost('arena', next, 1);
+  const ok = !later && unlocked && Boolean(cost) && canAfford(rich.materials, cost!);
+  expect(ok).toBe(false);
+  expect(BUILDING_BY_ID.arena.liveMaxLevel).toBe(0);
 });
 
 void run();

@@ -14,6 +14,7 @@ import { getSettings } from './settingsService';
 import type { EconomySettings, ModuleSettings } from '../types/village';
 import { addDays } from '../utils/clock';
 import { bumpChallenge } from './challengesService';
+import { nextQuizStreak } from './village/stats';
 
 export const dailyQuizId = (userId: string, date: string) => `${userId}_${date}`;
 
@@ -168,11 +169,17 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
   }
   try {
     const { bumpVillage, bumpFriend } = await import('./village/statsBump');
+    const yesterday = await getDailyQuiz(userId, addDays(date, -1));
+    const yDate = addDays(date, -1);
+    const yProg = await getDoc(doc(db, 'dailyProgress', `${userId}_${yDate}`));
+    const skipped = yProg.data()?.vacation === true || yProg.data()?.paused === true;
+    const vSnap = await getDoc(doc(db, 'village', userId));
+    const prevStreak = Number(vSnap.data()?.stats?.quizStreak) || 0;
     const deltas: Record<string, number> = { quizzesDone: 1 };
     if (result.score >= 6) deltas.quizScore = result.score;
     if (result.score >= 8) deltas.quizPerfect = 1;
-    bumpVillage(userId, deltas);
-    bumpFriend(userId, 'sabio', 2);
+    await bumpVillage(userId, deltas, { set: { quizStreak: nextQuizStreak(prevStreak, yesterday?.completed === true, skipped) } });
+    await bumpFriend(userId, 'sabio', 2);
   } catch (e) {
     console.warn('stats prova', e);
   }
@@ -180,6 +187,12 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
 
 export async function saveReflection(userId: string, date: string, reflection: string): Promise<void> {
   await updateDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), { reflection: reflection.trim(), updatedAt: serverTimestamp() });
+  try {
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(userId, { reflections: 1 });
+  } catch (e) {
+    console.warn('stats reflexão', e);
+  }
 }
 
 /** Prova linear: gold e XP por acerto (economia v2). */

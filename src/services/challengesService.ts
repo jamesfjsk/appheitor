@@ -22,6 +22,7 @@ import { claimKey, hasClaim } from './village/claims';
 import { fromVillageDoc, stripUndefined } from './villageService';
 import { getSettings } from './settingsService';
 import { listGoldTransactions, roomForGameGold, txsInWeek } from './goldTx';
+import { addVillageStats } from './village/stats';
 
 function omitUndefined<T extends Record<string, unknown>>(data: T): T {
   return Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined)) as T;
@@ -155,8 +156,9 @@ export async function completeChallenge(uid: string, challengeId: string): Promi
     const today = getTodayBrazil();
     tx.update(cRef, { completedAt: today, updatedAt: today });
     const claimed = { ...village.claimed, [key]: nowBrazil().iso };
-    if (vSnap.exists()) tx.update(vRef, stripUndefined({ claimed, updatedAt: nowBrazil().iso }));
-    else tx.set(vRef, stripUndefined({ ...village, claimed, updatedAt: nowBrazil().iso }));
+    const stats = addVillageStats(village.stats, { challengesDone: 1 });
+    if (vSnap.exists()) tx.update(vRef, stripUndefined({ claimed, stats, updatedAt: nowBrazil().iso }));
+    else tx.set(vRef, stripUndefined({ ...village, claimed, stats, updatedAt: nowBrazil().iso }));
     if (pSnap.exists()) {
       tx.update(pRef, {
         totalXP: increment(challenge.xpReward),
@@ -182,6 +184,10 @@ export async function completeChallenge(uid: string, challengeId: string): Promi
     }
     paid = true;
   });
+  if (paid) {
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(uid, {});
+  }
   return paid;
 }
 

@@ -51,7 +51,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const { completeTask, completeLateTask, addTask } = useData();
   const { childUid } = useAuth();
   const { hour, weekday, today, period: clockPeriod } = useClock();
-  const { economy } = useVillage();
+  const { economy, village } = useVillage();
   const [yesterdayDone, setYesterdayDone] = React.useState<string[]>([]);
   const [ownTitle, setOwnTitle] = React.useState('');
   const [ownBusy, setOwnBusy] = React.useState(false);
@@ -79,6 +79,15 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     !task.optional &&
     isTaskAvailableToday(task, weekday)
   );
+  const planToday = village.plan.date === today ? village.plan.order : [];
+  const orderedTasks = [...filteredTasks].sort((a, b) => {
+    const ia = planToday.indexOf(a.id);
+    const ib = planToday.indexOf(b.id);
+    if (ia === -1 && ib === -1) return 0;
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
   React.useEffect(() => {
     if (!childUid) return;
     const yesterday = addDays(today, -1);
@@ -87,8 +96,8 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
   const extraTasks = tasks.filter((task) => extraVisibleOn(task, today) && isTaskAvailableToday(task, weekday));
 
-  const completedTasks = filteredTasks.filter(task => isTaskCompletedToday(task, today)).length;
-  const totalTasks = filteredTasks.length;
+  const completedTasks = orderedTasks.filter(task => isTaskCompletedToday(task, today)).length;
+  const totalTasks = orderedTasks.length;
   const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
   
   const currentPeriod = getCurrentPeriod();
@@ -96,10 +105,10 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   
   // Guided mode: show only current incomplete task
   const currentTask = guidedMode 
-    ? filteredTasks.find(task => !isTaskCompletedToday(task, today)) 
+    ? orderedTasks.find(task => !isTaskCompletedToday(task, today)) 
     : null;
   
-  const tasksToShow = guidedMode && currentTask ? [currentTask] : filteredTasks;
+  const tasksToShow = guidedMode && currentTask ? [currentTask] : orderedTasks;
 
   const handleCompleteTask = async (taskId: string, completed: boolean) => {
     // Only allow completion, not un-completion

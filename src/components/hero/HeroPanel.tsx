@@ -9,13 +9,13 @@ import { VillageProvider, useVillage } from '../../contexts/VillageContext';
 import PunishmentModeScreen from './PunishmentModeScreen';
 import DailyQuiz from './DailyQuiz';
 import SurpriseMissionQuiz from './SurpriseMissionQuiz';
-import BirthdayCelebration from './BirthdayCelebration';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { ReadyBoot } from '../common/useDismissBoot';
 import VillageHome from './village/VillageHome';
 import Onboarding from './village/Onboarding';
 import LevelUpModal from './village/LevelUpModal';
 import { getTodayBrazil } from '../../utils/clock';
+import { quizLockedFor } from '../../services/village/quizGate';
 import { useClock } from '../../contexts/ClockContext';
 
 const VillageGate: React.FC<{
@@ -41,14 +41,20 @@ const VillageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 const AfterOnboard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { village, loading } = useVillage();
+  const { requestPermission, permission } = useNotifications();
   const forceOnboard = import.meta.env.DEV && new URLSearchParams(window.location.search).get('onboard') === '1';
-  if (loading || !village.onboardedAt || forceOnboard) return null;
+  const ready = !loading && Boolean(village.onboardedAt) && !forceOnboard;
+  useEffect(() => {
+    if (!ready || permission !== 'default') return;
+    const timer = setTimeout(() => { void requestPermission(); }, 3000);
+    return () => clearTimeout(timer);
+  }, [ready, permission, requestPermission]);
+  if (!ready) return null;
   return <>{children}</>;
 };
 
 const HeroPanel: React.FC = () => {
   const { progress, loading } = useData();
-  const { requestPermission, permission } = useNotifications();
   const { isPunished } = usePunishment();
   const { period: clockPeriod, today: clockToday } = useClock();
   const [selectedPeriod, setSelectedPeriod] = useState<'morning' | 'afternoon' | 'evening'>(clockPeriod);
@@ -68,13 +74,6 @@ const HeroPanel: React.FC = () => {
     setQuizCompleted(Boolean(localStorage.getItem(quizKey)));
   }, [progress.userId, clockToday]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (permission === 'default') requestPermission();
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [permission, requestPermission]);
-
   const markQuizDone = useCallback(() => {
     if (!progress.userId) return;
     localStorage.setItem(`quiz_completed_${progress.userId}_${getTodayBrazil()}`, '1');
@@ -83,8 +82,11 @@ const HeroPanel: React.FC = () => {
 
   if (loading) return <LoadingSpinner size="lg" />;
 
-  const quizLocked = (Boolean(progress.quizRequired) && !quizCompleted)
-    || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('quiz') === 'lock');
+  const quizLocked = quizLockedFor({
+    quizEnabled: progress.quizEnabled,
+    quizRequired: progress.quizRequired,
+    completed: quizCompleted,
+  }) || (import.meta.env.DEV && new URLSearchParams(window.location.search).get('quiz') === 'lock');
   const todayString = clockToday.slice(5);
 
   return (
@@ -117,7 +119,6 @@ const HeroPanel: React.FC = () => {
         </VillageShell>
       </VillageProvider>
 
-      <BirthdayCelebration onComplete={() => undefined} />
       {isPunished && !punishOpen && (
         <button type="button" className="fixed top-24 right-4 z-50 mc-btn mc-btn-stone min-h-[44px] px-3" onClick={() => setPunishOpen(true)}>
           Tarefas da punição

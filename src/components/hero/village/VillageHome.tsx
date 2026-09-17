@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Maximize2 } from 'lucide-react';
+import { Maximize2, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
@@ -13,7 +13,7 @@ import { chestAllowed } from '../../../services/village/chest';
 import { noticesForNow, habitTipForNow, pickLine } from '../../../services/village/notices';
 import { nextEvents, occurrencesBetween, reminderDue } from '../../../services/village/agenda';
 import { markAgendaDone, subscribeAgenda, updateAgendaItem, weeklyOrganizedBonus } from '../../../services/agendaService';
-import { applyVillageStats, repairLot, talkToNpc } from '../../../services/villageService';
+import { completeNight, repairLot, settleAfter, talkToNpc } from '../../../services/villageService';
 import { claimKey, hasClaim } from '../../../services/village/claims';
 import { createMineSfx } from '../english/mine/sfx';
 import { CHILD_BIRTHDAY_MMDD } from '../../../config/rules';
@@ -41,20 +41,20 @@ import Cofrinho from './Cofrinho';
 import Agenda from './Agenda';
 import DesafiosCard from './DesafiosCard';
 import Mochila, { type PackTab } from './Mochila';
+import BuildingCard from './BuildingCard';
 import type { DollSlot } from './CharacterEditor';
 import type { BuildingId } from '../../../types/english';
 import type { Period } from '../../../types/village';
-import BuildingCard from './BuildingCard';
+import { getLevelFromXP } from '../../../utils/levelSystem';
+import { quizBlocksDest, quizGateActive } from '../../../services/village/quizGate';
 
-type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | null;
-
-function quizBlocksDest(id: string): boolean {
-  return id === 'market' || id === 'workshop' || id.startsWith('build:');
-}
+const nightInFlight = new Set<string>();
 
 function shopBlocksDest(id: string): boolean {
   return id === 'market' || id === 'chest' || id === 'pack' || id === 'chest_streak';
 }
+
+type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | null;
 
 interface Props {
   selectedPeriod: Period;
@@ -249,16 +249,49 @@ const VillageHome: React.FC<Props> = ({
 
   const cracks = visibleCracks(village.cracks);
   const broken = (bid: string) => cracks.includes(bid);
-  const mesaDown = (buildings.mesa || 0) >= 1 && broken('mesa');
-  const quizGate = quizLocked && !mesaDown;
+  const quizGate = quizGateActive(quizLocked);
+  const minerLevel = getLevelFromXP(progress.totalXP || 0);
   const chestDone = gate.reason === 'already' || hasClaim(village, claimKey('daily', today));
   const quotasPaid = due.length > 0 && done >= due.length && !quizLocked && chestDone;
   const nightClosed = hour >= 21 && quotasPaid;
+
+  useEffect(() => {
+    if (!childUid || !nightClosed || (village.stats.nightComplete || 0) >= 1) return;
+    const key = `night:${today}`;
+    if (village.claimed[key]) return;
+    const flight = `${childUid}:${today}`;
+    if (nightInFlight.has(flight)) return;
+    nightInFlight.add(flight);
+    void completeNight(childUid, today).catch(() => {
+      nightInFlight.delete(flight);
+    });
+  }, [childUid, nightClosed, today, village.claimed, village.stats.nightComplete]);
 
   const openDistrict = useCallback((id: string) => {
     playClick();
     if (quizGate && quizBlocksDest(id)) {
       onOpenQuiz();
+      return;
+    }
+    if (id === 'build:arena' || id === 'arena') {
+      const state = village.npcs.olheiro;
+      const ctx: DialogueCtx = {
+        hour,
+        weekday: now.weekday,
+        level: minerLevel,
+        tier: state?.tier || 0,
+        fullDays: village.fullDays,
+        baseLevels: buildings,
+        yesterday: yesterdayCtx,
+        today: { done, due: due.length, quizDone: !quizLocked },
+        pause: pauseDays.dates.includes(today),
+        punish: lockedShop,
+        firstTime: new Set(state?.lastTalkDate ? [] : ['olheiro']),
+      };
+      const entry = pickDialogue('olheiro', ctx, state?.seen || [], (state?.seen || []).slice(-14));
+      const lines = entry?.lines?.length ? entry.lines : [VILLAGE_LINES.olheiro?.[0]?.text].filter(Boolean) as string[];
+      if (lines[0]) setSpeech({ npc: 'olheiro', text: lines[0], rest: lines.slice(1) });
+      if (childUid) void talkToNpc(childUid, 'olheiro', today, 0, entry?.id).catch(() => undefined);
       return;
     }
     if (lockedShop && (shopBlocksDest(id) || id === 'build:bau')) {
@@ -309,7 +342,7 @@ const VillageHome: React.FC<Props> = ({
       const ctx: DialogueCtx = {
         hour,
         weekday: now.weekday,
-        level: progress.level || 1,
+        level: minerLevel,
         tier: state?.tier || 0,
         fullDays: village.fullDays,
         baseLevels: buildings,
@@ -336,7 +369,7 @@ const VillageHome: React.FC<Props> = ({
     }
     // broken() deriva de village.cracks, já na lista
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildings, hour, lockedShop, onOpenQuiz, playClick, quizGate, village.cracks, village.npcs, village.fullDays, village.claimed, today, childUid, due, done, progress.level, pauseDays.dates, now.weekday, yesterdayCtx, quizLocked, nightClosed]); // broken() usa village.cracks
+  }, [buildings, hour, lockedShop, onOpenQuiz, playClick, quizGate, village.cracks, village.npcs, village.fullDays, village.claimed, today, childUid, due, done, minerLevel, pauseDays.dates, now.weekday, yesterdayCtx, quizLocked, nightClosed]); // broken() usa village.cracks
 
   useEffect(() => {
     if (!buildFx) return;
@@ -575,6 +608,7 @@ const VillageHome: React.FC<Props> = ({
                     <img src={label === 'Missões' ? houseSprite(village.season) : HOTBAR_ICONS[label]} alt="" className="w-5 h-5 mc-pixel" draggable={false} />
                   )}
                   {label}
+                  {quizGate && quizBlocksDest(id) && <Lock className="w-4 h-4" aria-hidden />}
                 </button>
               );
             })}
@@ -611,10 +645,7 @@ const VillageHome: React.FC<Props> = ({
             playHammer();
             setBuildFx({ id, level: newLevel, at: performance.now() });
             setSceneEvent({ kind: 'build', at: performance.now(), lot: id });
-            if (childUid) {
-              void applyVillageStats(childUid, { buildsDone: 1 }, { buildings: { ...buildings, [id]: newLevel } }).catch(() => undefined);
-              void talkToNpc(childUid, 'ferreiro', today, 2).catch(() => undefined);
-            }
+            if (childUid) void settleAfter(childUid, 'ferreiro');
           }}
         />
       )}

@@ -443,7 +443,7 @@ export const NPC_PORTRAIT: Record<string, string> = {
   olheiro: ISO_NPC.olheiro,
 };
 
-export const WOOD_PICKAXE_SPRITE = '/assets/village/items/pickaxe-madeira.png';
+export const WOOD_PICKAXE_SPRITE = '/assets/village/items/pickaxe-madeira.png?v=2';
 
 export const GEAR_SPRITE: Record<string, string> = {
   pickaxe_wood: WOOD_PICKAXE_SPRITE,
@@ -458,11 +458,11 @@ export const GEAR_SPRITE: Record<string, string> = {
 };
 
 export const PICK_OVERLAY: Record<number, string> = {
-  0: '/assets/village/char/pick-wood.png?v=7',
-  1: '/assets/village/char/pick-stone.png?v=7',
-  2: '/assets/village/char/pick-iron.png?v=7',
-  3: '/assets/village/char/pick-gold.png?v=7',
-  4: '/assets/village/char/pick-diamond.png?v=7',
+  0: '/assets/village/char/pick-wood.png?v=10',
+  1: '/assets/village/char/pick-stone.png?v=10',
+  2: '/assets/village/char/pick-iron.png?v=10',
+  3: '/assets/village/char/pick-gold.png?v=10',
+  4: '/assets/village/char/pick-diamond.png?v=10',
 };
 
 export function pickaxeInfo(level: number): { level: PickaxeLevel; label: string; sprite: string } {

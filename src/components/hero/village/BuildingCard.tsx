@@ -254,6 +254,11 @@ const BuildingCard: React.FC<Props> = ({
                     : `${doneToday}/${due.length} missões hoje`}
               </p>
             </section>
+            {id === 'mesa' && (
+              <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
+                Prova do dia
+              </button>
+            )}
           </div>
         </div>
       </div>

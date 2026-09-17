@@ -14,6 +14,7 @@ import { noteDoneOf, sessionMarks } from './village/redstone';
 import { getTodayBrazil } from '../utils/clock';
 import { getLevelFromXP } from '../utils/levelSystem';
 import { bumpFriend, bumpVillage } from './village/statsBump';
+import { addVillageStats } from './village/stats';
 
 export interface CompleteRedstoneResult {
   redstone: number;
@@ -75,11 +76,16 @@ export async function completeRedstone(
     const base = baseSnap.exists() ? fromBaseDoc(uid, (baseSnap.data() || {}) as Record<string, unknown>) : initialBaseDoc(uid, finishedAt);
     const materials = { ...base.materials, redstone: base.materials.redstone + pay.redstone };
     const claimed = { ...village.claimed, [key]: finishedAt };
+    const deltas: Record<string, number> = {};
+    if (marks.redstoneDone) deltas.redstoneDone = marks.redstoneDone;
+    if (marks.redstonePerfect) deltas.redstonePerfect = marks.redstonePerfect;
+    if (stagesWon > 0) deltas.redstoneStages = stagesWon;
+    const stats = addVillageStats(village.stats, deltas);
     const previousXP = Number(pSnap.data()?.totalXP) || 0;
     const totalXP = previousXP + pay.xp;
 
-    if (!vSnap.exists()) tx.set(vRef, stripUndefined({ ...village, claimed, updatedAt: finishedAt }));
-    else tx.update(vRef, stripUndefined({ claimed, updatedAt: finishedAt }));
+    if (!vSnap.exists()) tx.set(vRef, stripUndefined({ ...village, claimed, stats, updatedAt: finishedAt }));
+    else tx.update(vRef, stripUndefined({ claimed, stats, updatedAt: finishedAt }));
     if (!baseSnap.exists()) tx.set(bRef, stripUndefined({ ...base, materials, updatedAt: finishedAt }));
     else tx.update(bRef, stripUndefined({ materials, updatedAt: finishedAt }));
     if (pSnap.exists()) {
@@ -108,11 +114,7 @@ export async function completeRedstone(
 
   const result = out as CompleteRedstoneResult | null;
   if (!result) throw new Error('Não deu para guardar o circuito.');
-  const deltas: Record<string, number> = {};
-  if (marks.redstoneDone) deltas.redstoneDone = marks.redstoneDone;
-  if (marks.redstonePerfect) deltas.redstonePerfect = marks.redstonePerfect;
-  if (stagesWon > 0) deltas.redstoneStages = stagesWon;
-  bumpVillage(uid, deltas, { level: getLevelFromXP(result.totalXP) });
-  if (marks.ferreiro > 0) bumpFriend(uid, 'ferreiro', marks.ferreiro);
+  await bumpVillage(uid, {}, { level: getLevelFromXP(result.totalXP) });
+  if (marks.ferreiro > 0) await bumpFriend(uid, 'ferreiro', marks.ferreiro);
   return result;
 }

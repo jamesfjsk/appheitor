@@ -1,9 +1,10 @@
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { collection, deleteField, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { LearningDoc } from '../types/village';
-import { isoWeekOf, nowBrazil } from '../utils/clock';
+import { addDays, getTodayBrazil, isoWeekOf, mondayOfIsoWeek, nowBrazil } from '../utils/clock';
 import { listGoldTransactions } from './goldTx';
 import { weeklyStatement } from './village/bank';
+import { countWeekTorches } from './village/season';
 import { getVillage } from './villageService';
 import { touchHealth } from './observability';
 
@@ -15,30 +16,38 @@ function asDate(value: unknown): Date {
   return new Date(value as string);
 }
 
+function wordsFromVocab(vocab: unknown): number {
+  if (!vocab || typeof vocab !== 'object') return 0;
+  return Object.values(vocab as Record<string, { seen?: number }>).filter((v) => (Number(v?.seen) || 0) >= 3).length;
+}
+
 export async function computeWeeklyLearning(uid: string, week: string): Promise<LearningDoc> {
-  const [quizSnap, txSnap, chalSnap, village] = await Promise.all([
+  const [bankSnap, quizSnap, txSnap, chalSnap, village, baseSnap] = await Promise.all([
+    getDocs(query(collection(db, 'quizBank'), where('userId', '==', uid))),
     getDocs(query(collection(db, 'dailyQuizzes'), where('userId', '==', uid))),
     listGoldTransactions(uid, 800),
     getDocs(query(collection(db, 'challenges'), where('userId', '==', uid))),
     getVillage(uid),
+    getDoc(doc(db, 'englishBase', uid)),
   ]);
 
   const byCat: Record<string, { ok: number; n: number }> = {};
   let reflections = 0;
+  for (const d of bankSnap.docs) {
+    const data = d.data();
+    const date = String(data.date || '');
+    if (!date || isoWeekOf(date) !== week) continue;
+    const cat = String(data.category || 'geral');
+    const hit = data.correct === true;
+    byCat[cat] = byCat[cat] || { ok: 0, n: 0 };
+    byCat[cat].n += 1;
+    if (hit) byCat[cat].ok += 1;
+  }
   for (const d of quizSnap.docs) {
     const data = d.data();
     const date = String(data.date || '');
     if (!date || isoWeekOf(date) !== week) continue;
     if (data.reflection) reflections += 1;
-    const answers = Array.isArray(data.answers) ? data.answers : [];
-    for (const a of answers) {
-      if (!a || typeof a !== 'object') continue;
-      const cat = String((a as { category?: string }).category || 'geral');
-      const hit = (a as { correct?: boolean }).correct === true;
-      byCat[cat] = byCat[cat] || { ok: 0, n: 0 };
-      byCat[cat].n += 1;
-      if (hit) byCat[cat].ok += 1;
-    }
   }
   const quizAccuracyByCategory: Record<string, number> = {};
   for (const [k, v] of Object.entries(byCat)) {
@@ -46,7 +55,20 @@ export async function computeWeeklyLearning(uid: string, week: string): Promise<
   }
 
   const money = weeklyStatement(txSnap, week);
-  const fullDays = Number(village.stats.fullDaysCount || village.fullDays || 0);
+  const monday = mondayOfIsoWeek(week);
+  const dates = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+  const torchSnaps = await Promise.all(dates.map((d) => getDoc(doc(db, 'dailyProgress', `${uid}_${d}`))));
+  const fullDays = countWeekTorches(torchSnaps.map((s) => {
+    if (!s.exists()) return { due: 0, done: 0 };
+    const d = s.data();
+    return {
+      due: Number(d.totalTasksAvailable) || 0,
+      done: Number(d.tasksCompleted) || 0,
+      vacation: d.vacation === true,
+      paused: d.paused === true,
+      punished: d.punished === true,
+    };
+  }));
   const challengesDone = chalSnap.docs.filter((d) => {
     const data = d.data();
     const at = data.completedAt;
@@ -54,11 +76,12 @@ export async function computeWeeklyLearning(uid: string, week: string): Promise<
     const iso = nowBrazil(asDate(at).getTime()).date;
     return isoWeekOf(iso) === week;
   }).length;
+  const wordsMastered = wordsFromVocab(baseSnap.data()?.vocab) || Number(village.stats.wordsMastered || 0);
 
   const docData: LearningDoc = {
     week,
     quizAccuracyByCategory,
-    wordsMastered: Number(village.stats.wordsMastered || 0),
+    wordsMastered,
     reflections,
     savingsRatePct: money.savingsRatePct,
     goldEarned: money.earned,
@@ -69,7 +92,30 @@ export async function computeWeeklyLearning(uid: string, week: string): Promise<
     updatedAt: nowBrazil().iso,
   };
 
-  await setDoc(doc(db, 'learning', uid), { userId: uid, ...docData }, { merge: true });
+  const ref = doc(db, 'learning', uid);
+  const currentWeek = isoWeekOf(getTodayBrazil());
+  const closedWeek = isoWeekOf(addDays(mondayOfIsoWeek(currentWeek), -1));
+  const writeTop = week === closedWeek;
+  await setDoc(ref, {
+    userId: uid,
+    weeks: { [week]: { ...docData } },
+    ...(writeTop ? {
+      week: docData.week,
+      wordsMastered: docData.wordsMastered,
+      reflections: docData.reflections,
+      savingsRatePct: docData.savingsRatePct,
+      goldEarned: docData.goldEarned,
+      goldSpent: docData.goldSpent,
+      goldSaved: docData.goldSaved,
+      fullDays: docData.fullDays,
+      challengesDone: docData.challengesDone,
+      updatedAt: docData.updatedAt,
+      quizAccuracyByCategory: deleteField(),
+    } : { updatedAt: docData.updatedAt }),
+  }, { merge: true });
+  if (writeTop) {
+    await setDoc(ref, { quizAccuracyByCategory }, { merge: true });
+  }
   await touchHealth(uid, 'lastLearningWeek', week);
   return docData;
 }

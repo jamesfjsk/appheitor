@@ -114,6 +114,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
   const { village, economy, settings, modules } = useVillage();
   const { tasks } = useData();
   const { hour: hourBrazil, minute, today } = useClock();
+  const isFocus = village.plan.date === today && village.plan.focusTaskId === task.id;
   const periodOpen = periodAllowedAt(task.period, hourBrazil, economy);
   const abreHora = task.period === 'afternoon'
     ? economy.periodStartHours.afternoon
@@ -162,6 +163,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
         <h3 className={`text-[17px] font-bold leading-tight ${done ? 'line-through' : ''}`}>
           {task.title}
         </h3>
+        {isFocus && <p className="text-[13px] mc-good mt-0.5">Foco · 2x material</p>}
         {task.description && (
           <p className="text-[13px] mc-muted mt-0.5">{task.description}</p>
         )}

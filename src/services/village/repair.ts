@@ -12,7 +12,7 @@ import { crackedSentence, DEFAULT_ECONOMY } from '../../config/village';
 
 /** Casa, Mina, Mochila e personagens não entram. */
 export const BREAKABLE_LOTS: BuildingId[] = [
-  'fornalha', 'bau', 'cerca', 'torre', 'mesa', 'cofre', 'agenda', 'mercado', 'campinho', 'arena',
+  'fornalha', 'bau', 'cerca', 'torre', 'mesa', 'cofre', 'agenda', 'mercado',
 ];
 
 export const DEFAULT_LOTS_BY_PERIOD: Record<Period, BuildingId> = {

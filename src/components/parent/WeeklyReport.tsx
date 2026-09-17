@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
-import { computeWeeklyLearning, getLearning } from '../../services/learningService';
+import { computeWeeklyLearning } from '../../services/learningService';
 import type { LearningDoc } from '../../types/village';
 import { isoWeekOf, getTodayBrazil, weekRangeLabel } from '../../utils/clock';
 
@@ -10,23 +10,49 @@ const WeeklyReport: React.FC = () => {
   const week = isoWeekOf(getTodayBrazil());
   const [doc, setDoc] = useState<LearningDoc | null>(null);
   const [busy, setBusy] = useState(false);
+  const [boot, setBoot] = useState<'loading' | 'ok' | 'fail'>('loading');
 
   useEffect(() => {
     if (!childUid) return;
-    void getLearning(childUid).then(setDoc).catch(() => setDoc(null));
-  }, [childUid]);
+    let cancelled = false;
+    setBoot('loading');
+    void computeWeeklyLearning(childUid, week)
+      .then((next) => {
+        if (cancelled) return;
+        if (!next) {
+          setDoc(null);
+          setBoot('fail');
+          return;
+        }
+        setDoc(next);
+        setBoot('ok');
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setDoc(null);
+        setBoot('fail');
+      });
+    return () => { cancelled = true; };
+  }, [childUid, week]);
 
   const load = async () => {
     if (!childUid) return;
     setBusy(true);
     try {
       const next = await computeWeeklyLearning(childUid, week);
+      if (!next) {
+        setDoc(null);
+        setBoot('fail');
+        toast.error('Não deu para calcular');
+        return;
+      }
       setDoc(next);
+      setBoot('ok');
       toast.success('Relatório atualizado');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Não deu para calcular');
-      const prev = await getLearning(childUid).catch(() => null);
-      setDoc(prev);
+      setDoc(null);
+      setBoot('fail');
     } finally {
       setBusy(false);
     }
@@ -36,12 +62,13 @@ const WeeklyReport: React.FC = () => {
     <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-xl font-bold text-gray-900">Relatório semanal</h2>
-        <button type="button" className="px-3 py-1 bg-blue-600 text-white rounded" disabled={busy || !childUid} onClick={() => void load()}>
+        <button type="button" className="px-3 py-1 bg-blue-600 text-white rounded" disabled={busy || boot === 'loading' || !childUid} onClick={() => void load()}>
           Recalcular
         </button>
       </div>
       <p className="text-sm text-gray-600 mb-3">{weekRangeLabel(week)}</p>
-      {!doc && <p className="text-sm text-gray-500">Aperte Recalcular no domingo, ou quando quiser conferir.</p>}
+      {boot === 'loading' && !doc && <p className="text-sm text-gray-500">Calculando o relatório desta semana…</p>}
+      {boot === 'fail' && !doc && <p className="text-sm text-gray-500">Não deu para calcular</p>}
       {doc && (
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="border rounded p-3">
@@ -56,7 +83,7 @@ const WeeklyReport: React.FC = () => {
           <div className="border rounded p-3">
             <p className="font-semibold">Hábitos e reflexões</p>
             <p className="text-sm">Reflexões: {doc.reflections}</p>
-            <p className="text-sm">Dias completos (acumulado): {doc.fullDays}</p>
+            <p className="text-sm">Dias completos nesta semana: {doc.fullDays}</p>
           </div>
           <div className="border rounded p-3">
             <p className="font-semibold">Dinheiro</p>

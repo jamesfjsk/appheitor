@@ -21,6 +21,7 @@ import type { Period, ScheduleTask } from '../types/village';
 import { cracksAfterClose, liveBuildingLevel } from './village/repair';
 import { claimKey, hasClaim } from './village/claims';
 import { bumpChallenge, extendActiveChallenges } from './challengesService';
+import { addVillageStats, skipDayPenalty } from './village/stats';
 
 export interface DailyRules {
   enabled: boolean;
@@ -160,8 +161,10 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
     isPunishedOn(userId, date),
   ]);
   const due = dueTasks.length;
-  const skipPenalty = vacation || paused || punished;
+  const skipPenalty = skipDayPenalty({ vacation, paused, punished, enabled: r.enabled });
   const missedTasks = dueTasks.filter((t) => !done.taskIds.includes(t.id));
+  const quizSnap = await getDoc(doc(db, 'dailyQuizzes', `${userId}_${date}`));
+  const quizDone = quizSnap.data()?.completed === true;
 
   const progressRef = doc(db, 'progress', userId);
   const villageRef = doc(db, 'village', userId);
@@ -185,7 +188,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
     let missed = missedTasks.length;
     let helmetUsed = false;
     const week = isoWeekOf(date);
-    if (!vacation && !paused && missed === 1 && village.gear.helmet >= 1 && village.shield.helmetWeek !== week) {
+    if (!skipPenalty && missed === 1 && village.gear.helmet >= 1 && village.shield.helmetWeek !== week) {
       missed = 0;
       helmetUsed = true;
     }
@@ -256,7 +259,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       });
     }
 
-    const missedIds = (vacation || paused)
+    const missedIds = skipPenalty
       ? []
       : helmetUsed
         ? missedTasks.slice(1).map((t) => t.id)
@@ -283,15 +286,31 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       fullDays: village.fullDays,
       fullDaysStart: village.fullDaysStart,
       date,
-      skip: paused || punished || vacation || keepTorches,
+      skip: skipPenalty || keepTorches,
     });
     fullDaysAfter = torches.changed ? torches.fullDays : village.fullDays;
+    const torch = !skipPenalty && due > 0 && dueDone >= due;
+    const stats = addVillageStats(village.stats, {
+      fullDaysCount: torch ? 1 : 0,
+      noPunishDays: skipPenalty ? 0 : 1,
+    });
+    if (punished) stats.noPunishDays = 0;
+    if (skipPenalty) {
+      /* férias/folga/off: não mexe na sequência "sem esquecer" */
+    } else if (lost) {
+      stats.perfectWeeks = 0;
+    } else if (torch) {
+      stats.perfectWeeks = (village.stats.perfectWeeks || 0) + 1;
+    }
+    if (torch) stats.fullDaysBest = Math.max(Number(stats.fullDaysBest) || 0, fullDaysAfter);
+    if (!vacation && !paused && !quizDone && progressSnap.data()?.quizEnabled !== false) stats.quizStreak = 0;
     const patch = {
       fullDays: torches.changed ? torches.fullDays : village.fullDays,
       fullDaysStart: torches.changed ? torches.fullDaysStart : village.fullDaysStart,
       cracks,
       claimed,
       shield,
+      stats,
       updatedAt: new Date().toISOString(),
     };
     if (villageSnap.exists()) tx.update(villageRef, patch);
@@ -314,8 +333,14 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
   if (extendPunish) {
     try { await extendActiveChallenges(userId, 1); } catch (e) { console.warn('closeDay: extend desafios', e); }
   }
-  if (applied && !vacation && !paused && !punished) {
+  if (applied && !skipPenalty) {
     try { await bumpChallenge(userId, 'full_days', fullDaysAfter, true); } catch (e) { console.warn('closeDay: bump full_days', e); }
+  }
+  try {
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(userId, {});
+  } catch (e) {
+    console.warn('closeDay: stats', e);
   }
 
   void touchHealth(userId, 'lastCloseDay', date);

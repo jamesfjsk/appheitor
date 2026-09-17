@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return email.includes('pai') || email.includes('admin') ? 'admin' : 'child';
   };
 
-  const ensureUserSetup = async (firebaseUser: FirebaseUser): Promise<User> => {
+  const ensureUserSetup = async (firebaseUser: FirebaseUser): Promise<{ user: User; childUid: string }> => {
     try {
       const role = determineRole(firebaseUser.email || '');
       
@@ -59,32 +59,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
 
       if (role === 'admin') {
-        // Ensure admin has a linked child
         const managedChildId = await FirestoreService.ensureAdminChildLink(firebaseUser.uid);
-        setChildUid(managedChildId);
-        
-        // Ensure child progress exists
         await FirestoreService.ensureUserProgress(managedChildId);
-        
         console.log('✅ AUTH - Admin setup complete:', {
           adminUid: firebaseUser.uid,
           childUid: managedChildId
         });
-        
-        return { ...user, managedChildId };
-      } else {
-        // Child user
-        setChildUid(firebaseUser.uid);
-        
-        // Ensure child progress exists
-        await FirestoreService.ensureUserProgress(firebaseUser.uid);
-        
-        console.log('✅ AUTH - Child setup complete:', {
-          childUid: firebaseUser.uid
-        });
-        
-        return user;
+        return { user: { ...user, managedChildId }, childUid: managedChildId };
       }
+      await FirestoreService.ensureUserProgress(firebaseUser.uid);
+      console.log('✅ AUTH - Child setup complete:', {
+        childUid: firebaseUser.uid
+      });
+      return { user, childUid: firebaseUser.uid };
     } catch (error) {
       console.error('❌ AUTH - Error in user setup:', error);
       throw error;
@@ -96,8 +83,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         if (firebaseUser) {
           console.log('🔥 AUTH - User authenticated:', firebaseUser.email);
-          const user = await ensureUserSetup(firebaseUser);
-          setUser(user);
+          const setup = await ensureUserSetup(firebaseUser);
+          setUser(setup.user);
+          setChildUid(setup.childUid);
         } else {
           console.log('🔥 AUTH - User not authenticated');
           setUser(null);
@@ -149,8 +137,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       console.log('📝 AUTH - Registering new', userType, 'account:', email);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = await ensureUserSetup(userCredential.user);
-      setUser(user);
+      const setup = await ensureUserSetup(userCredential.user);
+      setUser(setup.user);
+      setChildUid(setup.childUid);
       toast.success(`Conta criada com sucesso! Bem-vindo, ${displayName}!`);
     } catch (error) {
       const errorMessages = {

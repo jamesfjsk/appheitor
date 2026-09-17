@@ -120,16 +120,6 @@ export const ITEMS: Item[] = [
     description: 'Prêmio de verdade cadastrado pelo pai.',
     source: 'evento',
   })),
-  ...[10, 20, 30, 40].map((n): Item => ({
-    id: `milestone_${n}`,
-    name: `Marco ${n}`,
-    kind: 'milestone',
-    icon: '/assets/village/items/crown.png',
-    rarity: 'exclusivo',
-    description: 'Cosmético de marco. Em breve, se o PNG ainda não chegou.',
-    minLevel: n,
-    source: 'marco',
-  })),
   {
     id: 'trophy_bronze',
     name: 'Troféu de bronze',

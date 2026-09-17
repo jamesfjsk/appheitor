@@ -7,7 +7,7 @@ import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
 import type { AgendaItem, AgendaKind } from '../../../types/village';
 import { nextEvents, occurrencesBetween, organizationXp, studyPlanFor } from '../../../services/village/agenda';
-import { acceptStudyPlan, createAgendaItem, deleteAgendaItem, markAgendaDone, subscribeAgenda, updateAgendaItem } from '../../../services/agendaService';
+import { acceptStudyPlan, createAgendaItem, deleteAgendaItem, finishFocusBlock, markAgendaDone, subscribeAgenda, updateAgendaItem } from '../../../services/agendaService';
 import { addDays } from '../../../utils/clock';
 import FlashTimer from '../FlashTimer';
 import CalendarModal from '../CalendarModal';
@@ -167,6 +167,7 @@ const Agenda: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   onClose={() => setFocusMin(null)}
                   onFinished={() => {
                     if (focusTaskId) void completeTask(focusTaskId);
+                    if (childUid) void finishFocusBlock(childUid).catch((e) => console.warn('foco', e));
                     toast.success('Foco concluído');
                     setFocusMin(null);
                     setFocusTaskId(null);

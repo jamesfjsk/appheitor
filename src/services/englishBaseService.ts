@@ -22,6 +22,7 @@ import { assertAiBudget, buildDailyContracts, regenerateSingle } from './english
 import { prefetchAudio } from './englishTts';
 import { addDays } from './dailyQuizService';
 import { getTodayBrazil } from '../utils/timezone';
+import { addVillageStats } from './village/stats';
 
 /** Lease de geração: outra aba só assume depois disso */
 const LEASE_MS = 3 * 60_000;
@@ -516,6 +517,9 @@ export async function completeContract(
   const sessionRef = doc(collection(db, 'englishSessions'));
   const today = getTodayBrazil();
   const finishedAt = nowIso();
+  let contractType = '';
+  let wordsMastered = 0;
+  let perfect = false;
   let out: CompleteResult | null = null;
 
   await runTransaction(db, async (tx) => {
@@ -548,6 +552,8 @@ export async function completeContract(
     const { xp, gold } = rewardFor(contract.type, material, rewarded);
     const rewardedIds = rewarded && !plan.rewardedIds.includes(contractId) ? [...plan.rewardedIds, contractId] : plan.rewardedIds;
     const result: ContractResult = { ...outcome, materialEarned: material, rewarded, xp, gold, durationSec, finishedAt };
+    contractType = contract.type;
+    perfect = Number(outcome.score) >= Number(outcome.max) && Number(outcome.max) > 0;
 
     const materials = { ...base.materials, [contract.material]: base.materials[contract.material] + material };
     // Recado no estágio 2: a "Dica" custa 1 ferro (a tela só a libera com ferro em caixa)
@@ -569,6 +575,7 @@ export async function completeContract(
       contractsDone: base.contractsDone + 1,
       updatedAt: finishedAt,
     };
+    wordsMastered = Object.values(vocab).filter((v) => (v?.seen ?? 0) >= 3).length;
     const before = affordableIds(base);
     const unlockedBuildings = affordableIds(nextBase).filter((id) => !before.includes(id));
 
@@ -609,8 +616,14 @@ export async function completeContract(
   }
   try {
     const { bumpVillage, bumpFriend } = await import('./village/statsBump');
-    bumpVillage(uid, { contractsDone: 1 });
-    bumpFriend(uid, 'comerciante', 2);
+    const deltas: Record<string, number> = { contractsDone: 1, contractsWeek: 1 };
+    if (contractType === 'letter') deltas.contractsLetter = 1;
+    if (contractType === 'note') deltas.contractsNote = 1;
+    if (contractType === 'forge') deltas.contractsForge = 1;
+    if (contractType === 'merchant') deltas.contractsMerchant = 1;
+    if (perfect) deltas.contractsPerfect = 1;
+    await bumpVillage(uid, deltas, { set: { wordsMastered } });
+    await bumpFriend(uid, 'comerciante', 2);
   } catch (e) {
     console.warn('stats contrato', e);
   }
@@ -715,6 +728,13 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
       buildings: { ...base.buildings, [buildingId]: check.nextLevel },
       updatedAt: nowIso(),
     });
+    if (vSnap.exists()) {
+      const rawStats = (vSnap.data()?.stats || {}) as Record<string, number>;
+      tx.update(doc(db, 'village', uid), {
+        stats: addVillageStats(rawStats, { buildsDone: 1 }),
+        updatedAt: nowIso(),
+      });
+    }
     out = { newLevel: check.nextLevel, xp: buildXp(check.nextLevel) };
   });
   if (!out) throw new Error('Falha ao construir.');
@@ -725,12 +745,27 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
 export async function setThemeRequest(uid: string, text: string | null): Promise<void> {
   const vSnap = await getDoc(doc(db, 'village', uid));
   if (isBroken(cracksOf(vSnap.data()?.cracks), 'mesa')) throw ruinUseError('mesa');
+  const bPrev = await getDoc(baseRef(uid));
+  const prevTheme = String(bPrev.data()?.themeRequest || '') || null;
   const value = (text ?? '').trim().slice(0, THEME_REQUEST_MAX);
   const themeRequest = value || null;
+  const changed = themeRequest !== prevTheme;
   await setDoc(baseRef(uid), { userId: uid, themeRequest, updatedAt: nowIso() }, { merge: true });
   const tomorrow = addDays(getTodayBrazil(), 1);
   const plan = await getPlan(uid, tomorrow);
   if (plan && !hasDone(plan) && plan.themeRequest !== themeRequest) await regeneratePlan(uid, tomorrow);
+  if (themeRequest && changed) {
+    const day = Number(getTodayBrazil().replace(/-/g, ''));
+    const themeSetOn = Number((vSnap.data()?.stats as Record<string, number> | undefined)?.themeSetOn) || 0;
+    if (themeSetOn !== day) {
+      try {
+        const { bumpVillage } = await import('./village/statsBump');
+        await bumpVillage(uid, { themesSet: 1 }, { set: { themeSetOn: day } });
+      } catch (e) {
+        console.warn('stats tema', e);
+      }
+    }
+  }
 }
 
 // ---------- painel ----------

@@ -1,6 +1,6 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import { addDays, mondayOfIsoWeek, weekRangeLabel } from '../../../utils/clock';
-import { buildingLevelSum, recordsAfterWeek, seasonEndsOn, trophyOfWeek, villageGrowthStage } from '../season';
+import { buildingLevelSum, closeSeasonState, countWeekTorches, recordsAfterWeek, seasonEndsOn, trophyOfWeek, villageGrowthStage } from '../season';
 import { checkinXp, sageReplyFor, tomorrowValid } from '../checkin';
 import { evaluateAchievements, progressOf, rewardHasGold, visibleAchievements } from '../achievements';
 import { GAME_ACHIEVEMENTS } from '../../../data/achievements';
@@ -28,6 +28,63 @@ test('seasonEndsOn e troféu da semana', () => {
   expect(villageGrowthStage(10)).toBe(2);
   expect(villageGrowthStage(18)).toBe(3);
   expect(buildingLevelSum({ fornalha: 2, bau: 1 })).toBe(3);
+  expect(countWeekTorches([
+    { due: 3, done: 3 },
+    { due: 3, done: 2 },
+    { due: 3, done: 3, vacation: true },
+    { due: 0, done: 0 },
+    { due: 3, done: 3, punished: true },
+    { due: 3, done: 3 },
+  ])).toBe(2);
+});
+
+test('fechar temporada: recusa a segunda e apaga claimed das conquistas de temporada', () => {
+  const resetIds = ['nivel_5', 'nivel_10'];
+  const first = closeSeasonState({
+    season: 1,
+    stars: [],
+    claimed: { 'ach:nivel_5': '2026-09-01', 'ach:primeira_picaretada': '2026-09-02' },
+    newAchievements: ['nivel_5', 'primeira_picaretada'],
+    achievementsUnlocked: { nivel_5: '2026-09-01', primeira_picaretada: '2026-09-02' },
+    stats: { seasonsDone: 0 },
+    today: '2026-09-17',
+    level: 8,
+    resetIds,
+  });
+  expect(first.ok).toBe(true);
+  if (!first.ok) return;
+  expect(first.nextSeason).toBe(2);
+  expect(first.stars).toEqual([{ season: 1, level: 8, endedOn: '2026-09-17' }]);
+  expect(first.claimed['season:1']).toBe('2026-09-17');
+  expect(first.claimed['ach:nivel_5']).toBe(undefined);
+  expect(first.claimed['ach:primeira_picaretada']).toBe('2026-09-02');
+  expect(first.newAchievements).toEqual(['primeira_picaretada']);
+  expect(first.achievementsUnlocked.nivel_5).toBe(undefined);
+  const second = closeSeasonState({
+    season: first.nextSeason,
+    stars: first.stars,
+    claimed: first.claimed,
+    newAchievements: first.newAchievements,
+    achievementsUnlocked: first.achievementsUnlocked,
+    stats: first.stats,
+    today: '2026-09-17',
+    level: 1,
+    resetIds,
+  });
+  expect(second.ok).toBe(false);
+  if (!second.ok) expect(second.reason).toBe('Já fechou uma temporada hoje');
+  const again = closeSeasonState({
+    season: 1,
+    stars: first.stars,
+    claimed: {},
+    newAchievements: [],
+    achievementsUnlocked: {},
+    stats: {},
+    today: '2026-09-17',
+    level: 1,
+    resetIds,
+  });
+  expect(again.ok).toBe(false);
 });
 
 test('check-in: 5 XP se respondeu, 0 se não; amanhã pede 3 palavras', () => {
@@ -54,12 +111,15 @@ test('conquistas: destrava no alvo e não antes; escondidas; nunca gold', () => 
   expect(visibleAchievements({ lua_da_vila: '2026-09-15' }).some((x) => x.id === 'lua_da_vila')).toBe(true);
   for (const ach of GAME_ACHIEVEMENTS) expect(rewardHasGold(ach)).toBe(false);
   expect('gold' in (first.reward as object) ? (first.reward as { gold?: number }).gold : undefined).toBe(undefined);
-  expect(GAME_ACHIEVEMENTS.length >= 72).toBe(true);
-  expect(GAME_ACHIEVEMENTS.some((x) => x.id === 'primeira_vagoneta')).toBe(true);
-  expect(evaluateAchievements({ redstoneDone: 0 }, {}).some((x) => x.id === 'primeira_vagoneta')).toBe(false);
-  expect(evaluateAchievements({ redstoneDone: 1 }, {}).some((x) => x.id === 'primeira_vagoneta')).toBe(true);
-  expect(evaluateAchievements({ redstonePerfect: 1 }, {}).some((x) => x.id === 'vagoneta_perfeita_1')).toBe(true);
-  expect(evaluateAchievements({ redstoneDone: 1 }, {}).some((x) => x.id === 'vagoneta_perfeita_1')).toBe(false);
+  expect(GAME_ACHIEVEMENTS.some((x) => x.id === 'primeira_vagoneta')).toBe(false);
+  expect(GAME_ACHIEVEMENTS.filter((x) => x.id.startsWith('cart_')).length).toBe(7);
+  const cartFirst = GAME_ACHIEVEMENTS.find((x) => x.id === 'cart_first')!;
+  expect(cartFirst.reward.xp).toBe(10);
+  expect(cartFirst.reward.material).toBe(undefined);
+  expect(GAME_ACHIEVEMENTS.find((x) => x.id === 'cart_perfect')!.reward).toEqual({ xp: 15 });
+  expect(evaluateAchievements({ redstoneDone: 1 }, {}).some((x) => x.id === 'cart_first')).toBe(true);
+  expect(evaluateAchievements({ redstonePerfect: 1 }, {}).some((x) => x.id === 'cart_perfect')).toBe(true);
+  expect(evaluateAchievements({ redstoneDone: 1 }, {}).some((x) => x.id === 'cart_perfect')).toBe(false);
 });
 
 test('npcBehavior: horários, caminhada e toque', () => {
