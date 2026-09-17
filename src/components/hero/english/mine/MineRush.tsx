@@ -13,6 +13,7 @@ import { Heart, Volume2 } from 'lucide-react';
 import { EnglishCategory, EnglishWord } from '../../../../data/englishVocabulary';
 import { EnglishProgressDoc, RoundResult, pickWords, playWord, playWordAsync, shuffle, speakAsync, wordsOf } from '../../../../services/englishGameService';
 import { useVillage } from '../../../../contexts/VillageContext';
+import { useSound } from '../../../../contexts/SoundContext';
 import { BlockRow, Lane, MineEvent, MineState, MineWord, PICKAXES, PromptMode, RenderAssets, RenderOptions, RowPhase, RunPlan } from './types';
 import { chooseLane, createRun, drainEvents, pause, releaseRow, resume, start, summarize, tick } from './engine';
 import { createRenderer } from './render';

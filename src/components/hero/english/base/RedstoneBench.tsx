@@ -1,3 +1,4 @@
+// Molde da porta "jogo" (docs/MUNDO.md §5). Não importar até a Etapa 3.
 // ========================================
 // Mina: oficina de Redstone em tela cheia (Phaser). Regras em redstone.ts.
 // Porta: Recado feito. 3 etapas. Paga redstone + XP, nunca gold.
@@ -131,7 +132,7 @@ const RedstoneBench: React.FC<Props> = ({ uid, date, minerLevel, noteDone, claim
   const sim = running ? hot : cold;
   const inputOn = noteDone && !done && !saving && !celebrate && !reveal;
   const triesLeft = Math.max(0, RS_MAX_TRIES - fails);
-  const coach = useMemo(() => coachOf(puzzle, state, tool), [puzzle, state, tool]);
+  const coach = useMemo(() => coachOf(puzzle, state), [puzzle, state]);
 
   useEffect(() => {
     if (!inputOn || puzzle.mode === 'order') return;

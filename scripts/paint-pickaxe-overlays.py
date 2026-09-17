@@ -1,132 +1,35 @@
-"""In-hand pickaxe: clean T-head on the shoulder, item palettes, black outline."""
+"""Held pickaxe: the backpack 32x32 sprite, rotated into the shoulder."""
 from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 CHAR = ROOT / "public" / "assets" / "village" / "char"
+ITEMS = ROOT / "public" / "assets" / "village" / "items"
 PREV = ROOT / "docs" / "exemplos" / "telas" / "cena-v2" / "tmp-arena" / "look-shots"
 PREV.mkdir(parents=True, exist_ok=True)
 SIZE = 64
+ANGLE = -48
+HEIGHT = 16
+OX, OY = 43, 8
 
 iso = Image.open(CHAR / "miner-iso.png").convert("RGBA")
 iso_px = iso.load()
 
-# sampled from the inventory sprites: outline, dark, mid, lite, shine, handle, bind
-MAT = {
-    "wood": {
-        "o": (29, 25, 32),
-        "d": (86, 58, 34),
-        "m": (112, 79, 52),
-        "l": (150, 108, 70),
-        "s": (196, 154, 104),
-        "h": (112, 79, 52),
-        "b": (72, 48, 28),
-    },
-    "stone": {
-        "o": (12, 11, 11),
-        "d": (66, 67, 71),
-        "m": (88, 90, 95),
-        "l": (140, 143, 156),
-        "s": (226, 225, 244),
-        "h": (119, 61, 33),
-        "b": (72, 48, 28),
-    },
-    "iron": {
-        "o": (13, 10, 12),
-        "d": (82, 82, 80),
-        "m": (165, 171, 173),
-        "l": (210, 214, 216),
-        "s": (252, 252, 252),
-        "h": (119, 61, 33),
-        "b": (86, 86, 84),
-    },
-    "gold": {
-        "o": (10, 7, 4),
-        "d": (85, 51, 8),
-        "m": (204, 150, 5),
-        "l": (254, 217, 93),
-        "s": (252, 251, 248),
-        "h": (119, 61, 33),
-        "b": (85, 51, 8),
-    },
-    "diamond": {
-        "o": (11, 11, 9),
-        "d": (30, 105, 98),
-        "m": (27, 100, 93),
-        "l": (63, 244, 249),
-        "s": (220, 252, 249),
-        "h": (109, 76, 45),
-        "b": (22, 16, 11),
-    },
+ITEM_FILES = {
+    "wood": "pickaxe-madeira.png",
+    "stone": "pickaxe-pedra.png",
+    "iron": "pickaxe-ferro.png",
+    "gold": "pickaxe-ouro.png",
+    "diamond": "diamond-pickaxe.png",
 }
 
-# rows at y=12, x starts at 47. . empty
-# o outline  d dark  m mid  l lite  s shine  h handle  b bind
-BASE = [
-    "  oslso",
-    " olslmo",
-    "homldo",
-    "hhbdo",
-    "hhbml o",
-    " hbmlo",
-    "  omlo",
-    "  omdo",
-    "   mldo",
-    "   mdo",
-    "    do",
-    "    o",
-]
-
-EXTRA = {
-    "wood": [],
-    "stone": [
-        (6, 1, "d"),
-        (6, 8, "l"),
-    ],
-    "iron": [
-        (6, 0, "s"),
-        (6, 1, "l"),
-        (7, 8, "s"),
-        (6, 9, "l"),
-    ],
-    "gold": [
-        (6, 0, "s"),
-        (7, 1, "l"),
-        (6, 2, "d"),
-        (7, 8, "s"),
-        (7, 9, "l"),
-        (6, 10, "m"),
-    ],
-    "diamond": [
-        (6, 0, "s"),
-        (6, 1, "l"),
-        (7, 1, "s"),
-        (6, 2, "m"),
-        (5, 3, "l"),
-        (6, 7, "l"),
-        (7, 8, "s"),
-        (7, 9, "l"),
-        (6, 10, "m"),
-        (5, 11, "d"),
-    ],
-}
-
-SPARK = {
-    "wood": [],
-    "stone": [],
-    "iron": [(5, 0)],
-    "gold": [(6, 0), (4, 2)],
-    "diamond": [(6, 0), (7, 8)],
-}
-
-# fist handle — same wood as the item handles
 FIST = {
-    (21, 32): "l",
-    (20, 33): "m",
-    (18, 33): "m",
-    (17, 33): "d",
-    (18, 34): "d",
-    (21, 33): "o",
+    (21, 32): (207, 176, 137),
+    (20, 33): (119, 61, 33),
+    (18, 33): (119, 61, 33),
+    (17, 33): (65, 41, 23),
+    (18, 34): (65, 41, 23),
+    (21, 33): (22, 16, 11),
 }
 
 
@@ -137,87 +40,108 @@ def helmet(x, y):
     return r > 150 and g > 110 and b < 90 and r + g > b * 3
 
 
-def brim(x, y):
-    return x >= 45 and y >= 14 and y <= 18
+def is_stock_pick(r, g, b, a, x, y):
+    if a < 16 or x < 44 or y < 11 or y > 26:
+        return False
+    if helmet(x, y):
+        return False
+    gray = abs(r - g) < 32 and abs(g - b) < 32
+    if not gray:
+        return False
+    if r < 24:
+        return True
+    return r > 68 and r < 220 and b > 80
 
 
-def put(px, x, y, rgb):
-    if 0 <= x < SIZE and 0 <= y < SIZE:
-        px[x, y] = (*rgb, 255)
+def crop_opaque(im: Image.Image) -> Image.Image:
+    bbox = im.split()[-1].getbbox()
+    return im.crop(bbox) if bbox else im
 
 
-def paint(name: str) -> Image.Image:
-    pal = MAT[name]
-    im = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    px = im.load()
-    ox, oy = 46, 12
-    filled = {}
+def palette_of(im: Image.Image):
+    cols = []
+    for r, g, b, a in im.getdata():
+        if a >= 16:
+            cols.append((r, g, b))
+    return list(dict.fromkeys(cols))
 
-    def stamp(x, y, key):
-        if not (0 <= x < SIZE and 0 <= y < SIZE):
-            return
-        if helmet(x, y) and not brim(x, y):
-            return
-        put(px, x, y, pal[key])
-        filled[(x, y)] = key
 
-    for iy, row in enumerate(BASE):
-        for ix, ch in enumerate(row):
-            if ch == " ":
+def nearest(rgb, pal):
+    r, g, b = rgb
+    best, dist = pal[0], 10**9
+    for pr, pg, pb in pal:
+        d = (r - pr) ** 2 + (g - pg) ** 2 + (b - pb) ** 2
+        if d < dist:
+            best, dist = (pr, pg, pb), d
+    return best
+
+
+def snap(im: Image.Image, pal, thr=96) -> Image.Image:
+    out = im.copy()
+    p = out.load()
+    w, h = out.size
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = p[x, y]
+            if a < thr:
+                p[x, y] = (0, 0, 0, 0)
+            else:
+                nr, ng, nb = nearest((r, g, b), pal)
+                p[x, y] = (nr, ng, nb, 255)
+    return out
+
+
+def item_to_held(item: Image.Image) -> Image.Image:
+    pal = palette_of(item)
+    head = crop_opaque(item.crop((0, 0, 32, 16)))
+    big = head.resize((head.width * 8, head.height * 8), Image.NEAREST)
+    rot = big.rotate(ANGLE, resample=Image.BICUBIC, expand=True, fillcolor=(0, 0, 0, 0))
+    rot = snap(crop_opaque(snap(rot, pal)), pal)
+    rot = crop_opaque(rot)
+    f = HEIGHT / rot.height
+    nw, nh = max(1, round(rot.width * f)), HEIGHT
+    return rot.resize((nw, nh), Image.NEAREST)
+
+
+def paint(item: Image.Image) -> Image.Image:
+    held = item_to_held(item)
+    layer = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    lp = layer.load()
+    hp = held.load()
+    for y in range(held.height):
+        for x in range(held.width):
+            r, g, b, a = hp[x, y]
+            if a < 16:
                 continue
-            stamp(ox + ix, oy + iy, ch)
-
-    for ix, iy, key in EXTRA[name]:
-        stamp(ox + ix, oy + iy, key)
-
-    for ix, iy in SPARK[name]:
-        stamp(ox + ix, oy + iy, "s")
-
-    # outline empty neighbors (not into the helmet)
-    for (x, y) in list(filled):
-        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-            nx, ny = x + dx, y + dy
-            if (nx, ny) in filled:
+            gx, gy = OX + x, OY + y
+            if not (0 <= gx < SIZE and 0 <= gy < SIZE):
                 continue
-            if nx < 44 or ny < 11 or ny > 27:
+            if gx < 42 or gy < 7 or gy > 28:
                 continue
-            if helmet(nx, ny) and not brim(nx, ny):
+            if helmet(gx, gy) and not (gx >= 44 and 12 <= gy <= 20):
                 continue
-            stamp(nx, ny, "o")
-
-    wood_h = {
-        "o": (22, 16, 11),
-        "d": (86, 48, 24),
-        "m": (119, 61, 33),
-        "l": (158, 96, 52),
-        "h": (119, 61, 33),
-    }
-    for (x, y), key in FIST.items():
-        put(px, x, y, wood_h.get(key, wood_h["m"]))
-
-    return im
+            lp[gx, gy] = (r, g, b, 255)
+    for (x, y), rgb in FIST.items():
+        lp[x, y] = (*rgb, 255)
+    return layer
 
 
 def erase_stock(im: Image.Image) -> Image.Image:
     out = im.copy()
     p = out.load()
-    for y in range(11, 28):
+    for y in range(11, 27):
         for x in range(44, SIZE):
             r, g, b, a = p[x, y]
-            if a < 16:
-                continue
-            if helmet(x, y):
-                continue
-            gray = abs(r - g) < 32 and abs(g - b) < 32
-            if gray and r < 220 and (r > 68 or r < 22):
+            if is_stock_pick(r, g, b, a, x, y):
                 p[x, y] = (0, 0, 0, 0)
     return out
 
 
 def main():
     base = erase_stock(iso)
-    for name in MAT:
-        layer = paint(name)
+    for name, fname in ITEM_FILES.items():
+        item = Image.open(ITEMS / fname).convert("RGBA")
+        layer = paint(item)
         dest = CHAR / f"pick-{name}.png"
         layer.save(dest)
         preview = base.copy()
@@ -225,7 +149,7 @@ def main():
         preview.save(PREV / f"pick-{name}.png")
         preview.resize((256, 256), Image.NEAREST).save(PREV / f"pick-{name}-4x.png")
         n = sum(1 for p in layer.getdata() if p[3] > 16)
-        print(name, dest.name, n)
+        print(name, dest.name, n, "held", item_to_held(item).size)
 
 
 if __name__ == "__main__":

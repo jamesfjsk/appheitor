@@ -106,12 +106,13 @@ export async function completeRedstone(
     out = { redstone: pay.redstone, xp: pay.xp, previousXP, totalXP };
   });
 
-  if (!out) throw new Error('Não deu para guardar o circuito.');
+  const result = out as CompleteRedstoneResult | null;
+  if (!result) throw new Error('Não deu para guardar o circuito.');
   const deltas: Record<string, number> = {};
   if (marks.redstoneDone) deltas.redstoneDone = marks.redstoneDone;
   if (marks.redstonePerfect) deltas.redstonePerfect = marks.redstonePerfect;
   if (stagesWon > 0) deltas.redstoneStages = stagesWon;
-  bumpVillage(uid, deltas, { level: getLevelFromXP(out.totalXP) });
+  bumpVillage(uid, deltas, { level: getLevelFromXP(result.totalXP) });
   if (marks.ferreiro > 0) bumpFriend(uid, 'ferreiro', marks.ferreiro);
-  return out;
+  return result;
 }

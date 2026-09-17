@@ -282,6 +282,7 @@ Não fazer nesta etapa: restilizar o painel; mexer na Vagoneta fora de bug do E2
 | `src/components/parent/LaunchGuide.tsx` | P4 | settings, village, tasks, rewards, notices | pai | não ensina |
 | `scripts/export-user.cjs`, `launch-reset.cjs`, `clone-to-test.cjs`, `backfill-quizbank.cjs` | P3, P5 | Firestore | operação do domingo | não ensina |
 | `src/game/README.md` | P0 | `MUNDO.md` §5 | Etapa 3 | não ensina |
+| `src/components/hero/village/itemGlyphs.ts` | P0 | `ItemGlyph.tsx` | glifos do look | não ensina |
 | `src/data/dialogue/helpers.ts` e os 4 bancos de falas; `docs/conteudo/*` | P5 (líder) | contexto do dia (`DialogueCtx`) | balões dos NPCs | diálogos e amizade (Etapa 2, §22) |
 | Vagoneta da Mina (`cart.ts`, `CartBench.tsx`, `redstoneService.ts`; entrou sem doc no Lote 2) | regularizada aqui | Recado do dia feito; nível da Mina; maestria | redstone para a Fornalha; XP; amizade com o Ferreiro; stats `redstoneDone`, `redstonePerfect`, `redstoneStages`; 7 conquistas | abaixo |
 

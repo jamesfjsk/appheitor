@@ -32,6 +32,7 @@ import {
   initialBaseDoc,
   isBuildingUnlocked,
   missingMaterials,
+  publicFilePath,
 } from '../../../config/englishBase';
 
 // ---------- tokens proibidos ----------
@@ -131,9 +132,9 @@ test('10 construções: custos somam 3/5/8 com ferro >= 1; ícones existem', () 
       expect(total).toBe([3, 5, 8][i]);
       expect(c.ferro >= 1).toBeTruthy();
     });
-    expect(existsSync(join(pub, b.icon))).toBeTruthy();
+    expect(existsSync(join(pub, publicFilePath(b.icon)))).toBeTruthy();
   }
-  expect(existsSync(join(pub, TERRAIN_ICON))).toBeTruthy();
+  expect(existsSync(join(pub, publicFilePath(TERRAIN_ICON)))).toBeTruthy();
   expect(buildingCost('fornalha', 1)).toEqual({ madeira: 1, pedra: 1, ferro: 1, redstone: 0 });
   expect(buildingCost('fornalha', 1, 2)).toEqual({ madeira: 2, pedra: 2, ferro: 2, redstone: 0 });
   expect(buildingCost('fornalha', 4)).toBe(null);
@@ -195,7 +196,7 @@ test('12 lugares com relações permitidas e 17 itens sem id de lugar; imagens e
   expect(spotIds.size).toBe(12);
   for (const s of MERCHANT_SPOTS) {
     expect(s.relations.length >= 2).toBeTruthy();
-    expect(existsSync(join(pub, s.image))).toBeTruthy();
+    expect(existsSync(join(pub, publicFilePath(s.image)))).toBeTruthy();
   }
   const relationsOf = (id: string): string[] => MERCHANT_SPOTS.find((s) => s.id === id)?.relations ?? [];
   expect(relationsOf('door')).toEqual(['next_to', 'under']);
@@ -206,12 +207,12 @@ test('12 lugares com relações permitidas e 17 itens sem id de lugar; imagens e
     expect(spotIds.has(it.id)).toBeFalsy();
     expect(itemIds.has(it.id)).toBeFalsy();
     itemIds.add(it.id);
-    expect(existsSync(join(pub, it.image))).toBeTruthy();
+    expect(existsSync(join(pub, publicFilePath(it.image)))).toBeTruthy();
     expect(it.plural.length > 0).toBeTruthy();
   }
   expect(MERCHANT_ITEMS.find((i) => i.id === 'apple')?.image).toBe('/assets/english/ui/apple.webp');
-  Object.values(MATERIAL_ICONS).forEach((p) => expect(existsSync(join(pub, p))).toBeTruthy());
-  Object.values(CONTRACT_ICONS).forEach((p) => expect(existsSync(join(pub, p))).toBeTruthy());
+  Object.values(MATERIAL_ICONS).forEach((p) => expect(existsSync(join(pub, publicFilePath(p)))).toBeTruthy());
+  Object.values(CONTRACT_ICONS).forEach((p) => expect(existsSync(join(pub, publicFilePath(p)))).toBeTruthy());
 });
 
 void run();

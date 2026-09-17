@@ -183,11 +183,11 @@ test('três raciocínios: contrário, recusar o E, E+NÃO', () => {
   for (const p of [p1, p2, p3]) {
     const zero = initialState(p);
     expect(BAN.test(goalOf(p))).toBe(false);
-    expect(BAN.test(coachOf(p, zero, 'hand'))).toBe(false);
+    expect(BAN.test(coachOf(p, zero))).toBe(false);
     expect(BAN.test(whyOf(p, mashOf(p)))).toBe(false);
     expect(BAN.test(lookOf(p, zero))).toBe(false);
-    expect(coachOf(p, zero, 'hand').includes('Etapa')).toBe(true);
-    expect(coachOf(p, zero, 'hand').includes('Pronto')).toBe(true);
+    expect(coachOf(p, zero).includes('Etapa')).toBe(true);
+    expect(coachOf(p, zero).includes('Pronto')).toBe(true);
     expect(lookOf(p, zero, false).includes('Pronto')).toBe(true);
   }
   expect(howOf(p1).map((c) => c.id)).toEqual(['lever', 'dust', 'torch', 'lamp']);

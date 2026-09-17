@@ -431,7 +431,7 @@ export function lookOf(puzzle: RedstonePuzzle, state: BenchState, running = true
   return 'Olha o fio: vermelho é o sinal andando.';
 }
 
-export function coachOf(puzzle: RedstonePuzzle, state: BenchState, _tool: Tool): string {
+export function coachOf(puzzle: RedstonePuzzle, state: BenchState): string {
   if (puzzle.stage) {
     return `Etapa ${puzzle.stage} de 3. Lê o fio. Pronto manda o sinal.`;
   }
@@ -524,9 +524,8 @@ function leversOfAt(puzzle: RedstonePuzzle, state: BenchState): number[] {
 }
 
 function sealLogic(p: RedstonePuzzle, rng: Rng): RedstonePuzzle {
-  const { layoutHash: _hash, ...rest } = p;
   return finish({
-    ...rest,
+    ...p,
     kit: EMPTY_KIT,
     solution: nonePlaced(),
     mode: 'levers',

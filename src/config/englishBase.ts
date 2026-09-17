@@ -270,6 +270,12 @@ export function buildingCost(id: BuildingId, targetLevel: number, multiplier = 1
   };
 }
 
+/** Caminho em `public/` sem querystring de cache (`?v=`). */
+export function publicFilePath(src: string): string {
+  const cut = src.search(/[?#]/);
+  return cut >= 0 ? src.slice(0, cut) : src;
+}
+
 /** Ícone do lote: fantasma do n1 no nível 0 (cinza na UI), sprite próprio nos níveis 1-3. */
 export function buildingIcon(id: BuildingId, level: number): string {
   const n = level <= 0 ? 1 : Math.min(BUILDING_MAX_LEVEL, level);

@@ -239,8 +239,12 @@ const CharacterEditor: React.FC<{
       if (!id) return;
       const item = COSMETICS.find((c) => c.id === id);
       if (!item || ownedOf(id, item.free, village.owned)) return;
-      if (OPTIONAL.includes(slot)) next[slot] = null;
-      else next[slot] = village.character[slot];
+      if (slot === 'hat' || slot === 'cape' || slot === 'pet') {
+        next[slot] = null;
+        return;
+      }
+      const fallback = village.character[slot];
+      if (fallback) next[slot] = fallback;
     });
     return next;
   };

@@ -458,11 +458,11 @@ export const GEAR_SPRITE: Record<string, string> = {
 };
 
 export const PICK_OVERLAY: Record<number, string> = {
-  0: '/assets/village/char/pick-wood.png?v=5',
-  1: '/assets/village/char/pick-stone.png?v=5',
-  2: '/assets/village/char/pick-iron.png?v=5',
-  3: '/assets/village/char/pick-gold.png?v=5',
-  4: '/assets/village/char/pick-diamond.png?v=5',
+  0: '/assets/village/char/pick-wood.png?v=7',
+  1: '/assets/village/char/pick-stone.png?v=7',
+  2: '/assets/village/char/pick-iron.png?v=7',
+  3: '/assets/village/char/pick-gold.png?v=7',
+  4: '/assets/village/char/pick-diamond.png?v=7',
 };
 
 export function pickaxeInfo(level: number): { level: PickaxeLevel; label: string; sprite: string } {
