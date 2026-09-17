@@ -63,7 +63,9 @@ export function dailyChestContents(
   const extra = bauLevel >= 2 ? 1 : 0;
   const materials: Partial<Record<Material, number>> = { [pick]: 2 + extra };
   const gear: VillageGear = village.gear;
-  if (gear.pickaxe >= 3) {
+  if (gear.pickaxe >= 4) {
+    materials[pick] = (materials[pick] ?? 0) + 2;
+  } else if (gear.pickaxe >= 3) {
     materials[pick] = (materials[pick] ?? 0) + 1;
   }
   const counted = village.fullDays + 1;

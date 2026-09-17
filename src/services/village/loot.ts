@@ -18,7 +18,8 @@ export function computeTaskLoot(input: TaskLootInput): TaskLoot {
   const pick = input.gear.pickaxe;
 
   let bonus = 0;
-  if (pick >= 4) bonus += 1;
+  if (pick >= 4) bonus += 2;
+  else if (pick >= 3) bonus += 1;
   else if (pick >= 2 && firstOfPeriod) bonus += 1;
   else if (pick >= 1 && firstOfDay) bonus += 1;
 

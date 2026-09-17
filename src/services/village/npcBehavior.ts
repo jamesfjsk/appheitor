@@ -324,19 +324,164 @@ export function smoothPath(points: Pt[]): Pt[] {
   return out;
 }
 
+/** Distância máxima do clique até a trilha para o Heitor aceitar o passo. */
+export const HERO_WALK_SNAP_PX = 80;
+
+export function closestOnSeg(p: Pt, a: Pt, b: Pt): { point: Pt; dist: number } {
+  const abx = b.x - a.x;
+  const aby = b.y - a.y;
+  const len2 = abx * abx + aby * aby;
+  if (len2 < 1) {
+    return { point: { x: a.x, y: a.y }, dist: Math.hypot(p.x - a.x, p.y - a.y) };
+  }
+  const t = Math.min(1, Math.max(0, ((p.x - a.x) * abx + (p.y - a.y) * aby) / len2));
+  const point = { x: a.x + abx * t, y: a.y + aby * t };
+  return { point, dist: Math.hypot(p.x - point.x, p.y - point.y) };
+}
+
+export function nearestWalkPoint(p: Pt, graph: WalkGraph = DEFAULT_WALK_GRAPH): { point: Pt; dist: number } {
+  const ids = Object.keys(graph.nodes);
+  const first = graph.nodes[ids[0]] || { x: p.x, y: p.y };
+  let best = { point: { x: first.x, y: first.y }, dist: Math.hypot(p.x - first.x, p.y - first.y) };
+  for (const n of Object.values(graph.nodes)) {
+    const d = Math.hypot(n.x - p.x, n.y - p.y);
+    if (d < best.dist) best = { point: { x: n.x, y: n.y }, dist: d };
+  }
+  for (const [a, b] of graph.edges) {
+    const A = graph.nodes[a];
+    const B = graph.nodes[b];
+    if (!A || !B) continue;
+    const hit = closestOnSeg(p, A, B);
+    if (hit.dist < best.dist) best = hit;
+  }
+  return best;
+}
+
+export function inVillageWater(
+  p: Pt,
+  water?: { x: number; y: number; w: number; h: number } | null,
+): boolean {
+  if (!water) return false;
+  const cx = water.x + water.w * 0.52;
+  const cy = water.y + water.h * 0.58;
+  const rx = Math.max(8, water.w * 0.38);
+  const ry = Math.max(8, water.h * 0.22);
+  const dx = (p.x - cx) / rx;
+  const dy = (p.y - cy) / ry;
+  return dx * dx + dy * dy <= 1;
+}
+
+function clampWalk(p: Pt, bounds: { w: number; h: number }): Pt {
+  return {
+    x: Math.max(36, Math.min(bounds.w - 36, p.x)),
+    y: Math.max(90, Math.min(HERO_FENCE_MAX_Y, p.y)),
+  };
+}
+
+/** Clique no chão → ponto na trilha, ou null se for água/mato/céu. */
+export function heroWalkablePoint(
+  click: Pt,
+  graph: WalkGraph = DEFAULT_WALK_GRAPH,
+  water?: { x: number; y: number; w: number; h: number } | null,
+  bounds: { w: number; h: number } = { w: 1280, h: 640 },
+): Pt | null {
+  if (inVillageWater(click, water)) return null;
+  const snap = nearestWalkPoint(click, graph);
+  if (snap.dist > HERO_WALK_SNAP_PX) return null;
+  const to = clampWalk(snap.point, bounds);
+  if (inVillageWater(to, water)) return null;
+  return to;
+}
+
+function edgeOf(p: Pt, graph: WalkGraph): [string, string] | null {
+  let best: [string, string] | null = null;
+  let bestD = 18;
+  for (const [a, b] of graph.edges) {
+    const A = graph.nodes[a];
+    const B = graph.nodes[b];
+    if (!A || !B) continue;
+    const d = closestOnSeg(p, A, B).dist;
+    if (d < bestD) {
+      bestD = d;
+      best = [a, b];
+    }
+  }
+  return best;
+}
+
+function routeAnchors(p: Pt, graph: WalkGraph): string[] {
+  const node = nearestNode(p, graph);
+  const n = graph.nodes[node];
+  if (n && Math.hypot(p.x - n.x, p.y - n.y) < 14) return [node];
+  const edge = edgeOf(p, graph);
+  return edge || [node];
+}
+
+function dropOvershoot(points: Pt[]): Pt[] {
+  if (points.length < 3) return points;
+  const dest = points[points.length - 1];
+  const via = points[points.length - 2];
+  const prev = points[points.length - 3];
+  if (closestOnSeg(dest, prev, via).dist < 12) {
+    return [...points.slice(0, -2), dest];
+  }
+  return points;
+}
+
 export function heroRoute(from: Pt, to: Pt, graph: WalkGraph = DEFAULT_WALK_GRAPH): Pt[] {
   const straight = Math.hypot(to.x - from.x, to.y - from.y);
   if (straight < 36) return [from, to];
-  const ids = shortestPath(nearestNode(from, graph), nearestNode(to, graph), graph);
-  const pts: Pt[] = [{ x: from.x, y: from.y }];
-  const push = (p: Pt) => {
-    const last = pts[pts.length - 1];
-    if (Math.hypot(p.x - last.x, p.y - last.y) >= 10) pts.push({ x: p.x, y: p.y });
-  };
-  for (const id of ids) push(graph.nodes[id]);
-  push(to);
-  const raw = pts.length >= 2 ? pts : [from, to];
-  return smoothPath(raw);
+  const fromEdge = edgeOf(from, graph);
+  const toEdge = edgeOf(to, graph);
+  if (fromEdge && toEdge && new Set(fromEdge).size === 2 && fromEdge[0] === toEdge[0] && fromEdge[1] === toEdge[1]) {
+    return [from, to];
+  }
+  if (fromEdge && toEdge && fromEdge[0] === toEdge[1] && fromEdge[1] === toEdge[0]) {
+    return [from, to];
+  }
+  const starts = routeAnchors(from, graph);
+  const ends = routeAnchors(to, graph);
+  let best: Pt[] | null = null;
+  let bestLen = Infinity;
+  for (const s of starts) {
+    for (const e of ends) {
+      const ids = shortestPath(s, e, graph);
+      const pts: Pt[] = [{ x: from.x, y: from.y }];
+      const push = (p: Pt) => {
+        const last = pts[pts.length - 1];
+        if (Math.hypot(p.x - last.x, p.y - last.y) >= 10) pts.push({ x: p.x, y: p.y });
+      };
+      for (const id of ids) push(graph.nodes[id]);
+      push(to);
+      const raw = dropOvershoot(pts.length >= 2 ? pts : [from, to]);
+      const len = pathLength(raw);
+      if (len < bestLen) {
+        bestLen = len;
+        best = raw;
+      }
+    }
+  }
+  return smoothPath(best && best.length >= 2 ? best : [from, to]);
+}
+
+export function heroGroundPlan(
+  from: Pt,
+  click: Pt,
+  graph: WalkGraph = DEFAULT_WALK_GRAPH,
+  reducedMotion = false,
+  water?: { x: number; y: number; w: number; h: number } | null,
+  bounds: { w: number; h: number } = { w: 1280, h: 640 },
+): HeroClickPlan | null {
+  const to = heroWalkablePoint(click, graph, water, bounds);
+  if (!to) return null;
+  if (Math.hypot(to.x - from.x, to.y - from.y) < 18) {
+    return { to: { x: from.x, y: from.y }, points: [from], durationMs: 0, shakeId: null, immediate: true };
+  }
+  if (reducedMotion) return { to, points: [from, to], durationMs: 0, shakeId: null, immediate: true };
+  const points = heroRoute(from, to, graph);
+  const dist = pathLength(points);
+  const durationMs = heroWalkDurationMs(dist, false);
+  return { to, points, durationMs, shakeId: null, immediate: durationMs === 0 };
 }
 
 export function heroWalkDurationMs(dist: number, reducedMotion: boolean): number {

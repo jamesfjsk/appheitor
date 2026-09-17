@@ -10,7 +10,7 @@ import { initialVillageDoc } from '../config/village';
 import { fromBaseDoc, fromPlanDoc, planId } from './englishBaseService';
 import { fromVillageDoc } from './villageService';
 import { claimKey, hasClaim } from './village/claims';
-import { noteDoneOf, sessionPay } from './village/redstone';
+import { noteDoneOf, sessionMarks } from './village/redstone';
 import { getTodayBrazil } from '../utils/clock';
 import { getLevelFromXP } from '../utils/levelSystem';
 import { bumpFriend, bumpVillage } from './village/statsBump';
@@ -49,7 +49,8 @@ export async function completeRedstone(
   if (!Number.isInteger(stagesWon) || stagesWon < 0 || stagesWon > 3) {
     throw new Error('Resultado inválido.');
   }
-  const pay = sessionPay(stagesWon);
+  const marks = sessionMarks(stagesWon);
+  const pay = { redstone: marks.redstone, xp: marks.xp };
   const key = claimKey('redstone', date);
   const pRef = doc(db, 'englishPlans', planId(uid, date));
   const bRef = doc(db, 'englishBase', uid);
@@ -106,7 +107,11 @@ export async function completeRedstone(
   });
 
   if (!out) throw new Error('Não deu para guardar o circuito.');
-  bumpVillage(uid, { redstoneDone: 1 });
-  bumpFriend(uid, 'ferreiro', 2);
+  const deltas: Record<string, number> = {};
+  if (marks.redstoneDone) deltas.redstoneDone = marks.redstoneDone;
+  if (marks.redstonePerfect) deltas.redstonePerfect = marks.redstonePerfect;
+  if (stagesWon > 0) deltas.redstoneStages = stagesWon;
+  bumpVillage(uid, deltas, { level: getLevelFromXP(out.totalXP) });
+  if (marks.ferreiro > 0) bumpFriend(uid, 'ferreiro', marks.ferreiro);
   return out;
 }

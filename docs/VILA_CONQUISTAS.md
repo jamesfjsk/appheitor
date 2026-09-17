@@ -23,7 +23,7 @@ Regra: a lista do jogo tem que ser grande o bastante para sempre haver uma conqu
 - Por temporada: as de nível e de temporada reiniciam com a estrela (o histórico fica em `stars`); as demais são permanentes.
 - O pacote de 12 que a "nova fase" cria em `achievements` deixa de existir: vira parte deste catálogo. As da vida real continuam em `achievements` com `checkAchievements` como hoje, só com o campo `kind: 'real'` e o ícone escolhido pelo pai.
 
-## Catálogo inicial (72 conquistas do jogo)
+## Catálogo inicial (72 conquistas do jogo, mais 7 da Vagoneta desde 17/09)
 
 Alvos em (bronze / prata / ouro); recompensa padrão por camada: bronze 10 XP + 1 material; prata 25 XP + 2 materiais; ouro 50 XP + 1 esmeralda; exclusiva 100 XP + 1 diamante ou cosmético.
 
@@ -98,6 +98,17 @@ Alvos em (bronze / prata / ouro); recompensa padrão por camada: bronze 10 XP + 
 - Lua da Vila: abriu a Vila depois das 21h num dia completo.
 - Colecionador: os quatro cosméticos de marco.
 - Creeper amigo: clicou 5 vezes no creeper do resumo de ontem (Etapa 4).
+
+**Vagoneta da Mina** (7; entrou em 17/09 com o módulo `logic`; contadores `redstoneDone`, `redstonePerfect`, `redstoneStages` de `redstoneService`; ficha em `docs/etapas/ETAPA_2_LANCAMENTO.md`, seção 12)
+- Primeira carga (`cart_first`): 1 sessão com pelo menos uma vagoneta carregada (bronze, 10 XP).
+- Três de três (`cart_perfect`): 1 sessão perfeita (15 XP).
+- Vagoneteiro (`cart_5`): 5 sessões com acerto (bronze, 20 XP).
+- Trilho longo (`cart_stages_30`): 30 vagonetas carregadas no total (prata, 25 XP).
+- Carga exata (`cart_perfect_5`): 5 sessões perfeitas (prata, 30 XP + 1 esmeralda).
+- Mestre da vagoneta (`cart_20`): 20 sessões com acerto (ouro, 40 XP).
+- Sem tombar (`cart_perfect_15`): 15 sessões perfeitas (exclusiva, 50 XP + 1 diamante).
+
+Contadores sem fonte até a Etapa 3 e por isso **fora do catálogo no lançamento** (decisão de 17/09): `saverWeeks` (Poupador), `creeperClicks` (Creeper amigo), `weekQuestion` (pedido 5 do Sábio, que vira "Sete provas seguidas" com `quizStreak`). Toda conquista precisa de uma linha em `src/services/village/statSources.ts`; o teste quebra se faltar.
 
 ## A Torre (aba Conquistas)
 

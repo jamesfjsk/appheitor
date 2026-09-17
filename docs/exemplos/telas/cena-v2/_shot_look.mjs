@@ -82,36 +82,58 @@ try {
   await sleep(250);
   await shot('00-ficha');
 
-  await page.click('[aria-label="Camisa"]');
-  await sleep(200);
-  await page.click('[aria-label="Camisa vermelha"]');
-  await sleep(280);
+  const clickSlot = async (label) => {
+    await page.waitForSelector(`[aria-label="${label}"]`, { timeout: 8000 });
+    if (!(await editorOpen())) {
+      await page.click('[data-testid="hotbar-pack"]').catch(() => {});
+      await sleep(400);
+    }
+    await page.click(`[aria-label="${label}"]`);
+    await sleep(220);
+  };
+
+  await clickSlot('Camisa');
+  await clickSlot('Camisa vermelha');
+  await sleep(80);
   await shot('01-camisa-vermelha');
 
-  await page.click('[aria-label="Calça"]');
-  await sleep(200);
-  await page.click('[aria-label="Calça azul"]');
-  await sleep(280);
+  await clickSlot('Calça');
+  await clickSlot('Calça azul');
+  await sleep(80);
   await shot('02-calca-azul');
 
-  await page.click('[aria-label="Chapéu"]');
-  await sleep(200);
-  await page.click('[aria-label="Boné"]');
-  await sleep(280);
+  await clickSlot('Chapéu');
+  await clickSlot('Boné');
+  await sleep(80);
   await shot('03-chapeu-bone');
 
-  await page.click('[aria-label="Capa"]');
-  await sleep(200);
-  await page.click('[aria-label="Capa vermelha"]');
-  await sleep(280);
+  await clickSlot('Capacete da Forja');
+  await sleep(80);
+  await shot('03b-forja');
+
+  await clickSlot('Coroa');
+  await sleep(80);
+  await shot('03c-coroa');
+
+  await clickSlot('Capa');
+  await clickSlot('Capa vermelha');
+  await sleep(80);
   await shot('04-capa-vermelha');
 
-  await page.click('[aria-label="Picareta"]');
-  await sleep(250);
+  await clickSlot('Cachecol da vila');
+  await sleep(80);
+  await shot('04b-cachecol');
+
+  await clickSlot('Capa da Mina');
+  await clickSlot('Chapéu');
+  await clickSlot('Capacete da Forja');
+  await sleep(80);
+  await shot('04c-forja-capa');
+
+  await clickSlot('Picareta');
   await shot('05-picareta');
 
-  await page.click('[aria-label="Botas"]');
-  await sleep(250);
+  await clickSlot('Botas');
   await shot('05b-botas');
 
   await clickLabel('Sacola');

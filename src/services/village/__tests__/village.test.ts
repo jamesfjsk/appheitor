@@ -95,6 +95,14 @@ test('picaretas 1-4 em dias simulados', () => {
     effectsEnabled: true,
   });
   expect(goldFirst.qty).toBe(2);
+  const goldAgain = computeTaskLoot({
+    period: 'evening',
+    gear: gear({ pickaxe: 3 }),
+    completionsTodayByPeriod: { morning: 1, afternoon: 1, evening: 1 },
+    settings: DEFAULT_ECONOMY,
+    effectsEnabled: true,
+  });
+  expect(goldAgain.qty).toBe(2);
 
   const diamondEvery = computeTaskLoot({
     period: 'evening',
@@ -103,7 +111,7 @@ test('picaretas 1-4 em dias simulados', () => {
     settings: DEFAULT_ECONOMY,
     effectsEnabled: true,
   });
-  expect(diamondEvery.qty).toBe(2);
+  expect(diamondEvery.qty).toBe(3);
 });
 
 test('botas arredondam +20% de XP', () => {
@@ -189,6 +197,22 @@ test('baú: gold = base + tochas até o teto; 2 do material mais escasso; esmera
     { madeira: 8, pedra: 1, ferro: 5 }
   );
   expect(scarce.materials.pedra).toBe(2);
+  const goldChest = dailyChestContents(
+    'uid-a',
+    '2026-09-15',
+    { fullDays: 0, gear: gear({ pickaxe: 3 }) },
+    DEFAULT_ECONOMY,
+    { madeira: 8, pedra: 1, ferro: 5 }
+  );
+  expect(goldChest.materials.pedra).toBe(3);
+  const diamondChest = dailyChestContents(
+    'uid-a',
+    '2026-09-15',
+    { fullDays: 0, gear: gear({ pickaxe: 4 }) },
+    DEFAULT_ECONOMY,
+    { madeira: 8, pedra: 1, ferro: 5 }
+  );
+  expect(diamondChest.materials.pedra).toBe(4);
 
   const allowed = chestAllowed({
     hourBrazil: 18,
@@ -255,14 +279,18 @@ test('priceOf com multiplicador e canCraft recusa sem ferro', () => {
   const rare = { diamante: 0, esmeralda: 0 };
   expect(canCraft(mats, rare, 'pickaxe_iron', 1).ok).toBe(false);
   expect(canCraft(mats, rare, 'pickaxe_iron', 1).reason).toBe('materials');
-  expect(canCraft({ ...mats, ferro: 8 }, rare, 'pickaxe_iron', 1).ok).toBe(true);
+  expect(canCraft({ ...mats, ferro: 10, pedra: 6 }, rare, 'pickaxe_iron', 1).ok).toBe(true);
   expect(canBuy({ owned: [] }, 10, 'hat_cap').reason).toBe('gold');
   expect(canBuy({ owned: [] }, 30, 'hat_cap').ok).toBe(true);
   expect(tradePreview('madeira', 'pedra')).toEqual({ ok: true, fromQty: 3, toQty: 1, from: 'madeira', to: 'pedra' });
   expect(tradePreview('ferro', 'ferro').ok).toBe(false);
   expect(tradePreview('madeira', 'redstone').ok).toBe(false);
   expect(canBuy({ owned: [] }, 30, 'hat_cap', undefined, 1).reason).toBe('level');
-  expect(canCraft({ madeira: 10, pedra: 10, ferro: 8, redstone: 10 }, rare, 'pickaxe_iron', 1, 5).reason).toBe('level');
+  expect(canCraft({ madeira: 10, pedra: 10, ferro: 10, redstone: 10 }, rare, 'pickaxe_iron', 1, 5).reason).toBe('level');
+  expect(canCraft({ madeira: 0, pedra: 0, ferro: 14, redstone: 10 }, rare, 'pickaxe_gold', 2, 22).reason).toBe('rare');
+  expect(canCraft({ madeira: 0, pedra: 0, ferro: 14, redstone: 10 }, { diamante: 0, esmeralda: 2 }, 'pickaxe_gold', 2, 22).ok).toBe(true);
+  expect(canCraft({ madeira: 0, pedra: 0, ferro: 18, redstone: 14 }, { diamante: 3, esmeralda: 0 }, 'pickaxe_diamond', 3, 30).reason).toBe('level');
+  expect(canCraft({ madeira: 0, pedra: 0, ferro: 18, redstone: 14 }, { diamante: 3, esmeralda: 0 }, 'pickaxe_diamond', 3, 32).ok).toBe(true);
 });
 
 test('isoWeekOf em viradas de ano', () => {

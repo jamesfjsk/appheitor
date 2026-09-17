@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { BuildingId } from '../../../types/english';
-import { buildingSprite, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, visibleCracks, type SceneProp } from '../../../config/village';
+import { buildingSprite, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, lookBodySrc, visibleCracks, type SceneProp } from '../../../config/village';
 import type { NpcId, VillageDoc, VillageSceneEvent } from '../../../types/village';
-import { npcTarget, npcTouch, npcHopPx, lookFacing, npcWalk, heroClickPlan, heroWalkAlong, arrivePulse, DEFAULT_WALK_GRAPH, HERO_ARRIVE_HOLD_MS, type WalkGraph } from '../../../services/village/npcBehavior';
+import { npcTarget, npcTouch, npcHopPx, lookFacing, npcWalk, heroClickPlan, heroGroundPlan, heroWalkAlong, heroWalkablePoint, arrivePulse, DEFAULT_WALK_GRAPH, HERO_ARRIVE_HOLD_MS, type WalkGraph } from '../../../services/village/npcBehavior';
 import { buildingLevelSum, villageGrowthStage } from '../../../services/village/season';
 import { isNightHour } from '../../../utils/clock';
-import { paintCharacterLook } from './drawCharacter';
+import { lookOverlaySrc, paintCharacterLook, type LookKit } from './drawCharacter';
 import { paintLotRuins, paintRuinedSprite } from './drawDamage';
 import {
   defaultFireflies,
@@ -163,7 +163,7 @@ function bakeCharSheet(
   dest: HTMLCanvasElement,
   sheet: HTMLImageElement,
   character: VillageDoc['character'],
-  pet: CanvasImageSource | null,
+  kit: LookKit,
 ): number {
   const n = Math.max(1, Math.floor(sheet.naturalWidth / 64));
   dest.width = 64 * n;
@@ -184,7 +184,7 @@ function bakeCharSheet(
   for (let i = 0; i < n; i++) {
     sctx.clearRect(0, 0, 64, 64);
     sctx.drawImage(sheet, i * 64, 0, 64, 64, 0, 0, 64, 64);
-    paintCharacterLook(pctx, src, null, character, pet, 'iso');
+    paintCharacterLook(pctx, src, null, character, kit, 'iso');
     dctx.drawImage(painted, i * 64, 0);
   }
   return n;
@@ -892,7 +892,7 @@ const VillageScene: React.FC<Props> = ({
         if (now - trip.start >= trip.duration + hold) {
           trip.fired = true;
           heroTrip.current = null;
-          onClickSpotRef.current(trip.spotId);
+          if (trip.spotId) onClickSpotRef.current(trip.spotId);
         }
       }
 
@@ -1171,15 +1171,18 @@ const VillageScene: React.FC<Props> = ({
         });
       }
 
-      const miner = img(ISO_MINER, bump);
+      const bodySrc = lookBodySrc(village.character);
+      const miner = img(bodySrc, bump);
+      const isoMiner = img(ISO_MINER, bump);
       const walkSheet = img(ISO_MINER_WALK, bump);
       const idleSheet = img(ISO_MINER_IDLE, bump);
+      const posed = bodySrc !== ISO_MINER;
       const petSrc = village.character.pet ? PET_SPRITE[village.character.pet] : null;
       const pet = petSrc ? img(petSrc, bump) : null;
       const charH = heroHome.h;
       const charW = charH;
-      const walkCols = walkSheet && walkSheet.naturalWidth >= 128 ? Math.floor(walkSheet.naturalWidth / 64) : 1;
-      const idleCols = idleSheet && idleSheet.naturalWidth >= 128 ? Math.floor(idleSheet.naturalWidth / 64) : 1;
+      const walkCols = posed ? 1 : walkSheet && walkSheet.naturalWidth >= 128 ? Math.floor(walkSheet.naturalWidth / 64) : 1;
+      const idleCols = posed ? 1 : idleSheet && idleSheet.naturalWidth >= 128 ? Math.floor(idleSheet.naturalWidth / 64) : 1;
       const hasWalk = walkCols > 1;
       const hasIdle = idleCols > 1;
       let extraBob = 0;
@@ -1213,12 +1216,18 @@ const VillageScene: React.FC<Props> = ({
         draw: (c) => {
           groundShadow(c, hx, hy - 2, charW, night);
           if (!miner) return;
-          const key = `${ISO_MINER}|${ISO_MINER_WALK}|${ISO_MINER_IDLE}|${walkCols}|${idleCols}|${village.character.skin}|${village.character.hair}|${village.character.shirt}|${village.character.pants}|${village.character.hat || ''}|${village.character.cape || ''}|${village.character.pet || ''}`;
+          const overlay = lookOverlaySrc(village.character, village.gear);
+          const capeImg = overlay.cape ? img(overlay.cape, bump) : null;
+          const pickImg = overlay.pickaxe ? img(overlay.pickaxe, bump) : null;
+          const kit: LookKit = { pet, cape: capeImg, pickaxe: pickImg, gear: village.gear, iso: isoMiner };
+          const key = `${bodySrc}|${posed ? 1 : 0}|${walkCols}|${idleCols}|${village.character.skin}|${village.character.hair}|${village.character.shirt}|${village.character.pants}|${village.character.hat || ''}|${village.character.cape || ''}|${village.character.pet || ''}|${village.gear.pickaxe}|${village.gear.boots}|${capeImg ? 1 : 0}|${pickImg ? 1 : 0}`;
           const walkOff = lookCanvas.current;
           const idleOff = idleCanvas.current;
           if (lookKey.current !== key) {
-            if (walkOff) bakeCharSheet(walkOff, walkSheet && walkSheet.naturalWidth >= 64 ? walkSheet : miner, village.character, pet);
-            if (idleOff) bakeCharSheet(idleOff, idleSheet && idleSheet.naturalWidth >= 128 ? idleSheet : miner, village.character, pet);
+            const walkSrc = posed ? miner : walkSheet && walkSheet.naturalWidth >= 64 ? walkSheet : miner;
+            const idleSrc = posed ? miner : idleSheet && idleSheet.naturalWidth >= 128 ? idleSheet : miner;
+            if (walkOff && walkSrc) bakeCharSheet(walkOff, walkSrc, village.character, kit);
+            if (idleOff && idleSrc) bakeCharSheet(idleOff, idleSrc, village.character, kit);
             lookKey.current = key;
           }
           const off = useWalk ? walkOff : idleOff;
@@ -1362,6 +1371,8 @@ const VillageScene: React.FC<Props> = ({
         });
       });
       canvas.dataset.npcWalk = walkingNow.join(',');
+      canvas.dataset.hero = `${Math.round(hx)},${Math.round(hy)}`;
+      canvas.dataset.walking = walking ? '1' : '0';
 
       const props = anchors.props?.length ? anchors.props : SCENE_PROPS;
       props.forEach((prop) => {
@@ -1637,13 +1648,38 @@ const VillageScene: React.FC<Props> = ({
     };
   }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick, houseSmoke, buildFx, repairFx, event, date]);
 
-  const hitAt = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const sceneXY = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = ref.current;
-    if (!canvas) return undefined;
+    if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * anchors.size.w;
-    const y = ((e.clientY - rect.top) / rect.height) * anchors.size.h;
-    return pickHit(spots.current, x, y);
+    return {
+      x: ((e.clientX - rect.left) / rect.width) * anchors.size.w,
+      y: ((e.clientY - rect.top) / rect.height) * anchors.size.h,
+    };
+  };
+
+  const walkGraph = anchors.walk || DEFAULT_WALK_GRAPH;
+
+  const startHeroWalk = (
+    plan: { to: { x: number; y: number }; points: Array<{ x: number; y: number }>; durationMs: number; shakeId: string | null; immediate: boolean },
+    spotId: string,
+  ) => {
+    if (plan.immediate) {
+      heroPos.current = plan.to;
+      heroTrip.current = null;
+      if (spotId) onClickSpot(spotId);
+      setTick((n) => n + 1);
+      return;
+    }
+    heroTrip.current = {
+      points: plan.points,
+      start: performance.now(),
+      duration: plan.durationMs,
+      spotId,
+      shakeId: plan.shakeId,
+      fired: false,
+    };
+    setTick((n) => n + 1);
   };
 
   return (
@@ -1654,40 +1690,36 @@ const VillageScene: React.FC<Props> = ({
       style={{ aspectRatio: `${anchors.size.w} / ${anchors.size.h}`, cursor, imageRendering: 'pixelated' }}
       onClick={(e) => {
         if (frozen) return;
-        const hit = hitAt(e);
-        if (!hit) {
+        const xy = sceneXY(e);
+        if (!xy) return;
+        const hit = pickHit(spots.current, xy.x, xy.y);
+        if (hit) {
+          if (hit.id.startsWith('npc:')) {
+            npcClickId.current = hit.id.slice(4);
+            npcClickAt.current = performance.now();
+          }
+          const from = heroPos.current || { x: anchors.character.x, y: anchors.character.y };
+          const plan = heroClickPlan(hit.id, from, hit, anchors.size, reducedMotion, walkGraph);
+          startHeroWalk(plan, hit.id);
+          return;
+        }
+        const from = heroPos.current || { x: anchors.character.x, y: anchors.character.y };
+        const plan = heroGroundPlan(from, xy, walkGraph, reducedMotion, anchors.water, anchors.size);
+        if (!plan) {
           if (speech) onDismissSpeech();
           return;
         }
-        if (hit.id.startsWith('npc:')) {
-          npcClickId.current = hit.id.slice(4);
-          npcClickAt.current = performance.now();
-        }
-        const from = heroPos.current || { x: anchors.character.x, y: anchors.character.y };
-        const plan = heroClickPlan(hit.id, from, hit, anchors.size, reducedMotion, anchors.walk || DEFAULT_WALK_GRAPH);
-        if (plan.immediate) {
-          heroPos.current = plan.to;
-          heroTrip.current = null;
-          onClickSpot(hit.id);
-          setTick((n) => n + 1);
-          return;
-        }
-        heroTrip.current = {
-          points: plan.points,
-          start: performance.now(),
-          duration: plan.durationMs,
-          spotId: hit.id,
-          shakeId: plan.shakeId,
-          fired: false,
-        };
-        setTick((n) => n + 1);
+        startHeroWalk(plan, '');
       }}
       onMouseMove={(e) => {
-        const next = hitAt(e);
+        const xy = sceneXY(e);
+        if (!xy) return;
+        const next = pickHit(spots.current, xy.x, xy.y);
         const prev = hover.current;
         hover.current = next;
         if (prev?.id !== next?.id) setTick((n) => n + 1);
-        const cur = next ? 'pointer' : 'default';
+        const walkHere = !next && Boolean(heroWalkablePoint(xy, walkGraph, anchors.water, anchors.size));
+        const cur = next || walkHere ? 'pointer' : 'default';
         if (cur !== cursor) setCursor(cur);
       }}
       onMouseLeave={() => {

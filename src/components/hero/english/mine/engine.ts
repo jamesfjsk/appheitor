@@ -185,6 +185,7 @@ function interleave(state: MineState, count: number, total: number): number[] {
 export function createRun(plan: RunPlan, config: Partial<MineConfig> = {}): MineState {
   if (plan.words.length === 0) throw new Error('RunPlan sem palavras');
   const cfg: MineConfig = { ...DEFAULT_CONFIG, ...config };
+  cfg.pickaxeFloor = Math.max(0, Math.min(4, Math.round(cfg.pickaxeFloor) || 0));
   const state: MineState = {
     status: 'ready',
     seed: plan.seed,
@@ -201,7 +202,7 @@ export function createRun(plan: RunPlan, config: Partial<MineConfig> = {}): Mine
     hearts: cfg.hearts,
     combo: 0,
     maxCombo: 0,
-    pickaxe: 0,
+    pickaxe: cfg.pickaxeFloor,
     score: 0,
     depth: 0,
     windowMs: cfg.windowStartMs,
@@ -281,10 +282,10 @@ function updateActive(state: MineState): void {
   if (active) state.choiceAgeMs = active.ageMs;
 }
 
-export function pickaxeFor(combo: number): number {
+export function pickaxeFor(combo: number, floor = 0): number {
   let level = 0;
   for (let i = 0; i < PICKAXES.length; i++) if (combo >= PICKAXES[i].minCombo) level = i;
-  return level;
+  return Math.max(floor, level);
 }
 
 function setPickaxe(state: MineState, level: number): void {
@@ -367,7 +368,7 @@ function resolveHit(state: MineState, row: BlockRow): void {
   const fast = state.choiceAgeMs <= cfg.fastFraction * row.windowMs;
   state.combo += 1;
   state.maxCombo = Math.max(state.maxCombo, state.combo);
-  const level = pickaxeFor(state.combo);
+  const level = pickaxeFor(state.combo, state.config.pickaxeFloor);
   const points = cfg.basePoints * PICKAXES[level].multiplier + (fast ? cfg.fastBonus : 0);
   state.score += points;
   // Palavra nova não aperta a janela global
@@ -377,7 +378,7 @@ function resolveHit(state: MineState, row: BlockRow): void {
   // Profundidade = acertos nos 40 blocos originais; retry vale pontos e combo, mas não avança a mina
   if (!row.retry) state.depth += 1;
   state.results.push({ id: row.target.id, correct: true });
-  spawnParticles(state, row.correctLane, PARTICLES_PER_HIT);
+  spawnParticles(state, row.correctLane, PARTICLES_PER_HIT + level);
   state.events.push({ type: 'hit', word: row.target, points, fast, combo: state.combo, pickaxe: level });
   setPickaxe(state, level);
   state.events.push({ type: 'audio', word: row.target, reason: 'hit', mode: row.mode });
@@ -389,7 +390,7 @@ function resolveMiss(state: MineState, row: BlockRow): void {
   row.resolved = 'miss';
   state.hearts = Math.max(0, state.hearts - 1);
   state.combo = 0;
-  setPickaxe(state, 0);
+  setPickaxe(state, pickaxeFor(0, state.config.pickaxeFloor));
   state.windowMs = cfg.windowStartMs;
   state.results.push({ id: row.target.id, correct: false });
   const chosen = row.faces[state.lane].word;

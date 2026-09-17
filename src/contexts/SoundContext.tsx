@@ -8,6 +8,8 @@ interface SoundContextType {
   playClick: () => void;
   playHammer: () => void;
   playError: () => void;
+  playTick: () => void;
+  playWhistle: () => void;
   playNotification: () => void;
   isSoundEnabled: boolean;
   toggleSound: () => void;
@@ -158,6 +160,17 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     playTone(800, 0.05, 'square', 0.1);
   };
 
+  const playTick = () => {
+    playTone(196, 0.045, 'square', 0.07);
+  };
+
+  const playWhistle = () => {
+    playSequence([
+      { freq: 392, duration: 0.16, delay: 0, type: 'sine', volume: 0.14 },
+      { freq: 330, duration: 0.28, delay: 140, type: 'sine', volume: 0.12 },
+    ]);
+  };
+
   const playHammer = () => {
     playSequence([
       { freq: 140, duration: 0.08, delay: 0, type: 'square', volume: 0.22 },
@@ -193,6 +206,8 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     playClick,
     playHammer,
     playError,
+    playTick,
+    playWhistle,
     playNotification,
     isSoundEnabled,
     toggleSound

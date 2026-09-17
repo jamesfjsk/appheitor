@@ -6,8 +6,6 @@ import {
   COSMETIC_ICON,
   GEAR,
   GEAR_SPRITE,
-  HAT_SPRITE,
-  CAPE_SPRITE,
   PET_SPRITE,
   SKIN_SPRITE,
   cosmeticHasSprite,
@@ -45,8 +43,8 @@ function gearRarity(id: string, slot: string): ItemRarity {
 function cosmeticIcon(id: string, slot: string): string {
   if (COSMETIC_ICON[id]) return COSMETIC_ICON[id];
   if (slot === 'skin') return SKIN_SPRITE[id] || '/assets/village/char/miner-base.png';
-  if (slot === 'hat') return HAT_SPRITE[id] || '/assets/village/items/cap.png';
-  if (slot === 'cape') return CAPE_SPRITE[id] || '/assets/village/items/cape.png';
+  if (slot === 'hat') return '/assets/village/items/cap.png';
+  if (slot === 'cape') return '/assets/village/items/cape.png';
   if (slot === 'pet') return PET_SPRITE[id] || '/assets/village/pets/lobo.png';
   return '/assets/village/items/mochila.png';
 }

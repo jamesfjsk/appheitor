@@ -26,6 +26,7 @@ import { useData } from '../../../../contexts/DataContext';
 import { useVillage } from '../../../../contexts/VillageContext';
 import { claimKey, hasClaim } from '../../../../services/village/claims';
 import { noteDoneOf } from '../../../../services/village/redstone';
+import { pickaxeInfo } from '../../../../config/village';
 
 const CartBench = lazy(() => import('./CartBench'));
 
@@ -38,7 +39,6 @@ interface Props {
 type View = 'loading' | 'board' | 'contract' | 'redstone';
 
 const BANNER = '/assets/english/ui/banner.webp';
-const PICKAXE = '/assets/english/ui/pickaxe.webp';
 const TOTAL_CONTRACTS = 5;
 
 const copyContract = (c: Contract): Contract => JSON.parse(JSON.stringify(c)) as Contract;
@@ -177,11 +177,12 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
   const arrived = plan ? Object.keys(plan.contracts).length : 0;
   const shown = Math.min(progress.total || TOTAL_CONTRACTS, Math.max(progress.ready, arrived));
   const total = progress.total || TOTAL_CONTRACTS;
+  const pick = pickaxeInfo(village.gear.pickaxe);
   const subtitle =
     view === 'loading'
       ? 'Preparando os jogos...'
       : view === 'board'
-        ? 'Jogos de hoje · Contratos'
+        ? `Jogos de hoje · ${pick.label}`
         : active?.title ?? '';
   const errorMsg = loadError ?? genError;
 
@@ -192,6 +193,8 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
           uid={childUid}
           date={today}
           minerLevel={userProgress.level || 1}
+          redstoneDone={Number(village.stats.redstoneDone) || 0}
+          redstonePerfect={Number(village.stats.redstonePerfect) || 0}
           noteDone={noteDoneOf(plan)}
           claimed={hasClaim(village, claimKey('redstone', today))}
           onQuit={() => {
@@ -218,7 +221,7 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
           <img src={BANNER} alt="" className="absolute inset-0 w-full h-full object-cover mc-pixel" draggable={false} />
           <div className="absolute inset-0 bg-gradient-to-t from-[#2f2a27] via-[#2f2a27]/40 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 px-4 pb-2 flex items-end gap-3">
-            <img src={PICKAXE} alt="" className="w-10 h-10 sm:w-14 sm:h-14 mc-pixel drop-shadow-[2px_2px_0_rgba(0,0,0,0.6)]" draggable={false} />
+            <img src={pick.sprite} alt="" className="w-10 h-10 sm:w-14 sm:h-14 mc-pixel drop-shadow-[2px_2px_0_rgba(0,0,0,0.6)]" draggable={false} />
             <div className="min-w-0 flex-1">
               <h2 className="mc-title text-sm sm:text-lg">Mina</h2>
               <p className="text-xs sm:text-sm text-white/85 mt-1 truncate">{subtitle}</p>

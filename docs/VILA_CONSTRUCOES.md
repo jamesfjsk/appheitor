@@ -65,8 +65,14 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 - **Nível 1**: libera o **pet exclusivo** do Campinho (Etapa 4) e o mini-jogo **Gol de Placa** (inglês por voz, Etapa 4).
 - **Nível 2**: **bônus de fim de semana**: no sábado e domingo, missões pagam +1 material (Etapa 4).
 - **Nível 3**: **torneio mensal** do Gol de Placa com recorde na Torre (Etapa 4).
-- **Ao tocar**: até a Etapa 4, cartão com o texto dos níveis e a etiqueta "em breve"; **não pode ser construído** antes da Etapa 4 (botão "Abre na Etapa 4" desabilitado), para não gastar material em algo sem efeito.
-- **Visual**: `buildings/campinho-1..3.png`.
+- **Decisão de 17/09**: o Campinho **sai da cena e da aba Obras** até a Etapa 4 (regra: nada "em breve" pode ser comprável nem ocupar lote). Volta com efeito de verdade (pet, Gol de Placa, bônus de fim de semana). Não confundir com a Arena (abaixo), que fica na cena como marco.
+- **Visual**: `buildings/campinho-1..3.png` (prontos, guardados para a Etapa 4).
+
+### Arena: marco da cena, não construção (decisão do pai em 17/09)
+
+- **O que é**: o lugar do Olheiro na cena da Vila (arquibancada), entrou no Lote 2 da Etapa 2 sem documento e fica como **landmark**: sem custo, sem nível, nunca aparece em Obras nem no cartão de construir. É a porta futura dos jogos contra os pais (`docs/MINER_MISSIONS_ROADMAP.md`, Etapa 4B).
+- **Ao tocar**: abre a fala do Olheiro (sistema de diálogos), que hoje diz o que a Arena vai ser. Nunca um cartão "Construir".
+- **Código**: `config/englishBase.ts` sem custo e sem níveis para `arena`; `arena` e `campinho` fora de `BREAKABLE_LOTS` (`src/services/village/repair.ts`), porque marco não cai e o Campinho não existe. Sprite `buildings/arena-1.png`.
 
 ### 7. Cofre (Vault): a poupança (Etapa 2)
 
@@ -140,6 +146,18 @@ Subir de nível precisa aparecer na cena, não só no cartão.
 5. **Decorações escolhidas por ele** (Etapa 4): `village.decor` e a Loja de decorações em material, posicionadas em pontos fixos do JSON de âncoras.
 
 Aceite visual: foto da cena com a base em três somas diferentes (3, 10, 18) mostrando sprites de nível e a camada de crescimento; foto noturna com as luzes por nível.
+
+## Ruínas: obra que cai por missão perdida (como está implementado; decisão do pai em 17/09: manter)
+
+Entrou no Lote 2 da Etapa 2 como reforço da "consequência sem castigo" e o pai decidiu manter como está. Este é o comportamento de verdade, lido de `src/services/village/repair.ts`, `dailyRulesService.closeDay` e dos portões em `villageService.ts`, `goalsService.ts` e `englishBaseService.ts`.
+
+**Quando cai.** No fechamento do dia (`closeDay`), cada missão devida e não feita derruba **uma** obra construída (`cracksAfterClose`): de preferência a obra do período da missão (manhã: Fornalha; tarde: Cerca; noite: Torre) e, se ela já caiu ou não existe, a primeira construída que ainda está de pé. Só obras de `BREAKABLE_LOTS` caem: Fornalha, Armazém, Cerca, Torre, Biblioteca, Cofre, Sino, Barraca. A Casa, a Mina, a Mochila, os personagens e a Arena nunca caem. O capacete absorve a primeira missão perdida da semana antes de contar. **Regra fechada em 17/09 (P1.13 do lançamento): a obra só cai quando há penalidade**, ou seja, nunca em férias, folga, punição ou com as regras do dia desligadas. Cerca nível 2 zera as rachaduras antes de contar as novas do dia.
+
+**O que uma obra caída faz.** Enquanto está em ruínas ela vale nível 0 (`liveBuildingLevel`): Fornalha caída trava fundição, queima e o bônus de contrato; Armazém caído trava o Baú do Dia; Barraca caída trava compras e vendas; Cofre caído trava depósito e zera os juros da semana; Torre e Sino caídos perdem os efeitos de nível; **Biblioteca caída perde só os bônus dela e a prova continua alcançável** (exceção única, porque a prova é portão de tudo: P1.1). A cena mostra a rachadura sobre o lote e o cartão da obra diz o que travou e como arrumar.
+
+**Como levanta.** Dois caminhos, sempre sem gold: (1) **fazer todas as missões devidas de hoje** levanta todas as obras de uma vez (`repairLot`) e devolve metade da penalidade de ontem em gold (`repairRefund`, `repairRefundPct` da economia), uma vez por dia; (2) **material**: 1 unidade do material principal da obra (`repairMaterialCost`) levanta só aquela obra, sem reembolso. O botão "Consertar" no cartão da obra e na Casa mostra o caminho disponível.
+
+**O que ensina** (ficha curta): consequência visível e reparável no mesmo dia; a rotina protege o que ele construiu; nunca destrói progresso (o nível volta inteiro no reparo). Mede-se por dias com queda e reparos; o pai vê no resumo de ontem e no Relatório.
 
 ## O que muda no código, por etapa
 

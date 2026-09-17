@@ -2,13 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { BUILDINGS, buildingCost, buildingEffectNow, MATERIAL_ICONS, MATERIAL_LABELS, MATERIALS } from '../../../config/englishBase';
-import { GEAR, buildingSprite, visibleCracks } from '../../../config/village';
+import { GEAR, buildingSprite, pickaxeInfo, visibleCracks } from '../../../config/village';
 import { ITEMS } from '../../../config/items';
 import { canCraft, tradePreview } from '../../../services/village/shop';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useData } from '../../../contexts/DataContext';
 import type { Material } from '../../../types/english';
+import type { PickaxeLevel } from '../../../types/village';
 import { VILLAGE_LINES } from '../../../data/villageLines';
 import { calculateLevelSystem } from '../../../utils/levelSystem';
 import ItemSlot from './ItemSlot';
@@ -32,6 +33,8 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
   const preview = tradePreview(from, to);
   const selected = GEAR.find((g) => g.id === picked) || GEAR[0];
   const selectedItem = ITEMS.find((i) => i.id === selected.id);
+  const hand = pickaxeInfo(village.gear.pickaxe);
+  const previewPick = selected.slot === 'pickaxe' ? pickaxeInfo(selected.level) : hand;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-veil" onClick={onClose}>
@@ -73,8 +76,25 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
           {tab === 'gear' && !furnaceDown && (
             <>
               <div className="flex gap-3 items-start">
-                <CharacterPreview character={village.character} gear={village.gear} size={96} />
-                {selectedItem && <p className="text-sm">{selected.effect}</p>}
+                <CharacterPreview
+                  character={village.character}
+                  gear={selected.slot === 'pickaxe'
+                    ? { ...village.gear, pickaxe: selected.level as PickaxeLevel }
+                    : village.gear}
+                  size={128}
+                />
+                {selectedItem && (
+                  <p className="text-sm pt-1">
+                    <span className="block font-bold text-amber-200">{selected.label}</span>
+                    {selected.effect}
+                    {selected.slot === 'pickaxe' && (
+                      <span className="block mt-1 text-xs mc-muted">
+                        Na mão: {hand.label}
+                        {previewPick.level > hand.level ? ' · esta ainda não é sua' : previewPick.level === hand.level ? ' · é esta' : ''}
+                      </span>
+                    )}
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {GEAR.map((g) => {
@@ -97,6 +117,16 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
                               {materials[m] || 0}/{g.cost[m]} {MATERIAL_LABELS[m]}{' '}
                             </span>
                           ))}
+                          {(g.rare.esmeralda || 0) > 0 && (
+                            <span className={(village.rare.esmeralda || 0) >= (g.rare.esmeralda || 0) ? 'text-green-300' : 'text-red-300'}>
+                              {village.rare.esmeralda || 0}/{g.rare.esmeralda} esmeralda{' '}
+                            </span>
+                          )}
+                          {(g.rare.diamante || 0) > 0 && (
+                            <span className={(village.rare.diamante || 0) >= (g.rare.diamante || 0) ? 'text-green-300' : 'text-red-300'}>
+                              {village.rare.diamante || 0}/{g.rare.diamante} diamante
+                            </span>
+                          )}
                         </span>
                       }
                     />
@@ -114,9 +144,11 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
                       ? `Precisa da picareta anterior`
                       : check.reason === 'level'
                         ? `Nível ${check.minLevel}`
-                        : check.ok
-                          ? 'Forjar'
-                          : 'Faltam materiais';
+                        : check.reason === 'rare'
+                          ? 'Faltam gemas'
+                          : check.ok
+                            ? 'Forjar'
+                            : 'Faltam materiais';
                 return (
                   <button type="button" disabled={!check.ok} className="mc-btn mc-btn-green min-h-[44px] px-4 font-bold" onClick={() => {
                     playClick();

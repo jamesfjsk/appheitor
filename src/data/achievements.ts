@@ -81,6 +81,10 @@ export const GAME_ACHIEVEMENTS: GameAchievement[] = [
   a('ferraria_20', 'mina', 'bronze', 'Ferraria', '20 contratos de ferraria.', 'book', 'contractsForge', 20),
   a('comerciante_20', 'mina', 'bronze', 'Comerciante', '20 contratos de comerciante.', 'book', 'contractsMerchant', 20),
 
+  a('primeira_vagoneta', 'mina', 'bronze', 'Primeira vagoneta', 'Acertou uma conta na oficina.', 'forge', 'redstoneDone', 1),
+  ...trio('vagoneta_dias', 'mina', 'Oficina', 'Dias com acerto na vagoneta', 'forge', 'redstoneDone', [10, 50, 100]),
+  ...trio('vagoneta_perfeita', 'mina', 'Vagoneta cheia', 'Dias 3 de 3 na oficina', 'forge', 'redstonePerfect', [1, 10, 50]),
+
   a('primeira_prova', 'biblioteca', 'bronze', 'Primeira prova', 'Fez a prova do dia.', 'book', 'quizzesDone', 1),
   ...trio('nota_maxima', 'biblioteca', 'Nota máxima', 'Provas 8 de 8', 'star', 'quizPerfect', [1, 10, 50]),
   ...trio('constancia', 'biblioteca', 'Constância', 'Provas seguidas', 'book', 'quizStreak', [7, 30, 100]),

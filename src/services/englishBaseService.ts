@@ -13,7 +13,7 @@ import type { BaseDoc, BuildingId, Contract, ContractOutcome, ContractResult, Da
 import { BUILDINGS, MATERIALS, baseLevel, buildingCost, buildingOpensLater, canAfford, initialBaseDoc, isBuildingUnlocked, missingMaterials } from '../config/englishBase';
 import { DEFAULT_ECONOMY } from '../config/village';
 import { getSettings } from './settingsService';
-import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, buildXp, rewardFor } from '../config/englishRewards';
+import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, applyPickaxeBonus, buildXp, rewardFor } from '../config/englishRewards';
 import { cracksOf, isBroken, liveBuildingLevel, ruinUseError } from './village/repair';
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
@@ -500,7 +500,7 @@ const affordableIds = (base: BaseDoc): BuildingId[] => BUILDINGS.map((b) => b.id
 /**
  * Transação única da conclusão: exige plano 'ready', contrato 'open' e a mesma versão;
  * decide a vaga premiada (Recado sempre; mais os 2 primeiros outros com material > 0;
- * refazer nunca premia), soma o material (bônus da Fornalha n1 no primeiro do dia, teto 3),
+ * refazer nunca premia), soma o material (Fornalha n1 no primeiro do dia + picareta forjada, teto 3),
  * atualiza vocab, andaime, contadores e dias jogados, grava o resultado e a sessão.
  */
 export async function completeContract(
@@ -535,7 +535,13 @@ export async function completeContract(
 
     const cracks = cracksOf(vSnap.data()?.cracks);
     const firstOfDay = !hasDone(plan);
-    const material = applyFurnaceBonus(clampMaterial(outcome.materialEarned), liveBuildingLevel(base.buildings, cracks, 'fornalha'), firstOfDay);
+    const pickaxe = Math.max(0, Math.min(4, Math.round(Number(vSnap.data()?.gear?.pickaxe) || 0)));
+    const doneToday = Object.values(plan.contracts).filter((c) => c.status === 'done').length;
+    const material = applyPickaxeBonus(
+      applyFurnaceBonus(clampMaterial(outcome.materialEarned), liveBuildingLevel(base.buildings, cracks, 'fornalha'), firstOfDay),
+      pickaxe,
+      doneToday
+    );
     const othersRewarded = plan.rewardedIds.filter((id) => plan.contracts[id]?.type !== 'note').length;
     const slotFree = contract.type === 'note' || othersRewarded < REWARDED_OTHER_SLOTS;
     const rewarded = material > 0 && !contract.retryUsed && slotFree;

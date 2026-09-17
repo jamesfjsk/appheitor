@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -9,13 +9,13 @@ import {
   GEAR_SPRITE,
   cosmeticHasSprite,
   cosmeticSwatchHex,
+  pickaxeInfo,
 } from '../../../config/village';
-import { SLOT_LABEL } from '../../../config/items';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useData } from '../../../contexts/DataContext';
 import { calculateLevelSystem } from '../../../utils/levelSystem';
-import type { VillageCharacter } from '../../../types/village';
+import type { PickaxeLevel, VillageCharacter, VillageGear } from '../../../types/village';
 import CharacterPreview from './CharacterPreview';
 import GarmentIcon from './GarmentIcon';
 import { lookKey } from './drawCharacter';
@@ -58,14 +58,14 @@ const GHOST: Partial<Record<DollSlot, string>> = {
 };
 
 const HINT: Record<DollSlot, string> = {
-  shirt: 'Vista a camisa. O retrato muda na hora.',
-  pants: 'Vista a calça.',
-  hat: 'Troca o capacete. Vazio = o amarelo.',
-  cape: 'Capa nas costas. Vazio tira.',
-  pet: 'O bicho no canto do retrato.',
-  pickaxe: 'A arma da mão. Novas nascem na Ferraria.',
-  boots: 'Botas dos pés. Novas nascem na Ferraria.',
-  lamp: 'Lanterna. Ainda vai abrir.',
+  shirt: 'A camisa do minerador.',
+  pants: 'A calça.',
+  hat: 'O que vai na cabeça. Sem nada, fica o capacete da mina.',
+  cape: 'O pano das costas. O cachecol fica no pescoço.',
+  pet: 'O bicho que anda com você.',
+  pickaxe: 'A picareta da mão. Quanto melhor, mais material e mais força na Mina.',
+  boots: 'As botas. A Ferraria faz as novas.',
+  lamp: 'A lanterna ainda não abriu.',
 };
 
 function ownedOf(id: string, free: boolean | undefined, owned: string[]): boolean {
@@ -76,14 +76,11 @@ function slotThumb(id: string, slot: DollSlot): React.ReactNode {
   if (slot === 'shirt' || slot === 'pants') {
     return <GarmentIcon kind={slot} hex={cosmeticSwatchHex(id) || undefined} />;
   }
+  if (slot === 'cape') {
+    return <GarmentIcon kind={id === 'cape_vila' ? 'scarf' : 'cape'} hex={cosmeticSwatchHex(id) || '#B33A2B'} />;
+  }
   if (COSMETIC_ICON[id]) {
-    const pip = slot === 'cape' ? cosmeticSwatchHex(id) : null;
-    return (
-      <span className="mn-eq-stack">
-        <img src={COSMETIC_ICON[id]} alt="" className="mn-eq-img mc-pixel" draggable={false} />
-        {pip ? <i className="mn-eq-dot" style={{ background: pip }} /> : null}
-      </span>
-    );
+    return <img src={COSMETIC_ICON[id]} alt="" className="mn-eq-img mc-pixel" draggable={false} />;
   }
   return null;
 }
@@ -91,6 +88,9 @@ function slotThumb(id: string, slot: DollSlot): React.ReactNode {
 function slotGhost(slot: DollSlot): React.ReactNode {
   if (slot === 'shirt' || slot === 'pants') {
     return <GarmentIcon kind={slot} ghost />;
+  }
+  if (slot === 'cape') {
+    return <GarmentIcon kind="cape" ghost />;
   }
   if (GHOST[slot]) {
     return <img src={GHOST[slot]} alt="" className="mn-eq-ghost mc-pixel" draggable={false} />;
@@ -142,7 +142,15 @@ const CharacterEditor: React.FC<{
   const level = levelSys.currentLevel;
   const [tab, setTab] = useState<DollSlot>(DOLL_SLOTS.includes(startSlot) ? startSlot : 'shirt');
   const [draft, setDraft] = useState<VillageCharacter>(village.character);
+  const [lookGear, setLookGear] = useState<VillageGear>(village.gear);
   const dirty = lookKey(draft) !== lookKey(village.character);
+
+  useEffect(() => {
+    setLookGear((prev) => ({
+      ...village.gear,
+      pickaxe: prev.pickaxe > village.gear.pickaxe ? prev.pickaxe : village.gear.pickaxe,
+    }));
+  }, [village.gear.pickaxe, village.gear.boots, village.gear.helmet, village.gear.lamp, village.gear.cape]);
 
   const cosmetics = useMemo(
     () => COSMETICS.filter((c) => c.slot === tab && cosmeticHasSprite(c.id)),
@@ -155,15 +163,20 @@ const CharacterEditor: React.FC<{
 
   const lockedOnTab = cosmetics.some((c) => !ownedOf(c.id, c.free, village.owned));
   const currentName = (() => {
-    if (tab === 'pickaxe') {
-      const g = GEAR.find((x) => x.slot === 'pickaxe' && x.level === village.gear.pickaxe);
-      return g?.label || 'Picareta de madeira';
-    }
+    if (tab === 'pickaxe') return pickaxeInfo(lookGear.pickaxe).label;
     if (tab === 'boots') return village.gear.boots >= 1 ? 'Botas' : 'Botas de couro';
     if (tab === 'lamp') return village.gear.lamp >= 1 ? 'Lanterna' : 'Vazio';
     const id = draft[tab as keyof VillageCharacter];
     if (!id) return 'Vazio';
     return COSMETICS.find((c) => c.id === id)?.label || String(id);
+  })();
+  const previewLocked = (() => {
+    if (tab === 'pickaxe') return lookGear.pickaxe > village.gear.pickaxe;
+    if (tab === 'boots' || tab === 'lamp') return false;
+    const id = draft[tab as keyof VillageCharacter];
+    if (!id) return false;
+    const item = COSMETICS.find((c) => c.id === id);
+    return Boolean(item) && !ownedOf(id, item?.free, village.owned);
   })();
 
   const pickCosmetic = (id: string | null, owned: boolean, minLevel?: number, price?: number) => {
@@ -177,7 +190,22 @@ const CharacterEditor: React.FC<{
   const pickGear = (id: string, owned: boolean, on: boolean, minLevel?: number) => {
     playClick();
     if (id === 'pickaxe_wood') {
-      toast(village.gear.pickaxe === 0 ? 'Já está equipado' : 'A de madeira é a inicial');
+      setLookGear({ ...village.gear, pickaxe: 0 });
+      toast(village.gear.pickaxe === 0 ? 'Já está na mão' : 'Prévia da de madeira');
+      return;
+    }
+    const gearDef = GEAR.find((x) => x.id === id);
+    if (gearDef?.slot === 'pickaxe') {
+      setLookGear({ ...village.gear, pickaxe: gearDef.level as PickaxeLevel });
+      if (owned && village.gear.pickaxe === gearDef.level) {
+        toast('Já está na mão');
+        return;
+      }
+      if (owned) {
+        toast('Já está com você');
+        return;
+      }
+      toast(minLevel && level < minLevel ? `Prévia · libera no nível ${minLevel}` : 'Prévia · forja na Ferraria');
       return;
     }
     if (id === 'boots_leather') {
@@ -236,9 +264,7 @@ const CharacterEditor: React.FC<{
     setTab(slot);
   };
 
-  const pickaxeSprite = village.gear.pickaxe >= 1
-    ? GEAR_SPRITE[GEAR.find((g) => g.slot === 'pickaxe' && g.level === village.gear.pickaxe)?.id || ''] || PICK_WOOD
-    : PICK_WOOD;
+  const pickaxeSprite = pickaxeInfo(lookGear.pickaxe).sprite;
 
   const invCount = (tab === 'pickaxe' || tab === 'boots' ? 1 : 0)
     + (OPTIONAL.includes(tab as keyof VillageCharacter) ? 1 : 0)
@@ -266,8 +292,9 @@ const CharacterEditor: React.FC<{
           <EqSlot area="shirt" label="Camisa" selected={tab === 'shirt'} onClick={() => go('shirt')}>
             {slotThumb(draft.shirt, 'shirt')}
           </EqSlot>
-          <div className="mn-doll-body mn-look-stage">
-            <CharacterPreview character={draft} gear={village.gear} size={176} />
+          <div className={`mn-doll-body mn-look-stage ${previewLocked ? 'is-prev' : ''}`}>
+            <CharacterPreview character={draft} gear={lookGear} size={176} />
+            {previewLocked ? <span className="mn-look-prev">Prévia</span> : null}
           </div>
           <EqSlot area="lamp" label="Lanterna" selected={tab === 'lamp'} onClick={() => go('lamp')}>
             {village.gear.lamp >= 1 ? <img src={GEAR_SPRITE.lamp} alt="" className="mn-eq-img mc-pixel" draggable={false} /> : null}
@@ -292,20 +319,26 @@ const CharacterEditor: React.FC<{
 
       <div className="mn-ficha-inv">
         <div className="mn-ficha-head">
-          <p className="mn-panel-k">{SLOT_LABEL[tab] || tab}</p>
-          <p className="mn-ficha-item">{currentName}</p>
+          <p className="mn-panel-k">{SHORT[tab]}</p>
+          <p className="mn-ficha-item">{previewLocked ? `Prévia · ${currentName}` : currentName}</p>
         </div>
-        <p className="mn-look-hint">{HINT[tab]}</p>
+        <p className="mn-look-hint">
+          {previewLocked
+            ? (tab === 'pickaxe'
+              ? (GEAR.find((g) => g.slot === 'pickaxe' && g.level === lookGear.pickaxe)?.effect || 'Prévia. Forja na Ferraria.')
+              : 'Ainda não é seu. Pode ver, mas o salvar não grava.')
+            : HINT[tab]}
+        </p>
         <div className="mn-inv">
           {tab === 'pickaxe' && (
             <button
               type="button"
-              className={`mn-inv-slot mc-slot ${village.gear.pickaxe === 0 ? 'is-on' : ''}`}
+              className={`mn-inv-slot mc-slot ${lookGear.pickaxe === 0 ? 'is-on' : ''}`}
               title="Picareta de madeira"
               aria-label="Picareta de madeira"
               onClick={() => pickGear('pickaxe_wood', true, village.gear.pickaxe === 0)}
             >
-              <img src={PICK_WOOD} alt="" className="mn-eq-img mc-pixel" draggable={false} />
+              <img src={pickaxeInfo(0).sprite} alt="" className="mn-eq-img mc-pixel" draggable={false} />
             </button>
           )}
           {tab === 'boots' && (
@@ -334,24 +367,26 @@ const CharacterEditor: React.FC<{
             const owned = ownedOf(c.id, c.free, village.owned);
             const selected = draft[tab as keyof VillageCharacter] === c.id;
             const tooSoon = Boolean(c.minLevel && level < c.minLevel && !owned);
+            const marco = !c.free && !(c.basePrice > 0);
+            const tag = tooSoon ? `Nv.${c.minLevel}` : marco ? 'marco' : `${c.basePrice}g`;
             return (
               <button
                 key={c.id}
                 type="button"
                 className={`mn-inv-slot mc-slot ${selected ? 'is-on' : ''} ${owned ? '' : 'is-lock'}`}
-                title={owned ? c.label : tooSoon ? `Nível ${c.minLevel}` : `${c.basePrice}g na loja`}
+                title={owned ? c.label : tooSoon ? `Nível ${c.minLevel}` : marco ? 'Peça de marco' : `${c.basePrice}g na loja`}
                 aria-label={c.label}
                 onClick={() => pickCosmetic(c.id, owned, c.minLevel, c.basePrice)}
               >
                 {slotThumb(c.id, tab)}
-                {!owned && <span className="mn-inv-tag">{tooSoon ? `Nv.${c.minLevel}` : `${c.basePrice}g`}</span>}
+                {!owned && <span className="mn-inv-tag">{tag}</span>}
               </button>
             );
           })}
           {gearItems.map((g) => {
             const equipped = g.slot === 'pickaxe' ? village.gear.pickaxe : village.gear[g.slot];
             const owned = g.slot === 'pickaxe' ? equipped >= g.level : equipped >= 1;
-            const on = g.slot === 'pickaxe' ? village.gear.pickaxe === g.level : owned;
+            const on = g.slot === 'pickaxe' ? lookGear.pickaxe === g.level : owned;
             const tooSoon = Boolean(g.minLevel && level < g.minLevel && !owned);
             return (
               <button

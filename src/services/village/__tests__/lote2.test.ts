@@ -4,7 +4,7 @@ import { buildingLevelSum, recordsAfterWeek, seasonEndsOn, trophyOfWeek, village
 import { checkinXp, sageReplyFor, tomorrowValid } from '../checkin';
 import { evaluateAchievements, progressOf, rewardHasGold, visibleAchievements } from '../achievements';
 import { GAME_ACHIEVEMENTS } from '../../../data/achievements';
-import { heroClickPlan, heroRoute, heroShakeTarget, heroStandPoint, heroWalkAlong, heroWalkDurationMs, lookFacing, npcHopPx, npcRoutine, npcTarget, npcTouch, npcWalk, tapPulse, DEFAULT_WALK_GRAPH } from '../npcBehavior';
+import { heroClickPlan, heroGroundPlan, heroRoute, heroShakeTarget, heroStandPoint, heroWalkAlong, heroWalkDurationMs, heroWalkablePoint, lookFacing, npcHopPx, npcRoutine, npcTarget, npcTouch, npcWalk, tapPulse, DEFAULT_WALK_GRAPH } from '../npcBehavior';
 import { friendTier, pickDialogue, talkPointsToday, type DialogueCtx } from '../dialogue';
 
 test('semana ISO vira rótulo Semana de 14 a 20/09', () => {
@@ -55,6 +55,11 @@ test('conquistas: destrava no alvo e não antes; escondidas; nunca gold', () => 
   for (const ach of GAME_ACHIEVEMENTS) expect(rewardHasGold(ach)).toBe(false);
   expect('gold' in (first.reward as object) ? (first.reward as { gold?: number }).gold : undefined).toBe(undefined);
   expect(GAME_ACHIEVEMENTS.length >= 72).toBe(true);
+  expect(GAME_ACHIEVEMENTS.some((x) => x.id === 'primeira_vagoneta')).toBe(true);
+  expect(evaluateAchievements({ redstoneDone: 0 }, {}).some((x) => x.id === 'primeira_vagoneta')).toBe(false);
+  expect(evaluateAchievements({ redstoneDone: 1 }, {}).some((x) => x.id === 'primeira_vagoneta')).toBe(true);
+  expect(evaluateAchievements({ redstonePerfect: 1 }, {}).some((x) => x.id === 'vagoneta_perfeita_1')).toBe(true);
+  expect(evaluateAchievements({ redstoneDone: 1 }, {}).some((x) => x.id === 'vagoneta_perfeita_1')).toBe(false);
 });
 
 test('npcBehavior: horários, caminhada e toque', () => {
@@ -156,6 +161,29 @@ test('Heitor anda pelo caminho de terra, sem dash', () => {
   expect(fence.to.y < 500).toBe(true);
   const housePlan = heroClickPlan('house', from, { x: 938, y: 110, w: 96, h: 74 }, bounds, false);
   expect(housePlan.points.every((p) => Math.hypot(p.x - 848, p.y - 268) > 40)).toBe(true);
+});
+
+test('Heitor aceita clique na trilha e recusa água, mato e céu', () => {
+  const from = { x: 640, y: 365 };
+  const water = { x: 1125, y: 345, w: 145, h: 125 };
+  const trail = heroWalkablePoint({ x: 720, y: 370 }, DEFAULT_WALK_GRAPH, water);
+  expect(Boolean(trail)).toBe(true);
+  expect(trail && trail.x > 680).toBe(true);
+  expect(heroWalkablePoint({ x: 1200, y: 410 }, DEFAULT_WALK_GRAPH, water)).toBe(null);
+  expect(heroWalkablePoint({ x: 40, y: 80 }, DEFAULT_WALK_GRAPH, water)).toBe(null);
+  expect(heroWalkablePoint({ x: 640, y: 40 }, DEFAULT_WALK_GRAPH, water)).toBe(null);
+  const east = heroGroundPlan(from, { x: 780, y: 390 }, DEFAULT_WALK_GRAPH, false, water);
+  expect(Boolean(east)).toBe(true);
+  expect(east && east.immediate).toBe(false);
+  expect(east && east.shakeId).toBe(null);
+  expect(east && east.points.length >= 2).toBe(true);
+  expect(heroGroundPlan(from, { x: 1200, y: 410 }, DEFAULT_WALK_GRAPH, false, water)).toBe(null);
+  const stay = heroGroundPlan(from, { x: 642, y: 366 }, DEFAULT_WALK_GRAPH, false, water);
+  expect(stay && stay.immediate).toBe(true);
+  expect(stay && stay.durationMs).toBe(0);
+  const along = heroRoute(from, { x: 780, y: 390 });
+  expect(along.every((p) => p.y > 330)).toBe(true);
+  expect(along.some((p) => p.x > 700)).toBe(true);
 });
 
 test('diálogo: prioridade, once, 14 dias e missão perdida só nesse caso', () => {

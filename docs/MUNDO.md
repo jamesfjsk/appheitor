@@ -4,7 +4,7 @@ Documento de desenho (fonte de verdade a partir de 16/09/2026). Pedido do pai: o
 
 ## 1. A ideia
 
-A Vila é o **centro** de um mundo, não o mundo. Cada lugar grande vira uma **cena** própria (mesmo motor da Vila: fundo pintado, âncoras, hotspots, luz por hora, personagens), e um **mapa do mundo** liga as cenas. Novos módulos ganham um lugar no mapa em vez de espremer a Vila. O Heitor **não anda** pelo mapa: clica no quadro. A viagem é a troca de cena (seção 3). O que não pode acontecer é todo minijogo nascer como mais um quadro: lugar e jogo são portas diferentes (seção 5).
+A Vila é o **centro** de um mundo, não o mundo. Cada lugar grande vira uma **cena** própria (mesmo motor da Vila: fundo pintado, âncoras, hotspots, luz por hora, personagens), e um **mapa do mundo** liga as cenas. Novos módulos ganham um lugar no mapa em vez de espremer a Vila. O Heitor **não anda pelo mapa**: clica no quadro; a viagem é a troca de cena (seção 3). Dentro de uma cena, o minerador **caminha até o ponto clicado** (decisão do pai em 17/09: entrou no Lote 2 da Etapa 2 e fica): é charme visual, deslocamento linear sem física, sem colisão e sem teclado; **a porta de cada lugar continua sendo o clique no lugar**, e a ação abre quando o clique acontece, não quando o boneco chega. O que não pode acontecer é todo minijogo nascer como mais um quadro: lugar e jogo são portas diferentes (seção 5).
 
 ## 2. O mapa do mundo
 
@@ -45,7 +45,7 @@ Regiões fechadas aparecem no mapa com névoa e uma placa dizendo o que falta ("
 
 ## 5. Duas portas: lugar e jogo (decisão 16/09/2026)
 
-O mundo clicável fica. Motor gráfico Unity/Godot/andar pelo mapa: não. O que faltava não era o Heitor caminhar na Vila; era os minijogos não nascerem todos como o mesmo quadro.
+O mundo clicável fica. Motor gráfico Unity/Godot, andar pelo mapa, teclado e física: não. O caminhar até o ponto clicado dentro da cena (seção 1) é só deslocamento visual e não muda esta regra. O que faltava não era o Heitor controlar o boneco; era os minijogos não nascerem todos como o mesmo quadro.
 
 | Porta | O que é | Como se faz | Exemplos |
 |---|---|---|---|
@@ -56,14 +56,16 @@ O mundo clicável fica. Motor gráfico Unity/Godot/andar pelo mapa: não. O que 
 Regras:
 
 1. Clicar num lugar **nunca** é a partida. O quadro some; o jogo ocupa a tela; ao sair, o quadro volta. Gold, XP, pai e Placa continuam no React.
-2. A Vila, o mapa e a Fazenda **não** ganham Phaser nem personagem andável. Menos margem de erro no tablet; a rotina não vira RPG.
+2. A Vila, o mapa e a Fazenda **não** ganham Phaser nem personagem controlado (teclado, joystick, colisão). O minerador só caminha até onde o clique mandou. Menos margem de erro no tablet; a rotina não vira RPG.
 3. A Fazenda não vira Stardew: regar à mão e andar no lote quebram a pedagogia da seção 4.
 4. A Arena não vira modal da Vila com botões. É tabuleiro vivo (peça anda, chip cai, tiro na água, “sua vez”).
-5. Não colocar motor 3D nem engine no app inteiro. Phaser entra só nestas duas portas de jogo, nunca na Vila/mapa/Fazenda. Summer Engine (Godot) é ferramenta à parte, não entra no PWA. O kit de ação entra na Etapa 4 (Turno na Mina já é o molde; Gol de Placa é o segundo); o kit de tabuleiro entra na Etapa 4B, um jogo por entrega. **Molde já no ar:** a Oficina de Redstone da Mina (`src/game/redstone/` + `RedstoneBench`) — bandeja de peças, o minerador monta o circuito, puxa a alavanca; as regras continuam em `redstone.ts`. Sem assinatura (Phaser é MIT).
+5. Não colocar motor 3D nem engine no app inteiro. Phaser entra só nestas duas portas de jogo, nunca na Vila/mapa/Fazenda. Summer Engine (Godot) é ferramenta à parte, não entra no PWA. O kit de ação entra na Etapa 4 (Turno na Mina já é o molde; Gol de Placa é o segundo); o kit de tabuleiro entra na Etapa 4B, um jogo por entrega. **Molde já no ar:** a Oficina de Redstone da Mina (`src/game/redstone/` + `RedstoneBench`) — bandeja de peças, o minerador monta o circuito, puxa a alavanca; as regras continuam em `redstone.ts`. Sem assinatura (Phaser é MIT). **Decisão de 17/09:** o molde fica no repositório documentado (`src/game/README.md`) e **sem import** até a Etapa 3; `phaser` não pode aparecer no bundle (`dist/assets`) antes disso. Na Mina, o que está no ar até lá é a Vagoneta da Mina (React, sem Phaser; ficha em `docs/etapas/ETAPA_2_LANCAMENTO.md`, seção 12).
 
 ## 6. Regra para o código, desde agora (vale para o Lote 2)
 
 Toda coisa nova de **lugar** é **dado, não código da Vila**: `public/assets/village/scene/` vira `public/assets/scenes/<id>/` com `backdrop-day.png`, `anchors.json` (lotes, personagens, hotspots, luzes, água, props, spots de NPC, camadas de crescimento), e o componente `VillageScene` vira `SceneCanvas` que recebe o id da cena e desenha o que o JSON diz. Fumaça, luzes, rótulos, balões, rachaduras, crescimento e vida dos NPCs continuam funcionando em qualquer cena porque leem do JSON. Nada de `if (id === 'fornalha')` dentro do canvas: comportamento por tipo de âncora (`lot`, `npc`, `prop`, `water`, `light`, `entrance`). Os hotspots disparam `onClickSpot(id)` como hoje e o mapa de ids para telas mora fora do canvas (`sceneActions`). Regra de aceite para qualquer entrega com cena: "daria para criar uma segunda cena só com um JSON e um PNG?".
+
+O que o Lote 2 já pôs no `anchors.json` da Vila e passa a ser o padrão de qualquer cena: `npcSpots` (onde cada NPC fica por hora), `walk` (área e velocidade do deslocamento do minerador), `growth` (camadas de "vila que cresce" por soma de níveis), `props` (objetos parados) e as camadas `look`, `wall` e `growth`. Decisão de 17/09: essas camadas existem **só como dado**; o canvas desenha o que o JSON descreve e nenhuma delas ganha código próprio antes da Etapa 4 (arte das camadas `wall` e `growth` fica para lá).
 
 ## 7. Ordem
 

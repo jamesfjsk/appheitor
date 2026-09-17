@@ -365,6 +365,24 @@ export function sessionPay(stagesWon: number): { redstone: number; xp: number } 
   return { redstone: n, xp: 5 + 2 * n };
 }
 
+/** 0 acertos: só XP de participação. Acerto destrava redstone, stat e ferreiro. */
+export function sessionMarks(stagesWon: number): {
+  redstone: number;
+  xp: number;
+  redstoneDone: number;
+  redstonePerfect: number;
+  ferreiro: number;
+} {
+  const n = Math.max(0, Math.min(3, Math.floor(Number(stagesWon) || 0)));
+  const pay = sessionPay(n);
+  return {
+    ...pay,
+    redstoneDone: n > 0 ? 1 : 0,
+    redstonePerfect: n === 3 ? 1 : 0,
+    ferreiro: n === 0 ? 0 : n === 3 ? 3 : 2,
+  };
+}
+
 export function noteDoneOf(plan: { contracts: Record<string, { type: string; status: string }> } | null | undefined): boolean {
   if (!plan) return false;
   return Object.values(plan.contracts).some((c) => c.type === 'note' && c.status === 'done');

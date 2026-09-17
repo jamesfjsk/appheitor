@@ -19,6 +19,7 @@ import {
   sessionFor,
   sessionHash,
   sessionPay,
+  sessionMarks,
   simulate,
   solve,
   startTool,
@@ -59,6 +60,10 @@ test('pagamento da sessão: 0 a 3 redstone, XP 5/7/9/11, sem gold', () => {
   expect(sessionPay(3)).toEqual({ redstone: 3, xp: 11 });
   expect(sessionPay(9)).toEqual({ redstone: 3, xp: 11 });
   expect(sessionPay(-1)).toEqual({ redstone: 0, xp: 5 });
+  expect(sessionMarks(0)).toEqual({ redstone: 0, xp: 5, redstoneDone: 0, redstonePerfect: 0, ferreiro: 0 });
+  expect(sessionMarks(1)).toEqual({ redstone: 1, xp: 7, redstoneDone: 1, redstonePerfect: 0, ferreiro: 2 });
+  expect(sessionMarks(2).ferreiro).toBe(2);
+  expect(sessionMarks(3)).toEqual({ redstone: 3, xp: 11, redstoneDone: 1, redstonePerfect: 1, ferreiro: 3 });
   expect(redstoneTier(1)).toBe(1);
   expect(redstoneTier(5)).toBe(2);
   expect(redstoneTier(10)).toBe(3);

@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Heart, Volume2 } from 'lucide-react';
 import { EnglishCategory, EnglishWord } from '../../../../data/englishVocabulary';
 import { EnglishProgressDoc, RoundResult, pickWords, playWord, playWordAsync, shuffle, speakAsync, wordsOf } from '../../../../services/englishGameService';
-import { useSound } from '../../../../contexts/SoundContext';
+import { useVillage } from '../../../../contexts/VillageContext';
 import { BlockRow, Lane, MineEvent, MineState, MineWord, PICKAXES, PromptMode, RenderAssets, RenderOptions, RowPhase, RunPlan } from './types';
 import { chooseLane, createRun, drainEvents, pause, releaseRow, resume, start, summarize, tick } from './engine';
 import { createRenderer } from './render';
@@ -227,6 +227,8 @@ const PromptBody: React.FC<{ prompt: HudPrompt; big: boolean }> = ({ prompt, big
 
 const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => {
   const { isSoundEnabled } = useSound();
+  const { village } = useVillage();
+  const pickaxeFloor = village.gear.pickaxe;
   const [phase, setPhase] = useState<Phase>('intro');
   const [hud, setHud] = useState<Hud | null>(null);
   const [paused, setPaused] = useState(false);
@@ -307,7 +309,7 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
     wordById.current = new Map(pool.map((w) => [w.id, w]));
     const urls = pool.map((w) => w.image).filter((u): u is string => Boolean(u));
     assetsRef.current = { images: await preloadImages(urls) };
-    const st = createRun(plan);
+    const st = createRun(plan, { pickaxeFloor });
     stateRef.current = st;
     finishedRef.current = false;
     prevPickaxeRef.current = st.pickaxe;
@@ -540,6 +542,9 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
         <img src="/assets/english/ui/minecart.webp" alt="" className="w-28 h-28 mx-auto" style={{ imageRendering: 'pixelated' }} draggable={false} />
         <h3 className="mc-title text-base sm:text-xl mt-2">Mine Rush</h3>
         <p className="text-white/85 mt-3">Ouça o pedido, troque de pista e quebre o bloco certo antes do carrinho bater.</p>
+        <p className="text-sm mt-2 font-bold" style={{ color: PICKAXES[pickaxeFloor].color }}>
+          Você desce com a {PICKAXES[pickaxeFloor].name.toLowerCase()} (x{PICKAXES[pickaxeFloor].multiplier}). Combo ainda sobe. Errar não tira essa picareta.
+        </p>
         <p className="text-sm text-white/60 mt-1">Toque nos lados da tela, deslize, ou use A, S, D e as setas.</p>
         {bestDepth > 0 && (
           <p className="mc-font text-[10px] mc-diamond mt-4">Recorde: {bestDepth} blocos</p>

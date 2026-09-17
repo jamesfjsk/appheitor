@@ -14,6 +14,7 @@ import { applyVillageStats, getVillage, repairLot } from '../services/villageSer
 import { getSettings } from '../services/settingsService';
 import { DEFAULT_ECONOMY, DEFAULT_MODULES, DEFAULT_VILLAGE_SETTINGS } from '../config/village';
 import { computeTaskLoot, xpWithBoots } from '../services/village/loot';
+import { MATERIAL_LABELS } from '../config/englishBase';
 import { dueTasksOn, periodAllowedAt } from '../services/village/schedule';
 import type { EconomySettings, ModuleSettings, Period, VillageSettings } from '../types/village';
 import { bumpChallenge } from '../services/challengesService';
@@ -374,6 +375,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         loot.qty > 0 ? loot : undefined,
         { focus }
       );
+
+      if (loot.qty > 0) {
+        const extra = loot.qty > (economy.materialsPerTask || 1);
+        toast.success(`+${loot.qty} ${MATERIAL_LABELS[loot.material]}${extra ? ' · picareta' : ''}`);
+      }
 
       try {
         await bumpChallenge(childUid, 'tasks_count', 1);

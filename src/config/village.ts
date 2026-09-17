@@ -13,6 +13,7 @@ import type {
   NpcId,
   NpcState,
   Period,
+  PickaxeLevel,
   PriceBand,
   VillageCharacter,
   VillageDoc,
@@ -173,7 +174,7 @@ export const GEAR: GearDef[] = [
     slot: 'pickaxe',
     level: 1,
     label: 'Picareta de pedra',
-    effect: '+1 material na primeira missão do dia',
+    effect: '+1 na primeira missão do dia · na Mina começa na Pedra',
     cost: { pedra: 6, madeira: 2 },
     rare: {},
     minLevel: 5,
@@ -183,30 +184,30 @@ export const GEAR: GearDef[] = [
     slot: 'pickaxe',
     level: 2,
     label: 'Picareta de ferro',
-    effect: '+1 material na primeira missão de cada período',
-    cost: { ferro: 8, pedra: 4 },
+    effect: '+1 na primeira de cada turno · na Mina começa no Ferro',
+    cost: { ferro: 10, pedra: 6 },
     rare: {},
-    minLevel: 10,
+    minLevel: 12,
   },
   {
     id: 'pickaxe_gold',
     slot: 'pickaxe',
     level: 3,
     label: 'Picareta de ouro',
-    effect: '+1 na primeira missão de cada período; Baú do Dia com +1 material',
-    cost: { ferro: 10, redstone: 6 },
-    rare: { esmeralda: 1 },
-    minLevel: 20,
+    effect: '+1 em toda missão · Baú do Dia farto · na Mina começa no Ouro',
+    cost: { ferro: 14, redstone: 10 },
+    rare: { esmeralda: 2 },
+    minLevel: 22,
   },
   {
     id: 'pickaxe_diamond',
     slot: 'pickaxe',
     level: 4,
     label: 'Picareta de diamante',
-    effect: '+1 material em toda missão',
-    cost: { ferro: 12, redstone: 8 },
-    rare: { diamante: 2 },
-    minLevel: 30,
+    effect: '+2 em toda missão · Baú ainda mais farto · na Mina começa no Diamante',
+    cost: { ferro: 18, redstone: 14 },
+    rare: { diamante: 3 },
+    minLevel: 32,
   },
   {
     id: 'boots',
@@ -316,7 +317,7 @@ export const COSMETIC_BY_ID: Record<string, CosmeticItem> = Object.fromEntries(C
 
 export const FREE_COSMETIC_IDS: string[] = COSMETICS.filter((c) => c.free).map((c) => c.id);
 
-/** Câmera canônica do minerador (low top-down). Retrato, HUD, cena e editor. */
+/** Retrato iso (HUD, teaser, ícone da Vila). Câmera canônica do minerador. */
 export const ISO_MINER = '/assets/village/char/miner-iso.png';
 /** Folha 8×64: walk cycle (PixelLab). Grama do chão removida. */
 export const ISO_MINER_WALK = '/assets/village/char/miner-walk.png?v=2';
@@ -408,21 +409,26 @@ export function cosmeticSwatchHex(id: string): string | null {
 }
 
 export const HAT_SPRITE: Record<string, string> = {
-  hat_cap: '/assets/village/char/miner-cap.png',
-  hat_deco: '/assets/village/char/miner-iron-helmet.png',
-  hat_crown: '/assets/village/char/miner-crown.png',
-  milestone_10: '/assets/village/char/miner-iron-helmet.png',
-  milestone_30: '/assets/village/char/miner-crown.png',
-  milestone_40: '/assets/village/char/miner-crown.png',
-  hat_mestre_obras: '/assets/village/char/miner-iron-helmet.png',
+  hat_cap: '/assets/village/char/miner-iso-cap.png',
+  hat_deco: '/assets/village/char/miner-iso-iron.png',
+  hat_crown: '/assets/village/char/miner-iso-crown.png',
+  milestone_10: '/assets/village/char/miner-iso-iron.png',
+  milestone_30: '/assets/village/char/miner-iso-crown.png',
+  milestone_40: '/assets/village/char/miner-iso-crown.png',
+  hat_mestre_obras: '/assets/village/char/miner-iso-iron.png',
 };
 
 export const CAPE_SPRITE: Record<string, string> = {
-  cape_red: '/assets/village/char/miner-cape.png',
-  cape_blue: '/assets/village/char/miner-cape.png',
-  milestone_20: '/assets/village/char/miner-cape.png',
-  cape_vila: '/assets/village/char/miner-cape.png',
+  cape_red: '/assets/village/char/miner-iso-cape.png',
+  cape_blue: '/assets/village/char/miner-iso-cape.png',
+  milestone_20: '/assets/village/char/miner-iso-cape.png',
 };
+
+export function lookBodySrc(character: VillageCharacter): string {
+  if (character.hat && HAT_SPRITE[character.hat]) return HAT_SPRITE[character.hat];
+  if (character.cape && character.cape !== 'cape_vila') return CAPE_SPRITE[character.cape] || ISO_MINER;
+  return ISO_MINER;
+}
 
 export const PET_SPRITE: Record<string, string> = {
   pet_wolf: '/assets/village/pets/lobo.png',
@@ -437,7 +443,10 @@ export const NPC_PORTRAIT: Record<string, string> = {
   olheiro: ISO_NPC.olheiro,
 };
 
+export const WOOD_PICKAXE_SPRITE = '/assets/village/items/pickaxe-madeira.png';
+
 export const GEAR_SPRITE: Record<string, string> = {
+  pickaxe_wood: WOOD_PICKAXE_SPRITE,
   pickaxe_stone: '/assets/village/items/pickaxe-pedra.png',
   pickaxe_iron: '/assets/village/items/pickaxe-ferro.png',
   pickaxe_gold: '/assets/village/items/pickaxe-ouro.png',
@@ -448,20 +457,39 @@ export const GEAR_SPRITE: Record<string, string> = {
   cape: '/assets/village/items/cape.png',
 };
 
+export const PICK_OVERLAY: Record<number, string> = {
+  0: '/assets/village/char/pick-wood.png?v=5',
+  1: '/assets/village/char/pick-stone.png?v=5',
+  2: '/assets/village/char/pick-iron.png?v=5',
+  3: '/assets/village/char/pick-gold.png?v=5',
+  4: '/assets/village/char/pick-diamond.png?v=5',
+};
+
+export function pickaxeInfo(level: number): { level: PickaxeLevel; label: string; sprite: string } {
+  const lv = Math.max(0, Math.min(4, Math.round(level || 0))) as PickaxeLevel;
+  if (lv <= 0) return { level: 0, label: 'Picareta de madeira', sprite: WOOD_PICKAXE_SPRITE };
+  const g = GEAR.find((x) => x.slot === 'pickaxe' && x.level === lv);
+  return {
+    level: lv,
+    label: g?.label || 'Picareta',
+    sprite: (g && GEAR_SPRITE[g.id]) || WOOD_PICKAXE_SPRITE,
+  };
+}
+
 export const COSMETIC_ICON: Record<string, string> = {
   hat_cap: '/assets/village/items/cap.png',
-  hat_deco: '/assets/village/items/helmet-deco.png',
+  hat_deco: '/assets/village/items/iron-helmet.png',
   hat_crown: '/assets/village/items/crown.png',
   cape_red: '/assets/village/items/cape.png',
   cape_blue: '/assets/village/items/cape.png',
   pet_wolf: '/assets/village/pets/lobo.png',
   pet_cat: '/assets/village/pets/gato.png',
   pet_parrot: '/assets/village/pets/papagaio.png',
-  milestone_10: '/assets/village/items/helmet-deco.png',
+  milestone_10: '/assets/village/items/iron-helmet.png',
   milestone_20: '/assets/village/items/cape.png',
   milestone_30: '/assets/village/items/crown.png',
   milestone_40: '/assets/village/items/crown.png',
-  hat_mestre_obras: '/assets/village/items/helmet-deco.png',
+  hat_mestre_obras: '/assets/village/items/iron-helmet.png',
   cape_vila: '/assets/village/items/cape.png',
 };
 

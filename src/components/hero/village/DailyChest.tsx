@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { pickaxeInfo } from '../../../config/village';
 import { useVillage } from '../../../contexts/VillageContext';
 import { chestAllowed } from '../../../services/village/chest';
 import { dueTasksOn } from '../../../services/village/schedule';
@@ -32,6 +33,7 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
   }).length;
   const gate = chestAllowed({ hourBrazil: hour, settings: economy, due: due.length, done, village, date: today });
   const already = gate.reason === 'already';
+  const pick = pickaxeInfo(village.gear.pickaxe);
   const leftMin = Math.max(0, economy.chestOpenHour * 60 - (hour * 60 + minute));
   const leftLabel = `${Math.floor(leftMin / 60)}h${String(leftMin % 60).padStart(2, '0')}`;
 
@@ -64,7 +66,7 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
                   ? 'Hoje não tem missões suficientes'
                   : gate.reason === 'incomplete'
                     ? `Faltam ${due.length - done} missões`
-                    : `Baú de hoje: ${economy.dailyChestGold[0]} + ${village.fullDays} tochas = ${Math.min(economy.dailyChestGold[1], economy.dailyChestGold[0] + village.fullDays)} gold`}
+                    : `Baú de hoje: ${economy.dailyChestGold[0]} + ${village.fullDays} tochas = ${Math.min(economy.dailyChestGold[1], economy.dailyChestGold[0] + village.fullDays)} gold${pick.level >= 3 ? ` · ${pick.label} deixa o baú mais farto` : ''}`}
         </p>
         {loot && (
           <div className="mc-pop mb-4 grid grid-cols-3 gap-2">

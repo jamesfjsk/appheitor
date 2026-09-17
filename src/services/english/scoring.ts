@@ -16,6 +16,7 @@ export {
   materialFor,
   rewardFor,
   applyFurnaceBonus,
+  applyPickaxeBonus,
 } from '../../config/englishRewards';
 
 export type NoteErrorSeverity = 'ignored' | 'small' | 'blocking';

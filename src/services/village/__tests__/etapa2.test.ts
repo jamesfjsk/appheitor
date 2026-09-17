@@ -226,6 +226,7 @@ test('presente de nível e minLevel', () => {
   expect(levelGift(10, 1)).toEqual({ materialChoice: true, rare: 'diamante', cosmeticId: 'milestone_10' });
   expect(levelGift(3, 1).rare).toBe(null);
   expect(minLevelFor('pickaxe_stone')).toBe(5);
+  expect(minLevelFor('pickaxe_diamond')).toBe(32);
   expect(minLevelFor('hat_crown')).toBe(25);
 });
 

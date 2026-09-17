@@ -1,152 +1,1602 @@
 [
   {
-    "question": "Qual é o processo pelo qual as plantas produzem seu próprio alimento usando luz solar?",
-    "options": ["Respiração", "Fotossíntese", "Digestão", "Transpiração"],
-    "answer": "Fotossíntese",
-    "explanation": "A fotossíntese é o processo que permite às plantas transformar luz solar, água e gás carbônico em alimento e oxigênio!"
+    "question": "Se você viajar do Brasil para o Japão, o que acontece com o relógio quando chegar lá?",
+    "options": ["Ele precisa adiantar várias horas", "Ele fica igual", "Ele precisa atrasar várias horas", "Só muda o dia da semana"],
+    "answer": "Ele precisa adiantar várias horas",
+    "explanation": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+    "category": "geografia",
+    "subject": "fusos horários"
   },
   {
-    "question": "Se um livro custa R$ 25,00 e você tem uma nota de R$ 50,00, quanto você receberá de troco?",
-    "options": ["R$ 20,00", "R$ 25,00", "R$ 30,00", "R$ 35,00"],
-    "answer": "R$ 25,00",
-    "explanation": "50 - 25 = 25. Você receberá R$ 25,00 de troco! É importante saber calcular trocos nas compras."
+    "question": "Qual frase é verdadeira sobre os rios?",
+    "options": ["Rios correm sempre do lugar mais alto para o mais baixo", "Rios correm sempre do sul para o norte", "Rios nascem no mar e sobem para as montanhas", "Rios correm mais rápido em terreno plano"],
+    "answer": "Rios correm sempre do lugar mais alto para o mais baixo",
+    "explanation": "A gravidade puxa a água para baixo, então todo rio nasce em um lugar alto e desce até o mar, um lago ou outro rio.",
+    "category": "geografia",
+    "subject": "rios"
   },
   {
-    "question": "Qual é o maior oceano do planeta Terra?",
-    "options": ["Oceano Atlântico", "Oceano Índico", "Oceano Pacífico", "Oceano Ártico"],
-    "answer": "Oceano Pacífico",
-    "explanation": "O Oceano Pacífico é o maior oceano do mundo, cobrindo cerca de um terço da superfície da Terra!"
+    "question": "O Rio Amazonas atravessa o Brasil de oeste para leste. Em qual oceano ele deságua?",
+    "options": ["Oceano Atlântico", "Oceano Pacífico", "Oceano Índico", "Oceano Ártico"],
+    "answer": "Oceano Atlântico",
+    "explanation": "O Amazonas nasce nos Andes, no Peru, cruza o norte do Brasil e chega ao Atlântico perto de Belém. Como corre para leste, só pode terminar no oceano do lado leste.",
+    "category": "geografia",
+    "subject": "rios"
   },
   {
-    "question": "Quantos estados tem o Brasil?",
-    "options": ["24", "25", "26", "27"],
-    "answer": "26",
-    "explanation": "O Brasil tem 26 estados mais o Distrito Federal, totalizando 27 unidades federativas!"
+    "question": "Num mapa, 1 cm representa 10 km. Duas cidades estão a 5 cm uma da outra no mapa. Qual é a distância real?",
+    "options": ["50 km", "5 km", "15 km", "500 km"],
+    "answer": "50 km",
+    "explanation": "Cada centímetro vale 10 km, então 5 cm valem 5 × 10 = 50 km. Isso é a escala do mapa.",
+    "category": "geografia",
+    "subject": "mapas e escala"
   },
   {
-    "question": "Qual é o nome da camada da atmosfera terrestre onde vivemos?",
-    "options": ["Estratosfera", "Troposfera", "Mesosfera", "Termosfera"],
-    "answer": "Troposfera",
-    "explanation": "A troposfera é a camada mais baixa da atmosfera, onde acontecem os fenômenos climáticos e onde respiramos!"
+    "question": "O que aconteceria se o eixo da Terra não fosse inclinado?",
+    "options": ["Não existiriam as estações do ano", "Não existiria dia e noite", "Os oceanos secariam", "O ano teria menos dias"],
+    "answer": "Não existiriam as estações do ano",
+    "explanation": "As estações existem porque a inclinação faz cada metade da Terra receber mais ou menos Sol ao longo do ano. Sem inclinação, o clima seria parecido o ano inteiro.",
+    "category": "geografia",
+    "subject": "estações do ano"
   },
   {
-    "question": "Se Ana tem 12 anos e é 3 anos mais velha que Bruno, quantos anos Bruno tem?",
-    "options": ["7", "8", "9", "10"],
-    "answer": "9",
-    "explanation": "12 - 3 = 9. Bruno tem 9 anos! Problemas com idades nos ajudam a praticar subtração."
+    "question": "Ache o erro: 'O deserto do Saara fica na África, é coberto de areia e neva quase todo dia.'",
+    "options": ["Neva quase todo dia", "Fica na África", "É coberto de areia", "Não há erro"],
+    "answer": "Neva quase todo dia",
+    "explanation": "O Saara é um dos lugares mais secos e quentes do mundo. Neve lá é raríssima e só apareceu algumas vezes na história.",
+    "category": "geografia",
+    "subject": "desertos"
   },
   {
-    "question": "Qual invenção de Johannes Gutenberg revolucionou a comunicação no século XV?",
-    "options": ["Telefone", "Prensa móvel", "Telégrafo", "Rádio"],
-    "answer": "Prensa móvel",
-    "explanation": "A prensa móvel de Gutenberg permitiu imprimir livros em massa, facilitando a disseminação do conhecimento!"
+    "question": "Estime: um avião voa a 850 km/h. Quanto tempo leva para cruzar o Brasil de norte a sul, cerca de 4.300 km?",
+    "options": ["Cerca de 5 horas", "Cerca de 1 hora", "Cerca de 12 horas", "Cerca de 1 dia"],
+    "answer": "Cerca de 5 horas",
+    "explanation": "Arredonde: 4.000 ÷ 800 = 5. Estimar com números redondos resolve rápido e ajuda a conferir se uma conta faz sentido.",
+    "category": "geografia",
+    "subject": "distâncias"
   },
   {
-    "question": "Qual é o resultado de 7 × 8?",
-    "options": ["54", "56", "58", "60"],
-    "answer": "56",
-    "explanation": "7 × 8 = 56. A tabuada do 7 e do 8 são importantes para cálculos rápidos no dia a dia!"
+    "question": "No verão, o Polo Norte tem Sol por meses seguidos. Por que mesmo assim faz tanto frio lá?",
+    "options": ["Os raios do Sol chegam muito inclinados e espalham pouco calor", "O Sol fica mais longe do Polo", "O gelo apaga o calor do Sol", "O vento vem do espaço"],
+    "answer": "Os raios do Sol chegam muito inclinados e espalham pouco calor",
+    "explanation": "Nos polos, a luz chega quase deitada, então a mesma quantidade de Sol se espalha por uma área grande e aquece pouco. Perto do Equador, a luz cai de cima e concentra o calor.",
+    "category": "geografia",
+    "subject": "clima"
   },
   {
-    "question": "Qual é o nome do processo de transformação da água líquida em vapor?",
-    "options": ["Condensação", "Evaporação", "Solidificação", "Precipitação"],
-    "answer": "Evaporação",
-    "explanation": "Evaporação é quando a água aquece e se transforma em vapor, subindo para a atmosfera!"
+    "question": "O que acontece com as estações nos hemisférios norte e sul?",
+    "options": ["Quando é verão em um, é inverno no outro", "O hemisfério sul não tem inverno", "As estações são iguais nos dois", "O hemisfério norte tem estações mais curtas"],
+    "answer": "Quando é verão em um, é inverno no outro",
+    "explanation": "Enquanto o Brasil tem verão em dezembro, países do norte, como o Canadá, estão no inverno. Isso acontece por causa da inclinação da Terra.",
+    "category": "geografia",
+    "subject": "estações do ano"
   },
   {
-    "question": "Em que continente está localizado o Egito?",
-    "options": ["Ásia", "África", "Europa", "América"],
-    "answer": "África",
-    "explanation": "O Egito fica no nordeste da África e é famoso por suas pirâmides e história antiga!"
+    "question": "Duas cidades estão na mesma latitude: uma no alto de uma montanha e outra na praia. Qual costuma ser mais fria?",
+    "options": ["A da montanha, porque o ar fica mais frio quanto mais alto", "A da praia, por causa do vento do mar", "As duas têm a mesma temperatura", "A da praia, porque a água do mar é gelada"],
+    "answer": "A da montanha, porque o ar fica mais frio quanto mais alto",
+    "explanation": "A cada 1.000 metros de altitude, a temperatura cai cerca de 6 graus. Por isso existe neve no topo de montanhas até em países quentes.",
+    "category": "geografia",
+    "subject": "relevo e clima"
   },
   {
-    "question": "Quanto é 144 ÷ 12?",
-    "options": ["10", "11", "12", "13"],
+    "question": "Você mexe uma colher de açúcar num copo de água e o açúcar some de vista. O que aconteceu?",
+    "options": ["Ele se dissolveu, mas continua na água", "Ele virou água", "Ele evaporou", "Ele desapareceu para sempre"],
+    "answer": "Ele se dissolveu, mas continua na água",
+    "explanation": "Na dissolução, o açúcar se espalha em pedaços tão pequenos que não dá para ver. O gosto doce prova que ele continua lá.",
+    "category": "quimica",
+    "subject": "misturas"
+  },
+  {
+    "question": "Qual frase é verdadeira sobre o gelo?",
+    "options": ["Gelo é água no estado sólido e flutua na água", "Gelo afunda porque é mais pesado que a água", "Gelo é uma substância diferente da água", "Gelo só existe dentro do congelador"],
+    "answer": "Gelo é água no estado sólido e flutua na água",
+    "explanation": "Gelo e água são a mesma substância em estados diferentes. O gelo ocupa mais espaço com a mesma massa, por isso é menos denso e flutua.",
+    "category": "quimica",
+    "subject": "estados da matéria"
+  },
+  {
+    "question": "Você deixa um copo de água na janela e, dias depois, tem bem menos água. Para onde ela foi?",
+    "options": ["Evaporou e virou vapor no ar", "Foi absorvida pelo vidro", "O Sol destruiu a água", "Virou gelo invisível"],
+    "answer": "Evaporou e virou vapor no ar",
+    "explanation": "Mesmo sem ferver, a água vai virando vapor aos poucos, principalmente com calor e vento. É o mesmo que acontece com a roupa no varal.",
+    "category": "quimica",
+    "subject": "evaporação"
+  },
+  {
+    "question": "Ache o erro: 'O ferro enferruja em contato com ar e água, e a ferrugem deixa o ferro mais forte.'",
+    "options": ["A ferrugem deixa o ferro mais fraco, não mais forte", "O ferro não enferruja com água", "O ferro nunca enferruja", "Não há erro"],
+    "answer": "A ferrugem deixa o ferro mais fraco, não mais forte",
+    "explanation": "A ferrugem é o ferro se combinando com o oxigênio do ar. Ela é quebradiça e vai corroendo a peça até furar.",
+    "category": "quimica",
+    "subject": "reações químicas"
+  },
+  {
+    "question": "O que aconteceria se você misturasse óleo e água num pote e deixasse parado?",
+    "options": ["O óleo ficaria por cima, separado da água", "Os dois virariam um líquido só", "A água ficaria por cima do óleo", "Os dois evaporariam juntos"],
+    "answer": "O óleo ficaria por cima, separado da água",
+    "explanation": "Óleo e água não se misturam, e o óleo é menos denso. Por isso ele sobe e forma uma camada em cima.",
+    "category": "quimica",
+    "subject": "densidade"
+  },
+  {
+    "question": "Por que a massa do bolo cresce dentro do forno?",
+    "options": ["O fermento libera gás que forma bolhas na massa", "O calor derrete a farinha", "O açúcar vira ar", "O forno empurra a massa para cima"],
+    "answer": "O fermento libera gás que forma bolhas na massa",
+    "explanation": "O fermento reage com o calor e solta gás carbônico. As bolhas ficam presas na massa e a deixam fofa e alta.",
+    "category": "quimica",
+    "subject": "reações químicas"
+  },
+  {
+    "question": "Uma vela acesa é coberta por um pote de vidro fechado. Depois de um tempo ela apaga. Por quê?",
+    "options": ["O oxigênio dentro do pote acabou", "O vidro esfria a chama", "A cera derreteu toda", "O pote é feito de material que apaga fogo"],
+    "answer": "O oxigênio dentro do pote acabou",
+    "explanation": "O fogo precisa de oxigênio para continuar queimando. Quando ele acaba dentro do pote, a chama morre, mesmo com cera sobrando.",
+    "category": "quimica",
+    "subject": "combustão"
+  },
+  {
+    "question": "Ao nível do mar, a água ferve a 100 °C. O que acontece no alto de uma montanha muito alta?",
+    "options": ["Ela ferve com temperatura menor que 100 °C", "Ela ferve com temperatura maior que 100 °C", "Ela não consegue ferver", "Ela ferve exatamente a 100 °C"],
+    "answer": "Ela ferve com temperatura menor que 100 °C",
+    "explanation": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+    "category": "quimica",
+    "subject": "ebulição"
+  },
+  {
+    "question": "Qual destas mudanças NÃO tem volta fácil?",
+    "options": ["Queimar um papel", "Derreter um cubo de gelo", "Dissolver sal na água", "Esfriar chocolate derretido"],
+    "answer": "Queimar um papel",
+    "explanation": "Queimar transforma o papel em cinzas e gases, uma mudança química. As outras são mudanças físicas: dá para congelar a água de novo ou evaporar a água e recuperar o sal.",
+    "category": "quimica",
+    "subject": "mudanças físicas e químicas"
+  },
+  {
+    "question": "Um cubo de gelo flutua num copo cheio até a borda. Quando ele derreter, a água vai transbordar?",
+    "options": ["Não, o nível fica praticamente igual", "Sim, transborda bastante", "O nível desce muito", "A água some do copo"],
+    "answer": "Não, o nível fica praticamente igual",
+    "explanation": "O gelo flutuando já empurra para o lado exatamente o volume de água que ele vira ao derreter. Por isso o nível quase não muda.",
+    "category": "quimica",
+    "subject": "densidade"
+  },
+  {
+    "question": "Uma pizza foi cortada em 8 fatias iguais. Heitor comeu 3 e o pai comeu 2. Que fração da pizza sobrou?",
+    "options": ["3/8", "5/8", "2/8", "1/2"],
+    "answer": "3/8",
+    "explanation": "Foram comidas 3 + 2 = 5 fatias. Sobraram 8 − 5 = 3 fatias de 8, ou seja, 3/8 da pizza.",
+    "category": "matematica",
+    "subject": "frações"
+  },
+  {
+    "question": "Um ônibus sai às 7h40 e a viagem dura 1 hora e 35 minutos. A que horas ele chega?",
+    "options": ["9h15", "9h05", "8h55", "8h75"],
+    "answer": "9h15",
+    "explanation": "7h40 mais 1 hora dá 8h40; mais 35 minutos dá 9h15. Quando os minutos passam de 60, vira uma hora a mais.",
+    "category": "matematica",
+    "subject": "tempo"
+  },
+  {
+    "question": "Qual número vem depois na sequência 2, 6, 12, 20, 30, ...?",
+    "options": ["42", "40", "36", "44"],
+    "answer": "42",
+    "explanation": "A diferença entre os números cresce de 2 em 2: 4, 6, 8, 10. O próximo salto é 12, e 30 + 12 = 42.",
+    "category": "matematica",
+    "subject": "sequências"
+  },
+  {
+    "question": "Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?",
+    "options": ["34 cm", "17 cm", "60 cm", "24 cm"],
+    "answer": "34 cm",
+    "explanation": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+    "category": "matematica",
+    "subject": "perímetro"
+  },
+  {
+    "question": "Ache o erro no cálculo: 25 × 4 = 90.",
+    "options": ["O resultado certo é 100", "O resultado certo é 80", "O resultado certo é 110", "Não há erro"],
+    "answer": "O resultado certo é 100",
+    "explanation": "Quatro moedas de 25 centavos fazem 1 real, então 25 × 4 = 100. Pensar em dinheiro ajuda a conferir contas.",
+    "category": "matematica",
+    "subject": "multiplicação"
+  },
+  {
+    "question": "Estime sem fazer a conta exata: 398 + 203 fica mais perto de qual número?",
+    "options": ["600", "500", "700", "550"],
+    "answer": "600",
+    "explanation": "Arredonde para 400 + 200 = 600. O resultado exato é 601, então a estimativa está ótima.",
+    "category": "matematica",
+    "subject": "estimativa"
+  },
+  {
+    "question": "Numa turma de 30 alunos, 2/5 são meninas. Quantos meninos há na turma?",
+    "options": ["18", "12", "20", "6"],
+    "answer": "18",
+    "explanation": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+    "category": "matematica",
+    "subject": "frações"
+  },
+  {
+    "question": "Qual é o menor número que pode ser dividido por 2, por 3 e por 4 sem deixar resto?",
+    "options": ["12", "24", "6", "8"],
     "answer": "12",
-    "explanation": "144 ÷ 12 = 12. Uma dúzia de dúzias! A tabuada do 12 é muito útil."
+    "explanation": "12 ÷ 2 = 6, 12 ÷ 3 = 4 e 12 ÷ 4 = 3, tudo sem resto. O 6 não funciona porque 6 ÷ 4 sobra 2.",
+    "category": "matematica",
+    "subject": "múltiplos"
   },
   {
-    "question": "Qual gás as plantas absorvem durante a fotossíntese?",
-    "options": ["Oxigênio", "Nitrogênio", "Gás carbônico", "Hidrogênio"],
-    "answer": "Gás carbônico",
-    "explanation": "As plantas absorvem gás carbônico (CO₂) e liberam oxigênio, purificando o ar que respiramos!"
+    "question": "Um número tem 3 algarismos: o das centenas é 4, o das dezenas é o dobro dele e o das unidades é zero. Que número é esse?",
+    "options": ["480", "840", "408", "440"],
+    "answer": "480",
+    "explanation": "Centenas 4, dezenas 8 (o dobro de 4) e unidades 0 formam 480. A posição de cada algarismo muda o valor dele.",
+    "category": "matematica",
+    "subject": "valor posicional"
   },
   {
-    "question": "Quantos continentes existem na Terra?",
-    "options": ["5", "6", "7", "8"],
+    "question": "Cada caixa guarda 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?",
+    "options": ["7", "6", "8", "5"],
     "answer": "7",
-    "explanation": "Existem 7 continentes: África, América do Norte, América do Sul, Antártida, Ásia, Europa e Oceania!"
+    "explanation": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+    "category": "matematica",
+    "subject": "divisão com resto"
   },
   {
-    "question": "Qual é o nome do satélite natural da Terra?",
-    "options": ["Marte", "Lua", "Fobos", "Titã"],
-    "answer": "Lua",
-    "explanation": "A Lua é o único satélite natural da Terra e influencia as marés dos oceanos!"
+    "question": "Qual frase sobre números é verdadeira?",
+    "options": ["0,5 é igual a 1/2", "0,5 é maior que 1", "0,25 é maior que 0,5", "1/4 é igual a 0,4"],
+    "answer": "0,5 é igual a 1/2",
+    "explanation": "Meio real é R$ 0,50, e 1/2 também é a metade. Já 1/4 é 0,25, não 0,4.",
+    "category": "matematica",
+    "subject": "decimais e frações"
   },
   {
-    "question": "Se um triângulo tem todos os lados iguais, como ele é chamado?",
-    "options": ["Isósceles", "Escaleno", "Equilátero", "Retângulo"],
-    "answer": "Equilátero",
-    "explanation": "Um triângulo equilátero tem os três lados com o mesmo tamanho e todos os ângulos de 60 graus!"
+    "question": "Um quadrado tem área de 36 cm². Quanto mede cada lado?",
+    "options": ["6 cm", "9 cm", "18 cm", "4 cm"],
+    "answer": "6 cm",
+    "explanation": "A área do quadrado é lado × lado. Como 6 × 6 = 36, cada lado mede 6 cm.",
+    "category": "matematica",
+    "subject": "área"
   },
   {
-    "question": "Qual é o nome do sistema do corpo humano responsável por levar sangue a todas as partes do corpo?",
-    "options": ["Sistema digestivo", "Sistema respiratório", "Sistema circulatório", "Sistema nervoso"],
-    "answer": "Sistema circulatório",
-    "explanation": "O sistema circulatório inclui o coração, veias e artérias que transportam sangue pelo corpo!"
-  },
-  {
-    "question": "Quanto é 3/4 (três quartos) de 100?",
-    "options": ["65", "70", "75", "80"],
-    "answer": "75",
-    "explanation": "3/4 de 100 = 75. Para calcular, dividimos 100 por 4 (=25) e multiplicamos por 3 (=75)!"
-  },
-  {
-    "question": "Qual é o nome da estrela mais próxima da Terra?",
-    "options": ["Sirius", "Próxima Centauri", "Sol", "Polaris"],
-    "answer": "Sol",
-    "explanation": "O Sol é a estrela mais próxima de nós! Ele está a cerca de 150 milhões de km da Terra."
-  },
-  {
-    "question": "Quem pintou a famosa obra 'Mona Lisa'?",
-    "options": ["Michelangelo", "Leonardo da Vinci", "Van Gogh", "Picasso"],
-    "answer": "Leonardo da Vinci",
-    "explanation": "Leonardo da Vinci pintou a Mona Lisa no século XVI. É uma das pinturas mais famosas do mundo!"
-  },
-  {
-    "question": "Qual é a capital do Brasil?",
-    "options": ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"],
-    "answer": "Brasília",
-    "explanation": "Brasília é a capital do Brasil desde 1960 e foi planejada pelo arquiteto Oscar Niemeyer!"
-  },
-  {
-    "question": "Se você tem 24 balas e quer dividir igualmente entre 6 amigos, quantas balas cada um receberá?",
-    "options": ["3", "4", "5", "6"],
+    "question": "Heitor tem o triplo da idade do primo. Juntos, eles têm 16 anos. Qual é a idade do primo?",
+    "options": ["4", "12", "8", "6"],
     "answer": "4",
-    "explanation": "24 ÷ 6 = 4. Cada amigo receberá 4 balas. Dividir igualmente é ser justo com todos!"
+    "explanation": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+    "category": "matematica",
+    "subject": "problemas"
   },
   {
-    "question": "Qual animal é o maior mamífero do mundo?",
-    "options": ["Elefante africano", "Girafa", "Baleia-azul", "Urso polar"],
-    "answer": "Baleia-azul",
-    "explanation": "A baleia-azul é o maior animal que já existiu na Terra, podendo chegar a 30 metros de comprimento!"
+    "question": "De manhã o termômetro marcava −3 °C. Até a tarde, a temperatura subiu 8 graus. Quanto marca agora?",
+    "options": ["5 °C", "11 °C", "−11 °C", "−5 °C"],
+    "answer": "5 °C",
+    "explanation": "De −3, subir 3 graus chega a zero; sobram 5 graus para subir, chegando a 5 °C. Números negativos ficam abaixo do zero.",
+    "category": "matematica",
+    "subject": "números negativos"
   },
   {
-    "question": "Quantos anos tem um século?",
-    "options": ["10 anos", "50 anos", "100 anos", "1000 anos"],
-    "answer": "100 anos",
-    "explanation": "Um século tem 100 anos. Estamos no século XXI, que começou em 2001!"
+    "question": "Quantos minutos há em 2 horas e meia?",
+    "options": ["150", "120", "130", "250"],
+    "answer": "150",
+    "explanation": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+    "category": "matematica",
+    "subject": "tempo"
   },
   {
-    "question": "Qual é o principal gás que compõe o ar que respiramos?",
-    "options": ["Oxigênio", "Nitrogênio", "Gás carbônico", "Hidrogênio"],
-    "answer": "Nitrogênio",
-    "explanation": "O ar é composto por cerca de 78% de nitrogênio e 21% de oxigênio, mais outros gases!"
+    "question": "Se a Lua deixasse de existir, o que mudaria mais nos oceanos?",
+    "options": ["As marés ficariam muito mais fracas", "Os oceanos congelariam", "Os oceanos ferveriam", "Nada mudaria"],
+    "answer": "As marés ficariam muito mais fracas",
+    "explanation": "As marés sobem e descem principalmente porque a Lua puxa a água dos oceanos. Sem ela, só o Sol faria marés, bem menores.",
+    "category": "astronomia",
+    "subject": "Lua e marés"
   },
   {
-    "question": "Em qual país foram inventadas as Olimpíadas na antiguidade?",
-    "options": ["Roma", "Egito", "Grécia", "China"],
-    "answer": "Grécia",
-    "explanation": "Os Jogos Olímpicos surgiram na Grécia Antiga, há mais de 2.700 anos, na cidade de Olímpia!"
+    "question": "Qual frase é verdadeira sobre o Sol?",
+    "options": ["O Sol é uma estrela", "O Sol é um planeta muito quente", "O Sol gira em volta da Terra", "O Sol é uma bola de fogo de madeira"],
+    "answer": "O Sol é uma estrela",
+    "explanation": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+    "category": "astronomia",
+    "subject": "Sol"
+  },
+  {
+    "question": "Em Vênus, um dia dura mais que um ano. O que isso quer dizer?",
+    "options": ["Vênus demora mais para girar sobre si mesmo do que para dar uma volta no Sol", "Vênus gira mais rápido que a Terra", "Vênus fica parado no espaço", "Em Vênus o Sol nunca nasce"],
+    "answer": "Vênus demora mais para girar sobre si mesmo do que para dar uma volta no Sol",
+    "explanation": "Vênus gira muito devagar: leva 243 dias terrestres para completar uma volta sobre si mesmo, mas só 225 para dar a volta no Sol.",
+    "category": "astronomia",
+    "subject": "planetas"
+  },
+  {
+    "question": "Qual planeta fica entre a Terra e Júpiter na ordem de distância do Sol?",
+    "options": ["Marte", "Vênus", "Saturno", "Mercúrio"],
+    "answer": "Marte",
+    "explanation": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+    "category": "astronomia",
+    "subject": "sistema solar"
+  },
+  {
+    "question": "Por que a Lua brilha à noite?",
+    "options": ["Ela reflete a luz do Sol", "Ela produz luz própria", "Ela é feita de gelo brilhante", "Ela pega luz das estrelas"],
+    "answer": "Ela reflete a luz do Sol",
+    "explanation": "A Lua não tem luz própria. Vemos só a parte dela iluminada pelo Sol, e por isso ela muda de fase ao longo do mês.",
+    "category": "astronomia",
+    "subject": "Lua"
+  },
+  {
+    "question": "A luz do Sol leva cerca de 8 minutos para chegar à Terra. Se o Sol se apagasse agora, quando você perceberia?",
+    "options": ["Só daqui a 8 minutos", "No mesmo instante", "Depois de 1 dia", "Depois de 1 hora"],
+    "answer": "Só daqui a 8 minutos",
+    "explanation": "A luz que você vê agora saiu do Sol há 8 minutos. Então, por 8 minutos, ainda veríamos a luz que já estava a caminho.",
+    "category": "astronomia",
+    "subject": "velocidade da luz"
+  },
+  {
+    "question": "Estime: quantas Terras enfileiradas cabem no diâmetro do Sol?",
+    "options": ["Cerca de 100", "Cerca de 10", "Cerca de 1.000", "Cerca de 2"],
+    "answer": "Cerca de 100",
+    "explanation": "O Sol tem cerca de 1,4 milhão de km de diâmetro e a Terra, quase 13 mil km. A divisão dá pouco mais de 100.",
+    "category": "astronomia",
+    "subject": "tamanhos"
+  },
+  {
+    "question": "Ache o erro: 'Marte é chamado de planeta vermelho, tem duas luas e é o maior planeta do sistema solar.'",
+    "options": ["O maior planeta é Júpiter, não Marte", "Marte não tem luas", "Marte é azul", "Não há erro"],
+    "answer": "O maior planeta é Júpiter, não Marte",
+    "explanation": "Marte é vermelho por causa da ferrugem no solo e tem duas luas pequenas, Fobos e Deimos. Mas ele é bem menor que a Terra; o gigante é Júpiter.",
+    "category": "astronomia",
+    "subject": "planetas"
+  },
+  {
+    "question": "Um astronauta na Lua solta um martelo e uma pena ao mesmo tempo. O que acontece?",
+    "options": ["Os dois caem juntos, porque lá não há ar", "A pena flutua para cima", "O martelo cai primeiro", "Nada cai, porque não há gravidade"],
+    "answer": "Os dois caem juntos, porque lá não há ar",
+    "explanation": "Na Terra, o ar freia a pena. Na Lua não há ar, e a gravidade puxa tudo igual. Isso foi testado de verdade na missão Apollo 15.",
+    "category": "astronomia",
+    "subject": "gravidade"
+  },
+  {
+    "question": "A gravidade da Lua é cerca de 6 vezes menor que a da Terra. O que acontece com uma pessoa de 60 kg lá?",
+    "options": ["Ela sente como se pesasse uns 10 kg", "Ela sente como se pesasse 360 kg", "Ela pesa igual", "Ela não tem peso nenhum"],
+    "answer": "Ela sente como se pesasse uns 10 kg",
+    "explanation": "60 ÷ 6 = 10. Por isso os astronautas dão pulos enormes na Lua, mesmo com roupas pesadas.",
+    "category": "astronomia",
+    "subject": "gravidade"
+  },
+  {
+    "question": "O que acontece com o batimento do coração quando você corre?",
+    "options": ["Acelera, para levar mais oxigênio aos músculos", "Diminui, para economizar energia", "Fica exatamente igual", "Para por alguns segundos"],
+    "answer": "Acelera, para levar mais oxigênio aos músculos",
+    "explanation": "Os músculos gastam mais oxigênio quando trabalham. O coração bate mais rápido para bombear mais sangue e entregar esse oxigênio.",
+    "category": "corpo",
+    "subject": "coração"
+  },
+  {
+    "question": "Qual frase é verdadeira sobre os ossos?",
+    "options": ["Os ossos são vivos e se consertam quando quebram", "Os ossos são feitos de pedra", "Adultos têm mais ossos que bebês", "Os ossos param de mudar depois que nascemos"],
+    "answer": "Os ossos são vivos e se consertam quando quebram",
+    "explanation": "Um osso quebrado se refaz sozinho com o tempo, por isso usamos gesso para deixá-lo parado. Bebês nascem com cerca de 300 ossos que se juntam até formar 206 no adulto.",
+    "category": "corpo",
+    "subject": "ossos"
+  },
+  {
+    "question": "Por que sentimos sede?",
+    "options": ["O corpo avisa que perdeu água e precisa repor", "A boca fica suja", "O estômago está vazio", "É só um costume"],
+    "answer": "O corpo avisa que perdeu água e precisa repor",
+    "explanation": "Perdemos água no suor, no xixi e até na respiração. A sede é o sinal do cérebro de que o nível de água baixou.",
+    "category": "corpo",
+    "subject": "hidratação"
+  },
+  {
+    "question": "Ache o erro: 'O ar entra pelo nariz, vai para os pulmões, e o coração transforma o ar em oxigênio.'",
+    "options": ["O coração não transforma ar; ele bombeia sangue", "O ar não entra pelo nariz", "Os pulmões não recebem ar", "Não há erro"],
+    "answer": "O coração não transforma ar; ele bombeia sangue",
+    "explanation": "O oxigênio já está no ar. Os pulmões passam esse oxigênio para o sangue, e o coração bombeia o sangue para o corpo todo.",
+    "category": "corpo",
+    "subject": "respiração"
+  },
+  {
+    "question": "Você come um pedaço de pão. Qual é a ordem certa do caminho que ele faz?",
+    "options": ["Boca, esôfago, estômago, intestino", "Boca, estômago, esôfago, intestino", "Boca, intestino, estômago, esôfago", "Boca, pulmão, estômago, intestino"],
+    "answer": "Boca, esôfago, estômago, intestino",
+    "explanation": "O esôfago é o tubo que leva a comida da boca ao estômago. No estômago ela é misturada e, no intestino, os nutrientes passam para o sangue.",
+    "category": "corpo",
+    "subject": "digestão"
+  },
+  {
+    "question": "O que aconteceria se uma pessoa não tivesse o sentido do tato?",
+    "options": ["Ela poderia se machucar sem perceber", "Ela não conseguiria enxergar", "Ela não sentiria o gosto da comida", "Ela não conseguiria ouvir"],
+    "answer": "Ela poderia se machucar sem perceber",
+    "explanation": "A dor é um aviso do tato. Sem ela, você poderia encostar num fogão quente e só notar pelo cheiro ou pela marca.",
+    "category": "corpo",
+    "subject": "sentidos"
+  },
+  {
+    "question": "Estime: quantas vezes o coração de uma criança bate em 1 minuto quando ela está descansando?",
+    "options": ["Cerca de 80", "Cerca de 10", "Cerca de 500", "Cerca de 2.000"],
+    "answer": "Cerca de 80",
+    "explanation": "Em repouso, o coração de uma criança bate entre 70 e 100 vezes por minuto. Correndo, pode passar de 150.",
+    "category": "corpo",
+    "subject": "coração"
+  },
+  {
+    "question": "Por que os músculos ficam doloridos no dia seguinte a um treino puxado?",
+    "options": ["As fibras sofrem pequenas lesões e se recuperam mais fortes", "O sangue para de chegar neles", "Eles encolhem de tamanho", "O osso empurra o músculo"],
+    "answer": "As fibras sofrem pequenas lesões e se recuperam mais fortes",
+    "explanation": "O esforço causa microlesões nas fibras musculares. Durante o descanso, o corpo conserta e reforça o músculo, por isso dormir e comer bem importam.",
+    "category": "corpo",
+    "subject": "músculos"
+  },
+  {
+    "question": "Qual destas funções o cérebro NÃO faz?",
+    "options": ["Bombear o sangue", "Controlar os movimentos", "Guardar memórias", "Sentir emoções"],
+    "answer": "Bombear o sangue",
+    "explanation": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+    "category": "corpo",
+    "subject": "cérebro"
+  },
+  {
+    "question": "Você espirra. O que o corpo está tentando fazer?",
+    "options": ["Expulsar algo que irritou o nariz", "Esfriar a cabeça", "Encher os pulmões de ar", "Avisar que está com fome"],
+    "answer": "Expulsar algo que irritou o nariz",
+    "explanation": "Poeira, pólen ou vírus irritam o nariz, e o espirro joga ar para fora em alta velocidade para limpar. Por isso cobrimos com o braço.",
+    "category": "corpo",
+    "subject": "defesas do corpo"
+  },
+  {
+    "question": "Você mistura tinta azul com tinta amarela. Que cor aparece?",
+    "options": ["Verde", "Roxo", "Laranja", "Marrom"],
+    "answer": "Verde",
+    "explanation": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+    "category": "arte",
+    "subject": "cores"
+  },
+  {
+    "question": "Qual frase é verdadeira sobre uma escultura?",
+    "options": ["É uma obra com volume, que dá para ver de vários lados", "É sempre feita com tinta", "Só pode ser feita de mármore", "É uma pintura pequena"],
+    "answer": "É uma obra com volume, que dá para ver de vários lados",
+    "explanation": "A escultura tem três dimensões: altura, largura e profundidade. Pode ser de pedra, metal, madeira, argila e até gelo.",
+    "category": "arte",
+    "subject": "escultura"
+  },
+  {
+    "question": "Um artista quer que uma montanha pareça bem longe na pintura. O que ele deve fazer?",
+    "options": ["Pintá-la menor e com cores mais claras", "Pintá-la maior e mais escura", "Pintá-la bem no centro da tela", "Usar só a cor vermelha"],
+    "answer": "Pintá-la menor e com cores mais claras",
+    "explanation": "Coisas distantes parecem menores e mais desbotadas por causa do ar entre nós e elas. Isso se chama perspectiva.",
+    "category": "arte",
+    "subject": "perspectiva"
+  },
+  {
+    "question": "Ache o erro: 'Numa orquestra, o violino é um instrumento de sopro.'",
+    "options": ["O violino é de cordas, não de sopro", "O violino é de percussão", "Orquestras não têm violinos", "Não há erro"],
+    "answer": "O violino é de cordas, não de sopro",
+    "explanation": "O som do violino vem das cordas esfregadas pelo arco. Instrumentos de sopro, como flauta e trompete, usam o ar.",
+    "category": "arte",
+    "subject": "instrumentos musicais"
+  },
+  {
+    "question": "Uma música tem compassos de 4 tempos. Você bate palmas 12 vezes seguindo o pulso. Quantos compassos passaram?",
+    "options": ["3", "4", "12", "16"],
+    "answer": "3",
+    "explanation": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+    "category": "arte",
+    "subject": "música"
+  },
+  {
+    "question": "Que técnica usa pequenos pedaços de pedra ou vidro colorido para formar uma imagem?",
+    "options": ["Mosaico", "Aquarela", "Grafite", "Origami"],
+    "answer": "Mosaico",
+    "explanation": "No mosaico, os pedacinhos são colados lado a lado, e a imagem aparece quando olhamos de longe. Os romanos usavam muito em pisos.",
+    "category": "arte",
+    "subject": "técnicas"
+  },
+  {
+    "question": "O que acontece com uma pintura se o artista usar apenas tons de uma única cor?",
+    "options": ["Ela fica monocromática", "Ela fica invisível", "Ela vira um mosaico", "Ela perde o desenho"],
+    "answer": "Ela fica monocromática",
+    "explanation": "Mono significa um; cromático significa cor. Uma obra monocromática usa só claros e escuros de uma cor, como o azul do Picasso numa fase.",
+    "category": "arte",
+    "subject": "cores"
+  },
+  {
+    "question": "Quais são as três cores primárias da tinta, que não nascem da mistura de outras?",
+    "options": ["Vermelho, azul e amarelo", "Verde, laranja e roxo", "Preto, branco e cinza", "Azul, verde e vermelho"],
+    "answer": "Vermelho, azul e amarelo",
+    "explanation": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+    "category": "arte",
+    "subject": "cores"
+  },
+  {
+    "question": "Numa história em quadrinhos, o balão ligado ao personagem por bolhinhas serve para quê?",
+    "options": ["Mostrar o que ele está pensando", "Mostrar que ele está gritando", "Mostrar que ele está debaixo d'água", "Mostrar que a cena é à noite"],
+    "answer": "Mostrar o que ele está pensando",
+    "explanation": "Bolhinhas indicam pensamento; balão com pontas indica grito; e balão com linha tremida indica medo ou frio.",
+    "category": "arte",
+    "subject": "quadrinhos"
+  },
+  {
+    "question": "Uma canção diz 'sobe, sobe, balão'. Se a melodia imita a letra, o que as notas fazem?",
+    "options": ["Ficam mais agudas", "Ficam mais graves", "Param de tocar", "Ficam todas iguais"],
+    "answer": "Ficam mais agudas",
+    "explanation": "Na música, subir significa ficar mais agudo, como a voz fina; descer é ficar mais grave, como a voz grossa.",
+    "category": "arte",
+    "subject": "música"
+  },
+  {
+    "question": "O que aconteceria hoje se a roda nunca tivesse sido inventada?",
+    "options": ["Transportar coisas pesadas seria muito mais difícil", "Não existiria fogo", "Não existiriam casas", "Não existiriam livros"],
+    "answer": "Transportar coisas pesadas seria muito mais difícil",
+    "explanation": "Carros, bicicletas, carrinhos e até engrenagens usam a roda. Sem ela, tudo teria que ser arrastado ou carregado.",
+    "category": "invencoes",
+    "subject": "roda"
+  },
+  {
+    "question": "Qual destas invenções apareceu primeiro?",
+    "options": ["A imprensa de Gutenberg", "O telefone", "A lâmpada elétrica", "O avião"],
+    "answer": "A imprensa de Gutenberg",
+    "explanation": "A imprensa é de cerca de 1450. O telefone é de 1876, a lâmpada prática de 1879 e o avião do início dos anos 1900.",
+    "category": "invencoes",
+    "subject": "linha do tempo"
+  },
+  {
+    "question": "Ache o erro: 'Santos Dumont, brasileiro, voou com o 14-Bis em Paris, em 1906, usando um motor a vapor.'",
+    "options": ["O 14-Bis usava motor a gasolina, não a vapor", "Santos Dumont era francês", "O voo aconteceu em 1806", "Não há erro"],
+    "answer": "O 14-Bis usava motor a gasolina, não a vapor",
+    "explanation": "Motores a vapor eram pesados demais para voar. O 14-Bis usou um motor leve a gasolina, e o voo em Paris foi visto por uma multidão.",
+    "category": "invencoes",
+    "subject": "aviação"
+  },
+  {
+    "question": "Por que a geladeira mudou tanto a vida das pessoas?",
+    "options": ["Permitiu guardar comida por mais tempo sem estragar", "Deixou a comida mais gostosa", "Acabou com a necessidade de cozinhar", "Inventou o gelo"],
+    "answer": "Permitiu guardar comida por mais tempo sem estragar",
+    "explanation": "Antes dela, era preciso salgar, secar ou comer logo. O frio deixa os micróbios lentos, e a comida dura dias em vez de horas.",
+    "category": "invencoes",
+    "subject": "geladeira"
+  },
+  {
+    "question": "Qual frase é verdadeira sobre a internet?",
+    "options": ["Ela liga computadores do mundo todo por cabos e sinais", "Ela foi inventada junto com a televisão", "Ela funciona sem nenhum cabo em lugar nenhum", "Ela existe desde 1900"],
+    "answer": "Ela liga computadores do mundo todo por cabos e sinais",
+    "explanation": "Até o wi-fi da sua casa termina num cabo, e cabos enormes cruzam o fundo dos oceanos ligando os continentes.",
+    "category": "invencoes",
+    "subject": "internet"
+  },
+  {
+    "question": "Estime: há quanto tempo foi criada a primeira lâmpada elétrica que funcionava bem?",
+    "options": ["Há cerca de 150 anos", "Há cerca de 30 anos", "Há cerca de 500 anos", "Há cerca de 2.000 anos"],
+    "answer": "Há cerca de 150 anos",
+    "explanation": "A lâmpada prática de Thomas Edison é de 1879. Antes disso, as casas eram iluminadas com velas e lampiões.",
+    "category": "invencoes",
+    "subject": "eletricidade"
+  },
+  {
+    "question": "O que a bússola permitiu aos navegadores fazer?",
+    "options": ["Saber a direção mesmo sem ver o Sol ou as estrelas", "Medir a profundidade do mar", "Prever tempestades", "Falar com outros navios"],
+    "answer": "Saber a direção mesmo sem ver o Sol ou as estrelas",
+    "explanation": "A agulha da bússola aponta sempre para o norte magnético. Em dias nublados ou à noite, ela era o único guia dos marinheiros.",
+    "category": "invencoes",
+    "subject": "navegação"
+  },
+  {
+    "question": "Qual destes objetos funciona pelo mesmo princípio de uma alavanca?",
+    "options": ["A tesoura", "A lâmpada", "O rádio", "A bússola"],
+    "answer": "A tesoura",
+    "explanation": "A tesoura é formada por duas alavancas presas no mesmo ponto. Quanto mais perto do parafuso você corta, mais força faz.",
+    "category": "invencoes",
+    "subject": "máquinas simples"
+  },
+  {
+    "question": "Um inventor quer subir caixas pesadas até o segundo andar fazendo pouco esforço. O que ele deveria usar?",
+    "options": ["Uma roldana", "Um espelho", "Um ímã pequeno", "Uma mola de caneta"],
+    "answer": "Uma roldana",
+    "explanation": "A roldana muda a direção da força e, se forem várias, divide o peso. Guindastes e elevadores usam esse princípio.",
+    "category": "invencoes",
+    "subject": "máquinas simples"
+  },
+  {
+    "question": "O que vem depois nesta sequência de jeitos de ouvir música: disco de vinil, fita cassete, CD, ...?",
+    "options": ["Música digital pela internet", "Rádio", "Gramofone", "Caixinha de música"],
+    "answer": "Música digital pela internet",
+    "explanation": "Cada tecnologia guardou mais músicas em menos espaço. Hoje, o streaming nem precisa de objeto: a música vem pela rede.",
+    "category": "invencoes",
+    "subject": "linha do tempo"
+  },
+  {
+    "question": "Na mitologia grega, Zeus é o rei dos deuses. Qual era a arma dele?",
+    "options": ["O raio", "O tridente", "O martelo", "O arco"],
+    "answer": "O raio",
+    "explanation": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+    "category": "mitologia",
+    "subject": "mitologia grega"
+  },
+  {
+    "question": "Antes da ciência, como as pessoas explicavam trovões e tempestades?",
+    "options": ["Com mitos, contando histórias de deuses", "Com experiências em laboratório", "Com satélites", "Elas não tentavam explicar"],
+    "answer": "Com mitos, contando histórias de deuses",
+    "explanation": "Os mitos eram histórias para explicar o mundo: o trovão seria a fúria de Zeus ou o martelo de Thor. Hoje sabemos que é o ar se expandindo com o raio.",
+    "category": "mitologia",
+    "subject": "o que é mito"
+  },
+  {
+    "question": "Na mitologia nórdica, Thor carrega um martelo. O que ele controla com ele?",
+    "options": ["Trovões e raios", "O mar", "O fogo", "O tempo dos relógios"],
+    "answer": "Trovões e raios",
+    "explanation": "O martelo de Thor se chama Mjölnir e sempre volta para a mão dele. Thor era o deus do trovão, e a quinta-feira em inglês, Thursday, vem do nome dele.",
+    "category": "mitologia",
+    "subject": "mitologia nórdica"
+  },
+  {
+    "question": "Ache o erro: 'Hércules era famoso pela sua força e cumpriu dez trabalhos quase impossíveis.'",
+    "options": ["Foram doze trabalhos, não dez", "Hércules era famoso pela velocidade", "Hércules era um deus do mar", "Não há erro"],
+    "answer": "Foram doze trabalhos, não dez",
+    "explanation": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+    "category": "mitologia",
+    "subject": "mitologia grega"
+  },
+  {
+    "question": "O Curupira, do folclore brasileiro, tem os pés virados para trás. Por que isso ajuda ele?",
+    "options": ["As pegadas confundem os caçadores, que vão na direção errada", "Ele corre mais rápido", "Ele sobe em árvores mais fácil", "Ele escuta melhor"],
+    "answer": "As pegadas confundem os caçadores, que vão na direção errada",
+    "explanation": "Quem segue as pegadas do Curupira anda para o lado oposto. Assim ele protege a floresta de quem caça demais.",
+    "category": "mitologia",
+    "subject": "folclore brasileiro"
+  },
+  {
+    "question": "No mito grego, Ícaro voou com asas de penas e cera. O que ele fez de errado?",
+    "options": ["Voou perto demais do Sol e a cera derreteu", "Voou baixo demais e molhou as asas", "Esqueceu de colocar as asas", "Voou durante a noite"],
+    "answer": "Voou perto demais do Sol e a cera derreteu",
+    "explanation": "O pai dele, Dédalo, avisou para não subir demais. Ícaro não ouviu, as asas se desfizeram e ele caiu no mar.",
+    "category": "mitologia",
+    "subject": "mitologia grega"
+  },
+  {
+    "question": "Como os deuses do Egito antigo costumavam ser representados?",
+    "options": ["Com corpo humano e cabeça de animal", "Como estrelas", "Como plantas", "Como crianças"],
+    "answer": "Com corpo humano e cabeça de animal",
+    "explanation": "Anúbis tinha cabeça de chacal, Hórus, de falcão, e Bastet, de gato. Cada animal mostrava um poder do deus.",
+    "category": "mitologia",
+    "subject": "mitologia egípcia"
+  },
+  {
+    "question": "O Cavalo de Troia era um presente com truque. O que estava escondido dentro dele?",
+    "options": ["Soldados gregos", "Ouro", "Um deus disfarçado", "Cavalos menores"],
+    "answer": "Soldados gregos",
+    "explanation": "Os troianos levaram o cavalo para dentro das muralhas. À noite, os soldados saíram e abriram os portões para o exército grego.",
+    "category": "mitologia",
+    "subject": "mitologia grega"
+  },
+  {
+    "question": "Medusa transformava em pedra quem olhasse para ela. Como Perseu conseguiu vencê-la?",
+    "options": ["Olhando o reflexo dela num escudo polido", "Fechando os olhos e correndo", "Usando óculos escuros", "Distraindo ela com música"],
+    "answer": "Olhando o reflexo dela num escudo polido",
+    "explanation": "Perseu usou o escudo como espelho para se aproximar sem olhar direto. O reflexo não tinha o poder do olhar dela.",
+    "category": "mitologia",
+    "subject": "mitologia grega"
+  },
+  {
+    "question": "Na lenda da Amazônia, o que o Boto cor-de-rosa faz nas noites de festa?",
+    "options": ["Vira um homem elegante e sai da água", "Vira um peixe pequeno", "Canta para os pescadores", "Apaga as luzes da cidade"],
+    "answer": "Vira um homem elegante e sai da água",
+    "explanation": "Na lenda, ele usa chapéu para esconder o buraco de respirar no alto da cabeça e volta ao rio antes do amanhecer.",
+    "category": "mitologia",
+    "subject": "folclore brasileiro"
+  },
+  {
+    "question": "Você tem R$ 50 e quer um jogo de R$ 80. Se guardar R$ 10 por semana, em quantas semanas consegue comprar?",
+    "options": ["3", "8", "5", "2"],
+    "answer": "3",
+    "explanation": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+    "category": "dinheiro",
+    "subject": "poupança"
+  },
+  {
+    "question": "Um brinquedo custa R$ 40 e está com 25% de desconto. Quanto você paga?",
+    "options": ["R$ 30", "R$ 35", "R$ 15", "R$ 10"],
+    "answer": "R$ 30",
+    "explanation": "25% é a quarta parte: 40 ÷ 4 = 10 de desconto. Então 40 − 10 = 30 reais.",
+    "category": "dinheiro",
+    "subject": "porcentagem"
+  },
+  {
+    "question": "Qual frase é verdadeira sobre juros?",
+    "options": ["Quem guarda dinheiro no banco pode receber juros; quem pega emprestado paga juros", "Juros são um imposto do governo", "Só empresas pagam juros", "Juros são sempre zero"],
+    "answer": "Quem guarda dinheiro no banco pode receber juros; quem pega emprestado paga juros",
+    "explanation": "Juros são o preço de usar o dinheiro dos outros. Por isso guardar rende um pouco, e dever custa mais do que se pegou.",
+    "category": "dinheiro",
+    "subject": "juros"
+  },
+  {
+    "question": "O que aconteceria se uma pessoa gastasse sempre tudo o que ganha?",
+    "options": ["Não teria reserva para uma emergência", "Ficaria rica mais rápido", "Os preços cairiam", "Nunca precisaria trabalhar"],
+    "answer": "Não teria reserva para uma emergência",
+    "explanation": "Imprevistos acontecem: um conserto, um remédio. Guardar uma parte do que entra evita ter que pedir emprestado e pagar juros.",
+    "category": "dinheiro",
+    "subject": "poupança"
+  },
+  {
+    "question": "Ache o erro: 'Uma loja comprou uma bola por R$ 20, vendeu por R$ 30 e teve um prejuízo de R$ 10.'",
+    "options": ["Foi um lucro de R$ 10, não prejuízo", "A bola foi vendida por R$ 20", "A loja não comprou a bola", "Não há erro"],
+    "answer": "Foi um lucro de R$ 10, não prejuízo",
+    "explanation": "Lucro é quando se vende por mais do que se pagou: 30 − 20 = 10 de lucro. Prejuízo seria vender por menos de 20.",
+    "category": "dinheiro",
+    "subject": "lucro e prejuízo"
+  },
+  {
+    "question": "Você compra 3 canetas de R$ 2,50 cada e paga com uma nota de R$ 10. Quanto recebe de troco?",
+    "options": ["R$ 2,50", "R$ 7,50", "R$ 3,50", "R$ 2,00"],
+    "answer": "R$ 2,50",
+    "explanation": "As canetas custam 3 × 2,50 = 7,50. O troco é 10 − 7,50 = 2,50.",
+    "category": "dinheiro",
+    "subject": "troco"
+  },
+  {
+    "question": "Por que o mesmo produto pode custar preços diferentes em duas lojas?",
+    "options": ["Cada loja decide seu preço conforme seus custos e a concorrência", "É proibido, o preço tem que ser igual", "Uma das lojas está sempre errada", "O produto é diferente por dentro"],
+    "answer": "Cada loja decide seu preço conforme seus custos e a concorrência",
+    "explanation": "Aluguel, transporte e quantidade vendida mudam o custo de cada loja. Comparar antes de comprar é uma forma de economizar.",
+    "category": "dinheiro",
+    "subject": "preços"
+  },
+  {
+    "question": "O que é um orçamento?",
+    "options": ["Um plano de quanto dinheiro vai entrar e quanto vai sair", "O nome de uma moeda antiga", "Uma dívida com o banco", "Um tipo de loja"],
+    "answer": "Um plano de quanto dinheiro vai entrar e quanto vai sair",
+    "explanation": "Com um orçamento, você sabe antes se o dinheiro dá para tudo. Famílias, empresas e governos fazem isso.",
+    "category": "dinheiro",
+    "subject": "orçamento"
+  },
+  {
+    "question": "Estime: se você guardar R$ 5 por semana, quanto terá depois de um ano?",
+    "options": ["Cerca de R$ 260", "Cerca de R$ 60", "Cerca de R$ 500", "Cerca de R$ 1.000"],
+    "answer": "Cerca de R$ 260",
+    "explanation": "Um ano tem 52 semanas, e 52 × 5 = 260. Pequenas quantias viram muito com constância.",
+    "category": "dinheiro",
+    "subject": "poupança"
+  },
+  {
+    "question": "Duas embalagens de suco: 1 litro por R$ 8 e 2 litros por R$ 14. Qual é mais barata por litro?",
+    "options": ["A de 2 litros", "A de 1 litro", "As duas custam o mesmo por litro", "Não dá para saber"],
+    "answer": "A de 2 litros",
+    "explanation": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+    "category": "dinheiro",
+    "subject": "comparar preços"
+  },
+  {
+    "question": "Qual frase é verdadeira sobre as leis?",
+    "options": ["Elas valem para todas as pessoas, inclusive quem governa", "Só valem para adultos", "Cada pessoa escolhe quais seguir", "Só valem dentro da escola"],
+    "answer": "Elas valem para todas as pessoas, inclusive quem governa",
+    "explanation": "Ninguém está acima da lei, nem o presidente. Isso é uma das bases de uma democracia.",
+    "category": "cidadania",
+    "subject": "leis"
+  },
+  {
+    "question": "O que aconteceria numa cidade se ninguém pagasse impostos?",
+    "options": ["Faltaria dinheiro para escolas, hospitais e ruas", "Tudo ficaria de graça", "As pessoas ficariam mais ricas para sempre", "Nada mudaria"],
+    "answer": "Faltaria dinheiro para escolas, hospitais e ruas",
+    "explanation": "Os impostos pagam serviços que todos usam. Por isso é importante fiscalizar se esse dinheiro está sendo bem gasto.",
+    "category": "cidadania",
+    "subject": "impostos"
+  },
+  {
+    "question": "Para que serve o voto?",
+    "options": ["Para escolher quem vai representar as pessoas no governo", "Para pagar contas", "Para escolher o time campeão", "Para ganhar dinheiro"],
+    "answer": "Para escolher quem vai representar as pessoas no governo",
+    "explanation": "Como não dá para todo mundo decidir tudo, elegemos representantes: vereadores, prefeitos, deputados e presidente.",
+    "category": "cidadania",
+    "subject": "voto"
+  },
+  {
+    "question": "Ache o erro: 'No Brasil, o voto é obrigatório a partir dos 12 anos.'",
+    "options": ["O voto é obrigatório a partir dos 18 anos", "O voto é obrigatório a partir dos 8 anos", "Não existe voto no Brasil", "Não há erro"],
+    "answer": "O voto é obrigatório a partir dos 18 anos",
+    "explanation": "No Brasil, o voto é obrigatório dos 18 aos 70 anos. Aos 16 e 17 anos, quem quiser já pode votar, mas não é obrigado.",
+    "category": "cidadania",
+    "subject": "voto"
+  },
+  {
+    "question": "Um amigo joga lixo no chão do parque. Qual é a atitude de um bom cidadão?",
+    "options": ["Recolher e lembrar que o parque é de todos", "Fazer o mesmo, para não ficar diferente", "Ignorar, porque não é problema seu", "Brigar com ele"],
+    "answer": "Recolher e lembrar que o parque é de todos",
+    "explanation": "Espaço público é de todo mundo, então cuidar dele é cuidar do que também é seu. Explicar com calma funciona melhor que brigar.",
+    "category": "cidadania",
+    "subject": "convivência"
+  },
+  {
+    "question": "O que significa ter um direito?",
+    "options": ["Algo que a pessoa pode exigir e ninguém pode tirar, como estudar", "Algo que se compra na loja", "Uma tarefa obrigatória", "Um prêmio por bom comportamento"],
+    "answer": "Algo que a pessoa pode exigir e ninguém pode tirar, como estudar",
+    "explanation": "Toda criança tem direito a escola, saúde e proteção. Direitos vêm junto com deveres, como respeitar os direitos dos outros.",
+    "category": "cidadania",
+    "subject": "direitos"
+  },
+  {
+    "question": "Qual destas coisas é um dever de quem vive numa cidade?",
+    "options": ["Respeitar as regras de trânsito", "Ter um carro", "Morar em apartamento", "Torcer para o time da cidade"],
+    "answer": "Respeitar as regras de trânsito",
+    "explanation": "Regras de trânsito valem para motoristas, ciclistas e pedestres. Elas existem para que todos possam circular em segurança.",
+    "category": "cidadania",
+    "subject": "deveres"
+  },
+  {
+    "question": "Por que existem faixas de pedestres nas ruas?",
+    "options": ["Para organizar onde as pessoas atravessam com segurança", "Para enfeitar a rua", "Para os carros estacionarem", "Para marcar onde a rua termina"],
+    "answer": "Para organizar onde as pessoas atravessam com segurança",
+    "explanation": "Na faixa, o motorista sabe que deve parar e o pedestre sabe onde atravessar. Regra combinada evita acidente.",
+    "category": "cidadania",
+    "subject": "trânsito"
+  },
+  {
+    "question": "Quem faz as leis no Brasil?",
+    "options": ["Deputados e senadores eleitos", "Os juízes", "Os professores", "Os policiais"],
+    "answer": "Deputados e senadores eleitos",
+    "explanation": "Deputados e senadores formam o Poder Legislativo, que escreve e vota as leis. Os juízes aplicam as leis, e o presidente executa.",
+    "category": "cidadania",
+    "subject": "três poderes"
+  },
+  {
+    "question": "Numa votação da turma, 14 alunos escolheram o zoológico e 11 o museu. O que acontece com quem votou no museu?",
+    "options": ["Vai ao zoológico, porque a maioria decidiu", "Fica sem passeio", "Vai ao museu sozinho", "Vota de novo até ganhar"],
+    "answer": "Vai ao zoológico, porque a maioria decidiu",
+    "explanation": "Na democracia, a maioria decide e todos respeitam o resultado, mas quem perdeu pode continuar defendendo sua ideia na próxima vez.",
+    "category": "cidadania",
+    "subject": "democracia"
+  },
+  {
+    "question": "O que aconteceria com uma floresta se todas as abelhas sumissem?",
+    "options": ["Muitas plantas parariam de dar frutos por falta de polinização", "Nada mudaria", "As árvores cresceriam mais", "Haveria mais mel nas flores"],
+    "answer": "Muitas plantas parariam de dar frutos por falta de polinização",
+    "explanation": "As abelhas levam o pólen de uma flor a outra, e é assim que muitas plantas geram frutos e sementes. Sem elas, faltaria comida para muitos animais.",
+    "category": "animais",
+    "subject": "polinização"
+  },
+  {
+    "question": "Um golfinho precisa subir à superfície de tempos em tempos. Por quê?",
+    "options": ["Ele é mamífero e respira ar pelos pulmões", "Ele come na superfície", "Ele precisa se aquecer no Sol", "Ele tem medo do fundo"],
+    "answer": "Ele é mamífero e respira ar pelos pulmões",
+    "explanation": "Golfinhos e baleias não têm guelras como os peixes. Eles respiram por um buraco no alto da cabeça e amamentam os filhotes.",
+    "category": "animais",
+    "subject": "mamíferos"
+  },
+  {
+    "question": "Ache o erro: 'A aranha é um inseto de oito patas.'",
+    "options": ["A aranha tem oito patas, mas não é inseto", "A aranha tem seis patas", "A aranha é um réptil", "Não há erro"],
+    "answer": "A aranha tem oito patas, mas não é inseto",
+    "explanation": "Insetos têm seis patas e o corpo em três partes. Aranhas têm oito patas e são aracnídeas, como os escorpiões.",
+    "category": "animais",
+    "subject": "classificação"
+  },
+  {
+    "question": "Por que o camaleão muda de cor?",
+    "options": ["Para se comunicar, regular a temperatura e se esconder", "Porque está com fome", "Porque a pele dele é transparente", "Só quando chove"],
+    "answer": "Para se comunicar, regular a temperatura e se esconder",
+    "explanation": "A cor mostra o humor do camaleão e ajuda a esquentar ou esfriar o corpo. Se esconder é só um dos motivos.",
+    "category": "animais",
+    "subject": "adaptação"
+  },
+  {
+    "question": "Estime: quantos anos uma tartaruga gigante pode viver?",
+    "options": ["Mais de 100 anos", "Cerca de 10 anos", "Cerca de 30 anos", "Cerca de 2 anos"],
+    "answer": "Mais de 100 anos",
+    "explanation": "Tartarugas gigantes de Galápagos passam dos 150 anos. O metabolismo lento e o casco protetor ajudam nessa vida longa.",
+    "category": "animais",
+    "subject": "longevidade"
+  },
+  {
+    "question": "Qual destes animais é o parente vivo mais próximo dos dinossauros?",
+    "options": ["A galinha", "O lagarto", "O elefante", "O tubarão"],
+    "answer": "A galinha",
+    "explanation": "As aves descendem de dinossauros com penas. Ossos, ovos e até o jeito de andar da galinha lembram um pequeno dinossauro.",
+    "category": "animais",
+    "subject": "evolução"
+  },
+  {
+    "question": "Um sapo começa a vida como girino. O que muda até ele virar adulto?",
+    "options": ["Ele perde a cauda e ganha patas e pulmões", "Ele fica menor", "Ele perde os olhos", "Ele vira peixe"],
+    "answer": "Ele perde a cauda e ganha patas e pulmões",
+    "explanation": "O girino respira por guelras e nada como peixe. Na metamorfose, ele ganha patas e pulmões para viver também na terra.",
+    "category": "animais",
+    "subject": "metamorfose"
+  },
+  {
+    "question": "Por que não existem pinguins selvagens no Polo Norte?",
+    "options": ["Eles evoluíram no hemisfério sul e nunca cruzaram o Equador quente", "Porque no norte não há gelo", "Porque eles não sabem nadar em água fria", "Porque as focas não deixam"],
+    "answer": "Eles evoluíram no hemisfério sul e nunca cruzaram o Equador quente",
+    "explanation": "Pinguins vivem na Antártida, na África do Sul e até no Brasil. Ursos polares vivem só no norte, então os dois nunca se encontram na natureza.",
+    "category": "animais",
+    "subject": "habitat"
+  },
+  {
+    "question": "Qual animal usa o eco do próprio som para se guiar e caçar no escuro?",
+    "options": ["O morcego", "A coruja", "O gato", "A cobra"],
+    "answer": "O morcego",
+    "explanation": "O morcego emite sons agudos que batem nos objetos e voltam. Pelo eco, ele sabe onde está cada inseto, mesmo sem luz nenhuma.",
+    "category": "animais",
+    "subject": "sentidos"
+  },
+  {
+    "question": "A onça caça veados, e os veados comem capim. Se o capim sumir, o que acontece com a onça?",
+    "options": ["Ela também terá menos comida, porque os veados diminuem", "Nada muda para ela", "Ela passa a comer capim", "Ela vira herbívora"],
+    "answer": "Ela também terá menos comida, porque os veados diminuem",
+    "explanation": "Numa cadeia alimentar, cada elo depende do anterior. Menos capim significa menos veados, e menos veados significa onças com fome.",
+    "category": "animais",
+    "subject": "cadeia alimentar"
+  },
+  {
+    "question": "Você precisa estar na escola às 7h30, leva 20 minutos para se arrumar e 15 para chegar. Qual é o horário máximo para acordar?",
+    "options": ["6h55", "7h10", "7h15", "6h30"],
+    "answer": "6h55",
+    "explanation": "Some o tempo total: 20 + 15 = 35 minutos. Depois volte 35 minutos a partir de 7h30, que dá 6h55.",
+    "category": "cotidiano",
+    "subject": "rotina e tempo"
+  },
+  {
+    "question": "Por que lavar as mãos com sabão funciona melhor do que só com água?",
+    "options": ["O sabão desprende a gordura e os germes que a água sozinha não tira", "O sabão é mais quente que a água", "A água sozinha não molha a mão", "O sabão só serve para dar cheiro"],
+    "answer": "O sabão desprende a gordura e os germes que a água sozinha não tira",
+    "explanation": "Germes ficam grudados na gordura da pele, e água não mistura com gordura. O sabão quebra essa gordura e leva tudo embora.",
+    "category": "cotidiano",
+    "subject": "higiene"
+  },
+  {
+    "question": "Por que a roupa no varal seca mais rápido num dia de vento?",
+    "options": ["O vento leva embora o vapor de água que sai da roupa", "O vento esquenta a roupa", "O vento tira a cor da roupa", "Não seca mais rápido"],
+    "answer": "O vento leva embora o vapor de água que sai da roupa",
+    "explanation": "A água evapora e fica no ar perto da roupa. O vento troca esse ar úmido por ar seco, e a evaporação continua rápida.",
+    "category": "cotidiano",
+    "subject": "ciência em casa"
+  },
+  {
+    "question": "Você quer que o sorvete demore a derreter no caminho de casa. O que ajuda?",
+    "options": ["Embrulhar em pano ou caixa de isopor", "Deixar no sol", "Tirar da embalagem", "Segurar com a mão"],
+    "answer": "Embrulhar em pano ou caixa de isopor",
+    "explanation": "Pano e isopor são isolantes: dificultam a passagem do calor de fora para dentro. É o mesmo motivo de usar casaco no frio.",
+    "category": "cotidiano",
+    "subject": "ciência em casa"
+  },
+  {
+    "question": "Ache o erro: 'Para economizar água, deixo a torneira aberta enquanto escovo os dentes.'",
+    "options": ["Torneira aberta desperdiça água; feche enquanto escova", "Não se deve escovar os dentes", "Só se pode escovar de manhã", "Não há erro"],
+    "answer": "Torneira aberta desperdiça água; feche enquanto escova",
+    "explanation": "Uma torneira aberta gasta uns 12 litros em cinco minutos de escovação. Fechar enquanto escova economiza quase tudo isso.",
+    "category": "cotidiano",
+    "subject": "economia de água"
+  },
+  {
+    "question": "Uma receita para 4 pessoas usa 2 ovos. Quantos ovos você precisa para 10 pessoas?",
+    "options": ["5", "4", "8", "6"],
+    "answer": "5",
+    "explanation": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+    "category": "cotidiano",
+    "subject": "cozinha"
+  },
+  {
+    "question": "Por que o leite aberto deve ficar na geladeira?",
+    "options": ["O frio deixa os micróbios mais lentos e o leite dura mais", "A geladeira adoça o leite", "O leite congela e vira sorvete", "Fora da geladeira o leite vira queijo em minutos"],
+    "answer": "O frio deixa os micróbios mais lentos e o leite dura mais",
+    "explanation": "Micróbios se multiplicam rápido no calor e azedam o leite. No frio eles quase param, e o leite dura dias.",
+    "category": "cotidiano",
+    "subject": "alimentos"
+  },
+  {
+    "question": "O que vem depois nesta rotina: tirar a roupa suja, colocar na máquina, lavar, ...?",
+    "options": ["Estender para secar", "Guardar no armário", "Vestir", "Colocar no cesto de roupa suja"],
+    "answer": "Estender para secar",
+    "explanation": "Roupa lavada sai molhada e precisa secar antes de dobrar e guardar. Guardar úmida dá mofo e cheiro ruim.",
+    "category": "cotidiano",
+    "subject": "rotina"
+  },
+  {
+    "question": "Estime: quantos litros de água um banho de 10 minutos gasta num chuveiro comum?",
+    "options": ["Cerca de 100 litros", "Cerca de 2 litros", "Cerca de 1.000 litros", "Cerca de 10 litros"],
+    "answer": "Cerca de 100 litros",
+    "explanation": "Um chuveiro comum solta uns 8 a 10 litros por minuto. Em 10 minutos, dá perto de 100 litros, o mesmo que 50 garrafas de 2 litros.",
+    "category": "cotidiano",
+    "subject": "economia de água"
+  },
+  {
+    "question": "Você vai atravessar uma rua sem semáforo. Qual é a ordem certa?",
+    "options": ["Parar, olhar para os dois lados, atravessar na faixa", "Correr o mais rápido possível", "Olhar o celular e atravessar", "Atravessar por trás de um ônibus parado"],
+    "answer": "Parar, olhar para os dois lados, atravessar na faixa",
+    "explanation": "Parar dá tempo de ver o que vem. Atrás de um ônibus, você não vê os carros e eles não veem você.",
+    "category": "cotidiano",
+    "subject": "segurança"
+  },
+  {
+    "question": "O Brasil faz fronteira com quase toda a América do Sul. Quais são os dois países do continente que ele NÃO toca?",
+    "options": ["Chile e Equador", "Argentina e Uruguai", "Peru e Bolívia", "Colômbia e Venezuela"],
+    "answer": "Chile e Equador",
+    "explanation": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+    "category": "brasil",
+    "subject": "fronteiras"
+  },
+  {
+    "question": "Se você viajar do Amazonas até o Rio Grande do Sul, de qual região para qual região está indo?",
+    "options": ["Do Norte para o Sul", "Do Nordeste para o Sudeste", "Do Centro-Oeste para o Sul", "Do Norte para o Sudeste"],
+    "answer": "Do Norte para o Sul",
+    "explanation": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+    "category": "brasil",
+    "subject": "regiões"
+  },
+  {
+    "question": "Ache o erro: 'O Brasil foi colonizado por Portugal e ficou independente em 1500.'",
+    "options": ["1500 é a chegada dos portugueses; a independência foi em 1822", "O Brasil foi colonizado pela Espanha", "O Brasil nunca foi colônia", "Não há erro"],
+    "answer": "1500 é a chegada dos portugueses; a independência foi em 1822",
+    "explanation": "Entre 1500 e 1822 se passaram mais de 300 anos de colônia. A independência foi declarada por Dom Pedro I em 7 de setembro de 1822.",
+    "category": "brasil",
+    "subject": "história do Brasil"
+  },
+  {
+    "question": "Por que o português é a língua oficial do Brasil?",
+    "options": ["Porque Portugal colonizou o Brasil", "Porque é a língua mais fácil", "Porque o Brasil fica perto de Portugal", "Porque foi escolhida por votação em 1900"],
+    "answer": "Porque Portugal colonizou o Brasil",
+    "explanation": "Os colonizadores trouxeram a língua. Mas o português do Brasil ganhou muitas palavras indígenas e africanas, como abacaxi e moleque.",
+    "category": "brasil",
+    "subject": "língua"
+  },
+  {
+    "question": "Qual bioma brasileiro é a maior floresta tropical do mundo?",
+    "options": ["Amazônia", "Cerrado", "Caatinga", "Pantanal"],
+    "answer": "Amazônia",
+    "explanation": "A Amazônia cobre quase metade do Brasil e avança por outros 8 países. Ela abriga mais espécies do que qualquer outro lugar da Terra.",
+    "category": "brasil",
+    "subject": "biomas"
+  },
+  {
+    "question": "O que aconteceria se a Floresta Amazônica fosse toda derrubada?",
+    "options": ["Muitas espécies sumiriam e o clima mudaria", "Choveria mais no Brasil inteiro", "Nada mudaria", "O rio Amazonas ficaria maior"],
+    "answer": "Muitas espécies sumiriam e o clima mudaria",
+    "explanation": "As árvores soltam vapor que vira chuva em outras regiões do Brasil. Sem a floresta, haveria menos chuva e milhares de animais sem casa.",
+    "category": "brasil",
+    "subject": "meio ambiente"
+  },
+  {
+    "question": "Estime: quantas pessoas vivem no Brasil?",
+    "options": ["Cerca de 200 milhões", "Cerca de 20 milhões", "Cerca de 2 bilhões", "Cerca de 2 milhões"],
+    "answer": "Cerca de 200 milhões",
+    "explanation": "O Brasil tem pouco mais de 200 milhões de habitantes e está entre os 7 países mais populosos do mundo.",
+    "category": "brasil",
+    "subject": "população"
+  },
+  {
+    "question": "Qual bioma do Nordeste é seco e tem plantas que aguentam meses sem chuva?",
+    "options": ["Caatinga", "Mata Atlântica", "Pampa", "Amazônia"],
+    "answer": "Caatinga",
+    "explanation": "Na Caatinga, o mandacaru guarda água e as árvores perdem as folhas na seca. Só existe no Brasil.",
+    "category": "brasil",
+    "subject": "biomas"
+  },
+  {
+    "question": "Brasília foi construída de propósito para ser a capital. Por que ela fica no meio do país?",
+    "options": ["Para ajudar a povoar o interior e ficar longe do litoral", "Porque era o lugar mais frio", "Porque tinha ouro no local", "Porque ficava perto do mar"],
+    "answer": "Para ajudar a povoar o interior e ficar longe do litoral",
+    "explanation": "Até 1960 a capital era o Rio de Janeiro. Brasília foi erguida em poucos anos no Planalto Central para levar gente e estradas ao interior.",
+    "category": "brasil",
+    "subject": "história do Brasil"
+  },
+  {
+    "question": "O que representam as estrelas da bandeira do Brasil?",
+    "options": ["Os estados e o Distrito Federal", "As cinco regiões", "Os maiores rios", "Os presidentes"],
+    "answer": "Os estados e o Distrito Federal",
+    "explanation": "São 27 estrelas, uma para cada estado e uma para o Distrito Federal, desenhadas como o céu do Rio de Janeiro em 15 de novembro de 1889.",
+    "category": "brasil",
+    "subject": "símbolos"
+  },
+  {
+    "question": "No Minecraft, o que pode acontecer se você cavar direto para baixo, bem embaixo dos seus pés?",
+    "options": ["Cair em lava ou numa caverna sem ver", "Ganhar diamantes na hora", "Ficar impossível de cavar", "O bloco virar água"],
+    "answer": "Cair em lava ou numa caverna sem ver",
+    "explanation": "Cavando reto, você não vê o que tem embaixo. Cavar em escada, ou em dois blocos alternados, evita cair na lava.",
+    "category": "minecraft",
+    "subject": "mineração"
+  },
+  {
+    "question": "Qual frase é verdadeira sobre a lava no Minecraft?",
+    "options": ["Água caindo numa fonte de lava vira obsidiana", "Lava apaga o fogo", "Lava é segura de tocar", "Lava não queima itens"],
+    "answer": "Água caindo numa fonte de lava vira obsidiana",
+    "explanation": "Água sobre a fonte de lava gera obsidiana; sobre lava correndo, gera pedregulho. A obsidiana é o bloco do portal do Nether.",
+    "category": "minecraft",
+    "subject": "blocos"
+  },
+  {
+    "question": "Ache o erro: 'Para fazer uma picareta de madeira, uso 3 tábuas e 2 gravetos na mesa de trabalho.'",
+    "options": ["Não há erro", "São 3 gravetos e 2 tábuas", "Precisa de 5 tábuas", "Precisa de um lingote de ferro"],
+    "answer": "Não há erro",
+    "explanation": "A receita está certa: 3 tábuas em cima e 2 gravetos em coluna no meio. Toda picareta usa o mesmo desenho, mudando só o material.",
+    "category": "minecraft",
+    "subject": "crafting"
+  },
+  {
+    "question": "Um creeper explode perto da sua casa. Qual destes blocos NÃO quebra com a explosão?",
+    "options": ["Obsidiana", "Terra", "Madeira", "Pedra"],
+    "answer": "Obsidiana",
+    "explanation": "A obsidiana resiste a explosões de creeper e de TNT. Por isso ela protege baús e portais.",
+    "category": "minecraft",
+    "subject": "mobs"
+  },
+  {
+    "question": "Você tem 1 diamante e quer fazer uma picareta de diamante. Quantos diamantes faltam?",
+    "options": ["2", "1", "3", "4"],
+    "answer": "2",
+    "explanation": "A picareta usa 3 diamantes e 2 gravetos. Como você já tem 1, faltam 3 − 1 = 2.",
+    "category": "minecraft",
+    "subject": "crafting"
+  },
+  {
+    "question": "Qual é a picareta mais simples que consegue soltar o minério de ferro no Minecraft?",
+    "options": ["Picareta de pedra", "Picareta de madeira", "Picareta de ouro", "Não precisa de picareta"],
+    "answer": "Picareta de pedra",
+    "explanation": "Madeira e ouro quebram o bloco, mas não soltam o ferro. A ordem é: madeira, pedra, ferro, diamante e netherita.",
+    "category": "minecraft",
+    "subject": "mineração"
+  },
+  {
+    "question": "Por que os zumbis pegam fogo de dia no Minecraft?",
+    "options": ["A luz do Sol queima os mobs mortos-vivos", "Eles são feitos de carvão", "O calor derrete a pele deles", "Eles não pegam fogo de dia"],
+    "answer": "A luz do Sol queima os mobs mortos-vivos",
+    "explanation": "Zumbis e esqueletos queimam sob o Sol, a não ser que estejam na sombra, na água ou usando capacete. Creepers e aranhas não queimam.",
+    "category": "minecraft",
+    "subject": "mobs"
+  },
+  {
+    "question": "Estime: quantos blocos de terra cabem numa pilha completa do inventário?",
+    "options": ["64", "100", "32", "16"],
+    "answer": "64",
+    "explanation": "A maioria dos itens empilha até 64. Ovos e bolas de neve empilham só até 16, e ferramentas não empilham.",
+    "category": "minecraft",
+    "subject": "inventário"
+  },
+  {
+    "question": "A fornalha precisa de combustível. Qual destes dura mais tempo queimando?",
+    "options": ["Um bloco de carvão", "Um graveto", "Uma tábua", "Um pedaço de carvão"],
+    "answer": "Um bloco de carvão",
+    "explanation": "Um pedaço de carvão funde 8 itens; o bloco, feito de 9 pedaços, funde 80. Juntar em bloco rende mais.",
+    "category": "minecraft",
+    "subject": "fornalha"
+  },
+  {
+    "question": "Você planta trigo no Minecraft. O que ele precisa para crescer?",
+    "options": ["Luz e terra arada com água por perto", "Lava por perto", "Escuridão total", "Um bloco de pedra embaixo"],
+    "answer": "Luz e terra arada com água por perto",
+    "explanation": "Trigo cresce em terra arada com a enxada. Água até 4 blocos de distância deixa a terra úmida e o crescimento mais rápido.",
+    "category": "minecraft",
+    "subject": "agricultura"
+  },
+  {
+    "question": "Um time fez 2 gols no primeiro tempo e sofreu 3 no segundo. Se o jogo terminou 4 a 3 para ele, quantos gols fez no segundo tempo?",
+    "options": ["2", "1", "3", "4"],
+    "answer": "2",
+    "explanation": "O time terminou com 4 gols e já tinha 2 no primeiro tempo, então marcou 4 − 2 = 2 no segundo. Os 3 sofridos não mudam essa conta.",
+    "category": "futebol",
+    "subject": "placar"
+  },
+  {
+    "question": "Quando o impedimento é marcado?",
+    "options": ["Quando o atacante está à frente do penúltimo defensor no momento do passe", "Quando a bola sai pela lateral", "Quando o goleiro sai da área", "Quando o jogador chuta de muito longe"],
+    "answer": "Quando o atacante está à frente do penúltimo defensor no momento do passe",
+    "explanation": "O que importa é a posição na hora em que o passe sai, não na hora em que a bola chega. Por isso o bandeirinha olha a linha do último zagueiro.",
+    "category": "futebol",
+    "subject": "regras"
+  },
+  {
+    "question": "Ache o erro: 'Uma partida tem dois tempos de 45 minutos, e o goleiro pode pegar a bola com a mão em qualquer lugar do campo.'",
+    "options": ["O goleiro só pode usar as mãos dentro da própria área", "Os tempos são de 30 minutos", "O goleiro nunca pode usar as mãos", "Não há erro"],
+    "answer": "O goleiro só pode usar as mãos dentro da própria área",
+    "explanation": "Fora da grande área, o goleiro é um jogador comum. Se pegar a bola com a mão lá fora, é falta e pode levar cartão.",
+    "category": "futebol",
+    "subject": "regras"
+  },
+  {
+    "question": "No campeonato, vitória vale 3 pontos e empate vale 1. Um time com 5 vitórias, 4 empates e 3 derrotas tem quantos pontos?",
+    "options": ["19", "15", "9", "23"],
+    "answer": "19",
+    "explanation": "Vitórias: 5 × 3 = 15. Empates: 4 × 1 = 4. Derrotas não dão ponto. Total: 15 + 4 = 19.",
+    "category": "futebol",
+    "subject": "pontuação"
+  },
+  {
+    "question": "De quantos em quantos anos acontece a Copa do Mundo de futebol?",
+    "options": ["4", "2", "5", "1"],
+    "answer": "4",
+    "explanation": "A Copa acontece a cada 4 anos, como as Olimpíadas. O Brasil é o único país que jogou todas as edições.",
+    "category": "futebol",
+    "subject": "Copa do Mundo"
+  },
+  {
+    "question": "O que acontece com um jogador que recebe o segundo cartão amarelo na mesma partida?",
+    "options": ["É expulso, como se fosse cartão vermelho", "Nada, só o terceiro expulsa", "Fica 10 minutos fora", "O time perde um ponto"],
+    "answer": "É expulso, como se fosse cartão vermelho",
+    "explanation": "Dois amarelos viram um vermelho, e o jogador sai sem substituto. Por isso quem já tem amarelo precisa jogar com mais cuidado.",
+    "category": "futebol",
+    "subject": "regras"
+  },
+  {
+    "question": "Por que o Brasil é chamado de 'país do futebol', se o esporte não foi inventado aqui?",
+    "options": ["Pela tradição, pelos títulos e pela paixão popular", "Porque a bola foi criada no Brasil", "Porque só existe um time no país", "Porque o futebol é obrigatório na escola"],
+    "answer": "Pela tradição, pelos títulos e pela paixão popular",
+    "explanation": "O futebol moderno nasceu na Inglaterra e chegou ao Brasil no fim dos anos 1800. Cinco Copas e craques como Pelé e Marta deram o apelido.",
+    "category": "futebol",
+    "subject": "cultura"
+  },
+  {
+    "question": "Estime: com dois tempos de 45 minutos e um intervalo de 15, quanto dura uma partida, sem acréscimos?",
+    "options": ["Cerca de 1h45", "Cerca de 1h", "Cerca de 3h", "Cerca de 45 minutos"],
+    "answer": "Cerca de 1h45",
+    "explanation": "45 + 45 = 90 minutos de jogo, mais 15 de intervalo, dá 105 minutos, ou seja, 1 hora e 45 minutos.",
+    "category": "futebol",
+    "subject": "tempo de jogo"
+  },
+  {
+    "question": "Um atacante avança sozinho e o goleiro sai do gol em direção a ele. Por que isso ajuda o goleiro?",
+    "options": ["Ele cobre mais espaço do gol visto pelo atacante", "Ele fica mais rápido", "O atacante é obrigado a parar", "A bola fica mais pesada"],
+    "answer": "Ele cobre mais espaço do gol visto pelo atacante",
+    "explanation": "Quanto mais perto do atacante, maior o goleiro parece e menor o pedaço de gol que sobra. É o chamado 'fechar o ângulo'.",
+    "category": "futebol",
+    "subject": "tática"
+  },
+  {
+    "question": "Um time começa com 11 jogadores e tem 2 expulsos. Com quantos fica, e o jogo continua?",
+    "options": ["9, e o jogo continua", "9, e o jogo acaba", "10, e o jogo continua", "8, e o jogo continua"],
+    "answer": "9, e o jogo continua",
+    "explanation": "11 − 2 = 9 jogadores. A partida só é encerrada se um time ficar com menos de 7 em campo.",
+    "category": "futebol",
+    "subject": "regras"
+  },
+  {
+    "question": "Se ninguém estiver olhando, ainda vale a pena fazer a coisa certa?",
+    "options": ["Sim, porque o certo não depende de plateia", "Não, só vale se alguém ver", "Só se der algum prêmio", "Depende do humor do dia"],
+    "answer": "Sim, porque o certo não depende de plateia",
+    "explanation": "Quem faz o certo só quando é visto está fingindo. O caráter aparece justamente quando ninguém está olhando.",
+    "category": "filosofia",
+    "subject": "ética"
+  },
+  {
+    "question": "Qual frase é verdadeira sobre a filosofia?",
+    "options": ["É a arte de fazer boas perguntas e pensar com cuidado sobre elas", "É uma ciência que mede coisas com régua", "É só decorar frases antigas", "É um esporte de discussão"],
+    "answer": "É a arte de fazer boas perguntas e pensar com cuidado sobre elas",
+    "explanation": "Filósofos perguntam coisas como 'o que é justiça?' e testam as respostas com argumentos. A palavra significa 'amor pelo saber'.",
+    "category": "filosofia",
+    "subject": "o que é filosofia"
+  },
+  {
+    "question": "Sócrates dizia 'só sei que nada sei'. O que ele queria ensinar com isso?",
+    "options": ["Que reconhecer o que não sabemos é o começo do aprendizado", "Que ele nunca estudou", "Que não vale a pena estudar", "Que ele sabia tudo"],
+    "answer": "Que reconhecer o que não sabemos é o começo do aprendizado",
+    "explanation": "Quem acha que já sabe tudo para de perguntar. Sócrates fazia perguntas até a pessoa perceber onde estava a dúvida.",
+    "category": "filosofia",
+    "subject": "Sócrates"
+  },
+  {
+    "question": "Você e um amigo discordam sobre qual jogo é melhor. O que é pensar bem nessa hora?",
+    "options": ["Ouvir os motivos dele antes de responder", "Falar mais alto para vencer", "Mudar de assunto", "Dizer que ele está errado sem ouvir"],
+    "answer": "Ouvir os motivos dele antes de responder",
+    "explanation": "Discutir bem é comparar motivos, não vozes. Às vezes você muda de ideia, às vezes ele muda, e os dois saem ganhando.",
+    "category": "filosofia",
+    "subject": "diálogo"
+  },
+  {
+    "question": "Ache o erro no raciocínio: 'Todo cachorro tem quatro patas. Meu gato tem quatro patas. Logo, meu gato é um cachorro.'",
+    "options": ["Ter quatro patas não é só de cachorro, então a conclusão não segue", "Cachorros não têm quatro patas", "Gatos não têm patas", "Não há erro"],
+    "answer": "Ter quatro patas não é só de cachorro, então a conclusão não segue",
+    "explanation": "A primeira frase diz que cachorros têm quatro patas, não que só cachorros têm. Vacas, gatos e cavalos também têm.",
+    "category": "filosofia",
+    "subject": "argumentos"
+  },
+  {
+    "question": "O que significa ser justo?",
+    "options": ["Tratar as pessoas com as mesmas regras e dar a cada uma o que ela merece", "Dar sempre razão ao mais forte", "Fazer só o que é bom para si", "Nunca mudar de opinião"],
+    "answer": "Tratar as pessoas com as mesmas regras e dar a cada uma o que ela merece",
+    "explanation": "Justiça é a regra valer igual para todos. Um juiz de futebol é justo quando marca a mesma falta para os dois times.",
+    "category": "filosofia",
+    "subject": "justiça"
+  },
+  {
+    "question": "Se um robô fizesse todas as suas tarefas de escola, você teria aprendido algo?",
+    "options": ["Não, porque aprender exige fazer e errar por conta própria", "Sim, porque a tarefa ficou pronta", "Sim, porque o robô é inteligente", "Tanto faz"],
+    "answer": "Não, porque aprender exige fazer e errar por conta própria",
+    "explanation": "A tarefa pronta não é o objetivo; ela é o treino. É como pedir para alguém malhar por você: o músculo não cresce.",
+    "category": "filosofia",
+    "subject": "aprendizado"
+  },
+  {
+    "question": "O que aconteceria se todo mundo mentisse o tempo todo?",
+    "options": ["Ninguém confiaria em ninguém e as promessas perderiam valor", "As pessoas seriam mais felizes", "Nada mudaria", "As mentiras virariam verdades"],
+    "answer": "Ninguém confiaria em ninguém e as promessas perderiam valor",
+    "explanation": "A mentira só funciona porque a maioria fala a verdade. Se todos mentissem, nem a mentira funcionaria mais.",
+    "category": "filosofia",
+    "subject": "confiança"
+  },
+  {
+    "question": "Qual destas perguntas é uma pergunta de filosofia?",
+    "options": ["O que torna uma ação boa?", "Quanto é 8 × 7?", "Que horas são?", "Quanto pesa um elefante?"],
+    "answer": "O que torna uma ação boa?",
+    "explanation": "As outras têm resposta única e fácil de checar. A pergunta sobre o bem exige pensar, argumentar e comparar ideias.",
+    "category": "filosofia",
+    "subject": "o que é filosofia"
+  },
+  {
+    "question": "Você ganhou um prêmio por um trabalho que um colega fez. O que a honestidade pede?",
+    "options": ["Contar a verdade e dividir o crédito", "Ficar com o prêmio calado", "Esconder o colega", "Reclamar que o prêmio é pequeno"],
+    "answer": "Contar a verdade e dividir o crédito",
+    "explanation": "Um prêmio que não é seu pesa mais do que vale. Dizer a verdade pode ser difícil na hora, mas mantém a confiança das pessoas em você.",
+    "category": "filosofia",
+    "subject": "honestidade"
+  },
+  {
+    "question": "O que vem depois nesta ordem: Pré-História, Idade Antiga, Idade Média, ...?",
+    "options": ["Idade Moderna", "Idade Contemporânea", "Idade da Pedra", "Renascimento"],
+    "answer": "Idade Moderna",
+    "explanation": "A Idade Moderna vai de 1453 até 1789, época das grandes navegações. Depois dela vem a Contemporânea, que é a nossa.",
+    "category": "historia",
+    "subject": "períodos"
+  },
+  {
+    "question": "O que marca o fim da Pré-História?",
+    "options": ["A invenção da escrita", "A extinção dos dinossauros", "A fundação de Roma", "A invenção da roda"],
+    "answer": "A invenção da escrita",
+    "explanation": "Chamamos de História o período com registros escritos, há cerca de 5 mil anos. Antes disso, só sabemos das pessoas pelos ossos, ferramentas e pinturas.",
+    "category": "historia",
+    "subject": "pré-história"
+  },
+  {
+    "question": "Ache o erro: 'As pirâmides do Egito foram construídas com guindastes elétricos há mais de 4 mil anos.'",
+    "options": ["Não havia eletricidade; usaram rampas, cordas e muita gente", "As pirâmides têm só 200 anos", "As pirâmides ficam na Grécia", "Não há erro"],
+    "answer": "Não havia eletricidade; usaram rampas, cordas e muita gente",
+    "explanation": "A Grande Pirâmide tem mais de 2 milhões de blocos de pedra, movidos com rampas, trenós e alavancas por milhares de trabalhadores.",
+    "category": "historia",
+    "subject": "Egito antigo"
+  },
+  {
+    "question": "Por que dominar o fogo foi tão importante para os primeiros humanos?",
+    "options": ["Permitiu cozinhar, se aquecer e afastar animais", "Serviu para fabricar rodas", "Foi usado só em festas", "Não fez diferença"],
+    "answer": "Permitiu cozinhar, se aquecer e afastar animais",
+    "explanation": "Comida cozida é mais fácil de digerir e dá mais energia. O fogo também iluminava a noite e reunia o grupo.",
+    "category": "historia",
+    "subject": "pré-história"
+  },
+  {
+    "question": "Estime: há quantos anos os humanos começaram a plantar em vez de só caçar e coletar?",
+    "options": ["Cerca de 10 mil anos", "Cerca de 100 anos", "Cerca de 1 milhão de anos", "Cerca de 500 anos"],
+    "answer": "Cerca de 10 mil anos",
+    "explanation": "A agricultura começou há uns 10 mil anos. Com comida plantada, as pessoas pararam de andar atrás dos animais e nasceram as primeiras aldeias.",
+    "category": "historia",
+    "subject": "agricultura"
+  },
+  {
+    "question": "O que aconteceria se a escrita nunca tivesse sido inventada?",
+    "options": ["Seria muito difícil guardar e passar conhecimento entre gerações", "Não existiriam pessoas", "Ninguém conseguiria falar", "As cidades seriam maiores"],
+    "answer": "Seria muito difícil guardar e passar conhecimento entre gerações",
+    "explanation": "Sem escrita, tudo dependeria da memória e da fala. Leis, receitas e descobertas se perderiam com o tempo.",
+    "category": "historia",
+    "subject": "escrita"
+  },
+  {
+    "question": "Os romanos construíram estradas de pedra ligando cidades muito distantes. Qual era a principal vantagem?",
+    "options": ["Mover soldados e mercadorias com rapidez", "Deixar a paisagem bonita", "Evitar a chuva", "Fazer pistas de corrida"],
+    "answer": "Mover soldados e mercadorias com rapidez",
+    "explanation": "Com estradas, o exército chegava rápido a qualquer canto do império. Algumas dessas estradas ainda existem na Europa.",
+    "category": "historia",
+    "subject": "Roma antiga"
+  },
+  {
+    "question": "Em 1500, Pedro Álvares Cabral chegou ao Brasil. De onde ele tinha saído?",
+    "options": ["De Portugal", "Da Espanha", "Da Inglaterra", "Da Itália"],
+    "answer": "De Portugal",
+    "explanation": "A frota de Cabral saiu de Lisboa rumo à Índia, mas fez uma grande curva pelo Atlântico e chegou à Bahia.",
+    "category": "historia",
+    "subject": "grandes navegações"
+  },
+  {
+    "question": "Na Idade Média, os castelos tinham muros altos e fossos com água em volta. Para quê?",
+    "options": ["Para dificultar a invasão de inimigos", "Para criar peixes", "Para enfeitar o castelo", "Para guardar água da chuva"],
+    "answer": "Para dificultar a invasão de inimigos",
+    "explanation": "O fosso impedia escadas e máquinas de encostar no muro. A ponte levadiça era a única entrada, e podia ser erguida.",
+    "category": "historia",
+    "subject": "Idade Média"
+  },
+  {
+    "question": "Um objeto foi feito no ano de 1750. Em que século ele foi feito?",
+    "options": ["Século XVIII", "Século XVII", "Século XIX", "Século XV"],
+    "answer": "Século XVIII",
+    "explanation": "O século I vai do ano 1 ao 100, então o século XVIII vai de 1701 a 1800. Uma dica: pegue os dois primeiros algarismos e some 1.",
+    "category": "historia",
+    "subject": "séculos"
+  },
+  {
+    "question": "Ana é mais alta que Bia. Bia é mais alta que Carla. Quem é a mais baixa das três?",
+    "options": ["Carla", "Bia", "Ana", "Não dá para saber"],
+    "answer": "Carla",
+    "explanation": "Se Ana está acima de Bia, e Bia acima de Carla, a ordem é Ana, Bia, Carla. Carla fica por último.",
+    "category": "logica",
+    "subject": "ordenação"
+  },
+  {
+    "question": "O que vem depois: segunda, quarta, sexta, ...?",
+    "options": ["Domingo", "Sábado", "Terça", "Quinta"],
+    "answer": "Domingo",
+    "explanation": "A sequência pula um dia de cada vez. Depois de sexta vem sábado, que é pulado, e cai em domingo.",
+    "category": "logica",
+    "subject": "sequências"
+  },
+  {
+    "question": "Qual figura NÃO combina com as outras: quadrado, retângulo, triângulo, losango?",
+    "options": ["Triângulo", "Quadrado", "Retângulo", "Losango"],
+    "answer": "Triângulo",
+    "explanation": "Quadrado, retângulo e losango têm 4 lados. O triângulo é o único com 3.",
+    "category": "logica",
+    "subject": "classificação"
+  },
+  {
+    "question": "Todos os gatos da vila são pretos. Tom é um gato da vila. O que podemos afirmar?",
+    "options": ["Tom é preto", "Tom é branco", "Tom não é gato", "Não dá para afirmar nada"],
+    "answer": "Tom é preto",
+    "explanation": "Se a regra vale para todos os gatos da vila e Tom é um deles, a regra vale para Tom. Isso é uma dedução.",
+    "category": "logica",
+    "subject": "dedução"
+  },
+  {
+    "question": "Numa gaveta há meias azuis e vermelhas misturadas, e está escuro. Quantas meias você precisa pegar para garantir um par da mesma cor?",
+    "options": ["3", "2", "4", "10"],
+    "answer": "3",
+    "explanation": "Com 2 meias, pode vir uma de cada cor. A terceira obrigatoriamente repete uma das duas cores, formando o par.",
+    "category": "logica",
+    "subject": "raciocínio"
+  },
+  {
+    "question": "Ache o erro: 'Se chove, a rua fica molhada. A rua está molhada. Logo, choveu.'",
+    "options": ["A rua pode ter molhado por outro motivo, como um caminhão-pipa", "Chuva não molha a rua", "A rua nunca fica molhada", "Não há erro"],
+    "answer": "A rua pode ter molhado por outro motivo, como um caminhão-pipa",
+    "explanation": "A chuva molha a rua, mas a rua molhada não prova chuva. Pode ter sido lavagem, cano estourado ou mangueira.",
+    "category": "logica",
+    "subject": "argumentos"
+  },
+  {
+    "question": "Qual número está fora do padrão: 3, 6, 9, 11, 15?",
+    "options": ["11", "3", "9", "15"],
+    "answer": "11",
+    "explanation": "Todos os outros são múltiplos de 3. O 11 não é: 3 × 3 = 9 e 3 × 4 = 12, e 11 fica no meio.",
+    "category": "logica",
+    "subject": "padrões"
+  },
+  {
+    "question": "Na fila, Pedro está atrás de Lucas e na frente de Júlia. Quem está no meio dos três?",
+    "options": ["Pedro", "Lucas", "Júlia", "Ninguém está no meio"],
+    "answer": "Pedro",
+    "explanation": "Lucas está na frente, Pedro atrás dele, e Júlia atrás de Pedro. Pedro fica entre os dois.",
+    "category": "logica",
+    "subject": "ordenação"
+  },
+  {
+    "question": "Uma balança fica equilibrada com 3 maçãs de um lado e, do outro, 1 maçã mais um peso de 200 g. Quanto pesa cada maçã?",
+    "options": ["100 g", "200 g", "50 g", "300 g"],
+    "answer": "100 g",
+    "explanation": "Tire uma maçã de cada lado: sobram 2 maçãs contra 200 g. Então 2 maçãs pesam 200 g, e cada uma pesa 100 g.",
+    "category": "logica",
+    "subject": "equações"
+  },
+  {
+    "question": "O que vem depois: 1, 1, 2, 3, 5, 8, ...?",
+    "options": ["13", "11", "12", "16"],
+    "answer": "13",
+    "explanation": "Cada número é a soma dos dois anteriores: 5 + 8 = 13. É a sequência de Fibonacci, que aparece em conchas e girassóis.",
+    "category": "logica",
+    "subject": "sequências"
+  },
+  {
+    "question": "Qual frase sobre figuras é verdadeira?",
+    "options": ["Todo quadrado é um retângulo", "Todo retângulo é um quadrado", "Nenhum quadrado é um retângulo", "Quadrados têm 3 lados"],
+    "answer": "Todo quadrado é um retângulo",
+    "explanation": "Retângulo é qualquer figura de 4 lados com 4 ângulos retos. O quadrado cumpre isso, só que com todos os lados iguais.",
+    "category": "logica",
+    "subject": "classificação"
+  },
+  {
+    "question": "Três caixas têm etiquetas: 'maçãs', 'laranjas' e 'mistura', mas todas estão erradas. Você tira uma fruta da caixa 'mistura' e sai uma maçã. O que há nessa caixa?",
+    "options": ["Só maçãs", "Só laranjas", "Maçãs e laranjas misturadas", "Não dá para saber"],
+    "answer": "Só maçãs",
+    "explanation": "Como a etiqueta 'mistura' está errada, a caixa não é mistura. Saiu maçã, então ela só pode ser a caixa só de maçãs.",
+    "category": "logica",
+    "subject": "raciocínio"
+  },
+  {
+    "question": "Um relógio de ponteiros marca exatamente 3 horas. Quantos graus há entre o ponteiro das horas e o dos minutos?",
+    "options": ["90", "45", "180", "60"],
+    "answer": "90",
+    "explanation": "A volta inteira tem 360 graus divididos em 12 horas, ou seja, 30 graus por hora. Do 12 ao 3 são 3 × 30 = 90 graus.",
+    "category": "logica",
+    "subject": "ângulos"
+  },
+  {
+    "question": "Se hoje é quarta-feira, que dia da semana será daqui a 10 dias?",
+    "options": ["Sábado", "Sexta", "Domingo", "Quarta"],
+    "answer": "Sábado",
+    "explanation": "7 dias depois é quarta de novo. Sobram 3 dias: quinta, sexta, sábado.",
+    "category": "logica",
+    "subject": "calendário"
+  },
+  {
+    "question": "Três amigos apertam as mãos, cada um com cada um, só uma vez. Quantos apertos de mão acontecem?",
+    "options": ["3", "6", "9", "2"],
+    "answer": "3",
+    "explanation": "Chame de A, B e C: os apertos são AB, AC e BC. O aperto de A com B é o mesmo de B com A, por isso não conta duas vezes.",
+    "category": "logica",
+    "subject": "contagem"
+  },
+  {
+    "question": "Qual frase em inglês está correta?",
+    "options": ["I am ten years old.", "I have ten years old.", "I am ten years.", "Me ten years old."],
+    "answer": "I am ten years old.",
+    "explanation": "Em inglês, a idade é dita com o verbo 'to be' (ser/estar), não com 'have' (ter). Por isso 'I am ten'.",
+    "category": "ingles",
+    "subject": "frases do dia a dia"
+  },
+  {
+    "question": "Ache o erro: 'She go to school every day.'",
+    "options": ["O certo é 'She goes'", "O certo é 'She going'", "O certo é 'She gone'", "Não há erro"],
+    "answer": "O certo é 'She goes'",
+    "explanation": "Com he, she e it, o verbo no presente ganha um 's': she goes, he plays, it works.",
+    "category": "ingles",
+    "subject": "gramática"
+  },
+  {
+    "question": "O que significa a placa 'EXIT' num shopping?",
+    "options": ["Saída", "Entrada", "Cuidado", "Fechado"],
+    "answer": "Saída",
+    "explanation": "'Exit' é saída. Entrada é 'entrance', e 'closed' é fechado.",
+    "category": "ingles",
+    "subject": "vocabulário"
+  },
+  {
+    "question": "'Dog' vira 'dogs' no plural. Como fica o plural de 'box' (caixa)?",
+    "options": ["boxes", "boxs", "boxies", "box"],
+    "answer": "boxes",
+    "explanation": "Palavras terminadas em x, s, ch e sh ganham 'es' no plural: boxes, buses, watches, dishes.",
+    "category": "ingles",
+    "subject": "plural"
+  },
+  {
+    "question": "Qual palavra é o oposto de 'big'?",
+    "options": ["small", "tall", "old", "fast"],
+    "answer": "small",
+    "explanation": "'Big' é grande e 'small' é pequeno. 'Tall' é alto, 'old' é velho e 'fast' é rápido.",
+    "category": "ingles",
+    "subject": "vocabulário"
+  },
+  {
+    "question": "'It's raining, so take your ___.' Qual palavra completa a frase?",
+    "options": ["umbrella", "sunglasses", "ball", "pillow"],
+    "answer": "umbrella",
+    "explanation": "'It's raining' significa 'está chovendo', então você leva o guarda-chuva: umbrella.",
+    "category": "ingles",
+    "subject": "vocabulário"
+  },
+  {
+    "question": "O que vem depois: Monday, Tuesday, Wednesday, ...?",
+    "options": ["Thursday", "Friday", "Sunday", "Saturday"],
+    "answer": "Thursday",
+    "explanation": "Depois de quarta (Wednesday) vem quinta (Thursday). Os dias em inglês começam com letra maiúscula.",
+    "category": "ingles",
+    "subject": "dias da semana"
+  },
+  {
+    "question": "Alguém pergunta 'What time is it?'. Qual resposta faz sentido?",
+    "options": ["It's three o'clock.", "I'm fine, thanks.", "My name is Heitor.", "It's blue."],
+    "answer": "It's three o'clock.",
+    "explanation": "'What time is it?' é 'que horas são?'. 'I'm fine' responde a 'how are you?', e 'my name is' responde a 'what's your name?'.",
+    "category": "ingles",
+    "subject": "conversação"
+  },
+  {
+    "question": "No futebol em inglês, o 'goalkeeper' é qual jogador?",
+    "options": ["Goleiro", "Atacante", "Zagueiro", "Juiz"],
+    "answer": "Goleiro",
+    "explanation": "'Goal' é gol e 'keeper' é quem guarda. Atacante é 'striker', zagueiro é 'defender' e juiz é 'referee'.",
+    "category": "ingles",
+    "subject": "futebol em inglês"
+  },
+  {
+    "question": "Como se escreve o número quinze em inglês?",
+    "options": ["fifteen", "fiveteen", "fifty", "fourteen"],
+    "answer": "fifteen",
+    "explanation": "Quinze é 'fifteen'; 'fifty' é cinquenta e 'fourteen' é catorze. O 'five' vira 'fif' em fifteen e fifty.",
+    "category": "ingles",
+    "subject": "números"
   }
 ]

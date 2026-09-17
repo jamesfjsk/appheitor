@@ -48,7 +48,7 @@ export interface DailyQuizQuestion {
 
 export interface DailyQuizTheme {
   id: string;          // id do tema no currículo
-  category: string;    // filosofia, caráter, ciência...
+  category: string;    // id de QuizCategory (filosofia, carater, quimica...)
   title: string;
   lesson: string;      // a "ideia do dia": texto curto e concreto
   whyItMatters: string;

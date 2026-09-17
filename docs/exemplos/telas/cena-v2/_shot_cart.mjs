@@ -36,18 +36,36 @@ const parseGoal = (target, loaded, need) => ({
   need: need ? Number(need) : null,
 });
 
-const winMask = (crates, loaded, target, need) => {
+const ruleOk = (v, say) => {
+  if (say.includes('ímpares')) return v % 2 === 1;
+  if (say.includes('pares')) return v % 2 === 0;
+  if (say.includes('Sem o 5')) return v !== 5;
+  if (say.includes('Sem o 7')) return v !== 7;
+  if (say.includes('maior que 7')) return v <= 7;
+  if (say.includes('menor que 4')) return v >= 4;
+  return true;
+};
+
+const winMask = (crates, loaded, target, need, kind, say) => {
   const n = crates.length;
   for (let m = 1; m < (1 << n); m++) {
-    let sum = loaded;
+    let sum = 0;
     let count = 0;
+    let product = 1;
+    let ok = true;
     for (let i = 0; i < n; i++) {
       if (m & (1 << i)) {
-        sum += crates[i];
+        const v = crates[i];
+        if (!ruleOk(v, say)) ok = false;
+        sum += v;
         count += 1;
+        product *= v;
       }
     }
-    if (sum === target && (need == null || count === need)) return m;
+    if (!ok) continue;
+    if (kind === 'product' && count >= 2 && product === target) return m;
+    if (kind === 'divide' && sum > 0 && loaded % sum === 0 && loaded / sum === target) return m;
+    if (kind !== 'product' && kind !== 'divide' && loaded + sum === target && (need == null || count === need)) return m;
   }
   return 0;
 };
@@ -95,54 +113,63 @@ try {
       loaded: bench?.getAttribute('data-loaded') || '0',
       need: bench?.getAttribute('data-need') || '',
       wagons: document.querySelectorAll('.vg-wagon').length,
+      fuse: document.querySelector('[data-testid="cart-fuse"]')?.getAttribute('data-left') || '',
       lecture: /Soma de cabeça|O peso só aparece|já tem|No chão|Etapa \d de 3/i.test(t),
       ban: /anel|marcada|puxa as duas|desliga a/i.test(t),
     };
   });
   console.log('hud', JSON.stringify(hud));
   await shot('00-start');
+  if (!hud.locked && !hud.done) {
+    await page.click('[data-testid="cart-smith"]');
+    await new Promise((r) => setTimeout(r, 180));
+    await shot('00-smith');
+  }
+  await new Promise((r) => setTimeout(r, 2200));
+  const fuseBurn = await page.evaluate(() => document.querySelector('[data-testid="cart-fuse"]')?.getAttribute('data-left') || '');
+  console.log('fuse-burn', fuseBurn);
+  await shot('00-fuse');
   if (hud.locked || hud.done) {
-    await page.evaluate(() => {
-      document.querySelector('.rs-play-lock')?.remove();
-      document.querySelector('[data-testid="cart-scale"]')?.remove();
-      const line = document.querySelector('[data-testid="cart-body"]');
-      if (line && !document.querySelector('[data-testid="redstone-ready"]')) {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'vg-send';
-        b.setAttribute('data-testid', 'redstone-ready');
-        b.innerHTML = '<img src="/assets/english/ui/cart/signal.png" alt="" class="vg-signal mc-pixel" draggable="false"><span>Enviar</span>';
-        line.appendChild(b);
-      }
-    });
-    await new Promise((r) => setTimeout(r, 200));
-    await shot('00-layout');
+    const closed = await page.evaluate(() => ({
+      pay: document.querySelector('[data-testid="redstone-done"]')?.textContent || '',
+      say: document.querySelector('[data-testid="cart-say"]')?.textContent || '',
+      overlay: Boolean(document.querySelector('.rs-play-lock')),
+    }));
+    console.log('closed', JSON.stringify(closed));
+    await shot('05-closed');
     console.log('blocked', hud.locked ? 'recado' : 'claimed');
   } else {
   await page.click('[data-testid="cart-crate-0"]');
   await new Promise((r) => setTimeout(r, 180));
   await shot('00-hitch');
   const resetBtn = await page.$('[data-testid="redstone-retry"]');
+  const fuseBeforeRetry = await page.evaluate(() => document.querySelector('[data-testid="cart-fuse"]')?.getAttribute('data-left') || '');
   if (resetBtn) await resetBtn.click();
   await new Promise((r) => setTimeout(r, 250));
+  const fuseAfterRetry = await page.evaluate(() => document.querySelector('[data-testid="cart-fuse"]')?.getAttribute('data-left') || '');
+  console.log('fuse-denovo', JSON.stringify({ fuseBeforeRetry, fuseAfterRetry }));
   const crateCount = await page.evaluate(() => document.querySelectorAll('[data-testid^="cart-crate-"]').length);
   for (let i = 0; i < crateCount; i += 1) {
     await page.click(`[data-testid="cart-crate-${i}"]`);
   }
+  await new Promise((r) => setTimeout(r, 450));
+  await shot('00-full');
   await page.click('[data-testid="redstone-ready"]');
   await new Promise((r) => setTimeout(r, 800));
   const mash = await page.evaluate(() => ({
     why: document.querySelector('[data-testid="cart-why"]')?.textContent || '',
     scale: document.querySelector('[data-testid="cart-scale"]')?.textContent || '',
+    say: document.querySelector('[data-testid="cart-say"]')?.textContent || '',
     fail: document.querySelector('.vg-line.is-fail') !== null,
   }));
   console.log('mash', JSON.stringify(mash));
   await shot('01-mash-fail');
   await new Promise((r) => setTimeout(r, 450));
   await shot('01-return');
-  await new Promise((r) => setTimeout(r, 900));
+  await new Promise((r) => setTimeout(r, 1100));
+  await page.waitForSelector('[data-testid="redstone-ready"]', { timeout: 8000 });
 
-  const board = await page.evaluate(() => {
+  const readBoard = async () => page.evaluate(() => {
     const bench = document.querySelector('[data-testid="cart-bench"]');
     const crates = [...document.querySelectorAll('[data-testid^="cart-crate-"]')].map((el) => ({
       i: Number((el.getAttribute('data-testid') || '').replace('cart-crate-', '')),
@@ -150,38 +177,43 @@ try {
     }));
     crates.sort((a, b) => a.i - b.i);
     return {
-      target: bench?.getAttribute('data-target') || '',
-      loaded: bench?.getAttribute('data-loaded') || '0',
+      kind: bench?.getAttribute('data-kind') || 'sum',
+      target: Number(bench?.getAttribute('data-target') || 0),
+      loaded: Number(bench?.getAttribute('data-loaded') || 0),
       need: bench?.getAttribute('data-need') || '',
+      say: document.querySelector('[data-testid="cart-say"]')?.textContent || '',
       crates,
     };
   });
-  const parsed = parseGoal(board.target, board.loaded, board.need);
-  const values = board.crates.map((c) => c.n);
-  const mask = winMask(values, parsed.loaded, parsed.target, parsed.need);
-  console.log('solve', JSON.stringify({ board, parsed, mask }));
-  for (let i = 0; i < values.length; i += 1) {
-    if (mask & (1 << i)) await page.click(`[data-testid="cart-crate-${i}"]`);
-  }
-  await page.click('[data-testid="redstone-ready"]');
-  await new Promise((r) => setTimeout(r, 800));
-  const win = await page.evaluate(() => ({
-    go: document.querySelector('.vg-line.is-go') !== null,
-    scale: document.querySelector('[data-testid="cart-scale"]')?.textContent || '',
-    look: document.querySelector('[data-testid="cart-scale"]')?.textContent || '',
-  }));
-  console.log('win', JSON.stringify(win));
-  await shot('02-win');
-  await new Promise((r) => setTimeout(r, 1600));
-  const stage2 = await page.evaluate(() => ({
-    title: [...document.querySelectorAll('.vg-dots i.is-now')].length,
-    loaded: document.querySelector('[data-testid="cart-loaded"] .vg-wagon-tag')?.textContent || '',
-    goal: document.querySelector('[data-testid="redstone-goal"]')?.textContent || '',
-    loaded: document.querySelector('[data-testid="cart-loaded"]')?.textContent || '',
-  }));
-  console.log('stage2', JSON.stringify(stage2));
+  const playWin = async (name) => {
+    await page.waitForSelector('[data-testid="redstone-ready"]', { timeout: 8000 });
+    await new Promise((r) => setTimeout(r, 400));
+    const board = await readBoard();
+    const need = board.need ? Number(board.need) : null;
+    const mask = winMask(board.crates.map((c) => c.n), board.loaded, board.target, need, board.kind, board.say);
+    console.log(name, JSON.stringify({ kind: board.kind, target: board.target, loaded: board.loaded, need, mask, say: board.say }));
+    for (let i = 0; i < board.crates.length; i += 1) {
+      if (mask & (1 << i)) await page.click(`[data-testid="cart-crate-${i}"]`);
+    }
+    await page.waitForSelector('[data-testid="redstone-ready"]:not([disabled])', { timeout: 8000 });
+    await page.click('[data-testid="redstone-ready"]');
+    await new Promise((r) => setTimeout(r, 900));
+    await shot(name);
+    await new Promise((r) => setTimeout(r, 1600));
+  };
+  await playWin('02-win');
   await shot('03-stage2');
-  await page.click('[data-testid="redstone-quit"]');
+  await playWin('03-stage2-win');
+  await playWin('04-stage3-win');
+  await page.waitForSelector('[data-testid="redstone-done"]', { timeout: 15000 });
+  await new Promise((r) => setTimeout(r, 400));
+  const closed = await page.evaluate(() => ({
+    pay: document.querySelector('[data-testid="redstone-done"]')?.textContent || '',
+    say: document.querySelector('[data-testid="cart-say"]')?.textContent || '',
+    overlay: Boolean(document.querySelector('.rs-play-lock')),
+  }));
+  console.log('pay', JSON.stringify(closed));
+  await shot('05-closed');
   }
 } catch (err) {
   console.error(err);

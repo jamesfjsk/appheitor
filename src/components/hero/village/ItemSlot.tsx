@@ -17,8 +17,11 @@ function thumb(item: Item): React.ReactNode {
   if (item.slot === 'shirt' || item.slot === 'pants') {
     return <GarmentIcon kind={item.slot} hex={cosmeticSwatchHex(item.id) || undefined} />;
   }
+  if (item.slot === 'cape') {
+    return <GarmentIcon kind={item.id === 'cape_vila' ? 'scarf' : 'cape'} hex={cosmeticSwatchHex(item.id) || '#B33A2B'} />;
+  }
   const hex = item.kind === 'cosmetic' ? cosmeticSwatchHex(item.id) : null;
-  if (hex && item.slot !== 'cape') {
+  if (hex) {
     return <span className="mn-item-swatch" style={{ background: hex }} />;
   }
   return <img src={item.icon} alt="" className="w-8 h-8 mc-pixel" draggable={false} onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} />;
@@ -40,6 +43,7 @@ const ItemSlot: React.FC<{
       style={{ boxShadow: `inset 0 0 0 2px ${frame.color}` }}
       onClick={onClick}
       title={item.description}
+      aria-label={item.name}
     >
       {thumb(item)}
       <span className="text-[10px] leading-tight truncate w-full">{item.name}</span>

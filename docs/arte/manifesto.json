@@ -269,6 +269,66 @@
       }
     },
     {
+      "file": "char/miner-iso-cap.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "green baseball cap with an orange visor instead of the yellow mining helmet, same cute miner boy, hair visible at the sides",
+        "inpainting_image": "char/miner-iso.png",
+        "mask_image": "masks/helmet.png",
+        "view": "low top-down",
+        "seed": 201
+      }
+    },
+    {
+      "file": "char/miner-iso-iron.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "gray iron mining helmet with a small headlamp instead of the yellow helmet, same cute miner boy",
+        "inpainting_image": "char/miner-iso.png",
+        "mask_image": "masks/helmet.png",
+        "view": "low top-down",
+        "seed": 202
+      }
+    },
+    {
+      "file": "char/miner-iso-hair.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "dark brown messy hair, no helmet, no lamp, same cute miner boy face and eyes",
+        "inpainting_image": "char/miner-iso.png",
+        "mask_image": "masks/helmet.png",
+        "view": "low top-down",
+        "seed": 215
+      }
+    },
+    {
+      "file": "char/miner-iso-crown.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "a small gold royal crown with pointed tips and a red gem sitting on the hair",
+        "inpainting_image": "char/miner-iso-hair.png",
+        "mask_image": "masks/crown.png",
+        "view": "low top-down",
+        "seed": 216
+      }
+    },
+    {
+      "file": "char/miner-iso-cape.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "a long red cape hanging behind both shoulders down to the knees with a small gold clasp at the neck. Keep the yellow mining helmet, face, blue shirt and pickaxe unchanged.",
+        "inpainting_image": "char/miner-iso.png",
+        "mask_image": "masks/cape-iso.png",
+        "view": "low top-down",
+        "seed": 214
+      }
+    },
+    {
       "file": "items/pickaxe-madeira.png",
       "kind": "item",
       "endpoint": "generate-image-pixflux",

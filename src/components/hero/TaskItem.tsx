@@ -5,8 +5,12 @@ import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import { useVillage } from '../../contexts/VillageContext';
 import { useClock } from '../../contexts/ClockContext';
+import { useData } from '../../contexts/DataContext';
 import { periodAllowedAt } from '../../services/village/schedule';
+import { computeTaskLoot } from '../../services/village/loot';
+import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../config/englishBase';
 import { getTodayBrazil } from '../../utils/clock';
+import type { Period } from '../../types/village';
 import toast from 'react-hot-toast';
 
 const CLOCK = '/assets/english/ui/clock.webp';
@@ -107,8 +111,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
     }
   };
 
-  const { economy } = useVillage();
-  const { hour: hourBrazil, minute } = useClock();
+  const { village, economy, settings, modules } = useVillage();
+  const { tasks } = useData();
+  const { hour: hourBrazil, minute, today } = useClock();
   const periodOpen = periodAllowedAt(task.period, hourBrazil, economy);
   const abreHora = task.period === 'afternoon'
     ? economy.periodStartHours.afternoon
@@ -117,6 +122,22 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
       : null;
 
   const done = isTaskCompletedToday(task);
+  const byPeriod: Record<Period, number> = { morning: 0, afternoon: 0, evening: 0 };
+  if (!done) {
+    for (const t of tasks) {
+      if (t.status === 'done' && t.lastCompletedDate === today) byPeriod[t.period] += 1;
+    }
+  }
+  const effectsOn = settings.effectsEnabled && modules.effects !== false;
+  const loot = done
+    ? null
+    : computeTaskLoot({
+      period: task.period,
+      gear: village.gear,
+      completionsTodayByPeriod: byPeriod,
+      settings: economy,
+      effectsEnabled: effectsOn,
+    });
   const periodLabel =
     task.period === 'morning' ? 'Manhã' :
     task.period === 'afternoon' ? 'Tarde' : 'Noite';
@@ -157,6 +178,13 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
           <span className="mc-font text-[8px] mc-good">+{task.xp ?? TASK_DEFAULT_XP} XP</span>
           {(task.gold ?? TASK_DEFAULT_GOLD) > 0 && (
             <span className="mc-font text-[8px] mc-warn">+{task.gold ?? TASK_DEFAULT_GOLD} GOLD</span>
+          )}
+          {loot && loot.qty > 0 && (
+            <span className="inline-flex items-center gap-1 mc-font text-[8px] text-amber-200" title={loot.qty > (economy.materialsPerTask || 1) ? 'Bônus da picareta' : undefined}>
+              <img src={MATERIAL_ICONS[loot.material]} alt="" className="w-3.5 h-3.5 mc-pixel" draggable={false} />
+              +{loot.qty} {MATERIAL_LABELS[loot.material]}
+              {loot.qty > (economy.materialsPerTask || 1) ? ' · picareta' : ''}
+            </span>
           )}
         </div>
       </div>

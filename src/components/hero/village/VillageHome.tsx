@@ -280,8 +280,13 @@ const VillageHome: React.FC<Props> = ({
       return;
     }
     if (id === 'workshop') {
-      if (broken('fornalha') || lv('fornalha') < 1) setLot('fornalha');
-      else setDistrict('workshop');
+      if (broken('fornalha') || lv('fornalha') < 1) {
+        setDistrict(null);
+        setLot('fornalha');
+      } else {
+        setLot(null);
+        setDistrict('workshop');
+      }
       return;
     }
     if (id === 'npc:comerciante' && (hour >= 21 || hour < 7)) {
