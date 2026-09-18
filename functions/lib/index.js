@@ -1,0 +1,229 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.agendaReminders = exports.openai = void 0;
+const app_1 = require("firebase-admin/app");
+const firestore_1 = require("firebase-admin/firestore");
+const messaging_1 = require("firebase-admin/messaging");
+const storage_1 = require("firebase-admin/storage");
+const https_1 = require("firebase-functions/v2/https");
+const scheduler_1 = require("firebase-functions/v2/scheduler");
+const params_1 = require("firebase-functions/params");
+const crypto_1 = require("crypto");
+const clock_1 = require("./clock");
+(0, app_1.initializeApp)();
+const db = (0, firestore_1.getFirestore)();
+const OPENAI_API_KEY = (0, params_1.defineSecret)('OPENAI_API_KEY');
+const AI_MONTHLY_CALL_CAP = 800;
+const REGION = 'southamerica-east1';
+const CHAT_MODELS = new Set(['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini']);
+const TTS_MODELS = new Set(['gpt-4o-mini-tts']);
+const TTS_MAX_CHARS = 300;
+const CHAT_MAX_TOKENS = 4000;
+function addDays(date, n) {
+    const t = Date.parse(`${date}T12:00:00.000-03:00`) + n * 86400000;
+    return (0, clock_1.nowBrazil)(t).date;
+}
+function reminderDue(item, now) {
+    if (item.remindedAt)
+        return false;
+    const minutes = item.remindMinutesBefore ?? 0;
+    if (!item.time) {
+        const prev = addDays(item.date, -1);
+        return now.date > prev || (now.date === prev && now.hour >= 19);
+    }
+    const [h, m] = item.time.split(':').map(Number);
+    const eventMin = h * 60 + m - minutes;
+    const dayShift = eventMin < 0 ? -1 : 0;
+    const targetDate = addDays(item.date, dayShift);
+    const targetMin = ((eventMin % (24 * 60)) + 24 * 60) % (24 * 60);
+    const targetH = Math.floor(targetMin / 60);
+    const targetM = targetMin % 60;
+    if (now.date > targetDate)
+        return true;
+    if (now.date < targetDate)
+        return false;
+    return now.hour > targetH || (now.hour === targetH && now.minute >= targetM);
+}
+async function modulesOf() {
+    const snap = await db.doc('settings/modules').get();
+    const data = snap.data() || {};
+    return {
+        aiGeneration: data.aiGeneration !== false,
+        tts: data.tts !== false,
+    };
+}
+async function monthCalls() {
+    const month = (0, clock_1.nowBrazil)().date.slice(0, 7);
+    const snap = await db.doc(`aiUsage/${month}`).get();
+    return Number(snap.data()?.calls) || 0;
+}
+async function bumpUsage(model, calls, inputTokens = 0, outputTokens = 0, ttsChars = 0) {
+    const month = (0, clock_1.nowBrazil)().date.slice(0, 7);
+    const ref = db.doc(`aiUsage/${month}`);
+    await ref.set({
+        calls: firestore_1.FieldValue.increment(calls),
+        inputTokens: firestore_1.FieldValue.increment(inputTokens),
+        outputTokens: firestore_1.FieldValue.increment(outputTokens),
+        ttsChars: firestore_1.FieldValue.increment(ttsChars),
+        [`byModel.${model.replace(/\./g, '_')}`]: firestore_1.FieldValue.increment(calls),
+    }, { merge: true });
+}
+async function tokensOf(uid) {
+    const snap = await db.doc(`users/${uid}`).get();
+    const raw = snap.data()?.fcmTokens;
+    if (Array.isArray(raw))
+        return raw.filter((t) => typeof t === 'string' && t.length > 8);
+    if (raw && typeof raw === 'object')
+        return Object.keys(raw);
+    return [];
+}
+async function sendPush(tokens, title, body) {
+    const unique = [...new Set(tokens)];
+    if (unique.length === 0)
+        return;
+    await (0, messaging_1.getMessaging)().sendEachForMulticast({
+        tokens: unique,
+        notification: { title, body },
+        webpush: { notification: { title, body } },
+    });
+}
+exports.openai = (0, https_1.onCall)({ region: REGION, secrets: [OPENAI_API_KEY] }, async (request) => {
+    if (!request.auth)
+        throw new https_1.HttpsError('unauthenticated', 'Entre na conta para usar a IA.');
+    const body = (request.data || {});
+    const kind = body.kind === 'tts' ? 'tts' : 'chat';
+    const mods = await modulesOf();
+    if (kind === 'chat' && !mods.aiGeneration) {
+        throw new https_1.HttpsError('failed-precondition', 'A geração por IA está desligada no painel.');
+    }
+    if (kind === 'tts' && !mods.tts) {
+        throw new https_1.HttpsError('failed-precondition', 'A voz da Mina está desligada no painel.');
+    }
+    const key = OPENAI_API_KEY.value();
+    if (!key)
+        throw new https_1.HttpsError('failed-precondition', 'A chave da OpenAI ainda não foi configurada no servidor.');
+    const used = await monthCalls();
+    if (used >= AI_MONTHLY_CALL_CAP) {
+        throw new https_1.HttpsError('resource-exhausted', 'Teto mensal de IA atingido.');
+    }
+    if (kind === 'chat') {
+        const model = CHAT_MODELS.has(body.model || '') ? body.model : 'gpt-4o-mini';
+        await bumpUsage(model, 1);
+        const input = typeof body.input === 'string' ? { system: '', user: body.input, maxTokens: 800 } : (body.input || {});
+        const maxTokens = Math.min(CHAT_MAX_TOKENS, Math.max(16, Math.floor(Number(input.maxTokens) || 800)));
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+            body: JSON.stringify({
+                model,
+                temperature: body.temperature ?? 0.9,
+                max_tokens: maxTokens,
+                response_format: { type: 'json_object' },
+                messages: [
+                    { role: 'system', content: input.system || '' },
+                    { role: 'user', content: input.user || '' },
+                ],
+            }),
+        });
+        if (!response.ok) {
+            const text = await response.text().catch(() => '');
+            throw new https_1.HttpsError('internal', `OpenAI ${response.status}: ${text.slice(0, 180)}`);
+        }
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (!content)
+            throw new https_1.HttpsError('internal', 'Resposta vazia da IA');
+        let json;
+        try {
+            json = JSON.parse(content);
+        }
+        catch {
+            throw new https_1.HttpsError('internal', 'A IA não devolveu JSON válido');
+        }
+        const usage = { inputTokens: data.usage?.prompt_tokens ?? 0, outputTokens: data.usage?.completion_tokens ?? 0 };
+        await bumpUsage(model, 0, usage.inputTokens, usage.outputTokens);
+        return body.withUsage ? { json, usage } : { json };
+    }
+    const text = typeof body.input === 'string' ? body.input : String(body.input?.user || '');
+    if (!text.trim())
+        throw new https_1.HttpsError('invalid-argument', 'Texto vazio para a voz.');
+    if (text.length > TTS_MAX_CHARS)
+        throw new https_1.HttpsError('invalid-argument', `A voz aceita no máximo ${TTS_MAX_CHARS} caracteres.`);
+    const ttsModel = TTS_MODELS.has(body.model || '') ? body.model : 'gpt-4o-mini-tts';
+    await bumpUsage(ttsModel, 0, 0, 0, text.length);
+    const speech = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+        body: JSON.stringify({
+            model: ttsModel,
+            voice: body.voice || 'nova',
+            speed: 0.95,
+            input: text,
+            response_format: 'mp3',
+        }),
+    });
+    if (!speech.ok) {
+        const detail = await speech.text().catch(() => '');
+        throw new https_1.HttpsError('internal', `OpenAI TTS ${speech.status}: ${detail.slice(0, 180)}`);
+    }
+    const buf = Buffer.from(await speech.arrayBuffer());
+    const hash = (0, crypto_1.createHash)('sha256').update(`${ttsModel}|${body.voice || 'nova'}|0.95|${text}`).digest('hex');
+    const path = `english/tts/${hash}.mp3`;
+    const file = (0, storage_1.getStorage)().bucket().file(path);
+    await file.save(buf, { contentType: 'audio/mpeg', metadata: { cacheControl: 'public, max-age=31536000, immutable' } });
+    const url = await (0, storage_1.getDownloadURL)(file);
+    await db.doc(`englishAudio/${hash}`).set({ text, url, createdAt: new Date().toISOString() }, { merge: true });
+    return { url };
+});
+exports.agendaReminders = (0, scheduler_1.onSchedule)({ region: REGION, schedule: 'every 5 minutes', timeZone: 'America/Sao_Paulo' }, async () => {
+    const now = (0, clock_1.nowBrazil)();
+    const today = now.date;
+    const tomorrow = addDays(today, 1);
+    const [dated, weekly] = await Promise.all([
+        db.collection('agenda').where('date', 'in', [today, tomorrow]).get(),
+        db.collection('agenda').where('repeat', '==', 'weekly').limit(200).get(),
+    ]);
+    const seen = new Set();
+    const docs = [...dated.docs, ...weekly.docs].filter((d) => {
+        if (seen.has(d.id))
+            return false;
+        seen.add(d.id);
+        return true;
+    });
+    const admins = await db.collection('users').where('role', '==', 'admin').get();
+    const adminTokens = [];
+    for (const a of admins.docs)
+        adminTokens.push(...await tokensOf(a.id));
+    for (const snap of docs) {
+        const data = snap.data();
+        const occDate = data.repeat === 'weekly'
+            ? (() => {
+                let cursor = data.date;
+                while (cursor < today)
+                    cursor = addDays(cursor, 7);
+                return cursor;
+            })()
+            : data.date;
+        const item = {
+            date: occDate,
+            time: data.time,
+            remindMinutesBefore: data.remindMinutesBefore,
+            remindedAt: data.remindedFor === occDate ? data.remindedAt : undefined,
+        };
+        if (!reminderDue(item, now))
+            continue;
+        const title = String(data.title || 'Compromisso');
+        const when = data.time ? `${occDate === tomorrow ? 'Amanhã' : 'Hoje'} ${data.time}` : (occDate === tomorrow ? 'Amanhã' : 'Hoje');
+        const body = `${when}: ${title}. Já revisou?`;
+        const childTokens = data.userId ? await tokensOf(data.userId) : [];
+        await sendPush(childTokens, 'Agenda da Vila', body);
+        if (data.kind === 'prova' || data.kind === 'compromisso') {
+            await sendPush(adminTokens, 'Agenda da Vila', body);
+        }
+        await snap.ref.update({
+            remindedAt: `${now.date}T${String(now.hour).padStart(2, '0')}:${String(now.minute).padStart(2, '0')}`,
+            remindedFor: occDate,
+        });
+    }
+});
+//# sourceMappingURL=index.js.map
