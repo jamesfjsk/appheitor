@@ -1,11 +1,11 @@
 /** Trilha da Vila: loop com crossfade, some na Mina/prova, respeita o mudo. */
 
-export const VILLAGE_THEME = '/assets/village/music/vila.mp3?v=7';
-export const BGM_VOL = 0.22;
+export const VILLAGE_THEME = '/assets/village/music/vila.mp3?v=13';
+export const BGM_VOL = 0.24;
 export const BGM_DUCK_VOL = 0.06;
 export const SOUND_PREF_KEY = 'mm_sound';
 
-const CROSS_S = 1.35;
+const CROSS_S = 0.28;
 
 export function bgmDuckFor(district: string | null, quizOpen: boolean): boolean {
   return quizOpen || district === 'mine';
@@ -111,7 +111,7 @@ class VillageBgm {
 
   private arm(): void {
     if (this.watch !== null) return;
-    this.watch = window.setInterval(() => this.tick(), 200);
+    this.watch = window.setInterval(() => this.tick(), 50);
   }
 
   private disarm(): void {
@@ -126,7 +126,8 @@ class VillageBgm {
     if (!cur || !other || this.crossing || this.target() <= 0) return;
     const dur = cur.duration;
     if (!Number.isFinite(dur) || dur < 6) return;
-    if (dur - cur.currentTime > CROSS_S) return;
+    const remain = dur - cur.currentTime;
+    if (!cur.ended && remain > CROSS_S) return;
     this.crossing = true;
     other.currentTime = 0;
     other.volume = 0;
@@ -135,8 +136,9 @@ class VillageBgm {
     const step = () => {
       const k = clamp01((performance.now() - t0) / (CROSS_S * 1000));
       const vol = this.target();
-      other.volume = vol * k;
-      cur.volume = vol * (1 - k);
+      const ease = k * k * (3 - 2 * k);
+      other.volume = vol * Math.sin((Math.PI / 2) * ease);
+      cur.volume = vol * Math.cos((Math.PI / 2) * ease);
       if (k < 1) {
         requestAnimationFrame(step);
         return;

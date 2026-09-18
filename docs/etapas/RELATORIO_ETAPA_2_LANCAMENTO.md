@@ -299,3 +299,55 @@ Domingo (Heitor), backup do dia + apply. O `--confirm` usa o nome **atual** da v
 - `rewardsRedeemed` foi a 0 no progress (não estava na lista da spec; é progresso de jogo).
 - `englishBase` volta ao `initialBaseDoc` (1 ferro da Fornalha pela metade), preservando `level` e `vocab`.
 
+## P2 — Pacote 1 (18/09, hotfix do dia 1)
+
+Itens 2, 3, 5, 8, 18b e achados A3, A4, A9, A10, A11. Sem mudança de regra, arte ou economia. Sem Pacote 2. Sem commit. Não mexi em `cart.ts`, `CartBench.tsx`, `npcBehavior.ts`, música nem nas laterais da cena (`.mn-stage::before`).
+
+### O que mudou (na ordem)
+
+1. **Item 2.** Cabeçalho compacto em altura &lt; 800 px: uma linha (nome, nível, gold, tochas, relógio, placa). A cena usa o espaço que sobra. Em 1920×1080 o cabeçalho completo fica. Tirei o chip “Feliz aniversário” que cobria o relógio (decisão 1: aniversário fora do app até a Etapa 4).
+2. **Item 3.** Placa continua chip no cabeçalho; o painel abre no céu, centro-topo, `max-height: 26%`, sem cobrir Fornalha nem Ferreiro. Fala de NPC fecha a placa.
+3. **Item 5.** Contrato `done` (ou com `result`) nunca mostra “Abrir”; o selo é “Feito”.
+4. **Item 8.** Toasts `bottom-center`, 96 px acima da hotbar, um por vez (`id: child-notice`). Lembrete de agenda não abre balão por cima do Continuar. `reminderDue` já recusa evento passado.
+5. **18b.** O cartão da missão mostra o gold/XP que a conclusão paga (`vacationApplyGold` + origem criança/agenda = 0 + botas). O toast usa o valor pago; se cortou, acrescenta “teto do dia” ou “modo férias”.
+6. **A3.** Quadro da Mina só com `status === 'ready'`. Lease vencido não zera contratos. Regeneração com contrato feito continua recusada; o commit final preserva `done` (`keepDoneContracts`).
+7. **A4.** Ao subir de nível grava `pending:level:<season>:<n>` em `claimed`; o modal reabre. Escolher o material apaga o pending e grava a chave paga.
+8. **A9.** Comerciante: colocação errada avisa uma vez “Tem certeza? Ouça de novo” antes de fechar a entrega.
+9. **A10.** Diálogos e resumo de ontem ignoram datas &lt; `village.launchedOn`. `closeDay` honra `skipPenalty` no doc e o corte do lançamento. `launch-reset.cjs` marca `dailyProgress/{uid}_{launch-1}` com `skipPenalty: true`.
+10. **A11.** `vite:preloadError` recarrega a página uma vez (`sessionStorage`).
+
+### Arquivos
+
+- `src/components/hero/HeroHeader.tsx`, `HeroPanel.tsx`, `TaskItem.tsx`, `YesterdaySummary.tsx`
+- `src/components/hero/village/VillageHome.tsx`, `LevelUpModal.tsx`
+- `src/components/hero/english/base/ContractBoard.tsx`, `EnglishBase.tsx`, `MerchantContract.tsx`
+- `src/services/englishBaseService.ts`, `villageService.ts`, `dailyRulesService.ts`
+- `src/services/village/claims.ts`, `src/config/englishBase.ts`, `src/utils/clock.ts`
+- `src/contexts/DataContext.tsx`, `src/App.tsx`, `src/main.tsx`, `src/styles/miner.css`
+- `scripts/launch-reset.cjs`
+- `src/utils/__tests__/clock.test.ts`, `src/services/village/__tests__/etapa2.test.ts`
+- fotos em `docs/exemplos/telas/varredura-p2/{720,1080}/p1-*.png`
+- este relatório
+
+### Como verificou
+
+| Comando | Resultado |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | 0 erros |
+| `npx eslint src --max-warnings 7` | 0 erros; 7 avisos (ícones + `CharacterEditor.tsx:154`) |
+| `npm run test:english` | 19 arquivos; casos novos: `isBeforeLaunch`, presente pendente, `keepDoneContracts` |
+| `npx vite build` | ok; `App-DM9nqtGq.js` + `CartBench-Dy7Ddbhk.js` + `statsBump-BtP6dVbT.js` |
+| chunk `phaser` em `dist/assets` | nenhum |
+| fotos 1280×720 e 1920×1080 | `p1-vila`, `p1-placa`, `p1-casa-missoes`, `p1-mina` (conta de teste, `?h=14`) |
+
+### O que ficou de fora e por quê
+
+- Pacote 2 (itens 10, 12, 13, 14, 16, 17, 18 de 12 px, P2.2 tour do Sábio): amanhã, como pedido.
+- A1, A2, A5, A6, A7, A8: não estavam neste pacote.
+- Gold de missão continua fora do `gameGoldDailyCap` (não é fonte de “gold do jogo”); o cartão e o toast passam a usar o mesmo valor pago.
+- `launch-reset --apply` no Heitor: não rodei.
+
+### Dúvidas
+
+Nenhuma que tenha impedido o pacote.
+

@@ -106,7 +106,7 @@ export const DEFAULT_MODULES: ModuleSettings = {
   effects: true,
   bank: true,
   interest: true,
-  logic: false,
+  logic: true,
   lines: false,
   dilemmas: false,
   mineShift: false,

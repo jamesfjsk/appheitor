@@ -39,7 +39,7 @@ const MODULE_HELP: Record<keyof ModuleSettings, string> = {
   effects: 'Desligado: equipamentos não dão bônus (ainda dá para craftar).',
   bank: 'Cofrinho, juros e metas da criança.',
   interest: 'Bônus de paciência (5% por semana).',
-  logic: 'Reservado para a próxima etapa.',
+  logic: 'Vagoneta da Mina. Aparece na Mina depois do Recado do dia.',
   lines: 'Reservado para a próxima etapa.',
   dilemmas: 'Reservado para a próxima etapa.',
   mineShift: 'Reservado para a próxima etapa.',

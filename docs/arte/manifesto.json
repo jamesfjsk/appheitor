@@ -855,6 +855,381 @@
       "body": {
         "description": "grey rain cloud icon with three blue raindrops, simple game ui icon, centered, not scary"
       }
+    },
+    {
+      "file": "merchant/spot-door.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a wooden front door with a small window and a round handle, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-window.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a wooden framed window with four panes and a small sill, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-fence.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a short wooden picket fence, three posts, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-chest.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a closed wooden treasure chest with iron bands, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-box.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "an open wooden crate, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-oven.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a stone oven with a little fire inside, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-barrel.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a wooden barrel with iron hoops, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-table.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a small wooden table, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-bed.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a small bed with a red blanket and a white pillow, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-shelf.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a wooden shelf with two boards, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-rug.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a round red and blue rug on the floor, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/spot-bench.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a wooden bench, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 96,
+          "height": 96
+        },
+        "view": "side",
+        "negative_description": "text, watermark, character, person, blurry"
+      }
+    },
+    {
+      "file": "merchant/item-torch.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a single handheld wooden torch stick with a small orange flame on top, held upright, no building, pixel art game item icon, clean black outline, soft shading, transparent background, centered",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "seed": 123
+      }
+    },
+    {
+      "file": "merchant/item-sword.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a short iron sword, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-book.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a closed blue book, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-ball.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a round soccer ball with black and white pentagon pattern, pixel art game item icon, clean black outline, soft shading, transparent background, centered",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "seed": 123
+      }
+    },
+    {
+      "file": "merchant/item-apple.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a red apple, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-banana.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a yellow banana, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-orange.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "an orange fruit, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-map.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a rolled treasure map, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-clock.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a round alarm clock, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-bucket.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a metal bucket, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-bone.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a white dog bone, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-cake.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a slice of chocolate cake with a cherry, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-key.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a golden key, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-lamp.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a small oil lamp, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-boots.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a pair of brown leather boots, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
+    },
+    {
+      "file": "merchant/item-helmet.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a yellow hard hat mining helmet with a small round headlamp on the front, seen from the front, no house, no building, pixel art game item icon, clean black outline, soft shading, transparent background, centered",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "seed": 123
+      }
+    },
+    {
+      "file": "merchant/item-potion.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a purple potion bottle, pixel art game sprite, front view, clean black outline, soft shading, transparent background, centered, readable silhouette, warm palette of a cozy mine village shop",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        }
+      }
     }
   ]
 }
