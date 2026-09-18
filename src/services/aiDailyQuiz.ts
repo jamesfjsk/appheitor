@@ -70,7 +70,7 @@ export async function generateDailyQuiz(opts: {
   if (!opts.forceOffline && isAIConfigured()) {
     try {
       const system = buildPrompt(opts.seed, opts.count, age);
-      const avoidText = opts.avoidQuestions.length ? `Perguntas já usadas (não repita nem parafraseie):\n- ${opts.avoidQuestions.slice(-60).join('\n- ')}` : 'Primeira prova: capriche.';
+      const avoidText = opts.avoidQuestions.length ? `Perguntas já usadas (não repita nem parafraseie):\n- ${opts.avoidQuestions.slice(0, 80).join('\n- ')}` : 'Primeira prova: capriche.';
       const parsed = (await callOpenAI(system, avoidText, 220 * opts.count + 900, opts.signal)) as Record<string, unknown>;
       const themeRaw = (parsed.theme ?? {}) as Record<string, unknown>;
       const questions = coerceQuestions(parsed.questions, opts.count, opts.avoidQuestions);

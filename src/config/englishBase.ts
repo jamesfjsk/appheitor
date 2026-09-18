@@ -43,10 +43,10 @@ export const CONTRACT_LABELS: Record<ContractType, string> = {
 };
 
 export const CONTRACT_ICONS: Record<ContractType, string> = {
-  merchant: '/assets/english/ui/base/c_merchant.webp',
+  merchant: '/assets/village/npc/comerciante-iso.png',
   letter: '/assets/english/ui/base/c_letter.webp',
   note: '/assets/english/ui/base/c_note.webp',
-  forge: '/assets/english/ui/base/c_forge.webp',
+  forge: '/assets/village/npc/ferreiro-iso.png',
 };
 
 /** Material que cada tipo de contrato paga (seção 1) */

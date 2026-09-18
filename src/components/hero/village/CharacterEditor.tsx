@@ -10,6 +10,7 @@ import {
   cosmeticHasSprite,
   cosmeticSwatchHex,
   pickaxeInfo,
+  kidName,
 } from '../../../config/village';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
@@ -281,7 +282,7 @@ const CharacterEditor: React.FC<{
       <div className="mn-doll-wrap">
         <div className="mn-ficha-head">
           <p className="mn-panel-k">Equipado</p>
-          <p className="mn-ficha-item">{village.characterName || 'Heitor'}</p>
+          <p className="mn-ficha-item">{kidName(village.characterName)}</p>
         </div>
         <div className="mn-doll">
           <EqSlot area="cape" label="Capa" selected={tab === 'cape'} onClick={() => go('cape')}>
@@ -314,7 +315,7 @@ const CharacterEditor: React.FC<{
           </EqSlot>
         </div>
         <div className="mn-doll-plate">
-          <p className="mn-doll-rank">Nv. {level} · {levelSys.levelTitle}</p>
+          <p className="mn-doll-rank">Nível {level} · {levelSys.levelTitle}</p>
           <span className="mn-doll-xp" aria-hidden="true">
             <span style={{ width: `${Math.round(levelSys.progressPercentage)}%` }} />
           </span>

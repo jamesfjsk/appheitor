@@ -1,5 +1,6 @@
 import type { DialogueEntry } from '../../services/village/dialogue';
 import type { NpcId } from '../../types/village';
+import { minerBand } from './helpers';
 
 function e(
   npc: NpcId,
@@ -20,7 +21,7 @@ const FALLBACK: DialogueEntry[] = [
   e('sabio', 's_miss', ['Ontem faltou uma. Hoje é outro dia.'], (c) => c.yesterday.missed, { priority: 50 }),
   e('sabio', 's_pause', ['Folga. A Vila descansa com você.'], (c) => Boolean(c.pause), { priority: 45 }),
   e('sabio', 's_punish', ['Hoje o Mercado fecha. Prova e Mina continuam.'], (c) => Boolean(c.punish), { priority: 48 }),
-  e('sabio', 's_lv10', ['Nível 10. A Forja já te conhece.'], (c) => c.level >= 10, { once: true, priority: 30 }),
+  e('sabio', 's_lv10', ['Nível 10. A Forja já te conhece.'], minerBand(10, 15), { once: true, priority: 30 }),
   e('sabio', 's_quiz', ['A prova de hoje está na Biblioteca.'], (c) => !c.today.quizDone && c.hour < 21, { priority: 8 }),
   e('sabio', 's_t3', ['Colega. Posso te fazer uma pergunta de verdade.'], (c) => c.tier >= 2, { priority: 6 }),
   e('sabio', 's_generic', ['As missões de casa pagam o ouro da vila.'], () => true, { priority: 1 }),

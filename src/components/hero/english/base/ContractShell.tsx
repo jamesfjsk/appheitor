@@ -184,7 +184,12 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
     <div data-testid="contract-shell">
       {/* Barra do contrato: tipo, título, cronômetro, ajuda e sair */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <img src={CONTRACT_ICONS[contract.type]} alt="" className="w-9 h-9 mc-pixel shrink-0" draggable={false} />
+        <img
+          src={CONTRACT_ICONS[contract.type]}
+          alt=""
+          className={`mc-pixel shrink-0 ${contract.type === 'merchant' || contract.type === 'forge' ? 'w-12 h-12' : 'w-9 h-9'}`}
+          draggable={false}
+        />
         <div className="min-w-0 flex-1">
           <p className="mc-font text-[9px] mc-muted uppercase">{CONTRACT_LABELS[contract.type]}</p>
           <p className="text-sm font-bold text-white truncate">{contract.title}</p>

@@ -129,6 +129,16 @@ export function paintPixelTail(
   steps.forEach(([x, y, w, h]) => ctx.fillRect(P + x, Q + y, w, h));
 }
 
+export function hoverLabelPos(
+  hit: HoverHit,
+  canvas: { w: number; h: number } = { w: 1280, h: 640 },
+): { x: number; y: number } {
+  const bh = 18;
+  const cx = hit.x + hit.w / 2;
+  const y = Math.max(4, Math.min(canvas.h - bh - 4, hit.y - bh - 6));
+  return { x: cx, y };
+}
+
 export function paintHoverLabel(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -140,13 +150,14 @@ export function paintHoverLabel(
   const tw = Math.ceil(ctx.measureText(text).width);
   const bw = tw + 14;
   const bh = 18;
-  const x = Math.round(cx - bw / 2);
-  const yy = Math.round(y - 2);
+  const maxX = Math.max(4, ctx.canvas.width - bw - 4);
+  const x = Math.max(4, Math.min(maxX, Math.round(cx - bw / 2)));
+  const yy = Math.round(y);
   paintPixelPanel(ctx, x, yy, bw, bh, 'wood');
   ctx.fillStyle = '#f3e6c8';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, Math.round(cx), yy + Math.round(bh / 2) + 1);
+  ctx.fillText(text, x + Math.round(bw / 2), yy + Math.round(bh / 2) + 1);
   ctx.restore();
 }
 
@@ -552,7 +563,7 @@ export function paintHover(
       paintSilhouette(ctx, hit.sprite, hit.x, hit.y, hit.w, hit.h, rgba(gold, 1), 0.55 + 0.35 * pulse);
     }
     if (!reduced) paintFenceSparks(ctx, hit, elapsed, gold, reduced);
-    return { x: feet.x, y: Math.max(18, hit.y - 10) };
+    return hoverLabelPos(hit, { w: ctx.canvas.width, h: ctx.canvas.height });
   }
 
   paintGlow(ctx, feet.x, feet.y, kind === 'npc' ? 16 : 20, gold, 0.14 * pulse);
@@ -561,7 +572,7 @@ export function paintHover(
   }
   const hw = kind === 'npc' ? 10 : Math.min(16, Math.max(10, hit.w * 0.14));
   paintDiamondRing(ctx, feet.x, feet.y, hw, Math.max(5, Math.round(hw * 0.42)), rgba(gold, 0.7 * pulse));
-  return { x: feet.x, y: Math.min(628, feet.y + 16) };
+  return hoverLabelPos(hit, { w: ctx.canvas.width, h: ctx.canvas.height });
 }
 
 export type GrowthMark = {

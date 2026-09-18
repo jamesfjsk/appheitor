@@ -1,14 +1,9 @@
 import React from 'react';
 import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
-import { useAuth } from '../../contexts/AuthContext';
 import TaskItem from './TaskItem';
 import { useClock } from '../../contexts/ClockContext';
-import { addDays } from '../../utils/clock';
-import { dueTasksOn, extraVisibleOn } from '../../services/village/schedule';
-import { useVillage } from '../../contexts/VillageContext';
-import { lateWindow } from '../../services/village/late';
-import { FirestoreService } from '../../services/firestoreService';
+import { extraVisibleOn } from '../../services/village/schedule';
 
 const MAP = '/assets/english/ui/map.webp';
 const SUN = '/assets/english/ui/sun.webp';
@@ -52,11 +47,8 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   focusTaskId = null,
   onSetFocus,
 }) => {
-  const { completeTask, completeLateTask } = useData();
-  const { childUid } = useAuth();
+  const { completeTask } = useData();
   const { hour, weekday, today, period: clockPeriod } = useClock();
-  const { economy } = useVillage();
-  const [yesterdayDone, setYesterdayDone] = React.useState<string[]>([]);
 
   const getCurrentPeriod = (): 'morning' | 'afternoon' | 'evening' => clockPeriod;
 
@@ -82,12 +74,6 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     isTaskAvailableToday(task, weekday)
   );
   const orderedTasks = [...filteredTasks];
-  React.useEffect(() => {
-    if (!childUid) return;
-    const yesterday = addDays(today, -1);
-    void FirestoreService.getCompletedTaskIdsOn(childUid, yesterday).then(setYesterdayDone).catch(() => setYesterdayDone([]));
-  }, [childUid, today]);
-
   const extraTasks = tasks.filter((task) => extraVisibleOn(task, today) && isTaskAvailableToday(task, weekday));
 
   const completedTasks = orderedTasks.filter(task => isTaskCompletedToday(task, today)).length;
@@ -204,21 +190,6 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           </span>
         </div>
       )}
-
-      {lateWindow(hour, economy) && dueTasksOn(tasks, addDays(today, -1)).filter((t) => !yesterdayDone.includes(t.id)).map((t) => {
-        const full = tasks.find((x) => x.id === t.id);
-        if (!full) return null;
-        return (
-          <div key={`late-${t.id}`} className="mc-row rounded p-3 mb-2 flex justify-between items-center">
-            <p className="text-sm">Recuperar: {full.title}</p>
-            <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" onClick={() => {
-              void completeLateTask(full.id).then(() => {
-                setYesterdayDone((ids) => ids.includes(full.id) ? ids : [...ids, full.id]);
-              }).catch(() => undefined);
-            }}>Recuperar</button>
-          </div>
-        );
-      })}
 
       {extraTasks.length > 0 && (
         <div className="mb-3">

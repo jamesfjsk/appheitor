@@ -1,5 +1,5 @@
 import type { DialogueEntry } from '../../services/village/dialogue';
-import { e, isMorning, isAfternoon, isEvening, isWeekend, dayComplete, nothingYet, oneLeft, quizPending, lv, daysBetween } from './helpers';
+import { e, isMorning, isAfternoon, isEvening, isWeekend, dayComplete, nothingYet, oneLeft, quizPending, lv, daysBetween, minerBand } from './helpers';
 
 // Comerciante: pão-duro e engraçado. Fala de preço, troca e material. Adora pedra.
 // Sem fala de punição (só Sábio e Ferreiro).
@@ -14,7 +14,7 @@ const FIRST: DialogueEntry[] = [
   e(N, 'c_first_chest', ['Seu primeiro Baú do Dia. Abriu sozinho, sem chave e sem taxa.', 'Aproveita, que aqui na barraca nada é assim.'], (c) => c.firstTime.has('chest'), { once: true, priority: 80 }),
   e(N, 'c_first_buy', ['Sua primeira compra! Fico feliz. O gold, nem tanto.', 'Brincadeira. Gold bem gasto volta em alegria.'], (c) => c.firstTime.has('buy'), { once: true, priority: 80 }),
   e(N, 'c_first_goal', ['Uma meta no Cofrinho? Guardar em vez de gastar? Comigo aqui do lado?', 'Tá bom, admito: foi bem pensado.'], (c) => c.firstTime.has('goal'), { once: true, priority: 80 }),
-  e(N, 'c_first_lv10', ['Nível 10. Nesse ritmo, daqui a pouco você vai querer comprar a minha barraca.', 'Não está à venda. Ainda.'], (c) => c.firstTime.has('lv10'), { once: true, priority: 80 }),
+  e(N, 'c_first_lv10', ['Nível 10. Nesse ritmo, daqui a pouco você vai querer comprar a minha barraca.', 'Não está à venda. Ainda.'], minerBand(10, 15), { once: true, priority: 80 }),
   e(N, 'c_first_season', ['Uma temporada inteira e a barraca continua de pé. Milagre.', 'Treze semanas de negócio. Você é o meu melhor cliente.'], (c) => c.firstTime.has('season'), { once: true, priority: 80 }),
 ];
 
@@ -37,12 +37,12 @@ const DAY: DialogueEntry[] = [
 ];
 
 const PROG: DialogueEntry[] = [
-  e(N, 'c_prog_lv5', ['Nível 5. Já sabe onde a pedra fica e quanto ela vale.', 'Que é muito, para constar.'], (c) => c.level >= 5, { once: true, priority: 30 }),
-  e(N, 'c_prog_lv10', ['Nível 10. Cliente de dois dígitos ganha desconto. Brincadeira, não ganha.', 'Mas ganha meu respeito, que é mais raro.'], (c) => c.level >= 10, { once: true, priority: 30 }),
-  e(N, 'c_prog_lv15', ['Nível 15. Nessa altura, eu já não te vendo nada errado.', 'Você repararia.'], (c) => c.level >= 15, { once: true, priority: 30 }),
-  e(N, 'c_prog_lv20', ['Nível 20. Quando eu tinha o seu nível, minha barraca era uma caixa virada.', 'Ainda é, mas agora tem toldo.'], (c) => c.level >= 20, { once: true, priority: 30 }),
-  e(N, 'c_prog_lv30', ['Nível 30. Se você abrisse uma barraca, eu ficaria preocupado.', 'Não abre, por favor.'], (c) => c.level >= 30, { once: true, priority: 30 }),
-  e(N, 'c_prog_lv40', ['Nível 40. Já vi muito minerador passar por aqui. Nenhum chegou tão longe.', 'Estou até pensando em dar desconto. Pensando.'], (c) => c.level >= 40, { once: true, priority: 30 }),
+  e(N, 'c_prog_lv5', ['Nível 5. Já sabe onde a pedra fica e quanto ela vale.', 'Que é muito, para constar.'], minerBand(5, 10), { once: true, priority: 30 }),
+  e(N, 'c_prog_lv10', ['Nível 10. Cliente de dois dígitos ganha desconto. Brincadeira, não ganha.', 'Mas ganha meu respeito, que é mais raro.'], minerBand(10, 15), { once: true, priority: 30 }),
+  e(N, 'c_prog_lv15', ['Nível 15. Nessa altura, eu já não te vendo nada errado.', 'Você repararia.'], minerBand(15, 20), { once: true, priority: 30 }),
+  e(N, 'c_prog_lv20', ['Nível 20. Quando eu tinha o seu nível, minha barraca era uma caixa virada.', 'Ainda é, mas agora tem toldo.'], minerBand(20, 30), { once: true, priority: 30 }),
+  e(N, 'c_prog_lv30', ['Nível 30. Se você abrisse uma barraca, eu ficaria preocupado.', 'Não abre, por favor.'], minerBand(30, 40), { once: true, priority: 30 }),
+  e(N, 'c_prog_lv40', ['Nível 40. Já vi muito minerador passar por aqui. Nenhum chegou tão longe.', 'Estou até pensando em dar desconto. Pensando.'], minerBand(40), { once: true, priority: 30 }),
   e(N, 'c_prog_mercado1', ['A barraca de pé! Toldo novo, balcão firme.', 'Agora sim: Prêmios, Loja e eu. Bem-vindo ao comércio.'], (c) => lv(c, 'mercado') >= 1, { once: true, priority: 30 }),
   e(N, 'c_prog_bau1', ['Armazém construído. Agora dá para ver o que você tem.', 'E o que você tem, eu sei contar de longe.'], (c) => lv(c, 'bau') >= 1, { once: true, priority: 30 }),
   e(N, 'c_prog_cofre1', ['O Cofre. Gold guardado rende bônus de paciência.', 'Rende sem trabalhar. Eu devia ter inventado isso.'], (c) => lv(c, 'cofre') >= 1, { once: true, priority: 30 }),

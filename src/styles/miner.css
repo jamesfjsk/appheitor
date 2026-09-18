@@ -302,6 +302,7 @@
   display: block;
   width: 100%;
   border: 0;
+  cursor: default;
 }
 
 /* recado fino sobre a pintura — placa de madeira, não uma barra de produto */
@@ -448,6 +449,23 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+.mn-npc-face {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.mn-contract.is-need {
+  box-shadow: inset 3px 3px 0 #574f49, inset -3px -3px 0 #26211e, 0 0 0 3px #ffd83d;
+}
+.mn-contract.is-done {
+  background: #2f4a24;
+  box-shadow: inset 3px 3px 0 #4a6a3a, inset -3px -3px 0 #1e2e18;
+}
+.mn-contract.is-done .mc-slot-good {
+  background: #3d6a28;
+  color: #e8ffd0;
+}
 .mn-child-foot {
   flex: 0 0 auto;
   padding: 10px 12px;
@@ -480,6 +498,22 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  /* Laterais quando a cena cabe pela altura: a própria paisagem, desfocada e escurecida, em vez de preto (18/09). */
+  background: #17130f;
+  overflow: hidden;
+}
+.mn-village .mn-stage::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  background: url('/assets/village/scene/backdrop-day.png') center / cover no-repeat;
+  filter: blur(6px) brightness(0.42) saturate(0.8);
+  pointer-events: none;
+}
+.mn-village .mn-stage .mn-scene {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 3px #17130f, 0 0 28px rgba(0, 0, 0, 0.55);
 }
 .mn-village .mn-stage .mn-scene {
   width: auto !important;
@@ -551,16 +585,8 @@
   font-size: 12px;
 }
 
-@media (min-width: 1600px) {
-  .mn-child-scale {
-    zoom: 1.25;
-    width: calc(100vw / 1.25);
-    height: calc(100vh / 1.25);
-    min-height: calc(100vh / 1.25) !important;
-    margin: 0 auto;
-    overflow: hidden;
-  }
-}
+/* Tela larga: sem `zoom` (no Firefox o zoom rasteriza a página e borra texto e cena, 18/09).
+   Quando for escalar em 1920, é por tamanhos em rem/clamp, nunca por zoom ou transform. */
 
 .mc-btn-wood {
   background-color: var(--mc-wood);
@@ -1096,11 +1122,10 @@
 }
 .vg-smith-body {
   display: block;
-  width: 112px;
+  width: 128px;
   height: auto;
   image-rendering: pixelated;
   filter: drop-shadow(2px 3px 0 #0d0b0a);
-  transform: scaleX(-1);
 }
 .vg-smith.is-talk .vg-smith-stand {
   animation: vg-smith-hop 0.42s ease-out;

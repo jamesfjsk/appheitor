@@ -47,7 +47,7 @@ export const DEFAULT_ECONOMY: EconomySettings = {
   taskDefaultXp: 10,
   taskDefaultGold: 5,
   periodStartHours: { afternoon: 12, evening: 18 },
-  periodGating: true,
+  periodGating: false,
   chestOpenHour: 18,
   minDueForChest: 3,
   incomeDayGold: 45,
@@ -521,6 +521,24 @@ export function houseTitle(season: number): string {
   return t === 1 ? 'Cabana' : t === 2 ? 'Casa' : 'Sobrado';
 }
 
+const PLACEHOLDER_KID = /^(teste|test|conta de teste|user|jogador)$/i;
+const PLACEHOLDER_VILLAGE = /^(vila do )?teste$/i;
+
+export function kidName(raw?: string | null): string {
+  const n = String(raw || '').trim();
+  return !n || PLACEHOLDER_KID.test(n) ? 'Heitor' : n;
+}
+
+export function villageLabel(raw?: string | null): string {
+  const n = String(raw || '').trim();
+  return !n || PLACEHOLDER_VILLAGE.test(n) ? 'Vila do Heitor' : n;
+}
+
+export function houseWelcome(season: number, rawName?: string | null, allDone = false): string {
+  const rest = allDone ? 'A chaminé está acesa: o dia está completo.' : 'Aqui ficam as missões de hoje.';
+  return `${houseTitle(season)} do ${kidName(rawName)}. ${rest}`;
+}
+
 export const HOTBAR_ICONS: Record<string, string> = {
   Vila: ISO_MINER,
   Missões: '/assets/village/buildings/casa-1.png',
@@ -571,17 +589,17 @@ export function characterSpriteSrc(gear: VillageGear, shirt: string, skin = 'ski
 }
 
 export const DISTRICT_LABELS: Record<string, string> = {
-  mine: 'Mina / Mine',
-  library: 'Biblioteca / Library',
-  workshop: 'Ferraria / Forge',
-  market: 'Mercado / Market',
-  tower: 'Torre / Tower',
-  bank: 'Banco / Bank',
-  pack: 'Mochila / Pack',
-  agenda: 'Agenda / Agenda',
-  house: 'Casa / House',
-  chest: 'Baú do Dia / Daily chest',
-  arena: 'Arena / Arena',
+  mine: 'Mina',
+  library: 'Biblioteca',
+  workshop: 'Ferraria',
+  market: 'Mercado',
+  tower: 'Torre',
+  bank: 'Banco',
+  pack: 'Mochila',
+  agenda: 'Agenda',
+  house: 'Casa',
+  chest: 'Baú do Dia',
+  arena: 'Arena',
 };
 
 /** Nome na cena: o mesmo da antiga grade, no lugar certo. */

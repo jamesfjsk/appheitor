@@ -1,5 +1,5 @@
 import type { DialogueEntry } from '../../services/village/dialogue';
-import { e, isMorning, isAfternoon, isEvening, isWeekend, dayComplete, nothingYet, oneLeft, quizPending, lv, daysBetween } from './helpers';
+import { e, isMorning, isAfternoon, isEvening, isWeekend, dayComplete, nothingYet, oneLeft, quizPending, lv, daysBetween, minerBand } from './helpers';
 
 // Olheiro: fala de futebol e de caráter. Vê talento no esforço; comenta constância e recordes.
 // Sem fala de punição (só Sábio e Ferreiro).
@@ -14,7 +14,7 @@ const FIRST: DialogueEntry[] = [
   e(N, 'o_first_chest', ['Primeiro Baú. Fechou o dia inteiro, e o prêmio veio.', 'É assim que se ganha campeonato: um jogo de cada vez.'], (c) => c.firstTime.has('chest'), { once: true, priority: 80 }),
   e(N, 'o_first_buy', ['Primeira compra. Escolheu bem? Escolher é parte do jogo.', 'O capitão também escolhe.'], (c) => c.firstTime.has('buy'), { once: true, priority: 80 }),
   e(N, 'o_first_goal', ['Uma meta no Cofrinho. Meta, no futebol e no banco, é onde você mira.', 'Agora chuta na direção dela.'], (c) => c.firstTime.has('goal'), { once: true, priority: 80 }),
-  e(N, 'o_first_lv10', ['Nível 10. Camisa 10 é de quem decide o jogo.', 'Você começou a decidir o seu.'], (c) => c.firstTime.has('lv10'), { once: true, priority: 80 }),
+  e(N, 'o_first_lv10', ['Nível 10. Camisa 10 é de quem decide o jogo.', 'Você começou a decidir o seu.'], minerBand(10, 15), { once: true, priority: 80 }),
   e(N, 'o_first_season', ['Uma temporada inteira. Treze rodadas sem abandonar o campeonato.', 'Poucos aguentam a primeira. Você aguentou.'], (c) => c.firstTime.has('season'), { once: true, priority: 80 }),
 ];
 
@@ -37,12 +37,12 @@ const DAY: DialogueEntry[] = [
 ];
 
 const PROG: DialogueEntry[] = [
-  e(N, 'o_prog_lv5', ['Nível 5. Já passou da peneira. Agora é categoria de base.'], (c) => c.level >= 5, { once: true, priority: 30 }),
-  e(N, 'o_prog_lv10', ['Nível 10. Se fosse futebol, eu já teria ligado para um clube grande.'], (c) => c.level >= 10, { once: true, priority: 30 }),
-  e(N, 'o_prog_lv15', ['Nível 15. Sabe o que eu vi? Você não desistiu nos níveis chatos, aqueles do meio.'], (c) => c.level >= 15, { once: true, priority: 30 }),
-  e(N, 'o_prog_lv20', ['Nível 20. Profissional. Daqui para frente, cada nível custa mais suor.', 'Você tem.'], (c) => c.level >= 20, { once: true, priority: 30 }),
-  e(N, 'o_prog_lv30', ['Nível 30. Isso é seleção. Eu olhei muito jogador e poucos chegam aqui.'], (c) => c.level >= 30, { once: true, priority: 30 }),
-  e(N, 'o_prog_lv40', ['Nível 40. Camisa aposentada. Ninguém mais usa esse número na Vila.'], (c) => c.level >= 40, { once: true, priority: 30 }),
+  e(N, 'o_prog_lv5', ['Nível 5. Já passou da peneira. Agora é categoria de base.'], minerBand(5, 10), { once: true, priority: 30 }),
+  e(N, 'o_prog_lv10', ['Nível 10. Se fosse futebol, eu já teria ligado para um clube grande.'], minerBand(10, 15), { once: true, priority: 30 }),
+  e(N, 'o_prog_lv15', ['Nível 15. Sabe o que eu vi? Você não desistiu nos níveis chatos, aqueles do meio.'], minerBand(15, 20), { once: true, priority: 30 }),
+  e(N, 'o_prog_lv20', ['Nível 20. Profissional. Daqui para frente, cada nível custa mais suor.', 'Você tem.'], minerBand(20, 30), { once: true, priority: 30 }),
+  e(N, 'o_prog_lv30', ['Nível 30. Isso é seleção. Eu olhei muito jogador e poucos chegam aqui.'], minerBand(30, 40), { once: true, priority: 30 }),
+  e(N, 'o_prog_lv40', ['Nível 40. Camisa aposentada. Ninguém mais usa esse número na Vila.'], minerBand(40), { once: true, priority: 30 }),
   e(N, 'o_prog_torre1', ['A Torre de pé. Todo clube tem sala de troféus.', 'A sua começou hoje.'], (c) => lv(c, 'torre') >= 1, { once: true, priority: 30 }),
   e(N, 'o_prog_torre2', ['Torre nível 2: agora tem Recordes.', 'Recorde é para quebrar. O seu próprio, principalmente.'], (c) => lv(c, 'torre') >= 2, { once: true, priority: 30 }),
   e(N, 'o_prog_cerca1', ['A Cerca protege a tocha uma vez por mês.', 'É a defesa do time. Sem defesa, o ataque não ganha nada.'], (c) => lv(c, 'cerca') >= 1, { once: true, priority: 30 }),

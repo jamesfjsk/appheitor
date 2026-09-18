@@ -367,7 +367,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         )
       );
 
-      const focus = village.plan.date === today && village.plan.focusTaskId === taskId;
+      const focus = false; // missão-foco removida em 18/09 (decisão 22): sem material em dobro
       const morningEarly = task.period === 'morning' && hour < 9;
       const paid = await FirestoreService.completeTaskWithRewards(
         taskId,

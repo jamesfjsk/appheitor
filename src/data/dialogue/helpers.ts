@@ -24,3 +24,6 @@ export const lv = (c: DialogueCtx, id: string): number => c.baseLevels[id] || 0;
 /** A prova só existe com a Biblioteca (mesa) nível 1; depois das 21h não vale mais cobrar. */
 export const quizPending = (c: DialogueCtx): boolean => lv(c, 'mesa') >= 1 && !c.today.quizDone && c.hour < 21;
 export const daysBetween = (c: DialogueCtx, min: number, max: number): boolean => c.fullDays >= min && c.fullDays <= max;
+/** Marco do minerador: só o patamar atual, não um nível antigo. */
+export const minerBand = (min: number, next?: number) => (c: DialogueCtx): boolean =>
+  c.level >= min && (next == null || c.level < next);

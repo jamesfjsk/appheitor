@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { COSMETICS, cosmeticHasSprite } from '../../../config/village';
+import { COSMETICS, ISO_NPC, cosmeticHasSprite } from '../../../config/village';
 import { ITEMS, itemState } from '../../../config/items';
 import { canBuy, priceOf } from '../../../services/village/shop';
 import { daysToAfford, referenceIncome } from '../../../services/village/income';
@@ -19,7 +19,7 @@ import ItemSlot from './ItemSlot';
 import ItemCard from './ItemCard';
 import RewardsPanel from '../RewardsPanel';
 
-const COMERCIANTE = '/assets/village/npc/comerciante.png';
+const COMERCIANTE = ISO_NPC.comerciante;
 const FILTERS = [
   { id: 'all', label: 'Tudo' },
   { id: 'hat', label: 'Chapéus' },

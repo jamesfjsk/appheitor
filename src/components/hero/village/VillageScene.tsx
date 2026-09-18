@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { BuildingId } from '../../../types/english';
-import { buildingSprite, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, lookBodySrc, visibleCracks, type SceneProp } from '../../../config/village';
+import { buildingSprite, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, kidName, lookBodySrc, visibleCracks, type SceneProp } from '../../../config/village';
 import type { NpcId, VillageDoc, VillageSceneEvent } from '../../../types/village';
-import { npcTarget, npcTouch, npcHopPx, lookFacing, npcWalk, npcRoutine, heroClickPlan, heroGroundPlan, heroWalkAlong, heroWalkablePoint, heroShouldOpen, arrivePulse, DEFAULT_WALK_GRAPH, HERO_ARRIVE_HOLD_MS, type WalkGraph } from '../../../services/village/npcBehavior';
+import { npcTarget, npcTouch, npcHopPx, lookFacing, npcWalk, npcRoutine, heroClickPlan, heroGroundPlan, heroWalkAlong, heroShouldOpen, arrivePulse, DEFAULT_WALK_GRAPH, HERO_ARRIVE_HOLD_MS, type WalkGraph } from '../../../services/village/npcBehavior';
 import { buildingLevelSum, villageGrowthStage } from '../../../services/village/season';
 import { isNightHour } from '../../../utils/clock';
 import { quizBlocksDest } from '../../../services/village/quizGate';
@@ -839,17 +839,25 @@ const VillageScene: React.FC<Props> = ({
 
     const draw = (now: number) => {
       if (!alive) return;
-      const wait = reducedMotion ? 1000 : 1000 / 30;
+      // "Reduzir movimento" (Firefox segue a opção do Windows) tira balanço e tremor, mas o andar do Heitor
+      // e as falas continuam animados: sem isso o laço parava e o boneco "teletransportava" (18/09).
+      const wait = reducedMotion && !heroTrip.current ? 1000 / 8 : 1000 / 30;
       if (now - last.current < wait && last.current !== 0) {
         raf = requestAnimationFrame(draw);
         return;
       }
+      const frameStart = performance.now();
       last.current = now;
       void date;
       const hidden = document.hidden || !visible;
       const dpr = Math.min(2, window.devicePixelRatio || 1);
-      const cssW = canvas.clientWidth || W;
-      const cssH = Math.round(cssW * (H / W));
+      // A caixa do canvas pode não ter a proporção da cena (CSS `object-fit: contain` desde o P2, 18/09):
+      // a pintura ocupa o retângulo "contido" e o mouse é mapeado pelo mesmo retângulo (sceneXY).
+      const boxW = canvas.clientWidth || W;
+      const boxH = canvas.clientHeight || Math.round(boxW * (H / W));
+      const fit = Math.min(boxW / W, boxH / H);
+      const cssW = Math.max(1, Math.round(W * fit));
+      const cssH = Math.max(1, Math.round(H * fit));
       if (canvas.width !== Math.round(cssW * dpr) || canvas.height !== Math.round(cssH * dpr)) {
         canvas.width = Math.round(cssW * dpr);
         canvas.height = Math.round(cssH * dpr);
@@ -950,7 +958,6 @@ const VillageScene: React.FC<Props> = ({
       const growthMarks = visibleGrowthMarks(anchors.growth, sum);
 
       const layers: Layer[] = [];
-      const hits: Hotspot[] = [];
       const cracks = visibleCracks(village.cracks);
       growthMarks.forEach((mark, i) => {
         layers.push({
@@ -989,7 +996,6 @@ const VillageScene: React.FC<Props> = ({
             hover: 'building',
             door: lot.door,
           };
-        if (!fenceBuilt) hits.push(hit);
         layers.push({
           id: hit.id,
           y: lot.y + lot.h + (empty && lot.id !== 'cerca' && lot.id !== 'torre' ? 12 : 0),
@@ -1065,7 +1071,6 @@ const VillageScene: React.FC<Props> = ({
             pixel: Boolean(sprite),
             hover: 'fence',
           };
-          hits.push(hit);
           layers.push({
             id: `wall:${i}`,
             y: dy + sh,
@@ -1126,7 +1131,6 @@ const VillageScene: React.FC<Props> = ({
           hover: id === 'mine' ? 'spot' : (spotSprite ? 'building' : 'spot'),
           door: box.door,
         };
-        hits.push(hit);
         layers.push({
           id,
           y: box.y + box.h,
@@ -1166,7 +1170,6 @@ const VillageScene: React.FC<Props> = ({
           hover: 'building',
           door: houseLot.door,
         };
-        hits.push(hit);
         layers.push({
           id: 'house',
           y: houseLot.y + houseLot.h,
@@ -1218,10 +1221,9 @@ const VillageScene: React.FC<Props> = ({
         y: hy - charH + charBob,
         w: charW,
         h: charH,
-        label: village.characterName || 'Heitor',
+        label: kidName(village.characterName),
         hover: 'npc',
       };
-      hits.push(charHit);
       layers.push({
         id: 'character',
         y: hy,
@@ -1288,7 +1290,6 @@ const VillageScene: React.FC<Props> = ({
           if (pos.sign) {
             const board = { x: a.x - 40, y: a.y - 52, w: 80, h: 36 };
             const hit: Hotspot = { id: `npc:${npc}`, x: board.x, y: board.y, w: board.w, h: board.h, label: pos.sign, hover: 'spot' };
-            hits.push(hit);
             layers.push({
               id: hit.id,
               y: a.y,
@@ -1334,22 +1335,23 @@ const VillageScene: React.FC<Props> = ({
             : walking && !walked.step
               ? Math.round(a.h * 0.9)
               : wave ? a.h * 0.9 : a.h;
-        const pad = 10;
         const nx = pos.x + nShift;
         const routine = npcRoutine(npc as NpcId, hour);
         const spot = anchors.npcSpots?.[npc]?.[routine.spot];
         const door = spot?.door || a.door || { x: pos.x, y: Math.min(pos.y + 16, 518) };
+        const npcTop = pos.y - nH + nBob - (sit ? 8 : 0);
         const hit: Hotspot = {
           id: `npc:${npc}`,
-          x: nx - nW / 2 - pad,
-          y: pos.y - nH + nBob - (sit ? 8 : 0) - pad,
-          w: nW + pad * 2,
-          h: nH + pad * 2 + (sit ? 8 : 0),
+          x: nx - nW / 2,
+          y: npcTop,
+          w: nW,
+          h: nH + (sit ? 8 : 0),
           label: NPC_LABEL[npc] || npc,
           hover: 'npc',
+          sprite: spr || undefined,
+          pixel: false,
           door,
         };
-        hits.push(hit);
         layers.push({
           id: hit.id,
           y: pos.y,
@@ -1407,7 +1409,6 @@ const VillageScene: React.FC<Props> = ({
           hover: 'building',
           door: prop.door,
         };
-        hits.push(hit);
         layers.push({
           id: prop.id,
           y: prop.y + prop.h,
@@ -1426,7 +1427,11 @@ const VillageScene: React.FC<Props> = ({
 
       layers.sort((a, b) => a.y - b.y);
       layers.forEach((layer) => layer.draw(ctx));
-      spots.current = hits;
+      const picked = layers.flatMap((layer) => (layer.hit ? [layer.hit] : []));
+      spots.current = [
+        ...picked.filter((h) => h.hover !== 'npc'),
+        ...picked.filter((h) => h.hover === 'npc'),
+      ];
 
       if (cracks.length) {
         if (crackShakeUntil.current === 0) crackShakeUntil.current = now + 480;
@@ -1651,7 +1656,8 @@ const VillageScene: React.FC<Props> = ({
         }
       }
 
-      if (!hidden && !reducedMotion) raf = requestAnimationFrame(draw);
+      canvas.dataset.frameMs = String(Math.round(performance.now() - frameStart));
+      if (!hidden) raf = requestAnimationFrame(draw);
     };
 
     last.current = 0;
@@ -1670,9 +1676,17 @@ const VillageScene: React.FC<Props> = ({
     const canvas = ref.current;
     if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    // mesmo retângulo "contido" que o desenho usa (object-fit: contain): sem isso o clique
+    // cai deslocado quando a caixa do canvas não tem a proporção da cena (18/09)
+    const fit = Math.min(rect.width / anchors.size.w, rect.height / anchors.size.h);
+    const dw = anchors.size.w * fit;
+    const dh = anchors.size.h * fit;
+    const ox = rect.left + (rect.width - dw) / 2;
+    const oy = rect.top + (rect.height - dh) / 2;
     return {
-      x: ((e.clientX - rect.left) / rect.width) * anchors.size.w,
-      y: ((e.clientY - rect.top) / rect.height) * anchors.size.h,
+      x: (e.clientX - ox) / fit,
+      y: (e.clientY - oy) / fit,
     };
   };
 
@@ -1734,11 +1748,8 @@ const VillageScene: React.FC<Props> = ({
         const xy = sceneXY(e);
         if (!xy) return;
         const next = pickHit(spots.current, xy.x, xy.y);
-        const prev = hover.current;
         hover.current = next;
-        if (prev?.id !== next?.id) setTick((n) => n + 1);
-        const walkHere = !next && Boolean(heroWalkablePoint(xy, walkGraph, anchors.water, anchors.size));
-        const cur = next || walkHere ? 'pointer' : 'default';
+        const cur = next ? 'pointer' : 'default';
         if (cur !== cursor) setCursor(cur);
       }}
       onMouseLeave={() => {

@@ -97,7 +97,8 @@ export async function regenerateDailyQuiz(userId: string, date: string, today: s
 }
 
 async function buildAndSave(userId: string, date: string, today: string, count: number): Promise<DailyQuiz> {
-  const recent = await getRecentDailyQuizzes(userId, today, 45);
+  // 90 dias de memória (18/09): a lista chega da mais recente para a mais antiga, e o prompt recebe as 80 mais recentes
+  const recent = await getRecentDailyQuizzes(userId, today, 90);
   const recentIds = recent.filter((q) => q.date !== date).map((q) => q.theme.id).filter(Boolean);
   const avoid = recent.flatMap((q) => q.questions.map((x) => x.question));
   const seed = pickThemeForDate(date, recentIds);

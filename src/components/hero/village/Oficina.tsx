@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { BUILDINGS, buildingCost, buildingEffectNow, MATERIAL_ICONS, MATERIAL_LABELS, MATERIALS } from '../../../config/englishBase';
-import { GEAR, buildingSprite, pickaxeInfo, visibleCracks } from '../../../config/village';
+import { GEAR, ISO_NPC, buildingSprite, pickaxeInfo, visibleCracks } from '../../../config/village';
 import { ITEMS } from '../../../config/items';
 import { canCraft, tradePreview } from '../../../services/village/shop';
 import { useVillage } from '../../../contexts/VillageContext';
@@ -15,7 +15,7 @@ import { calculateLevelSystem } from '../../../utils/levelSystem';
 import ItemSlot from './ItemSlot';
 import CharacterPreview from './CharacterPreview';
 
-const FORGE = '/assets/english/ui/base/c_forge.webp';
+const FORGE = ISO_NPC.ferreiro;
 
 const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | 'works'; onOpenPack?: () => void; onOpenLot?: (id: string) => void }> = ({ onClose, initialTab = 'gear', onOpenPack, onOpenLot }) => {
   const { village, materials, buildings, economy, craftGear, tradeMaterials } = useVillage();

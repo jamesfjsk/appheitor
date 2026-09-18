@@ -122,6 +122,14 @@ Também nesta rodada, sem teste no navegador: guarda in-flight (`ref`) no efeito
 - `goalsService.finishGoal`: a leitura de `settings/economy` do `bigGoals` roda depois da transação e sem `try/catch` (mesmo padrão do A14).
 - Nenhum teste cobre que o papel `admin` pula a cadeia diária.
 
+### Correções feitas por mim em 18/09 de manhã (o pai testando no Firefox; entram no commit do P2)
+
+- **Andar restaurado** como aprovado no Lote 2 (125 px/s, mínimo 480 ms, abre na chegada; sem atalho de "perto"; `npcBehavior.ts`, `VillageScene.tsx`, testes).
+- **Laço da cena não para mais com "reduzir movimento"** (Firefox segue a opção do Windows; o boneco ficava travado e "teletransportava"): `VillageScene.tsx`, `draw`.
+- **Mouse na cena**: com o `object-fit: contain` que o P2 pôs no canvas, a pintura e o clique usavam retângulos diferentes, e o cursor e o clique caíam deslocados conforme a resolução. Desenho e `sceneXY` passam a usar o mesmo retângulo contido; conferido em 1280x720, 1366x768, 1600x900 e 1920x1080, Chromium e Firefox.
+- **Sem `zoom` em tela larga** (borrava no Firefox); **"Recuperar" fora**; **missão do dia vale o dia inteiro** (`periodGating: false` por padrão); **missão-foco fora** (decisão 22).
+- **Laterais da cena** (`.mn-village .mn-stage::before`): quando a cena cabe pela altura, as faixas dos lados mostram a própria paisagem desfocada e escurecida em vez de preto. **Aprovado pelo pai em 18/09; não mexer.**
+
 ### Rodada 2 conferida (17/09, 19h40): **P1 aprovado**
 
 Lido no código atual: `AuthContext` devolve `{ user, childUid }` e grava os dois no mesmo tick (linhas 87-88 e 141-142); o efeito de montagem do `DataContext` espera `user`, depende de `user?.role` e a cadeia inteira, streak incluído, fica atrás de `role !== 'admin'` (1298-1330), assim como o `run` da virada (1510). `computeWeeklyLearning` grava o topo só quando a semana pedida é a fechada (`closedWeek`, 96-104) e a corrente vai só para `weeks[week]`. Cadeado com placa clara (`VillageScene.tsx:317`) e cadeado no atalho Mercado (`VillageHome.tsx:611`). `Casa.tsx:223` chama `finishFocusBlock`. `nextQuizStreak(prev, done, skipped)` com teste 7 → férias → 8; a prova lê férias e folga de ontem em `dailyProgress`; `closeDay` respeita `quizEnabled`. `nightComplete` com guarda de módulo por `uid:dia`. Checks: tsc 0, eslint 0 e 7 avisos, 19 arquivos de teste verdes.
@@ -153,9 +161,11 @@ Motivo: o pai viu a Casa cortada (Fechar e Concluir fora da tela) e mandou lapid
 12. **Agenda, Hoje**: a criança apaga e edita itens criados pelo pai com um clique. Item do pai é só leitura para a criança (pode marcar feito); os dela pedem confirmação para apagar.
 13. **Cartão do Mercado** repete o painel de prêmios inteiro (1094 px de rolagem) e termina com "Oficina". Cartão só com o resumo ("3 prêmios ao seu alcance") e "Abrir o Mercado".
 14. **Cartão da Biblioteca nível 0** diz "A prova do dia já pode ser feita" com a prova já feita: texto por estado (feita, pendente, trancada).
-15. **1920x1080: tudo pequeno** (coluna de 1280 px com 320 px vazios de cada lado; modais em px; alavanca da Vagoneta com rótulo de 9 px): a tela da criança escala em largura ≥ 1600 (`zoom: 1.25` no root da tela da criança, ou tamanhos em `rem` com base maior), a cena ocupa a largura útil.
+15. **1920x1080: tudo pequeno** (coluna de 1280 px com 320 px vazios de cada lado; modais em px; alavanca da Vagoneta com rótulo de 9 px): a tela da criança cresce em largura ≥ 1600 por tamanhos em `rem` com `clamp()` e a cena ocupa a largura útil. **Nunca `zoom` nem `transform: scale`**: o `zoom: 1.25` que entrou borrou texto e cena no Firefox (o pai viu em 18/09; removido por mim).
 16. **Cerca nível 0 sem lote desenhado** (só aparece no hover): desenhar terra e placa como nos outros lotes vazios.
 17. **Nomes** (glossário `VILA_MAPA.md`): a faixa diz "A Ferraria caiu" quando é a **Fornalha**; botão "Oficina" nos cartões vira "Ferraria"; o cartão diz "Armazém" e o resto "Baú": a construção é **Armazém**, o Baú é o Baú do Dia.
+6b. **Chip "Feliz aniversário" por cima do Onboarding** (foto do pai, 18/09): o cabeçalho com o chip de aniversário renderiza acima do Onboarding em tela cheia. Regra do P2: nada (chip, toast, modal, pedido de permissão) aparece enquanto o Onboarding está aberto; o chip de aniversário só na Vila.
+18b. **Cartão promete 2 gold e o toast paga 1** (foto do pai, 18/09): quando o teto diário (`gameGoldDailyCap`) ou qualquer regra corta o valor, a linha de recompensa do cartão mostra o valor **que vai pagar de verdade** (calcular com o mesmo `computeTaskLoot`/teto antes de mostrar), e o toast diz por quê quando cortou ("teto do dia"). Prometer 2 e dar 1 é o tipo de coisa que faz a criança desconfiar do jogo.
 18. **Texto pequeno** (9 a 11 px): chips do cabeçalho, `mc-lbl`, "RECADO", linha de recompensa da missão, números do Extrato e dos Recordes, tags "Novo". Mínimo 12 px em texto e 14 px em número que ele precisa ler; fonte pixel só em título e número grande.
 
 ### Depois (P4 ou Etapa 3; registrados)
@@ -165,3 +175,35 @@ Motivo: o pai viu a Casa cortada (Fechar e Concluir fora da tela) e mandou lapid
 Telas sem defeito de layout: prova (inicial, lição, resultado, reflexão), contrato aberto e em jogo, Vagoneta, Ferraria Obras, Loja "em breve", Comerciante, Cofrinho, Foco, cartões Fornalha, Torre, Armazém e Agenda, Baú do Dia, Vila 18h e 21h, balões do Comerciante, Sábio e Olheiro, LevelUpModal em si.
 
 Aceite do P2 (com esta lista): os itens 1 a 18 corrigidos com foto em 1280x720 e 1920x1080; eu refaço a varredura nas duas resoluções antes do go/no-go.
+
+
+## Revisão final de lançamento (18/09, manhã; o pai decidiu liberar o primeiro acesso hoje)
+
+### O que fica registrado de tudo que o Heitor faz (base para ajustes e para não repetir)
+
+| O que ele faz | Onde fica gravado | O que dá para saber depois |
+|---|---|---|
+| Prova do dia | `dailyQuizzes/{uid}_{data}`: tema (id, categoria, título, ideia do dia), as 8 perguntas com alternativas, resposta certa e explicação, `answers[]` (o que ele marcou), `score`, `xpEarned`, `goldEarned`, `reflection` (o que escreveu), `source` (IA ou reserva), horários | cada pergunta já feita, acerto por pergunta, categorias fortes e fracas, reflexões; a lista "não repita" da IA passa a receber as **80 perguntas mais recentes** dos últimos **90 dias** (corrigido hoje: antes mandava as 60 mais antigas de 45 dias) |
+| Missões | `taskCompletions` (uma por conclusão: missão, data, hora, XP, gold, material, foco, tarde), `goldTransactions` (cada gold que entra ou sai, com saldo antes e depois), `dailyProgress/{uid}_{data}` (fechamento do dia: feitas, perdidas, penalidade, bônus, obras caídas, `checkin` com humor e "amanhã eu") | rotina dia a dia, horários em que faz, dias completos, o que perde mais |
+| Mina (inglês) | `englishPlans/{uid}_{data}` (os contratos do dia com o conteúdo e o `result`: nota, resposta dele, correção, detalhes como ouvir de novo e olhar o glossário), `englishSessions` (uma linha por contrato e por jogo, inclusive a Vagoneta), `englishBase.vocab` (cada palavra vista, quantas vezes e quando; `seen >= 3` é dominada) | palavras já mostradas e dominadas, temas usados, acertos por tipo de contrato, cálculo mental da Vagoneta |
+| Desafios e metas | `challenges` (progresso e `completedAt`), `goals` (depósitos, alcançada ou cancelada) | o que ele topa e cumpre |
+| Vila | `village.stats` (todos os contadores: missões, dias completos, provas, contratos, obras, conversas, Baú, raros), `village.claimed` (cada prêmio pago, com data), `achievementsUnlocked`, `npcs` (amizade e falas vistas), `agenda` (o que ele marca) | conquistas, ritmo de obras, com quem fala, o que agenda |
+| Erros do app | `clientErrors` e `health/{uid}` | o que quebrou e quando |
+
+O reset de lançamento **preserva** tudo isso (só zera o jogo). O que ainda não existe e entra na Etapa 3, já desenhado em `ETAPA_2_LANCAMENTO.md` §8.4: a coleção `quizBank` (uma linha por pergunta com `hash`, para deduplicar por texto e para a revisita de erros), o perfil de aprendizado e a rotação de temas por perfil. Os dados brutos de hoje em diante servem de base para o `backfill-quizbank.cjs`.
+
+### Estado do código (18/09, 11h)
+
+`tsc` 0 erros; `eslint` 0 erros (7 avisos antigos); 19 arquivos de teste verdes; `vite build` sem `phaser`. Regras e índice do Firestore publicados em 17/09 às 14h19. Backup do Heitor gravado: `backups/xZkTTR2tlIYXIpAelxEqXugNjqo2-2026-09-18.json` (5.373 documentos). Dry-run do reset conferido: gold 116 → 100, XP 23.148 → 0, temporada 1, Onboarding de novo, 15 missões em pendente, 13 conquistas do pacote antigo desativadas, nível 1 e 3 palavras de inglês preservados, `dailyRules.activatedOn` = 2026-09-18.
+
+### Como liberar hoje (ordem)
+
+1. **Commit** da árvore (tudo que está aqui: P2 parcial do Cursor, correções de hoje). Mensagem sugerida: "P2 parcial e correções do lançamento".
+2. **Reset do Heitor** (com o backup já feito): `node scripts/launch-reset.cjs --uid xZkTTR2tlIYXIpAelxEqXugNjqo2 --launch 2026-09-18 --apply --confirm "LANCAR Vila do teste"`. Rodar de novo não muda nada.
+3. **Deploy**: `git checkout main && git merge etapa-2 && git push`; na Vercel, variável `VITE_MAINTENANCE=0` (sem ela o site mostra o teaser) e redeploy; conferir `flashmissons.com` abrindo o login.
+4. **Painel** (5 minutos): missões de hoje por período (as 15 já existem), 3 prêmios com faixa, recado de boas-vindas na Placa, módulos (Loja desligada, Cofrinho ligado, Vagoneta desligada até passar no teste), gerar e ler a prova de hoje na aba Prova.
+5. Entrar como Heitor só até "Crie seu minerador" e sair. Chamar o Heitor.
+
+### O que fica de fora hoje (registrado, sem prometer)
+
+Itens 6 a 18 da varredura que o Cursor ainda não fechou seguem na lista do P2 para a semana 1; `quizBank`, perfil de aprendizado e rotação por perfil (Etapa 3, semana 2); Expedição do Explorador (27/09).

@@ -282,6 +282,12 @@ test('diálogo: prioridade, once, 14 dias e missão perdida só nesse caso', () 
   expect(noMiss?.id === 's_miss').toBe(false);
   const skip14 = pickDialogue('sabio', { ...base, firstTime: new Set() }, [], ['s_morn']);
   expect(skip14?.id === 's_morn').toBe(false);
+  const lv8 = pickDialogue('sabio', { ...base, level: 8, firstTime: new Set() }, [], []);
+  expect(lv8?.id).toBe('s_prog_lv5');
+  expect(lv8?.lines[0].startsWith('Nível 5')).toBe(true);
+  const lv12 = pickDialogue('sabio', { ...base, level: 12, firstTime: new Set() }, [], []);
+  expect(lv12?.lines[0].includes('Nível 5')).toBe(false);
+  expect(lv12?.lines[0].includes('Nível 10')).toBe(true);
   expect(friendTier(0)).toBe(0);
   expect(friendTier(5)).toBe(1);
   expect(friendTier(80)).toBe(5);

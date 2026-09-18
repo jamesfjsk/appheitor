@@ -1,5 +1,5 @@
 import type { DialogueEntry } from '../../services/village/dialogue';
-import { e, isMorning, isAfternoon, isEvening, isWeekend, dayComplete, nothingYet, oneLeft, quizPending, lv, daysBetween } from './helpers';
+import { e, isMorning, isAfternoon, isEvening, isWeekend, dayComplete, nothingYet, oneLeft, quizPending, lv, daysBetween, minerBand } from './helpers';
 
 // Sábio: calmo, faz perguntas, cita ideias simples de filosofia e ciência. Nunca dá sermão.
 // Camadas: s_first_* (primeira vez), s_day_* (estado do dia), s_prog_* (progresso),
@@ -14,7 +14,7 @@ const FIRST: DialogueEntry[] = [
   e(N, 's_first_chest', ['O primeiro Baú abriu. Sabe o que ele guarda de verdade?', 'Um dia inteiro que você fechou.'], (c) => c.firstTime.has('chest'), { once: true, priority: 80 }),
   e(N, 's_first_buy', ['Sua primeira compra. Trocou gold por uma coisa que queria.', 'Escolher já é uma forma de pensar.'], (c) => c.firstTime.has('buy'), { once: true, priority: 80 }),
   e(N, 's_first_goal', ['Uma meta no Cofrinho. Você mandou um recado para o seu futuro.', 'Ele vai receber.'], (c) => c.firstTime.has('goal'), { once: true, priority: 80 }),
-  e(N, 's_first_lv10', ['Nível 10. Dois dígitos.', 'Lembra do nível 1? Eu lembro. Você mudou desde lá.'], (c) => c.firstTime.has('lv10'), { once: true, priority: 80 }),
+  e(N, 's_first_lv10', ['Nível 10. Dois dígitos.', 'Lembra do nível 1? Eu lembro. Você mudou desde lá.'], minerBand(10, 15), { once: true, priority: 80 }),
   e(N, 's_first_season', ['Uma temporada inteira. Treze semanas.', 'A Terra andou um quarto da volta em torno do Sol. Você também andou.'], (c) => c.firstTime.has('season'), { once: true, priority: 80 }),
 ];
 
@@ -37,12 +37,12 @@ const DAY: DialogueEntry[] = [
 ];
 
 const PROG: DialogueEntry[] = [
-  e(N, 's_prog_lv5', ['Nível 5. Você já entende como a Vila funciona.', 'Agora vem a parte boa: escolher o que construir.'], (c) => c.level >= 5, { once: true, priority: 30 }),
-  e(N, 's_prog_lv10', ['Nível 10. Pitágoras achava que os números explicam o mundo.', 'O seu, pelo menos, explica bastante.'], (c) => c.level >= 10, { once: true, priority: 30 }),
-  e(N, 's_prog_lv15', ['Nível 15. Sócrates dizia que só sabia que nada sabia.', 'Você já sabe bem mais do que isso.'], (c) => c.level >= 15, { once: true, priority: 30 }),
-  e(N, 's_prog_lv20', ['Nível 20. Metade de 40, o dobro de 10.', 'Os números são simples; o caminho até eles, não.'], (c) => c.level >= 20, { once: true, priority: 30 }),
-  e(N, 's_prog_lv30', ['Nível 30. Poucos chegam aqui, e nenhum chega por acaso.', 'O que te trouxe até aqui?'], (c) => c.level >= 30, { once: true, priority: 30 }),
-  e(N, 's_prog_lv40', ['Nível 40. Eu já não tenho muito a te ensinar.', 'Talvez agora seja você quem me ensina.'], (c) => c.level >= 40, { once: true, priority: 30 }),
+  e(N, 's_prog_lv5', ['Nível 5. Você já entende como a Vila funciona.', 'Agora vem a parte boa: escolher o que construir.'], minerBand(5, 10), { once: true, priority: 30 }),
+  e(N, 's_prog_lv10', ['Nível 10. Pitágoras achava que os números explicam o mundo.', 'O seu, pelo menos, explica bastante.'], minerBand(10, 15), { once: true, priority: 30 }),
+  e(N, 's_prog_lv15', ['Nível 15. Sócrates dizia que só sabia que nada sabia.', 'Você já sabe bem mais do que isso.'], minerBand(15, 20), { once: true, priority: 30 }),
+  e(N, 's_prog_lv20', ['Nível 20. Metade de 40, o dobro de 10.', 'Os números são simples; o caminho até eles, não.'], minerBand(20, 30), { once: true, priority: 30 }),
+  e(N, 's_prog_lv30', ['Nível 30. Poucos chegam aqui, e nenhum chega por acaso.', 'O que te trouxe até aqui?'], minerBand(30, 40), { once: true, priority: 30 }),
+  e(N, 's_prog_lv40', ['Nível 40. Eu já não tenho muito a te ensinar.', 'Talvez agora seja você quem me ensina.'], minerBand(40), { once: true, priority: 30 }),
   e(N, 's_prog_mesa1', ['A Biblioteca abriu. Um livro é uma conversa com alguém que não está aqui.', 'A prova do dia mora nela.'], (c) => lv(c, 'mesa') >= 1, { once: true, priority: 30 }),
   e(N, 's_prog_fornalha1', ['A Fornalha acesa. Fogo controlado foi a primeira grande invenção humana.', 'A sua já rende mais material.'], (c) => lv(c, 'fornalha') >= 1, { once: true, priority: 30 }),
   e(N, 's_prog_torre1', ['A Torre de pé. Lá de cima dá para ver o que você já fez.', 'Sobe de vez em quando.'], (c) => lv(c, 'torre') >= 1, { once: true, priority: 30 }),

@@ -6,7 +6,7 @@ import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { DAY_CHANGED_EVENT, useClock } from '../../../contexts/ClockContext';
-import { HOTBAR_ICONS, houseSprite, visibleCracks, crackedListSentence } from '../../../config/village';
+import { HOTBAR_ICONS, houseSprite, kidName, villageLabel, visibleCracks, crackedListSentence } from '../../../config/village';
 import { BUILDING_BY_ID, MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import { dueTasksOn, periodAllowedAt } from '../../../services/village/schedule';
 import { chestAllowed } from '../../../services/village/chest';
@@ -468,7 +468,7 @@ const VillageHome: React.FC<Props> = ({
         nextEventLabel={nextEventLabel}
         hour={hour}
         avatar={<CharacterPreview character={village.character} gear={village.gear} size={compactHud ? 40 : 52} />}
-        subtitle={`${village.characterName} · ${village.name}`}
+        subtitle={`${kidName(village.characterName)} · ${villageLabel(village.name)}`}
         fullDays={village.fullDays}
         compact={compactHud}
         crackLine={cracks.length ? crackedListSentence(cracks) : undefined}

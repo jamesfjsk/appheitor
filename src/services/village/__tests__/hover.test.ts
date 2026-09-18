@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { hoverAnchor, idleFrameIndex, idleBob, idleShift, pickHit, visibleGrowthMarks, DEFAULT_GROWTH } from '../../../components/hero/village/drawAmbient';
+import { hoverAnchor, hoverLabelPos, idleFrameIndex, idleBob, idleShift, pickHit, visibleGrowthMarks, DEFAULT_GROWTH } from '../../../components/hero/village/drawAmbient';
 
 test('cerca: âncora no portão, não no rodapé da caixa AABB', () => {
   const fence = { x: 400, y: 500, w: 480, h: 72, hover: 'fence' as const };
@@ -20,6 +20,17 @@ test('lote estreito ancora nos pés, não no centro', () => {
   const lot = { x: 147, y: 198, w: 102, h: 78, hover: 'building' as const };
   const a = hoverAnchor(lot);
   expect(a.y).toBe(lot.y + lot.h - 2);
+});
+
+test('placa do nome fica acima do sprite, não nos pés', () => {
+  const npc = { x: 800, y: 200, w: 74, h: 74, hover: 'npc' as const };
+  const label = hoverLabelPos(npc);
+  expect(label.y < npc.y).toBe(true);
+  expect(label.y + 18 <= npc.y).toBe(true);
+  const mine = { x: 545, y: 32, w: 210, h: 138, hover: 'spot' as const };
+  const mineLabel = hoverLabelPos(mine);
+  expect(mineLabel.y < 32).toBe(true);
+  expect(mineLabel.y + 18 < mine.y + mine.h / 2).toBe(true);
 });
 
 test('idle: pisca de vez em quando e respeita reducedMotion', () => {

@@ -1,5 +1,5 @@
 import type { DialogueEntry } from '../../services/village/dialogue';
-import { e, isMorning, isAfternoon, isEvening, isWeekend, dayComplete, nothingYet, oneLeft, quizPending, lv, daysBetween } from './helpers';
+import { e, isMorning, isAfternoon, isEvening, isWeekend, dayComplete, nothingYet, oneLeft, quizPending, lv, daysBetween, minerBand } from './helpers';
 
 // Ferreiro: poucas palavras, frases curtas. Fala de ferro, fogo e trabalho bem feito.
 // Camadas: f_first_*, f_day_*, f_prog_*, f_friend_*, f_cur_*.
@@ -13,7 +13,7 @@ const FIRST: DialogueEntry[] = [
   e(N, 'f_first_chest', ['Baú aberto.', 'Dia inteiro rende. Viu?'], (c) => c.firstTime.has('chest'), { once: true, priority: 80 }),
   e(N, 'f_first_buy', ['Comprou.', 'Gold vira coisa. Coisa boa, espero.'], (c) => c.firstTime.has('buy'), { once: true, priority: 80 }),
   e(N, 'f_first_goal', ['Meta no Cofre.', 'Ferro também é assim: primeiro junta, depois forja.'], (c) => c.firstTime.has('goal'), { once: true, priority: 80 }),
-  e(N, 'f_first_lv10', ['Nível 10.', 'Agora aguenta martelo pesado.'], (c) => c.firstTime.has('lv10'), { once: true, priority: 80 }),
+  e(N, 'f_first_lv10', ['Nível 10.', 'Agora aguenta martelo pesado.'], minerBand(10, 15), { once: true, priority: 80 }),
   e(N, 'f_first_season', ['Uma temporada.', 'Treze semanas de fogo. Nunca apagou.'], (c) => c.firstTime.has('season'), { once: true, priority: 80 }),
 ];
 
@@ -36,12 +36,12 @@ const DAY: DialogueEntry[] = [
 ];
 
 const PROG: DialogueEntry[] = [
-  e(N, 'f_prog_lv5', ['Nível 5.', 'Já sabe segurar o martelo.'], (c) => c.level >= 5, { once: true, priority: 30 }),
-  e(N, 'f_prog_lv10', ['Nível 10.', 'O ferro te respeita agora.'], (c) => c.level >= 10, { once: true, priority: 30 }),
-  e(N, 'f_prog_lv15', ['Nível 15.', 'Trabalho bem feito. Continua.'], (c) => c.level >= 15, { once: true, priority: 30 }),
-  e(N, 'f_prog_lv20', ['Nível 20.', 'Nível 3 das obras abre para você. Vai com calma.'], (c) => c.level >= 20, { once: true, priority: 30 }),
-  e(N, 'f_prog_lv30', ['Nível 30.', 'Poucos aguentam esse calor.'], (c) => c.level >= 30, { once: true, priority: 30 }),
-  e(N, 'f_prog_lv40', ['Nível 40.', 'Mestre. Não digo isso à toa.'], (c) => c.level >= 40, { once: true, priority: 30 }),
+  e(N, 'f_prog_lv5', ['Nível 5.', 'Já sabe segurar o martelo.'], minerBand(5, 10), { once: true, priority: 30 }),
+  e(N, 'f_prog_lv10', ['Nível 10.', 'O ferro te respeita agora.'], minerBand(10, 15), { once: true, priority: 30 }),
+  e(N, 'f_prog_lv15', ['Nível 15.', 'Trabalho bem feito. Continua.'], minerBand(15, 20), { once: true, priority: 30 }),
+  e(N, 'f_prog_lv20', ['Nível 20.', 'Nível 3 das obras abre para você. Vai com calma.'], minerBand(20, 30), { once: true, priority: 30 }),
+  e(N, 'f_prog_lv30', ['Nível 30.', 'Poucos aguentam esse calor.'], minerBand(30, 40), { once: true, priority: 30 }),
+  e(N, 'f_prog_lv40', ['Nível 40.', 'Mestre. Não digo isso à toa.'], minerBand(40), { once: true, priority: 30 }),
   e(N, 'f_prog_fornalha1', ['Fornalha acesa.', 'Primeiro contrato do dia rende mais. Usa.'], (c) => lv(c, 'fornalha') >= 1, { once: true, priority: 30 }),
   e(N, 'f_prog_fornalha2', ['Fundição aberta.', 'Três viram um. Não desperdiça.'], (c) => lv(c, 'fornalha') >= 2, { once: true, priority: 30 }),
   e(N, 'f_prog_fornalha3', ['Fornalha no máximo.', 'Cinco madeira, uma redstone. Uma vez por dia.'], (c) => lv(c, 'fornalha') >= 3, { once: true, priority: 30 }),

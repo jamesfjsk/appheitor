@@ -46,6 +46,8 @@ import {
   cosmeticHasSprite,
   emptyNpcs,
   initialVillageDoc,
+  kidName,
+  villageLabel,
 } from '../config/village';
 import { MATERIALS, initialBaseDoc } from '../config/englishBase';
 import { MINER_MISSIONS_ACHIEVEMENTS } from '../config/villageAchievements';
@@ -311,8 +313,8 @@ export async function completeOnboarding(
 ): Promise<void> {
   await ensureVillage(uid);
   await updateDoc(villageRef(uid), stripUndefined({
-    characterName: input.characterName.trim() || 'Heitor',
-    name: input.villageName.trim() || 'Vila do Heitor',
+    characterName: kidName(input.characterName),
+    name: villageLabel(input.villageName),
     character: input.character,
     onboardedAt: nowIso(),
     updatedAt: nowIso(),

@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { crackedLabel, crackedListSentence, crackedSentence, DEFAULT_ECONOMY, DISTRICT_ICONS, EMPTY_GEAR, houseSprite, houseTier, houseTitle, LOT_SCENE_LABEL, MATERIAL_BY_PERIOD, SCENE_PROPS } from '../../../config/village';
+import { crackedLabel, crackedListSentence, crackedSentence, DEFAULT_ECONOMY, DISTRICT_ICONS, EMPTY_GEAR, houseSprite, houseTier, houseTitle, houseWelcome, kidName, LOT_SCENE_LABEL, MATERIAL_BY_PERIOD, SCENE_PROPS, villageLabel } from '../../../config/village';
 import { ITEMS } from '../../../config/items';
 import { isoWeekOf } from '../../../utils/isoWeek';
 import { getLevelFromXP, getLevelTitle, getXPForLevel } from '../../../utils/levelSystem';
@@ -141,12 +141,16 @@ test('dueTasksOn: daily, weekday, weekend e createdAt futuro', () => {
 });
 
 test('periodAllowedAt e isChestTime', () => {
+  // padrão desde 18/09 (decisão do pai): a missão do dia pode ser feita o dia inteiro
+  expect(DEFAULT_ECONOMY.periodGating).toBe(false);
   expect(periodAllowedAt('morning', 8)).toBe(true);
-  expect(periodAllowedAt('afternoon', 11)).toBe(false);
-  expect(periodAllowedAt('afternoon', 12)).toBe(true);
-  expect(periodAllowedAt('evening', 17)).toBe(false);
-  expect(periodAllowedAt('evening', 18)).toBe(true);
-  expect(periodAllowedAt('evening', 10, { ...DEFAULT_ECONOMY, periodGating: false })).toBe(true);
+  expect(periodAllowedAt('afternoon', 11)).toBe(true);
+  expect(periodAllowedAt('evening', 10)).toBe(true);
+  const gated = { ...DEFAULT_ECONOMY, periodGating: true };
+  expect(periodAllowedAt('afternoon', 11, gated)).toBe(false);
+  expect(periodAllowedAt('afternoon', 12, gated)).toBe(true);
+  expect(periodAllowedAt('evening', 17, gated)).toBe(false);
+  expect(periodAllowedAt('evening', 18, gated)).toBe(true);
   expect(isChestTime(17)).toBe(false);
   expect(isChestTime(18)).toBe(true);
   expect(weekdayFromDate('2026-09-15')).toBe(2);
@@ -344,6 +348,13 @@ test('casa cresce por temporada e os ícones da grade não se repetem', () => {
   expect(houseSprite(2)).toBe('/assets/village/buildings/casa-2.png');
   expect(houseTitle(3)).toBe('Sobrado');
   expect(houseTitle(9)).toBe('Sobrado');
+  expect(kidName('teste')).toBe('Heitor');
+  expect(kidName('Teste')).toBe('Heitor');
+  expect(kidName('Heitor')).toBe('Heitor');
+  expect(villageLabel('Vila do teste')).toBe('Vila do Heitor');
+  expect(houseWelcome(1, 'teste', false)).toBe('Cabana do Heitor. Aqui ficam as missões de hoje.');
+  expect(houseWelcome(1, 'teste', true)).toBe('Cabana do Heitor. A chaminé está acesa: o dia está completo.');
+  expect(houseWelcome(1, 'Heitor', false)).not.toMatch(/teste/i);
   expect(DISTRICT_ICONS.house).toBe('/assets/village/buildings/casa-1.png');
   expect(DISTRICT_ICONS.pack).toBe('/assets/village/items/mochila.png');
   expect(DISTRICT_ICONS.bank).toBe('/assets/village/buildings/cofre-1.png');

@@ -18,7 +18,7 @@ const PLACA = '/assets/village/buildings/placa-vila.png';
 
 const SAGE_STEPS = [
   { title: 'A Vila', text: 'A Vila abre tocando. Cada lugar faz uma coisa. Toque para descobrir.', icon: PLACA },
-  { title: 'A Casa', text: 'A Casa guarda suas missões: manhã, tarde e noite. Cada missão feita paga gold e material.', icon: HOUSE },
+  { title: 'A Casa', text: 'A Casa guarda as missões: manhã, tarde e noite. Cada missão feita paga ouro e material.', icon: HOUSE },
   { title: 'A Biblioteca', text: 'A Biblioteca tem a prova do dia. Sem ela, a Mina, o Mercado e a Ferraria ficam com cadeado.', icon: LIB },
   { title: 'A Mina', text: 'A Mina é onde você trabalha em inglês e ganha material para as obras.', icon: MINE },
   { title: 'O Baú do Dia', text: 'Às 18h, com tudo feito, o Baú do Dia abre. Antes de dormir, feche o dia na Casa.', icon: CHEST },

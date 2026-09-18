@@ -5,7 +5,7 @@ import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useAuth } from '../../../contexts/AuthContext';
-import { houseSprite, houseTitle } from '../../../config/village';
+import { houseSprite, houseWelcome } from '../../../config/village';
 import type { AgendaItem, DailyCheckinAnswers, DayMood, Period } from '../../../types/village';
 import DailyChecklist from '../DailyChecklist';
 import CharacterPreview from './CharacterPreview';
@@ -13,7 +13,7 @@ import ChildSheet from './ChildSheet';
 import { dayTimeline, occurrencesBetween } from '../../../services/village/agenda';
 import { markAgendaDone } from '../../../services/agendaService';
 import { addDays, getTodayBrazil, isNightHour } from '../../../utils/clock';
-import { savePlan, submitCheckin } from '../../../services/villageService';
+import { submitCheckin } from '../../../services/villageService';
 import { subscribePlan } from '../../../services/englishBaseService';
 import { FirestoreService } from '../../../services/firestoreService';
 import { getDailyQuiz } from '../../../services/dailyQuizService';
@@ -58,19 +58,16 @@ const Casa: React.FC<{
   const [check, setCheck] = useState<DailyCheckinAnswers>({ tomorrow: '' });
   const [closed, setClosed] = useState(false);
   const [closeBusy, setCloseBusy] = useState(false);
-  const [quizLine, setQuizLine] = useState('ainda não');
+  const [quizLine, setQuizLine] = useState('ainda não fez');
   const [tomorrowTheme, setTomorrowTheme] = useState('');
   const [goldToday, setGoldToday] = useState(0);
   const [mineToday, setMineToday] = useState('—');
   const night = isNightHour(hour);
   const allDone = due > 0 && done >= due;
-  const name = village.characterName || 'Heitor';
-  const title = houseTitle(village.season);
   const src = houseSprite(village.season);
   const today = getTodayBrazil();
   const line = dayTimeline(agendaItems, tasks, village.plan, today);
   const tomorrow = occurrencesBetween(agendaItems, addDays(today, 1), addDays(today, 1));
-  const focusId = village.plan.date === today ? village.plan.focusTaskId : null;
   const closeAllowed = hour >= 20 || Boolean(chestReady);
   const closeWhy = closed
     ? 'Dia fechado'
@@ -95,8 +92,8 @@ const Casa: React.FC<{
       setGoldToday(d?.goldEarned || 0);
     });
     void getDailyQuiz(childUid, today).then((q) => {
-      if (q?.completed) setQuizLine(`nota ${q.score ?? 0} de ${q.totalQuestions || q.questions.length || 0}`);
-      else setQuizLine('ainda não');
+      if (q?.completed) setQuizLine(`acertou ${q.score ?? 0} de ${q.totalQuestions || q.questions.length || 0}`);
+      else setQuizLine('ainda não fez');
     }).catch(() => undefined);
     void getDailyQuiz(childUid, addDays(today, 1)).then((q) => {
       setTomorrowTheme(q?.theme?.title || '');
@@ -110,17 +107,6 @@ const Casa: React.FC<{
       setMineToday(`${n}/${p.order.length}`);
     });
   }, [childUid, today]);
-
-  const setFocus = async (id: string) => {
-    if (!childUid) return;
-    playClick();
-    try {
-      await savePlan(childUid, { date: today, order: [], focusTaskId: id });
-      toast.success('Missão-foco: material em dobro');
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Não deu para marcar o foco');
-    }
-  };
 
   const closeDay = async () => {
     if (!childUid || closeBusy || closed || !closeAllowed) return;
@@ -146,7 +132,7 @@ const Casa: React.FC<{
           Casa do Minerador
         </h2>
         <p className="text-sm mt-1">
-          {title} de {name}. {allDone ? 'A chaminé está acesa: o dia foi feito.' : 'Aqui moram as missões do dia.'}
+          {houseWelcome(village.season, village.characterName, allDone)}
         </p>
         <p className="mc-num text-white mt-2">{done}/{due} hoje</p>
       </div>
@@ -210,8 +196,6 @@ const Casa: React.FC<{
               onPeriodChange={onPeriodChange}
               guidedMode={guidedMode}
               onToggleGuidedMode={onToggleGuidedMode}
-              focusTaskId={focusId}
-              onSetFocus={(id) => void setFocus(id)}
             />
             {line.length > 0 && (
               <div className="mc-card p-3 space-y-2">
@@ -240,7 +224,7 @@ const Casa: React.FC<{
           <div className="mn-casa-sheet p-4 space-y-3">
             <h3 className="mc-h">
               <img src={LANTERN} alt="" className="mc-pixel" draggable={false} />
-              O dia em números
+              O dia de hoje
             </h3>
             <div className="mc-row rounded p-2 flex items-center gap-2">
               <img src={TORCH} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
@@ -255,7 +239,7 @@ const Casa: React.FC<{
             </div>
             <div className="mc-row rounded p-2 flex items-center gap-2">
               <img src={GOLD} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
-              <span className="text-sm">Gold de hoje: {goldToday}</span>
+              <span className="text-sm">Ouro de hoje: {goldToday}</span>
             </div>
             <div className="mc-row rounded p-2 flex items-center gap-2">
               <img src={CHEST} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
@@ -300,7 +284,7 @@ const Casa: React.FC<{
                     maxLength={80}
                     onChange={(e) => setCheck((c) => ({ ...c, tomorrow: e.target.value }))}
                     className="mc-slot w-full mt-1 px-3 py-2 text-white"
-                    placeholder="três palavras no mínimo"
+                    placeholder="Ex.: treinar bola cedo"
                   />
                 </label>
               </>

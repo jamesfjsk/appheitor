@@ -7,6 +7,7 @@ import { ITEM_BY_ID } from '../../../config/items';
 import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import type { Material } from '../../../types/english';
 import { calculateLevelSystem } from '../../../utils/levelSystem';
+import { kidName } from '../../../config/village';
 import CharacterEditor, { type DollSlot } from './CharacterEditor';
 
 export type PackTab = 'ficha' | 'sacola';
@@ -52,7 +53,7 @@ const Mochila: React.FC<{
         <div className="mn-wood-head flex justify-between items-center shrink-0">
           <div>
             <h2 className="mc-title text-sm">Mochila</h2>
-            <p className="mn-pack-sub">{village.characterName || 'Heitor'} · Nv. {level}</p>
+            <p className="mn-pack-sub">{kidName(village.characterName)} · Nível {level}</p>
           </div>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={close} aria-label="Fechar"><X /></button>
         </div>
