@@ -221,3 +221,16 @@ Achados do teste (entram no P2 da semana 1; nenhum bloqueia o dia 1):
 - **A6 (baixo)** Toasts cobrindo botões (item 8 da varredura, confirma).
 - **A7 (observação)** `progress.level` fica atrás do XP (a tela usa `getLevelFromXP`, certo); `allDoneBonus` padrão 0 faz a Placa não dizer "ontem foi dia completo"; rótulos de 9 a 10 px na Mina (item 18).
 
+### Dia 1 real do Heitor (18/09, até 11h): o que os dados mostraram
+
+Tudo gravado como desenhado: prova (8 perguntas e respostas, 2 de 8, tema "Democracia na Grécia"), 5 contratos da Mina com conteúdo e resultado item a item (Carta 3/3; Recado 1/3 com correção da IA: plural e ordem de palavras; Ferraria 4,5/6 com erros nos itens 2, 3 e 5; Comerciante 0/2 e 1/2 com cada colocação registrada), 11 palavras vistas, 3 conversas com NPCs, zero erros de app. Dois achados para o P2 da semana 1:
+
+- **A8 (médio)** A Vagoneta abriu e gravou uma sessão (0 de 3) com `modules.logic` desligado: a aba e o botão da Vagoneta respeitam o módulo (não aparecem quando desligado).
+- **A9 (baixo)** Comerciante: a entrega fecha com objeto no lugar errado ("in the box" quando o pedido era "on the box") sem aviso; antes de fechar, uma confirmação "Tem certeza? Ouça de novo" quando a colocação não bate, uma vez por entrega.
+
+### Reset do Heitor: o que ficou errado e a limpeza (18/09, 11h10)
+
+O `launch-reset.cjs` preserva as coleções pedagógicas inteiras e por isso manteve **registros de hoje feitos antes do reset** (teste do pai às 8h34 e 8h39): a prova de hoje ficou "feita" (2 de 8), o Recado do dia ficou concluído, 3 missões constavam feitas, e uma penalidade de 17/09 (-10) e 5 movimentos de gold pré-reset apareciam no Extrato do dia 1. O Heitor perdeu a primeira prova e o primeiro contrato. Limpeza feita por mim às 11h10 (REST, backup em `scratchpad/limpeza-heitor-18-09.json`): prova de hoje de volta a `ready` com as mesmas perguntas (ele não as tinha visto), contrato c1 de volta a `open` sem resultado, apagados 6 `goldTransactions`, 3 `taskCompletions` e 2 `englishSessions` anteriores a 13:09:58Z; o que ele fez depois do reset ficou intacto.
+
+**Correção para o Cursor (P3, semana 1)**: `launch-reset.cjs` passa a tratar o **dia do lançamento**: `dailyQuizzes/{uid}_{launch}` volta a `ready` (mantendo as perguntas) se estava concluída antes da hora do reset; `englishPlans/{uid}_{launch}` com todos os contratos de volta a `open` e sem `result`; `englishSessions`, `taskCompletions`, `goldTransactions` e `dailyProgress` do dia com `createdAt` anterior à hora do reset são apagados (o backup do dia guarda tudo). E `village.launchedAt` (instante, além de `launchedOn`): Extrato, Balança, `sinceLaunch` e o painel filtram por instante, não por data. Teste do script: rodar numa conta com prova e contratos feitos no mesmo dia antes do reset e conferir que o dia 1 nasce limpo.
+

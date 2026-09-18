@@ -1,7 +1,7 @@
 /** Trilha da Vila: loop com crossfade, some na Mina/prova, respeita o mudo. */
 
-export const VILLAGE_THEME = '/assets/village/music/vila.mp3';
-export const BGM_VOL = 0.34;
+export const VILLAGE_THEME = '/assets/village/music/vila.mp3?v=4';
+export const BGM_VOL = 0.22;
 export const BGM_DUCK_VOL = 0.06;
 export const SOUND_PREF_KEY = 'mm_sound';
 
