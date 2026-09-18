@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
+import { readSoundPref, villageBgm, writeSoundPref } from '../services/village/bgm';
 
 interface SoundContextType {
   playTaskComplete: () => void;
@@ -13,6 +14,8 @@ interface SoundContextType {
   playNotification: () => void;
   isSoundEnabled: boolean;
   toggleSound: () => void;
+  setBgmWanted: (on: boolean) => void;
+  setMusicDuck: (key: string, on: boolean) => void;
 }
 
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
@@ -31,53 +34,49 @@ interface SoundProviderProps {
 }
 
 export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
-  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(() => readSoundPref());
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
   useEffect(() => {
-    // Load sound preference from Firebase instead of localStorage
-    const loadSoundPreference = async () => {
-      try {
-        // For now, keep sound enabled by default
-        // In a full implementation, this would be stored in user preferences in Firebase
-        setIsSoundEnabled(true);
-      } catch (error) {
-        console.error('❌ Error loading sound preference:', error);
-        setIsSoundEnabled(true);
-      }
-    };
-    
-    loadSoundPreference();
+    villageBgm.enable(isSoundEnabled);
+  }, [isSoundEnabled]);
 
-    // Initialize AudioContext after user interaction
+  useEffect(() => {
     const initAudioContext = () => {
-      if (!audioContext) {
-        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-        setAudioContext(ctx);
-      }
+      setAudioContext((prev) => {
+        if (prev) return prev;
+        return new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      });
+      villageBgm.unlock();
     };
 
     document.addEventListener('click', initAudioContext, { once: true });
     document.addEventListener('touchstart', initAudioContext, { once: true });
+    const vis = () => villageBgm.setHidden(document.hidden);
+    document.addEventListener('visibilitychange', vis);
+    vis();
 
     return () => {
       document.removeEventListener('click', initAudioContext);
       document.removeEventListener('touchstart', initAudioContext);
+      document.removeEventListener('visibilitychange', vis);
     };
-  }, [audioContext]);
+  }, []);
 
-  const toggleSound = async () => {
-    const newState = !isSoundEnabled;
-    setIsSoundEnabled(newState);
-    
-    try {
-      // In a full implementation, save to Firebase user preferences
-      // await FirestoreService.updateUserPreferences(userId, { soundEnabled: newState });
-      console.log('🔊 Sound preference updated:', newState);
-    } catch (error) {
-      console.error('❌ Error saving sound preference:', error);
-    }
+  const toggleSound = () => {
+    const next = !isSoundEnabled;
+    setIsSoundEnabled(next);
+    writeSoundPref(next);
+    villageBgm.enable(next);
   };
+
+  const setBgmWanted = useCallback((on: boolean) => {
+    villageBgm.want(on);
+  }, []);
+
+  const setMusicDuck = useCallback((key: string, on: boolean) => {
+    villageBgm.duck(key, on);
+  }, []);
 
   // Função para criar tons usando Web Audio API
   const playTone = (frequency: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.3) => {
@@ -210,7 +209,9 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     playWhistle,
     playNotification,
     isSoundEnabled,
-    toggleSound
+    toggleSound,
+    setBgmWanted,
+    setMusicDuck,
   };
 
   return (

@@ -17,6 +17,8 @@ import LevelUpModal from './village/LevelUpModal';
 import { getTodayBrazil } from '../../utils/clock';
 import { quizLockedFor } from '../../services/village/quizGate';
 import { useClock } from '../../contexts/ClockContext';
+import { useSound } from '../../contexts/SoundContext';
+import { useModules } from '../../hooks/useModules';
 
 const VillageGate: React.FC<{
   selectedPeriod: 'morning' | 'afternoon' | 'evening';
@@ -57,12 +59,24 @@ const HeroPanel: React.FC = () => {
   const { progress, loading } = useData();
   const { isPunished } = usePunishment();
   const { period: clockPeriod, today: clockToday } = useClock();
+  const { setBgmWanted, setMusicDuck } = useSound();
+  const modules = useModules();
   const [selectedPeriod, setSelectedPeriod] = useState<'morning' | 'afternoon' | 'evening'>(clockPeriod);
   const [guidedMode, setGuidedMode] = useState(false);
   const [showSurpriseMission, setShowSurpriseMission] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizRequestId, setQuizRequestId] = useState(0);
   const [punishOpen, setPunishOpen] = useState(false);
+
+  useEffect(() => {
+    setBgmWanted(modules.music);
+    return () => setBgmWanted(false);
+  }, [modules.music, setBgmWanted]);
+
+  useEffect(() => {
+    setMusicDuck('surprise', showSurpriseMission);
+    return () => setMusicDuck('surprise', false);
+  }, [showSurpriseMission, setMusicDuck]);
 
   useEffect(() => {
     setSelectedPeriod(clockPeriod);

@@ -70,7 +70,7 @@ const VillageHome: React.FC<Props> = ({
 }) => {
   const { village, materials, buildings, economy, pauseDays, notices, ackNotice } = useVillage();
   const { tasks, progress } = useData();
-  const { playClick, playHammer } = useSound();
+  const { playClick, playHammer, setMusicDuck } = useSound();
   const { hour, minute, today, now, driftMs } = useClock();
   const { isPunished } = usePunishment();
   const lockedShop = punished || isPunished;
@@ -94,6 +94,11 @@ const VillageHome: React.FC<Props> = ({
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [agendaFlash, setAgendaFlash] = useState<string | null>(null);
   const { childUid } = useAuth();
+
+  useEffect(() => {
+    setMusicDuck('mine', district === 'mine');
+    return () => setMusicDuck('mine', false);
+  }, [district, setMusicDuck]);
   const dismissSpeech = useCallback(() => {
     setSpeech((cur) => {
       if (cur?.rest && cur.rest.length) {

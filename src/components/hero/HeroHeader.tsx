@@ -100,7 +100,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
             type="button"
             onClick={() => { playClick(); toggleSound(); }}
             className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
-            title={isSoundEnabled ? 'Desativar sons' : 'Ativar sons'}
+            title={isSoundEnabled ? 'Desativar música e sons' : 'Ativar música'}
           >
             <FlashIcon name={isSoundEnabled ? 'volume' : 'mute'} className="w-5 h-5" />
           </button>

@@ -29,7 +29,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const { childUid } = useAuth();
   const { progress } = useData();
   const { economy } = useVillage();
-  const { playTaskComplete, playLevelUp, playError, playClick } = useSound();
+  const { playTaskComplete, playLevelUp, playError, playClick, setMusicDuck } = useSound();
 
   const today = getTodayBrazil();
   const enabled = progress.quizEnabled ?? true;
@@ -51,6 +51,11 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const [reflectionSaved, setReflectionSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const prefetched = useRef(false);
+
+  useEffect(() => {
+    setMusicDuck('quiz', open);
+    return () => setMusicDuck('quiz', false);
+  }, [open, setMusicDuck]);
 
   // Acompanha o documento do dia
   useEffect(() => {

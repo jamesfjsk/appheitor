@@ -47,7 +47,7 @@ const MODULE_HELP: Record<keyof ModuleSettings, string> = {
   chat: 'Reservado para a próxima etapa.',
   tts: 'Desligado: a Mina não fala as palavras.',
   aiGeneration: 'Desligado: a prova e o plano do dia não usam IA.',
-  music: 'Reservado para a próxima etapa.',
+  music: 'Trilha da Vila. Desligado: a Vila fica em silêncio (os cliques continuam).',
 };
 
 const VillageManager: React.FC = () => {

@@ -114,7 +114,7 @@ export const DEFAULT_MODULES: ModuleSettings = {
   chat: false,
   tts: true,
   aiGeneration: true,
-  music: false,
+  music: true,
 };
 
 export const EMPTY_GEAR: VillageGear = {

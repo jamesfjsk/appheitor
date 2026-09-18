@@ -1,5 +1,6 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import { crackedLabel, crackedListSentence, crackedSentence, DEFAULT_ECONOMY, DISTRICT_ICONS, EMPTY_GEAR, houseSprite, houseTier, houseTitle, houseWelcome, kidName, LOT_SCENE_LABEL, MATERIAL_BY_PERIOD, SCENE_PROPS, villageLabel } from '../../../config/village';
+import { bgmDuckFor } from '../bgm';
 import { ITEMS } from '../../../config/items';
 import { isoWeekOf } from '../../../utils/isoWeek';
 import { getLevelFromXP, getLevelTitle, getXPForLevel } from '../../../utils/levelSystem';
@@ -376,6 +377,13 @@ test('casa cresce por temporada e os ícones da grade não se repetem', () => {
 test('ids únicos no catálogo de itens', () => {
   const ids = ITEMS.map((i) => i.id);
   expect(new Set(ids).size).toBe(ids.length);
+});
+
+test('trilha da vila some na mina e na prova, e fica nas missões', () => {
+  expect(bgmDuckFor(null, false)).toBe(false);
+  expect(bgmDuckFor('house', false)).toBe(false);
+  expect(bgmDuckFor('mine', false)).toBe(true);
+  expect(bgmDuckFor(null, true)).toBe(true);
 });
 
 void run();
