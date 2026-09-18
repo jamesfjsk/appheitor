@@ -10,7 +10,11 @@ import type {
   GearDef,
   HabitDef,
   ModuleSettings,
+  NpcId,
+  NpcState,
   Period,
+  PickaxeLevel,
+  PriceBand,
   VillageCharacter,
   VillageDoc,
   VillageGear,
@@ -35,23 +39,73 @@ export const DEFAULT_VILLAGE_SETTINGS: VillageSettings = {
 
 export const DEFAULT_ECONOMY: EconomySettings = {
   materialsPerTask: 1,
-  dailyChestGold: [5, 15],
+  dailyChestGold: [10, 15],
   rareEveryNDays: 3,
   gameGoldDailyCap: 35,
+  gameGoldWeeklyCap: 100,
   redeemMinTasks: 5,
   taskDefaultXp: 10,
   taskDefaultGold: 5,
   periodStartHours: { afternoon: 12, evening: 18 },
-  periodGating: true,
+  periodGating: false,
   chestOpenHour: 18,
   minDueForChest: 3,
+  incomeDayGold: 45,
+  quizGoldPerHit: 2,
+  quizXpPerHit: 6,
+  challengeGoldWeeklyCap: 60,
+  achievementGoldCap: 40,
+  buildCostMultiplier: 2,
+  merchantBuy: { materials: 10, gold: 3, dailyCap: 2 },
+  savingsTargetPct: 20,
+  interestRatePct: 5,
+  interestCapGold: 20,
+  maxOpenGoals: 2,
+  lateMissionUntilHour: 12,
+  lateMissionGoldPct: 50,
+  repairRefundPct: 50,
+  seasonWeeks: 13,
+  levelCap: 40,
 };
+
+export const PRICE_BANDS: PriceBand[] = [
+  { id: 'mimo', days: 0.5 },
+  { id: 'pequeno', days: 1 },
+  { id: 'medio', days: 3 },
+  { id: 'grande', days: 7 },
+  { id: 'enorme', days: 20, onlyGoal: true },
+  { id: 'temporada', days: 50, onlyGoal: true },
+];
+
+export const LEVEL_REWARDS: Record<number, { rare?: 'esmeralda' | 'diamante'; cosmeticId?: string }> = {
+  5: { rare: 'esmeralda' },
+  10: { rare: 'diamante', cosmeticId: 'milestone_10' },
+  15: { rare: 'esmeralda' },
+  20: { rare: 'diamante', cosmeticId: 'milestone_20' },
+  25: { rare: 'esmeralda' },
+  30: { rare: 'diamante', cosmeticId: 'milestone_30' },
+  35: { rare: 'esmeralda' },
+  40: { rare: 'diamante', cosmeticId: 'milestone_40' },
+};
+
+export function emptyNpcState(): NpcState {
+  return { points: 0, tier: 0, lastTalkDate: null, seen: [], quest: { chapter: 0, progress: 0, doneAt: null } };
+}
+
+export function emptyNpcs(): Record<NpcId, NpcState> {
+  return {
+    sabio: emptyNpcState(),
+    comerciante: emptyNpcState(),
+    ferreiro: emptyNpcState(),
+    olheiro: emptyNpcState(),
+  };
+}
 
 export const DEFAULT_MODULES: ModuleSettings = {
   shop: true,
   effects: true,
-  bank: false,
-  interest: false,
+  bank: true,
+  interest: true,
   logic: false,
   lines: false,
   dilemmas: false,
@@ -102,6 +156,15 @@ export function initialVillageDoc(userId: string, nowIso: string): VillageDoc {
     noticesDismissed: [],
     habits: {},
     season: 0,
+    npcs: emptyNpcs(),
+    cracks: [],
+    stars: [],
+    trophies: {},
+    plan: { date: '', order: [], focusTaskId: null },
+    newItems: [],
+    stats: {},
+    achievementsUnlocked: {},
+    newAchievements: [],
   };
 }
 
@@ -111,36 +174,40 @@ export const GEAR: GearDef[] = [
     slot: 'pickaxe',
     level: 1,
     label: 'Picareta de pedra',
-    effect: '+1 material na primeira missão do dia',
+    effect: '+1 na primeira missão do dia · na Mina começa na Pedra',
     cost: { pedra: 6, madeira: 2 },
     rare: {},
+    minLevel: 5,
   },
   {
     id: 'pickaxe_iron',
     slot: 'pickaxe',
     level: 2,
     label: 'Picareta de ferro',
-    effect: '+1 material na primeira missão de cada período',
-    cost: { ferro: 8, pedra: 4 },
+    effect: '+1 na primeira de cada turno · na Mina começa no Ferro',
+    cost: { ferro: 10, pedra: 6 },
     rare: {},
+    minLevel: 12,
   },
   {
     id: 'pickaxe_gold',
     slot: 'pickaxe',
     level: 3,
     label: 'Picareta de ouro',
-    effect: '+1 na primeira missão de cada período; Baú do Dia com +1 material',
-    cost: { ferro: 10, redstone: 6 },
-    rare: { esmeralda: 1 },
+    effect: '+1 em toda missão · Baú do Dia farto · na Mina começa no Ouro',
+    cost: { ferro: 14, redstone: 10 },
+    rare: { esmeralda: 2 },
+    minLevel: 22,
   },
   {
     id: 'pickaxe_diamond',
     slot: 'pickaxe',
     level: 4,
     label: 'Picareta de diamante',
-    effect: '+1 material em toda missão',
-    cost: { ferro: 12, redstone: 8 },
-    rare: { diamante: 2 },
+    effect: '+2 em toda missão · Baú ainda mais farto · na Mina começa no Diamante',
+    cost: { ferro: 18, redstone: 14 },
+    rare: { diamante: 3 },
+    minLevel: 32,
   },
   {
     id: 'boots',
@@ -150,33 +217,37 @@ export const GEAR: GearDef[] = [
     effect: '+20% XP nas missões (arredondado)',
     cost: { madeira: 5, ferro: 3 },
     rare: {},
+    minLevel: 10,
   },
   {
     id: 'helmet',
     slot: 'helmet',
     level: 1,
     label: 'Capacete',
-    effect: 'Visual nesta etapa (absorve missão perdida na Etapa 2)',
+    effect: 'Absorve 1 missão perdida por semana',
     cost: { ferro: 6, pedra: 3 },
     rare: {},
+    minLevel: 15,
   },
   {
     id: 'lamp',
     slot: 'lamp',
     level: 1,
     label: 'Lanterna',
-    effect: 'Visual nesta etapa',
+    effect: 'Mostra contratos e prova de amanhã; 1 dica grátis por dia',
     cost: { redstone: 4, ferro: 2 },
     rare: {},
+    minLevel: 15,
   },
   {
     id: 'cape',
     slot: 'cape',
     level: 1,
     label: 'Capa',
-    effect: 'Visual nesta etapa',
+    effect: 'Visual (estilo conta)',
     cost: { madeira: 6, redstone: 4 },
     rare: { esmeralda: 1 },
+    minLevel: 25,
   },
 ];
 
@@ -188,18 +259,27 @@ const cosmetic = (
   label: string,
   basePrice: number,
   free = false,
-  premium = false
-): CosmeticItem => ({ id, slot, label, basePrice, free, premium });
+  premium = false,
+  minLevel = 0
+): CosmeticItem => ({
+  id,
+  slot,
+  label,
+  basePrice,
+  free,
+  premium,
+  minLevel: free ? 0 : minLevel,
+});
 
 export const COSMETICS: CosmeticItem[] = [
   cosmetic('skin_1', 'skin', 'Pele clara', 0, true),
   cosmetic('skin_2', 'skin', 'Pele média', 0, true),
   cosmetic('skin_3', 'skin', 'Pele morena', 0, true),
   cosmetic('skin_4', 'skin', 'Pele escura', 0, true),
-  cosmetic('hair_1', 'hair', 'Cabelo curto', 0, true),
-  cosmetic('hair_2', 'hair', 'Cabelo com franja', 20),
-  cosmetic('hair_3', 'hair', 'Cabelo cacheado', 20),
-  cosmetic('hair_4', 'hair', 'Cabelo comprido', 20),
+  cosmetic('hair_1', 'hair', 'Cabelo castanho', 0, true),
+  cosmetic('hair_2', 'hair', 'Cabelo mel', 20, false, false, 5),
+  cosmetic('hair_3', 'hair', 'Cabelo cobre', 20, false, false, 5),
+  cosmetic('hair_4', 'hair', 'Cabelo preto', 20, false, false, 5),
   cosmetic('shirt_1', 'shirt', 'Camisa marrom', 0, true),
   cosmetic('shirt_2', 'shirt', 'Camisa verde', 0, true),
   cosmetic('shirt_3', 'shirt', 'Camisa azul', 0, true),
@@ -208,7 +288,7 @@ export const COSMETICS: CosmeticItem[] = [
   cosmetic('shirt_6', 'shirt', 'Camisa amarela', 0, true),
   cosmetic('shirt_7', 'shirt', 'Camisa branca', 0, true),
   cosmetic('shirt_8', 'shirt', 'Camisa preta', 0, true),
-  cosmetic('shirt_team', 'shirt', 'Camisa do time', 40),
+  cosmetic('shirt_team', 'shirt', 'Camisa do time', 40, false, false, 5),
   cosmetic('pants_1', 'pants', 'Calça marrom', 0, true),
   cosmetic('pants_2', 'pants', 'Calça azul', 0, true),
   cosmetic('pants_3', 'pants', 'Calça verde', 0, true),
@@ -217,27 +297,42 @@ export const COSMETICS: CosmeticItem[] = [
   cosmetic('pants_6', 'pants', 'Calça bege', 0, true),
   cosmetic('pants_7', 'pants', 'Calça vermelha', 0, true),
   cosmetic('pants_8', 'pants', 'Calça branca', 0, true),
-  cosmetic('hat_cap', 'hat', 'Boné', 30),
-  cosmetic('hat_deco', 'hat', 'Capacete decorativo', 60),
-  cosmetic('hat_crown', 'hat', 'Coroa', 200, false, true),
-  cosmetic('cape_red', 'cape', 'Capa vermelha', 80),
-  cosmetic('cape_blue', 'cape', 'Capa azul', 120, false, true),
-  cosmetic('pet_wolf', 'pet', 'Lobo', 120),
-  cosmetic('pet_cat', 'pet', 'Gato', 120),
-  cosmetic('pet_parrot', 'pet', 'Papagaio', 150),
+  cosmetic('hat_cap', 'hat', 'Boné', 30, false, false, 5),
+  cosmetic('hat_deco', 'hat', 'Capacete decorativo', 60, false, false, 10),
+  cosmetic('hat_crown', 'hat', 'Coroa', 200, false, true, 25),
+  cosmetic('cape_red', 'cape', 'Capa vermelha', 80, false, false, 20),
+  cosmetic('cape_blue', 'cape', 'Capa azul', 120, false, true, 25),
+  cosmetic('pet_wolf', 'pet', 'Lobo', 120, false, false, 15),
+  cosmetic('pet_cat', 'pet', 'Gato', 120, false, false, 15),
+  cosmetic('pet_parrot', 'pet', 'Papagaio', 150, false, false, 15),
+  cosmetic('milestone_10', 'hat', 'Capacete da Forja', 0, false, true, 10),
+  cosmetic('milestone_20', 'cape', 'Capa da Mina', 0, false, true, 20),
+  cosmetic('milestone_30', 'hat', 'Coroa de Diamante', 0, false, true, 30),
+  cosmetic('milestone_40', 'hat', 'Coroa de Lenda', 0, false, true, 40),
+  cosmetic('hat_mestre_obras', 'hat', 'Capacete de mestre de obras', 0, false, true, 1),
+  cosmetic('cape_vila', 'cape', 'Cachecol da vila', 0, false, true, 1),
 ];
 
 export const COSMETIC_BY_ID: Record<string, CosmeticItem> = Object.fromEntries(COSMETICS.map((c) => [c.id, c]));
 
 export const FREE_COSMETIC_IDS: string[] = COSMETICS.filter((c) => c.free).map((c) => c.id);
 
-/** Câmera canônica do minerador (low top-down). Retrato, HUD, cena e editor. */
+/** Retrato iso (HUD, teaser, ícone da Vila). Câmera canônica do minerador. */
 export const ISO_MINER = '/assets/village/char/miner-iso.png';
+/** Folha 8×64: walk cycle (PixelLab). Grama do chão removida. */
+export const ISO_MINER_WALK = '/assets/village/char/miner-walk.png?v=2';
+/** Folha 4×64: idle (pisca / peso). */
+export const ISO_MINER_IDLE = '/assets/village/char/miner-idle.png?v=1';
 export const ISO_NPC: Record<string, string> = {
   sabio: '/assets/village/npc/sabio-iso.png',
   comerciante: '/assets/village/npc/comerciante-iso.png',
   ferreiro: '/assets/village/npc/ferreiro-iso.png',
   olheiro: '/assets/village/npc/olheiro-iso.png',
+};
+/** Folha 8×64: walk cycle (PixelLab). Só quem troca de posto na cena. */
+export const ISO_NPC_WALK: Record<string, string> = {
+  sabio: '/assets/village/npc/sabio-walk.png?v=1',
+  comerciante: '/assets/village/npc/comerciante-walk.png?v=1',
 };
 
 export const NPC_LABEL: Record<string, string> = {
@@ -271,6 +366,7 @@ export const SHIRT_HEX: Record<string, string> = {
   shirt_6: '#D4B03A',
   shirt_7: '#E8E0D4',
   shirt_8: '#2A2420',
+  shirt_team: '#2E6B38',
 };
 
 export const HAIR_HEX: Record<string, string> = {
@@ -284,11 +380,17 @@ export const HAT_HEX: Record<string, string> = {
   hat_cap: '#3D6EA8',
   hat_deco: '#8B8B8B',
   hat_crown: '#E8B923',
+  milestone_10: '#8B8B8B',
+  milestone_30: '#E8B923',
+  milestone_40: '#E8B923',
+  hat_mestre_obras: '#8B8B8B',
 };
 
 export const CAPE_HEX: Record<string, string> = {
   cape_red: '#B33A2B',
   cape_blue: '#3D6EA8',
+  cape_vila: '#5B9B3A',
+  milestone_20: '#3D6B2A',
 };
 
 export const PANTS_HEX: Record<string, string> = {
@@ -302,16 +404,31 @@ export const PANTS_HEX: Record<string, string> = {
   pants_8: '#EDE6D9',
 };
 
+export function cosmeticSwatchHex(id: string): string | null {
+  return SKIN_HEX[id] || SHIRT_HEX[id] || PANTS_HEX[id] || HAIR_HEX[id] || CAPE_HEX[id] || null;
+}
+
 export const HAT_SPRITE: Record<string, string> = {
-  hat_cap: '/assets/village/char/miner-cap.png',
-  hat_deco: '/assets/village/char/miner-iron-helmet.png',
-  hat_crown: '/assets/village/char/miner-crown.png',
+  hat_cap: '/assets/village/char/miner-iso-cap.png',
+  hat_deco: '/assets/village/char/miner-iso-iron.png',
+  hat_crown: '/assets/village/char/miner-iso-crown.png',
+  milestone_10: '/assets/village/char/miner-iso-iron.png',
+  milestone_30: '/assets/village/char/miner-iso-crown.png',
+  milestone_40: '/assets/village/char/miner-iso-crown.png',
+  hat_mestre_obras: '/assets/village/char/miner-iso-iron.png',
 };
 
 export const CAPE_SPRITE: Record<string, string> = {
-  cape_red: '/assets/village/char/miner-cape.png',
-  cape_blue: '/assets/village/char/miner-cape.png',
+  cape_red: '/assets/village/char/miner-iso-cape.png',
+  cape_blue: '/assets/village/char/miner-iso-cape.png',
+  milestone_20: '/assets/village/char/miner-iso-cape.png',
 };
+
+export function lookBodySrc(character: VillageCharacter): string {
+  if (character.hat && HAT_SPRITE[character.hat]) return HAT_SPRITE[character.hat];
+  if (character.cape && character.cape !== 'cape_vila') return CAPE_SPRITE[character.cape] || ISO_MINER;
+  return ISO_MINER;
+}
 
 export const PET_SPRITE: Record<string, string> = {
   pet_wolf: '/assets/village/pets/lobo.png',
@@ -326,7 +443,10 @@ export const NPC_PORTRAIT: Record<string, string> = {
   olheiro: ISO_NPC.olheiro,
 };
 
+export const WOOD_PICKAXE_SPRITE = '/assets/village/items/pickaxe-madeira.png?v=2';
+
 export const GEAR_SPRITE: Record<string, string> = {
+  pickaxe_wood: WOOD_PICKAXE_SPRITE,
   pickaxe_stone: '/assets/village/items/pickaxe-pedra.png',
   pickaxe_iron: '/assets/village/items/pickaxe-ferro.png',
   pickaxe_gold: '/assets/village/items/pickaxe-ouro.png',
@@ -337,34 +457,96 @@ export const GEAR_SPRITE: Record<string, string> = {
   cape: '/assets/village/items/cape.png',
 };
 
+export const PICK_OVERLAY: Record<number, string> = {
+  0: '/assets/village/char/pick-wood.png?v=10',
+  1: '/assets/village/char/pick-stone.png?v=10',
+  2: '/assets/village/char/pick-iron.png?v=10',
+  3: '/assets/village/char/pick-gold.png?v=10',
+  4: '/assets/village/char/pick-diamond.png?v=10',
+};
+
+export function pickaxeInfo(level: number): { level: PickaxeLevel; label: string; sprite: string } {
+  const lv = Math.max(0, Math.min(4, Math.round(level || 0))) as PickaxeLevel;
+  if (lv <= 0) return { level: 0, label: 'Picareta de madeira', sprite: WOOD_PICKAXE_SPRITE };
+  const g = GEAR.find((x) => x.slot === 'pickaxe' && x.level === lv);
+  return {
+    level: lv,
+    label: g?.label || 'Picareta',
+    sprite: (g && GEAR_SPRITE[g.id]) || WOOD_PICKAXE_SPRITE,
+  };
+}
+
 export const COSMETIC_ICON: Record<string, string> = {
   hat_cap: '/assets/village/items/cap.png',
-  hat_deco: '/assets/village/items/helmet-deco.png',
+  hat_deco: '/assets/village/items/iron-helmet.png',
   hat_crown: '/assets/village/items/crown.png',
   cape_red: '/assets/village/items/cape.png',
   cape_blue: '/assets/village/items/cape.png',
   pet_wolf: '/assets/village/pets/lobo.png',
   pet_cat: '/assets/village/pets/gato.png',
   pet_parrot: '/assets/village/pets/papagaio.png',
+  milestone_10: '/assets/village/items/iron-helmet.png',
+  milestone_20: '/assets/village/items/cape.png',
+  milestone_30: '/assets/village/items/crown.png',
+  milestone_40: '/assets/village/items/crown.png',
+  hat_mestre_obras: '/assets/village/items/iron-helmet.png',
+  cape_vila: '/assets/village/items/cape.png',
 };
 
 export const DISTRICT_ICONS: Record<string, string> = {
   mine: '/assets/village/items/lantern.png',
   library: '/assets/village/rewards/livro.png',
   workshop: '/assets/village/items/iron-helmet.png',
-  market: '/assets/village/rewards/dinheiro.png',
+  market: '/assets/village/buildings/mercado-1.png',
   tower: '/assets/village/buildings/torre-1.png',
-  map: '/assets/village/buildings/placa.png',
-  timer: '/assets/village/items/lantern.png',
+  bank: '/assets/village/buildings/cofre-1.png',
+  pack: '/assets/village/items/mochila.png',
+  agenda: '/assets/english/ui/clock.webp',
+  house: '/assets/village/buildings/casa-1.png',
   chest: '/assets/village/buildings/bau-1.png',
+  arena: '/assets/village/buildings/arena-1.png',
 };
+
+export function houseTier(season: number): 1 | 2 | 3 {
+  const n = Math.max(1, Math.floor(Number(season) || 1));
+  return (n >= 3 ? 3 : n) as 1 | 2 | 3;
+}
+
+export function houseSprite(season: number): string {
+  return `/assets/village/buildings/casa-${houseTier(season)}.png`;
+}
+
+export function houseTitle(season: number): string {
+  const t = houseTier(season);
+  return t === 1 ? 'Cabana' : t === 2 ? 'Casa' : 'Sobrado';
+}
+
+const PLACEHOLDER_KID = /^(teste|test|conta de teste|user|jogador)$/i;
+const PLACEHOLDER_VILLAGE = /^(vila do )?teste$/i;
+
+export function kidName(raw?: string | null): string {
+  const n = String(raw || '').trim();
+  return !n || PLACEHOLDER_KID.test(n) ? 'Heitor' : n;
+}
+
+export function villageLabel(raw?: string | null): string {
+  const n = String(raw || '').trim();
+  return !n || PLACEHOLDER_VILLAGE.test(n) ? 'Vila do Heitor' : n;
+}
+
+export function houseWelcome(season: number, rawName?: string | null, allDone = false): string {
+  const rest = allDone ? 'A chaminé está acesa: o dia está completo.' : 'Aqui ficam as missões de hoje.';
+  return `${houseTitle(season)} do ${kidName(rawName)}. ${rest}`;
+}
 
 export const HOTBAR_ICONS: Record<string, string> = {
   Vila: ISO_MINER,
-  Missões: '/assets/village/items/pickaxe-ferro.png',
+  Missões: '/assets/village/buildings/casa-1.png',
   Mina: '/assets/village/items/lantern.png',
   Oficina: '/assets/village/items/iron-helmet.png',
-  Mercado: '/assets/village/rewards/dinheiro.png',
+  Mercado: '/assets/village/buildings/mercado-1.png',
+  Mochila: '/assets/village/items/mochila.png',
+  Ferraria: '/assets/village/items/iron-helmet.png',
 };
 
 /** Cosméticos sem sprite próprio não entram na Loja nem no editor. */
@@ -407,13 +589,99 @@ export function characterSpriteSrc(gear: VillageGear, shirt: string, skin = 'ski
 }
 
 export const DISTRICT_LABELS: Record<string, string> = {
-  mine: 'Mina / Mine',
-  library: 'Biblioteca / Library',
-  workshop: 'Oficina / Workshop',
-  market: 'Mercado / Market',
-  tower: 'Torre / Tower',
-  map: 'Mapa / Map',
-  timer: 'Ampulheta / Hourglass',
-  chest: 'Baú do Dia / Daily chest',
+  mine: 'Mina',
+  library: 'Biblioteca',
+  workshop: 'Ferraria',
+  market: 'Mercado',
+  tower: 'Torre',
+  bank: 'Banco',
+  pack: 'Mochila',
+  agenda: 'Agenda',
+  house: 'Casa',
+  chest: 'Baú do Dia',
+  arena: 'Arena',
 };
+
+/** Nome na cena: o mesmo da antiga grade, no lugar certo. */
+export const LOT_SCENE_LABEL: Record<string, string> = {
+  fornalha: 'Fornalha',
+  bau: 'Armazém',
+  cerca: 'Cerca',
+  torre: 'Torre',
+  mesa: 'Biblioteca',
+  campinho: 'Campinho',
+  arena: 'Arena',
+  cofre: 'Cofre',
+  agenda: 'Agenda',
+  mercado: 'Mercado',
+};
+
+const CRACK_FEM: Record<string, true> = {
+  fornalha: true,
+  cerca: true,
+  torre: true,
+  mesa: true,
+  agenda: true,
+  arena: true,
+};
+
+export function crackedLabel(id: string, name = LOT_SCENE_LABEL[id] || 'lote'): string {
+  return `${name} em ruínas`;
+}
+
+export function crackedSentence(id: string): string {
+  const name = LOT_SCENE_LABEL[id] || 'lote';
+  return CRACK_FEM[id] ? `A ${name} caiu.` : `O ${name} caiu.`;
+}
+
+export function crackedListSentence(ids: string[]): string {
+  const clean = ids.filter(Boolean);
+  if (clean.length === 0) return '';
+  if (clean.length === 1) return crackedSentence(clean[0]);
+  return `${clean.length} obras cairam.`;
+}
+
+/** Em localhost, `?crack=fornalha` na primeira carga mostra o dano sem gravar no save. */
+const DEV_CRACK: string[] = (() => {
+  if (typeof window === 'undefined') return [];
+  if (!/localhost|127\.0\.0\.1/.test(window.location.hostname)) return [];
+  try {
+    const extra = new URLSearchParams(window.location.search).get('crack');
+    if (!extra || extra === '0' || extra === 'none') return [];
+    return extra.split(',').map((s) => s.trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
+})();
+
+const DEV_CRACK_CLEARED = new Set<string>();
+
+/** Só a prévia `?crack=`; o save real não entra. */
+export function dismissDevCrack(id: string): void {
+  if (!id) return;
+  DEV_CRACK_CLEARED.add(id);
+}
+
+export function visibleCracks(cracks: string[] | undefined): string[] {
+  const base = cracks || [];
+  const extra = DEV_CRACK.filter((id) => !DEV_CRACK_CLEARED.has(id) && !base.includes(id));
+  if (!extra.length) return base;
+  return [...base, ...extra];
+}
+
+export type SceneProp = {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  sprite: string;
+  label: string;
+  badge?: string;
+  door?: { x: number; y: number };
+};
+
+export const SCENE_PROPS: SceneProp[] = [
+  { id: 'pack', x: 592, y: 336, w: 48, h: 48, sprite: '/assets/village/items/mochila.png', label: 'Mochila', door: { x: 548, y: 390 } },
+];
 

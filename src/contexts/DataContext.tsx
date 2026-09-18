@@ -5,16 +5,21 @@ import { useVacation } from './VacationContext';
 import { Task, Reward, UserProgress, RewardRedemption, Notification, CalendarDay, Achievement, UserAchievement, FlashReminder, SurpriseMissionConfig, DailySurpriseMissionStatus, Note } from '../types';
 import { FirestoreService } from '../services/firestoreService';
 import { checkLevelUp, calculateLevelSystem, emitMinerLevelUp } from '../utils/levelSystem';
-import { getTodayBrazil } from '../utils/timezone';
+import { addDays, getTodayBrazil, isoWeekOf, nowBrazil, weekdayOf } from '../utils/clock';
+import { DAY_CHANGED_EVENT } from './ClockContext';
 import { getErrorMessage, getErrorCode } from '../utils/errors';
 import toast from 'react-hot-toast';
 import { useOffline } from './OfflineContext';
-import { getVillage } from '../services/villageService';
+import { applyVillageStats, ensureWeekRecords, getVillage, repairLot } from '../services/villageService';
+import { computeWeeklyLearning } from '../services/learningService';
 import { getSettings } from '../services/settingsService';
 import { DEFAULT_ECONOMY, DEFAULT_MODULES, DEFAULT_VILLAGE_SETTINGS } from '../config/village';
 import { computeTaskLoot, xpWithBoots } from '../services/village/loot';
+import { MATERIAL_LABELS } from '../config/englishBase';
 import { dueTasksOn, periodAllowedAt } from '../services/village/schedule';
 import type { EconomySettings, ModuleSettings, Period, VillageSettings } from '../types/village';
+import { bumpChallenge } from '../services/challengesService';
+import { applyWeeklyInterest } from '../services/goalsService';
 
 interface DataContextType {
   tasks: Task[];
@@ -36,6 +41,7 @@ interface DataContextType {
   updateTask: (taskId: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   completeTask: (taskId: string) => Promise<void>;
+  completeLateTask: (taskId: string) => Promise<void>;
 
   // Reward methods
   addReward: (reward: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
@@ -151,7 +157,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       
       let achievementsUnlocked = 0;
       
-      for (const achievement of achievements.filter(a => a.isActive)) {
+      for (const achievement of achievements.filter(a => a.isActive === true)) {
         const existingUserAchievement = userAchievements.find(ua => ua.achievementId === achievement.id);
         
         if (existingUserAchievement?.isCompleted) {
@@ -251,19 +257,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const addTask = useCallback(async (taskData: Omit<Task, 'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid || !user?.userId) throw new Error('Usuário não autenticado');
     
-    const completeTaskData = {
+    const completeTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> = {
       title: taskData.title,
       description: taskData.description || '',
-      xp: taskData.xp || 10,
-      gold: taskData.gold || 5,
+      xp: Math.trunc(taskData.origin === 'child' ? (taskData.xp || 5) : (taskData.xp || 10)),
+      gold: taskData.origin === 'child' ? 0 : (taskData.gold ?? 5),
       period: taskData.period,
-      time: taskData.time,
       frequency: taskData.frequency || 'daily',
       active: taskData.active !== false,
       status: taskData.status || 'pending',
       ownerId: childUid,
-      createdBy: user.userId
+      createdBy: user.userId,
     };
+    if (taskData.time) completeTaskData.time = taskData.time;
+    if (taskData.optional === true) completeTaskData.optional = true;
+    if (taskData.origin) completeTaskData.origin = taskData.origin;
+    if (taskData.date) completeTaskData.date = taskData.date;
     
     try {
       await FirestoreService.createTask(completeTaskData);
@@ -314,11 +323,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         throw new Error('offline');
       }
 
-      const hour = Number(new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'America/Sao_Paulo',
-        hour: 'numeric',
-        hour12: false,
-      }).format(new Date()));
+      const hour = nowBrazil().hour;
       const [village, economyRaw, villageSetRaw, modulesRaw] = await Promise.all([
         getVillage(childUid),
         getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>),
@@ -349,8 +354,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         effectsEnabled: effectsOn,
       });
 
-      const baseXP = task.xp || 10;
-      const baseGold = task.gold || 5;
+      const baseXP = task.xp ?? 10;
+      const baseGold = task.gold ?? 5;
       const xpReward = xpWithBoots(vacationApplyXP(baseXP), village.gear, effectsOn);
       const goldReward = vacationApplyGold(baseGold);
 
@@ -362,16 +367,42 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         )
       );
 
-      await FirestoreService.completeTaskWithRewards(
+      const focus = false; // missão-foco removida em 18/09 (decisão 22): sem material em dobro
+      const morningEarly = task.period === 'morning' && hour < 9;
+      const paid = await FirestoreService.completeTaskWithRewards(
         taskId,
         childUid,
         xpReward,
         goldReward,
-        loot.qty > 0 ? loot : undefined
+        loot.qty > 0 ? loot : undefined,
+        { focus, morningEarly }
       );
 
       try {
+        await bumpChallenge(childUid, 'tasks_count', 1);
+      } catch (e) {
+        console.warn('desafio tasks_count', e);
+      }
+
+      try {
+        const ids = await applyVillageStats(childUid, {});
+        if (ids.includes('primeira_picaretada')) {
+          toast.success('Primeira picaretada · +10 XP, +1 madeira');
+        } else if (ids.length) {
+          toast.success('Conquista nova na Torre');
+        }
+        window.dispatchEvent(new CustomEvent('village-event', { detail: { kind: 'task_done' } }));
+      } catch (e) {
+        console.warn('stats da vila', e);
+      }
+
+      try {
         const streakResult = await FirestoreService.updateStreak(childUid);
+        try {
+          await bumpChallenge(childUid, 'streak_days', streakResult.streak, true);
+        } catch (e) {
+          console.warn('desafio streak_days', e);
+        }
 
         if (streakResult.streakIncreased) {
           setTimeout(() => {
@@ -417,17 +448,43 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         checkAchievements();
       }, 1500);
 
-      const matLabel = loot.qty > 0 ? `, +${loot.qty} ${loot.material}` : '';
-      toast.success(`+${goldReward} gold${matLabel}, +${xpReward} XP`);
+      const shownQty = paid.loot?.qty || 0;
+      const matLabel = shownQty > 0 && paid.loot ? `, +${shownQty} ${MATERIAL_LABELS[paid.loot.material]}` : '';
+      const goldLabel = paid.gold > 0 ? `+${paid.gold} gold` : 'sem gold';
+      toast.success(`${goldLabel}${matLabel}, +${paid.xp} XP`);
+
+      try {
+        if ((village.cracks || []).length > 0) {
+          const dueNow = dueTasksOn(tasks, today);
+          const doneNow = dueNow.filter((t) => {
+            if (t.id === taskId) return true;
+            const full = tasks.find((x) => x.id === t.id);
+            return full?.status === 'done' && full.lastCompletedDate === today;
+          }).length;
+          if (doneNow >= dueNow.length) {
+            const refund = await repairLot(childUid, addDays(today, -1));
+            window.dispatchEvent(new CustomEvent('miner-repaired', {
+              detail: { gold: refund, lots: village.cracks || [] },
+            }));
+            toast.success(refund > 0 ? `Lote consertado: +${refund} gold` : 'Lote consertado');
+          }
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : '';
+        if (msg && !msg.includes('já foi feito') && !msg.includes('Faça todas')) {
+          console.warn('conserto automático', e);
+        }
+      }
     } catch (error) {
       console.error('❌ Erro ao completar tarefa:', error);
       const msg = getErrorMessage(error);
       if (msg === 'Task already completed today') {
         toast('Missão já feita hoje. Volta amanhã.');
+        return;
       } else if (msg === 'offline' || msg === 'PERIOD_LOCKED') {
-        /* toast já mostrado */
+        return;
       } else {
-        toast.error('Sem internet: a missão não foi salva');
+        toast.error(msg === 'Essa extra não é de hoje' ? msg : 'Sem internet: a missão não foi salva');
         setTasks(prevTasks => 
           prevTasks.map(t => 
             t.id === taskId 
@@ -440,6 +497,25 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   }, [childUid, tasks, rewards, progress.totalXP, playLevelUp, checkAchievements, vacationApplyXP, vacationApplyGold, isOffline]);
 
+  const completeLateTask = useCallback(async (taskId: string) => {
+    if (!childUid) throw new Error('Child UID não definido');
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) throw new Error('Tarefa não encontrada');
+    try {
+      await FirestoreService.completeTaskWithRewards(taskId, childUid, task.xp ?? 10, task.gold ?? 5, undefined, { late: true });
+      toast.success('Missão recuperada (metade do gold, sem material)');
+      try {
+        await applyVillageStats(childUid, {});
+      } catch (e) {
+        console.warn('stats recuperação', e);
+      }
+    } catch (error) {
+      const msg = getErrorMessage(error);
+      toast.error(msg === 'Missão já recuperada' ? msg : (msg || 'Não deu para recuperar'));
+      throw error;
+    }
+  }, [childUid, tasks]);
+
   const addReward = useCallback(async (rewardData: Omit<Reward, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => {
     if (!childUid) throw new Error('Child UID não definido');
     
@@ -451,7 +527,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       emoji: rewardData.emoji || 'gift',
       requiredLevel: rewardData.requiredLevel || 1,
       active: rewardData.active !== false,
-      ownerId: childUid
+      ownerId: childUid,
+      goalOnly: rewardData.goalOnly === true,
     };
     
     try {
@@ -500,7 +577,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const todayCompletions = tasks.filter((task) =>
         dueIds.has(task.id) && task.status === 'done' && task.lastCompletedDate === today
       );
-      const minTasks = economy.redeemMinTasks ?? 5;
+      const minTasks = Math.min(economy.redeemMinTasks ?? 5, Math.max(1, due.length));
 
       if (todayCompletions.length < minTasks) {
         throw new Error(`Você precisa completar pelo menos ${minTasks} missões hoje para resgatar recompensas. Completadas: ${todayCompletions.length}/${minTasks}`);
@@ -1049,7 +1126,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           id: task.id,
           title: task.title,
           xp: task.xp || 10,
-          gold: task.gold || 5,
+          gold: task.gold ?? 5,
           completedAt: date
         }))];
         
@@ -1145,38 +1222,37 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   }, [childUid]);
 
-  // Initialize listeners when childUid changes
+  // Initialize listeners when childUid and role are known
   useEffect(() => {
-    // Prevent duplicate initialization
-    if (!childUid || childUid === lastChildUid) {
-      if (!childUid) {
-        setTasks([]);
-        setRewards([]);
-        setRedemptions([]);
-        setNotifications([]);
-        setFlashReminders([]);
-        setAchievements([]);
-        setUserAchievements([]);
-        setProgress({
-          userId: '',
-          level: 1,
-          totalXP: 0,
-          availableGold: 0,
-          totalGoldEarned: 0,
-          totalGoldSpent: 0,
-          streak: 0,
-          longestStreak: 0,
-          rewardsRedeemed: 0,
-          totalTasksCompleted: 0,
-          lastActivityDate: new Date(),
-          updatedAt: new Date()
-        });
-        setLoading(false);
-        setListenersInitialized(false);
-        setLastChildUid(null);
-      }
+    if (!childUid) {
+      setTasks([]);
+      setRewards([]);
+      setRedemptions([]);
+      setNotifications([]);
+      setFlashReminders([]);
+      setAchievements([]);
+      setUserAchievements([]);
+      setProgress({
+        userId: '',
+        level: 1,
+        totalXP: 0,
+        availableGold: 0,
+        totalGoldEarned: 0,
+        totalGoldSpent: 0,
+        streak: 0,
+        longestStreak: 0,
+        rewardsRedeemed: 0,
+        totalTasksCompleted: 0,
+        lastActivityDate: new Date(),
+        updatedAt: new Date()
+      });
+      setLoading(false);
+      setListenersInitialized(false);
+      setLastChildUid(null);
       return;
     }
+    if (!user) return;
+    if (childUid === lastChildUid) return;
 
     console.log('🔥 DataContext: Setting up listeners for childUid:', childUid);
     setLoading(true);
@@ -1219,25 +1295,28 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         console.log('🔄 DataContext: Initiating daily processing...');
 
         // First, check and reset streak if user was inactive
-        FirestoreService.checkAndResetStreakIfNeeded(childUid)
-          .then(() => {
-            console.log('✅ DataContext: Streak check completed');
-
-            // Then process any unprocessed daily summaries (penalties/bonuses)
-            return FirestoreService.processUnprocessedDays(childUid);
-          })
-          .then(() => {
-            console.log('✅ DataContext: Daily summaries processed');
-
-            // Then reset outdated tasks
-            return FirestoreService.resetOutdatedTasks(childUid);
-          })
-          .then(resetCount => {
-            console.log(`✅ DataContext: Daily processing complete - ${resetCount} tasks reset`);
-          })
-          .catch(error => {
-            console.error('❌ DataContext: Error in daily processing:', error);
-          });
+        if (currentUser?.role !== 'admin') {
+          FirestoreService.checkAndResetStreakIfNeeded(childUid)
+            .then(() => {
+              console.log('✅ DataContext: Streak check completed');
+              return FirestoreService.processUnprocessedDays(childUid);
+            })
+            .then(() => applyWeeklyInterest(childUid).catch(() => 0))
+            .then(() => {
+              console.log('✅ DataContext: Daily summaries processed');
+              return FirestoreService.resetOutdatedTasks(childUid);
+            })
+            .then(resetCount => {
+              console.log(`✅ DataContext: Daily processing complete - ${resetCount} tasks reset`);
+              void ensureWeekRecords(childUid).catch(() => undefined);
+              if (weekdayOf(getTodayBrazil()) === 1) {
+                void computeWeeklyLearning(childUid, isoWeekOf(addDays(getTodayBrazil(), -1))).catch(() => undefined);
+              }
+            })
+            .catch(error => {
+              console.error('❌ DataContext: Error in daily processing:', error);
+            });
+        }
 
         // Set up real-time listeners with error handling
         const unsubscribeTasks = FirestoreService.subscribeToUserTasks(
@@ -1421,57 +1500,45 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
       setListenersInitialized(false);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- listeners must be (re)created only when childUid changes; other values are read once at setup
-  }, [childUid]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- listeners (re)created when childUid or role is known
+  }, [childUid, user?.role]);
 
   // ⚡ AUTOMATIC DAY CHANGE MONITOR
   // This useEffect checks every minute if the date has changed
   // and automatically resets tasks when a new day begins
   useEffect(() => {
-    if (!childUid) return;
+    if (!childUid || !user) return;
 
-    console.log('🕐 DataContext: Starting day change monitor...');
-
-    // Check every minute if the date has changed
-    const intervalId = setInterval(() => {
-      const currentDate = getTodayBrazil();
-
-      if (currentDate !== lastResetDate) {
-        console.log(`📅 DAY CHANGE DETECTED! Was: ${lastResetDate}, Now: ${currentDate}`);
-        console.log('🔄 Triggering automatic daily processing...');
-
-        // Process daily summaries (penalties/bonuses) FIRST
-        FirestoreService.processUnprocessedDays(childUid)
-          .then(() => {
-            console.log('✅ Daily summaries processed (penalties/bonuses applied)');
-
-            // Then reset tasks for the new day
-            return FirestoreService.resetOutdatedTasks(childUid);
-          })
-          .then(resetCount => {
-            console.log(`✅ AUTO-RESET: ${resetCount} tasks reset for new day`);
-            toast.success(`Novo dia: ${resetCount} missões prontas para hoje.`);
-            setLastResetDate(currentDate);
-          })
-          .catch(error => {
-            console.error('❌ AUTO-RESET ERROR:', error);
-            toast.error('Erro ao processar novo dia');
-          });
+    const run = (currentDate: string) => {
+      if (currentDate === lastResetDate) return;
+      if (user.role === 'admin') {
+        setLastResetDate(currentDate);
+        return;
       }
-    }, 60000); // Check every 60 seconds
+      FirestoreService.processUnprocessedDays(childUid)
+        .then(() => applyWeeklyInterest(childUid).catch(() => 0))
+        .then(() => FirestoreService.resetOutdatedTasks(childUid))
+        .then(() => FirestoreService.deactivateExpiredExtras(childUid).catch(() => 0))
+        .then(() => {
+          setLastResetDate(currentDate);
+        })
+        .catch((error) => {
+          console.error('Erro ao processar novo dia', error);
+        });
+    };
 
-    // Also check immediately on mount
+    const onDay = () => run(getTodayBrazil());
+    window.addEventListener(DAY_CHANGED_EVENT, onDay);
+
+    const intervalId = setInterval(() => run(getTodayBrazil()), 60_000);
     const currentDate = getTodayBrazil();
-    if (currentDate !== lastResetDate) {
-      console.log(`📅 Initial date check (Brazil GMT-3) - resetting from ${lastResetDate} to ${currentDate}`);
-      setLastResetDate(currentDate);
-    }
+    if (currentDate !== lastResetDate) setLastResetDate(currentDate);
 
     return () => {
-      console.log('🧹 DataContext: Cleaning up day change monitor');
+      window.removeEventListener(DAY_CHANGED_EVENT, onDay);
       clearInterval(intervalId);
     };
-  }, [childUid, lastResetDate]);
+  }, [childUid, lastResetDate, user]);
 
   // Remove the old useEffect that was causing duplicate listeners
   // The old useEffect has been replaced with the optimized version above
@@ -1495,6 +1562,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     updateTask,
     deleteTask,
     completeTask,
+    completeLateTask,
     addReward,
     updateReward,
     deleteReward,
@@ -1537,6 +1605,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     updateTask,
     deleteTask,
     completeTask,
+    completeLateTask,
     addReward,
     updateReward,
     deleteReward,

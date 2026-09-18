@@ -272,16 +272,18 @@ const BirthdayCelebration: React.FC<BirthdayCelebrationProps> = ({ onComplete })
                 {buttonLabel}
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCelebration(false);
-                  onComplete();
-                }}
-                className="mt-3 text-sm mc-muted underline"
-              >
-                Pular celebração (apenas para teste)
-              </button>
+              {import.meta.env.DEV && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCelebration(false);
+                    onComplete();
+                  }}
+                  className="mt-3 text-sm mc-muted underline"
+                >
+                  Pular
+                </button>
+              )}
             </div>
           </div>
         </div>

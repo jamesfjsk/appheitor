@@ -1,7 +1,7 @@
 // ========================================
-// A Base: mapa (grade 3x2, lotes ocultos até desbloquear), inventário de materiais,
-// tochas dos dias seguidos, custo e "Construir", campo da Mesa (tema de amanhã).
-// A construção em si (transação, som, XP) é do container; aqui só a subida em 3 quadros.
+// Mapa de obras (grade 3x2). Fora da Mina: construir/melhorar é o cartão do lote
+// na Vila. Este arquivo fica só como referência da animação de subida.
+
 // ========================================
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -20,6 +20,8 @@ import {
 } from '../../../../config/englishBase';
 import { buildXp } from '../../../../config/englishRewards';
 import { baseLevelOf, canBuild } from '../../../../services/englishBaseService';
+import { visibleCracks } from '../../../../config/village';
+import { useVillage } from '../../../../contexts/VillageContext';
 
 interface Props {
   base: BaseDoc;
@@ -40,6 +42,8 @@ const RISE_CSS =
   '@keyframes mcb-rise{0%{transform:translateY(28px);opacity:.2}33%{transform:translateY(18px);opacity:.6}66%{transform:translateY(8px);opacity:.9}100%{transform:translateY(0);opacity:1}}.mcb-rising{animation:mcb-rise .6s steps(3,end) both}';
 
 const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, onSaveTheme }) => {
+  const { village } = useVillage();
+  const mesaLive = base.buildings.mesa >= 1 && !visibleCracks(village.cracks).includes('mesa');
   const [selected, setSelected] = useState<BuildingId | null>('fornalha');
   const [rising, setRising] = useState<BuildingId | null>(null);
   const [theme, setTheme] = useState(base.themeRequest ?? '');
@@ -113,7 +117,7 @@ const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, 
 
       {/* Grade 3x2 */}
       <div className="grid grid-cols-3 gap-2 mb-3" data-testid="lots">
-        {BUILDINGS.map((b) => {
+        {BUILDINGS.filter((b) => !b.hideOnBaseMap).map((b) => {
           const lvl = base.buildings[b.id] ?? 0;
           if (!isBuildingUnlocked(b.id, base.buildings)) {
             return (
@@ -192,7 +196,7 @@ const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, 
       )}
 
       {/* Mesa nível 1: tema de amanhã */}
-      {base.buildings.mesa >= 1 && (
+      {mesaLive && (
         <div className="mc-card p-3 mb-4" data-testid="theme-request">
           <label className="mc-font text-[9px] mc-muted uppercase block mb-1" htmlFor="theme-request">O que você quer na história de amanhã?</label>
           <div className="flex gap-2">

@@ -4,13 +4,14 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { FlashIcon, isIconKey } from '../../icons';
 import { useData } from '../../contexts/DataContext';
-import { useAuth } from '../../contexts/AuthContext';
 import { useSound } from '../../contexts/SoundContext';
 import { Reward } from '../../types';
 import { calculateLevelSystem } from '../../utils/levelSystem';
 import { isRewardUnlocked } from '../../utils/rewardLevels';
-import { getTodayBrazil } from '../../utils/timezone';
 import { rewardIconSrc } from '../../config/rewardIcons';
+import { dueTasksOn } from '../../services/village/schedule';
+import { useVillage } from '../../contexts/VillageContext';
+import { useClock } from '../../contexts/ClockContext';
 const UI = '/assets/english/ui';
 /** Ícone pixel por categoria do prêmio (o campo emoji legado não tem equivalente pixel; a Etapa 1 traz ícones próprios) */
 const REWARD_CATEGORY_ICON: Record<string, string> = {
@@ -30,101 +31,30 @@ const CLOCK = '/assets/english/ui/clock.webp';
 interface RewardsPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  embedded?: boolean;
+  browseOnly?: boolean;
+  onCreateGoal?: (title: string, gold: number, rewardId?: string) => void;
 }
 
-const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
+const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, browseOnly, onCreateGoal }) => {
   const { rewards, redemptions, progress, redeemReward, tasks } = useData();
-  const { childUid } = useAuth();
   const { playClick } = useSound();
+  const { economy } = useVillage();
+  const { today } = useClock();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'available' | 'locked'>('all');
-  const [dailyTasksCompleted, setDailyTasksCompleted] = useState<number>(0);
-  const [loadingDailyTasks, setLoadingDailyTasks] = useState(true);
   const [confirming, setConfirming] = useState<Reward | null>(null);
   const [redeeming, setRedeeming] = useState(false);
   
   const levelSystem = calculateLevelSystem(progress.totalXP || 0);
   const currentLevel = levelSystem.currentLevel;
-
-  // Load daily tasks completed count
-  React.useEffect(() => {
-    const loadDailyTasksCount = async () => {
-      if (!childUid) return;
-      
-      setLoadingDailyTasks(true);
-      try {
-        // Count completed tasks from current tasks data instead of relying on completion history
-        const today = getTodayBrazil();
-        
-        // Filter tasks that should be available today based on frequency
-        const todayTasks = tasks.filter(task => {
-          if (!task.active) return false;
-          
-          const dayOfWeek = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-          
-          switch (task.frequency) {
-            case 'daily':
-              return true;
-            case 'weekday':
-              return dayOfWeek >= 1 && dayOfWeek <= 5;
-            case 'weekend':
-              return dayOfWeek === 0 || dayOfWeek === 6;
-            default:
-              return true;
-          }
-        });
-        
-        // Count how many of today's tasks are completed
-        const completedTodayTasks = todayTasks.filter(task => 
-          task.status === 'done' && task.lastCompletedDate === today
-        );
-        
-        console.log('🔍 RewardsPanel: Daily tasks verification:', {
-          today,
-          totalActiveTasks: tasks.filter(t => t.active).length,
-          todayTasks: todayTasks.length,
-          completedToday: completedTodayTasks.length,
-          completedTasks: completedTodayTasks.map(t => ({ id: t.id, title: t.title, period: t.period }))
-        });
-        
-        setDailyTasksCompleted(completedTodayTasks.length);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes('index') || errorMessage.includes('Index')) {
-          console.log('📋 Firestore index is building for taskCompletions. Using default value.');
-          
-          // Fallback: use current tasks data directly
-          const today = getTodayBrazil();
-          const todayTasks = tasks.filter(task => {
-            if (!task.active) return false;
-            
-            const dayOfWeek = new Date().getDay();
-            switch (task.frequency) {
-              case 'daily': return true;
-              case 'weekday': return dayOfWeek >= 1 && dayOfWeek <= 5;
-              case 'weekend': return dayOfWeek === 0 || dayOfWeek === 6;
-              default: return true;
-            }
-          });
-          
-          const completedTodayTasks = todayTasks.filter(task => 
-            task.status === 'done' && task.lastCompletedDate === today
-          );
-          
-          setDailyTasksCompleted(completedTodayTasks.length);
-        } else {
-          console.error('❌ Error loading daily tasks count:', error);
-          setDailyTasksCompleted(0);
-        }
-      } finally {
-        setLoadingDailyTasks(false);
-      }
-    };
-
-    if (isOpen) {
-      loadDailyTasksCount();
-    }
-  }, [childUid, isOpen, tasks]); // Added tasks dependency to update when tasks change
+  const dueToday = dueTasksOn(tasks, today);
+  const dailyTasksCompleted = dueToday.filter((t) => {
+    const full = tasks.find((x) => x.id === t.id);
+    return full?.status === 'done' && full.lastCompletedDate === today;
+  }).length;
+  const minRequired = Math.min(economy.redeemMinTasks ?? REDEEM_MIN_TASKS, dueToday.length);
+  const loadingDailyTasks = false;
 
   const getRewardById = (rewardId: string) => {
     return rewards.find(reward => reward.id === rewardId);
@@ -145,7 +75,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
     const hasEnoughGold = (progress.availableGold || 0) >= goldCost;
     const isUnlocked = isRewardUnlocked(reward.requiredLevel || 1, currentLevel);
     const notPending = !redemption; // Only check if there's no pending redemption
-    const hasCompletedEnoughTasks = dailyTasksCompleted >= REDEEM_MIN_TASKS;
+    const hasCompletedEnoughTasks = dailyTasksCompleted >= minRequired;
     
     console.log('🔥 Verificando se pode resgatar:', {
       reward: reward.title,
@@ -210,43 +140,30 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const missingGold = (reward: Reward) => Math.max(0, (reward.costGold || 0) - (progress.availableGold || 0));
-  const gateOpen = dailyTasksCompleted >= REDEEM_MIN_TASKS;
+  const gateOpen = dailyTasksCompleted >= minRequired;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="mc-panel rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white"
-      >
+  const inner = (
+    <>
+        {!embedded && (
         <div className="p-4 border-b-4 border-[#17130f] flex items-start gap-3">
           <div className="flex-1 min-w-0">
             <h2 className="mc-h">
               <img src={CHEST} alt="" className="mc-pixel" draggable={false} />
-              Baú de recompensas
+              Prêmios de verdade
             </h2>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <img src={GOLD} alt="" className="w-[22px] h-[22px] mc-pixel" draggable={false} />
               <span className="mc-num text-[#ffd83d]" style={{ fontSize: 16 }}>{progress.availableGold || 0}</span>
               <span className="text-xs font-semibold mc-muted">gold disponível</span>
             </div>
-            {progress.totalGoldSpent > 0 && (
-              <p className="mc-lbl mt-1">ganho {progress.totalGoldEarned || 0} · gasto {progress.totalGoldSpent || 0}</p>
-            )}
           </div>
           <button type="button" onClick={onClose} className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0" aria-label="Fechar">
             <X className="w-5 h-5" />
           </button>
         </div>
+        )}
 
-        <div className="p-4 space-y-3">
+        <div className="mn-child-body p-4 space-y-3">
           <div className="mc-hotbar">
             {categories.map((category) => (
               <button
@@ -288,15 +205,15 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                     : 'Trocas bloqueadas'}
               </p>
               <p className="text-sm text-white/85">
-                {dailyTasksCompleted}/{REDEEM_MIN_TASKS} missões feitas hoje
+                {dailyTasksCompleted}/{minRequired} missões feitas hoje
               </p>
               {!loadingDailyTasks && !gateOpen && (
                 <p className="text-sm mc-muted mt-1">
-                  Faça pelo menos {REDEEM_MIN_TASKS} missões hoje para liberar as trocas. Faltam {REDEEM_MIN_TASKS - dailyTasksCompleted}.
+                  Faça pelo menos {minRequired} missões hoje para liberar as trocas. Faltam {Math.max(0, minRequired - dailyTasksCompleted)}.
                 </p>
               )}
             </div>
-            <span className="mc-num" style={{ fontSize: 18 }}>{dailyTasksCompleted}/{REDEEM_MIN_TASKS}</span>
+            <span className="mc-num" style={{ fontSize: 18 }}>{dailyTasksCompleted}/{minRequired}</span>
           </div>
         </div>
 
@@ -334,8 +251,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                         <span className="mc-num">{reward.costGold || 0}</span>
                         <span className="mc-lbl">gold</span>
                         {!isUnlocked && <span className="text-xs font-semibold mc-muted">Nível {requiredLevel}</span>}
-                        {justUnlocked && <span className="mc-font text-[8px] mc-good">Novo</span>}
-                        {pendingRedemption && <span className="mc-lbl mc-warn">Aguardando</span>}
+                        {justUnlocked && <span className="text-sm mc-good">Novo</span>}
+                        {pendingRedemption && <span className="mc-lbl mc-warn">Aguardando o pai</span>}
+                        {reward.goalOnly && <span className="mc-lbl">Só pelo Cofrinho</span>}
                       </div>
                       {isConfirming && (
                         <div className="mc-card rounded p-3 mt-2">
@@ -362,14 +280,22 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                         </div>
                       )}
                     </div>
-                    {!isConfirming && (
-                      !isUnlocked ? (
+                    {!isConfirming && !browseOnly && (
+                      reward.goalOnly || missingGold(reward) > 0 ? (
+                        <button
+                          type="button"
+                          className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto"
+                          onClick={() => { playClick(); onCreateGoal?.(reward.title, reward.costGold || 0, reward.id); }}
+                        >
+                          Criar meta no Banco
+                        </button>
+                      ) : !isUnlocked ? (
                         <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
                           Nível {requiredLevel}
                         </button>
                       ) : pendingRedemption ? (
                         <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
-                          Aguardando
+                          Aguardando o pai
                         </button>
                       ) : canRedeemReward ? (
                         <button
@@ -377,17 +303,26 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                           onClick={() => { playClick(); setConfirming(reward); }}
                           className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto"
                         >
-                          Trocar
+                          Pedir
                         </button>
-                      ) : dailyTasksCompleted < REDEEM_MIN_TASKS ? (
+                      ) : dailyTasksCompleted < minRequired ? (
                         <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
-                          Faça {REDEEM_MIN_TASKS} missões
+                          Faça {minRequired} missões
                         </button>
                       ) : (
                         <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
                           Faltam {missingGold(reward)} gold
                         </button>
                       )
+                    )}
+                    {!isConfirming && browseOnly && (reward.goalOnly || missingGold(reward) > 0) && (
+                      <button
+                        type="button"
+                        className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto"
+                        onClick={() => { playClick(); onCreateGoal?.(reward.title, reward.costGold || 0, reward.id); }}
+                      >
+                        Criar meta no Banco
+                      </button>
                     )}
                   </div>
                 );
@@ -404,9 +339,9 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
               ) : selectedFilter === 'available' ? (
                 <>
                   <p className="font-bold text-[17px]">Nenhuma recompensa disponível nesta categoria</p>
-                  {dailyTasksCompleted < REDEEM_MIN_TASKS ? (
+                  {dailyTasksCompleted < minRequired ? (
                     <p className="text-[13px] mc-muted mt-2">
-                      Complete {REDEEM_MIN_TASKS - dailyTasksCompleted} missões hoje para liberar as trocas.
+                      Complete {minRequired - dailyTasksCompleted} missões hoje para liberar as trocas.
                     </p>
                   ) : (
                     <p className="text-[13px] mc-muted mt-2">Complete mais missões para ganhar gold.</p>
@@ -426,12 +361,13 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
           <div className="p-4 border-t-4 border-[#17130f]">
             <h3 className="mc-h mb-3">
               <img src={CLOCK} alt="" className="mc-pixel" draggable={false} />
-              Minhas trocas ({redemptions.length})
+              Meus pedidos ({redemptions.length})
             </h3>
             <div className="space-y-2">
               {redemptions.slice(0, 10).map((redemption) => {
                 const reward = getRewardById(redemption.rewardId);
-                if (!reward) return null;
+                const title = reward?.title || redemption.rewardTitle || 'Pedido do Cofrinho';
+                if (!reward && !redemption.rewardTitle) return null;
                 const statusLabel =
                   redemption.status === 'pending' ? 'Aguardando' :
                   redemption.status === 'approved' ? 'Aprovado' :
@@ -445,10 +381,10 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
                 return (
                   <div key={redemption.id} className="mc-card rounded p-3 flex items-center gap-3">
                     <div className="mc-slot w-10 h-10 p-1 flex items-center justify-center shrink-0">
-                      <img src={rewardIcon(reward.category)} alt="" draggable={false} className="w-7 h-7 mc-pixel" />
+                      <img src={rewardIcon(reward?.category || 'custom')} alt="" draggable={false} className="w-7 h-7 mc-pixel" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h5 className="font-bold text-[15px]">{reward.title}</h5>
+                      <h5 className="font-bold text-[15px]">{title}</h5>
                       <p className="text-[12px] mc-muted">
                         {redemption.createdAt.toLocaleDateString('pt-BR')} às {redemption.createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </p>
@@ -463,6 +399,26 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
         )}
+    </>
+  );
+
+  if (embedded) return <div className="text-white">{inner}</div>;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-2 sm:p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="mc-panel mn-child-sheet rounded-lg w-full max-w-3xl text-white overflow-hidden"
+      >
+        {inner}
       </motion.div>
     </motion.div>
   );

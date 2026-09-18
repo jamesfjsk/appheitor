@@ -124,38 +124,22 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress, compact = false }) 
 
   if (compact) {
     return (
-      <>
-        <section className="mc-panel rounded-lg px-3 py-2 mt-2">
-          <div className="flex items-center gap-3">
-            <span className="mc-lbl shrink-0">XP</span>
-            <div className="mc-bar flex-1">
-              <div className="mc-bar-fill" style={{ width: `${levelSystem.progressPercentage}%` }} />
+      <AnimatePresence>
+        {showLevelUp && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
+          >
+            <div className="mc-modal mc-pop rounded-lg px-8 py-6 text-center">
+              <img src={DIAMOND} alt="" className="w-12 h-12 mx-auto mb-3 mc-pixel" draggable={false} />
+              <div className="mc-title text-lg">Nível {levelSystem.currentLevel}</div>
+              <div className="text-lg text-white mt-2">{levelSystem.levelTitle}</div>
             </div>
-            <span className="mc-num text-white shrink-0 text-[10px] sm:text-[12px]">
-              {xpNoNivel}/{xpDoNivel}
-            </span>
-            {dailyXP > 0 && (
-              <span className="mc-font text-[8px] mc-good shrink-0">+{dailyXP}</span>
-            )}
-          </div>
-        </section>
-        <AnimatePresence>
-          {showLevelUp && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
-            >
-              <div className="mc-modal mc-pop rounded-lg px-8 py-6 text-center">
-                <img src={DIAMOND} alt="" className="w-12 h-12 mx-auto mb-3 mc-pixel" draggable={false} />
-                <div className="mc-title text-lg">Nível {levelSystem.currentLevel}</div>
-                <div className="text-lg text-white mt-2">{levelSystem.levelTitle}</div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </>
+          </motion.div>
+        )}
+      </AnimatePresence>
     );
   }
 

@@ -109,3 +109,16 @@ export function applyFurnaceBonus(material: MaterialCount, fornalhaLevel: number
   if (!firstOfDay || fornalhaLevel < 1 || material <= 0) return material;
   return clampMaterial(material + 1);
 }
+
+/**
+ * Picareta forjada nos contratos da Mina (teto 3).
+ * Pedra: +1 no primeiro; ferro: +1 nos dois primeiros; ouro/diamante: +1 em todo contrato com material.
+ */
+export function applyPickaxeBonus(material: MaterialCount, pickaxe: number, doneToday: number): MaterialCount {
+  if (material <= 0 || pickaxe < 1) return material;
+  let add = 0;
+  if (pickaxe >= 3) add = 1;
+  else if (pickaxe >= 2 && doneToday < 2) add = 1;
+  else if (pickaxe >= 1 && doneToday === 0) add = 1;
+  return clampMaterial(material + add);
+}

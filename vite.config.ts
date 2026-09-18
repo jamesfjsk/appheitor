@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     optimizeDeps: {
+      include: ['phaser'],
       exclude: ['lucide-react'],
     },
     define: {

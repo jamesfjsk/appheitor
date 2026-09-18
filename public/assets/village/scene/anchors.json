@@ -1,29 +1,129 @@
 {
   "size": { "w": 1280, "h": 640 },
-  "spriteScale": 1.5,
+  "spriteScale": 1,
   "lots": [
-    { "id": "fornalha", "x": 170, "y": 178, "w": 160, "h": 88 },
-    { "id": "bau",      "x": 365, "y": 178, "w": 155, "h": 88 },
-    { "id": "cerca",    "x": 205, "y": 315, "w": 165, "h": 86 },
-    { "id": "torre",    "x": 410, "y": 315, "w": 160, "h": 86 },
-    { "id": "mesa",     "x": 245, "y": 450, "w": 170, "h": 82 },
-    { "id": "campinho", "x": 455, "y": 450, "w": 170, "h": 82 },
-    { "id": "cofre",    "x": 750, "y": 548, "w": 170, "h": 84 }
+    { "id": "fornalha", "x": 147, "y": 198, "w": 102, "h": 78, "door": { "x": 214, "y": 310 } },
+    { "id": "bau", "x": 144, "y": 348, "w": 105, "h": 78, "door": { "x": 196, "y": 440 } },
+    { "id": "cerca", "x": 600, "y": 528, "w": 80, "h": 48, "door": { "x": 640, "y": 448 } },
+    { "id": "torre", "x": 1064, "y": 48, "w": 90, "h": 112, "door": { "x": 1054, "y": 188 } },
+    { "id": "mesa", "x": 723, "y": 234, "w": 90, "h": 63, "door": { "x": 770, "y": 338 } },
+    { "id": "cofre", "x": 472, "y": 422, "w": 104, "h": 80, "door": { "x": 524, "y": 512 } },
+    { "id": "agenda", "x": 584, "y": 412, "w": 112, "h": 92, "door": { "x": 640, "y": 516 } },
+    { "id": "mercado", "x": 708, "y": 414, "w": 112, "h": 90, "door": { "x": 764, "y": 516 } },
+    { "id": "arena", "x": 929, "y": 318, "w": 186, "h": 146, "destW": 148, "landmark": true, "door": { "x": 1016, "y": 498 } }
   ],
-  "character": { "x": 700, "y": 445, "h": 96 },
+  "character": { "x": 640, "y": 365, "h": 80 },
   "npcs": {
-    "sabio": { "x": 800, "y": 215, "h": 96 },
-    "comerciante": { "x": 1090, "y": 385, "h": 96 },
-    "ferreiro": { "x": 125, "y": 505, "h": 96 },
-    "olheiro": { "x": 1180, "y": 130, "h": 96 }
+    "sabio": { "x": 848, "y": 268, "h": 74, "door": { "x": 848, "y": 320 } },
+    "comerciante": { "x": 838, "y": 468, "h": 74, "door": { "x": 838, "y": 500 } },
+    "ferreiro": { "x": 78, "y": 250, "h": 74, "door": { "x": 108, "y": 318 } },
+    "olheiro": { "x": 1114, "y": 79, "h": 52, "door": { "x": 1110, "y": 168 } }
+  },
+  "npcSpots": {
+    "comerciante": {
+      "morning": { "x": 1172, "y": 486, "door": { "x": 1148, "y": 508 } },
+      "afternoon": { "x": 996, "y": 228, "door": { "x": 1004, "y": 268 } },
+      "night": null
+    },
+    "sabio": {
+      "day": { "x": 620, "y": 240, "door": { "x": 620, "y": 268 } },
+      "night": { "x": 1052, "y": 228, "door": { "x": 1048, "y": 260 } }
+    }
   },
   "hotspots": {
-    "mine": { "x": 500, "y": 0, "w": 170, "h": 150 }
+    "mine": { "x": 545, "y": 32, "w": 210, "h": 138, "type": "district", "label": "Mina", "door": { "x": 650, "y": 198 } },
+    "reserva": { "x": 468, "y": 234, "w": 90, "h": 63, "type": "future", "label": "Em breve", "door": { "x": 640, "y": 255 } },
+    "chest_streak": {
+      "x": 253,
+      "y": 348,
+      "w": 48,
+      "h": 48,
+      "type": "chest_streak",
+      "label": "Baú das tochas",
+      "sprite": "/assets/village/items/chest_streak.png",
+      "minFullDays": 7,
+      "door": { "x": 196, "y": 440 }
+    }
   },
-  "lights": [
-    { "id": "mina", "x": 585, "y": 75, "r": 90 },
-    { "id": "fogueira", "x": 890, "y": 400, "r": 70 }
+  "wall": [
+    { "kind": "south", "x": 400, "y": 500, "w": 480, "h": 72 }
   ],
-  "water": { "x": 1040, "y": 455, "w": 210, "h": 135 },
-  "smokeOffset": { "dx": 100, "dy": -70 }
+  "growth": [
+    { "stage": 1, "minLevels": 0, "src": "/assets/village/scene/growth-1.png", "marks": [] },
+    {
+      "stage": 2,
+      "minLevels": 7,
+      "src": "/assets/village/scene/growth-2.png",
+      "marks": [
+        { "kind": "flowers", "x": 448, "y": 292 },
+        { "kind": "flowers", "x": 502, "y": 278 },
+        { "kind": "flowers", "x": 690, "y": 292 },
+        { "kind": "flowers", "x": 768, "y": 286 },
+        { "kind": "flowers", "x": 978, "y": 268 },
+        { "kind": "flowers", "x": 1064, "y": 272 },
+        { "kind": "stones", "x": 520, "y": 352 },
+        { "kind": "stones", "x": 470, "y": 348 },
+        { "kind": "lamp", "x": 976, "y": 236 },
+        { "kind": "lamp", "x": 1068, "y": 238 }
+      ]
+    },
+    {
+      "stage": 3,
+      "minLevels": 14,
+      "src": "/assets/village/scene/growth-3.png",
+      "marks": [
+        { "kind": "bunting", "x": 360, "y": 328, "x2": 820, "y2": 322 },
+        { "kind": "bunting", "x": 948, "y": 132, "x2": 1088, "y2": 88 },
+        { "kind": "bench", "x": 1108, "y": 504 },
+        { "kind": "lamp", "x": 1124, "y": 512 },
+        { "kind": "lamp", "x": 392, "y": 388 },
+        { "kind": "flowers", "x": 620, "y": 498 },
+        { "kind": "flowers", "x": 680, "y": 508 }
+      ]
+    }
+  ],
+  "lights": [
+    { "id": "mina", "x": 640, "y": 96, "r": 52 },
+    { "id": "fogueira", "x": 1020, "y": 210, "r": 54 },
+    { "id": "poste-l", "x": 382, "y": 430, "r": 40 },
+    { "id": "poste-r", "x": 876, "y": 442, "r": 40 }
+  ],
+  "water": { "x": 1125, "y": 345, "w": 145, "h": 125 },
+  "smokeOffset": { "dx": 51, "dy": 8 },
+  "house": { "id": "casa", "x": 938, "y": 110, "w": 96, "h": 74, "door": { "x": 986, "y": 204 } },
+  "props": [
+    { "id": "pack", "x": 592, "y": 336, "w": 48, "h": 48, "sprite": "/assets/village/items/mochila.png", "label": "Mochila", "door": { "x": 548, "y": 390 } }
+  ],
+  "walk": {
+    "nodes": {
+      "plaza": { "x": 640, "y": 365 },
+      "n1": { "x": 640, "y": 255 },
+      "mine": { "x": 650, "y": 198 },
+      "mesa": { "x": 770, "y": 338 },
+      "w1": { "x": 430, "y": 348 },
+      "furnace": { "x": 214, "y": 310 },
+      "chest": { "x": 196, "y": 440 },
+      "s1": { "x": 640, "y": 448 },
+      "coffre": { "x": 524, "y": 512 },
+      "agenda": { "x": 640, "y": 516 },
+      "market": { "x": 764, "y": 516 },
+      "e1": { "x": 840, "y": 400 },
+      "arena": { "x": 1016, "y": 498 },
+      "porch": { "x": 980, "y": 248 },
+      "house": { "x": 986, "y": 204 },
+      "tower": { "x": 1054, "y": 188 },
+      "fire": { "x": 1020, "y": 268 },
+      "lake": { "x": 1168, "y": 508 },
+      "pack": { "x": 548, "y": 390 }
+    },
+    "edges": [
+      ["plaza", "n1"], ["n1", "mine"], ["n1", "mesa"],
+      ["plaza", "w1"], ["w1", "furnace"], ["furnace", "chest"], ["w1", "chest"],
+      ["plaza", "s1"], ["s1", "coffre"], ["s1", "agenda"], ["s1", "market"],
+      ["plaza", "e1"], ["e1", "arena"], ["e1", "market"],
+      ["e1", "porch"], ["porch", "house"], ["porch", "fire"],
+      ["house", "tower"], ["fire", "arena"], ["arena", "lake"],
+      ["plaza", "pack"]
+    ]
+  }
 }

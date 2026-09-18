@@ -6,7 +6,10 @@ interface SoundContextType {
   playRewardUnlocked: () => void;
   playAchievement: () => void;
   playClick: () => void;
+  playHammer: () => void;
   playError: () => void;
+  playTick: () => void;
+  playWhistle: () => void;
   playNotification: () => void;
   isSoundEnabled: boolean;
   toggleSound: () => void;
@@ -157,6 +160,28 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     playTone(800, 0.05, 'square', 0.1);
   };
 
+  const playTick = () => {
+    playTone(196, 0.045, 'square', 0.07);
+  };
+
+  const playWhistle = () => {
+    playSequence([
+      { freq: 392, duration: 0.16, delay: 0, type: 'sine', volume: 0.14 },
+      { freq: 330, duration: 0.28, delay: 140, type: 'sine', volume: 0.12 },
+    ]);
+  };
+
+  const playHammer = () => {
+    playSequence([
+      { freq: 140, duration: 0.08, delay: 0, type: 'square', volume: 0.22 },
+      { freq: 90, duration: 0.05, delay: 30, type: 'sawtooth', volume: 0.12 },
+      { freq: 148, duration: 0.08, delay: 170, type: 'square', volume: 0.22 },
+      { freq: 92, duration: 0.05, delay: 200, type: 'sawtooth', volume: 0.12 },
+      { freq: 156, duration: 0.1, delay: 340, type: 'square', volume: 0.24 },
+      { freq: 98, duration: 0.06, delay: 370, type: 'sawtooth', volume: 0.14 },
+    ]);
+  };
+
   const playError = () => {
     // Som de erro - tom descendente
     playSequence([
@@ -179,7 +204,10 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     playRewardUnlocked,
     playAchievement,
     playClick,
+    playHammer,
     playError,
+    playTick,
+    playWhistle,
     playNotification,
     isSoundEnabled,
     toggleSound

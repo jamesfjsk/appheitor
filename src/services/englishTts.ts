@@ -6,28 +6,22 @@
 // ponto cai na fala do navegador (speakAsync en-US). Nada aqui rejeita.
 // ========================================
 
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { db, storage } from '../config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { functions, db } from '../config/firebase';
 import { speakAsync } from './englishGameService';
-import { recordUsage } from './aiUsage';
 import { DEFAULT_MODULES } from '../config/village';
 import { getSettings } from './settingsService';
 import type { ModuleSettings } from '../types/village';
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
-const SPEECH_URL = 'https://api.openai.com/v1/audio/speech';
 const TTS_MODEL = 'gpt-4o-mini-tts';
 const TTS_VOICE = 'nova';
 const TTS_SPEED = 0.95;
-/** Tempo máximo para gerar + subir um áudio antes de cair na fala do navegador */
-const GENERATE_TIMEOUT_MS = 15_000;
 /** Nenhuma reprodução segura a tela por mais que isso */
 const PLAY_GUARD_MS = 60_000;
 /** Pré-busca: quantas gerações ao mesmo tempo */
 const PREFETCH_CONCURRENCY = 2;
 
-const hasKey = (): boolean => Boolean(OPENAI_API_KEY && OPENAI_API_KEY.trim());
 const hasSubtle = (): boolean => typeof crypto !== 'undefined' && typeof crypto.subtle !== 'undefined';
 const hasSpeech = (): boolean => typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -50,20 +44,6 @@ async function sha256Hex(s: string): Promise<string> {
 
 const cacheKey = (normalized: string): string => `${TTS_MODEL}|${TTS_VOICE}|${TTS_SPEED}|${normalized}`;
 
-async function fetchSpeech(text: string, signal: AbortSignal): Promise<Blob> {
-  const response = await fetch(SPEECH_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${OPENAI_API_KEY}` },
-    body: JSON.stringify({ model: TTS_MODEL, voice: TTS_VOICE, speed: TTS_SPEED, input: text, response_format: 'mp3' }),
-    signal,
-  });
-  if (!response.ok) {
-    const detail = await response.text().catch(() => '');
-    throw new Error(`OpenAI TTS ${response.status}: ${detail.slice(0, 200)}`);
-  }
-  return response.blob();
-}
-
 /** Lê o índice; sem entrada, gera, sobe e grava. Devolve null quando não dá para ter o mp3. */
 async function resolveUrl(hash: string, normalized: string): Promise<string | null> {
   const indexRef = doc(db, 'englishAudio', hash);
@@ -72,22 +52,12 @@ async function resolveUrl(hash: string, normalized: string): Promise<string | nu
     const url = indexed.data().url;
     if (typeof url === 'string' && url) return url;
   }
-  if (!hasKey()) return null;
   const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
   if (modules.tts === false) return null;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), GENERATE_TIMEOUT_MS);
-  try {
-    const blob = await fetchSpeech(normalized, controller.signal);
-    const fileRef = ref(storage, `english/tts/${hash}.mp3`);
-    await uploadBytes(fileRef, blob, { contentType: 'audio/mpeg', cacheControl: 'public, max-age=31536000, immutable' });
-    const url = await getDownloadURL(fileRef);
-    await setDoc(indexRef, { text: normalized, url, createdAt: new Date().toISOString() });
-    void recordUsage({ model: TTS_MODEL, calls: 1, ttsChars: normalized.length });
-    return url;
-  } finally {
-    clearTimeout(timer);
-  }
+  const openai = httpsCallable(functions, 'openai');
+  const result = await openai({ kind: 'tts', voice: TTS_VOICE, input: normalized, model: TTS_MODEL });
+  const data = result.data as { url?: string };
+  return typeof data.url === 'string' && data.url ? data.url : null;
 }
 
 /** URL do mp3 do texto (cache em memória, índice no Firestore, geração quando falta); null se não der */

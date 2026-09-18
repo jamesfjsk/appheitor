@@ -6,6 +6,8 @@
 
 import { SurpriseMissionQuestion } from '../types';
 import { childAgeToday } from '../config/rules';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../config/firebase';
 
 export type QuizTheme = 'daily' | 'english' | 'math' | 'general' | 'mixed';
 export type QuizDifficulty = 'easy' | 'medium' | 'hard';
@@ -26,14 +28,11 @@ export interface GeneratedQuiz {
   source: QuizSource;
 }
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
-const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
-const MODEL = 'gpt-4o-mini';      // rápido e barato; qualidade suficiente para quiz infantil
-const REQUEST_TIMEOUT_MS = 45_000;
-const BATCH_SIZE = 15;            // lotes menores evitam JSON truncado e reduzem a espera
-const HISTORY_LIMIT = 60;         // perguntas lembradas por tipo para evitar repetição
+const MODEL = 'gpt-4o-mini';
+const BATCH_SIZE = 15;
+const HISTORY_LIMIT = 60;
 
-export const isAIConfigured = (): boolean => Boolean(OPENAI_API_KEY && OPENAI_API_KEY.trim());
+export const isAIConfigured = (): boolean => true;
 
 const THEME_TEXT: Record<QuizTheme, string> = {
   daily:
@@ -124,44 +123,18 @@ export function callOpenAI(system: string, user: string, maxTokens: number, opts
 export function callOpenAI(system: string, user: string, maxTokens: number, opts?: AbortSignal | CallOpenAIOptions): Promise<unknown>;
 export async function callOpenAI(system: string, user: string, maxTokens: number, opts?: AbortSignal | CallOpenAIOptions): Promise<unknown> {
   const options: CallOpenAIOptions = isAbortSignal(opts) ? { signal: opts } : opts ?? {};
-  const signal = options.signal;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const onAbort = () => controller.abort();
-  signal?.addEventListener('abort', onAbort);
-  try {
-    const response = await fetch(OPENAI_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${OPENAI_API_KEY}` },
-      body: JSON.stringify({
-        model: options.model ?? MODEL,
-        temperature: options.temperature ?? 0.9,
-        max_tokens: maxTokens,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user },
-        ],
-      }),
-      signal: controller.signal,
-    });
-    if (!response.ok) {
-      const text = await response.text().catch(() => '');
-      throw new Error(`OpenAI ${response.status}: ${text.slice(0, 200)}`);
-    }
-    const data = (await response.json()) as {
-      choices?: { message?: { content?: string } }[];
-      usage?: { prompt_tokens?: number; completion_tokens?: number };
-    };
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) throw new Error('Resposta vazia da IA');
-    const json = JSON.parse(content) as unknown;
-    if (!options.withUsage) return json;
-    return { json, usage: { inputTokens: data.usage?.prompt_tokens ?? 0, outputTokens: data.usage?.completion_tokens ?? 0 } };
-  } finally {
-    clearTimeout(timer);
-    signal?.removeEventListener('abort', onAbort);
-  }
+  const openai = httpsCallable(functions, 'openai');
+  const payload = {
+    kind: 'chat' as const,
+    model: options.model ?? MODEL,
+    input: { system, user, maxTokens },
+    temperature: options.temperature ?? 0.9,
+    withUsage: Boolean(options.withUsage),
+  };
+  const result = await openai(payload);
+  const data = result.data as { json?: unknown; usage?: OpenAIUsage };
+  if (options.withUsage) return { json: data.json, usage: data.usage ?? { inputTokens: 0, outputTokens: 0 } };
+  return data.json ?? data;
 }
 
 async function generateBatch(count: number, opts: GenerateQuizOptions, avoid: string[]): Promise<SurpriseMissionQuestion[]> {

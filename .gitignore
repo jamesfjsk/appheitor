@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+functions/lib
 *.local
 
 # Editor directories and files
@@ -23,3 +24,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Python cache dos scripts de arte
+__pycache__/
+# Backups do launch-reset (dados reais, nunca no repositório)
+backups/

@@ -18,14 +18,14 @@ Este documento é o cronograma por etapas para outras IAs executarem com precis�
 2. **XP e níveis**: curva em `src/utils/levelSystem.ts` (0/100/250/450/700/1000, depois +350 por nível, teto 100); patentes de minerador já aplicadas.
 3. **Missões**: `tasks` por `period` (morning/afternoon/evening) e `frequency` (daily/weekday/weekend); uma conclusão por dia por tarefa (`lastCompletedDate === getTodayBrazil()`); conclusão atômica em `FirestoreService.completeTaskWithRewards` (batch com `increment`) gravando `taskCompletions`.
 4. **Sequência**: `updateStreak`/`checkAndResetStreakIfNeeded` em `firestoreService.ts` (ontem mantém, hoje soma, senão zera).
-5. **Regras do dia** (`src/services/dailyRulesService.ts`): `closeDay` idempotente por `dailyProgress.summaryProcessed`, penalidade por missão perdida, bônus de dia completo, férias isentas.
+5. **Regras do dia** (`src/services/dailyRulesService.ts`): `closeDay` idempotente por `dailyProgress.summaryProcessed`, penalidade por missão perdida, bônus de dia completo, férias isentas. **Ruínas** (decisão de 17/09, `docs/VILA_CONSTRUCOES.md`, "Ruínas"): cada missão perdida derruba uma obra, **só quando há penalidade** (nunca em férias, folga, punição ou regras desligadas); obra caída vale nível 0 até o reparo (dia completo ou 1 material), e a prova continua alcançável com a Biblioteca caída. O fechamento nunca cobra dias anteriores a `settings/dailyRules.activatedOn` nem a `progress.lastDailySummaryProcessedDay`.
 6. **Modo punição**: substitui o app inteiro; 30 tarefas ou 7 dias; uma tarefa a cada 30 min; só o pai ativa/desativa.
-7. **Prova diária** (`dailyQuizService.ts`): gerada um dia antes, obrigatória se `progress.quizRequired`, nunca regenerada depois de concluída, temas sem repetir 45 dias.
+7. **Prova diária** (`dailyQuizService.ts`): gerada um dia antes, obrigatória se `progress.quizRequired` (verdadeiro desde o lançamento de 20/09: é portão, nunca abre sozinha), nunca regenerada depois de concluída. Desde 17/09: tema escolhido pelo motor de rotação (`src/services/quiz/rotation.ts`: categoria nunca repete em dias seguidos, tema não repete em 90 dias, perfil de aprendizado pesa) e **Memória da Prova** (`quizBank`, um doc por pergunta feita, com `hash` para nunca repetir enunciado; `learning/{uid}.profile` com acertos por categoria e assunto; uma revisita de erro por prova).
 8. **Datas e horas** sempre no fuso de São Paulo, lidas de um relógio só (**Relógio da Vila**, `src/utils/clock.ts` a partir da Etapa 2, corrigido pelo servidor; até lá `src/utils/timezone.ts`), datas como `YYYY-MM-DD`; nenhum componente lê `new Date().getHours()` direto; a virada de meia-noite com o app aberto é tratada pelo `ClockProvider`. Nunca gravar `undefined` no Firestore (copiar `omitUndefined`/`stripUndefined`).
 9. **Segurança**: `firestore.rules` por dono (`userId == uid`) com `get` permitido em documento inexistente; `storage.rules` para `english/**`; chave da OpenAI no cliente com teto mensal (`aiUsage`, `AI_MONTHLY_CALL_CAP`).
 10. **A Base e a Mina** (`src/services/englishBaseService.ts`, `src/types/english.ts`): `englishBase/{uid}` é o livro-razão de materiais comuns e construções; `completeContract` e `buildUpgrade` gravam o doc inteiro passando por `fromBaseDoc` (campos novos ali seriam apagados: por isso a vila tem doc próprio); contratos de inglês continuam como estão.
 11. **Interface**: português do Brasil, sem emojis, fonte pixel só em títulos e números, classes `mc-*` (`src/index.css`, seção final) e `src/styles/miner.css`; painel dos pais continua limpo (Tailwind, branco/azul).
-12. **Cofrinho**: gold guardado sai do saldo disponível no depósito e só volta por cancelamento do responsável; juros só sobre o guardado, com teto, uma vez por semana; meta alcançada é fechada pelo responsável (o gold vira o prêmio real). Desafios pagam uma única vez.
+12. **Cofrinho**: gold guardado sai do saldo disponível no depósito e só volta por cancelamento do responsável; juros só sobre o guardado, com teto, uma vez por semana; meta alcançada é fechada pelo responsável (o gold vira o prêmio real). Desafios pagam uma única vez. Exceção registrada em 17/09: com o Cofre em ruínas, depósito trava e os juros da semana são zero até o reparo (o guardado nunca some).
 13. **Qualidade**: `npx tsc --noEmit -p tsconfig.app.json`, `npx eslint src --max-warnings 0` (só os 6 avisos pré-existentes em `src/icons/index.tsx`), `npm run test:english` (testes em Node de módulos puros), `npx vite build`; módulos puros sem importar Firebase nem `import.meta.env`; cada etapa entrega um documento de API (`docs/*_API.md`) com todas as exportações.
 
 
@@ -41,7 +41,7 @@ Acordar na Vila (Placa diz o que há hoje: missões, prova, evento da Agenda, pe
 
 | Módulo | Recebe de | Entrega para |
 |---|---|---|
-| Missões (casa) | Agenda (missões de estudo), Plano do turno (ordem e foco), Ferraria (picareta), Mesa nível 3 e Cerca (proteções), pai (cadastro) | gold, XP, material por período; Baú do Dia; tochas; desafios; amizade do Olheiro; conquistas |
+| Casa do Minerador (missões, Linha do dia, Plano do turno, Fechar o dia) | Agenda (compromissos e missões de estudo na Linha do dia), Ferraria (picareta), Cerca e capacete (proteções), pai (cadastro), Relógio (períodos e virada do dia) | gold, XP, material por período; Baú do Dia; tochas; desafios; amizade do Olheiro; conquistas de rotina; check-in para o Sábio; "amanhã eu..." para o Diário |
 | Biblioteca (prova) | Mesa (tema de amanhã), Agenda (provas da escola viram tema), Estante de erros | gold, XP, esmeralda; Diário; amizade do Sábio; desafios `quiz_correct`; Mapa de habilidades |
 | Mina (inglês) | Fornalha (bônus), Lanterna (amanhã), Mesa (tema), Banco (nada: aprender não é emprego) | material e redstone, gold, XP; amizade do Comerciante; palavras dominadas (Torre); Baú ("+1 na Fornalha 3") |
 | Obras (construções) | material das missões, da Mina, do Baú, do presente de nível; pré-requisitos entre elas | efeitos em Missões, Mina, Baú, Ferraria (Fundição), Banco (Cofre), Torre, Biblioteca; amizade do Ferreiro; cena (visual) |
@@ -50,13 +50,20 @@ Acordar na Vila (Placa diz o que há hoje: missões, prova, evento da Agenda, pe
 | Banco da Vila | gold que sobra (Mercado mostra "criar meta"), Cofre (níveis), semanas ISO | metas viram prêmios de verdade; Extrato ensina; taxa de poupança no relatório; amizade do Comerciante (pedido 4) |
 | Mercado | gold; prêmios do pai; Loja (cosméticos com `minLevel`); Comerciante (material sobrando) | prêmios de verdade (motivação real); identidade (Mochila, cena); ralo de material; amizade do Comerciante |
 | Mochila | tudo que ele ganha ou compra | identidade na cena e no avatar; visão do que falta (Ferraria e Obras) |
-| Torre | conquistas, recordes, troféus, estrelas, pedidos cumpridos, Mapa de habilidades | metas de médio prazo; desafios propostos (nível 3); orgulho visível |
-| Agenda | provas e eventos (ele e o pai), Foco (o cronômetro) | missões de estudo (Missões), tema de prova (Biblioteca), XP de organização, chip do cabeçalho, Placa ("amanhã") |
-| Placa da Vila | tudo (missões, Baú, Agenda, NPCs, Sábio, pai, troféu) | o "o que fazer agora" de cada dia; nunca uma tela isolada |
+| Torre | conquistas do jogo (72, por contadores de todos os módulos), conquistas da vida real (do pai), recordes, troféus, estrelas, pedidos cumpridos, Mapa de habilidades | metas de médio prazo ("Quase lá"); desafios propostos (nível 3); orgulho visível; XP, material e raros das conquistas |
+| Agenda (calendário incluído) | provas e eventos (ele e o pai), Foco (o cronômetro), Relógio (hora dos lembretes), histórico de dias (tochas e gold na aba Mês) | Linha do dia da Casa, missões de estudo, tema de prova (Biblioteca), lembretes na Placa, push, chip do cabeçalho, "Amanhã você tem" no Fechar o dia, XP de organização, conquistas de Agenda, partidas da Arena marcadas |
+| Placa da Vila | tudo (missões, Baú, Agenda "Hoje você tem", NPCs e pedidos, Sábio, pai, troféu, conquistas novas) | o "o que fazer agora" de cada dia; nunca uma tela isolada |
+| Relógio da Vila | servidor (hora certa), fuso de Brasília | períodos das missões, portão do Baú, cena (céu e luz), lembretes da Agenda, virada do dia, fechamento de ontem, rotina dos NPCs, "Dia fechado" |
+| Mochila e itens | tudo que ele ganha, compra ou forja (Loja, Ferraria, patentes, marcos, NPCs, Baú) | o que ele veste na cena e no avatar; o que falta para forjar e construir; "Novo" que puxa de volta para a Torre, a Loja e a Ferraria |
 | NPCs (amizade e pedidos) | ações no domínio de cada um (contratos, prova, forja, dias completos) | falas que mudam, pedidos, cosméticos exclusivos, história (Museu, Etapa 3) |
 | Fechar o dia | o dia inteiro; hábitos | XP, resposta do Sábio na Placa, "amanhã eu..." no Diário |
 | Temporada e nível | XP de tudo | patentes, raros, cosméticos de marco, portas da Ferraria e da Loja, estrela |
-| Pai (painel) | tudo (relatórios, Extrato, Agenda, pedidos) | prêmios, desafios, eventos, folga, aprovações, ajustes de economia |
+| Mundo e Fazenda (Etapa 4) | dias completos (rega), material (sementes e níveis da Fazenda), pets da Loja, Cerca (proteção), modo férias (Praia), base completa (Montanha), temporada (Castelo) | colheita em material e ingredientes, decorações da Vila, ovos para o Comerciante (no teto), conquistas próprias, metas de longo prazo visíveis no mapa (regiões com névoa e placa), lugar para cada módulo novo sem espremer a Vila |
+| Arena (jogos com os pais, Etapa 4B; hoje marco na cena, sem custo) | Agenda (partida marcada), Torre (troféus), Olheiro (dono da Arena), banco de perguntas da prova | XP e material (nunca gold), recorde de partidas com o pai, troféu, assunto para o Diário |
+| Vagoneta da Mina (módulo `logic`; entrou no Lote 2, regularizada em 17/09) | Recado do dia feito; nível da Mina (teto); maestria mostrada (`redstoneDone`, `redstonePerfect`) | redstone para a Fornalha; XP; amizade com o Ferreiro; 7 conquistas; sessões no Relatório |
+| Memória da Prova (`quizBank` + `learning/{uid}.profile`; desde 17/09) | cada pergunta feita na prova (com acerto e erro) | lista "não repita" e perfil no prompt da prova; rotação de temas; revisita de erro; Mapa de habilidades da Torre; aba "Como ele vai" do painel; Expedição do Explorador (Etapa 3) |
+| Expedição do Explorador (avaliação mensal, Etapa 3; `docs/AVALIACAO_MENSAL.md`) | Memória da Prova, nível de inglês, bancos por descritor (BNCC e SAEB), banco autoral de raciocínio | `learning/{uid}.profile.assessment` que pesa a rotação da prova, os contratos e as falas do Sábio; Estante de erros; relatório mensal do pai; XP, selo e 1 raro (nunca gold) |
+| Pai (painel) | tudo (relatórios, Extrato, Agenda, pedidos, partidas da Arena) | prêmios, desafios, eventos, folga, aprovações, ajustes de economia, lances na Arena |
 
 ### Regras que valem para toda etapa
 
@@ -209,7 +216,7 @@ Depois: `DailyQuiz.tsx`, `SurpriseMissionQuiz.tsx`, `BirthdayCelebration.tsx`, `
 
 ### Etapa 1: a Vila jogável (~2 semanas)
 
-**Desenho da tela da criança** (fonte de verdade desde 15/09): construções em `docs/VILA_CONSTRUCOES.md`, itens em `docs/VILA_ITENS.md`, lugares e palavras em `docs/VILA_MAPA.md`. **Estado (15/09/2026):** executada pelo Cursor a partir de `docs/etapas/ETAPA_1_VILA.md`; revisada em `docs/etapas/REVISAO_ETAPA_1.md` (6 itens altos, correções até 18/09, curva de nível nova junto com a "nova fase", hábitos viram "Dica do turno" sem botão, `allDoneBonus` 0, XP de construção 0, cosméticos sem arte escondidos). Bloqueante corrigido na revisão: a regra de `tasks` impedia a criança de concluir missão. **Loja da Vila fechada ("Em breve", `settings/modules.shop = false`) até o Sistema de itens da Etapa 2**: na versão do dia 18 o gold vale só nos prêmios de verdade.
+**Desenho da tela da criança** (fonte de verdade desde 15/09): construções em `docs/VILA_CONSTRUCOES.md`, itens em `docs/VILA_ITENS.md`, lugares e palavras em `docs/VILA_MAPA.md`, conquistas do jogo e da vida real em `docs/VILA_CONQUISTAS.md`, mapa do mundo, cenas e Fazenda em `docs/MUNDO.md`. **Estado (15/09/2026):** executada pelo Cursor a partir de `docs/etapas/ETAPA_1_VILA.md`; revisada em `docs/etapas/REVISAO_ETAPA_1.md` (6 itens altos, correções até 18/09, curva de nível nova junto com a "nova fase", hábitos viram "Dica do turno" sem botão, `allDoneBonus` 0, XP de construção 0, cosméticos sem arte escondidos). Bloqueante corrigido na revisão: a regra de `tasks` impedia a criança de concluir missão. **Loja da Vila fechada ("Em breve", `settings/modules.shop = false`) até o Sistema de itens da Etapa 2**: na versão do dia 18 o gold vale só nos prêmios de verdade.
 
 Objetivo: casa do jogo. Personagem + base + missões pagando materiais + Oficina + Mercado com Loja da Vila + Baú do Dia; Mina, Biblioteca (prova), Torre, Mapa, Placas e Ampulheta acessíveis da Vila.
 Pré-requisitos: Etapa 0; ícones gerados pelo líder (`b_<id>_1..3.webp` para as 6 construções, `b_placa.webp`, picaretas `g_pickaxe_0..4`, `g_capa`, baús `chest_day_open`, `chest_streak`, `chest_streak_open`, distritos `d_oficina`, `d_mercado`, `d_placa`, `fx_rachadura`).
@@ -226,6 +233,8 @@ Não fazer: mexer em `englishBase` além de `materials`; mudar regras de puniç�
 
 **Arquivo da etapa:** `docs/etapas/ETAPA_2_BANCO_E_TEMPORADA.md` (dois lotes: Lote 1 dinheiro e regras, com a economia v2 inteira, a Cloud Function `openai`, a **Agenda do Minerador** (o cronômetro vira agenda com lembretes por push e plano de estudo; o calendário vira a aba Mês) os efeitos das construções de `docs/VILA_CONSTRUCOES.md` o **Sistema de itens** de `docs/VILA_ITENS.md` (Mochila, Loja, editor e Ferraria no mesmo padrão) e o **Mapa da Vila** de `docs/VILA_MAPA.md` (uma palavra e uma porta para cada coisa; Mercado com prêmios embutidos; Banco com Extrato); Lote 2 autonomia, temporada, painel "Hoje" e relatório semanal). O texto abaixo é o plano original; o arquivo da etapa prevalece.
 
+**Estado em 17/09/2026:** Lote 1 aprovado (`REVISAO_ETAPA_2_LOTE_1.md`, §13); Lote 2 revisado e não aprovado (`REVISAO_ETAPA_2_LOTE_2.md`). O pai decidiu **lançar para o Heitor no domingo 20/09** com esta branch lapidada: o fechamento está em **`docs/etapas/ETAPA_2_LANCAMENTO.md`** (13 decisões do pai, pacotes P0 a P5, reset de lançamento com 100 gold, primeiro acesso, Memória da Prova, motor de rotação, Vagoneta regularizada com ficha e 7 conquistas, go/no-go de sábado). O que o Lote 2 deixou e não entra até domingo vai para a Etapa 3 como "pendências da Etapa 2": Cofre nível 3, cosmético das 21 tochas, Torre com `ItemSlot` e "Pedir para o pai confirmar", toast/som/NPC de conquista, conversa especial de amizade, Placa com troféu/desafio/pedido, Fechar o dia como perguntas, faixa "Por hoje é isso", "aguardando o pai", presente de nível fora de missão, M13 completo (pagamentos em Cloud Function), `SceneCanvas`/`scenes/vila`, PNGs `growth`, quadros por inpaint, `learning` por semana em subcoleção, `quizLocked` pelo doc, `BirthdayCelebration` como evento, `saverWeeks`/`creeperClicks`/`weekQuestion` de volta ao catálogo.
+
 Objetivo: o equipamento importa, o dia tem clímax e ele aprende a poupar e a cumprir metas com prazo.
 **Banco da Vila** (frente própria, arquivos disjuntos): módulo puro `src/services/village/bank.ts` (cálculo de juros por semana ISO com teto, validação de depósito, resumo semanal do extrato a partir de `goldTransactions`) com testes; `src/services/goalsService.ts` (`createGoal`, `depositGoal` em `runTransaction` tocando `goals` + `progress.availableGold` + `goldTransactions` `goal_deposit`, `applyWeeklyInterest` idempotente por `lastInterestWeek`, `finishGoal(goalId, 'achieved' | 'cancelled')` só para admin com `goal_withdraw` no cancelamento); `src/services/challengesService.ts` (`subscribeChallenges`, `bumpChallenge(userId, kind, value, absolute?)` chamado em `DataContext.completeTask`, `updateStreak`, `completeDailyQuiz`, `englishBaseService.completeContract` e na Oficina de Redstone; ao completar paga XP/gold via `adjustUserXP/adjustUserGold` + `createGoldTransaction('challenge')`); regras em `firestore.rules` (`goals`: criança cria/lê/atualiza `savedGold` só via transação própria, fechamento admin; `challenges`: leitura pela criança, escrita admin). Telas: construção nova **Cofre** na cena da vila (7º lote, ícone `b_cofre_1..3` conforme o total guardado: 0-99, 100-299, 300+) que abre `Cofrinho.tsx` (metas abertas com barra, "Guardar" com valor, meta batida mostra "Avise seu pai"), `Extrato.tsx` (semana atual e anteriores, frase do Sábio), `DesafiosCard.tsx` (desafios da semana com prazo e progresso, no topo da Vila abaixo das missões); Loja e Prêmios com o atalho "Criar meta no Cofrinho". Painel: `GoalsPanel.tsx` (aprovar/cancelar metas, ver histórico) e `ChallengeManager.tsx` (criar desafios; modelos prontos: "5 dias seguidos", "20 missões na semana", "prova 8/8 duas vezes", "3 contratos de inglês por dia durante 5 dias"), adaptados da V2 (`appheitor-v2/src/components/parent/GoalsPanel.tsx`, `ChallengeManager.tsx`, `LedgerList.tsx`) para o Firestore e para o visual dos painéis atuais.
 Aceite do Banco: depositar debita o saldo e cria a linha `goal_deposit`; saldo nunca negativo; juros aplicados uma vez por semana com teto; cancelar devolve exatamente o guardado; meta alcançada some do saldo só quando o responsável fecha; desafios avançam nos cinco eventos e pagam uma vez; extrato bate com `goldTransactions`.
@@ -236,7 +245,9 @@ Aceite: um dia jogado com cada equipamento mostrando o efeito no toast, no hist�
 
 Objetivo: filosofia, lógica, caráter e conhecimento entram no jogo de forma natural, sem virar lição. Tudo gerado ou selecionado por código/IA; o pai só aprova no painel.
 - **Biblioteca / Livro do dia**: a prova diária vira uma conversa com o "Sábio da Vila" (personagem fixo, retrato pixel): a ideia do dia é apresentada como história curta (2-3 falas) antes das perguntas (reaproveitar `dailyQuizzes.theme.lesson` e `whyItMatters`; `DailyQuiz.tsx` só muda a apresentação); a reflexão dele vira página do **Diário do Minerador** (`dailyQuizzes.reflection` já existe; tela nova `Diario.tsx` lista as reflexões por data; o pai vê no painel). Recompensa: mantém `quizRewards`; 8/8 dá esmeralda (Etapa 2).
-- **Oficina de Redstone (lógica)**: 3 desafios por dia gerados por código, determinísticos por data e nível, sem IA: circuitos com alavancas e lâmpadas (E/OU/NÃO), sequências ("o que vem depois"), padrões, ordenar passos de um algoritmo, enigmas numéricos; explicação em PT de uma linha ao errar e uma segunda tentativa; paga redstone (0-3) e XP; módulo puro `src/services/village/logic.ts` com testes; tela `RedstoneWorkshop.tsx` dentro da Oficina. Dificuldade sobe com o nível da base.
+- **Oficina de Redstone (lógica)**: 3 desafios por dia gerados por código, determinísticos por data e nível, sem IA: circuitos com alavancas e lâmpadas (E/OU/NÃO), sequências ("o que vem depois"), padrões, ordenar passos de um algoritmo, enigmas numéricos; explicação em PT de uma linha ao errar e uma segunda tentativa; paga redstone (0-3) e XP; módulo puro `src/services/village/logic.ts` com testes; tela `RedstoneWorkshop.tsx` dentro da Oficina. Dificuldade sobe com o nível da base. **Atualização de 17/09:** as regras já existem em `src/services/village/redstone.ts` e a tela em Phaser (`src/game/redstone/`, `RedstoneBench.tsx`) está no repositório como molde da porta "jogo" (`docs/MUNDO.md` §5), sem import. Entra aqui com desenho e ficha antes do código; até lá a Mina tem a **Vagoneta da Mina** (cálculo mental, módulo `logic`).
+- **Memória da Prova completa** (o núcleo entrou no lançamento de 20/09): Estante de erros com bônus e revisita em 3, 10 e 30 dias; análise por dificuldade; sugestão automática de temas ao pai; a reflexão dele entra no prompt; perfil da criança editável pelo pai (interesses); pacotes semanais de falas por IA aprovados em "Personagens".
+- **Expedição do Explorador (avaliação mensal; pedido do pai em 17/09)**: desenho em `docs/AVALIACAO_MENSAL.md` (BNCC 5º ano, descritores e escala do SAEB, Bloom, domínios CHC como mapa, Piaget, PIRLS/TIMSS, adaptativo, repetição espaçada, CASEL e calibração). Seis blocos, cerca de 70 itens em até 3 sessões de 12 a 15 minutos no fim de semana; Bloco 1 (raciocínio) é banco autoral fixo (`docs/avaliacao/bloco1-raciocinio.json`, 45 itens revisados pelo pai); os demais vêm dos descritores com variações por IA guardadas em `assessmentBank`. Dados em `assessments/{uid}_{YYYY-MM}`; resumo em `learning/{uid}.profile.assessment` que passa a pesar a rotação da prova, os contratos e as falas do Sábio. O Heitor vê o "Mapa do Explorador" (estrelas por região, XP, selo do mês, 1 raro; sem nota, sem ranking); o pai vê o relatório por descritor e "3 coisas para fazer em casa". **Primeira: Expedição de Boas-vindas (linha de base) entre 27/09 e 04/10; depois no último fim de semana de cada mês.** Absorve a "Expedição do conhecimento" abaixo.
 - **Falas dos personagens** (o sistema de amizade, pedidos e falas condicionais nasce na Etapa 2, Lote 2, "Diálogos que evoluem", seção 15 de `ETAPA_2_BANCO_E_TEMPORADA.md`; aqui entram os bancos grandes e os pacotes de IA): Comerciante, Ferreiro, Sábio e Olheiro falam em PT ao abrir cada distrito, uma frase por dia: curiosidade, provérbio explicado, pergunta para pensar (banco em código com 200+ falas, `src/data/villageLines.ts`, sem repetir 60 dias; pacotes semanais gerados por IA a partir de `quizCurriculum.ts` e aprovados no painel).
 - **Cartas com dilema**: as Cartas da Mina (inglês) já têm pergunta de decisão; passa a existir 1 Carta por semana em português, do Olheiro, com dilema de caráter (honestidade, esforço, empatia) e 3 escolhas comentadas (sem certo/errado punitivo; paga pedra e uma fala do Sábio).
 - **Expedição do conhecimento**: a missão surpresa (30 perguntas) vira um mapa com 5 checkpoints por matéria, recompensa por checkpoint; mesma geração e mesmos dados (`dailySurpriseMissionStatus`).
@@ -244,13 +255,70 @@ Objetivo: filosofia, lógica, caráter e conhecimento entram no jogo de forma na
 - **Relatório da semana** no painel: temas da prova, reflexões, palavras de inglês dominadas, desafios de lógica, materiais e construções.
 Aceite: `logic.ts` com 100% dos desafios resolvíveis e explicados (teste em Node gera 365 dias x 3 níveis); prova continua obrigatória e idêntica nos dados; falas nunca repetem em 60 dias (teste); fotos das telas.
 
-### Etapa 4: vida na vila (~2 semanas)
+### Etapa 4: o Mundo e a vida na vila (~3 semanas)
+
+**Desenho em `docs/MUNDO.md` (16/09):** a Vila vira o centro de um mundo com mapa pintado, cenas próprias pelo mesmo motor (Mina, Biblioteca, Fazenda, Arena, Montanha, Praia, Castelo da Lenda), transição com o minerador andando na estradinha, e a **Fazenda** (plantar com material, regar pelo dia completo, colher em dias reais, animais dos pets) como espelho da rotina. A regra "cena é dado, não código" vale desde o Lote 2 da Etapa 2. O texto abaixo é o plano original da vida na vila e continua valendo dentro da Etapa 4. **Recebe do lançamento de 20/09 (decisões de 17/09):** Vagoneta v2; Campinho de volta com efeito (pet, Gol de Placa, bônus de fim de semana); Arena como cena (4B); look de corpo inteiro v2 com animação de andar para chapéu e capa; arte das camadas `wall` e `growth` do `anchors.json`; `BirthdayCelebration` como evento do `EventManager`.
 
 Datas especiais (`events`, painel `EventManager.tsx` adaptado da V2: o pai cadastra datas com bônus e mensagem; a vila celebra uma vez por ano, como o aniversário), feed de **Novidades** na Placa da vila (a coleção `notifications` já existe: mostrar as últimas 10 para a criança, marcar lidas), decorações posicionáveis (`village.decor`, Loja da Vila), pets animados ao lado do personagem, Campinho com efeito (n1 libera pet, n3 bônus de fim de semana) e o mini-jogo de futebol "Gol de Placa" (goleiro grita direções em inglês, do plano da Arena), "Turno na Mina" (Mine Rush com frases, 90 s, revisão do inglês), aniversário como festa na vila (fogos em pixel, presente no baú), férias como temporada (banner e cena de dia ensolarado), capa protegendo tochas 1 dia/mês, rotação sazonal do catálogo, animações do personagem (cavar ao concluir missão, comemorar no dia completo). **Vida v2 dos personagens**: folhas de animação de verdade (PixelLab `animate-with-skeleton` ou quadros por inpaint em série) para andar, falar, cavar e sentar; rotina completa por hora para os quatro NPCs; pequenas cenas (Ferreiro martelando na Fornalha, Olheiro no Campinho); a v1 por código entra na Etapa 2, Lote 2 (`ETAPA_2_BANCO_E_TEMPORADA.md`, seção 14). Se o boneco por código ficar simples demais, trocar por sprites gerados (serviço pago, ver abaixo) mantendo a mesma interface `drawCharacter`.
 
-### Etapa 5: polimento e memória (~1 semana)
+
+### Etapa 4B: Arena, jogos de raciocínio contra os pais (pedido do pai em 15/09; "Em breve" até ficar 100%)
+
+**O que é**: um lugar da Vila onde o Heitor joga contra o pai (ou a mãe) jogos de lógica e estratégia. Não é contra a máquina e não é contra outras crianças: é a família jogando, com o jogo cuidando das regras, do placar e da história.
+
+**Como se joga**: por turnos, cada um no seu aparelho e no seu tempo (o pai joga do painel ou do celular, a criança da Vila; no futuro, irmãos e amigos aprovados pelos responsáveis, ver "Visão de produto"), com aviso de "sua vez" por push (a mesma função de lembretes da Agenda). Também dá para jogar no mesmo PC, revezando ("mesa"). Uma partida dura dias se precisar; o tabuleiro fica na Arena e na Placa ("Sua vez no xadrez com o pai").
+
+**Jogos (entram um por vez, cada um só quando estiver completo e testado)**:
+1. **Xadrez**: regras completas (biblioteca `chess.js` para validar lances; peças em pixel art geradas pelo líder), vantagem opcional para equilibrar (o pai começa sem uma torre, ou com menos tempo), e "lição da partida" ao fim (peças capturadas, quantos lances, uma dica do Sábio sobre planejar).
+2. **Damas**: módulo puro próprio, regras brasileiras.
+3. **Lig 4** (quatro em linha): módulo puro, partida curta de 5 minutos.
+4. **Batalha naval**: módulo puro; ensina coordenadas.
+5. **Duelo de perguntas**: as perguntas do banco da prova, alternadas; ganha quem acerta mais em 10; o pai responde de verdade.
+6. **Desafio de Redstone a dois** (Etapa 3): o mesmo circuito, quem resolve em menos tentativas.
+
+**O que ganha**: XP e material (nunca gold, para não virar dinheiro "por jogar com o pai"); troféu da Arena na Torre por série vencida (melhor de 3, melhor de 5); recorde de "partidas com o pai" (a métrica que interessa: tempo junto); o pai pode combinar um prêmio de verdade para uma série, cadastrado nos prêmios como qualquer outro. Perder não custa nada.
+
+**Ficha pedagógica**: aprende a planejar jogadas, a antecipar o outro e a perder bem; cabe aos 10 anos com partidas curtas e vantagem ajustável; mede partidas jogadas, lances por partida, vitórias e "lição" lida; adapta pela vantagem que o pai escolhe; feedback é a lição da partida e o replay dos lances; o pai vê tudo porque joga; sem IA gerando conteúdo (só o duelo de perguntas usa o banco já aprovado); não vira emprego porque não paga gold e não vira castigo porque perder não custa.
+
+**Universo**: recebe da Agenda (partida marcada), da Torre (troféus), dos NPCs (o Olheiro é o dono da Arena e comenta as partidas); entrega XP e material, recorde de partidas, troféu, um assunto para o Diário ("hoje ganhei do meu pai no Lig 4").
+
+**Dados**: `arena/{matchId}`: `{ game, players: { child: uid, parent: uid }, state (posição serializada), turn, moves[], status: 'open' | 'done' | 'abandoned', winner?, handicap?, createdAt, updatedAt, lastMoveAt }`; regras: cada jogador só escreve na sua vez e só o campo de lance; validação no módulo puro do jogo antes de gravar; índice `arena(players.child, status)`.
+
+**Até ficar pronta**: cartão "Arena" na grade de distritos com "Em breve" e uma fala do Olheiro ("Quando a Arena abrir, eu quero ver você ganhar do seu pai no xadrez"); lugar reservado na cena (âncora `arena`, arte a gerar: arquibancada pequena com tabuleiro). O cartão entra na Etapa 2 junto com o Mapa da Vila; a Arena de verdade é a Etapa 4B, depois da vida na vila, com um jogo por entrega, cada jogo testado com o pai antes de aparecer para a criança.
+
+### Etapa 5: lapidação (visual, som, desempenho e educação; ~2 semanas)
+
+Duas trilhas: **5A** (o texto abaixo: trilha sonora, cinemáticas, PWA, desempenho, acessibilidade, ajuste de economia) e **5B**, a lapidação educacional módulo por módulo, descrita depois de 5A.
+
+#### Etapa 5A: polimento e memória
 
 Trilha sonora chiptune (tema da vila, da mina, do baú; volume e mudo no cabeçalho, respeitando `SoundContext`), cinemática de subida de nível e de construção (3 quadros + som), primeiro acesso guiado (o Sábio apresenta a vila em 5 passos), desempenho no celular (lazy load dos módulos, imagens em `loading="lazy"`), PWA instalável (manifest, ícones, tela cheia), relatório mensal para o pai, exportação do Diário em PDF, revisão de acessibilidade (alvos de 44 px, contraste), e uma rodada de teste com o Heitor com ajustes de economia.
+
+
+### Etapa 5B: lapidação educacional, módulo por módulo (pedido do pai em 15/09)
+
+Depois de tudo construído, uma passada dedicada em cada módulo que ensina alguma coisa, com o mesmo rigor da revisão de código. Nenhum módulo educacional é dado como pronto sem essa passada.
+
+**Ficha pedagógica** (obrigatória para cada módulo; nasce no arquivo da etapa que o cria e é conferida aqui):
+
+1. O que ele aprende, em uma frase (ex.: "ler um texto curto em inglês e achar a informação").
+2. Por que cabe aos 10 anos (dificuldade, vocabulário, tempo por sessão).
+3. Como o jogo mede se aprendeu (dado gravado, não impressão): acertos por categoria, palavras dominadas, reflexões, taxa de poupança, planejamento com antecedência.
+4. Como adapta: o que sobe e o que desce quando ele acerta ou erra (nível dos contratos, profundidade da prova, dificuldade da Redstone).
+5. O que ele vê de volta (o feedback tem que ensinar, não só pontuar: explicação de uma linha ao errar, "por que importa").
+6. O que o pai vê (relatório semanal, aba do painel) e o que pode ajustar sem programar.
+7. Onde a IA entra e como o pai aprova o conteúdo antes de a criança ver (bancos em código, pacotes aprovados, nada gerado sem revisão).
+8. Risco de virar "emprego" (gold por aprender) ou "castigo" (aprender como punição): o que impede.
+
+**Roteiro da passada** (por módulo, nesta ordem): Prova do dia e Biblioteca; Mina (contratos, juiz, TTS, planos de nível); Oficina de Redstone (lógica); Cartas com dilema e Diário com o Sábio; Agenda e Foco (organização); Banco (educação financeira: Cofrinho, paciência, Extrato, faixas de preço); Fechar o dia (hábitos); Diálogos dos NPCs (o que as falas ensinam e o tom); Expedição do conhecimento; Capítulo da semana e Conta do Comerciante; Torre e relatório semanal (o que mostramos como progresso). Para cada um: ficha conferida, dados de 4 semanas reais lidos, conteúdo gerado por IA amostrado (30 itens por módulo, revisados pelo pai), uma sessão de teste com o Heitor observada (o que ele entendeu sem explicação, onde travou, o que achou chato), e a lista de ajustes: texto, dificuldade, ritmo, recompensa, feedback.
+
+**Aceite da Etapa 5B**: todas as fichas preenchidas e batendo com o código; nenhum módulo paga gold por aprender além da prova; todo erro tem explicação em uma linha; o relatório semanal mostra por módulo o que ele está aprendendo; o pai consegue ajustar dificuldade e conteúdo pelo painel; três sessões com o Heitor sem "não entendi" em nenhum módulo.
+
+### Etapa 6: produto (famílias, assinatura, operação; só depois da 5B)
+
+Por enquanto o Miner Missions é um projeto pessoal para o Heitor. O pai já enxerga potencial de produto; a decisão registrada é: **primeiro fazer o jogo ser bom para uma criança de verdade, depois abrir**. Critério para começar a Etapa 6: o Heitor jogando por conta própria por 3 meses, economia estável sem ajuste por 4 semanas seguidas, Etapa 5B fechada, custo de IA por criança medido.
+
+O que a Etapa 6 cobre, em ordem: migração para `families/{fid}` (ver "Visão de produto"); cadastro e primeiro acesso de uma família nova (responsável cria a conta, convida a criança, o jogo se apresenta sem precisar de manual); painel com várias crianças; **assinatura** (mensal por família, cobrindo IA e infraestrutura, com período grátis; pagamento por Stripe ou similar, nunca dentro da tela da criança); termos, privacidade e LGPD para dados de crianças (consentimento do responsável, mínimo de dados, exclusão a pedido); revisão humana dos bancos de conteúdo e um fluxo de aprovação para o que a IA gera; suporte e página de status; site de apresentação no domínio (o teaser vira a página inicial de verdade); métricas de produto por família sem expor nenhuma criança; segunda criança na própria família como primeiro teste real. Tudo o que é "Heitor" no código vira perfil configurável antes disso (Etapa 5).
 
 ## Revisão v2: acréscimos obrigatórios (quatro críticos independentes: criança, educação, engenharia, operação do pai)
 
@@ -320,6 +388,30 @@ Estes itens corrigem lacunas do plano acima e prevalecem sobre o texto anterior 
 - Manifest sem precache agressivo (ou `vite-plugin-pwa` com `autoUpdate`); `CharacterCanvas` sem `requestAnimationFrame` parado e com `prefers-reduced-motion`; dados da criança fora de `rules.ts`; cronômetro do aceite (dia completo <= 25 min).
 - **Lapidação visual** (pedido do pai em 16/09): o fundo da tela do Heitor (hoje um gradiente de pedra com brilho de tochas em CSS, `ComicBackdrop` variante `mine`) ainda não agrada; refazer como cena de mina gerada por IA (parede de rocha com minérios, vigas de madeira, tochas, profundidade em camadas com parallax leve), coerente com os sprites da Vila. Revisar também espaçamentos, tamanhos de fonte e contraste tela por tela com o Heitor jogando.
 
+
+## Visão de produto: Miner Missions para muitas famílias (futuro; registrado em 15/09/2026)
+
+O pai quer que isto possa virar um app de verdade, com milhares de crianças sendo educadas pelo Miner Missions, com pais e, no futuro, outros filhos e outras famílias jogando juntos. Nada disso entra agora; o que entra agora é **não fechar a porta**.
+
+### Como ficaria
+
+- **Família** como unidade: `families/{fid}` com os responsáveis (um ou mais adultos) e as crianças (uma ou mais), cada criança com a sua Vila; o painel do responsável mostra as crianças lado a lado; convites por link; papéis "responsável" e "criança" em vez de "pai" e "Heitor".
+- **Arena** entre membros da família primeiro; depois entre amigos, só com aprovação dos dois responsáveis, sem chat livre (só lances e frases prontas), e com o mesmo motor de turnos.
+- **Conteúdo**: os bancos (falas, dilemas, capítulos, perguntas) viram conteúdo do produto, revisado por gente antes de publicar; a IA gera por criança (prova, contratos) dentro de um teto por família; nome, idade e interesses da criança saem do código e entram no perfil (`users/{uid}`), e a geração usa o perfil.
+- **Operação**: cobrança por família (assinatura) cobrindo IA e infraestrutura; custo por criança por dia hoje abaixo de US$ 0,10; LGPD para dados de crianças (consentimento do responsável, mínimo de dados, exclusão a pedido, sem foto pública); moderação de conteúdo gerado; observabilidade por família.
+
+### O que fazer desde já para não reescrever depois
+
+1. **Nenhum dado global de uma família em documento global**: hoje `settings/village`, `settings/economy`, `settings/modules`, `settings/pauseDays`, `settings/dailyRules`, `settings/testChild` são únicos no projeto. A partir da Etapa 2, toda leitura e escrita de settings passa por `settingsService` (já existe), para que o caminho vire `families/{fid}/settings/*` numa migração só, sem mexer nas telas.
+2. **Toda coleção nova nasce com `userId` e, a partir da Etapa 2, com `familyId`** (por enquanto sempre `'heitor'`), e as regras conferem os dois. Coleções antigas ganham `familyId` na migração.
+3. **Nada da criança em constante de código**: `CHILD_BIRTH_DATE`, nome, e-mail e `CHILD_PHOTO_URL` saem de `rules.ts` para `users/{uid}` (já previsto na Etapa 5; antecipar para a Etapa 2 se der).
+4. **Papéis**, não pessoas: o código diz `guardian` e `child`, as telas dizem "pai" só por texto configurável (`settings.guardianLabel`).
+5. **Cloud Functions multi-família** desde a primeira (`openai`, `agendaReminders`): recebem `familyId`, contam custo por família, nunca leem "o filho" global.
+6. **Bancos de conteúdo em arquivos de dados** (`src/data/*`), não espalhados em componentes, para virarem conteúdo publicável.
+7. **Testes puros continuam sem Firebase**: é o que permite trocar o armazenamento de lugar sem quebrar a lógica.
+
+Decisão mantida: uma criança por deploy até o produto existir; segundo filho na própria família = primeiro caso de uso da migração para `families`.
+
 ## Recursos pagos recomendados (o pai topou)
 
 1. **OpenAI** (já em uso): manter limite mensal de gasto no painel da OpenAI (sugestão US$ 20) e o teto de chamadas no app. Ícones de construção por nível podem usar `gpt-image-1` (não mini) em qualidade média para ficarem mais bonitos: centavos por ícone.
@@ -335,6 +427,7 @@ Nada de lojas de aplicativos: o PWA resolve.
 - **Quem coordena e revisa**: o Claude. Ao final de cada etapa, o pai pede a revisão; o Claude lê o código, roda as verificações e grava `docs/etapas/REVISAO_ETAPA_N.md` com o que ficou errado, o que faltou e o que corrigir, fazendo só pequenos ajustes diretos (o grosso volta para o Cursor, salvo se ficar problemático).
 - **Git**: ao fim de cada etapa aprovada, commit no repositório como backup (mensagem "Etapa N: ..."). Antes de começar uma etapa, o pai confirma que a árvore está commitada.
 - **Documento vivo**: este plano fica em `docs/MINER_MISSIONS_ROADMAP.md`; cada etapa concluída marca o que mudou e o que foi adiado.
+- **"Entrou sem doc"** (regra desde 17/09, depois de o Lote 2 trazer Vagoneta, Phaser, andar, look de corpo inteiro, Arena e Campinho sem documento): toda `REVISAO_*.md` abre com a seção "Entrou sem doc", listando cada arquivo, tela ou mecânica que apareceu na branch sem linha no arquivo de etapa. Cada item **ganha documento** (linha no arquivo de etapa, linha na tabela "recebe de / entrega para" e ficha pedagógica se ensina) **ou sai da branch**; quem decide é o pai, na revisão, nunca por omissão. Módulo que ensina e não tem ficha não é ligado no painel.
 
 ## Protocolo para a IA que executar uma etapa
 
@@ -343,7 +436,8 @@ Nada de lojas de aplicativos: o PWA resolve.
 3. Não tocar: invariantes acima; `src/components/common/ComicBackdrop.tsx` e `src/index.css` sem combinar com o pai (ele edita com outra ferramenta); painel dos pais além da aba prevista.
 4. Verificação obrigatória ao final: `npx tsc --noEmit -p tsconfig.app.json`, `npx eslint src --max-warnings 0`, `npm run test:english`, `npx vite build`, fluxo no navegador na conta de teste (`teste@flash.com`, criada na Etapa 1; até lá, na conta real, limpando os dados de teste com `scripts/cleanup-test-account.mjs` quando existir).
 5. Relatório final em português: arquivos, decisões, saídas dos comandos, fotos, pendências que exigem decisão do pai. Sem commit.
-6. Recurso novo só entra no arquivo de etapa com a linha "recebe de / entrega para" preenchida na tabela da seção "O universo conectado"; se não alimenta outro módulo nem é alimentado por outro, não entra.
+6. Todo módulo que ensina algo entra no arquivo de etapa com a **ficha pedagógica** (Etapa 5B) preenchida.
+7. Recurso novo só entra no arquivo de etapa com a linha "recebe de / entrega para" preenchida, e **todo relatório de etapa termina com a conferência de conexões**: para cada módulo tocado, o que passou a alimentar e o que passou a receber, com o caminho do código (função ou evento) que faz a ligação; ligação prometida no arquivo de etapa e não feita é pendência bloqueante na tabela da seção "O universo conectado"; se não alimenta outro módulo nem é alimentado por outro, não entra.
 
 ## Verificação end-to-end do plano inteiro
 

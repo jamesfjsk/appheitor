@@ -11,13 +11,17 @@
 
 import { collection, doc, getDoc, getDocs, onSnapshot, query, runTransaction, serverTimestamp, setDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { getTodayBrazil } from '../utils/timezone';
+import { addDays, getTodayBrazil, isoWeekOf } from '../utils/clock';
 import { DAILY_RULES_DEFAULTS } from '../config/rules';
 import { dueTasksOn, nextFullDays, rangeCoversDate } from './village/schedule';
 import { fromVillageDoc } from './villageService';
 import { initialVillageDoc } from '../config/village';
 import { touchHealth } from './observability';
-import type { ScheduleTask } from '../types/village';
+import type { Period, ScheduleTask } from '../types/village';
+import { cracksAfterClose, liveBuildingLevel } from './village/repair';
+import { claimKey, hasClaim } from './village/claims';
+import { bumpChallenge, extendActiveChallenges } from './challengesService';
+import { addVillageStats, skipDayPenalty } from './village/stats';
 
 export interface DailyRules {
   enabled: boolean;
@@ -43,8 +47,7 @@ export interface DayClosure {
 const RULES_DOC = doc(db, 'settings', 'dailyRules');
 
 export function addDaysStr(date: string, days: number): string {
-  const [y, m, d] = date.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+  return addDays(date, days);
 }
 
 function parseRules(data: Record<string, unknown> | undefined): DailyRules {
@@ -83,7 +86,7 @@ async function isVacationOn(date: string): Promise<boolean> {
   return true;
 }
 
-async function tasksDueOn(userId: string, date: string): Promise<number> {
+async function loadDueTasks(userId: string, date: string): Promise<ScheduleTask[]> {
   const snap = await getDocs(query(collection(db, 'tasks'), where('ownerId', '==', userId)));
   const tasks: ScheduleTask[] = snap.docs.map((t) => {
     const data = t.data();
@@ -93,9 +96,10 @@ async function tasksDueOn(userId: string, date: string): Promise<number> {
       frequency: data.frequency || 'daily',
       period: data.period || 'morning',
       createdAt: data.createdAt?.toDate?.() ?? null,
+      optional: data.optional === true,
     };
   });
-  return dueTasksOn(tasks, date).length;
+  return dueTasksOn(tasks, date);
 }
 
 async function isPauseDay(date: string): Promise<boolean> {
@@ -122,18 +126,20 @@ async function isPunishedOn(userId: string, date: string): Promise<boolean> {
   });
 }
 
-async function completionsOn(userId: string, date: string): Promise<{ count: number; xp: number; gold: number }> {
+async function completionsOn(userId: string, date: string): Promise<{ count: number; xp: number; gold: number; taskIds: string[] }> {
   const snap = await getDocs(query(collection(db, 'taskCompletions'), where('userId', '==', userId), where('date', '==', date)));
   let xp = 0;
   let gold = 0;
   let count = 0;
+  const taskIds: string[] = [];
   for (const c of snap.docs) {
     if (c.data().reverted === true) continue;
     count += 1;
     xp += Number(c.data().xpEarned) || 0;
     gold += Number(c.data().goldEarned) || 0;
+    if (c.data().taskId) taskIds.push(String(c.data().taskId));
   }
-  return { count, xp, gold };
+  return { count, xp, gold, taskIds };
 }
 
 /**
@@ -147,21 +153,24 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
   const existing = await getDoc(dailyRef);
   if (existing.exists() && existing.data().summaryProcessed === true) return null;
 
-  const [due, done, vacation, paused, punished] = await Promise.all([
-    tasksDueOn(userId, date),
+  const [dueTasks, done, vacation, paused, punished] = await Promise.all([
+    loadDueTasks(userId, date),
     completionsOn(userId, date),
     isVacationOn(date),
     isPauseDay(date),
     isPunishedOn(userId, date),
   ]);
-  const skipPenalty = vacation || paused || punished;
-  const missed = Math.max(0, due - done.count);
-  const penaltyWanted = r.enabled && !skipPenalty ? missed * r.penaltyPerMissedTask : 0;
-  const bonus = r.enabled && !skipPenalty && due > 0 && done.count >= due ? r.allDoneBonus : 0;
+  const due = dueTasks.length;
+  const skipPenalty = skipDayPenalty({ vacation, paused, punished, enabled: r.enabled });
+  const missedTasks = dueTasks.filter((t) => !done.taskIds.includes(t.id));
+  const quizSnap = await getDoc(doc(db, 'dailyQuizzes', `${userId}_${date}`));
+  const quizDone = quizSnap.data()?.completed === true;
 
   const progressRef = doc(db, 'progress', userId);
   const villageRef = doc(db, 'village', userId);
   let applied: DayClosure | null = null;
+  let extendPunish = false;
+  let fullDaysAfter = 0;
 
   await runTransaction(db, async (tx) => {
     const dailySnap = await tx.get(dailyRef);
@@ -169,6 +178,26 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
 
     const progressSnap = await tx.get(progressRef);
     const villageSnap = await tx.get(villageRef);
+    const baseSnap = await tx.get(doc(db, 'englishBase', userId));
+    const village = villageSnap.exists()
+      ? fromVillageDoc(userId, villageSnap.data() as Record<string, unknown>)
+      : initialVillageDoc(userId, new Date().toISOString());
+    const buildings = (baseSnap.data()?.buildings || {}) as Record<string, number>;
+    const cerca = liveBuildingLevel(buildings, village.cracks, 'cerca');
+
+    let missed = missedTasks.length;
+    let helmetUsed = false;
+    const week = isoWeekOf(date);
+    if (!skipPenalty && missed === 1 && village.gear.helmet >= 1 && village.shield.helmetWeek !== week) {
+      missed = 0;
+      helmetUsed = true;
+    }
+    const dueDone = Math.max(0, due - missed);
+
+    let penaltyWanted = r.enabled && !skipPenalty ? missed * r.penaltyPerMissedTask : 0;
+    if (cerca >= 3 && penaltyWanted > 1) penaltyWanted = 1;
+    const bonus = r.enabled && !skipPenalty && due > 0 && dueDone >= due ? r.allDoneBonus : 0;
+
     const gold = Number(progressSnap.data()?.availableGold) || 0;
     const penalty = Math.min(penaltyWanted, gold);
     const afterPenalty = gold - penalty;
@@ -178,7 +207,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       userId,
       date,
       totalTasksAvailable: due,
-      tasksCompleted: done.count,
+      tasksCompleted: dueDone,
       xpEarned: done.xp,
       goldEarned: done.gold,
       goldPenalty: penalty,
@@ -186,6 +215,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       vacation,
       paused,
       punished,
+      helmetUsed,
       summaryProcessed: true,
       processedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
@@ -209,7 +239,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
         type: 'penalty',
         source: 'daily_penalty',
         description: `${missed} ${missed === 1 ? 'missão perdida' : 'missões perdidas'} em ${date.split('-').reverse().slice(0, 2).join('/')}`,
-        metadata: { date, tasksCompleted: done.count, totalTasksAvailable: due, incompleteTasks: missed },
+        metadata: { date, tasksCompleted: dueDone, totalTasksAvailable: due, incompleteTasks: missed },
         balanceBefore: gold,
         balanceAfter: afterPenalty,
         createdAt: serverTimestamp(),
@@ -222,38 +252,74 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
         type: 'bonus',
         source: 'daily_bonus',
         description: `Dia completo em ${date.split('-').reverse().slice(0, 2).join('/')}: todas as missões feitas`,
-        metadata: { date, tasksCompleted: done.count, totalTasksAvailable: due },
+        metadata: { date, tasksCompleted: dueDone, totalTasksAvailable: due },
         balanceBefore: afterPenalty,
         balanceAfter: finalGold,
         createdAt: serverTimestamp(),
       });
     }
 
-    const village = villageSnap.exists()
-      ? fromVillageDoc(userId, villageSnap.data() as Record<string, unknown>)
-      : initialVillageDoc(userId, new Date().toISOString());
-    // Tochas: dia sem missão devida, folga, férias e punição não mexem (nextFullDays é puro e testado)
+    const missedIds = skipPenalty
+      ? []
+      : helmetUsed
+        ? missedTasks.slice(1).map((t) => t.id)
+        : missedTasks.map((t) => t.id);
+    const missedForCrack = missedTasks.filter((t) => missedIds.includes(t.id)).map((t) => ({ period: t.period as Period }));
+    const cracks = cracksAfterClose(cerca >= 2 ? [] : village.cracks, missedForCrack, buildings);
+    const punishKey = claimKey('punish', date);
+    const claimed = { ...village.claimed };
+    if (punished && !hasClaim(village, punishKey)) {
+      claimed[punishKey] = new Date().toISOString();
+      extendPunish = true;
+    }
+    const lost = !skipPenalty && due > 0 && dueDone < due;
+    const fenceKey = claimKey('fence', date.slice(0, 7));
+    let keepTorches = false;
+    if (lost && cerca >= 1 && !hasClaim(village, fenceKey)) {
+      keepTorches = true;
+      claimed[fenceKey] = new Date().toISOString();
+    }
+    const shield = helmetUsed ? { ...village.shield, helmetWeek: week } : village.shield;
     const torches = nextFullDays({
       due,
-      done: done.count,
+      done: dueDone,
       fullDays: village.fullDays,
       fullDaysStart: village.fullDaysStart,
       date,
-      skip: paused || punished || vacation,
+      skip: skipPenalty || keepTorches,
     });
-    if (torches.changed) {
-      const patch = { fullDays: torches.fullDays, fullDaysStart: torches.fullDaysStart, updatedAt: new Date().toISOString() };
-      if (villageSnap.exists()) {
-        tx.update(villageRef, patch);
-      } else {
-        tx.set(villageRef, { ...village, ...patch });
-      }
+    fullDaysAfter = torches.changed ? torches.fullDays : village.fullDays;
+    const torch = !skipPenalty && due > 0 && dueDone >= due;
+    const stats = addVillageStats(village.stats, {
+      fullDaysCount: torch ? 1 : 0,
+      noPunishDays: skipPenalty ? 0 : 1,
+    });
+    if (punished) stats.noPunishDays = 0;
+    if (skipPenalty) {
+      /* férias/folga/off: não mexe na sequência "sem esquecer" */
+    } else if (lost) {
+      stats.perfectWeeks = 0;
+    } else if (torch) {
+      stats.perfectWeeks = (village.stats.perfectWeeks || 0) + 1;
     }
+    if (torch) stats.fullDaysBest = Math.max(Number(stats.fullDaysBest) || 0, fullDaysAfter);
+    if (!vacation && !paused && !quizDone && progressSnap.data()?.quizEnabled !== false) stats.quizStreak = 0;
+    const patch = {
+      fullDays: torches.changed ? torches.fullDays : village.fullDays,
+      fullDaysStart: torches.changed ? torches.fullDaysStart : village.fullDaysStart,
+      cracks,
+      claimed,
+      shield,
+      stats,
+      updatedAt: new Date().toISOString(),
+    };
+    if (villageSnap.exists()) tx.update(villageRef, patch);
+    else tx.set(villageRef, { ...village, ...patch });
 
     applied = {
       date,
       totalTasksAvailable: due,
-      tasksCompleted: done.count,
+      tasksCompleted: dueDone,
       xpEarned: done.xp,
       goldEarned: done.gold,
       goldPenalty: penalty,
@@ -263,6 +329,19 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       punished,
     };
   });
+
+  if (extendPunish) {
+    try { await extendActiveChallenges(userId, 1); } catch (e) { console.warn('closeDay: extend desafios', e); }
+  }
+  if (applied && !skipPenalty) {
+    try { await bumpChallenge(userId, 'full_days', fullDaysAfter, true); } catch (e) { console.warn('closeDay: bump full_days', e); }
+  }
+  try {
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(userId, {});
+  } catch (e) {
+    console.warn('closeDay: stats', e);
+  }
 
   void touchHealth(userId, 'lastCloseDay', date);
   return applied;
@@ -274,14 +353,12 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
  */
 export async function processPendingDays(userId: string): Promise<DayClosure[]> {
   const rules = await getDailyRules();
-  if (!rules.enabled) return [];
-
   const today = getTodayBrazil();
   const yesterday = addDaysStr(today, -1);
   const progressSnap = await getDoc(doc(db, 'progress', userId));
   const lastClosed = progressSnap.exists() ? (progressSnap.data().lastDailySummaryProcessedDay as string | undefined) : undefined;
 
-  let start = rules.activatedOn ?? today;
+  let start = rules.activatedOn ?? (lastClosed ? addDaysStr(lastClosed, 1) : addDaysStr(today, -DAILY_RULES_DEFAULTS.maxLookbackDays));
   if (lastClosed && addDaysStr(lastClosed, 1) > start) start = addDaysStr(lastClosed, 1);
   const floor = addDaysStr(today, -DAILY_RULES_DEFAULTS.maxLookbackDays);
   if (start < floor) start = floor;
@@ -308,5 +385,7 @@ export async function getDayClosure(userId: string, date: string): Promise<DayCl
     goldPenalty: Number(d.goldPenalty) || 0,
     allTasksBonusGold: Number(d.allTasksBonusGold) || 0,
     vacation: d.vacation === true,
+    paused: d.paused === true,
+    punished: d.punished === true,
   };
 }

@@ -9,18 +9,16 @@ import { DailyQuiz, DailyQuizQuestion, DailyQuizTheme } from '../types';
 import { generateDailyQuiz } from './aiDailyQuiz';
 import { pickThemeForDate } from '../config/quizCurriculum';
 import { DAILY_QUIZ_QUESTIONS } from '../config/rules';
-import { DEFAULT_MODULES } from '../config/village';
+import { DEFAULT_ECONOMY, DEFAULT_MODULES } from '../config/village';
 import { getSettings } from './settingsService';
-import type { ModuleSettings } from '../types/village';
+import type { EconomySettings, ModuleSettings } from '../types/village';
+import { addDays } from '../utils/clock';
+import { bumpChallenge } from './challengesService';
+import { nextQuizStreak } from './village/stats';
 
 export const dailyQuizId = (userId: string, date: string) => `${userId}_${date}`;
 
-/** Soma dias a uma data YYYY-MM-DD sem depender de fuso */
-export function addDays(date: string, days: number): string {
-  const [y, m, d] = date.split('-').map(Number);
-  const t = new Date(Date.UTC(y, m - 1, d + days));
-  return t.toISOString().slice(0, 10);
-}
+export { addDays };
 
 function fromDoc(id: string, data: Record<string, unknown>): DailyQuiz | null {
   const questions = Array.isArray(data.questions) ? (data.questions as DailyQuizQuestion[]) : [];
@@ -99,7 +97,8 @@ export async function regenerateDailyQuiz(userId: string, date: string, today: s
 }
 
 async function buildAndSave(userId: string, date: string, today: string, count: number): Promise<DailyQuiz> {
-  const recent = await getRecentDailyQuizzes(userId, today, 45);
+  // 90 dias de memória (18/09): a lista chega da mais recente para a mais antiga, e o prompt recebe as 80 mais recentes
+  const recent = await getRecentDailyQuizzes(userId, today, 90);
   const recentIds = recent.filter((q) => q.date !== date).map((q) => q.theme.id).filter(Boolean);
   const avoid = recent.flatMap((q) => q.questions.map((x) => x.question));
   const seed = pickThemeForDate(date, recentIds);
@@ -155,21 +154,56 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     completedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }, { merge: true });
+  try {
+    await bumpChallenge(userId, 'quiz_correct', result.score);
+  } catch (e) {
+    console.warn('desafio quiz_correct', e);
+  }
+  if (result.score >= 8 && result.totalQuestions >= 8) {
+    try {
+      const { grantRare } = await import('./villageService');
+      const { claimKey } = await import('./village/claims');
+      await grantRare(userId, 'esmeralda', claimKey('quiz8', date));
+    } catch (e) {
+      console.warn('quiz 8/8 esmeralda', e);
+    }
+  }
+  try {
+    const { bumpVillage, bumpFriend } = await import('./village/statsBump');
+    const yesterday = await getDailyQuiz(userId, addDays(date, -1));
+    const yDate = addDays(date, -1);
+    const yProg = await getDoc(doc(db, 'dailyProgress', `${userId}_${yDate}`));
+    const skipped = yProg.data()?.vacation === true || yProg.data()?.paused === true;
+    const vSnap = await getDoc(doc(db, 'village', userId));
+    const prevStreak = Number(vSnap.data()?.stats?.quizStreak) || 0;
+    const deltas: Record<string, number> = { quizzesDone: 1 };
+    if (result.score >= 6) deltas.quizScore = result.score;
+    if (result.score >= 8) deltas.quizPerfect = 1;
+    await bumpVillage(userId, deltas, { set: { quizStreak: nextQuizStreak(prevStreak, yesterday?.completed === true, skipped) } });
+    await bumpFriend(userId, 'sabio', 2);
+  } catch (e) {
+    console.warn('stats prova', e);
+  }
 }
 
 export async function saveReflection(userId: string, date: string, reflection: string): Promise<void> {
   await updateDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), { reflection: reflection.trim(), updatedAt: serverTimestamp() });
+  try {
+    const { bumpVillage } = await import('./village/statsBump');
+    await bumpVillage(userId, { reflections: 1 });
+  } catch (e) {
+    console.warn('stats reflexão', e);
+  }
 }
 
-/** Prêmio por desempenho (mesmos degraus do v1, proporcionais ao total de perguntas) */
-export function quizRewards(score: number, total: number): { xp: number; gold: number } {
-  const pct = total > 0 ? score / total : 0;
-  if (pct >= 1) return { xp: 50, gold: 15 };
-  if (pct >= 0.85) return { xp: 35, gold: 12 };
-  if (pct >= 0.75) return { xp: 25, gold: 10 };
-  if (pct >= 0.6) return { xp: 18, gold: 7 };
-  if (pct >= 0.5) return { xp: 12, gold: 5 };
-  if (pct >= 0.35) return { xp: 8, gold: 3 };
-  if (pct >= 0.2) return { xp: 5, gold: 2 };
-  return { xp: 2, gold: 1 };
+/** Prova linear: gold e XP por acerto (economia v2). */
+export function quizRewards(
+  score: number,
+  total: number,
+  settings: Pick<EconomySettings, 'quizGoldPerHit' | 'quizXpPerHit'> = DEFAULT_ECONOMY
+): { xp: number; gold: number } {
+  const hits = Math.max(0, Math.min(score, total));
+  const goldPer = settings.quizGoldPerHit ?? 2;
+  const xpPer = settings.quizXpPerHit ?? 6;
+  return { gold: hits * goldPer, xp: hits * xpPer };
 }

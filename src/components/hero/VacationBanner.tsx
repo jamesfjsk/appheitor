@@ -25,7 +25,7 @@ const VacationBanner: React.FC = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="mc-panel rounded-lg p-4 flex items-center gap-4"
+      className="mc-panel rounded-lg p-4 mt-2 flex items-center gap-4"
     >
       <div className="mc-slot w-14 h-14 shrink-0 p-1">
         <img src={SUN} alt="" className="w-10 h-10 mc-pixel" draggable={false} />

@@ -11,7 +11,10 @@ import { arrayUnion, collection, doc, getDoc, onSnapshot, runTransaction, server
 import { db } from '../config/firebase';
 import type { BaseDoc, BuildingId, Contract, ContractOutcome, ContractResult, DailyPlan, Material, MaterialCount, PlanSource, ScaffoldStage } from '../types/english';
 import { BUILDINGS, MATERIALS, baseLevel, buildingCost, buildingOpensLater, canAfford, initialBaseDoc, isBuildingUnlocked, missingMaterials } from '../config/englishBase';
-import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, buildXp, rewardFor } from '../config/englishRewards';
+import { DEFAULT_ECONOMY } from '../config/village';
+import { getSettings } from './settingsService';
+import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, applyPickaxeBonus, buildXp, rewardFor } from '../config/englishRewards';
+import { cracksOf, isBroken, liveBuildingLevel, ruinUseError } from './village/repair';
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
 import { normalizedTokens } from './english/notePrecheck';
@@ -19,6 +22,7 @@ import { assertAiBudget, buildDailyContracts, regenerateSingle } from './english
 import { prefetchAudio } from './englishTts';
 import { addDays } from './dailyQuizService';
 import { getTodayBrazil } from '../utils/timezone';
+import { addVillageStats } from './village/stats';
 
 /** Lease de geração: outra aba só assume depois disso */
 const LEASE_MS = 3 * 60_000;
@@ -497,7 +501,7 @@ const affordableIds = (base: BaseDoc): BuildingId[] => BUILDINGS.map((b) => b.id
 /**
  * Transação única da conclusão: exige plano 'ready', contrato 'open' e a mesma versão;
  * decide a vaga premiada (Recado sempre; mais os 2 primeiros outros com material > 0;
- * refazer nunca premia), soma o material (bônus da Fornalha n1 no primeiro do dia, teto 3),
+ * refazer nunca premia), soma o material (Fornalha n1 no primeiro do dia + picareta forjada, teto 3),
  * atualiza vocab, andaime, contadores e dias jogados, grava o resultado e a sessão.
  */
 export async function completeContract(
@@ -513,10 +517,17 @@ export async function completeContract(
   const sessionRef = doc(collection(db, 'englishSessions'));
   const today = getTodayBrazil();
   const finishedAt = nowIso();
+  let contractType = '';
+  let wordsMastered = 0;
+  let perfect = false;
   let out: CompleteResult | null = null;
 
   await runTransaction(db, async (tx) => {
-    const [planSnap, baseSnap] = await Promise.all([tx.get(pRef), tx.get(bRef)]);
+    const [planSnap, baseSnap, vSnap] = await Promise.all([
+      tx.get(pRef),
+      tx.get(bRef),
+      tx.get(doc(db, 'village', uid)),
+    ]);
     if (!planSnap.exists()) throw new Error('Plano do dia não encontrado.');
     const plan = fromPlanDoc(planSnap.id, planSnap.data());
     if (plan.status !== 'ready') throw new Error('O plano ainda está sendo gerado.');
@@ -526,14 +537,23 @@ export async function completeContract(
     if (contract.version !== version) throw new Error('Este contrato foi atualizado; abra o quadro de novo.');
     const base = baseSnap.exists() ? fromBaseDoc(uid, baseSnap.data()) : initialBaseDoc(uid, finishedAt);
 
+    const cracks = cracksOf(vSnap.data()?.cracks);
     const firstOfDay = !hasDone(plan);
-    const material = applyFurnaceBonus(clampMaterial(outcome.materialEarned), base.buildings.fornalha, firstOfDay);
+    const pickaxe = Math.max(0, Math.min(4, Math.round(Number(vSnap.data()?.gear?.pickaxe) || 0)));
+    const doneToday = Object.values(plan.contracts).filter((c) => c.status === 'done').length;
+    const material = applyPickaxeBonus(
+      applyFurnaceBonus(clampMaterial(outcome.materialEarned), liveBuildingLevel(base.buildings, cracks, 'fornalha'), firstOfDay),
+      pickaxe,
+      doneToday
+    );
     const othersRewarded = plan.rewardedIds.filter((id) => plan.contracts[id]?.type !== 'note').length;
     const slotFree = contract.type === 'note' || othersRewarded < REWARDED_OTHER_SLOTS;
     const rewarded = material > 0 && !contract.retryUsed && slotFree;
     const { xp, gold } = rewardFor(contract.type, material, rewarded);
     const rewardedIds = rewarded && !plan.rewardedIds.includes(contractId) ? [...plan.rewardedIds, contractId] : plan.rewardedIds;
     const result: ContractResult = { ...outcome, materialEarned: material, rewarded, xp, gold, durationSec, finishedAt };
+    contractType = contract.type;
+    perfect = Number(outcome.score) >= Number(outcome.max) && Number(outcome.max) > 0;
 
     const materials = { ...base.materials, [contract.material]: base.materials[contract.material] + material };
     // Recado no estágio 2: a "Dica" custa 1 ferro (a tela só a libera com ferro em caixa)
@@ -555,6 +575,7 @@ export async function completeContract(
       contractsDone: base.contractsDone + 1,
       updatedAt: finishedAt,
     };
+    wordsMastered = Object.values(vocab).filter((v) => (v?.seen ?? 0) >= 3).length;
     const before = affordableIds(base);
     const unlockedBuildings = affordableIds(nextBase).filter((id) => !before.includes(id));
 
@@ -587,6 +608,25 @@ export async function completeContract(
   });
 
   if (!out) throw new Error('Falha ao concluir o contrato.');
+  try {
+    const { bumpChallenge } = await import('./challengesService');
+    await bumpChallenge(uid, 'english_contracts', 1);
+  } catch (e) {
+    console.warn('desafio english_contracts', e);
+  }
+  try {
+    const { bumpVillage, bumpFriend } = await import('./village/statsBump');
+    const deltas: Record<string, number> = { contractsDone: 1, contractsWeek: 1 };
+    if (contractType === 'letter') deltas.contractsLetter = 1;
+    if (contractType === 'note') deltas.contractsNote = 1;
+    if (contractType === 'forge') deltas.contractsForge = 1;
+    if (contractType === 'merchant') deltas.contractsMerchant = 1;
+    if (perfect) deltas.contractsPerfect = 1;
+    await bumpVillage(uid, deltas, { set: { wordsMastered } });
+    await bumpFriend(uid, 'comerciante', 2);
+  } catch (e) {
+    console.warn('stats contrato', e);
+  }
   return out;
 }
 
@@ -617,8 +657,25 @@ export function baseLevelOf(base: BaseDoc): number {
   return baseLevel(base.buildings);
 }
 
+function nextCost(id: BuildingId, nextLevel: number, multiplier = DEFAULT_ECONOMY.buildCostMultiplier) {
+  return buildingCost(id, nextLevel, multiplier);
+}
+
+function levelPrereq(base: BaseDoc, nextLevel: number, id: BuildingId): string | null {
+  if (id === 'cofre' || id === 'agenda' || id === 'mercado' || id === 'cerca' || id === 'fornalha' || id === 'bau') {
+    return null;
+  }
+  if (nextLevel >= 2 && (base.buildings.fornalha < 1 || base.buildings.bau < 1 || base.buildings.cerca < 1)) {
+    return 'Precisa da Fornalha, do Armazém e da Cerca no nível 1';
+  }
+  if (nextLevel >= 3 && (base.buildings.fornalha < 2 || base.buildings.bau < 2 || base.buildings.cerca < 2)) {
+    return 'Precisa da Fornalha, do Armazém e da Cerca no nível 2';
+  }
+  return null;
+}
+
 /** Pode construir o próximo nível? Traz o que falta de cada material (só os > 0) */
-export function canBuild(base: BaseDoc, id: BuildingId): {
+export function canBuild(base: BaseDoc, id: BuildingId, multiplier = DEFAULT_ECONOMY.buildCostMultiplier): {
   ok: boolean;
   missing: Partial<Record<Material, number>>;
   nextLevel: number;
@@ -627,8 +684,8 @@ export function canBuild(base: BaseDoc, id: BuildingId): {
 } {
   const nextLevel = (base.buildings[id] ?? 0) + 1;
   const unlocked = isBuildingUnlocked(id, base.buildings);
-  const later = buildingOpensLater(id, nextLevel);
-  const cost = buildingCost(id, nextLevel);
+  const later = buildingOpensLater(id, nextLevel) || levelPrereq(base, nextLevel, id);
+  const cost = nextCost(id, nextLevel, multiplier);
   if (!cost) return { ok: false, missing: {}, nextLevel, unlocked, later };
   const gap = missingMaterials(base.materials, cost);
   const missing: Partial<Record<Material, number>> = {};
@@ -644,15 +701,23 @@ export function canBuild(base: BaseDoc, id: BuildingId): {
 
 /** Valida custo e desbloqueio, debita os materiais e sobe o nível; o XP devolvido é aplicado pela tela */
 export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise<{ newLevel: number; xp: number }> {
+  const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as { buildCostMultiplier?: number };
+  const multiplier = economy.buildCostMultiplier ?? DEFAULT_ECONOMY.buildCostMultiplier;
   const ref = baseRef(uid);
   let out: { newLevel: number; xp: number } | null = null;
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
     const base = snap.exists() ? fromBaseDoc(uid, snap.data()) : initialBaseDoc(uid, nowIso());
-    const check = canBuild(base, buildingId);
-    if (check.later) throw new Error(`Abre na ${check.later}.`);
-    if (!check.unlocked) throw new Error('Essa construção ainda está bloqueada: suba a Fornalha e o Baú ao nível 1 primeiro.');
-    const cost = buildingCost(buildingId, check.nextLevel);
+    const vSnap = await tx.get(doc(db, 'village', uid));
+    if (isBroken(cracksOf(vSnap.data()?.cracks), buildingId)) throw ruinUseError(buildingId);
+    const check = canBuild(base, buildingId, multiplier);
+    if (check.later) throw new Error(/^(Precisa|Em breve)/.test(check.later) ? `${check.later}.` : `Abre na ${check.later}.`);
+    if (!check.unlocked) {
+      if (buildingId === 'cofre') throw new Error('Construa o Armazém primeiro.');
+      if (buildingId === 'cerca') throw new Error('Construa a Fornalha primeiro.');
+      throw new Error('Essa construção ainda está bloqueada: suba a Fornalha e o Armazém ao nível 1 primeiro.');
+    }
+    const cost = nextCost(buildingId, check.nextLevel, multiplier);
     if (!cost) throw new Error('Essa construção já está no nível máximo.');
     if (!check.ok) throw new Error('Faltam materiais para construir.');
     const materials = { ...base.materials };
@@ -663,6 +728,13 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
       buildings: { ...base.buildings, [buildingId]: check.nextLevel },
       updatedAt: nowIso(),
     });
+    if (vSnap.exists()) {
+      const rawStats = (vSnap.data()?.stats || {}) as Record<string, number>;
+      tx.update(doc(db, 'village', uid), {
+        stats: addVillageStats(rawStats, { buildsDone: 1 }),
+        updatedAt: nowIso(),
+      });
+    }
     out = { newLevel: check.nextLevel, xp: buildXp(check.nextLevel) };
   });
   if (!out) throw new Error('Falha ao construir.');
@@ -671,12 +743,29 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
 
 /** Mesa n1: tema de amanhã (30 caracteres). Se o plano de amanhã já existe sem contrato concluído, regenera com o pedido. */
 export async function setThemeRequest(uid: string, text: string | null): Promise<void> {
+  const vSnap = await getDoc(doc(db, 'village', uid));
+  if (isBroken(cracksOf(vSnap.data()?.cracks), 'mesa')) throw ruinUseError('mesa');
+  const bPrev = await getDoc(baseRef(uid));
+  const prevTheme = String(bPrev.data()?.themeRequest || '') || null;
   const value = (text ?? '').trim().slice(0, THEME_REQUEST_MAX);
   const themeRequest = value || null;
+  const changed = themeRequest !== prevTheme;
   await setDoc(baseRef(uid), { userId: uid, themeRequest, updatedAt: nowIso() }, { merge: true });
   const tomorrow = addDays(getTodayBrazil(), 1);
   const plan = await getPlan(uid, tomorrow);
   if (plan && !hasDone(plan) && plan.themeRequest !== themeRequest) await regeneratePlan(uid, tomorrow);
+  if (themeRequest && changed) {
+    const day = Number(getTodayBrazil().replace(/-/g, ''));
+    const themeSetOn = Number((vSnap.data()?.stats as Record<string, number> | undefined)?.themeSetOn) || 0;
+    if (themeSetOn !== day) {
+      try {
+        const { bumpVillage } = await import('./village/statsBump');
+        await bumpVillage(uid, { themesSet: 1 }, { set: { themeSetOn: day } });
+      } catch (e) {
+        console.warn('stats tema', e);
+      }
+    }
+  }
 }
 
 // ---------- painel ----------

@@ -1,6 +1,6 @@
 // Roda testes puros em Node (esbuild). Pastas: english e village.
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -11,10 +11,12 @@ const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const esbuildBin = require.resolve('esbuild/bin/esbuild');
 
 const dirs = process.argv.slice(2);
-const targets = (dirs.length ? dirs : ['english', 'village']).map((name) => ({
-  name,
-  dir: join(root, 'src', 'services', name, '__tests__'),
-}));
+const all = [
+  { name: 'english', dir: join(root, 'src', 'services', 'english', '__tests__') },
+  { name: 'village', dir: join(root, 'src', 'services', 'village', '__tests__') },
+  { name: 'utils', dir: join(root, 'src', 'utils', '__tests__') },
+];
+const targets = (dirs.length ? all.filter((t) => dirs.includes(t.name)) : all);
 
 const outDir = mkdtempSync(join(tmpdir(), 'app-tests-'));
 let failed = 0;
@@ -22,6 +24,7 @@ let filesRun = 0;
 
 try {
   for (const { name, dir } of targets) {
+    if (!existsSync(dir)) continue;
     const files = readdirSync(dir).filter((f) => f.endsWith('.test.ts')).sort();
     for (const file of files) {
       filesRun++;

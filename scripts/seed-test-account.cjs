@@ -1,4 +1,4 @@
-// Semeia a conta de teste (teste@flash.com) para testar a Vila: 3 missões diárias, 100 gold, 95 XP, 10 de cada material.
+// Semeia a conta de teste (teste@flash.com) para testar a Vila: 3 missões diárias, 20 gold, nível 1, 1 ferro.
 // Uso: node scripts/seed-test-account.cjs (usa o token do firebase-tools e o .env, como setup-test-account.cjs)
 // Semeia a conta de teste para o teste de navegador da Etapa 1: 3 missões, 100 gold, 95 XP, 10 de cada material.
 const fs = require('fs'); const os = require('os'); const path = require('path');
@@ -47,7 +47,7 @@ const enc = (o) => ({ fields: Object.fromEntries(Object.entries(o).map(([k, x]) 
     const r = await fetch(`${DOCS}/${p}?${mask}`, { method: 'PATCH', headers: H, body: JSON.stringify(enc(fields)) });
     console.log(p, r.status);
   };
-  await patch(`progress/${uid}`, { availableGold: 100, totalGoldEarned: 100, totalXP: 95, updatedAt: now });
-  await patch(`englishBase/${uid}`, { userId: uid, materials: { madeira: 10, pedra: 10, ferro: 10, redstone: 0 }, updatedAt: now.toISOString() });
+  await patch(`progress/${uid}`, { availableGold: 20, totalGoldEarned: 20, totalXP: 0, updatedAt: now });
+  await patch(`englishBase/${uid}`, { userId: uid, materials: { madeira: 0, pedra: 0, ferro: 1, redstone: 0 }, updatedAt: now.toISOString() });
   console.log('pronto');
 })().catch((e) => { console.error(e); process.exit(1); });

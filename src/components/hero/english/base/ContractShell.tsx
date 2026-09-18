@@ -42,7 +42,7 @@ interface Props {
   onDone: () => void;
   /** Desistiu antes de entregar */
   onQuit: () => void;
-  /** "Construir X agora" no resultado */
+  /** "Construir / Melhorar X na Vila" no resultado */
   onBuildNow: (id: BuildingId) => void;
 }
 
@@ -110,6 +110,7 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
   const [failMsg, setFailMsg] = useState('');
   const startedAtRef = useRef(0);
   const finishingRef = useRef(false);
+  const spendLot = firstBuildable(base);
 
   // Cronômetro só durante o jogo
   useEffect(() => {
@@ -164,7 +165,7 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
       if (reward.xp > 0) await adjustUserXP(reward.xp);
       if (reward.gold > 0) {
         await adjustUserGold(reward.gold);
-        await FirestoreService.createGoldTransaction(uid, reward.gold, 'earned', 'english_game', `A Base: ${CONTRACT_LABELS[contract.type]} (${contract.title})`, {
+        await FirestoreService.createGoldTransaction(uid, reward.gold, 'earned', 'english_game', `Mina: ${CONTRACT_LABELS[contract.type]} (${contract.title})`, {
           relatedId: contract.id,
           relatedTitle: contract.title,
           metadata: { date, contractId: contract.id, type: contract.type, material: reward.materialEarned, score: outcome.score, max: outcome.max, durationSec },
@@ -183,7 +184,12 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
     <div data-testid="contract-shell">
       {/* Barra do contrato: tipo, título, cronômetro, ajuda e sair */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <img src={CONTRACT_ICONS[contract.type]} alt="" className="w-9 h-9 mc-pixel shrink-0" draggable={false} />
+        <img
+          src={CONTRACT_ICONS[contract.type]}
+          alt=""
+          className={`mc-pixel shrink-0 ${contract.type === 'merchant' || contract.type === 'forge' ? 'w-12 h-12' : 'w-9 h-9'}`}
+          draggable={false}
+        />
         <div className="min-w-0 flex-1">
           <p className="mc-font text-[9px] mc-muted uppercase">{CONTRACT_LABELS[contract.type]}</p>
           <p className="text-sm font-bold text-white truncate">{contract.title}</p>
@@ -249,7 +255,8 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
           contract={contract}
           outcome={result.outcome}
           reward={result.reward}
-          buildable={firstBuildable(base)}
+          buildable={spendLot}
+          builtLevel={spendLot ? (base.buildings[spendLot] ?? 0) : 0}
           onNext={onDone}
           onBuild={onBuildNow}
         />

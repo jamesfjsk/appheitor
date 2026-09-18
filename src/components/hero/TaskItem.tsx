@@ -4,8 +4,13 @@ import { FlashIcon, CheckMark } from '../../icons';
 import { Task } from '../../types';
 import { useSound } from '../../contexts/SoundContext';
 import { useVillage } from '../../contexts/VillageContext';
+import { useClock } from '../../contexts/ClockContext';
+import { useData } from '../../contexts/DataContext';
 import { periodAllowedAt } from '../../services/village/schedule';
-import { getTodayBrazil } from '../../utils/timezone';
+import { computeTaskLoot } from '../../services/village/loot';
+import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../config/englishBase';
+import { getTodayBrazil } from '../../utils/clock';
+import type { Period } from '../../types/village';
 import toast from 'react-hot-toast';
 
 const CLOCK = '/assets/english/ui/clock.webp';
@@ -46,9 +51,11 @@ interface TaskItemProps {
   onComplete: (taskId: string, completed: boolean) => void;
   index: number;
   guidedMode?: boolean;
+  isFocus?: boolean;
+  onSetFocus?: (taskId: string) => void;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = false }) => {
+const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = false, isFocus = false, onSetFocus }) => {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const { playTaskComplete, playClick } = useSound();
@@ -60,8 +67,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
       toast('Missão já feita hoje. Volta amanhã.', {
         duration: 3000,
         style: {
-          background: '#10B981',
-          color: '#FFFFFF',
+          background: '#2f2a27',
+          color: '#f6f2ec',
+          border: '3px solid #17130f',
+          fontFamily: 'Fredoka, Segoe UI, system-ui, sans-serif',
         },
       });
       return;
@@ -69,11 +78,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
 
     // Prevent multiple clicks while completing
     if (isCompleting) {
-      console.log('⚠️ Task completion already in progress, ignoring click');
       return;
     }
 
-    console.log('🎯 Starting task completion:', { taskId: task.id, title: task.title });
     setIsCompleting(true);
 
     try {
@@ -91,9 +98,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
 
       // Complete the task immediately
       await onComplete(task.id, true);
-      
-      console.log('✅ Task completed successfully:', task.id);
-      
+
       setTimeout(() => {
         setShowSuccess(false);
       }, 800);
@@ -108,12 +113,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
     }
   };
 
-  const { economy } = useVillage();
-  const hourBrazil = Number(new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'America/Sao_Paulo',
-    hour: 'numeric',
-    hour12: false,
-  }).format(new Date()));
+  const { village, economy, settings, modules } = useVillage();
+  const { tasks } = useData();
+  const { hour: hourBrazil, minute, today } = useClock();
   const periodOpen = periodAllowedAt(task.period, hourBrazil, economy);
   const abreHora = task.period === 'afternoon'
     ? economy.periodStartHours.afternoon
@@ -122,17 +124,32 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
       : null;
 
   const done = isTaskCompletedToday(task);
+  const byPeriod: Record<Period, number> = { morning: 0, afternoon: 0, evening: 0 };
+  if (!done) {
+    for (const t of tasks) {
+      if (t.status === 'done' && t.lastCompletedDate === today) byPeriod[t.period] += 1;
+    }
+  }
+  const effectsOn = settings.effectsEnabled && modules.effects !== false;
+  const loot = done
+    ? null
+    : computeTaskLoot({
+      period: task.period,
+      gear: village.gear,
+      completionsTodayByPeriod: byPeriod,
+      settings: economy,
+      effectsEnabled: effectsOn,
+    });
   const periodLabel =
     task.period === 'morning' ? 'Manhã' :
     task.period === 'afternoon' ? 'Tarde' : 'Noite';
 
   let timeOverdue = false;
   if (task.time && !done) {
-    const now = new Date();
     const [hours, minutes] = task.time.split(':').map(Number);
-    const dueTime = new Date();
-    dueTime.setHours(hours, minutes, 0, 0);
-    timeOverdue = now > dueTime && task.status !== 'done';
+    const dueMinutes = hours * 60 + minutes;
+    const nowMinutes = hourBrazil * 60 + minute;
+    timeOverdue = nowMinutes > dueMinutes && task.status !== 'done';
   }
 
   return (
@@ -147,6 +164,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
         <h3 className={`text-[17px] font-bold leading-tight ${done ? 'line-through' : ''}`}>
           {task.title}
         </h3>
+        {isFocus && <p className="text-[13px] mc-good mt-0.5">Foco · 2x material</p>}
         {task.description && (
           <p className="text-[13px] mc-muted mt-0.5">{task.description}</p>
         )}
@@ -160,18 +178,22 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
               {!done && timeOverdue && <FlashIcon name="warning" className="w-3 h-3" />}
             </span>
           )}
-          <span className="mc-font text-[8px] mc-good">+{task.xp || TASK_DEFAULT_XP} XP</span>
-          <span className="mc-font text-[8px] mc-warn">+{task.gold || TASK_DEFAULT_GOLD} GOLD</span>
+          <span className="mc-font text-[12px] mc-good">+{task.xp ?? TASK_DEFAULT_XP} XP</span>
+          {(task.gold ?? TASK_DEFAULT_GOLD) > 0 && (
+            <span className="mc-font text-[12px] mc-warn">+{task.gold ?? TASK_DEFAULT_GOLD} GOLD</span>
+          )}
+          {loot && loot.qty > 0 && (
+            <span className="inline-flex items-center gap-1 mc-font text-[12px] text-amber-200" title={loot.qty > (economy.materialsPerTask || 1) ? 'Bônus da picareta' : undefined}>
+              <img src={MATERIAL_ICONS[loot.material]} alt="" className="w-3.5 h-3.5 mc-pixel" draggable={false} />
+              +{loot.qty} {MATERIAL_LABELS[loot.material]}
+              {loot.qty > (economy.materialsPerTask || 1) ? ' · picareta' : ''}
+            </span>
+          )}
         </div>
       </div>
 
       {done ? (
-        <button
-          type="button"
-          disabled
-          className="mc-btn mc-btn-green shrink-0 min-h-[44px] px-4 font-bold text-[15px] w-full sm:w-auto"
-          style={{ opacity: 1 }}
-        >
+        <button type="button" disabled className="mc-btn mc-btn-dark shrink-0 min-h-[44px] px-4 font-bold text-[15px] w-full sm:w-auto">
           Feita
         </button>
       ) : !periodOpen ? (
@@ -183,15 +205,26 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
           Abre às {abreHora}h
         </button>
       ) : (
-        <button
-          type="button"
-          onClick={handleToggle}
-          disabled={isCompleting}
-          className={`mc-btn text-white shrink-0 min-h-[44px] font-bold ${guidedMode ? 'px-6 text-[17px]' : 'px-4 text-[15px]'}`}
-          style={{ backgroundColor: 'var(--mc-wood)' }}
-        >
-          {isCompleting ? '...' : 'Concluir'}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-1 shrink-0 w-full sm:w-auto">
+          {onSetFocus && (
+            <button
+              type="button"
+              title="Foco: material em dobro"
+              className={`mc-btn min-h-[44px] px-3 font-bold ${isFocus ? 'mc-btn-gold' : 'mc-btn-dark'}`}
+              onClick={() => { playClick(); onSetFocus(task.id); }}
+            >
+              Foco
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleToggle}
+            disabled={isCompleting}
+            className={`mc-btn mc-btn-wood min-h-[44px] font-bold ${guidedMode ? 'px-6 text-[17px]' : 'px-4 text-[15px]'}`}
+          >
+            {isCompleting ? '...' : 'Concluir'}
+          </button>
+        </div>
       )}
     </div>
   );

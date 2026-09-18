@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { ISO_MINER, PET_SPRITE } from '../../../config/village';
+import { ISO_MINER, PET_SPRITE, lookBodySrc } from '../../../config/village';
 import type { VillageCharacter, VillageGear } from '../../../types/village';
-import { paintCharacterLook } from './drawCharacter';
+import { lookKey, lookOverlaySrc, paintCharacterLook } from './drawCharacter';
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -21,6 +21,7 @@ interface Props {
 
 const CharacterPreview: React.FC<Props> = ({ character, gear, size = 96, className = '' }) => {
   const ref = useRef<HTMLCanvasElement>(null);
+  const key = lookKey(character, gear);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -29,14 +30,18 @@ const CharacterPreview: React.FC<Props> = ({ character, gear, size = 96, classNa
     if (!ctx) return;
     let cancelled = false;
     const petSrc = character.pet ? PET_SPRITE[character.pet] : null;
+    const overlay = lookOverlaySrc(character, gear);
     void (async () => {
       try {
-        const [base, pet] = await Promise.all([
+        const [base, iso, pet, cape, pickaxe] = await Promise.all([
+          loadImage(lookBodySrc(character)),
           loadImage(ISO_MINER),
           petSrc ? loadImage(petSrc).catch(() => null) : Promise.resolve(null),
+          overlay.cape ? loadImage(overlay.cape).catch(() => null) : Promise.resolve(null),
+          overlay.pickaxe ? loadImage(overlay.pickaxe).catch(() => null) : Promise.resolve(null),
         ]);
         if (cancelled) return;
-        paintCharacterLook(ctx, base, null, character, pet, 'iso');
+        paintCharacterLook(ctx, base, null, character, { pet, cape, pickaxe, gear, iso }, 'iso');
       } catch {
         if (!cancelled) ctx.clearRect(0, 0, 64, 64);
       }
@@ -44,7 +49,7 @@ const CharacterPreview: React.FC<Props> = ({ character, gear, size = 96, classNa
     return () => {
       cancelled = true;
     };
-  }, [character, gear]);
+  }, [character, gear, key]);
 
   return (
     <canvas

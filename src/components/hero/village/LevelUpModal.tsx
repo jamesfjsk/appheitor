@@ -5,7 +5,9 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { grantLevelGift } from '../../../services/villageService';
 import { rareGiftForLevel } from '../../../services/village/claims';
+import { levelGift } from '../../../services/village/levels';
 import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
+import { COSMETIC_BY_ID } from '../../../config/village';
 
 const DIAMOND = '/assets/english/ui/diamond.webp';
 const PICK: Array<'madeira' | 'pedra' | 'ferro'> = ['madeira', 'pedra', 'ferro'];
@@ -35,6 +37,8 @@ const LevelUpModal: React.FC = () => {
 
   const rare = rareGiftForLevel(level);
   const uid = user?.userId;
+  const gift = levelGift(level, 1);
+  const marco = gift.cosmeticId ? COSMETIC_BY_ID[gift.cosmeticId] : null;
 
   const pick = async (material: 'madeira' | 'pedra' | 'ferro') => {
     if (!uid || busy) return;
@@ -59,6 +63,9 @@ const LevelUpModal: React.FC = () => {
         <p className="text-sm mc-muted mt-2">Escolhe 1 material de presente</p>
         {rare && (
           <p className="text-sm mc-good mt-1">+1 {rare} neste marco</p>
+        )}
+        {gift.cosmeticId && (
+          <p className="text-sm mt-1">{marco ? marco.label : 'Cosmético de marco chega em breve'}</p>
         )}
         <div className="flex flex-wrap justify-center gap-2 mt-4">
           {PICK.map((m) => (

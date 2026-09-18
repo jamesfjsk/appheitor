@@ -452,11 +452,19 @@ export function createRenderer(canvas: HTMLCanvasElement): MineRenderer {
     px(3, 1, 3, 1.2, pick.color);
     px(7, 0.6, 3, 1.6, pick.color);
     px(11, 1, 2, 1.2, pick.color);
-    // picareta apoiada na lateral
+    // picareta apoiada na lateral — cabeça cresce e brilha nas tops
     px(12.5, -3, 1, 5, '#8a5a2b');
     px(11, -3.5, 4, 1.2, pick.color);
     px(11, -2.5, 1, 1, pick.color);
     px(14, -2.5, 1, 1, pick.color);
+    if (state.pickaxe >= 3) {
+      px(10.4, -4.1, 5.4, 1.1, pick.color);
+      px(12.2, -5.1, 1, 1, state.pickaxe >= 4 ? '#e8ffff' : '#fff8c0');
+    }
+    if (state.pickaxe >= 4) {
+      px(10, -3.4, 6.2, 1.5, pick.color);
+      px(14.2, -4.8, 1, 1, '#ffffff');
+    }
     g.restore();
   }
 

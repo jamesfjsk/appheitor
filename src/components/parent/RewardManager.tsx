@@ -456,7 +456,8 @@ const RewardManager: React.FC = () => {
                 <div className="space-y-4">
                   {redemptions.map((redemption, index) => {
                     const reward = getRewardById(redemption.rewardId);
-                    if (!reward) return null;
+                    const title = reward?.title || redemption.rewardTitle || 'Pedido do Cofrinho';
+                    if (!reward && !redemption.rewardTitle) return null;
                     
                     const statusConfig = {
                       pending: { 
@@ -495,10 +496,10 @@ const RewardManager: React.FC = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <IconBadge name={reward.emoji} size={48} />
+                            <IconBadge name={reward?.emoji || 'chest'} size={48} />
                             <div>
-                              <h4 className="font-semibold text-gray-900">{reward.title}</h4>
-                              <p className="text-sm text-gray-600">{reward.description}</p>
+                              <h4 className="font-semibold text-gray-900">{title}</h4>
+                              <p className="text-sm text-gray-600">{reward?.description || 'Pedido criado pelo Cofrinho'}</p>
                               <p className="text-xs text-gray-500 mt-1">
                                 Resgatado em {redemption.createdAt.toLocaleDateString('pt-BR')} às {redemption.createdAt.toLocaleTimeString('pt-BR')}
                               </p>

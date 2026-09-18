@@ -1,0 +1,256 @@
+/* Boot da mina: usado no index.html (antes do JS) e no LoadingSpinner. */
+
+.mn-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: #100e0c;
+  color: #f6f2ec;
+  font-family: Fredoka, 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+  transition: opacity 0.32s ease, visibility 0.32s ease;
+}
+
+.mn-boot.is-off {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mn-boot-world {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mn-boot-cave {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 36%;
+  image-rendering: pixelated;
+  filter: saturate(1.08) contrast(1.08);
+}
+
+.mn-boot-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 58% 48% at 50% 36%, transparent 0%, rgba(8, 6, 5, 0.22) 68%, #100e0c 100%),
+    linear-gradient(180deg, rgba(16, 14, 12, 0.18) 0%, transparent 26%, rgba(16, 14, 12, 0.18) 58%, rgba(16, 14, 12, 0.62) 100%);
+}
+
+.mn-boot-glow {
+  position: absolute;
+  top: 18%;
+  width: min(28vw, 220px);
+  height: min(28vw, 220px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 150, 40, 0.28) 0%, rgba(255, 120, 20, 0.08) 42%, transparent 70%);
+  animation: mn-boot-glow-pulse 3.4s ease-in-out infinite;
+}
+
+.mn-boot-glow-l { left: 14%; }
+.mn-boot-glow-r { right: 14%; animation-delay: -1.5s; }
+
+.mn-boot-lockup {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: min(100% - 32px, 400px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mn-boot-hero {
+  position: relative;
+  width: min(36vw, 148px);
+  height: auto;
+  margin-bottom: -22px;
+  z-index: 3;
+  image-rendering: pixelated;
+  animation: mn-boot-hero-bob 1.2s steps(2, end) infinite;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.45));
+}
+
+.mn-boot-plaque {
+  position: relative;
+  width: 100%;
+  padding: 20px 18px 16px;
+  text-align: center;
+  background-color: #2f2a27;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 8px);
+  border: 4px solid #17130f;
+  box-shadow:
+    inset 4px 4px 0 #4a423c,
+    inset -4px -4px 0 #1e1a17,
+    0 10px 0 #0d0b0a;
+  border-radius: 8px;
+}
+
+.mn-boot-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(13px, 3.2vw, 18px);
+  color: #ffd83d;
+  text-shadow: 3px 3px 0 #3f2d00;
+  line-height: 1.45;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  margin: 0 0 14px;
+}
+
+.mn-boot-status {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f6f2ec;
+  min-height: 1.35em;
+  margin: 10px 0 0;
+}
+
+.mn-boot-gauge {
+  position: relative;
+  max-width: 300px;
+  margin: 0 auto;
+  padding-top: 28px;
+}
+
+.mn-boot-cart-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  z-index: 2;
+}
+
+.mn-boot-cart {
+  display: block;
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 3px 0 rgba(0, 0, 0, 0.55));
+}
+
+.mn-boot-loot {
+  position: absolute;
+  left: 12px;
+  bottom: 16px;
+  width: 18px;
+  height: 18px;
+  image-rendering: pixelated;
+  animation: mn-boot-bob 0.8s steps(2, end) infinite;
+}
+
+.mn-boot-bar {
+  position: relative;
+  height: 18px;
+  background-color: #2a1c10;
+  border: 3px solid #17130f;
+  box-shadow:
+    inset 2px 2px 0 #5a4030,
+    inset -2px -2px 0 #140e0a,
+    0 3px 0 #0d0b0a;
+  overflow: hidden;
+}
+
+.mn-boot-bar-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #ffe680 0 35%, #e8b923 35% 72%, #c49212 72% 100%);
+}
+
+.mn-boot-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 10px, rgba(0, 0, 0, 0.5) 10px 12px);
+  pointer-events: none;
+}
+
+.mn-boot-fill-wait {
+  width: 42%;
+  animation: mn-boot-fill 2.2s ease-in-out infinite;
+}
+
+.mn-boot.is-preboot .mn-boot-cart-wrap {
+  animation: mn-boot-cart-slide 2.6s ease-in-out infinite alternate;
+}
+
+.mn-boot-tip {
+  margin: 8px auto 0;
+  max-width: 28rem;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #a89f97;
+  min-height: 1.7em;
+}
+
+@keyframes mn-boot-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes mn-boot-hero-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes mn-boot-fill {
+  0% { width: 14%; }
+  55% { width: 82%; }
+  100% { width: 14%; }
+}
+
+@keyframes mn-boot-cart-slide {
+  from { left: 0; }
+  to { left: calc(100% - 44px); }
+}
+
+@keyframes mn-boot-glow-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@media (max-width: 420px) {
+  .mn-boot-lockup {
+    width: min(100% - 24px, 400px);
+    top: auto;
+    bottom: 7%;
+    transform: translateX(-50%);
+  }
+  .mn-boot-hero { width: 132px; margin-bottom: -18px; }
+  .mn-boot-plaque { padding: 18px 14px 14px; }
+  .mn-boot-title { font-size: 14px; }
+  .mn-boot-cave { object-position: center 22%; }
+  .mn-boot-glow { display: none; }
+  .mn-boot-vignette {
+    background:
+      radial-gradient(ellipse 80% 55% at 50% 30%, transparent 0%, rgba(8, 6, 5, 0.12) 72%, #100e0c 100%),
+      linear-gradient(180deg, rgba(16, 14, 12, 0.08) 0%, transparent 24%, transparent 68%, rgba(16, 14, 12, 0.5) 100%);
+  }
+}
+
+@media (max-height: 700px) and (min-width: 421px) {
+  .mn-boot-hero { width: 112px; margin-bottom: -18px; }
+  .mn-boot-plaque { padding: 16px 16px 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mn-boot { transition: none; }
+  .mn-boot-glow,
+  .mn-boot-hero,
+  .mn-boot-loot,
+  .mn-boot-fill-wait,
+  .mn-boot.is-preboot .mn-boot-cart-wrap {
+    animation: none;
+  }
+  .mn-boot.is-preboot .mn-boot-cart-wrap { left: 42%; }
+  .mn-boot-fill-wait { width: 70%; }
+}

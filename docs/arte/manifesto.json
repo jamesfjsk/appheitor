@@ -1,75 +1,860 @@
 {
   "defaults": {
-    "character": { "image_size": { "width": 64, "height": 64 }, "outline": "single color black outline", "shading": "basic shading", "detail": "medium detail", "view": "side", "direction": "south", "no_background": true, "negative_description": "blurry, text, watermark, extra limbs" },
-    "inpaint": { "image_size": { "width": 64, "height": 64 }, "outline": "single color black outline", "shading": "basic shading", "detail": "medium detail", "view": "side", "direction": "south", "no_background": true, "negative_description": "blurry, text, watermark" },
-    "building": { "image_size": { "width": 96, "height": 96 }, "outline": "single color black outline", "shading": "basic shading", "detail": "medium detail", "view": "low top-down", "no_background": true, "negative_description": "blurry, text, watermark, people, characters, faces", "seed": 77 },
-    "item": { "image_size": { "width": 32, "height": 32 }, "outline": "single color black outline", "shading": "basic shading", "detail": "medium detail", "view": "side", "no_background": true, "negative_description": "text, watermark, character, person", "seed": 91 },
-    "pet": { "image_size": { "width": 32, "height": 32 }, "outline": "single color black outline", "shading": "basic shading", "detail": "medium detail", "view": "side", "direction": "south", "no_background": true, "negative_description": "text, watermark, person", "seed": 61 }
+    "character": {
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "medium detail",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "negative_description": "blurry, text, watermark, extra limbs"
+    },
+    "inpaint": {
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "medium detail",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "negative_description": "blurry, text, watermark"
+    },
+    "building": {
+      "image_size": {
+        "width": 96,
+        "height": 96
+      },
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "medium detail",
+      "view": "low top-down",
+      "no_background": true,
+      "negative_description": "blurry, text, watermark, people, characters, faces",
+      "seed": 77
+    },
+    "item": {
+      "image_size": {
+        "width": 32,
+        "height": 32
+      },
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "medium detail",
+      "view": "side",
+      "no_background": true,
+      "negative_description": "text, watermark, character, person",
+      "seed": 91
+    },
+    "pet": {
+      "image_size": {
+        "width": 32,
+        "height": 32
+      },
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "medium detail",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "negative_description": "text, watermark, person",
+      "seed": 61
+    }
   },
   "items": [
-    { "file": "buildings/bau-2.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "medium village storage house with two big wooden chests in front and iron bands, cobblestone base, wooden plank walls and roof, hanging lantern, cute game building sprite" } },
-    { "file": "buildings/bau-3.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "large village warehouse with three big wooden chests with gold trim in front, cobblestone base, wooden plank walls, two-story roof, small flag on top, cute game building sprite" } },
-    { "file": "buildings/cerca-1.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "small wooden fence section with a gate around a patch of grass, cute game building sprite" } },
-    { "file": "buildings/cerca-2.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "wooden fence with a gate and two torches on posts around a grass patch with a small bush, cute game building sprite" } },
-    { "file": "buildings/cerca-3.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "sturdy fence of cobblestone pillars and iron bars with an arched gate and torches, grass and flowers inside, cute game building sprite" } },
-    { "file": "buildings/torre-1.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "short cobblestone watchtower with a wooden platform on top and one torch, cute game building sprite" } },
-    { "file": "buildings/torre-2.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "tall cobblestone watchtower with a wooden roof, two torches and a small window, cute game building sprite" } },
-    { "file": "buildings/torre-3.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "tall stone tower with iron trim, a pointed roof with a flag, four torches and a bell, cute game building sprite" } },
-    { "file": "buildings/mesa-1.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "small enchanting hut: dark stone base with an open book on a table and a few purple sparkles, wooden roof, cute game building sprite" } },
-    { "file": "buildings/mesa-2.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "enchanting house with obsidian block walls, a floating open book, purple sparkles and two bookshelves visible, wooden roof, cute game building sprite" } },
-    { "file": "buildings/mesa-3.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "grand enchanting library with obsidian and gold walls, floating glowing book, many purple sparkles, bookshelves and a crystal on top, cute game building sprite" } },
-    { "file": "buildings/campinho-2.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "small village football pitch with white lines, two goals with nets, a wooden fence and two floodlight posts, cute game building sprite" } },
-    { "file": "buildings/campinho-3.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "village football stadium: green pitch with white lines, two goals with nets, small wooden stands with colorful flags and four floodlights, cute game building sprite" } },
-    { "file": "buildings/placa.png", "kind": "building", "endpoint": "generate-image-pixflux", "body": { "description": "empty dirt plot with a big blank wooden signboard on two posts in the center, small rope fence around the plot, a few tufts of grass, cute game building sprite" } },
-    { "file": "npc/ferreiro.png", "kind": "character", "endpoint": "generate-image-bitforge", "body": { "description": "strong blacksmith villager with a leather apron, rolled sleeves, thick beard, holding a big hammer, full body, standing, facing the viewer, pixel art game sprite", "style_image": "char/miner-base.png", "style_strength": 60, "seed": 23 } },
-    { "file": "npc/olheiro.png", "kind": "character", "endpoint": "generate-image-bitforge", "body": { "description": "football scout with a green cap, tracksuit jacket, whistle on a cord and a clipboard, full body, standing, facing the viewer, pixel art game sprite", "style_image": "char/miner-base.png", "style_strength": 60, "seed": 24 } },
-    { "file": "char/miner-skin-2.png", "kind": "inpaint", "endpoint": "inpaint", "body": { "description": "young miner boy with light brown skin face", "inpainting_image": "char/miner-base.png", "mask_image": "masks/face.png", "seed": 84 } },
-    { "file": "char/miner-skin-3.png", "kind": "inpaint", "endpoint": "inpaint", "body": { "description": "young miner boy with dark brown skin face", "inpainting_image": "char/miner-base.png", "mask_image": "masks/face.png", "seed": 85 } },
-    { "file": "char/miner-skin-4.png", "kind": "inpaint", "endpoint": "inpaint", "body": { "description": "young miner boy with pale skin and freckles face", "inpainting_image": "char/miner-base.png", "mask_image": "masks/face.png", "seed": 86 } },
-    { "file": "char/miner-cape.png", "kind": "inpaint", "endpoint": "inpaint", "body": { "description": "young miner boy wearing a flowing red cape behind his back", "inpainting_image": "char/miner-base.png", "mask_image": "masks/cape.png", "seed": 87 } },
-    { "file": "char/miner-crown.png", "kind": "inpaint", "endpoint": "inpaint", "body": { "description": "young miner boy wearing a small golden crown with a red gem instead of a helmet", "inpainting_image": "char/miner-base.png", "mask_image": "masks/helmet.png", "seed": 88 } },
-    { "file": "char/miner-cap.png", "kind": "inpaint", "endpoint": "inpaint", "body": { "description": "young miner boy wearing a green baseball cap instead of a helmet", "inpainting_image": "char/miner-base.png", "mask_image": "masks/helmet.png", "seed": 89 } },
-    { "file": "items/pickaxe-madeira.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "wooden pickaxe, game item icon" } },
-    { "file": "items/pickaxe-pedra.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "stone pickaxe with a gray stone head and wooden handle, game item icon" } },
-    { "file": "items/pickaxe-ferro.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "iron pickaxe with a light gray metal head and wooden handle, game item icon" } },
-    { "file": "items/pickaxe-ouro.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "golden pickaxe with a shiny yellow gold head and wooden handle, game item icon" } },
-    { "file": "items/lantern.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "small iron lantern with a warm glowing light, game item icon" } },
-    { "file": "items/cape.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "folded red cape with gold clasp, game item icon" } },
-    { "file": "items/cap.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "green baseball cap, game item icon" } },
-    { "file": "items/crown.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "small golden crown with a red gem, game item icon" } },
-    { "file": "items/helmet-deco.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "fancy golden mining helmet with a blue gem lamp, game item icon" } },
-    { "file": "pets/lobo.png", "kind": "pet", "endpoint": "generate-image-pixflux", "body": { "description": "small friendly gray wolf pup sitting, game pet sprite" } },
-    { "file": "pets/gato.png", "kind": "pet", "endpoint": "generate-image-pixflux", "body": { "description": "small orange tabby cat sitting, game pet sprite" } },
-    { "file": "pets/papagaio.png", "kind": "pet", "endpoint": "generate-image-pixflux", "body": { "description": "small green and red parrot standing, game pet sprite" } },
-    { "file": "rewards/doce.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "colorful wrapped candy, game item icon" } },
-    { "file": "rewards/sorvete.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "ice cream cone with two scoops, game item icon" } },
-    { "file": "rewards/pizza.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "slice of pizza with cheese and pepperoni, game item icon" } },
-    { "file": "rewards/chocolate.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "chocolate bar half unwrapped, game item icon" } },
-    { "file": "rewards/refrigerante.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "soda can with a straw, game item icon" } },
-    { "file": "rewards/hamburguer.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "hamburger with lettuce and cheese, game item icon" } },
-    { "file": "rewards/pipoca.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "red and white striped popcorn bucket, game item icon" } },
-    { "file": "rewards/brinquedo.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "toy robot, game item icon" } },
-    { "file": "rewards/carrinho.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "red toy race car, game item icon" } },
-    { "file": "rewards/blocos.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "stack of colorful plastic building bricks, game item icon" } },
-    { "file": "rewards/pelucia.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "brown teddy bear plush, game item icon" } },
-    { "file": "rewards/videogame.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "game controller with colorful buttons, game item icon" } },
-    { "file": "rewards/tablet.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "tablet device with a bright screen, game item icon" } },
-    { "file": "rewards/tela.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "television screen showing a play button, game item icon" } },
-    { "file": "rewards/filme.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "movie clapperboard, game item icon" } },
-    { "file": "rewards/pesca.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "fishing rod with a red and white float, game item icon" } },
-    { "file": "rewards/bicicleta.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "blue bicycle, side view, game item icon" } },
-    { "file": "rewards/futebol.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "black and white football ball, game item icon" } },
-    { "file": "rewards/chuteira.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "football boot with studs, game item icon" } },
-    { "file": "rewards/passeio.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "park with a tree and a bench, game item icon" } },
-    { "file": "rewards/piscina.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "swimming pool with a float ring, game item icon" } },
-    { "file": "rewards/skate.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "skateboard, side view, game item icon" } },
-    { "file": "rewards/dormir-tarde.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "crescent moon with a small alarm clock, game item icon" } },
-    { "file": "rewards/dinheiro.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "stack of paper money with coins, game item icon" } },
-    { "file": "rewards/livro.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "comic book with a colorful cover, game item icon" } },
-    { "file": "rewards/jantar.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "dinner plate with a cloche lid, game item icon" } },
-    { "file": "rewards/amigo.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "two happy children with colorful shirts side by side giving a high five, bright vivid colors, smiling faces, full color, game item icon" } },
-    { "file": "rewards/tabuleiro.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "board game box with dice, game item icon" } },
-    { "file": "rewards/mochila.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "blue school backpack, game item icon" } },
-    { "file": "rewards/presente.png", "kind": "item", "endpoint": "generate-image-pixflux", "body": { "description": "wrapped gift box with a red bow, game item icon" } }
+    {
+      "file": "buildings/bau-2.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "medium village storage house with two big wooden chests in front and iron bands, cobblestone base, wooden plank walls and roof, hanging lantern, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/bau-3.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "large village warehouse with three big wooden chests with gold trim in front, cobblestone base, wooden plank walls, two-story roof, small flag on top, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/cerca-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small wooden fence section with a gate around a patch of grass, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/cerca-2.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "wooden fence with a gate and two torches on posts around a grass patch with a small bush, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/cerca-3.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "sturdy fence of cobblestone pillars and iron bars with an arched gate and torches, grass and flowers inside, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/torre-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "short cobblestone watchtower with a wooden platform on top and one torch, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/torre-2.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "tall cobblestone watchtower with a wooden roof, two torches and a small window, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/torre-3.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "tall stone tower with iron trim, a pointed roof with a flag, four torches and a bell, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/mesa-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small enchanting hut: dark stone base with an open book on a table and a few purple sparkles, wooden roof, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/mesa-2.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "enchanting house with obsidian block walls, a floating open book, purple sparkles and two bookshelves visible, wooden roof, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/mesa-3.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "grand enchanting library with obsidian and gold walls, floating glowing book, many purple sparkles, bookshelves and a crystal on top, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/campinho-2.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small village football pitch with white lines, two goals with nets, a wooden fence and two floodlight posts, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/campinho-3.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "village football stadium: green pitch with white lines, two goals with nets, small wooden stands with colorful flags and four floodlights, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/placa.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "empty dirt plot with a big blank wooden signboard on two posts in the center, small rope fence around the plot, a few tufts of grass, cute game building sprite"
+      }
+    },
+    {
+      "file": "npc/ferreiro.png",
+      "kind": "character",
+      "endpoint": "generate-image-bitforge",
+      "body": {
+        "description": "strong blacksmith villager with a leather apron, rolled sleeves, thick beard, holding a big hammer, full body, standing, facing the viewer, pixel art game sprite",
+        "style_image": "char/miner-base.png",
+        "style_strength": 60,
+        "seed": 23
+      }
+    },
+    {
+      "file": "npc/olheiro.png",
+      "kind": "character",
+      "endpoint": "generate-image-bitforge",
+      "body": {
+        "description": "football scout with a green cap, tracksuit jacket, whistle on a cord and a clipboard, full body, standing, facing the viewer, pixel art game sprite",
+        "style_image": "char/miner-base.png",
+        "style_strength": 60,
+        "seed": 24
+      }
+    },
+    {
+      "file": "char/miner-skin-2.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "young miner boy with light brown skin face",
+        "inpainting_image": "char/miner-base.png",
+        "mask_image": "masks/face.png",
+        "seed": 84
+      }
+    },
+    {
+      "file": "char/miner-skin-3.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "young miner boy with dark brown skin face",
+        "inpainting_image": "char/miner-base.png",
+        "mask_image": "masks/face.png",
+        "seed": 85
+      }
+    },
+    {
+      "file": "char/miner-skin-4.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "young miner boy with pale skin and freckles face",
+        "inpainting_image": "char/miner-base.png",
+        "mask_image": "masks/face.png",
+        "seed": 86
+      }
+    },
+    {
+      "file": "char/miner-cape.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "young miner boy wearing a flowing red cape behind his back",
+        "inpainting_image": "char/miner-base.png",
+        "mask_image": "masks/cape.png",
+        "seed": 87
+      }
+    },
+    {
+      "file": "char/miner-crown.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "young miner boy wearing a small golden crown with a red gem instead of a helmet",
+        "inpainting_image": "char/miner-base.png",
+        "mask_image": "masks/helmet.png",
+        "seed": 88
+      }
+    },
+    {
+      "file": "char/miner-cap.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "young miner boy wearing a green baseball cap instead of a helmet",
+        "inpainting_image": "char/miner-base.png",
+        "mask_image": "masks/helmet.png",
+        "seed": 89
+      }
+    },
+    {
+      "file": "char/miner-iso-cap.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "green baseball cap with an orange visor instead of the yellow mining helmet, same cute miner boy, hair visible at the sides",
+        "inpainting_image": "char/miner-iso.png",
+        "mask_image": "masks/helmet.png",
+        "view": "low top-down",
+        "seed": 201
+      }
+    },
+    {
+      "file": "char/miner-iso-iron.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "gray iron mining helmet with a small headlamp instead of the yellow helmet, same cute miner boy",
+        "inpainting_image": "char/miner-iso.png",
+        "mask_image": "masks/helmet.png",
+        "view": "low top-down",
+        "seed": 202
+      }
+    },
+    {
+      "file": "char/miner-iso-hair.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "dark brown messy hair, no helmet, no lamp, same cute miner boy face and eyes",
+        "inpainting_image": "char/miner-iso.png",
+        "mask_image": "masks/helmet.png",
+        "view": "low top-down",
+        "seed": 215
+      }
+    },
+    {
+      "file": "char/miner-iso-crown.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "a small gold royal crown with pointed tips and a red gem sitting on the hair",
+        "inpainting_image": "char/miner-iso-hair.png",
+        "mask_image": "masks/crown.png",
+        "view": "low top-down",
+        "seed": 216
+      }
+    },
+    {
+      "file": "char/miner-iso-cape.png",
+      "kind": "inpaint",
+      "endpoint": "inpaint",
+      "body": {
+        "description": "a long red cape hanging behind both shoulders down to the knees with a small gold clasp at the neck. Keep the yellow mining helmet, face, blue shirt and pickaxe unchanged.",
+        "inpainting_image": "char/miner-iso.png",
+        "mask_image": "masks/cape-iso.png",
+        "view": "low top-down",
+        "seed": 214
+      }
+    },
+    {
+      "file": "items/pickaxe-madeira.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "wooden pickaxe, game item icon"
+      }
+    },
+    {
+      "file": "items/pickaxe-pedra.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "stone pickaxe with a gray stone head and wooden handle, game item icon"
+      }
+    },
+    {
+      "file": "items/pickaxe-ferro.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "iron pickaxe with a light gray metal head and wooden handle, game item icon"
+      }
+    },
+    {
+      "file": "items/pickaxe-ouro.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "golden pickaxe with a shiny yellow gold head and wooden handle, game item icon"
+      }
+    },
+    {
+      "file": "items/lantern.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small iron lantern with a warm glowing light, game item icon"
+      }
+    },
+    {
+      "file": "items/cape.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "folded red cape with gold clasp, game item icon"
+      }
+    },
+    {
+      "file": "items/cap.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "green baseball cap, game item icon"
+      }
+    },
+    {
+      "file": "items/crown.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small golden crown with a red gem, game item icon"
+      }
+    },
+    {
+      "file": "items/helmet-deco.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "fancy golden mining helmet with a blue gem lamp, game item icon"
+      }
+    },
+    {
+      "file": "pets/lobo.png",
+      "kind": "pet",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small friendly gray wolf pup sitting, game pet sprite"
+      }
+    },
+    {
+      "file": "pets/gato.png",
+      "kind": "pet",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small orange tabby cat sitting, game pet sprite"
+      }
+    },
+    {
+      "file": "pets/papagaio.png",
+      "kind": "pet",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small green and red parrot standing, game pet sprite"
+      }
+    },
+    {
+      "file": "rewards/doce.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "colorful wrapped candy, game item icon"
+      }
+    },
+    {
+      "file": "rewards/sorvete.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "ice cream cone with two scoops, game item icon"
+      }
+    },
+    {
+      "file": "rewards/pizza.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "slice of pizza with cheese and pepperoni, game item icon"
+      }
+    },
+    {
+      "file": "rewards/chocolate.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "chocolate bar half unwrapped, game item icon"
+      }
+    },
+    {
+      "file": "rewards/refrigerante.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "soda can with a straw, game item icon"
+      }
+    },
+    {
+      "file": "rewards/hamburguer.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "hamburger with lettuce and cheese, game item icon"
+      }
+    },
+    {
+      "file": "rewards/pipoca.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "red and white striped popcorn bucket, game item icon"
+      }
+    },
+    {
+      "file": "rewards/brinquedo.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "toy robot, game item icon"
+      }
+    },
+    {
+      "file": "rewards/carrinho.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "red toy race car, game item icon"
+      }
+    },
+    {
+      "file": "rewards/blocos.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "stack of colorful plastic building bricks, game item icon"
+      }
+    },
+    {
+      "file": "rewards/pelucia.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "brown teddy bear plush, game item icon"
+      }
+    },
+    {
+      "file": "rewards/videogame.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "game controller with colorful buttons, game item icon"
+      }
+    },
+    {
+      "file": "rewards/tablet.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "tablet device with a bright screen, game item icon"
+      }
+    },
+    {
+      "file": "rewards/tela.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "television screen showing a play button, game item icon"
+      }
+    },
+    {
+      "file": "rewards/filme.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "movie clapperboard, game item icon"
+      }
+    },
+    {
+      "file": "rewards/pesca.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "fishing rod with a red and white float, game item icon"
+      }
+    },
+    {
+      "file": "rewards/bicicleta.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "blue bicycle, side view, game item icon"
+      }
+    },
+    {
+      "file": "rewards/futebol.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "black and white football ball, game item icon"
+      }
+    },
+    {
+      "file": "rewards/chuteira.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "football boot with studs, game item icon"
+      }
+    },
+    {
+      "file": "rewards/passeio.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "park with a tree and a bench, game item icon"
+      }
+    },
+    {
+      "file": "rewards/piscina.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "swimming pool with a float ring, game item icon"
+      }
+    },
+    {
+      "file": "rewards/skate.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "skateboard, side view, game item icon"
+      }
+    },
+    {
+      "file": "rewards/dormir-tarde.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "crescent moon with a small alarm clock, game item icon"
+      }
+    },
+    {
+      "file": "rewards/dinheiro.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "stack of paper money with coins, game item icon"
+      }
+    },
+    {
+      "file": "rewards/livro.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "comic book with a colorful cover, game item icon"
+      }
+    },
+    {
+      "file": "rewards/jantar.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "dinner plate with a cloche lid, game item icon"
+      }
+    },
+    {
+      "file": "rewards/amigo.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "two happy children with colorful shirts side by side giving a high five, bright vivid colors, smiling faces, full color, game item icon"
+      }
+    },
+    {
+      "file": "rewards/tabuleiro.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "board game box with dice, game item icon"
+      }
+    },
+    {
+      "file": "rewards/mochila.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "blue school backpack, game item icon"
+      }
+    },
+    {
+      "file": "rewards/presente.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "wrapped gift box with a red bow, game item icon"
+      }
+    },
+    {
+      "file": "buildings/cofre-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small stone vault hut with a heavy iron door and a padlock, a few gold coins on the doorstep, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/cofre-2.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "medium stone vault with a heavy iron door, brass lock wheel, a small gold coin pile and a lantern, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/cofre-3.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "large stone bank vault with a round iron door, golden trim, two lanterns and a treasure chest at the entrance, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/casa-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "tiny wooden miner cabin with a stone chimney, one window with warm light, a small porch and a pickaxe leaning on the wall, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/casa-2.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "cozy wooden miner house with a stone chimney, two windows with warm light, a porch with a lantern and flower boxes, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/casa-3.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "two-story wooden miner house with a stone chimney, balcony, several windows with warm light, a flag on the roof and a garden, cute game building sprite"
+      }
+    },
+    {
+      "file": "tiles/fx_rachadura.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "dark cracks and fissures on the ground only, no objects, isolated crack pattern for overlay, transparent background, game effect sprite"
+      }
+    },
+    {
+      "file": "items/chest_streak.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "ornate closed treasure chest with golden bands and seven small torches carved on the lid, game item icon"
+      }
+    },
+    {
+      "file": "items/chest_streak_open.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "ornate open treasure chest with golden bands overflowing with gold coins and a glowing diamond, game item icon"
+      }
+    },
+    {
+      "file": "items/trophy_bronze.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small bronze trophy cup with a star, game item icon"
+      }
+    },
+    {
+      "file": "items/trophy_prata.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "silver trophy cup with a star, game item icon"
+      }
+    },
+    {
+      "file": "items/trophy_ouro.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "shiny gold trophy cup with a star and sparkles, game item icon"
+      }
+    },
+    {
+      "file": "items/milestone_10.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "carved stone mining helmet with a small emerald on the front, game item icon"
+      }
+    },
+    {
+      "file": "items/milestone_20.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "golden cape with a red gem clasp, folded, game item icon"
+      }
+    },
+    {
+      "file": "items/milestone_30.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "diamond crown with blue gems, game item icon"
+      }
+    },
+    {
+      "file": "items/milestone_40.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "legendary golden crown with a large diamond and glowing aura, game item icon"
+      }
+    },
+    {
+      "file": "items/mochila.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "brown leather adventurer backpack with buckles and a pickaxe strapped on, game item icon"
+      }
+    },
+    {
+      "file": "buildings/mercado-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small wooden market stall with a striped red and white awning, a counter with a few goods and a gold coin sign, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/agenda-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "wooden post with a small bronze bell on top and a hanging wooden sign with a clock face, a few flowers at the base, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/placa-vila.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "large wooden notice board on two posts with pinned paper notes, a small lantern on top, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/arena-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small wooden bleacher with three rows and a chess board on a stump in front, a flag pole with a pennant, cute game building sprite"
+      }
+    },
+    {
+      "file": "ui/mood-bom.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "bright yellow sun icon with short rays, cheerful, simple game ui icon, centered"
+      }
+    },
+    {
+      "file": "ui/mood-normal.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "soft white cloud icon with a small sun peeking behind, calm, simple game ui icon, centered"
+      }
+    },
+    {
+      "file": "ui/mood-dificil.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "grey rain cloud icon with three blue raindrops, simple game ui icon, centered, not scary"
+      }
+    }
   ]
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ClockProvider } from './contexts/ClockContext';
 import { DataProvider } from './contexts/DataContext';
 import { OfflineProvider } from './contexts/OfflineContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -30,20 +31,26 @@ const RoleBasedRedirect: React.FC = () => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    const qs = typeof window !== 'undefined' ? window.location.search : '';
+    return <Navigate to={`/login${qs}`} replace />;
   }
 
-  // Redirect based on user's role from database
-  const redirectTo = user.role === 'admin' ? '/admin' : '/flash';
+  const qs = typeof window !== 'undefined' ? window.location.search : '';
+  const redirectTo = (user.role === 'admin' ? '/admin' : '/flash') + qs;
   return <Navigate to={redirectTo} replace />;
 };
 
 function App() {
+  const forceBoot = import.meta.env.DEV
+    && typeof window !== 'undefined'
+    && new URLSearchParams(window.location.search).get('boot') === '1';
+
   return (
     <div className="App">
       <OfflineProvider>
         <SoundProvider>
           <AuthProvider>
+            <ClockProvider>
             <NotificationProvider>
               <VacationProvider>
               <DataProvider>
@@ -51,6 +58,9 @@ function App() {
                   <Router>
                   <div className="min-h-screen bg-white">
                     <OfflineBanner />
+                    {forceBoot ? (
+                      <LoadingSpinner />
+                    ) : (
                     <Routes>
                       <Route path="/login" element={<LoginScreen />} />
                       <Route 
@@ -71,9 +81,10 @@ function App() {
                       />
                       <Route path="/" element={<RoleBasedRedirect />} />
                     </Routes>
+                    )}
                   </div>
                   <Toaster 
-                    position="top-right"
+                    position="bottom-center"
                     toastOptions={{
                       duration: 4000,
                       style: {
@@ -88,6 +99,7 @@ function App() {
               </DataProvider>
               </VacationProvider>
             </NotificationProvider>
+            </ClockProvider>
           </AuthProvider>
         </SoundProvider>
       </OfflineProvider>

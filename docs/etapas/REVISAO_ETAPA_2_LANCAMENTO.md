@@ -207,7 +207,6 @@ O reset de lançamento **preserva** tudo isso (só zera o jogo). O que ainda nã
 ### O que fica de fora hoje (registrado, sem prometer)
 
 Itens 6 a 18 da varredura que o Cursor ainda não fechou seguem na lista do P2 para a semana 1; `quizBank`, perfil de aprendizado e rotação por perfil (Etapa 3, semana 2); Expedição do Explorador (27/09).
-
 ### Teste do dia 1 na conta de teste (18/09, 9h30 às 10h20; dados clonados do Heitor; `scratchpad/e2e-dia1/`, 126 fotos)
 
 **Os 9 passos passaram, com zero erros de console e zero HTTP 400, em 1280x720 e 1920x1080**: clone e reset (idempotente) → Onboarding limpo (6 telas, nada por cima) → Vila do dia 1 (cadeados, sem penalidade, nenhum dia antigo fechado) → Casa (lista inteira rolando, sem Foco, Recuperar ou Criar missão; toast igual ao cartão) → prova até a reflexão (gravada com 8 respostas, cadeados somem sem recarregar) → Mina (Recado por IA em 18 s, `englishPlans` com resultado, sessão e vocabulário gravados, plano de amanhã pré-gerado) → Baú das 18h → Fechar o dia (resumo, humor, frase, +5 XP) → virada para 19/09 (tocha, Placa com o Sábio) → painel do pai (nada fechado ao abrir; prova de amanhã pronta). **Lançamento aprovado; reset do Heitor aplicado às 10h09 com backup das 9h30.**

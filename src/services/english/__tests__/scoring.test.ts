@@ -11,6 +11,7 @@ import {
   noteMaterial,
   noteScore,
   rewardFor,
+  applyPickaxeBonus,
 } from '../scoring';
 import { BUILD_XP, MIN_XP, buildXp } from '../../../config/englishRewards';
 
@@ -133,6 +134,14 @@ test('buildXp 0 (construir não paga XP) e bônus da Fornalha com teto 3', () =>
   expect(applyFurnaceBonus(2, 0, true)).toBe(2);
   expect(applyFurnaceBonus(2, 1, false)).toBe(2);
   expect(applyFurnaceBonus(0, 1, true)).toBe(0);
+  expect(applyPickaxeBonus(2, 0, 0)).toBe(2);
+  expect(applyPickaxeBonus(2, 1, 0)).toBe(3);
+  expect(applyPickaxeBonus(2, 1, 1)).toBe(2);
+  expect(applyPickaxeBonus(2, 2, 1)).toBe(3);
+  expect(applyPickaxeBonus(2, 2, 2)).toBe(2);
+  expect(applyPickaxeBonus(2, 3, 4)).toBe(3);
+  expect(applyPickaxeBonus(3, 4, 0)).toBe(3);
+  expect(applyPickaxeBonus(0, 4, 0)).toBe(0);
 });
 
 void run();

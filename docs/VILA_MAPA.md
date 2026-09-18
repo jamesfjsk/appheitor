@@ -32,7 +32,8 @@ Documento de desenho (fonte de verdade a partir de 15/09/2026). Junto com `docs/
 | Torre | conquistas, recordes, troféus, habilidades | construção Torre; distrito Torre |
 | Biblioteca | a prova do dia e o Sábio | distrito Biblioteca; Mesa de Encantamento |
 | Mina | os contratos de inglês | distrito Mina; entrada da mina na cena |
-| Agenda | provas, eventos, treinos, lembretes, Foco | distrito Agenda (antiga Ampulheta e Mapa) |
+| Agenda | provas, eventos, treinos, lembretes, Foco; o calendário é a aba Mês (passado e futuro) | distrito Agenda (antiga Ampulheta e Mapa); "Hoje você tem" na Placa; Linha do dia na Casa |
+| Arena | jogos de raciocínio contra os pais (xadrez, damas, Lig 4, batalha naval, duelo de perguntas); "Em breve" até a Etapa 4B | distrito Arena; lugar reservado na cena; Olheiro |
 | Placa da Vila | avisos do dia, dica do turno, recados do pai | faixa fixa no topo da Vila |
 | Tochas | dias completos seguidos | chip do cabeçalho |
 | Nível e patente | crescimento da temporada | chip do cabeçalho (abre a Torre) |
@@ -43,9 +44,20 @@ Palavras que somem: "Baú de recompensas", "Oficina", "Ampulheta", "Mapa", "Cron
 
 Esquerda: avatar (abre a Mochila, aba Equipado), saudação, nome da vila. Chips: **gold** (abre o Extrato), **tochas**, **nível e patente** (abre a Torre), **relógio** (Etapa 2), **próximo evento** da Agenda quando faltam 7 dias ou menos. Botões: som, tela cheia, sair. Somem: "Baú de recompensas" e calendário (viram Mercado > Prêmios e Agenda).
 
-## Grade de distritos (final, 8 cartões com ícone)
+## A Vila é a interface (decisão do pai em 15/09, à noite)
 
-Casa, Mina, Biblioteca, Ferraria, Mercado, Banco, Mochila, Torre, Agenda (9 cartões, ou 8 com a Casa só na cena e na hotbar). Cadeado da prova em Mina, Ferraria, Mercado e Banco. Hotbar: Vila, Missões, Mina, Mercado, Mochila (teclas 1 a 5).
+A grade de cartões de distritos abaixo da cena **sai**. Tudo se abre **dentro da cena**, tocando no lugar, e a única barra fixa é a hotbar do rodapé. Regras:
+
+- Cada lugar tem um hotspot na cena com rótulo ao passar o mouse e o mesmo cadeado da prova: Casa (missões, Linha do dia), entrada da mina (Mina), Mesa de Encantamento ou o Sábio (Biblioteca), Ferreiro ou Fornalha (Ferraria), Comerciante ou a barraca (Mercado), Cofre (Banco), Armazém ou o próprio minerador (Mochila), Torre (Torre), placa de madeira na cena (Placa da Vila com "Hoje você tem" e recados), relógio ou poste com sino perto da Casa (Agenda), arquibancada (Arena, "Em breve"). Mercado e Agenda são construções baratas do primeiro dia (Barraca do Comerciante e Sino da Vila, `VILA_CONSTRUCOES.md` 9 e 10, decisão do pai); Placa da Vila e Arena são objetos fixos da cena (âncoras `spots`, arte a gerar: placa de madeira, arquibancada).
+- A hotbar do rodapé continua com quatro atalhos do dia a dia: Vila, Missões (Casa), Mina, Mochila. Mercado sai do rodapé: é construção na cena.
+- O cabeçalho encolhe para uma faixa: avatar, saudação, chips (gold, tochas, nível, relógio, próximo evento) e os três botões (som, tela cheia, sair). A Placa da Vila deixa de ser um bloco fixo acima da cena: o essencial ("Hoje você tem", "Faltam N missões") vira um balão discreto no canto superior da cena que some ao clicar, e o resto mora na placa de madeira dentro da cena.
+- A cena cresce: com a grade fora e o cabeçalho menor, ela ocupa a altura que sobra em 1280 x 720 (mínimo 1280 x 640 lógicos), sem rolagem para chegar ao rodapé.
+- Em 390 px a cena continua inteira, os hotspots continuam clicáveis, e a hotbar ganha um sexto botão "Lugares" com a lista dos distritos em texto (acessibilidade e telas pequenas). Teclado: as teclas de atalho continuam para todos os lugares (M, E, O, L, B, I, A, T).
+- Nada abre por cima de outra tela: qualquer lugar aberto fecha ao clicar fora, no X ou em Esc, e a cena volta a aparecer.
+
+## Grade de distritos (substituída pela cena; mantida aqui só como lista do que existe)
+
+Casa, Mina, Biblioteca, Ferraria, Mercado, Cofre, Mochila, Torre, Agenda, Arena ("Em breve" até a Etapa 4B). A prova do dia só existe depois da Biblioteca nível 1; Mina, Ferraria e Mercado não ficam trancados atrás da prova. Hotbar: Vila, Missões, Mina, Mochila.
 
 ## Onde o gold circula (o desenho que a criança precisa entender)
 

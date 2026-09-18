@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../../contexts/AuthContext';
 import type { BaseDoc } from '../../../types/english';
 import { MATERIALS, MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
-import { baseLevelOf, subscribeBase } from '../../../services/englishBaseService';
+import { subscribeBase } from '../../../services/englishBaseService';
 import EnglishBase from './base/EnglishBase';
 
 const BANNER = '/assets/english/ui/banner.webp';
@@ -27,7 +27,6 @@ const EnglishArenaCard: React.FC = () => {
     return subscribeBase(childUid, setBase, (e) => console.error('EnglishArenaCard: erro ao assinar a base', e));
   }, [childUid]);
 
-  const level = base ? baseLevelOf(base) : 0;
   const streak = base?.streakDays ?? 0;
 
   return (
@@ -46,15 +45,15 @@ const EnglishArenaCard: React.FC = () => {
           <div className="absolute inset-x-0 bottom-0 px-4 pb-2 flex items-end gap-2">
             <img src={PICKAXE} alt="" className="w-12 h-12 mc-pixel drop-shadow-[2px_2px_0_rgba(0,0,0,0.6)]" draggable={false} />
             <div className="min-w-0 flex-1">
-              <h3 className="mc-title text-xs sm:text-sm pb-0.5">Arena de Inglês</h3>
-              <p className="text-xs text-white/85 pb-1">A Base</p>
+              <h3 className="mc-title text-xs sm:text-sm pb-0.5">Mina</h3>
+              <p className="text-xs text-white/85 pb-1">Jogos de hoje</p>
             </div>
           </div>
         </div>
 
         <div className="p-4">
           <div className="flex justify-between items-baseline mb-2 flex-wrap gap-1">
-            <span className="mc-font text-[10px] text-white">Base nível {level}</span>
+            <span className="mc-font text-[10px] text-white">Contratos</span>
             {streak > 0 && (
               <span className="flex items-center gap-0.5" title={`${streak} dias seguidos`}>
                 {Array.from({ length: Math.min(streak, MAX_TORCHES) }).map((_, i) => (
@@ -75,7 +74,7 @@ const EnglishArenaCard: React.FC = () => {
           </div>
 
           <button onClick={() => setOpen(true)} className="mc-btn mc-btn-green mt-4 w-full py-3 text-base font-bold uppercase" data-testid="open-base">
-            Entrar na base
+            Entrar na Mina
           </button>
         </div>
       </motion.div>

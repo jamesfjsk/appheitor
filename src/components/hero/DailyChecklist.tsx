@@ -1,9 +1,9 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Task } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import TaskItem from './TaskItem';
-import { getTodayBrazil } from '../../utils/timezone';
+import { useClock } from '../../contexts/ClockContext';
+import { extraVisibleOn } from '../../services/village/schedule';
 
 const MAP = '/assets/english/ui/map.webp';
 const SUN = '/assets/english/ui/sun.webp';
@@ -11,26 +11,20 @@ const SUNSET = '/assets/english/ui/sunset.webp';
 const MOON = '/assets/english/ui/moon.webp';
 const TROPHY = '/assets/english/ui/trophy.webp';
 
-// Helper function to check if task should be shown today based on frequency
-const isTaskAvailableToday = (task: Task): boolean => {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  
+const isTaskAvailableToday = (task: Task, weekday: number): boolean => {
   switch (task.frequency) {
     case 'daily':
-      return true; // Always available
+      return true;
     case 'weekday':
-      return dayOfWeek >= 1 && dayOfWeek <= 5; // Monday to Friday
+      return weekday >= 1 && weekday <= 5;
     case 'weekend':
-      return dayOfWeek === 0 || dayOfWeek === 6; // Saturday and Sunday
+      return weekday === 0 || weekday === 6;
     default:
       return true;
   }
 };
 
-// Helper function to check if task is completed today
-const isTaskCompletedToday = (task: Task): boolean => {
-  const today = getTodayBrazil(); // YYYY-MM-DD format
+const isTaskCompletedToday = (task: Task, today: string): boolean => {
   return task.status === 'done' && task.lastCompletedDate === today;
 };
 
@@ -40,6 +34,8 @@ interface DailyChecklistProps {
   onPeriodChange: (period: 'morning' | 'afternoon' | 'evening') => void;
   guidedMode?: boolean;
   onToggleGuidedMode?: () => void;
+  focusTaskId?: string | null;
+  onSetFocus?: (taskId: string) => void;
 }
 
 const DailyChecklist: React.FC<DailyChecklistProps> = ({
@@ -47,26 +43,22 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   selectedPeriod,
   onPeriodChange,
   guidedMode = false,
-  onToggleGuidedMode
+  onToggleGuidedMode,
+  focusTaskId = null,
+  onSetFocus,
 }) => {
   const { completeTask } = useData();
-  
-  // Auto-detect period based on current time
-  const getCurrentPeriod = (): 'morning' | 'afternoon' | 'evening' => {
-    const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 18) return 'afternoon';
-    return 'evening';
-  };
-  
-  // Auto-select current period on mount
+  const { hour, weekday, today, period: clockPeriod } = useClock();
+
+  const getCurrentPeriod = (): 'morning' | 'afternoon' | 'evening' => clockPeriod;
+
   React.useEffect(() => {
     const currentPeriod = getCurrentPeriod();
     if (selectedPeriod !== currentPeriod) {
       onPeriodChange(currentPeriod);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally runs once on mount
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- atualiza quando o Relógio da Vila muda de período
+  }, [clockPeriod]);
 
   const periods = [
     { id: 'morning' as const, label: 'Manhã', icon: SUN },
@@ -77,11 +69,15 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   const filteredTasks = tasks.filter(task => 
     task.period === selectedPeriod && 
     task.active === true &&
-    isTaskAvailableToday(task)
+    task.status !== 'proposed' &&
+    !task.optional &&
+    isTaskAvailableToday(task, weekday)
   );
+  const orderedTasks = [...filteredTasks];
+  const extraTasks = tasks.filter((task) => extraVisibleOn(task, today) && isTaskAvailableToday(task, weekday));
 
-  const completedTasks = filteredTasks.filter(task => isTaskCompletedToday(task)).length;
-  const totalTasks = filteredTasks.length;
+  const completedTasks = orderedTasks.filter(task => isTaskCompletedToday(task, today)).length;
+  const totalTasks = orderedTasks.length;
   const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
   
   const currentPeriod = getCurrentPeriod();
@@ -89,10 +85,10 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   
   // Guided mode: show only current incomplete task
   const currentTask = guidedMode 
-    ? filteredTasks.find(task => !isTaskCompletedToday(task)) 
+    ? orderedTasks.find(task => !isTaskCompletedToday(task, today)) 
     : null;
   
-  const tasksToShow = guidedMode && currentTask ? [currentTask] : filteredTasks;
+  const tasksToShow = guidedMode && currentTask ? [currentTask] : orderedTasks;
 
   const handleCompleteTask = async (taskId: string, completed: boolean) => {
     // Only allow completion, not un-completion
@@ -102,8 +98,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     
     // Check if task is already completed today before proceeding
     const task = tasks.find(t => t.id === taskId);
-    if (task && isTaskCompletedToday(task)) {
-      console.log('⚠️ Task already completed today, skipping');
+    if (task && isTaskCompletedToday(task, today)) {
       return;
     }
     
@@ -116,10 +111,9 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   };
   
   const getTimeBasedMessage = () => {
-    const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) return 'Bom dia, Heitor! Vamos começar pelas missões da manhã.';
-    if (hour >= 12 && hour < 18) return 'Boa tarde, Heitor! Hora das missões da tarde.';
-    return 'Boa noite, Heitor! Últimas missões do dia.';
+    if (hour < 12) return 'Missões da manhã. Começa por essas.';
+    if (hour < 18) return 'Missões da tarde. Hora de continuar.';
+    return 'Missões da noite. Últimas do dia.';
   };
 
   const periodLabel =
@@ -127,7 +121,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     selectedPeriod === 'afternoon' ? 'Tarde' : 'Noite';
 
   return (
-    <section className="mc-panel rounded-lg p-4 sm:p-5 text-white">
+    <section className="mn-casa-sheet p-4 sm:p-5">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 flex-wrap">
           <h2 className="mc-h">
@@ -141,8 +135,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
           <button
             type="button"
             onClick={onToggleGuidedMode}
-            className={`mc-btn min-h-[44px] px-4 font-bold ${guidedMode ? 'mc-btn-green' : 'text-white'}`}
-            style={guidedMode ? undefined : { backgroundColor: 'var(--mc-wood)' }}
+            className={`mc-btn min-h-[44px] px-4 font-bold ${guidedMode ? 'mc-btn-green' : 'mc-btn-wood'}`}
           >
             {guidedMode ? 'Modo guiado ligado' : 'Iniciar missões'}
           </button>
@@ -159,7 +152,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               type="button"
               aria-pressed={isSelected}
               onClick={() => onPeriodChange(period.id)}
-              className={`mc-slot rounded relative ${isSelected ? 'mc-slot-selected' : ''}`}
+              className={`mc-slot rounded relative min-h-[44px] ${isSelected ? 'mc-slot-selected' : ''}`}
             >
               <img src={period.icon} alt="" className="w-[26px] h-[26px] mc-pixel" draggable={false} />
               {period.label}
@@ -191,38 +184,19 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
       </div>
       
       {guidedMode && currentTask && (
-        <div className="mc-row rounded p-3 mb-4 flex items-center justify-between">
+        <div className="mc-row rounded p-3 mb-4">
           <span className="mc-lbl">
             Missão {filteredTasks.findIndex(t => t.id === currentTask.id) + 1} de {totalTasks}
           </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const currentIndex = filteredTasks.findIndex(t => t.id === currentTask.id);
-                if (currentIndex > 0) {
-                  // Logic to show previous task would go here
-                }
-              }}
-              className="mc-btn mc-btn-stone w-11 h-11 p-0"
-              disabled={filteredTasks.findIndex(t => t.id === currentTask.id) === 0}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const currentIndex = filteredTasks.findIndex(t => t.id === currentTask.id);
-                if (currentIndex < filteredTasks.length - 1) {
-                  // Logic to show next task would go here
-                }
-              }}
-              className="mc-btn mc-btn-stone w-11 h-11 p-0"
-              disabled={filteredTasks.findIndex(t => t.id === currentTask.id) === filteredTasks.length - 1}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+        </div>
+      )}
+
+      {extraTasks.length > 0 && (
+        <div className="mb-3">
+          <p className="text-sm font-bold mb-1">Extra · 2x material</p>
+          {extraTasks.map((task, index) => (
+            <TaskItem key={task.id} task={task} index={index} onComplete={handleCompleteTask} guidedMode={false} />
+          ))}
         </div>
       )}
 
@@ -235,6 +209,8 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               index={index}
               onComplete={handleCompleteTask}
               guidedMode={guidedMode}
+              isFocus={focusTaskId === task.id}
+              onSetFocus={onSetFocus}
             />
           ))
         ) : (

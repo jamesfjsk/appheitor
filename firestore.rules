@@ -11,6 +11,10 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function familyHeitor() {
+      return request.resource.data.familyId == 'heitor';
+    }
+
     // ---------- USERS ----------
     match /users/{uid} {
       // Admin pode ler todo mundo; usuário lê o próprio doc
@@ -38,13 +42,37 @@ service cloud.firestore {
       allow get: if signedIn() && (isAdmin() || resource == null || resource.data.ownerId == request.auth.uid);
       allow list: if signedIn() && (isAdmin() || resource.data.ownerId == request.auth.uid);
 
-      // Só admin cria/exclui tarefas (evita bagunça). A criança só pode marcar a própria missão
-      // como feita: status, lastCompletedDate e updatedAt (completeTaskWithRewards, na transação).
-      allow create, delete: if isAdmin();
+      // Criança cria só missão própria (origin child, proposed, gold 0). Admin cria/exclui tudo.
+      allow create: if isAdmin() || (
+        signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.gold == 0
+        && request.resource.data.xp is int
+        && request.resource.data.xp <= 10
+        && (
+          (request.resource.data.origin == 'child' && request.resource.data.status == 'proposed')
+          || (
+            request.resource.data.origin == 'agenda'
+            && request.resource.data.optional == true
+            && request.resource.data.gold == 0
+            && request.resource.data.date is string
+          )
+        )
+      );
+      allow delete: if isAdmin();
       allow update: if isAdmin() || (
         signedIn()
         && resource.data.ownerId == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'lastCompletedDate', 'updatedAt'])
+        && resource.data.status != 'proposed'
+        && (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'lastCompletedDate', 'updatedAt'])
+          || (
+            resource.data.origin == 'agenda'
+            && resource.data.optional == true
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'updatedAt'])
+            && request.resource.data.active == false
+          )
+        )
       );
 
       // ---------- TASK COMPLETIONS (subcoleção) ----------
@@ -188,7 +216,13 @@ service cloud.firestore {
       allow get: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
       allow list: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.reverted == true
+        && request.resource.data.userId == request.auth.uid
+      );
+      allow delete: if isAdmin();
     }
 
     // Progress Snapshots (audit trail)
@@ -260,7 +294,8 @@ service cloud.firestore {
       allow read, write: if signedIn();
     }
     match /aiUsage/{month} {
-      allow read, write: if signedIn();
+      allow read: if signedIn();
+      allow write: if isAdmin();
     }
 
     // ---------- SETTINGS (modo férias, regras do dia) ----------
@@ -271,7 +306,25 @@ service cloud.firestore {
 
     // ---------- VILA (Etapa 1) ----------
     match /village/{uid} {
-      allow read, write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow read: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow create: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow delete: if isAdmin();
+      allow update: if signedIn() && (
+        isAdmin()
+        || (
+          uid == request.auth.uid
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['season', 'stars', 'launchedOn'])
+        )
+      );
+    }
+
+    match /quizBank/{id} {
+      allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid)
+        && request.resource.data.keys().hasAll(['userId', 'date', 'question', 'hash', 'correct', 'category']);
+      allow update: if signedIn() && (isAdmin() || (resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviewedOk', 'reviewedOn'])));
+      allow delete: if isAdmin();
     }
 
     match /notices/{noticeId} {
@@ -297,6 +350,55 @@ service cloud.firestore {
 
     match /health/{uid} {
       allow read, write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
+    match /goals/{id} {
+      allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && familyHeitor() && (
+        isAdmin()
+        || (
+          request.resource.data.userId == request.auth.uid
+          && request.resource.data.status == 'open'
+          && request.resource.data.savedGold == 0
+        )
+      );
+      allow update: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['savedGold', 'lastInterestWeek', 'interestPaid', 'status', 'cancelReason', 'updatedAt'])
+        && request.resource.data.savedGold >= resource.data.savedGold
+        && (request.resource.data.status == resource.data.status || request.resource.data.status == 'cancel_requested'));
+      allow delete: if isAdmin();
+    }
+
+    match /challenges/{id} {
+      allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow create: if familyHeitor() && (isAdmin() || (
+        signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'proposed'
+        && request.resource.data.goldReward is int
+        && request.resource.data.goldReward <= 20
+        && request.resource.data.xpReward is int
+        && request.resource.data.xpReward <= 20
+        && request.resource.data.target is int
+        && request.resource.data.target >= 5
+      ));
+      allow update: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['progress', 'completedAt', 'extendedDays', 'endsOn', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    match /learning/{uid} {
+      allow read, write: if signedIn() && (isAdmin() || uid == request.auth.uid);
+    }
+
+    match /agenda/{id} {
+      allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow create: if familyHeitor() && (isAdmin() || (
+        signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.createdBy == 'child'
+      ));
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
     }
 
     // ---------- PUNISHMENT MODE ----------

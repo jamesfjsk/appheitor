@@ -913,13 +913,6 @@ body {
   box-shadow: inset 3px 3px 0 rgba(255, 255, 255, 0.3), inset -3px -3px 0 rgba(0, 0, 0, 0.45), 0 1px 0 #0d0b0a;
 }
 
-.mc-btn:disabled {
-  opacity: 0.6;
-  transform: none;
-  filter: none;
-  cursor: default;
-}
-
 .mc-btn-green {
   background-color: #5b9b3a;
   color: #ffffff;
@@ -944,6 +937,19 @@ body {
 .mc-btn-red {
   background-color: #b3261e;
   color: #ffffff;
+}
+
+.mc-btn:disabled,
+.mc-btn:disabled:hover,
+.mc-btn:disabled:active {
+  opacity: 1;
+  background-color: #3d3733;
+  color: #a89f97;
+  filter: none;
+  transform: none;
+  cursor: default;
+  box-shadow: inset 2px 2px 0 #26211e, inset -2px -2px 0 #1a1614, 0 2px 0 #0d0b0a;
+  text-shadow: none;
 }
 
 /* barra de progresso em segmentos (como a barra de XP) */

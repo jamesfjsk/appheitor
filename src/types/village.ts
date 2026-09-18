@@ -9,7 +9,27 @@ export type Period = 'morning' | 'afternoon' | 'evening';
 export type GearSlot = 'pickaxe' | 'helmet' | 'boots' | 'lamp' | 'cape';
 export type PickaxeLevel = 0 | 1 | 2 | 3 | 4;
 export type Flag01 = 0 | 1;
-export type ClaimKind = 'daily' | 'quiz8' | 'streak' | 'level' | 'event' | 'challenge' | 'season' | 'auto';
+export type ClaimKind =
+  | 'daily'
+  | 'quiz8'
+  | 'streak'
+  | 'level'
+  | 'event'
+  | 'challenge'
+  | 'season'
+  | 'auto'
+  | 'repair'
+  | 'trophy'
+  | 'merchant'
+  | 'milestone'
+  | 'hint'
+  | 'agenda'
+  | 'punish'
+  | 'burn'
+  | 'fence'
+  | 'ach'
+  | 'friend'
+  | 'redstone';
 export type NoticeType = 'compromisso' | 'regra' | 'viagem' | 'visita' | 'recado';
 export type HabitId = 'agua' | 'postura' | 'alongar' | 'tela' | 'arrumar' | 'sono' | 'gentileza';
 
@@ -51,6 +71,8 @@ export interface VillageDoc {
   name: string;
   characterName: string;
   onboardedAt: string | null;
+  /** YYYY-MM-DD (Brasília). Extrato, Balança e R7 ignoram o que veio antes. */
+  launchedOn?: string | null;
   rare: VillageRare;
   gear: VillageGear;
   character: VillageCharacter;
@@ -64,6 +86,15 @@ export interface VillageDoc {
   noticesDismissed: string[];
   habits: VillageHabits;
   season: number;
+  npcs: Record<NpcId, NpcState>;
+  cracks: string[];
+  stars: SeasonStar[];
+  trophies: Record<string, TrophyTier>;
+  plan: VillagePlan;
+  newItems: string[];
+  stats: VillageStats;
+  achievementsUnlocked: Record<string, string>;
+  newAchievements: string[];
 }
 
 export interface VillageSettings {
@@ -73,11 +104,18 @@ export interface VillageSettings {
   team: { name: string; color1: string; color2: string };
 }
 
+export interface MerchantBuySettings {
+  materials: number;
+  gold: number;
+  dailyCap: number;
+}
+
 export interface EconomySettings {
   materialsPerTask: number;
   dailyChestGold: [number, number];
   rareEveryNDays: number;
   gameGoldDailyCap: number;
+  gameGoldWeeklyCap: number;
   redeemMinTasks: number;
   taskDefaultXp: number;
   taskDefaultGold: number;
@@ -85,6 +123,22 @@ export interface EconomySettings {
   periodGating: boolean;
   chestOpenHour: number;
   minDueForChest: number;
+  incomeDayGold: number;
+  quizGoldPerHit: number;
+  quizXpPerHit: number;
+  challengeGoldWeeklyCap: number;
+  achievementGoldCap: number;
+  buildCostMultiplier: number;
+  merchantBuy: MerchantBuySettings;
+  savingsTargetPct: number;
+  interestRatePct: number;
+  interestCapGold: number;
+  maxOpenGoals: number;
+  lateMissionUntilHour: number;
+  lateMissionGoldPct: number;
+  repairRefundPct: number;
+  seasonWeeks: number;
+  levelCap: number;
 }
 
 export interface ModuleSettings {
@@ -117,6 +171,9 @@ export interface HealthDoc {
   lastQuizGenerated: string | null;
   lastPlanGenerated: string | null;
   lastChestDate: string | null;
+  lastInterestWeek: string | null;
+  lastLearningWeek: string | null;
+  clockDriftMs: number | null;
   updatedAt: string;
 }
 
@@ -127,6 +184,7 @@ export interface CosmeticItem {
   basePrice: number;
   free: boolean;
   premium: boolean;
+  minLevel: number;
 }
 
 export interface GearDef {
@@ -137,7 +195,202 @@ export interface GearDef {
   effect: string;
   cost: Partial<Record<Material, number>>;
   rare: Partial<VillageRare>;
+  minLevel: number;
 }
+
+export type NpcId = 'sabio' | 'comerciante' | 'ferreiro' | 'olheiro';
+
+export interface NpcState {
+  points: number;
+  tier: number;
+  lastTalkDate: string | null;
+  seen: string[];
+  quest: { chapter: number; progress: number; doneAt: string | null };
+}
+
+export type GoalStatus = 'open' | 'achieved' | 'cancelled' | 'cancel_requested';
+
+export interface GoalDoc {
+  id: string;
+  userId: string;
+  familyId: string;
+  title: string;
+  targetGold: number;
+  savedGold: number;
+  status: GoalStatus;
+  rewardId?: string;
+  cancelReason?: string;
+  lastInterestWeek?: string;
+  interestPaid: number;
+  createdAt: string;
+  updatedAt: string;
+  achievedAt?: string;
+  cancelledAt?: string;
+}
+
+export type ChallengeKind =
+  | 'tasks_count'
+  | 'streak_days'
+  | 'quiz_correct'
+  | 'english_contracts'
+  | 'full_days'
+  | 'manual';
+
+export type ChallengeStatus = 'active' | 'proposed' | 'rejected';
+
+export interface ChallengeDoc {
+  id: string;
+  userId: string;
+  familyId: string;
+  title: string;
+  description: string;
+  kind: ChallengeKind;
+  target: number;
+  progress: number;
+  startsOn: string;
+  endsOn: string;
+  xpReward: number;
+  goldReward: number;
+  createdBy: 'admin' | 'child';
+  status: ChallengeStatus;
+  completedAt?: string;
+  extendedDays: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VillagePlan {
+  date: string;
+  order: string[];
+  focusTaskId: string | null;
+}
+
+export type VillageStats = Record<string, number>;
+
+export type AchievementTier = 'bronze' | 'prata' | 'ouro' | 'exclusiva';
+
+export interface GameAchievementReward {
+  xp: number;
+  material?: number;
+  rare?: 'esmeralda' | 'diamante';
+  cosmetic?: string;
+}
+
+export interface GameAchievement {
+  id: string;
+  category: string;
+  tier: AchievementTier;
+  title: string;
+  description: string;
+  icon: string;
+  stat: string;
+  target: number;
+  hidden?: boolean;
+  resetOnSeason?: boolean;
+  reward: GameAchievementReward;
+}
+
+export type DayMood = 'bom' | 'normal' | 'dificil';
+
+export interface DailyCheckinAnswers {
+  mood?: DayMood;
+  water?: boolean;
+  stretch?: boolean;
+  kindness?: boolean;
+  screen?: boolean;
+  tomorrow: string;
+}
+
+export interface LearningDoc {
+  week: string;
+  quizAccuracyByCategory: Record<string, number>;
+  wordsMastered: number;
+  reflections: number;
+  savingsRatePct: number;
+  goldEarned: number;
+  goldSpent: number;
+  goldSaved: number;
+  fullDays: number;
+  challengesDone: number;
+  updatedAt: string;
+}
+
+export type VillageSceneEventKind =
+  | 'task_done'
+  | 'level_up'
+  | 'chest_open'
+  | 'full_day'
+  | 'missed_yesterday'
+  | 'build';
+
+export interface VillageSceneEvent {
+  kind: VillageSceneEventKind;
+  at: number;
+  lot?: string;
+}
+
+export const FRIEND_TIER_MIN = [0, 5, 15, 30, 50, 80] as const;
+export const FRIEND_TIER_NAME = ['Desconhecido', 'Conhecido', 'Colega', 'Amigo', 'Parceiro', 'Lenda da Vila'] as const;
+
+export type TrophyTier = 'bronze' | 'prata' | 'ouro';
+
+export interface SeasonStar {
+  season: number;
+  level: number;
+  endedOn: string;
+}
+
+export type AgendaKind =
+  | 'prova'
+  | 'trabalho'
+  | 'evento'
+  | 'aniversario'
+  | 'treino'
+  | 'compromisso'
+  | 'outro';
+
+export interface AgendaItem {
+  id: string;
+  userId: string;
+  familyId: string;
+  title: string;
+  kind: AgendaKind;
+  date: string;
+  time?: string;
+  remindMinutesBefore?: number;
+  repeat?: 'none' | 'weekly';
+  notes?: string;
+  createdBy: 'child' | 'admin';
+  plannedAheadDays: number;
+  doneAt?: string;
+  remindedAt?: string;
+  remindedFor?: string;
+  studyPlanAccepted?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PriceBand {
+  id: 'mimo' | 'pequeno' | 'medio' | 'grande' | 'enorme' | 'temporada';
+  days: number;
+  onlyGoal?: boolean;
+}
+
+export interface LevelGift {
+  materialChoice: boolean;
+  rare: 'esmeralda' | 'diamante' | null;
+  cosmeticId: string | null;
+}
+
+export type GameGoldSource =
+  | 'chest'
+  | 'streak_chest'
+  | 'challenge'
+  | 'achievement'
+  | 'goal_interest'
+  | 'merchant_sale'
+  | 'trophy'
+  | 'repair';
 
 export interface TaskLootInput {
   period: Period;
@@ -164,6 +417,7 @@ export interface ScheduleTask {
   frequency: 'daily' | 'weekday' | 'weekend';
   period: Period;
   createdAt?: Date | string | null;
+  optional?: boolean;
 }
 
 export interface FatherNotice {
@@ -204,6 +458,8 @@ export interface NoticeContext {
   vacation: boolean;
   fatherNotices: FatherNotice[];
   dismissed: string[];
+  agendaToday?: Array<{ title: string; time?: string }>;
+  agendaTomorrow?: Array<{ title: string }>;
 }
 
 export interface LineDef {

@@ -43,10 +43,10 @@ export const CONTRACT_LABELS: Record<ContractType, string> = {
 };
 
 export const CONTRACT_ICONS: Record<ContractType, string> = {
-  merchant: '/assets/english/ui/base/c_merchant.webp',
+  merchant: '/assets/village/npc/comerciante-iso.png',
   letter: '/assets/english/ui/base/c_letter.webp',
   note: '/assets/english/ui/base/c_note.webp',
-  forge: '/assets/english/ui/base/c_forge.webp',
+  forge: '/assets/village/npc/ferreiro-iso.png',
 };
 
 /** Material que cada tipo de contrato paga (seção 1) */
@@ -78,6 +78,8 @@ export interface BuildingDef {
   liveMaxLevel?: number;
   /** Quando liveMaxLevel impede a compra */
   opensIn?: string;
+  /** Fora da grade 3x2 da Mina; só na cena da Vila */
+  hideOnBaseMap?: boolean;
 }
 
 export const BUILDING_MAX_LEVEL = 3;
@@ -104,8 +106,8 @@ export const BUILDINGS: BuildingDef[] = [
   },
   {
     id: 'bau',
-    label: 'Baú',
-    labelEn: 'Chest',
+    label: 'Armazém',
+    labelEn: 'Storage',
     description: 'O armazém da Vila.',
     effects: [
       'Você vê o inventário e libera Torre, Mesa e Campinho.',
@@ -121,14 +123,14 @@ export const BUILDINGS: BuildingDef[] = [
     id: 'cerca',
     label: 'Cerca',
     labelEn: 'Fence',
-    description: 'Protege as tochas num dia ruim.',
+    description: 'Uma cerca simples. Protege as tochas num dia ruim.',
     effects: [
       'Uma vez por mês, um dia perdido não zera as tochas.',
       'A rachadura do conserto some sozinha depois de 1 dia.',
       'A penalidade por missão perdida nunca passa de 1 gold por dia.',
     ],
     effect: 'Uma vez por mês, um dia perdido não zera as tochas.',
-    icon: '/assets/village/buildings/cerca-1.png',
+    icon: '/assets/village/buildings/cerca-1.png?v=cerh3',
     costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
     requiresCore: false,
   },
@@ -149,9 +151,9 @@ export const BUILDINGS: BuildingDef[] = [
   },
   {
     id: 'mesa',
-    label: 'Mesa de Encantamento',
-    labelEn: 'Enchanting Table',
-    description: 'A casa do Sábio.',
+    label: 'Biblioteca',
+    labelEn: 'Library',
+    description: 'A casa do Sábio e da prova do dia.',
     effects: [
       'Você escolhe o tema da história de amanhã na Mina.',
       'Estante de erros e Diário.',
@@ -161,6 +163,8 @@ export const BUILDINGS: BuildingDef[] = [
     icon: '/assets/village/buildings/mesa-1.png',
     costs: [cost(1, 0, 1, 1), cost(1, 1, 1, 2), cost(2, 1, 2, 3)],
     requiresCore: true,
+    liveMaxLevel: 1,
+    opensIn: 'Etapa 3',
   },
   {
     id: 'campinho',
@@ -179,35 +183,122 @@ export const BUILDINGS: BuildingDef[] = [
     liveMaxLevel: 0,
     opensIn: 'Etapa 4',
   },
+  {
+    id: 'arena',
+    label: 'Arena',
+    labelEn: 'Arena',
+    description: 'O coliseu da Vila. Um dia você joga com o pai.',
+    effects: [
+      'O Olheiro cuida da Arena. Jogos com o pai: xadrez, Lig 4.',
+      'Melhor de 3 e recorde na Torre.',
+      'Troféu da Arena e partida na Placa.',
+    ],
+    effect: 'O Olheiro cuida da Arena. Jogos com o pai: xadrez, Lig 4.',
+    icon: '/assets/village/buildings/arena-1.png',
+    costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(2, 2, 2, 2)],
+    requiresCore: false,
+    liveMaxLevel: 0,
+    opensIn: 'Etapa 4B',
+    hideOnBaseMap: true,
+  },
+  {
+    id: 'cofre',
+    label: 'Cofre',
+    labelEn: 'Vault',
+    description: 'A poupança da Vila.',
+    effects: [
+      'Abre o Cofrinho com 1 meta.',
+      '2 metas e o bônus de paciência (5% por semana, teto 20).',
+      'Faixa prêmio da temporada e Extrato mensal.',
+    ],
+    effect: 'Abre o Cofrinho com 1 meta.',
+    icon: '/assets/village/buildings/cofre-1.png',
+    costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
+    requiresCore: false,
+    hideOnBaseMap: true,
+  },
+  {
+    id: 'agenda',
+    label: 'Agenda',
+    labelEn: 'Agenda',
+    description: 'Provas, treinos, eventos e lembretes.',
+    effects: [
+      'Abre a Agenda da Vila.',
+      'Agenda não tem níveis.',
+      'Agenda não tem níveis.',
+    ],
+    effect: 'Abre a Agenda da Vila.',
+    icon: '/assets/village/buildings/agenda-1.png',
+    costs: [cost(1, 1, 1, 0), cost(1, 2, 1, 1), cost(2, 3, 2, 1)],
+    requiresCore: false,
+    liveMaxLevel: 1,
+    hideOnBaseMap: true,
+  },
+  {
+    id: 'mercado',
+    label: 'Mercado',
+    labelEn: 'Market',
+    description: 'A barraca do Comerciante.',
+    effects: [
+      'Abre o Mercado: prêmios, Loja da Vila e Comerciante.',
+      'Mercado não tem níveis por agora.',
+      'Mercado não tem níveis por agora.',
+    ],
+    effect: 'Abre o Mercado: prêmios, Loja da Vila e Comerciante.',
+    icon: '/assets/village/buildings/mercado-1.png',
+    costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
+    requiresCore: false,
+    liveMaxLevel: 1,
+    hideOnBaseMap: true,
+  },
 ];
 
 export const BUILDING_BY_ID: Record<BuildingId, BuildingDef> = Object.fromEntries(
   BUILDINGS.map((b) => [b.id, b])
 ) as Record<BuildingId, BuildingDef>;
 
-/** Custo para subir a construção ao nível alvo (1..3); null fora da faixa */
-export function buildingCost(id: BuildingId, targetLevel: number): MaterialCost | null {
+/** Custo para subir a construção ao nível alvo (1..3); null fora da faixa. Multiplica madeira, pedra e ferro. */
+export function buildingCost(id: BuildingId, targetLevel: number, multiplier = 1): MaterialCost | null {
   if (!Number.isInteger(targetLevel) || targetLevel < 1 || targetLevel > BUILDING_MAX_LEVEL) return null;
-  return { ...BUILDING_BY_ID[id].costs[targetLevel - 1] };
+  const base = BUILDING_BY_ID[id].costs[targetLevel - 1];
+  const m = multiplier > 0 ? multiplier : 1;
+  return {
+    madeira: base.madeira * m,
+    pedra: base.pedra * m,
+    ferro: base.ferro * m,
+    redstone: base.redstone,
+  };
+}
+
+/** Caminho em `public/` sem querystring de cache (`?v=`). */
+export function publicFilePath(src: string): string {
+  const cut = src.search(/[?#]/);
+  return cut >= 0 ? src.slice(0, cut) : src;
 }
 
 /** Ícone do lote: fantasma do n1 no nível 0 (cinza na UI), sprite próprio nos níveis 1-3. */
 export function buildingIcon(id: BuildingId, level: number): string {
   const n = level <= 0 ? 1 : Math.min(BUILDING_MAX_LEVEL, level);
-  return `/assets/village/buildings/${id}-${n}.png`;
+  const v = id === 'cerca' ? '?v=cerh3' : '';
+  return `/assets/village/buildings/${id}-${n}.png${v}`;
 }
 
 export const BUILDING_PLACA = '/assets/village/buildings/placa.png';
 
 export function buildingSprite(id: BuildingId, level: number): string {
   if (level <= 0) return BUILDING_PLACA;
-  return `/assets/village/buildings/${id}-${level}.png`;
+  const v = id === 'cerca' ? 'cerh3' : 'arena7';
+  return `/assets/village/buildings/${id}-${level}.png?v=${v}`;
 }
 
 /** Torre, Mesa e Campinho só aparecem com Fornalha e Baú no nível 1 ou mais */
 export function isBuildingUnlocked(id: BuildingId, buildings: Record<BuildingId, number>): boolean {
+  if (id === 'arena') return true;
+  if (id === 'cerca') return (buildings.fornalha || 0) >= 1;
+  if (id === 'cofre') return (buildings.bau || 0) >= 1;
+  if (id === 'agenda' || id === 'mercado') return true;
   if (!BUILDING_BY_ID[id].requiresCore) return true;
-  return buildings.fornalha >= 1 && buildings.bau >= 1;
+  return (buildings.fornalha || 0) >= 1 && (buildings.bau || 0) >= 1;
 }
 
 /** Nível 0 = ainda não construída. */
@@ -258,6 +349,10 @@ export const INITIAL_BUILDINGS: Record<BuildingId, number> = {
   torre: 0,
   mesa: 0,
   campinho: 0,
+  arena: 0,
+  cofre: 0,
+  agenda: 0,
+  mercado: 0,
 };
 
 export function initialBaseDoc(userId: string, nowIso: string, level = 1): BaseDoc {

@@ -23,8 +23,10 @@ interface Props {
   contract: Contract;
   outcome: ContractOutcome;
   reward: CompleteReward;
-  /** Construção que já dá para erguer com os materiais atuais (ou null) */
+  /** Construção que já dá para erguer ou melhorar na Vila (ou null) */
   buildable: BuildingId | null;
+  /** Nível atual dessa construção na Vila (0 = ainda não existe) */
+  builtLevel?: number;
   onNext: () => void;
   onBuild: (id: BuildingId) => void;
 }
@@ -57,7 +59,7 @@ const MaterialBurst: React.FC<{ material: Material; count: number }> = ({ materi
   </div>
 );
 
-const ContractResult: React.FC<Props> = ({ contract, outcome, reward, buildable, onNext, onBuild }) => {
+const ContractResult: React.FC<Props> = ({ contract, outcome, reward, buildable, builtLevel = 0, onNext, onBuild }) => {
   const count = Math.max(0, Math.min(3, reward.materialEarned)) as MaterialCount;
   const label = MATERIAL_LABELS[reward.material];
   const bonus = count > outcome.materialEarned;
@@ -150,10 +152,10 @@ const ContractResult: React.FC<Props> = ({ contract, outcome, reward, buildable,
         {buildable && (
           <button onClick={() => onBuild(buildable)} className="mc-btn mc-btn-gold py-3 font-bold text-base" data-testid="result-build">
             <img src={BUILD_ICON(buildable)} alt="" className="w-7 h-7 mc-pixel" draggable={false} />
-            Construir {BUILDING_BY_ID[buildable].label} agora
+            {(builtLevel > 0 ? 'Melhorar' : 'Construir') + ` ${BUILDING_BY_ID[buildable].label} na Vila`}
           </button>
         )}
-        <button onClick={onNext} className="mc-btn mc-btn-green py-3 font-bold text-base" data-testid="result-next">Próximo contrato</button>
+        <button onClick={onNext} className="mc-btn mc-btn-green py-3 font-bold text-base" data-testid="result-next">Voltar aos contratos</button>
       </div>
     </div>
   );

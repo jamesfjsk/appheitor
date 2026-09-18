@@ -1,10 +1,17 @@
 import { addDoc, collection, doc, onSnapshot, query, setDoc, where } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import type { HealthDoc } from '../types/village';
+import { getTodayBrazil } from '../utils/clock';
 
 const STACK_MAX = 2048;
 
-export type HealthField = 'lastCloseDay' | 'lastQuizGenerated' | 'lastPlanGenerated' | 'lastChestDate';
+export type HealthField =
+  | 'lastCloseDay'
+  | 'lastQuizGenerated'
+  | 'lastPlanGenerated'
+  | 'lastChestDate'
+  | 'lastInterestWeek'
+  | 'lastLearningWeek';
 
 function appVersion(): string {
   try {
@@ -36,7 +43,7 @@ export async function touchHealth(uid: string, field: HealthField, value?: strin
   const now = new Date().toISOString();
   await setDoc(
     doc(db, 'health', uid),
-    { [field]: value ?? now.slice(0, 10), updatedAt: now },
+    { [field]: value ?? getTodayBrazil(), updatedAt: now },
     { merge: true }
   );
 }
@@ -68,6 +75,9 @@ export function subscribeHealth(uid: string, onChange: (doc: HealthDoc | null) =
       lastQuizGenerated: typeof d.lastQuizGenerated === 'string' ? d.lastQuizGenerated : null,
       lastPlanGenerated: typeof d.lastPlanGenerated === 'string' ? d.lastPlanGenerated : null,
       lastChestDate: typeof d.lastChestDate === 'string' ? d.lastChestDate : null,
+      lastInterestWeek: typeof d.lastInterestWeek === 'string' ? d.lastInterestWeek : null,
+      lastLearningWeek: typeof d.lastLearningWeek === 'string' ? d.lastLearningWeek : null,
+      clockDriftMs: typeof d.clockDriftMs === 'number' ? d.clockDriftMs : null,
       updatedAt: typeof d.updatedAt === 'string' ? d.updatedAt : '',
     });
   });
@@ -98,7 +108,11 @@ export function subscribeClientErrors(uid: string, onChange: (rows: ClientErrorR
             uid: String(data.uid || ''),
             route: String(data.route || ''),
             appVersion: String(data.appVersion || ''),
-            createdAt: String(data.createdAt || ''),
+            createdAt: typeof data.createdAt === 'string'
+              ? data.createdAt
+              : data.createdAt && typeof data.createdAt === 'object' && 'toDate' in data.createdAt
+                ? (data.createdAt as { toDate: () => Date }).toDate().toISOString()
+                : '',
           };
         })
         .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))

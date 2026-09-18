@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Save, Gift, Type, FileText } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Reward } from '../../types';
 import { REWARD_ICONS } from '../../config/rewardIcons';
+import { DEFAULT_ECONOMY, PRICE_BANDS } from '../../config/village';
+import { listGoldTransactions } from '../../services/goldTx';
+import { priceForDays, referenceIncome } from '../../services/village/income';
+import { getVillage } from '../../services/villageService';
 import toast from 'react-hot-toast';
 
 export interface RewardFormInitialData {
@@ -25,6 +30,8 @@ interface RewardFormProps {
 
 const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, isOpen }) => {
   const { addReward, updateReward } = useData();
+  const { childUid } = useAuth();
+  const [r7, setR7] = useState(DEFAULT_ECONOMY.incomeDayGold);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -33,6 +40,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
     category: 'custom' as Reward['category'],
     requiredLevel: 1,
     isActive: true,
+    goalOnly: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -48,6 +56,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
         category: initialData.category || 'custom',
         requiredLevel: initialData.requiredLevel || 1,
         isActive: initialData.isActive !== false,
+        goalOnly: false,
       });
     } else if (reward) {
       // Use existing reward data for editing
@@ -59,6 +68,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
         category: reward.category,
         requiredLevel: reward.requiredLevel || 1,
         isActive: reward.active,
+        goalOnly: reward.goalOnly === true,
       });
     } else {
       // Default empty form
@@ -70,10 +80,19 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
         category: 'custom',
         requiredLevel: 1,
         isActive: true,
+        goalOnly: false,
       });
     }
     setErrors({});
   }, [reward, initialData, isOpen]);
+
+  useEffect(() => {
+    if (!childUid || !isOpen) return;
+    void Promise.all([listGoldTransactions(childUid, 200), getVillage(childUid)]).then(([txs, village]) => {
+      const week = txs.filter((t) => Date.now() - t.createdAt.getTime() < 7 * 86400000);
+      setR7(referenceIncome(week, DEFAULT_ECONOMY.incomeDayGold, { launchedOn: village.launchedOn }));
+    });
+  }, [childUid, isOpen]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -125,7 +144,8 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
       costGold: formData.goldCost,
       emoji: formData.icon,
       requiredLevel: formData.requiredLevel,
-      active: formData.isActive === true
+      active: formData.isActive === true,
+      goalOnly: formData.goalOnly,
     };
 
     if (reward) {
@@ -265,6 +285,26 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
                 <p className="mt-1 text-sm text-red-600">{errors.goldCost}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">Entre 5 e 10000 Gold</p>
+              <p className="mt-2 text-sm text-gray-700">Ele ganha cerca de {r7} gold por dia</p>
+              <div className="flex flex-wrap gap-1 mt-2">
+                {PRICE_BANDS.map((b) => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    className="px-2 py-1 text-xs border rounded hover:bg-gray-50"
+                    onClick={() => {
+                      handleInputChange('goldCost', priceForDays(r7, b.days));
+                      handleInputChange('goalOnly', Boolean(b.onlyGoal));
+                    }}
+                  >
+                    {b.id}{b.onlyGoal ? ' (Cofrinho)' : ''}
+                  </button>
+                ))}
+              </div>
+              <label className="mt-2 flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" checked={formData.goalOnly} onChange={(e) => handleInputChange('goalOnly', e.target.checked)} />
+                Só pelo Cofrinho
+              </label>
             </div>
 
             {/* Required Level */}

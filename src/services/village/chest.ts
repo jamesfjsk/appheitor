@@ -3,7 +3,7 @@ import type { ChestContents, EconomySettings, VillageDoc, VillageGear } from '..
 import { DEFAULT_ECONOMY } from '../../config/village';
 import { claimKey, hasClaim } from './claims';
 import { isChestTime } from './schedule';
-import { createRng, randInt, seedFromString } from '../english/shuffle';
+import { createRng, seedFromString } from '../english/shuffle';
 
 const COMMONS: Material[] = ['madeira', 'pedra', 'ferro'];
 
@@ -25,34 +25,51 @@ export function chestAllowed(args: {
   return { ok: true, reason: 'ok' };
 }
 
+function scarcest(stock: Partial<Record<Material, number>>, rng: () => number): Material {
+  let best: Material = 'madeira';
+  let bestQty = Number.POSITIVE_INFINITY;
+  const tied: Material[] = [];
+  for (const m of COMMONS) {
+    const q = stock[m] ?? 0;
+    if (q < bestQty) {
+      bestQty = q;
+      best = m;
+      tied.length = 0;
+      tied.push(m);
+    } else if (q === bestQty) {
+      tied.push(m);
+    }
+  }
+  if (tied.length <= 1) return best;
+  return tied[Math.floor(rng() * tied.length) % tied.length];
+}
+
 /**
- * Conteúdo determinístico do Baú do Dia (hash uid+data).
- * Esmeralda a cada N dias completos, contando o dia atual (fullDays + 1).
+ * Gold determinístico: min(teto, base + tochas).
+ * 2 materiais do tipo mais escasso (empate: hash; ordem madeira, pedra, ferro).
  */
 export function dailyChestContents(
   uid: string,
   date: string,
   village: Pick<VillageDoc, 'fullDays' | 'gear'>,
-  settings: EconomySettings = DEFAULT_ECONOMY
+  settings: EconomySettings = DEFAULT_ECONOMY,
+  stock: Partial<Record<Material, number>> = {},
+  bauLevel = 0
 ): ChestContents {
+  const [base, cap] = settings.dailyChestGold;
+  const gold = Math.min(cap, base + Math.max(0, village.fullDays));
   const rng = createRng(seedFromString(`${uid}|${date}|chest`));
-  const [minG, maxG] = settings.dailyChestGold;
-  let gold = randInt(rng, minG, maxG);
-  gold = Math.min(gold, settings.gameGoldDailyCap);
-
-  const materials: Partial<Record<Material, number>> = {};
-  const add = (m: Material, n: number) => {
-    materials[m] = (materials[m] ?? 0) + n;
-  };
-  add(COMMONS[Math.floor(rng() * COMMONS.length)], 1);
-  add(COMMONS[Math.floor(rng() * COMMONS.length)], 1);
-
+  const pick = scarcest(stock, rng);
+  const extra = bauLevel >= 2 ? 1 : 0;
+  const materials: Partial<Record<Material, number>> = { [pick]: 2 + extra };
   const gear: VillageGear = village.gear;
-  if (gear.pickaxe >= 3) add(COMMONS[Math.floor(rng() * COMMONS.length)], 1);
-
+  if (gear.pickaxe >= 4) {
+    materials[pick] = (materials[pick] ?? 0) + 2;
+  } else if (gear.pickaxe >= 3) {
+    materials[pick] = (materials[pick] ?? 0) + 1;
+  }
   const counted = village.fullDays + 1;
-  const n = Math.max(1, settings.rareEveryNDays);
+  const n = bauLevel >= 3 ? 2 : Math.max(1, settings.rareEveryNDays);
   const esmeralda = counted % n === 0 ? 1 : 0;
-
   return { gold, materials, esmeralda };
 }

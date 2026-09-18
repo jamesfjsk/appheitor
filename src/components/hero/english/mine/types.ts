@@ -128,6 +128,8 @@ export interface MineConfig {
   spawnGapMs: number;            // 700: intervalo mínimo entre fileiras
   announceMinMs: number;         // 500: a fileira fica parada pelo menos isso, mesmo que a tela libere antes
   announceMaxMs: number;         // 6000: segurança; 0 = espera a tela para sempre
+  /** Picareta forjada: a corrida não cai abaixo disto (0 madeira … 4 diamante). */
+  pickaxeFloor: number;
 }
 
 export const DEFAULT_CONFIG: MineConfig = {
@@ -146,6 +148,7 @@ export const DEFAULT_CONFIG: MineConfig = {
   spawnGapMs: 700,
   announceMinMs: 500,
   announceMaxMs: 6000,
+  pickaxeFloor: 0,
 };
 
 /** Multiplicador por picareta (índice = nível) e combo mínimo para cada nível */
