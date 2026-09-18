@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { BuildingId } from '../../../types/english';
 import { buildingSprite, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, lookBodySrc, visibleCracks, type SceneProp } from '../../../config/village';
 import type { NpcId, VillageDoc, VillageSceneEvent } from '../../../types/village';
-import { npcTarget, npcTouch, npcHopPx, lookFacing, npcWalk, heroClickPlan, heroGroundPlan, heroWalkAlong, heroWalkablePoint, arrivePulse, DEFAULT_WALK_GRAPH, HERO_ARRIVE_HOLD_MS, type WalkGraph } from '../../../services/village/npcBehavior';
+import { npcTarget, npcTouch, npcHopPx, lookFacing, npcWalk, npcRoutine, heroClickPlan, heroGroundPlan, heroWalkAlong, heroWalkablePoint, heroShouldOpen, arrivePulse, DEFAULT_WALK_GRAPH, HERO_ARRIVE_HOLD_MS, type WalkGraph } from '../../../services/village/npcBehavior';
 import { buildingLevelSum, villageGrowthStage } from '../../../services/village/season';
 import { isNightHour } from '../../../utils/clock';
+import { quizBlocksDest } from '../../../services/village/quizGate';
 import { lookOverlaySrc, paintCharacterLook, type LookKit } from './drawCharacter';
 import { paintLotRuins, paintRuinedSprite } from './drawDamage';
 import {
@@ -15,6 +16,7 @@ import {
   paintCampFlame,
   paintCharBlink,
   paintClosedSign,
+  paintGateLock,
   paintEmber,
   paintFireflies,
   paintGlow,
@@ -55,14 +57,14 @@ function fenceSouthSrc(level: number): string {
   return `/assets/village/scene/wall/cerca-south-${n}.png?v=cerh3`;
 }
 
-type Lot = { id: string; x: number; y: number; w: number; h: number; destW?: number; landmark?: boolean };
+type Lot = { id: string; x: number; y: number; w: number; h: number; destW?: number; landmark?: boolean; door?: { x: number; y: number } };
 type WallPiece = {
   kind: 'south' | 'ne' | 'nw' | 'corner';
   x: number; y: number; w: number; h: number;
   torch?: boolean;
   flip?: boolean;
 };
-type Actor = { x: number; y: number; h: number };
+type Actor = { x: number; y: number; h: number; door?: { x: number; y: number } };
 type Light = { id: string; x: number; y: number; r: number };
 type Speech = { npc: string; text: string };
 
@@ -73,10 +75,11 @@ export type SceneAnchors = {
   wall?: WallPiece[];
   character: Actor;
   npcs: Record<string, Actor>;
-  npcSpots?: Record<string, Record<string, { x: number; y: number } | null>>;
+  npcSpots?: Record<string, Record<string, { x: number; y: number; door?: { x: number; y: number } } | null>>;
   hotspots?: Record<string, {
     x: number; y: number; w: number; h: number;
     type?: string; label?: string; sprite?: string; minFullDays?: number;
+    door?: { x: number; y: number };
   }>;
   lights: Light[];
   water: { x: number; y: number; w: number; h: number };
@@ -91,22 +94,22 @@ const FALLBACK: SceneAnchors = {
   size: { w: 1280, h: 640 },
   spriteScale: 1,
   lots: [
-    { id: 'fornalha', x: 147, y: 198, w: 102, h: 78 },
-    { id: 'bau', x: 144, y: 348, w: 105, h: 78 },
-    { id: 'cerca', x: 600, y: 528, w: 80, h: 48 },
-    { id: 'torre', x: 1064, y: 48, w: 90, h: 112 },
-    { id: 'mesa', x: 723, y: 234, w: 90, h: 63 },
-    { id: 'cofre', x: 472, y: 422, w: 104, h: 80 },
-    { id: 'agenda', x: 584, y: 412, w: 112, h: 92 },
-    { id: 'mercado', x: 708, y: 414, w: 112, h: 90 },
-    { id: 'arena', x: 929, y: 318, w: 186, h: 146, destW: 148, landmark: true },
+    { id: 'fornalha', x: 147, y: 198, w: 102, h: 78, door: { x: 214, y: 310 } },
+    { id: 'bau', x: 144, y: 348, w: 105, h: 78, door: { x: 196, y: 440 } },
+    { id: 'cerca', x: 600, y: 528, w: 80, h: 48, door: { x: 640, y: 448 } },
+    { id: 'torre', x: 1064, y: 48, w: 90, h: 112, door: { x: 1054, y: 188 } },
+    { id: 'mesa', x: 723, y: 234, w: 90, h: 63, door: { x: 770, y: 338 } },
+    { id: 'cofre', x: 472, y: 422, w: 104, h: 80, door: { x: 524, y: 512 } },
+    { id: 'agenda', x: 584, y: 412, w: 112, h: 92, door: { x: 640, y: 516 } },
+    { id: 'mercado', x: 708, y: 414, w: 112, h: 90, door: { x: 764, y: 516 } },
+    { id: 'arena', x: 929, y: 318, w: 186, h: 146, destW: 148, landmark: true, door: { x: 1016, y: 498 } },
   ],
   character: { x: 640, y: 365, h: 80 },
   npcs: {
-    sabio: { x: 848, y: 268, h: 74 },
-    comerciante: { x: 838, y: 468, h: 74 },
-    ferreiro: { x: 78, y: 250, h: 74 },
-    olheiro: { x: 1114, y: 79, h: 52 },
+    sabio: { x: 848, y: 268, h: 74, door: { x: 848, y: 320 } },
+    comerciante: { x: 838, y: 468, h: 74, door: { x: 838, y: 500 } },
+    ferreiro: { x: 78, y: 250, h: 74, door: { x: 108, y: 318 } },
+    olheiro: { x: 1114, y: 79, h: 52, door: { x: 1110, y: 168 } },
   },
   lights: [
     { id: 'mina', x: 640, y: 96, r: 52 },
@@ -116,18 +119,25 @@ const FALLBACK: SceneAnchors = {
   ],
   water: { x: 1125, y: 345, w: 145, h: 125 },
   smokeOffset: { dx: 51, dy: 8 },
-  house: { id: 'casa', x: 938, y: 110, w: 96, h: 74 },
+  house: { id: 'casa', x: 938, y: 110, w: 96, h: 74, door: { x: 986, y: 204 } },
   props: SCENE_PROPS,
   npcSpots: {
-    comerciante: { morning: { x: 1172, y: 486 }, afternoon: { x: 996, y: 228 }, night: null },
-    sabio: { day: { x: 620, y: 240 }, night: { x: 1052, y: 228 } },
+    comerciante: {
+      morning: { x: 1172, y: 486, door: { x: 1148, y: 508 } },
+      afternoon: { x: 996, y: 228, door: { x: 1004, y: 268 } },
+      night: null,
+    },
+    sabio: {
+      day: { x: 620, y: 240, door: { x: 620, y: 268 } },
+      night: { x: 1052, y: 228, door: { x: 1048, y: 260 } },
+    },
   },
   hotspots: {
-    mine: { x: 545, y: 32, w: 210, h: 138, type: 'district', label: 'Mina' },
-    reserva: { x: 468, y: 234, w: 90, h: 63, type: 'future', label: 'Em breve' },
+    mine: { x: 545, y: 32, w: 210, h: 138, type: 'district', label: 'Mina', door: { x: 650, y: 198 } },
+    reserva: { x: 468, y: 234, w: 90, h: 63, type: 'future', label: 'Em breve', door: { x: 640, y: 255 } },
     chest_streak: {
       x: 253, y: 348, w: 48, h: 48, type: 'chest_streak', label: 'Baú das tochas',
-      sprite: '/assets/village/items/chest_streak.png', minFullDays: 7,
+      sprite: '/assets/village/items/chest_streak.png', minFullDays: 7, door: { x: 196, y: 440 },
     },
   },
   wall: [
@@ -147,6 +157,7 @@ type Hotspot = {
   sprite?: HTMLImageElement | null;
   pixel?: boolean;
   hover?: HoverKind;
+  door?: { x: number; y: number };
 };
 type Smoke = { x: number; y: number; r: number; a: number; vy: number; vx?: number };
 type Layer = {
@@ -312,21 +323,6 @@ function groundShadow(
   ctx.restore();
 }
 
-function lockIcon(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  ctx.save();
-  ctx.fillStyle = '#f4e8c8';
-  ctx.strokeStyle = '#17130f';
-  ctx.lineWidth = 2;
-  ctx.fillRect(x, y, 28, 32);
-  ctx.strokeRect(x, y, 28, 32);
-  ctx.fillStyle = '#17130f';
-  ctx.fillRect(x + 6, y + 14, 16, 14);
-  ctx.beginPath();
-  ctx.arc(x + 14, y + 14, 6, Math.PI, 0);
-  ctx.stroke();
-  ctx.restore();
-}
-
 function spriteBox(
   lot: { id?: string; x: number; y: number; w: number; h: number; destW?: number },
   empty: boolean,
@@ -421,6 +417,10 @@ function graySprite(source: HTMLImageElement, w: number, h: number): HTMLCanvasE
 
 function nightOf(hour: number) {
   return isNightHour(hour);
+}
+
+function gateName(id: string, gated: boolean, fallback: string) {
+  return gated && quizBlocksDest(id) ? 'Faça a prova do dia' : fallback;
 }
 
 function isSkyPixel(r: number, g: number, b: number, y: number) {
@@ -734,7 +734,7 @@ interface Props {
   speech: Speech | null;
   onClickSpot: (id: string) => void;
   onDismissSpeech: () => void;
-  /** Cartão/distrito já aberto: cancela a caminhada pendente. */
+  /** Cartão aberto: bloqueia clique novo; o passo até a porta continua. */
   frozen?: boolean;
   houseSmoke?: boolean;
   buildFx?: { id: BuildingId; at: number } | null;
@@ -774,6 +774,7 @@ const VillageScene: React.FC<Props> = ({
   const heroPos = useRef<{ x: number; y: number } | null>(null);
   const heroTrip = useRef<{
     points: Array<{ x: number; y: number }>;
+    to: { x: number; y: number };
     start: number;
     duration: number;
     spotId: string;
@@ -807,13 +808,6 @@ const VillageScene: React.FC<Props> = ({
     const t = window.setTimeout(onDismissSpeech, 6000);
     return () => window.clearTimeout(t);
   }, [speech, onDismissSpeech]);
-
-  useEffect(() => {
-    if (!frozen) return;
-    const trip = heroTrip.current;
-    if (trip && !trip.fired) trip.fired = true;
-    heroTrip.current = null;
-  }, [frozen]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -890,12 +884,19 @@ const VillageScene: React.FC<Props> = ({
         if (!trip || trip.shakeId !== id) return { shakeX: 0, scale: 1 };
         return arrivePulse(trip.duration - (now - trip.start));
       };
-      if (trip && movedT >= 1 && !trip.fired) {
+      // O lugar abre quando ele chega (18/09): nada de abrir no meio do caminho. Segurança só se a viagem travar.
+      if (trip && !trip.fired && trip.spotId && heroShouldOpen(now - trip.start, Number.POSITIVE_INFINITY)) {
+        trip.fired = true;
+        onClickSpotRef.current(trip.spotId);
+      }
+      if (trip && movedT >= 1) {
         const hold = trip.duration <= 200 ? 0 : HERO_ARRIVE_HOLD_MS;
         if (now - trip.start >= trip.duration + hold) {
-          trip.fired = true;
-          heroTrip.current = null;
-          if (trip.spotId) onClickSpotRef.current(trip.spotId);
+          if (!trip.fired && trip.spotId) {
+            trip.fired = true;
+            onClickSpotRef.current(trip.spotId);
+          }
+          if (heroTrip.current === trip) heroTrip.current = null;
         }
       }
 
@@ -973,18 +974,20 @@ const VillageScene: React.FC<Props> = ({
         const name = cracked ? crackedLabel(lot.id) : LOT_SCENE_LABEL[lot.id];
         const skipSprite = (lot.id === 'torre' && !cracked) || (lot.id === 'cerca' && !empty);
         const fenceBuilt = lot.id === 'cerca' && !empty;
+        const lotId = `build:${lot.id}`;
         const hit: Hotspot = skipSprite || empty
-          ? { id: `build:${lot.id}`, x: lot.x, y: lot.y, w: lot.w, h: lot.h, label: name, hover: 'spot' }
+          ? { id: lotId, x: lot.x, y: lot.y, w: lot.w, h: lot.h, label: gateName(lotId, gated, name), hover: 'spot', door: lot.door }
           : {
-            id: `build:${lot.id}`,
+            id: lotId,
             x: dx,
             y: dy,
             w: destW,
             h: destH,
-            label: name,
+            label: gateName(lotId, gated, name),
             sprite,
             pixel: Boolean(sprite),
             hover: 'building',
+            door: lot.door,
           };
         if (!fenceBuilt) hits.push(hit);
         layers.push({
@@ -1015,25 +1018,26 @@ const VillageScene: React.FC<Props> = ({
             }
             const shaking = cracked && !repairing && !reducedMotion && now < crackShakeUntil.current;
             const shakeX = (shaking ? Math.sin(now / 38) * 2 : 0) + pulse.shakeX;
-            if (empty && lot.id !== 'cerca' && lot.id !== 'torre') {
+            const gateLot = gated && !reserved && quizBlocksDest(lotId);
+            if (empty && lot.id !== 'torre') {
               paintEmptyLot(c, lot.x + pulse.shakeX, lot.y, lot.w, lot.h, night, lot.id === 'mesa' ? '#e8b923' : '#7ecb4a');
-              return;
-            }
-            if (cracked && heal < 1) {
+            } else if (cracked && heal < 1) {
               if (lot.id === 'torre') paintLotRuins(c, ox, oy, dw, dh, shakeX, 1 - heal);
               if (sprite) paintRuinedSprite(c, sprite, ox, oy, dw, dh, lot.id, shakeX, 1 - heal);
               else paintLotRuins(c, ox, oy, dw, dh, shakeX, 1 - heal);
               if (heal > 0 && sprite && lot.id !== 'torre') {
                 c.save();
                 c.globalAlpha = heal;
-                c.drawImage(gated ? graySprite(sprite, Math.max(1, Math.round(dw)), Math.max(1, Math.round(dh))) : sprite, ox, oy, dw, dh);
+                c.drawImage(gateLot ? graySprite(sprite, Math.max(1, Math.round(dw)), Math.max(1, Math.round(dh))) : sprite, ox, oy, dw, dh);
                 c.restore();
               }
             } else if (sprite && !skipSprite && !empty) {
-              const gateLot = gated && !reserved;
               const drawn = gateLot ? graySprite(sprite, Math.max(1, Math.round(dw)), Math.max(1, Math.round(dh))) : sprite;
               c.drawImage(drawn, ox + shakeX, oy, dw, dh);
-              if (gateLot) lockIcon(c, ox + dw / 2 - 14, oy + 8);
+            }
+            if (gateLot && lot.id !== 'cerca') {
+              const onPad = empty || skipSprite;
+              paintGateLock(c, onPad ? lot.x + lot.w / 2 : ox + dw / 2, onPad ? lot.y + 8 : oy + 2);
             }
           },
         });
@@ -1116,10 +1120,11 @@ const VillageScene: React.FC<Props> = ({
           y: box.y,
           w: box.w,
           h: box.h,
-          label,
+          label: gateName(id, gated, label),
           sprite: spotSprite || undefined,
           pixel: Boolean(spotSprite),
           hover: id === 'mine' ? 'spot' : (spotSprite ? 'building' : 'spot'),
+          door: box.door,
         };
         hits.push(hit);
         layers.push({
@@ -1134,7 +1139,9 @@ const VillageScene: React.FC<Props> = ({
             } else if (kind === 'future') {
               paintEmptyLot(c, box.x + pulse.shakeX, box.y, box.w, box.h, night, '#7ecb4a');
             }
-            if (gated && id === 'mine') lockIcon(c, box.x + box.w / 2 - 14, box.y + 8);
+            if (id === 'mine' && gated && quizBlocksDest(id)) {
+              paintClosedSign(c, box.x + box.w / 2, box.y + Math.round(box.h * 0.78), 'Prova');
+            }
           },
         });
       });
@@ -1157,6 +1164,7 @@ const VillageScene: React.FC<Props> = ({
           sprite,
           pixel: Boolean(sprite),
           hover: 'building',
+          door: houseLot.door,
         };
         hits.push(hit);
         layers.push({
@@ -1328,6 +1336,9 @@ const VillageScene: React.FC<Props> = ({
               : wave ? a.h * 0.9 : a.h;
         const pad = 10;
         const nx = pos.x + nShift;
+        const routine = npcRoutine(npc as NpcId, hour);
+        const spot = anchors.npcSpots?.[npc]?.[routine.spot];
+        const door = spot?.door || a.door || { x: pos.x, y: Math.min(pos.y + 16, 518) };
         const hit: Hotspot = {
           id: `npc:${npc}`,
           x: nx - nW / 2 - pad,
@@ -1336,6 +1347,7 @@ const VillageScene: React.FC<Props> = ({
           h: nH + pad * 2 + (sit ? 8 : 0),
           label: NPC_LABEL[npc] || npc,
           hover: 'npc',
+          door,
         };
         hits.push(hit);
         layers.push({
@@ -1372,7 +1384,6 @@ const VillageScene: React.FC<Props> = ({
               }, 'dust');
             }
             if (!useWalk) paintCharBlink(c, nx - nW / 2, oy, nW, nH, now, i + 2, face, reducedMotion, NPC_EYES[npc]);
-            if (gated && (npc === 'ferreiro' || npc === 'comerciante')) lockIcon(c, nx - 14, oy - 10);
           },
         });
       });
@@ -1394,6 +1405,7 @@ const VillageScene: React.FC<Props> = ({
           sprite,
           pixel: Boolean(sprite),
           hover: 'building',
+          door: prop.door,
         };
         hits.push(hit);
         layers.push({
@@ -1679,6 +1691,7 @@ const VillageScene: React.FC<Props> = ({
     }
     heroTrip.current = {
       points: plan.points,
+      to: plan.to,
       start: performance.now(),
       duration: plan.durationMs,
       spotId,
@@ -1705,7 +1718,7 @@ const VillageScene: React.FC<Props> = ({
             npcClickAt.current = performance.now();
           }
           const from = heroPos.current || { x: anchors.character.x, y: anchors.character.y };
-          const plan = heroClickPlan(hit.id, from, hit, anchors.size, reducedMotion, walkGraph);
+          const plan = heroClickPlan(hit.id, from, hit, anchors.size, reducedMotion, walkGraph, hit.door);
           startHeroWalk(plan, hit.id);
           return;
         }

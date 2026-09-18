@@ -29,9 +29,16 @@ interface HeroHeaderProps {
   extraButton?: React.ReactNode;
   fullDays?: number;
   hour?: number;
+  compact?: boolean;
+  crackLine?: string;
+  placaLabel?: string;
+  onOpenPlaca?: () => void;
 }
 
-const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenGold, onOpenPack, onOpenTower, nextEventLabel, avatarSrc, avatar, subtitle, extraButton, fullDays, hour }) => {
+const HeroHeader: React.FC<HeroHeaderProps> = ({
+  progress, onOpenGold, onOpenPack, onOpenTower, nextEventLabel, avatarSrc, avatar, subtitle,
+  extraButton, fullDays, hour, compact = false, crackLine, placaLabel, onOpenPlaca,
+}) => {
   const { hour: clockHour, minute, today, weekday, period } = useClock();
   const { logout } = useAuth();
   const { playClick, isSoundEnabled, toggleSound } = useSound();
@@ -60,7 +67,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenGold, onOpenPac
       initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="mn-hud px-3 py-2 flex flex-col gap-2"
+      className={`mn-hud px-3 py-2 flex flex-col gap-2 ${compact ? 'is-compact' : ''}`}
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3 min-w-0 grow">
@@ -76,13 +83,15 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenGold, onOpenPac
           </button>
 
           <div className="min-w-0">
-            <p className="mc-title text-[9px]">Miner Missions</p>
-            <h1 className="text-[26px] font-bold leading-tight text-white">
-              {getGreeting()}, Heitor!
+            <p className="mc-title text-[12px]">Miner Missions</p>
+            <h1 className={`font-bold leading-tight text-white ${compact ? 'text-base' : 'text-[26px]'}`}>
+              {compact ? (subtitle || 'Heitor') : `${getGreeting()}, Heitor!`}
             </h1>
-            <p className="text-sm mc-muted truncate">
-              {subtitle || line}
-            </p>
+            {!compact && (
+              <p className="text-sm mc-muted truncate">
+                {subtitle || line}
+              </p>
+            )}
           </div>
         </div>
 
@@ -151,13 +160,24 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenGold, onOpenPac
             <span className="mc-chip-l">{levelSystem.levelTitle}</span>
           </div>
         </button>
+        {placaLabel && (
+          <button type="button" className="mc-slot mc-chip py-1" onClick={() => { playClick(); onOpenPlaca?.(); }} title="Placa da Vila">
+            <span className="text-sm text-white truncate max-w-[12rem]">{placaLabel}</span>
+          </button>
+        )}
         {nextEventLabel && (
           <div className="mc-slot mc-chip py-1" title="Próximo da Agenda">
-            <span className="text-xs text-white">{nextEventLabel}</span>
+            <span className="text-sm text-white">{nextEventLabel}</span>
+          </div>
+        )}
+        {crackLine && (
+          <div className="mc-slot mc-chip py-1" title={crackLine}>
+            <span className="mn-crack-line">{crackLine}</span>
           </div>
         )}
       </div>
-      <div className="flex items-center gap-3">
+      {!compact && (
+      <div className="flex items-center gap-3 mn-hud-xp">
         <span className="mc-lbl shrink-0">XP</span>
         <div className="mc-bar flex-1">
           <div className="mc-bar-fill" style={{ width: `${levelSystem.progressPercentage}%` }} />
@@ -168,6 +188,7 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({ progress, onOpenGold, onOpenPac
             : `${Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel)}/${Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel)}`}
         </span>
       </div>
+      )}
     </motion.header>
   );
 };

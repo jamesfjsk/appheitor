@@ -3,9 +3,10 @@ import { X } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useClock } from '../../../contexts/ClockContext';
-import { addDays, isoWeekOf, weekRangeLabel } from '../../../utils/clock';
+import { addDays, isoWeekOf, mondayOfIsoWeek, weekRangeLabel } from '../../../utils/clock';
 import { listGoldTransactions } from '../../../services/goldTx';
 import { weeklyStatement } from '../../../services/village/bank';
+import { sinceLaunch } from '../../../services/village/income';
 import type { GoldTransaction } from '../../../types';
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -26,9 +27,10 @@ const SOURCE_LABEL: Record<string, string> = {
 
 const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: boolean }> = ({ onClose, embedded, monthly }) => {
   const { childUid } = useAuth();
-  const { economy } = useVillage();
+  const { economy, village } = useVillage();
   const { today } = useClock();
   const [txs, setTxs] = useState<GoldTransaction[]>([]);
+  const visible = useMemo(() => sinceLaunch(txs, village.launchedOn), [txs, village.launchedOn]);
 
   useEffect(() => {
     if (!childUid) return;
@@ -47,19 +49,25 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: bo
     return list;
   }, [today]);
 
-  const rows = weeks.map((w) => weeklyStatement(txs, w));
+  const rows = weeks.map((w) => weeklyStatement(visible, w)).filter((r) => {
+    if (!village.launchedOn) return true;
+    const sun = addDays(mondayOfIsoWeek(r.weekIso), 6);
+    return sun >= village.launchedOn;
+  });
   const dayNum = Number(today.slice(8, 10));
   const monthHonest = dayNum <= 7;
   const currentWeek = isoWeekOf(today);
-  const weekLines = txs.filter((t) => {
+  const weekLines = visible.filter((t) => {
     const d = t.createdAt instanceof Date ? t.createdAt : new Date(t.createdAt);
     const ymd = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
     return isoWeekOf(ymd) === currentWeek;
   }).slice(0, 20);
+  const emptyLaunch = Boolean(village.launchedOn) && visible.length === 0;
 
   const body = (
     <div className="space-y-3">
-      {rows.map((r) => (
+      {emptyLaunch && <p className="text-sm mc-muted">Extrato zerado.</p>}
+      {!emptyLaunch && rows.map((r) => (
         <div key={r.weekIso} className="mc-card p-3 text-sm space-y-1">
           <p className="font-bold">{weekRangeLabel(r.weekIso)}</p>
           <p>Ganhou <span className="mc-num" style={{ fontSize: 12 }}>{r.earned}</span> · Gastou <span className="mc-num" style={{ fontSize: 12 }}>{r.spent}</span></p>
@@ -67,6 +75,7 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: bo
           <p>Guardou {r.savingsRatePct}% do que ganhou (alvo {economy.savingsTargetPct}%).</p>
         </div>
       ))}
+      {!emptyLaunch && (
       <div className="mc-card p-3 space-y-1">
         <p className="font-bold text-sm">Movimentos desta semana</p>
         {weekLines.length === 0 && <p className="text-sm mc-muted">Ainda não teve movimento nesta semana.</p>}
@@ -77,10 +86,11 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: bo
           </p>
         ))}
       </div>
+      )}
       {monthly && (
         <div className="mc-card p-3 space-y-1">
           <p className="font-bold text-sm">Extrato mensal</p>
-          <p className="text-sm">Ganhou {txs.filter((t) => t.amount > 0 && t.type !== 'saved').reduce((s, t) => s + t.amount, 0)} · Guardou {txs.filter((t) => t.source === 'goal_deposit').reduce((s, t) => s + Math.abs(t.amount), 0)}</p>
+          <p className="text-sm">Ganhou {visible.filter((t) => t.amount > 0 && t.type !== 'saved').reduce((s, t) => s + t.amount, 0)} · Guardou {visible.filter((t) => t.source === 'goal_deposit').reduce((s, t) => s + Math.abs(t.amount), 0)}</p>
         </div>
       )}
       {monthHonest && (
@@ -93,12 +103,12 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: bo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 mn-veil" onClick={onClose}>
-      <div className="mc-modal mc-pop rounded-lg w-full max-w-lg max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="mn-wood-head flex justify-between items-center">
+      <div className="mc-modal mc-pop mn-child-sheet rounded-lg w-full max-w-lg text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center shrink-0">
           <h2 className="mc-title text-sm">Extrato</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>
-        <div className="p-4">{body}</div>
+        <div className="mn-child-body p-4">{body}</div>
       </div>
     </div>
   );

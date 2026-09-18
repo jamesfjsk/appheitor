@@ -51,9 +51,11 @@ interface TaskItemProps {
   onComplete: (taskId: string, completed: boolean) => void;
   index: number;
   guidedMode?: boolean;
+  isFocus?: boolean;
+  onSetFocus?: (taskId: string) => void;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = false }) => {
+const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = false, isFocus = false, onSetFocus }) => {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const { playTaskComplete, playClick } = useSound();
@@ -114,7 +116,6 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
   const { village, economy, settings, modules } = useVillage();
   const { tasks } = useData();
   const { hour: hourBrazil, minute, today } = useClock();
-  const isFocus = village.plan.date === today && village.plan.focusTaskId === task.id;
   const periodOpen = periodAllowedAt(task.period, hourBrazil, economy);
   const abreHora = task.period === 'afternoon'
     ? economy.periodStartHours.afternoon
@@ -177,12 +178,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
               {!done && timeOverdue && <FlashIcon name="warning" className="w-3 h-3" />}
             </span>
           )}
-          <span className="mc-font text-[8px] mc-good">+{task.xp ?? TASK_DEFAULT_XP} XP</span>
+          <span className="mc-font text-[12px] mc-good">+{task.xp ?? TASK_DEFAULT_XP} XP</span>
           {(task.gold ?? TASK_DEFAULT_GOLD) > 0 && (
-            <span className="mc-font text-[8px] mc-warn">+{task.gold ?? TASK_DEFAULT_GOLD} GOLD</span>
+            <span className="mc-font text-[12px] mc-warn">+{task.gold ?? TASK_DEFAULT_GOLD} GOLD</span>
           )}
           {loot && loot.qty > 0 && (
-            <span className="inline-flex items-center gap-1 mc-font text-[8px] text-amber-200" title={loot.qty > (economy.materialsPerTask || 1) ? 'Bônus da picareta' : undefined}>
+            <span className="inline-flex items-center gap-1 mc-font text-[12px] text-amber-200" title={loot.qty > (economy.materialsPerTask || 1) ? 'Bônus da picareta' : undefined}>
               <img src={MATERIAL_ICONS[loot.material]} alt="" className="w-3.5 h-3.5 mc-pixel" draggable={false} />
               +{loot.qty} {MATERIAL_LABELS[loot.material]}
               {loot.qty > (economy.materialsPerTask || 1) ? ' · picareta' : ''}
@@ -204,14 +205,26 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
           Abre às {abreHora}h
         </button>
       ) : (
-        <button
-          type="button"
-          onClick={handleToggle}
-          disabled={isCompleting}
-          className={`mc-btn mc-btn-wood shrink-0 min-h-[44px] font-bold ${guidedMode ? 'px-6 text-[17px]' : 'px-4 text-[15px]'}`}
-        >
-          {isCompleting ? '...' : 'Concluir'}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-1 shrink-0 w-full sm:w-auto">
+          {onSetFocus && (
+            <button
+              type="button"
+              title="Foco: material em dobro"
+              className={`mc-btn min-h-[44px] px-3 font-bold ${isFocus ? 'mc-btn-gold' : 'mc-btn-dark'}`}
+              onClick={() => { playClick(); onSetFocus(task.id); }}
+            >
+              Foco
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleToggle}
+            disabled={isCompleting}
+            className={`mc-btn mc-btn-wood min-h-[44px] font-bold ${guidedMode ? 'px-6 text-[17px]' : 'px-4 text-[15px]'}`}
+          >
+            {isCompleting ? '...' : 'Concluir'}
+          </button>
+        </div>
       )}
     </div>
   );

@@ -156,11 +156,10 @@
 
 /* ---------- rótulos e números ---------- */
 .mc-lbl {
-  font-family: var(--mc-pixel);
-  font-size: 9px;
-  line-height: 1.6;
+  font-family: var(--font-hero);
+  font-size: 12px;
+  line-height: 1.4;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
   color: var(--mc-muted);
 }
 
@@ -168,7 +167,7 @@
 
 .mc-num {
   font-family: var(--mc-pixel);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
   font-variant-numeric: tabular-nums;
 }
@@ -179,7 +178,7 @@
   align-items: center;
   gap: 10px;
   font-family: var(--mc-pixel);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
   color: var(--mc-gold-hi);
   text-shadow: 2px 2px 0 #3f2d00;
@@ -202,8 +201,8 @@
 }
 
 .mc-chip img { width: 28px; height: 28px; }
-.mc-chip .mc-num { font-size: 11px; }
-.mc-chip .mc-chip-l { display: block; font-size: 11px; color: var(--mc-muted); line-height: 1; margin-top: 2px; }
+.mc-chip .mc-num { font-size: 14px; }
+.mc-chip .mc-chip-l { display: block; font-size: 12px; color: var(--mc-muted); line-height: 1; margin-top: 2px; }
 
 /* ---------- barra de itens (abas manhã/tarde/noite, filtros) ---------- */
 .mc-hotbar {
@@ -224,6 +223,13 @@
 }
 
 .mc-hotbar > button img { width: 26px; height: 26px; }
+.mc-hotbar > button.is-lock {
+  filter: grayscale(0.55) brightness(0.82);
+  color: var(--mc-muted);
+}
+.mc-hotbar > button.is-lock img {
+  filter: grayscale(1) brightness(0.55);
+}
 /* segunda barra de filtros, menor */
 .mc-hotbar > button.text-\[13px\] { font-size: 13px; }
 /* botão largo com conteúdo alinhado à esquerda (login) */
@@ -427,8 +433,133 @@
 
 .mn-casa-room {
   padding: 12px 16px 16px;
-  max-height: min(72vh, 760px);
+}
+
+.mn-child-sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: 96vh;
+  min-height: 0;
+  overflow: hidden;
+}
+.mn-child-body {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.mn-child-foot {
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-top: 4px solid #17130f;
+  background: #2a241f;
+}
+.mn-child-scale {
+  height: 100vh;
+  min-height: 100vh;
+}
+.mn-village {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: none;
+  overflow: hidden;
+  padding: 8px 12px 0;
+  box-sizing: border-box;
+}
+.mn-village-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mn-village .mn-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.mn-village .mn-stage .mn-scene {
+  width: auto !important;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.mn-village .mn-dock {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  flex: 0 0 auto;
+}
+.mn-placa-panel {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  width: min(28rem, 72%);
+  pointer-events: auto;
+}
+.mn-speech-next {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 5;
+}
+.mn-hud.is-compact {
+  padding: 4px 8px;
+  gap: 6px;
+}
+.mn-hud.is-compact .mn-hud-xp,
+.mn-hud.is-compact .mn-compact-hide {
+  display: none;
+}
+.mn-crack-line {
+  font-size: 12px;
+  color: #f4e8c8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mn-mood-btn {
+  min-height: 64px;
+}
+.mn-mood-btn img {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+}
+
+.mc-lbl {
+  font-size: 12px;
+}
+.mc-num {
+  font-size: 14px;
+}
+.mc-h {
+  font-size: 12px;
+}
+.mc-chip .mc-num {
+  font-size: 14px;
+}
+.mc-chip .mc-chip-l {
+  font-size: 12px;
+}
+
+@media (min-width: 1600px) {
+  .mn-child-scale {
+    zoom: 1.25;
+    width: calc(100vw / 1.25);
+    height: calc(100vh / 1.25);
+    min-height: calc(100vh / 1.25) !important;
+    margin: 0 auto;
+    overflow: hidden;
+  }
 }
 
 .mc-btn-wood {
@@ -541,7 +672,7 @@
   .mn-dock-nav > button {
     flex-direction: column;
     gap: 2px;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     padding: 6px 2px 4px;
     min-height: 52px;

@@ -214,10 +214,10 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
         initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         data-testid="english-base"
-        className="mc-modal rounded-lg w-full overflow-y-auto text-white max-w-3xl max-h-[96vh]"
+        className="mc-modal mn-child-sheet rounded-lg w-full text-white max-w-3xl overflow-hidden"
         style={{ fontFamily: 'var(--font-hero)' }}
       >
-        <div className="relative overflow-hidden border-b-4 border-[#17130f] h-24 sm:h-28">
+        <div className="relative overflow-hidden border-b-4 border-[#17130f] h-24 sm:h-28 shrink-0">
           <img src={BANNER} alt="" className="absolute inset-0 w-full h-full object-cover mc-pixel" draggable={false} />
           <div className="absolute inset-0 bg-gradient-to-t from-[#2f2a27] via-[#2f2a27]/40 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 px-4 pb-2 flex items-end gap-3">
@@ -232,7 +232,7 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
           </button>
         </div>
 
-        <div className="p-3 sm:p-5">
+        <div className="mn-child-body p-3 sm:p-5">
           {!childUid && <p className="text-sm mc-bad text-center py-10">Entre com a conta da criança para jogar.</p>}
 
           {childUid && view === 'loading' && (

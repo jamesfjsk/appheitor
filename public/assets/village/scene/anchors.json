@@ -2,37 +2,37 @@
   "size": { "w": 1280, "h": 640 },
   "spriteScale": 1,
   "lots": [
-    { "id": "fornalha", "x": 147, "y": 198, "w": 102, "h": 78 },
-    { "id": "bau", "x": 144, "y": 348, "w": 105, "h": 78 },
-    { "id": "cerca", "x": 600, "y": 528, "w": 80, "h": 48 },
-    { "id": "torre", "x": 1064, "y": 48, "w": 90, "h": 112 },
-    { "id": "mesa", "x": 723, "y": 234, "w": 90, "h": 63 },
-    { "id": "cofre", "x": 472, "y": 422, "w": 104, "h": 80 },
-    { "id": "agenda", "x": 584, "y": 412, "w": 112, "h": 92 },
-    { "id": "mercado", "x": 708, "y": 414, "w": 112, "h": 90 },
-    { "id": "arena", "x": 929, "y": 318, "w": 186, "h": 146, "destW": 148, "landmark": true }
+    { "id": "fornalha", "x": 147, "y": 198, "w": 102, "h": 78, "door": { "x": 214, "y": 310 } },
+    { "id": "bau", "x": 144, "y": 348, "w": 105, "h": 78, "door": { "x": 196, "y": 440 } },
+    { "id": "cerca", "x": 600, "y": 528, "w": 80, "h": 48, "door": { "x": 640, "y": 448 } },
+    { "id": "torre", "x": 1064, "y": 48, "w": 90, "h": 112, "door": { "x": 1054, "y": 188 } },
+    { "id": "mesa", "x": 723, "y": 234, "w": 90, "h": 63, "door": { "x": 770, "y": 338 } },
+    { "id": "cofre", "x": 472, "y": 422, "w": 104, "h": 80, "door": { "x": 524, "y": 512 } },
+    { "id": "agenda", "x": 584, "y": 412, "w": 112, "h": 92, "door": { "x": 640, "y": 516 } },
+    { "id": "mercado", "x": 708, "y": 414, "w": 112, "h": 90, "door": { "x": 764, "y": 516 } },
+    { "id": "arena", "x": 929, "y": 318, "w": 186, "h": 146, "destW": 148, "landmark": true, "door": { "x": 1016, "y": 498 } }
   ],
   "character": { "x": 640, "y": 365, "h": 80 },
   "npcs": {
-    "sabio": { "x": 848, "y": 268, "h": 74 },
-    "comerciante": { "x": 838, "y": 468, "h": 74 },
-    "ferreiro": { "x": 78, "y": 250, "h": 74 },
-    "olheiro": { "x": 1114, "y": 79, "h": 52 }
+    "sabio": { "x": 848, "y": 268, "h": 74, "door": { "x": 848, "y": 320 } },
+    "comerciante": { "x": 838, "y": 468, "h": 74, "door": { "x": 838, "y": 500 } },
+    "ferreiro": { "x": 78, "y": 250, "h": 74, "door": { "x": 108, "y": 318 } },
+    "olheiro": { "x": 1114, "y": 79, "h": 52, "door": { "x": 1110, "y": 168 } }
   },
   "npcSpots": {
     "comerciante": {
-      "morning": { "x": 1172, "y": 486 },
-      "afternoon": { "x": 996, "y": 228 },
+      "morning": { "x": 1172, "y": 486, "door": { "x": 1148, "y": 508 } },
+      "afternoon": { "x": 996, "y": 228, "door": { "x": 1004, "y": 268 } },
       "night": null
     },
     "sabio": {
-      "day": { "x": 620, "y": 240 },
-      "night": { "x": 1052, "y": 228 }
+      "day": { "x": 620, "y": 240, "door": { "x": 620, "y": 268 } },
+      "night": { "x": 1052, "y": 228, "door": { "x": 1048, "y": 260 } }
     }
   },
   "hotspots": {
-    "mine": { "x": 545, "y": 32, "w": 210, "h": 138, "type": "district", "label": "Mina" },
-    "reserva": { "x": 468, "y": 234, "w": 90, "h": 63, "type": "future", "label": "Em breve" },
+    "mine": { "x": 545, "y": 32, "w": 210, "h": 138, "type": "district", "label": "Mina", "door": { "x": 650, "y": 198 } },
+    "reserva": { "x": 468, "y": 234, "w": 90, "h": 63, "type": "future", "label": "Em breve", "door": { "x": 640, "y": 255 } },
     "chest_streak": {
       "x": 253,
       "y": 348,
@@ -41,7 +41,8 @@
       "type": "chest_streak",
       "label": "Baú das tochas",
       "sprite": "/assets/village/items/chest_streak.png",
-      "minFullDays": 7
+      "minFullDays": 7,
+      "door": { "x": 196, "y": 440 }
     }
   },
   "wall": [
@@ -89,9 +90,9 @@
   ],
   "water": { "x": 1125, "y": 345, "w": 145, "h": 125 },
   "smokeOffset": { "dx": 51, "dy": 8 },
-  "house": { "id": "casa", "x": 938, "y": 110, "w": 96, "h": 74 },
+  "house": { "id": "casa", "x": 938, "y": 110, "w": 96, "h": 74, "door": { "x": 986, "y": 204 } },
   "props": [
-    { "id": "pack", "x": 592, "y": 336, "w": 48, "h": 48, "sprite": "/assets/village/items/mochila.png", "label": "Mochila" }
+    { "id": "pack", "x": 592, "y": 336, "w": 48, "h": 48, "sprite": "/assets/village/items/mochila.png", "label": "Mochila", "door": { "x": 548, "y": 390 } }
   ],
   "walk": {
     "nodes": {

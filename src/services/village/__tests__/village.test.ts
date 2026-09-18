@@ -350,10 +350,10 @@ test('casa cresce por temporada e os ícones da grade não se repetem', () => {
   expect(DISTRICT_ICONS.arena).toBe('/assets/village/buildings/arena-1.png');
   expect(new Set(Object.values(DISTRICT_ICONS)).size).toBe(Object.keys(DISTRICT_ICONS).length);
   expect(SCENE_PROPS.map((p) => p.id).sort()).toEqual(['pack']);
-  expect(LOT_SCENE_LABEL.fornalha).toBe('Ferraria');
-  expect(crackedLabel('fornalha')).toBe('Ferraria em ruínas');
+  expect(LOT_SCENE_LABEL.fornalha).toBe('Fornalha');
+  expect(crackedLabel('fornalha')).toBe('Fornalha em ruínas');
   expect(crackedLabel('bau')).toBe('Armazém em ruínas');
-  expect(crackedSentence('fornalha')).toBe('A Ferraria caiu.');
+  expect(crackedSentence('fornalha')).toBe('A Fornalha caiu.');
   expect(crackedSentence('cofre')).toBe('O Cofre caiu.');
   expect(crackedListSentence(['fornalha', 'bau'])).toBe('2 obras cairam.');
   expect(LOT_SCENE_LABEL.mesa).toBe('Biblioteca');

@@ -174,6 +174,31 @@ export function paintClosedSign(
   return { x, y, w: bw, h: bh + 12 };
 }
 
+/** Cadeado da prova: ferro e madeira das placas, sem placa-inventário atrás. */
+export function paintGateLock(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
+  const x = Math.round(cx - 7);
+  const y = Math.round(cy);
+  ctx.save();
+  ctx.fillStyle = '#1a140f';
+  ctx.fillRect(x + 3, y, 9, 9);
+  ctx.fillStyle = '#d4b07a';
+  ctx.fillRect(x + 4, y + 1, 7, 7);
+  ctx.fillStyle = '#1a140f';
+  ctx.fillRect(x + 6, y + 3, 3, 6);
+  ctx.fillStyle = '#1a140f';
+  ctx.fillRect(x, y + 7, 15, 13);
+  ctx.fillStyle = '#8d5728';
+  ctx.fillRect(x + 1, y + 8, 13, 11);
+  ctx.fillStyle = '#c9a06a';
+  ctx.fillRect(x + 2, y + 8, 11, 2);
+  ctx.fillStyle = '#5c3a1c';
+  ctx.fillRect(x + 2, y + 16, 11, 2);
+  ctx.fillStyle = '#1a140f';
+  ctx.fillRect(x + 6, y + 12, 3, 3);
+  ctx.fillRect(x + 7, y + 14, 2, 3);
+  ctx.restore();
+}
+
 export function paintCharBlink(
   ctx: CanvasRenderingContext2D,
   ox: number,

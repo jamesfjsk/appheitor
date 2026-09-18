@@ -38,20 +38,20 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-veil" onClick={onClose}>
-      <div className="mc-modal mc-pop rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="mn-wood-head flex justify-between items-center">
+      <div className="mc-modal mc-pop mn-child-sheet rounded-lg w-full max-w-3xl text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center shrink-0">
           <h2 className="mc-h"><img src={FORGE} alt="" className="w-8 h-8 mc-pixel" />Ferraria</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>
-        <p className="px-4 pt-2 text-sm mc-muted">{speech} Chapéu é com o Comerciante.</p>
-        <div className="mc-hotbar p-3">
+        <p className="px-4 pt-2 text-sm mc-muted shrink-0">{speech} Chapéu é com o Comerciante.</p>
+        <div className="mc-hotbar p-3 shrink-0">
           {(['gear', 'trade', 'works'] as const).map((t) => (
             <button key={t} type="button" className={`mc-slot rounded px-3 ${tab === t ? 'mc-slot-selected' : ''}`} onClick={() => { playClick(); setTab(t); }}>
               {t === 'gear' ? 'Forjar' : t === 'trade' ? 'Fundição' : 'Obras'}
             </button>
           ))}
         </div>
-        <div className="p-4 space-y-3">
+        <div className="mn-child-body p-4 space-y-3">
           <div className="flex flex-wrap gap-2">
             {MATERIALS.map((m) => (
               <span key={m} className="mc-chip mc-slot px-2 py-1 flex items-center gap-1" title={m === 'madeira' ? 'Missões da manhã' : m === 'pedra' ? 'Missões da tarde' : m === 'ferro' ? 'Missões da noite' : 'Mina e Queima'}>
@@ -63,13 +63,13 @@ const Oficina: React.FC<{ onClose: () => void; initialTab?: 'gear' | 'trade' | '
           </div>
           {furnaceDown && (tab === 'gear' || tab === 'trade') && (
             <div className="space-y-2">
-              <p className="text-sm">A Ferraria está em ruínas. Arruma com material ou com as missões de hoje.</p>
+              <p className="text-sm">A Fornalha está em ruínas. Arruma com material ou com as missões de hoje.</p>
               <button
                 type="button"
                 className="mc-btn mc-btn-green w-full min-h-[44px] font-bold"
                 onClick={() => { playClick(); onOpenLot?.('fornalha'); }}
               >
-                Arrumar a Ferraria
+                Arrumar a Fornalha
               </button>
             </div>
           )}

@@ -50,7 +50,11 @@ export function sourceLabel(source: string): string {
   return SOURCE_LABEL[source] || source;
 }
 
-export function balancaTotals(cut: GoldTransaction[], fallbackR7 = DEFAULT_ECONOMY.incomeDayGold) {
+export function balancaTotals(
+  cut: GoldTransaction[],
+  fallbackR7 = DEFAULT_ECONOMY.incomeDayGold,
+  opts?: { launchedOn?: string | null; today?: string }
+) {
   const earned = cut
     .filter((t) => t.amount > 0 && t.type !== 'saved' && t.source !== 'goal_interest')
     .reduce((s, t) => s + t.amount, 0);
@@ -74,7 +78,7 @@ export function balancaTotals(cut: GoldTransaction[], fallbackR7 = DEFAULT_ECONO
     const label = DRAIN_LABEL[t.source] || sourceLabel(t.source);
     spentBy[label] = (spentBy[label] || 0) + Math.abs(t.amount);
   }
-  const r7 = referenceIncome(cut, fallbackR7);
+  const r7 = referenceIncome(cut, fallbackR7, opts);
   const gameGold = cut
     .filter((t) => GAME_SOURCES.has(t.source) && t.amount > 0)
     .reduce((s, t) => s + t.amount, 0);

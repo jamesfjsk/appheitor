@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Maximize2, Lock } from 'lucide-react';
+import { Maximize2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { DAY_CHANGED_EVENT, useClock } from '../../../contexts/ClockContext';
-import { HOTBAR_ICONS, houseSprite, visibleCracks } from '../../../config/village';
+import { HOTBAR_ICONS, houseSprite, visibleCracks, crackedListSentence } from '../../../config/village';
 import { BUILDING_BY_ID, MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import { dueTasksOn, periodAllowedAt } from '../../../services/village/schedule';
 import { chestAllowed } from '../../../services/village/chest';
@@ -29,7 +29,6 @@ import HeroHeader from '../HeroHeader';
 import Casa from './Casa';
 import VacationBanner from '../VacationBanner';
 import YesterdaySummary from '../YesterdaySummary';
-import ProgressBar from '../ProgressBar';
 import VillageScene from './VillageScene';
 import CharacterPreview from './CharacterPreview';
 import DailyChest from './DailyChest';
@@ -39,7 +38,6 @@ import EnglishBase from '../english/base/EnglishBase';
 import Torre from './Torre';
 import Cofrinho from './Cofrinho';
 import Agenda from './Agenda';
-import DesafiosCard from './DesafiosCard';
 import Mochila, { type PackTab } from './Mochila';
 import BuildingCard from './BuildingCard';
 import type { DollSlot } from './CharacterEditor';
@@ -71,7 +69,7 @@ const VillageHome: React.FC<Props> = ({
   onOpenQuiz, quizLocked, punished = false,
 }) => {
   const { village, materials, buildings, economy, pauseDays, notices, ackNotice } = useVillage();
-  const { tasks, progress, completeTask } = useData();
+  const { tasks, progress } = useData();
   const { playClick, playHammer } = useSound();
   const { hour, minute, today, now, driftMs } = useClock();
   const { isPunished } = usePunishment();
@@ -88,6 +86,10 @@ const VillageHome: React.FC<Props> = ({
   const [sceneEvent, setSceneEvent] = useState<VillageSceneEvent | null>(null);
   const [sageLine, setSageLine] = useState<string | null>(null);
   const [yesterdayCtx, setYesterdayCtx] = useState<{ missed: boolean; complete: boolean }>({ missed: false, complete: false });
+  const [placaOpen, setPlacaOpen] = useState(false);
+  const [compactHud, setCompactHud] = useState(
+    typeof window !== 'undefined' ? window.innerHeight < 800 : false,
+  );
   const [goalPreset, setGoalPreset] = useState<{ title: string; targetGold: number; rewardId?: string } | undefined>();
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [agendaFlash, setAgendaFlash] = useState<string | null>(null);
@@ -100,11 +102,21 @@ const VillageHome: React.FC<Props> = ({
       return null;
     });
   }, []);
+
+  useEffect(() => {
+    if (speech) setPlacaOpen(false);
+  }, [speech]);
   const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const reminderSfx = useRef<ReturnType<typeof createMineSfx> | null>(null);
   const reminderCtx = useRef<AudioContext | null>(null);
   const remindedStamp = useRef(new Set<string>());
   const repairing = useRef(false);
+
+  useEffect(() => {
+    const onResize = () => setCompactHud(window.innerHeight < 800);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     const onDay = () => toast.success('Novo dia na Vila');
@@ -189,7 +201,7 @@ const VillageHome: React.FC<Props> = ({
             {item.time ? `${item.time} · ` : ''}{item.title}
             <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => { toast.dismiss(t.id); setAgendaFlash(null); }}>Ok</button>
           </span>
-        ), { duration: 20000 });
+        ), { duration: 20000, id: 'agenda-reminder' });
         setSpeech({ npc: 'olheiro', text: `${item.title} daqui a pouco. Já está pronto?` });
         break;
       }
@@ -299,7 +311,7 @@ const VillageHome: React.FC<Props> = ({
       return;
     }
     if (nightClosed && (id === 'market' || id === 'chest' || id === 'chest_streak')) {
-      toast('Por hoje é isso. Amanhã tem mais.');
+      toast('Por hoje é isso. Amanhã tem mais.', { id: 'night-closed' });
       return;
     }
     const lv = (bid: BuildingId) => buildings[bid] || 0;
@@ -447,7 +459,7 @@ const VillageHome: React.FC<Props> = ({
   };
 
   return (
-    <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 py-3 pb-32">
+    <div className="relative z-10 mn-village">
       <HeroHeader
         progress={progress}
         onOpenGold={() => { if (broken('cofre')) setLot('cofre'); else setDistrict('extrato'); }}
@@ -455,9 +467,13 @@ const VillageHome: React.FC<Props> = ({
         onOpenTower={() => { setLot(null); setDistrict('tower'); }}
         nextEventLabel={nextEventLabel}
         hour={hour}
-        avatar={<CharacterPreview character={village.character} gear={village.gear} size={52} />}
+        avatar={<CharacterPreview character={village.character} gear={village.gear} size={compactHud ? 40 : 52} />}
         subtitle={`${village.characterName} · ${village.name}`}
         fullDays={village.fullDays}
+        compact={compactHud}
+        crackLine={cracks.length ? crackedListSentence(cracks) : undefined}
+        placaLabel={`Hoje você tem ${todayAgenda.length} · ${board.length} lembretes`}
+        onOpenPlaca={() => setPlacaOpen((v) => !v)}
         extraButton={
           <span className="mn-fs-btn">
             <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" title="Tela cheia" onClick={() => { playClick(); fullscreen(); }}>
@@ -466,14 +482,7 @@ const VillageHome: React.FC<Props> = ({
           </span>
         }
       />
-      <VacationBanner />
-      {lockedShop && (
-        <p className="text-sm mc-warn mt-2">Punição: Mercado, Baú e Loja fechados. Prova e Mina continuam abertas, sem gold extra.</p>
-      )}
-      <YesterdaySummary />
-      {quotasPaid && (
-        <p className="text-sm mc-good mt-2">Por hoje é isso. Amanhã tem mais.</p>
-      )}
+      <div className="mn-village-main">
       <div className="mn-stage mt-2">
         <VillageScene
           village={village}
@@ -491,12 +500,17 @@ const VillageHome: React.FC<Props> = ({
           date={today}
           event={sceneEvent}
         />
-        {speech?.rest && speech.rest.length > 0 && (
-          <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-3 mt-2" onClick={dismissSpeech}>Continuar</button>
+        {speech && (
+          <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-3 mn-speech-next" onClick={dismissSpeech}>Continuar</button>
         )}
-        {(todayAgenda.length > 0 || tomorrowAgenda.length > 0 || ticker || habitLine.text || driftLine || sageLine) && (
-          <div className="mn-ticker mn-placa">
-            {driftLine && <p className="text-xs mc-warn mb-2">{driftLine}</p>}
+        {placaOpen && (
+          <div className="mn-ticker mn-placa mn-placa-panel">
+            <VacationBanner />
+            {lockedShop && (
+              <p className="text-sm mc-warn mb-2">Punição: Mercado, Baú e Loja fechados.</p>
+            )}
+            <YesterdaySummary />
+            {driftLine && <p className="text-sm mc-warn mb-2">{driftLine}</p>}
             {todayAgenda.length > 0 && (
               <div className="space-y-1 mb-2">
                 <p className="text-sm font-bold">Hoje você tem</p>
@@ -532,11 +546,11 @@ const VillageHome: React.FC<Props> = ({
             {habitLine.text && (
               <p className={`text-sm ${ticker ? 'mc-muted mt-0.5' : 'text-white'}`}>{habitLine.text}</p>
             )}
+            <button type="button" className="mc-btn mc-btn-dark min-h-[36px] px-3 mt-2" onClick={() => setPlacaOpen(false)}>Fechar</button>
           </div>
         )}
       </div>
-      <ProgressBar progress={progress} compact />
-      <DesafiosCard embedded />
+      </div>
 
       <footer className="mn-dock">
         <div className="mn-dock-inner">
@@ -571,7 +585,13 @@ const VillageHome: React.FC<Props> = ({
                   <>
                     <span className="text-sm truncate max-w-[10rem]">{full.title}</span>
                     {open ? (
-                      <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-3" onClick={() => { playClick(); void completeTask(full.id); }}>Concluir</button>
+                      <button
+                        type="button"
+                        className="mc-btn mc-btn-wood min-h-[44px] px-3"
+                        onClick={() => { playClick(); setDistrict('house'); setLot(null); setDockTab('missoes'); }}
+                      >
+                        Casa
+                      </button>
                     ) : (
                       <span className="text-sm mc-muted">às {abre}h</span>
                     )}
@@ -596,19 +616,20 @@ const VillageHome: React.FC<Props> = ({
                 : id === 'missoes'
                   ? district === 'house'
                   : district === id;
+              const locked = quizGate && quizBlocksDest(id);
               return (
                 <button
                   key={label}
                   type="button"
                   data-testid={`hotbar-${id}`}
-                  className={`mc-slot rounded px-3 min-h-[44px] flex items-center gap-1 ${on ? 'mc-slot-selected is-on' : ''}`}
+                  title={locked ? 'Faça a prova do dia' : undefined}
+                  className={`mc-slot rounded px-3 min-h-[44px] flex items-center gap-1 ${on ? 'mc-slot-selected is-on' : ''} ${locked ? 'is-lock' : ''}`}
                   onClick={() => { playClick(); fn(); }}
                 >
                   {(label === 'Missões' ? houseSprite(village.season) : HOTBAR_ICONS[label]) && (
                     <img src={label === 'Missões' ? houseSprite(village.season) : HOTBAR_ICONS[label]} alt="" className="w-5 h-5 mc-pixel" draggable={false} />
                   )}
                   {label}
-                  {quizGate && quizBlocksDest(id) && <Lock className="w-4 h-4" aria-hidden />}
                 </button>
               );
             })}

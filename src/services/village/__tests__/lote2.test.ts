@@ -4,7 +4,7 @@ import { buildingLevelSum, closeSeasonState, countWeekTorches, recordsAfterWeek,
 import { checkinXp, sageReplyFor, tomorrowValid } from '../checkin';
 import { evaluateAchievements, progressOf, rewardHasGold, visibleAchievements } from '../achievements';
 import { GAME_ACHIEVEMENTS } from '../../../data/achievements';
-import { heroClickPlan, heroGroundPlan, heroRoute, heroShakeTarget, heroStandPoint, heroWalkAlong, heroWalkDurationMs, heroWalkablePoint, lookFacing, npcHopPx, npcRoutine, npcTarget, npcTouch, npcWalk, tapPulse, DEFAULT_WALK_GRAPH } from '../npcBehavior';
+import { heroClickPlan, heroGroundPlan, heroRoute, heroShakeTarget, heroShouldOpen, heroStandPoint, heroWalkAlong, heroWalkDurationMs, heroWalkablePoint, lookFacing, npcHopPx, npcRoutine, npcTarget, npcTouch, npcWalk, tapPulse, DEFAULT_WALK_GRAPH, HERO_OPEN_MAX_MS, HERO_ARRIVE_PX } from '../npcBehavior';
 import { friendTier, pickDialogue, talkPointsToday, type DialogueCtx } from '../dialogue';
 
 test('semana ISO vira rótulo Semana de 14 a 20/09', () => {
@@ -88,16 +88,18 @@ test('fechar temporada: recusa a segunda e apaga claimed das conquistas de tempo
 });
 
 test('check-in: 5 XP se respondeu, 0 se não; amanhã pede 3 palavras', () => {
-  const ok = { water: true, stretch: false, kindness: true, screen: true, tomorrow: 'estudar prova de matemática' };
+  const ok = { mood: 'bom' as const, tomorrow: 'estudar prova de matemática' };
   expect(tomorrowValid('oi')).toBe(false);
   expect(tomorrowValid(ok.tomorrow)).toBe(true);
   expect(checkinXp(ok)).toBe(5);
   expect(checkinXp(null)).toBe(0);
   expect(checkinXp({ ...ok, tomorrow: 'x' })).toBe(0);
+  expect(checkinXp({ tomorrow: ok.tomorrow })).toBe(0);
   const a = sageReplyFor(ok, '2026-09-15');
   const b = sageReplyFor(ok, '2026-09-15');
   expect(a).toBe(b);
   expect(a.length > 0).toBe(true);
+  expect(sageReplyFor({ mood: 'dificil', tomorrow: ok.tomorrow }, '2026-09-16').length > 0).toBe(true);
 });
 
 test('conquistas: destrava no alvo e não antes; escondidas; nunca gold', () => {
@@ -168,9 +170,17 @@ test('Heitor anda pelo caminho de terra, sem dash', () => {
   expect(to.y >= lot.y + lot.h).toBe(true);
   expect(route.some((p) => p.x > 380 && p.x < 480 && p.y > 320 && p.y < 380)).toBe(true);
   expect(route.length >= 3).toBe(true);
-  expect(heroWalkDurationMs(400, false) >= 3000).toBe(true);
-  expect(heroWalkDurationMs(400, false) <= 4000).toBe(true);
+  expect(heroWalkDurationMs(400, false)).toBe(3200);
+  expect(heroWalkDurationMs(125, false)).toBe(1000);
+  expect(heroWalkDurationMs(40, false)).toBe(480); // passo curto nunca vira pulo
+  expect(heroWalkDurationMs(2000, false)).toBe(4000);
   expect(heroWalkDurationMs(400, true)).toBe(0);
+  expect(heroShouldOpen(0, HERO_ARRIVE_PX)).toBe(true);
+  expect(heroShouldOpen(0, HERO_ARRIVE_PX + 1)).toBe(false);
+  expect(heroShouldOpen(HERO_OPEN_MAX_MS, 400)).toBe(true);
+  // no meio do caminho não abre: o lugar abre quando ele chega (18/09)
+  expect(heroShouldOpen(700, 400)).toBe(false);
+  expect(heroShouldOpen(3500, 120)).toBe(false);
   const mid = heroWalkAlong([{ x: 0, y: 0 }, { x: 100, y: 0 }], 500, 1000);
   expect(Math.abs(mid.x - 50) < 1).toBe(true);
   expect(mid.walking).toBe(true);
@@ -182,20 +192,24 @@ test('Heitor anda pelo caminho de terra, sem dash', () => {
   expect(heroShakeTarget('npc:sabio')).toBe(null);
   const far = heroClickPlan('build:fornalha', from, lot, bounds, false);
   expect(far.immediate).toBe(false);
-  expect(far.durationMs >= 1000).toBe(true);
+  expect(far.durationMs >= 700).toBe(true);
+  expect(far.durationMs <= HERO_OPEN_MAX_MS + 800).toBe(true);
   expect(far.points.length >= 3).toBe(true);
   expect(far.shakeId).toBe('fornalha');
   expect(far.to.y >= lot.y + lot.h).toBe(true);
   const here = heroClickPlan('build:fornalha', far.to, lot, bounds, false);
+  // já ao lado do lote: passinho de 180 ms para o cartão não abrir seco (andar aprovado em 18/09)
   expect(here.immediate).toBe(false);
   expect(here.durationMs).toBe(180);
-  expect(heroClickPlan('npc:sabio', from, { x: from.x, y: from.y - 40, w: 20, h: 40 }, bounds, false).immediate).toBe(true);
-  expect(heroClickPlan('npc:ferreiro', from, { x: 78, y: 176, w: 40, h: 74 }, bounds, false).immediate).toBe(true);
+  // NPC colado: ainda dá o passinho mínimo de 480 ms (o andar aprovado não tem atalho)
+  expect(heroClickPlan('npc:sabio', from, { x: from.x, y: from.y - 40, w: 20, h: 40 }, bounds, false).durationMs).toBe(480);
+  expect(heroClickPlan('npc:ferreiro', from, { x: 78, y: 176, w: 40, h: 74 }, bounds, false).immediate).toBe(false);
   expect(heroClickPlan('character', from, lot, bounds, false).immediate).toBe(true);
   const bag = heroClickPlan('pack', from, { x: 592, y: 336, w: 48, h: 48 }, bounds, false);
   expect(bag.immediate).toBe(false);
   expect(bag.to.y >= 384).toBe(true);
-  expect(heroClickPlan('build:fornalha', from, lot, bounds, true).immediate).toBe(true);
+  // "reduzir movimento" do sistema não tira o andar do Heitor (18/09)
+  expect(heroClickPlan('build:fornalha', from, lot, bounds, true).immediate).toBe(false);
   const pulse = tapPulse(80, 200);
   expect(pulse.scale > 1).toBe(true);
   expect(tapPulse(400, 200).scale).toBe(1);

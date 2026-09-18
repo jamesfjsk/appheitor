@@ -19,14 +19,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
 
   // Redirect to login if not authenticated
   if (!user) {
-    return <Navigate to="/login" replace />;
+    const qs = typeof window !== 'undefined' ? window.location.search : '';
+    return <Navigate to={`/login${qs}`} replace />;
   }
 
   // Check if user has the required role
   if (user.role !== requiredRole) {
-
-    // Redirect to correct panel based on user's actual role
-    const redirectTo = user.role === 'admin' ? '/admin' : '/flash';
+    const qs = typeof window !== 'undefined' ? window.location.search : '';
+    const redirectTo = (user.role === 'admin' ? '/admin' : '/flash') + qs;
     return <Navigate to={redirectTo} replace />;
   }
 

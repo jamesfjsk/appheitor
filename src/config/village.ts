@@ -586,7 +586,7 @@ export const DISTRICT_LABELS: Record<string, string> = {
 
 /** Nome na cena: o mesmo da antiga grade, no lugar certo. */
 export const LOT_SCENE_LABEL: Record<string, string> = {
-  fornalha: 'Ferraria',
+  fornalha: 'Fornalha',
   bau: 'Armazém',
   cerca: 'Cerca',
   torre: 'Torre',
@@ -660,9 +660,10 @@ export type SceneProp = {
   sprite: string;
   label: string;
   badge?: string;
+  door?: { x: number; y: number };
 };
 
 export const SCENE_PROPS: SceneProp[] = [
-  { id: 'pack', x: 592, y: 336, w: 48, h: 48, sprite: '/assets/village/items/mochila.png', label: 'Mochila' },
+  { id: 'pack', x: 592, y: 336, w: 48, h: 48, sprite: '/assets/village/items/mochila.png', label: 'Mochila', door: { x: 548, y: 390 } },
 ];
 

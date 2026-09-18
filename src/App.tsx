@@ -31,11 +31,12 @@ const RoleBasedRedirect: React.FC = () => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    const qs = typeof window !== 'undefined' ? window.location.search : '';
+    return <Navigate to={`/login${qs}`} replace />;
   }
 
-  // Redirect based on user's role from database
-  const redirectTo = user.role === 'admin' ? '/admin' : '/flash';
+  const qs = typeof window !== 'undefined' ? window.location.search : '';
+  const redirectTo = (user.role === 'admin' ? '/admin' : '/flash') + qs;
   return <Navigate to={redirectTo} replace />;
 };
 
@@ -83,7 +84,7 @@ function App() {
                     )}
                   </div>
                   <Toaster 
-                    position="top-right"
+                    position="bottom-center"
                     toastOptions={{
                       duration: 4000,
                       style: {

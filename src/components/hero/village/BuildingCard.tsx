@@ -29,7 +29,7 @@ import { burnWood, repairBuilding, repairLot } from '../../../services/villageSe
 import { repairMaterialCost } from '../../../services/village/repair';
 import { addDays, getTodayBrazil } from '../../../utils/clock';
 import type { BuildingId } from '../../../types/english';
-import RewardsPanel from '../RewardsPanel';
+import { getLevelFromXP } from '../../../utils/levelSystem';
 
 const THEME_MAX = 30;
 
@@ -51,11 +51,11 @@ interface Props {
 
 const BuildingCard: React.FC<Props> = ({
   id, onClose, onOpenMine, onOpenChest, onOpenTower, onOpenWorkshop, onOpenQuiz,
-  onOpenBank, onOpenAgenda, onOpenMarket, onCreateGoal, onBuilt, shopLocked = false,
+  onOpenBank, onOpenAgenda, onOpenMarket, onBuilt, shopLocked = false,
 }) => {
   const { childUid } = useAuth();
   const { village, materials, buildings, economy } = useVillage();
-  const { tasks } = useData();
+  const { tasks, rewards, progress } = useData();
   const { today } = useClock();
   const { playClick } = useSound();
   const [busy, setBusy] = useState(false);
@@ -107,6 +107,10 @@ const BuildingCard: React.FC<Props> = ({
   };
 
   const due = dueTasksOn(tasks, today);
+  const minerLevel = getLevelFromXP(progress.totalXP || 0);
+  const gold = progress.availableGold || 0;
+  const rewardsReach = rewards.filter((r) => r.active && r.costGold <= gold && (r.requiredLevel || 1) <= minerLevel).length;
+  const quizDone = Boolean(childUid && localStorage.getItem(`quiz_completed_${childUid}_${today}`));
   const doneToday = due.filter((t) => {
     const full = tasks.find((x) => x.id === t.id);
     return full?.status === 'done' && full.lastCompletedDate === today;
@@ -191,8 +195,8 @@ const BuildingCard: React.FC<Props> = ({
   if (cracked) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-obra-veil" onClick={onClose}>
-        <div className="mc-modal mc-pop rounded-lg w-full max-w-[560px] text-white" onClick={(e) => e.stopPropagation()}>
-          <div className="mn-obra-hero flex items-start justify-between gap-3">
+        <div className="mc-modal mc-pop mn-child-sheet rounded-lg w-full max-w-[560px] text-white" onClick={(e) => e.stopPropagation()}>
+          <div className="mn-obra-hero flex items-start justify-between gap-3 shrink-0">
             <div className="flex items-start gap-3 min-w-0">
               <div className="mc-slot mn-obra-portrait p-1 shrink-0 flex items-center justify-center">
                 <RuinThumb src={buildingSprite(id, Math.max(1, level))} seed={id} size={88} className="w-full h-full" />
@@ -206,7 +210,7 @@ const BuildingCard: React.FC<Props> = ({
               <X />
             </button>
           </div>
-          <div className="p-4 space-y-4">
+          <div className="mn-child-body p-4 space-y-4">
             <p className="text-sm">O benefício desta obra está desligado.</p>
 
             <section>
@@ -276,10 +280,10 @@ const BuildingCard: React.FC<Props> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-obra-veil" onClick={onClose}>
       <div
-        className="mc-modal mc-pop rounded-lg w-full max-w-[560px] max-h-[96vh] overflow-y-auto text-white"
+        className="mc-modal mc-pop mn-child-sheet rounded-lg w-full max-w-[560px] text-white"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mn-obra-hero flex items-start justify-between gap-3">
+        <div className="mn-obra-hero flex items-start justify-between gap-3 shrink-0">
           <div className="flex items-start gap-3 min-w-0">
             <div className={portraitClass}>
               <img
@@ -324,7 +328,7 @@ const BuildingCard: React.FC<Props> = ({
           </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="mn-child-body p-4 space-y-4">
           <section>
             <p className="mc-lbl mb-1">O que dá agora</p>
             <p className="text-sm">
@@ -416,7 +420,7 @@ const BuildingCard: React.FC<Props> = ({
                 className={`mc-btn w-full min-h-[48px] font-bold ${level < 1 ? 'mc-btn-dark' : 'mc-btn-green'}`}
                 onClick={() => { playClick(); setInv((v) => !v); }}
               >
-                {level < 1 ? 'Inventário: construa o Baú' : inv ? 'Fechar inventário' : 'Ver meu inventário'}
+                {level < 1 ? 'Inventário: construa o Armazém' : inv ? 'Fechar inventário' : 'Ver meu inventário'}
               </button>
               <button type="button" className="mc-btn mc-btn-gold w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenChest(); }}>
                 Abrir o Baú do Dia
@@ -510,7 +514,13 @@ const BuildingCard: React.FC<Props> = ({
                   </div>
                 </div>
               ) : (
-                <p className="text-sm mc-muted">A Mesa ainda não foi construída. A prova do dia já pode ser feita.</p>
+                <p className="text-sm mc-muted">
+                  {quizDone
+                    ? 'A prova de hoje já foi feita.'
+                    : progress.quizEnabled === false
+                      ? 'A prova está trancada.'
+                      : 'A prova do dia está pendente.'}
+                </p>
               )}
               <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
                 Prova do dia
@@ -560,6 +570,7 @@ const BuildingCard: React.FC<Props> = ({
 
           {id === 'mercado' && (
             <>
+              <p className="text-sm">{rewardsReach} prêmios ao seu alcance</p>
               <button
                 type="button"
                 disabled={level < 1 || shopLocked}
@@ -572,12 +583,11 @@ const BuildingCard: React.FC<Props> = ({
               >
                 {shopLocked ? 'Mercado fechado na punição' : level < 1 ? 'Construa o Mercado para abrir' : 'Abrir o Mercado'}
               </button>
-              <RewardsPanel isOpen onClose={() => undefined} embedded browseOnly={level < 1} onCreateGoal={onCreateGoal} />
             </>
           )}
 
           <button type="button" className="mc-btn mc-btn-stone w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenWorkshop(); }}>
-            Oficina
+            Ferraria
           </button>
         </div>
       </div>

@@ -443,12 +443,12 @@ const CharacterEditor: React.FC<{
   if (embedded) return inner;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-veil" onClick={onClose}>
-      <div className="mc-modal mc-pop rounded-lg max-w-3xl w-full text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="mn-wood-head flex justify-between items-center">
+      <div className="mc-modal mc-pop mn-child-sheet rounded-lg max-w-3xl w-full text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center shrink-0">
           <h2 className="mc-title text-sm">Personagem</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>
-        <div className="p-4">{inner}</div>
+        <div className="mn-child-body p-4">{inner}</div>
       </div>
     </div>
   );

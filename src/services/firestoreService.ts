@@ -1326,6 +1326,7 @@ export class FirestoreService {
           allTasksBonusGold: data.allTasksBonusGold || 0,
           summaryProcessed: data.summaryProcessed || false,
           checkin: data.checkin && typeof data.checkin === 'object' ? {
+            mood: data.checkin.mood === 'bom' || data.checkin.mood === 'normal' || data.checkin.mood === 'dificil' ? data.checkin.mood : undefined,
             water: Boolean(data.checkin.water),
             stretch: Boolean(data.checkin.stretch),
             kindness: Boolean(data.checkin.kindness),

@@ -4,6 +4,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { listGoldTransactions } from '../../services/goldTx';
 import { txsLastDays, balancaTotals } from '../../services/village/balance';
+import { sinceLaunch } from '../../services/village/income';
+import { subscribeVillage } from '../../services/villageService';
 import { DEFAULT_ECONOMY } from '../../config/village';
 import type { GoldTransaction } from '../../types';
 import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
@@ -13,16 +15,22 @@ const Balanca: React.FC = () => {
   const { childUid } = useAuth();
   const { progress } = useData();
   const [txs, setTxs] = useState<GoldTransaction[]>([]);
+  const [launchedOn, setLaunchedOn] = useState<string | null>(null);
 
   useEffect(() => {
     if (!childUid) return;
     void listGoldTransactions(childUid, 800).then(setTxs);
   }, [childUid]);
 
-  const cut = useMemo(() => txsLastDays(txs, 7), [txs]);
+  useEffect(() => {
+    if (!childUid) return;
+    return subscribeVillage(childUid, (v) => setLaunchedOn(v.launchedOn ?? null));
+  }, [childUid]);
+
+  const cut = useMemo(() => txsLastDays(sinceLaunch(txs, launchedOn), 7), [txs, launchedOn]);
   const { earned, spent, saved, bySource, spentBy, r7, rate, gamePct } = useMemo(
-    () => balancaTotals(cut, DEFAULT_ECONOMY.incomeDayGold),
-    [cut]
+    () => balancaTotals(cut, DEFAULT_ECONOMY.incomeDayGold, { launchedOn }),
+    [cut, launchedOn]
   );
   const gold = progress.availableGold || 0;
   const days = r7 > 0 ? gold / r7 : 0;

@@ -54,9 +54,9 @@ const Mercado: React.FC<{
     if (!childUid) return;
     void listGoldTransactions(childUid, 200).then((txs) => {
       const week = txs.filter((t) => Date.now() - t.createdAt.getTime() < 7 * 86400000);
-      setR7(referenceIncome(week, economy.incomeDayGold));
+      setR7(referenceIncome(week, economy.incomeDayGold, { launchedOn: village.launchedOn }));
     });
-  }, [childUid, economy.incomeDayGold]);
+  }, [childUid, economy.incomeDayGold, village.launchedOn]);
   const shopItems = COSMETICS.filter((c) => !c.free && cosmeticHasSprite(c.id) && (c.basePrice || 0) > 0 && c.slot !== 'skin' && c.slot !== 'hair').filter((c) => {
     if (filter === 'all') return true;
     if (filter === 'premium') return c.premium;
@@ -84,19 +84,20 @@ const Mercado: React.FC<{
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-2 mn-veil" onClick={onClose}>
-      <div className="mc-modal mc-pop rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="mn-wood-head flex justify-between items-center">
+      <div className="mc-modal mc-pop mn-child-sheet rounded-lg w-full max-w-3xl text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center shrink-0">
           <div>
             <h2 className="mc-title text-sm">Mercado</h2>
-            <p className="text-xs mc-muted">Você ganha cerca de {r7} gold por dia</p>
+            <p className="text-sm mc-muted">Você ganha cerca de {r7} gold por dia</p>
           </div>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>
-        <div className="mc-hotbar p-3">
+        <div className="mc-hotbar p-3 shrink-0">
           <button type="button" className={`mc-slot rounded px-3 ${tab === 'real' ? 'mc-slot-selected' : ''}`} onClick={() => { setPicked('real'); playClick(); }}>Prêmios de verdade</button>
           <button type="button" className={`mc-slot rounded px-3 ${tab === 'shop' ? 'mc-slot-selected' : ''}`} onClick={() => { playClick(); setPicked('shop'); }}>Loja da Vila</button>
           <button type="button" className={`mc-slot rounded px-3 ${tab === 'merchant' ? 'mc-slot-selected' : ''}`} onClick={() => { playClick(); setPicked('merchant'); }}>Comerciante</button>
         </div>
+        <div className="mn-child-body">
         {tab === 'real' && (
           <RewardsPanel isOpen onClose={onClose} embedded onCreateGoal={onCreateGoal} />
         )}
@@ -129,7 +130,7 @@ const Mercado: React.FC<{
                     item={item}
                     state={itemState({ owned, equipped, isNew: (village.newItems || []).includes(c.id), minLevel: c.minLevel, level, forSale: true })}
                     onClick={() => { playClick(); setCardId(c.id); }}
-                    costChip={gate.reason === 'level' ? <span className="text-[9px]">Nível {gate.minLevel}</span> : owned ? undefined : <span className="text-[9px]">{priceOf(c, settings)}g</span>}
+                    costChip={gate.reason === 'level' ? <span className="text-sm">Nível {gate.minLevel}</span> : owned ? undefined : <span className="text-sm">{priceOf(c, settings)}g</span>}
                   />
                 );
               })}
@@ -217,6 +218,7 @@ const Mercado: React.FC<{
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

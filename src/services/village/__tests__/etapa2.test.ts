@@ -4,7 +4,7 @@ import type { GoldTransaction } from '../../../types';
 import type { AgendaItem, ChallengeDoc, GoalDoc } from '../../../types/village';
 import { validateDeposit, vaultGoalCap, weeklyInterest, weeklyStatement, savingsRate } from '../bank';
 import { applyEvent, challengeState, extendForPunishment } from '../challenges';
-import { daysToAfford, priceForDays, referenceIncome } from '../income';
+import { daysToAfford, priceForDays, referenceIncome, sinceLaunch } from '../income';
 import { txsLastDays, balancaTotals } from '../balance';
 import { capGold, gameGoldRoom } from '../caps';
 import { applyMaterialRepair, canRepair, cracksAfterClose, isBroken, liveBuildingLevel, repairMaterialCost, repairRefund, BREAKABLE_LOTS } from '../repair';
@@ -145,6 +145,24 @@ test('R7, faixa de preço e dias para alcançar', () => {
   expect(daysToAfford(20, 30, 45)).toBe(0);
 });
 
+test('R7 ignora o histórico anterior ao lançamento e o presente', () => {
+  const old = tx({ amount: 90, type: 'earned', source: 'task_completion', createdAt: new Date('2026-09-10T15:00:00.000Z') });
+  const gift = tx({
+    amount: 100,
+    type: 'adjustment',
+    source: 'admin_adjustment',
+    createdAt: new Date('2026-09-20T15:00:00.000Z'),
+    metadata: { launch: true },
+  });
+  const play = tx({ amount: 45, type: 'earned', source: 'task_completion', createdAt: new Date('2026-09-22T15:00:00.000Z') });
+  expect(sinceLaunch([old, gift, play], '2026-09-20')).toEqual([play]);
+  expect(referenceIncome([old, gift, play], 45, { launchedOn: '2026-09-20', today: '2026-09-22' })).toBe(45);
+  const week = Array.from({ length: 7 }, (_, i) =>
+    tx({ amount: 30, type: 'earned', source: 'task_completion', createdAt: new Date(`2026-09-${21 + i}T15:00:00.000Z`) })
+  );
+  expect(referenceIncome(week, 45, { launchedOn: '2026-09-20', today: '2026-09-27' })).toBe(30);
+});
+
 test('teto de gold do jogo conta juros pelo metadata', () => {
   const today = [tx({ amount: 30, type: 'earned', source: 'chest' })];
   const week = [
@@ -259,6 +277,14 @@ test('agenda: repetição semanal, plano de estudo e XP de antecedência', () =>
   );
   expect(due).toBe(true);
   expect(reminderDue({ ...item, doneAt: '2026-09-16' }, nowBrazil(Date.parse('2026-09-16T00:00:00.000Z')))).toBe(false);
+  expect(reminderDue(
+    { ...item, date: '2026-09-16', time: '08:00', remindMinutesBefore: 0 },
+    nowBrazil(Date.parse('2026-09-16T21:00:00.000Z')),
+  )).toBe(false);
+  expect(reminderDue(
+    { ...item, date: '2026-09-15', time: '18:00', remindMinutesBefore: 0 },
+    nowBrazil(Date.parse('2026-09-16T15:00:00.000Z')),
+  )).toBe(false);
 });
 
 test('balança de 7 dias não conta depósito como gasto', () => {

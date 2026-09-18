@@ -393,10 +393,11 @@ export interface PunishmentTaskCompletion {
   taskTitle: string; // Title of the task for quick reference
 }
 export interface DailyCheckin {
-  water: boolean;
-  stretch: boolean;
-  kindness: boolean;
-  screen: boolean;
+  mood?: 'bom' | 'normal' | 'dificil';
+  water?: boolean;
+  stretch?: boolean;
+  kindness?: boolean;
+  screen?: boolean;
   tomorrow: string;
   at: string;
 }

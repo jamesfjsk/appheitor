@@ -1,7 +1,7 @@
 import type { NpcId } from '../../types/village';
 import { isNightHour } from '../../utils/clock';
 
-export type NpcSpotMap = Record<string, Record<string, { x: number; y: number } | null | undefined>>;
+export type NpcSpotMap = Record<string, Record<string, { x: number; y: number; door?: { x: number; y: number } } | null | undefined>>;
 
 export interface NpcRoutine {
   hidden: boolean;
@@ -105,12 +105,15 @@ export function lookFacing(selfX: number, targetX: number): 1 | -1 {
 const HERO_STAND_SOUTH = 16;
 /** Acima da cerca sul (palissada y=548; Heitor para em s1). */
 const HERO_FENCE_MAX_Y = 518;
-const HERO_WALK_MIN_MS = 480;
-const HERO_WALK_MAX_MS = 4000;
-/** Passo de pessoa. Duração usa essa média; o ease deixa o pico no meio. */
+/** O andar que o pai aprovou (18/09): 125 px/s, nunca menos de 480 ms nem mais de 4 s; o lugar abre quando ele chega. */
 export const HERO_WALK_PX_PER_SEC = 125;
+export const HERO_WALK_MIN_MS = 480;
+export const HERO_WALK_MAX_MS = 4000;
+/** Se já está ao lado do lote, ainda dá um passinho de 180 ms para o cartão não abrir seco. */
 const HERO_LOT_WAIT_MS = 180;
-/** Planta os pés antes do card — follow-through. */
+export const HERO_ARRIVE_PX = 24;
+/** Só segurança: se a viagem travar, abre mesmo assim depois disto. */
+export const HERO_OPEN_MAX_MS = 6000;
 export const HERO_ARRIVE_HOLD_MS = 140;
 const HERO_WALK_PX_PER_FRAME = 20;
 
@@ -194,7 +197,11 @@ export const HERO_DEST_NODE: Record<string, string> = {
 };
 
 export function heroSkipsWalk(spotId: string): boolean {
-  return spotId === 'character' || spotId.startsWith('npc:');
+  return spotId === 'character';
+}
+
+export function heroShouldOpen(elapsedMs: number, distPx: number): boolean {
+  return distPx <= HERO_ARRIVE_PX || elapsedMs >= HERO_OPEN_MAX_MS;
 }
 
 export type HeroClickPlan = {
@@ -477,7 +484,8 @@ export function heroGroundPlan(
   if (Math.hypot(to.x - from.x, to.y - from.y) < 18) {
     return { to: { x: from.x, y: from.y }, points: [from], durationMs: 0, shakeId: null, immediate: true };
   }
-  if (reducedMotion) return { to, points: [from, to], durationMs: 0, shakeId: null, immediate: true };
+  // "Reduzir movimento" do sistema tira balanço e tremor, nunca o andar: o pulo instantâneo é o movimento mais brusco de todos (18/09).
+  void reducedMotion;
   const points = heroRoute(from, to, graph);
   const dist = pathLength(points);
   const durationMs = heroWalkDurationMs(dist, false);
@@ -485,29 +493,34 @@ export function heroGroundPlan(
 }
 
 export function heroWalkDurationMs(dist: number, reducedMotion: boolean): number {
-  if (reducedMotion || dist < 10) return 0;
+  if (reducedMotion || dist < 1) return 0;
   return Math.round(Math.min(HERO_WALK_MAX_MS, Math.max(HERO_WALK_MIN_MS, (dist / HERO_WALK_PX_PER_SEC) * 1000)));
 }
 
 export function heroClickPlan(
   spotId: string,
   from: Pt,
-  hit: { x: number; y: number; w: number; h: number },
+  hit: { x: number; y: number; w: number; h: number; door?: Pt | null },
   bounds: { w: number; h: number },
   reducedMotion: boolean,
   graph: WalkGraph = DEFAULT_WALK_GRAPH,
+  door?: Pt | null,
 ): HeroClickPlan {
   if (heroSkipsWalk(spotId)) {
     return { to: { x: from.x, y: from.y }, points: [from], durationMs: 0, shakeId: null, immediate: true };
   }
+  void reducedMotion; // "reduzir movimento" do sistema não tira o andar (18/09)
   const destId = HERO_DEST_NODE[spotId];
   const node = destId ? graph.nodes[destId] : undefined;
-  const to = node ? { x: node.x, y: node.y } : heroStandPoint(hit, bounds);
+  const given = door || hit.door || null;
+  const to = node
+    ? { x: node.x, y: node.y }
+    : given
+      ? { x: given.x, y: given.y }
+      : heroStandPoint(hit, bounds);
   const shakeId = heroShakeTarget(spotId);
-  if (reducedMotion) return { to, points: [from, to], durationMs: 0, shakeId: null, immediate: true };
   const points = heroRoute(from, to, graph);
-  const dist = pathLength(points);
-  let durationMs = heroWalkDurationMs(dist, false);
+  let durationMs = heroWalkDurationMs(pathLength(points), false);
   if (durationMs === 0 && shakeId) durationMs = HERO_LOT_WAIT_MS;
   return { to, points, durationMs, shakeId, immediate: durationMs === 0 };
 }

@@ -169,11 +169,11 @@ const EnglishArena: React.FC<Props> = ({ isOpen, onClose }) => {
           initial={{ scale: 0.96, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           data-testid="english-arena"
-          className="mc-panel rounded-lg w-full max-w-2xl max-h-[96vh] overflow-y-auto text-white"
+          className="mc-panel mn-child-sheet rounded-lg w-full max-w-2xl text-white overflow-hidden"
           style={{ fontFamily: 'var(--font-hero)' }}
         >
           {/* Cabeçalho: entrada da mina */}
-          <div className="relative h-28 sm:h-36 overflow-hidden border-b-4 border-[#17130f]">
+          <div className="relative h-28 sm:h-36 overflow-hidden border-b-4 border-[#17130f] shrink-0">
             <img src={UI.banner} alt="" className="absolute inset-0 w-full h-full object-cover mc-pixel" draggable={false} />
             <div className="absolute inset-0 bg-gradient-to-t from-[#2f2a27] via-[#2f2a27]/40 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 px-4 pb-3 flex items-end gap-3">
@@ -188,7 +188,7 @@ const EnglishArena: React.FC<Props> = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          <div className="p-3 sm:p-5">
+          <div className="mn-child-body p-3 sm:p-5">
             {/* Resultado da rodada */}
             {result && (
               <div className="text-center py-2">

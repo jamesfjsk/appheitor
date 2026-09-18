@@ -230,6 +230,7 @@ export function fromVillageDoc(uid: string, data: Record<string, unknown>): Vill
     name: str(data.name, initial.name),
     characterName: str(data.characterName, initial.characterName),
     onboardedAt: strOrNull(data.onboardedAt),
+    launchedOn: strOrNull(data.launchedOn),
     rare: {
       diamante: Math.max(0, num(rawRare.diamante)),
       esmeralda: Math.max(0, num(rawRare.esmeralda)),
@@ -1046,20 +1047,18 @@ export async function burnWood(uid: string): Promise<void> {
 }
 
 export async function savePlan(uid: string, plan: VillagePlan): Promise<void> {
-  const now = nowBrazil();
-  if (now.hour >= 12) throw new Error('O plano do turno fecha ao meio-dia');
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(villageRef(uid));
     const village = snap.exists() ? fromVillageDoc(uid, snap.data()) : initialVillageDoc(uid, nowIso());
-    if (village.plan.date === plan.date && village.plan.order.length) {
-      throw new Error('O plano de hoje já foi gravado');
-    }
+    const first = village.plan.date !== plan.date;
     const next = {
       date: plan.date,
-      order: plan.order.slice(0, 40),
+      order: [],
       focusTaskId: plan.focusTaskId,
     };
-    const stats = { ...village.stats, plansSaved: (village.stats.plansSaved || 0) + 1 };
+    const stats = first
+      ? { ...village.stats, plansSaved: (village.stats.plansSaved || 0) + 1 }
+      : village.stats;
     if (!snap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, plan: next, stats, updatedAt: nowIso() }));
     else tx.update(villageRef(uid), stripUndefined({ plan: next, stats, updatedAt: nowIso() }));
   });
@@ -1068,7 +1067,7 @@ export async function savePlan(uid: string, plan: VillagePlan): Promise<void> {
 
 export async function submitCheckin(uid: string, date: string, answers: DailyCheckinAnswers): Promise<number> {
   const xp = checkinXp(answers);
-  if (xp <= 0) throw new Error('Escreva o que você quer amanhã, em pelo menos três palavras');
+  if (xp <= 0) throw new Error('Diga como foi o dia e escreva o amanhã em pelo menos três palavras');
   await runTransaction(db, async (tx) => {
     const dailyRef = doc(db, 'dailyProgress', `${uid}_${date}`);
     const dailySnap = await tx.get(dailyRef);
@@ -1078,10 +1077,7 @@ export async function submitCheckin(uid: string, date: string, answers: DailyChe
     const vSnap = await tx.get(villageRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     const checkin = {
-      water: Boolean(answers.water),
-      stretch: Boolean(answers.stretch),
-      kindness: Boolean(answers.kindness),
-      screen: Boolean(answers.screen),
+      mood: answers.mood,
       tomorrow: answers.tomorrow.trim(),
       at: nowIso(),
     };

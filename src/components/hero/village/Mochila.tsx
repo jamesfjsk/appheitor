@@ -48,15 +48,15 @@ const Mochila: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 mn-veil" onClick={close}>
-      <div className="mc-modal mc-pop mn-pack-modal rounded-lg w-full max-w-4xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="mn-wood-head flex justify-between items-center">
+      <div className="mc-modal mc-pop mn-pack-modal mn-child-sheet rounded-lg w-full max-w-4xl text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center shrink-0">
           <div>
             <h2 className="mc-title text-sm">Mochila</h2>
             <p className="mn-pack-sub">{village.characterName || 'Heitor'} · Nv. {level}</p>
           </div>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={close} aria-label="Fechar"><X /></button>
         </div>
-        <div className="p-4">
+        <div className="mn-child-body p-4">
           <div className="mn-look-tabs" role="tablist">
             <button type="button" role="tab" aria-selected={tab === 'ficha'} className={`mc-slot px-2.5 py-1.5 ${tab === 'ficha' ? 'mc-slot-selected' : ''}`} onClick={() => { playClick(); setTab('ficha'); }}>Ficha</button>
             <button type="button" role="tab" aria-selected={tab === 'sacola'} className={`mc-slot px-2.5 py-1.5 ${tab === 'sacola' ? 'mc-slot-selected' : ''}`} onClick={() => { playClick(); setTab('sacola'); }}>Sacola</button>

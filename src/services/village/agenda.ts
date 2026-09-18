@@ -115,6 +115,7 @@ export function reminderDue(item: AgendaItem, now: BrazilNow): boolean {
   if (item.remindedFor && item.remindedFor === item.date) return false;
   if (item.remindedAt && item.repeat !== 'weekly') return false;
   const minutes = item.remindMinutesBefore ?? 0;
+  if (now.date > item.date) return false;
   if (!item.time) {
     const prev = addDays(item.date, -1);
     return now.date > prev || (now.date === prev && now.hour >= 19);
@@ -126,8 +127,11 @@ export function reminderDue(item: AgendaItem, now: BrazilNow): boolean {
   const targetMin = ((eventMin % (24 * 60)) + 24 * 60) % (24 * 60);
   const targetH = Math.floor(targetMin / 60);
   const targetM = targetMin % 60;
-  if (now.date > targetDate) return true;
+  if (now.date > targetDate) return false;
   if (now.date < targetDate) return false;
+  const nowMin = now.hour * 60 + now.minute;
+  const eventAbs = h * 60 + m;
+  if (now.date === item.date && nowMin > eventAbs) return false;
   return now.hour > targetH || (now.hour === targetH && now.minute >= targetM);
 }
 

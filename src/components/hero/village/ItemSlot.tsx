@@ -46,13 +46,13 @@ const ItemSlot: React.FC<{
       aria-label={item.name}
     >
       {thumb(item)}
-      <span className="text-[10px] leading-tight truncate w-full">{item.name}</span>
+      <span className="text-sm leading-tight truncate w-full">{item.name}</span>
       {typeof qty === 'number' && (
         <span className="mc-num text-white" style={{ fontSize: 12 }}>{qty}</span>
       )}
-      {state === 'novo' && <span className="text-[9px] mc-warn">Novo</span>}
+      {state === 'novo' && <span className="text-sm mc-warn">Novo</span>}
       {state !== 'novo' && state !== 'a_venda' && (
-        <span className="text-[9px] mc-muted">{STATE_LABEL[state]}</span>
+        <span className="text-sm mc-muted">{STATE_LABEL[state]}</span>
       )}
       {costChip}
     </button>

@@ -831,6 +831,30 @@
       "body": {
         "description": "small wooden bleacher with three rows and a chess board on a stump in front, a flag pole with a pennant, cute game building sprite"
       }
+    },
+    {
+      "file": "ui/mood-bom.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "bright yellow sun icon with short rays, cheerful, simple game ui icon, centered"
+      }
+    },
+    {
+      "file": "ui/mood-normal.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "soft white cloud icon with a small sun peeking behind, calm, simple game ui icon, centered"
+      }
+    },
+    {
+      "file": "ui/mood-dificil.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "grey rain cloud icon with three blue raindrops, simple game ui icon, centered, not scary"
+      }
     }
   ]
 }

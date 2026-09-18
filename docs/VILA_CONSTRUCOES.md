@@ -102,7 +102,7 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 
 ### 10. Casa do Minerador (Home): onde as missões moram (pedido do pai em 15/09)
 
-- **Para que serve**: é a casa dele. As missões de casa acontecem em casa; hoje a lista fica solta abaixo da cena, "fora da vila". A Casa é o lugar da rotina: **Missões do dia** (manhã, tarde, noite, como hoje), **Plano do turno** (de manhã), **Fechar o dia** (à noite, com o check-in) e, na Etapa 3, o **Diário**.
+- **Para que serve**: é a casa dele. As missões de casa acontecem em casa; hoje a lista fica solta abaixo da cena, "fora da vila". A Casa é o lugar da rotina: **Missões do dia** (manhã, tarde, noite, como hoje), **Plano do turno** (de manhã), **Fechar o dia** (à noite: resumo automático do dia, "como foi o dia" em um toque e "amanhã eu..."; v2 decidida em 17/09, `ETAPA_2_LANCAMENTO.md` P2.6) e, na Etapa 3, o **Diário**.
 - **Não se constrói**: já existe desde o primeiro acesso. Cresce por temporada (estrela): temporada 1 cabana, 2 casa, 3 sobrado (`buildings/casa-1..3.png`, arte a gerar). À noite a janela acende; com todas as missões feitas, a fumaça da chaminé sobe.
 - **Ao tocar**: abre a Casa com as abas Missões (a lista atual, sem mudar regras), Plano do turno (Etapa 2), Fechar o dia (Etapa 2). Atalhos que também abrem a Casa: hotbar "Missões", tecla M, o cartão "Casa" da grade e a linha "Faltam N missões" da Placa.
 - **Na página da Vila** fica só uma faixa compacta "Hoje": progresso das missões (2 de 6), a próxima missão do período com o botão "Concluir" (uma só, para o gesto mais comum continuar a um clique), e "Abrir a Casa". A lista completa deixa de ocupar a página.

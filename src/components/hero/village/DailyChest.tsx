@@ -49,12 +49,12 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 mn-veil" onClick={onClose}>
-      <div className="mc-modal mc-pop rounded-lg max-w-md w-full text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="mn-wood-head flex justify-between items-center">
+      <div className="mc-modal mc-pop mn-child-sheet rounded-lg max-w-md w-full text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center shrink-0">
           <h2 className="mc-h"><img src={CHEST} alt="" className="mc-pixel w-8 h-8" />Baú do Dia</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={onClose} aria-label="Fechar"><X /></button>
         </div>
-        <div className="p-6">
+        <div className="mn-child-body p-6">
         <p className="text-sm mc-muted mb-4">
           {loot
             ? 'Você abriu o Baú do Dia'
@@ -83,13 +83,15 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
             )}
           </div>
         )}
-        <button type="button" disabled={!gate.ok || Boolean(loot)} onClick={() => void open()} className="mc-btn mc-btn-gold w-full h-12 font-bold mb-2">
+        </div>
+        <div className="mn-child-foot space-y-2">
+        <button type="button" disabled={!gate.ok || Boolean(loot)} onClick={() => void open()} className="mc-btn mc-btn-gold w-full h-12 font-bold">
           {loot || already ? 'Já aberto' : 'Abrir'}
         </button>
         {village.fullDays >= 7 && childUid && !hasClaim(village, claimKey('streak', village.fullDays >= 21 ? 21 : village.fullDays >= 14 ? 14 : 7, village.fullDaysStart || today)) && (
           <button
             type="button"
-            className="mc-btn mc-btn-green w-full h-12 font-bold mb-2"
+            className="mc-btn mc-btn-green w-full h-12 font-bold"
             onClick={() => {
               playClick();
               void openStreakChest(childUid).then((r) => r && toast.success(`Baú das tochas: +${r.gold} gold`)).catch((e) => toast.error(e instanceof Error ? e.message : 'Não deu certo'));

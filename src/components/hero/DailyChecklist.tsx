@@ -39,6 +39,8 @@ interface DailyChecklistProps {
   onPeriodChange: (period: 'morning' | 'afternoon' | 'evening') => void;
   guidedMode?: boolean;
   onToggleGuidedMode?: () => void;
+  focusTaskId?: string | null;
+  onSetFocus?: (taskId: string) => void;
 }
 
 const DailyChecklist: React.FC<DailyChecklistProps> = ({
@@ -46,15 +48,15 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
   selectedPeriod,
   onPeriodChange,
   guidedMode = false,
-  onToggleGuidedMode
+  onToggleGuidedMode,
+  focusTaskId = null,
+  onSetFocus,
 }) => {
-  const { completeTask, completeLateTask, addTask } = useData();
+  const { completeTask, completeLateTask } = useData();
   const { childUid } = useAuth();
   const { hour, weekday, today, period: clockPeriod } = useClock();
-  const { economy, village } = useVillage();
+  const { economy } = useVillage();
   const [yesterdayDone, setYesterdayDone] = React.useState<string[]>([]);
-  const [ownTitle, setOwnTitle] = React.useState('');
-  const [ownBusy, setOwnBusy] = React.useState(false);
 
   const getCurrentPeriod = (): 'morning' | 'afternoon' | 'evening' => clockPeriod;
 
@@ -79,15 +81,7 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
     !task.optional &&
     isTaskAvailableToday(task, weekday)
   );
-  const planToday = village.plan.date === today ? village.plan.order : [];
-  const orderedTasks = [...filteredTasks].sort((a, b) => {
-    const ia = planToday.indexOf(a.id);
-    const ib = planToday.indexOf(b.id);
-    if (ia === -1 && ib === -1) return 0;
-    if (ia === -1) return 1;
-    if (ib === -1) return -1;
-    return ia - ib;
-  });
+  const orderedTasks = [...filteredTasks];
   React.useEffect(() => {
     if (!childUid) return;
     const yesterday = addDays(today, -1);
@@ -235,43 +229,6 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
         </div>
       )}
 
-      <div className="mc-card p-3 mb-3 space-y-2">
-        <p className="text-sm font-bold">Criar missão</p>
-        <p className="text-xs mc-muted">O papai aprova. Paga XP e material, nunca gold.</p>
-        <div className="flex gap-2">
-          <input
-            value={ownTitle}
-            maxLength={40}
-            onChange={(e) => setOwnTitle(e.target.value)}
-            placeholder="título"
-            className="mc-slot flex-1 min-w-0 text-white text-sm px-3 py-2"
-          />
-          <button
-            type="button"
-            data-testid="enviar-missao-propria"
-            className="mc-btn mc-btn-wood min-h-[44px] px-3"
-            disabled={ownBusy || ownTitle.trim().length < 3}
-            onClick={() => {
-              setOwnBusy(true);
-              void addTask({
-                title: ownTitle.trim(),
-                xp: 5,
-                gold: 0,
-                period: selectedPeriod,
-                frequency: 'daily',
-                active: true,
-                status: 'proposed',
-                origin: 'child',
-              }).then(() => {
-                setOwnTitle('');
-              }).catch(() => undefined).finally(() => setOwnBusy(false));
-            }}
-          >
-            Enviar
-          </button>
-        </div>
-      </div>
-
       <div className="space-y-2">
         {tasksToShow.length > 0 ? (
           tasksToShow.map((task, index) => (
@@ -281,6 +238,8 @@ const DailyChecklist: React.FC<DailyChecklistProps> = ({
               index={index}
               onComplete={handleCompleteTask}
               guidedMode={guidedMode}
+              isFocus={focusTaskId === task.id}
+              onSetFocus={onSetFocus}
             />
           ))
         ) : (

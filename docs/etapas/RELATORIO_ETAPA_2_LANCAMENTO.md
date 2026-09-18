@@ -238,3 +238,64 @@ Cinco correções + guarda do `nightComplete`. Sem P3. Sem commit.
 - P3 (`launchedOn`) e os itens do P4/Etapa 3 (`saleStatDeltas`, `rollContractsWeek`, `finishGoal` try/catch, teste da cadeia admin).
 - Conta de teste no navegador: o pai retesta depois do commit.
 
+## P3 — backup, reset de lançamento e clone (17/09)
+
+Três scripts REST (token do firebase-tools, sem chave de serviço) + `village.launchedOn` no Extrato, na Balança e no R7. Sem `--apply` no Heitor. Sem clone. Sem P5.
+
+### O que mudou
+
+1. `scripts/lib/firestore-rest.cjs`: token, encode/decode, query paginada, commit em lotes. Os três scripts usam isso.
+2. `export-user.cjs --uid`: grava `backups/<uid>-<YYYY-MM-DD>.json` (data de Brasília; `backups/` já no `.gitignore`) e imprime a contagem por coleção. Inclui `birthdayEvents`, `dailySurpriseMissionStatus` e tenta `punishments` além de `punishmentMode`.
+3. `launch-reset.cjs`: dry-run sem `--apply`. `--apply` exige backup do dia e `--confirm "LANCAR <nome da vila atual>"`. Zera o jogo, preserva o pedagógico, grava +100 gold com `metadata.launch`. Segunda rodada no-op se essa linha já existe. `lastDailySummaryProcessedDay` = launch − 1 dia (é o campo que o `closeDay` escreve).
+4. `clone-to-test.cjs --from --to`: copia users (mantém e-mail/uid do destino), progress, village, englishBase, tasks, rewards, agenda e os últimos 30 `dailyQuizzes`. Recusa se `--to` não for `settings/testChild.uid` ou se `--from` for a conta de teste. Missões/prêmios/agenda saem com id novo para não sobrescrever os docs do Heitor.
+5. App: `VillageDoc.launchedOn`; `sinceLaunch` + R7 com `DEFAULT_ECONOMY` nos primeiros 7 dias; Extrato mostra “Extrato zerado.”; Balança, Mercado e RewardForm filtram o mesmo corte.
+
+### Arquivos
+
+- `scripts/lib/firestore-rest.cjs`, `export-user.cjs`, `launch-reset.cjs`, `clone-to-test.cjs`
+- `src/types/village.ts`, `src/services/villageService.ts`
+- `src/services/village/income.ts`, `balance.ts`, `__tests__/etapa2.test.ts`
+- `src/components/hero/village/Extrato.tsx`, `Mercado.tsx`
+- `src/components/parent/Balanca.tsx`, `RewardForm.tsx`
+- este relatório
+
+### Como verificou
+
+| Comando | Resultado |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | 0 erros |
+| `npx eslint src --max-warnings 7` | 0 erros; 7 avisos (os de sempre) |
+| `npm run test:english` | 19 arquivos; novo caso “R7 ignora o histórico anterior ao lançamento e o presente” |
+| `npx vite build` | ok; chunks `App-B384bRu0.js` + `CartBench-UQjrxeET.js` + `statsBump-CtJfKq9a.js` |
+| chunk `phaser` em `dist/assets` | nenhum |
+| `node scripts/launch-reset.cjs --uid xZkTTR2tlIYXIpAelxEqXugNjqo2 --launch 2026-09-20` | dry-run: Vila do teste, gold 111, XP 23071, 15 tarefas, 13 conquistas ativas, 903 txs; faria season 1 + 100 gold; nada gravado |
+| `node scripts/export-user.cjs --uid xZkTTR2tlIYXIpAelxEqXugNjqo2` | 4992 docs, 4,59 MB, todas as coleções da spec; arquivo gitignorado |
+| `--apply` sem `--confirm` / sem backup | recusa (exit 1); Firestore do Heitor intacto |
+| `clone-to-test --from teste --to Heitor` | recusa: `--to` tem que ser a conta de teste |
+
+Uid Heitor: `xZkTTR2tlIYXIpAelxEqXugNjqo2`. Uid teste: `DydxTQ0cGEbX46LLlQxxD123pQD3`.
+
+Sábado (conta de teste, nesta ordem):
+
+```
+node scripts/clone-to-test.cjs --from xZkTTR2tlIYXIpAelxEqXugNjqo2 --to DydxTQ0cGEbX46LLlQxxD123pQD3
+node scripts/export-user.cjs --uid DydxTQ0cGEbX46LLlQxxD123pQD3
+node scripts/launch-reset.cjs --uid DydxTQ0cGEbX46LLlQxxD123pQD3 --launch 2026-09-20 --apply --confirm "LANCAR <nome da vila depois do clone>"
+```
+
+Domingo (Heitor), backup do dia + apply. O `--confirm` usa o nome **atual** da vila.
+
+### O que ficou de fora e por quê
+
+- `--apply` e `clone-to-test` de verdade: sábado (teste) e domingo (Heitor). Aceite E2E (Onboarding, Extrato zerado, segunda rodada no-op) é o líder no sábado.
+- Botão no painel: Etapa 3.
+- P5 / P2 / P4.
+
+### Dúvidas
+
+- A spec chama a coleção `punishments`; no código é `punishmentMode` (`userId`, `isActive`). O reset apaga as ativas de `punishmentMode` e o export tenta as duas (hoje `punishments` = 0).
+- `settings/dailyRules.activatedOn` é um doc da família. O apply na conta de teste no sábado já muda essa data para o lançamento — o Heitor ainda não joga até domingo.
+- A vila do uid do Heitor está com `name` “Vila do teste” e `characterName` “teste”. O confirm de domingo é `LANCAR Vila do teste` até alguém renomear. O Onboarding deixa trocar depois.
+- `rewardsRedeemed` foi a 0 no progress (não estava na lista da spec; é progresso de jogo).
+- `englishBase` volta ao `initialBaseDoc` (1 ferro da Fornalha pela metade), preservando `level` e `vocab`.
+

@@ -63,12 +63,12 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 mn-veil" onClick={close}>
-      <div className="mc-modal mc-pop rounded-lg w-full max-w-2xl max-h-[96vh] overflow-y-auto text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="mn-wood-head flex justify-between items-center">
+      <div className="mc-modal mc-pop mn-child-sheet rounded-lg w-full max-w-2xl text-white" onClick={(e) => e.stopPropagation()}>
+        <div className="mn-wood-head flex justify-between items-center shrink-0">
           <h2 className="mc-title text-sm">Torre</h2>
           <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={close} aria-label="Fechar"><X /></button>
         </div>
-        <div className="mc-hotbar p-3">
+        <div className="mc-hotbar p-3 shrink-0">
           {([
             ['conquistas', 'Conquistas', 0],
             ['vida', 'Da vida real', 1],
@@ -97,7 +97,7 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             );
           })}
         </div>
-        <div className="p-4 space-y-3">
+        <div className="mn-child-body p-4 space-y-3">
           {torreLevel < 1 && tab === 'conquistas' && (
             <p className="text-sm mc-muted">Construa a Torre para ver recordes e troféus.</p>
           )}

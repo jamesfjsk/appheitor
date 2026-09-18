@@ -173,8 +173,8 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   return (
     <AnimatePresence>
       <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-        <div className="mc-panel rounded-lg w-full max-w-2xl max-h-[92vh] overflow-y-auto text-white">
-          <div className="p-4 border-b-4 border-[#17130f] flex items-center gap-3">
+        <div className="mc-panel mn-child-sheet rounded-lg w-full max-w-2xl text-white">
+          <div className="p-4 border-b-4 border-[#17130f] flex items-center gap-3 shrink-0">
             <img src={BOOK} alt="" className="w-10 h-10 mc-pixel shrink-0" draggable={false} />
             <div className="flex-1 min-w-0">
               <h2 className="mc-title text-sm">Prova do dia</h2>
@@ -192,7 +192,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
             </div>
           )}
 
-          <div className="p-5">
+          <div className="mn-child-body p-5">
             {phase === 'prompt' && (
               <div className="text-center py-2">
                 {quiz.completed ? (
@@ -295,17 +295,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
                 {selected && (
                   <div className="mc-card rounded p-4 mt-4">
                     <p className="font-bold mb-1">{selected === question.answer ? 'Isso.' : 'Não foi dessa vez.'}</p>
-                    <p className="text-sm leading-relaxed text-white/85">{question.explanation}</p>
+                    <p className="text-sm leading-relaxed">{question.explanation}</p>
                   </div>
                 )}
-                <button
-                  type="button"
-                  onClick={() => void next()}
-                  disabled={!selected || saving}
-                  className="mt-5 w-full mc-btn mc-btn-green px-6 py-3 font-bold"
-                >
-                  {saving ? 'Salvando...' : isLast ? 'Ver resultado' : 'Próxima'}
-                </button>
               </div>
             )}
 
@@ -315,11 +307,11 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
                 <div className="flex justify-center gap-3 mb-4">
                   <span className="mc-slot flex items-center gap-1.5 px-3 py-2">
                     <img src={STAR} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
-                    <span className="mc-font text-[9px] mc-good">+{reward.xp} XP</span>
+                    <span className="text-sm mc-good">+{reward.xp} XP</span>
                   </span>
                   <span className="mc-slot flex items-center gap-1.5 px-3 py-2">
                     <img src={GOLD} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
-                    <span className="mc-font text-[9px] mc-warn">+{reward.gold} GOLD</span>
+                    <span className="text-sm mc-warn">+{reward.gold} GOLD</span>
                   </span>
                 </div>
 
@@ -355,6 +347,18 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
               </div>
             )}
           </div>
+          {phase === 'questions' && (
+            <div className="mn-child-foot">
+              <button
+                type="button"
+                onClick={() => void next()}
+                disabled={!selected || saving}
+                className="w-full mc-btn mc-btn-green px-6 py-3 font-bold"
+              >
+                {saving ? 'Salvando...' : isLast ? 'Ver resultado' : 'Próxima'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </AnimatePresence>

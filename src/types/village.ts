@@ -71,6 +71,8 @@ export interface VillageDoc {
   name: string;
   characterName: string;
   onboardedAt: string | null;
+  /** YYYY-MM-DD (Brasília). Extrato, Balança e R7 ignoram o que veio antes. */
+  launchedOn?: string | null;
   rare: VillageRare;
   gear: VillageGear;
   character: VillageCharacter;
@@ -288,11 +290,14 @@ export interface GameAchievement {
   reward: GameAchievementReward;
 }
 
+export type DayMood = 'bom' | 'normal' | 'dificil';
+
 export interface DailyCheckinAnswers {
-  water: boolean;
-  stretch: boolean;
-  kindness: boolean;
-  screen: boolean;
+  mood?: DayMood;
+  water?: boolean;
+  stretch?: boolean;
+  kindness?: boolean;
+  screen?: boolean;
   tomorrow: string;
 }
 

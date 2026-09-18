@@ -163,7 +163,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, 
         </div>
         )}
 
-        <div className="p-4 space-y-3">
+        <div className="mn-child-body p-4 space-y-3">
           <div className="mc-hotbar">
             {categories.map((category) => (
               <button
@@ -251,7 +251,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, 
                         <span className="mc-num">{reward.costGold || 0}</span>
                         <span className="mc-lbl">gold</span>
                         {!isUnlocked && <span className="text-xs font-semibold mc-muted">Nível {requiredLevel}</span>}
-                        {justUnlocked && <span className="mc-font text-[8px] mc-good">Novo</span>}
+                        {justUnlocked && <span className="text-sm mc-good">Novo</span>}
                         {pendingRedemption && <span className="mc-lbl mc-warn">Aguardando o pai</span>}
                         {reward.goalOnly && <span className="mc-lbl">Só pelo Cofrinho</span>}
                       </div>
@@ -416,7 +416,7 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="mc-panel rounded-lg w-full max-w-3xl max-h-[96vh] overflow-y-auto text-white"
+        className="mc-panel mn-child-sheet rounded-lg w-full max-w-3xl text-white overflow-hidden"
       >
         {inner}
       </motion.div>

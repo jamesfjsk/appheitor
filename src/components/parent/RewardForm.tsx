@@ -8,6 +8,7 @@ import { REWARD_ICONS } from '../../config/rewardIcons';
 import { DEFAULT_ECONOMY, PRICE_BANDS } from '../../config/village';
 import { listGoldTransactions } from '../../services/goldTx';
 import { priceForDays, referenceIncome } from '../../services/village/income';
+import { getVillage } from '../../services/villageService';
 import toast from 'react-hot-toast';
 
 export interface RewardFormInitialData {
@@ -87,9 +88,9 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
 
   useEffect(() => {
     if (!childUid || !isOpen) return;
-    void listGoldTransactions(childUid, 200).then((txs) => {
+    void Promise.all([listGoldTransactions(childUid, 200), getVillage(childUid)]).then(([txs, village]) => {
       const week = txs.filter((t) => Date.now() - t.createdAt.getTime() < 7 * 86400000);
-      setR7(referenceIncome(week, DEFAULT_ECONOMY.incomeDayGold));
+      setR7(referenceIncome(week, DEFAULT_ECONOMY.incomeDayGold, { launchedOn: village.launchedOn }));
     });
   }, [childUid, isOpen]);
 

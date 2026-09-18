@@ -387,8 +387,8 @@ O jogo vai ter várias cenas (Mina, Biblioteca, Fazenda, Arena...) ligadas por u
 
 Módulos educacionais novos deste lote. Agenda, Banco e Prova já nasceram no Lote 1.
 
-### Plano do turno
-1. Aprende a ordenar o dia e escolher uma missão-foco.
+### Plano do turno (virou "Missão-foco" em 17/09, decisão 17 do `ETAPA_2_LANCAMENTO.md`: a aba saiu; fica só a escolha da foco na lista de missões)
+1. Aprende a escolher uma prioridade por dia (a missão-foco).
 2. Cabe aos 10 anos: lista curta, setas, uma escolha.
 3. Mede: `village.plan` do dia; `taskCompletions.focus`; `stats.plansSaved`.
 4. Adapta: uma foco por dia; fecha ao meio-dia.
@@ -397,17 +397,17 @@ Módulos educacionais novos deste lote. Agenda, Banco e Prova já nasceram no Lo
 7. IA: nenhuma.
 8. Impede emprego: sem gold; só XP/material da missão. Impede castigo: sem plano não há penalidade.
 
-### Fechar o dia
-1. Aprende a fechar o dia com 4 hábitos e uma intenção de amanhã.
-2. Quatro sim/não e três palavras; cabe em um minuto.
-3. Mede: `dailyProgress.checkin`; `stats.checkins`.
-4. Adapta: o Sábio responde na manhã seguinte conforme as respostas.
+### Fechar o dia (v2 desde 17/09; `ETAPA_2_LANCAMENTO.md`, P2.6)
+1. Aprende a fechar o dia com um olhar honesto (como foi o dia) e uma intenção (amanhã eu...). As quatro perguntas de hábito saíram: hábito é dica dos NPCs, não autorrelato.
+2. Um toque (bom, normal, difícil) e três palavras; cabe em 30 segundos; o resumo do dia é automático.
+3. Mede: `dailyProgress.checkin` (`mood`, `tomorrow`); `stats.checkins`; dias bons, normais e difíceis no relatório.
+4. Adapta: o Sábio responde na manhã seguinte conforme o humor e a frase.
 5. Vê: 5 XP e a fala do Sábio na Placa.
 6. Pai: relatório semanal (hábitos) e Saúde (`lastCloseDay`).
 7. IA: nenhuma; frases em `habitLines` e `SAGE_REPLIES`.
 8. Impede emprego: 5 XP, nunca gold. Impede castigo: sem check-in não há penalidade.
 
-### Missão própria e extras
+### Missão própria e extras (a missão própria saiu da tela em 17/09, decisão 16 do `ETAPA_2_LANCAMENTO.md`; volta na Etapa 3 com desenho próprio)
 1. Aprende a propor o próprio trabalho e a fazer um extra sem virar dívida.
 2. Título curto, período; o pai aprova.
 3. Mede: `tasks.origin==child` `status==proposed`; `optional` nas extras.
