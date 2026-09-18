@@ -7,7 +7,6 @@ import { dueTasksOn } from '../../../services/village/schedule';
 import { useData } from '../../../contexts/DataContext';
 import { useClock } from '../../../contexts/ClockContext';
 import { useSound } from '../../../contexts/SoundContext';
-import { createMineSfx } from '../english/mine/sfx';
 import type { ChestContents } from '../../../types/village';
 import type { Material } from '../../../types/english';
 import { claimKey, hasClaim } from '../../../services/village/claims';
@@ -23,7 +22,7 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
   const { village, economy, openChest } = useVillage();
   const { childUid } = useAuth();
   const { tasks } = useData();
-  const { playClick, isSoundEnabled } = useSound();
+  const { playRewardUnlocked, playError } = useSound();
   const [loot, setLoot] = useState<ChestContents | null>(null);
   const { minute, today } = useClock();
   const due = dueTasksOn(tasks, today);
@@ -38,11 +37,11 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
   const leftLabel = `${Math.floor(leftMin / 60)}h${String(leftMin % 60).padStart(2, '0')}`;
 
   const open = async () => {
-    playClick();
-    if (!gate.ok) return;
-    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = isSoundEnabled && AudioCtx ? new AudioCtx() : null;
-    createMineSfx(() => ctx, () => isSoundEnabled).unlock();
+    if (!gate.ok) {
+      playError();
+      return;
+    }
+    playRewardUnlocked();
     const contents = await openChest();
     setLoot(contents);
   };
@@ -93,7 +92,7 @@ const DailyChest: React.FC<{ hour: number; onClose: () => void }> = ({ hour, onC
             type="button"
             className="mc-btn mc-btn-green w-full h-12 font-bold"
             onClick={() => {
-              playClick();
+              playRewardUnlocked();
               void openStreakChest(childUid).then((r) => r && toast.success(`Baú das tochas: +${r.gold} gold`)).catch((e) => toast.error(e instanceof Error ? e.message : 'Não deu certo'));
             }}
           >

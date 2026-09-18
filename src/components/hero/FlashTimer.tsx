@@ -14,7 +14,7 @@ interface FlashTimerProps {
 }
 
 const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = false, minutes, onFinished }) => {
-  const { isSoundEnabled } = useSound();
+  const { playLevelUp } = useSound();
   
   // Timer state
   const [totalSeconds, setTotalSeconds] = useState(minutes ? minutes * 60 : 300);
@@ -28,7 +28,6 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = fal
   const [customSeconds, setCustomSeconds] = useState(0);
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
   const finishedOnceRef = useRef(false);
 
   // Preset times in seconds
@@ -52,16 +51,6 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = fal
     setIsRunning(false);
     finishedOnceRef.current = false;
   }, [minutes]);
-  useEffect(() => {
-    const initAudio = () => {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
-      }
-    };
-    
-    document.addEventListener('click', initAudio, { once: true });
-    return () => document.removeEventListener('click', initAudio);
-  }, []);
 
   // Timer logic
   useEffect(() => {
@@ -71,7 +60,8 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = fal
           if (prev <= 1) {
             setIsRunning(false);
             setIsFinished(true);
-            playFinishSound();
+            playLevelUp();
+            if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
             if (!finishedOnceRef.current) {
               finishedOnceRef.current = true;
               onFinished?.();
@@ -93,8 +83,8 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = fal
         clearInterval(intervalRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- playFinishSound is recreated every render; adding it would restart the interval each tick
-  }, [isRunning, remainingSeconds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- interval must follow remainingSeconds; playLevelUp is stable
+  }, [isRunning, remainingSeconds, playLevelUp]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -104,50 +94,6 @@ const FlashTimer: React.FC<FlashTimerProps> = ({ isOpen, onClose, embedded = fal
       }
     };
   }, []);
-
-  const playFinishSound = () => {
-    if (!isSoundEnabled || !audioContextRef.current) return;
-
-    try {
-      const ctx = audioContextRef.current;
-      
-      // Play epic finish fanfare
-      const notes = [
-        { freq: 523, duration: 0.3, delay: 0 },     // C5
-        { freq: 659, duration: 0.3, delay: 200 },   // E5
-        { freq: 784, duration: 0.3, delay: 400 },   // G5
-        { freq: 1047, duration: 0.6, delay: 600 },  // C6
-        { freq: 1319, duration: 0.8, delay: 900 }   // E6
-      ];
-
-      notes.forEach(note => {
-        setTimeout(() => {
-          const oscillator = ctx.createOscillator();
-          const gainNode = ctx.createGain();
-
-          oscillator.connect(gainNode);
-          gainNode.connect(ctx.destination);
-
-          oscillator.frequency.setValueAtTime(note.freq, ctx.currentTime);
-          oscillator.type = 'square';
-
-          gainNode.gain.setValueAtTime(0, ctx.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.01);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + note.duration);
-
-          oscillator.start(ctx.currentTime);
-          oscillator.stop(ctx.currentTime + note.duration);
-        }, note.delay);
-      });
-
-      // Vibration if available
-      if ('vibrate' in navigator) {
-        navigator.vibrate([200, 100, 200, 100, 200]);
-      }
-    } catch (error) {
-      console.warn('Erro ao reproduzir som de finalização:', error);
-    }
-  };
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);

@@ -45,6 +45,7 @@ import type { BuildingId } from '../../../types/english';
 import type { Period } from '../../../types/village';
 import { getLevelFromXP } from '../../../utils/levelSystem';
 import { quizBlocksDest, quizGateActive } from '../../../services/village/quizGate';
+import { furnaceOpensForge, type ForgeTab } from '../../../services/village/furnace';
 
 const nightInFlight = new Set<string>();
 
@@ -79,6 +80,7 @@ const VillageHome: React.FC<Props> = ({
   const [packTab, setPackTab] = useState<PackTab>('ficha');
   const [packSlot, setPackSlot] = useState<DollSlot>('shirt');
   const [lot, setLot] = useState<BuildingId | null>(null);
+  const [forgeTab, setForgeTab] = useState<ForgeTab>('gear');
   const [dockTab, setDockTab] = useState<'vila' | 'missoes'>('vila');
   const [speech, setSpeech] = useState<{ npc: string; text: string; rest?: string[] } | null>(null);
   const [buildFx, setBuildFx] = useState<{ id: BuildingId; level: number; at: number } | null>(null);
@@ -338,6 +340,7 @@ const VillageHome: React.FC<Props> = ({
         setDistrict(null);
         setLot('fornalha');
       } else {
+        setForgeTab('gear');
         setLot(null);
         setDistrict('workshop');
       }
@@ -381,6 +384,12 @@ const VillageHome: React.FC<Props> = ({
     }
     if (id.startsWith('build:')) {
       const bid = id.slice('build:'.length);
+      if (bid === 'fornalha' && furnaceOpensForge(lv('fornalha'), broken('fornalha'))) {
+        setForgeTab('fire');
+        setLot(null);
+        setDistrict('workshop');
+        return;
+      }
       if (bid in BUILDING_BY_ID) setLot(bid as BuildingId);
       return;
     }
@@ -653,7 +662,16 @@ const VillageHome: React.FC<Props> = ({
           onOpenMine={() => { setLot(null); openDistrict('mine'); }}
           onOpenChest={() => { setLot(null); openDistrict('chest'); }}
           onOpenTower={() => { setLot(null); setDistrict('tower'); }}
-          onOpenWorkshop={() => { setLot(null); openDistrict('workshop'); }}
+          onOpenWorkshop={(tab?: ForgeTab) => {
+            if (visibleCracks(village.cracks).includes('fornalha') || (buildings.fornalha || 0) < 1) {
+              setDistrict(null);
+              setLot('fornalha');
+              return;
+            }
+            setForgeTab(tab || 'gear');
+            setLot(null);
+            setDistrict('workshop');
+          }}
           onOpenQuiz={() => { setLot(null); onOpenQuiz(); }}
           onOpenBank={() => { setLot(null); setDistrict('bank'); }}
           onOpenAgenda={() => { setLot(null); openDistrict('agenda'); }}
@@ -682,6 +700,7 @@ const VillageHome: React.FC<Props> = ({
       {district === 'chest' && <DailyChest hour={hour} onClose={() => setDistrict(null)} />}
       {district === 'workshop' && (
         <Oficina
+          initialTab={forgeTab}
           onClose={() => setDistrict(null)}
           onOpenPack={() => { setPackTab('ficha'); setPackSlot('pickaxe'); setDistrict('pack'); }}
           onOpenLot={(bid) => { setDistrict(null); setLot(bid as BuildingId); }}

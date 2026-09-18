@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tema da Vila: piano + flauta leve. Sem baixo nem sanfona."""
+"""Tema da Vila: piano, flauta e violão de nylon. Sem baixo nem sanfona."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -120,25 +120,28 @@ def piano(freq: float, dur: float, amp: float) -> np.ndarray:
     ring = dur + (1.4 if dur >= 1.8 else 0.95)
     n = max(1, int(ring * SR))
     t = np.arange(n) / SR
-    vel = float(np.clip(amp / 0.14, 0.35, 1.15))
+    bright = float(np.clip((freq - 392.0) / 700.0, 0.0, 1.0))
+    amp = amp * (1.0 - 0.42 * bright)
+    vel = float(np.clip(amp / 0.14, 0.35, 1.05))
     decay = (1.05 if dur >= 1.8 else 1.45 if dur >= 1.5 else 2.05) * (1.12 - 0.12 * vel)
     env = (1.0 - np.exp(-t * (200 + 80 * vel))) * np.exp(-t * decay)
     sig = np.zeros(n)
     stretch = 0.00028
+    hi = 1.0 - 0.55 * bright
     partials = (
-        (1, 1.0), (2, 0.22 + 0.10 * vel), (3, 0.09 + 0.05 * vel),
-        (4, 0.04 + 0.03 * vel), (5, 0.018 * vel), (6, 0.01 * vel), (7, 0.005 * vel),
+        (1, 1.0), (2, (0.20 + 0.08 * vel) * hi), (3, (0.07 + 0.03 * vel) * hi),
+        (4, (0.03 + 0.02 * vel) * hi), (5, 0.010 * vel * hi), (6, 0.005 * vel * hi),
     )
     for k, a in partials:
         fk = k * freq * np.sqrt(1.0 + stretch * k * k)
         det = 1.0 + 0.00028 * ((k % 2) * 2 - 1)
         sig += a * np.sin(2 * np.pi * fk * det * t) * np.exp(-t * (1.05 + 0.58 * k))
-    duplex = 0.06 * vel * np.sin(2 * np.pi * freq * 2.002 * t) * np.exp(-t * 2.8)
-    hammer_n = min(n, int((0.008 + 0.006 * vel) * SR))
+    duplex = 0.045 * vel * (1.0 - bright) * np.sin(2 * np.pi * freq * 2.002 * t) * np.exp(-t * 2.8)
+    hammer_n = min(n, int((0.007 + 0.004 * vel) * SR))
     hammer = np.zeros(n)
     hammer[:hammer_n] = RNG.standard_normal(hammer_n) * np.linspace(1.0, 0.0, hammer_n)
-    hammer = butter_hp(butter_lp(hammer, 3800 + 800 * vel), 700) * (0.08 + 0.05 * vel)
-    body = butter_lp(amp * (env * (sig + duplex) + hammer), 5000 + 1400 * vel)
+    hammer = butter_hp(butter_lp(hammer, 2800 + 400 * vel), 700) * (0.05 + 0.03 * vel) * (1.0 - 0.6 * bright)
+    body = butter_lp(amp * (env * (sig + duplex) + hammer), 3800 - 900 * bright)
     tail = int(0.04 * SR)
     if tail < n:
         body[-tail:] *= np.linspace(1.0, 0.0, tail)
@@ -146,16 +149,58 @@ def piano(freq: float, dur: float, amp: float) -> np.ndarray:
 
 
 def flute(freq: float, dur: float, amp: float) -> np.ndarray:
-    n = max(1, int((dur + 0.2) * SR))
+    n = max(1, int((dur + 0.38) * SR))
     t = np.arange(n) / SR
-    att = np.minimum(t / 0.055, 1.0)
-    rel = np.clip((dur + 0.04 - t) / 0.14, 0.0, 1.0)
+    att = 1.0 - np.exp(-t / 0.10)
+    rel = np.clip((dur + 0.14 - t) / 0.24, 0.0, 1.0) ** 2
     env = att * rel
-    vib = 1.0 + 0.0015 * np.sin(2 * np.pi * 5.1 * t) * np.clip((t - 0.07) * 10, 0.0, 1.0)
+    vib = 1.0 + 0.0010 * np.sin(2 * np.pi * 4.5 * t) * np.clip((t - 0.20) * 5.0, 0.0, 1.0)
     f = freq * vib
-    tone = 0.90 * np.sin(2 * np.pi * f * t) + 0.08 * np.sin(2 * np.pi * 2 * f * t)
-    air = butter_hp(RNG.standard_normal(n) * 0.012 * env, 1600)
-    return butter_lp(amp * (env * tone + air), 3200)
+    tone = (
+        1.00 * np.sin(2 * np.pi * f * t)
+        + 0.045 * np.sin(2 * np.pi * 2 * f * t)
+        + 0.018 * np.sin(2 * np.pi * 3 * f * t)
+    )
+    breath = butter_lp(butter_hp(RNG.standard_normal(n), 700), 2200) * 0.0035
+    return butter_lp(amp * env * (tone + breath), 2500)
+
+
+def nylon(freq: float, dur: float, amp: float) -> np.ndarray:
+    n = max(1, int((dur + 0.95) * SR))
+    t = np.arange(n) / SR
+    env = (1.0 - np.exp(-t * 320.0)) * np.exp(-t * 2.35)
+    sig = np.zeros(n)
+    for k, a, d in (
+        (1, 1.00, 2.15),
+        (2, 0.34, 3.40),
+        (3, 0.11, 5.10),
+        (4, 0.045, 7.20),
+        (5, 0.018, 9.50),
+    ):
+        fk = k * freq * (1.0 + 0.00018 * k)
+        sig += a * np.sin(2 * np.pi * fk * t) * np.exp(-t * d)
+    nail_n = min(n, int(0.006 * SR))
+    nail = np.zeros(n)
+    nail[:nail_n] = RNG.standard_normal(nail_n) * np.linspace(1.0, 0.0, nail_n)
+    nail = butter_hp(butter_lp(nail, 4200), 900) * 0.07
+    body = butter_lp(butter_hp(amp * (env * sig + nail), 210), 3600)
+    tail = int(0.05 * SR)
+    if tail < n:
+        body[-tail:] *= np.linspace(1.0, 0.0, tail)
+    return body
+
+
+def gold_harmonic(freq: float, dur: float, amp: float) -> np.ndarray:
+    n = max(1, int((dur + 0.55) * SR))
+    t = np.arange(n) / SR
+    env = (1.0 - np.exp(-t * 90.0)) * np.exp(-t * 1.45)
+    f = freq * 2.0
+    tone = (
+        0.78 * np.sin(2 * np.pi * f * t) * np.exp(-t * 1.15)
+        + 0.16 * np.sin(2 * np.pi * 2 * f * t) * np.exp(-t * 2.8)
+        + 0.05 * np.sin(2 * np.pi * 3 * f * t) * np.exp(-t * 4.5)
+    )
+    return butter_lp(amp * env * tone, 5200)
 
 
 def put_flute(buf, bar, beat, name, dur, amp, pan=0.12):
@@ -164,8 +209,36 @@ def put_flute(buf, bar, beat, name, dur, amp, pan=0.12):
 
 def play_flute(buf, notes, start_bar: int, amp: float):
     for off, beat, name, dur in notes:
-        # flauta fica no registro da frase (D5–G5), não sobe oitava
+        if dur < 0.75:
+            continue
         put_flute(buf, start_bar + off, beat, name, dur, amp)
+
+
+def put_gtr(buf, bar, beat, name, dur, amp, pan=0.18):
+    when = bar_time(bar, beat) + float(RNG.uniform(-0.004, 0.004))
+    mix_in(buf, when, nylon(NOTE[name], dur * BEAT, amp), pan)
+
+
+def mid_strings(tones: list[str]) -> list[str]:
+    mid = [n for n in tones if MIDI[n] >= 59]
+    return mid if len(mid) >= 3 else tones[-3:]
+
+
+def guitar_bar(gtr, bar, tones, kind: str):
+    mid = mid_strings(tones)
+    if kind == 'sparse':
+        return
+    if kind == 'walk':
+        put_gtr(gtr, bar, 0.0, mid[0], 2.4, 0.042, pan=0.16)
+        put_gtr(gtr, bar, 2.0, mid[min(2, len(mid) - 1)], 2.2, 0.034, pan=0.24)
+    elif kind == 'run':
+        order = (0, 1, 2, 1)
+        for i, idx in enumerate(order):
+            put_gtr(gtr, bar, float(i), mid[idx % len(mid)], 1.7, 0.030, pan=0.14 if i % 2 == 0 else 0.26)
+    elif kind == 'peak':
+        order = (0, 1, 2, 1, 2, 1, 0, 2)
+        for i, idx in enumerate(order):
+            put_gtr(gtr, bar, i * 0.5, mid[idx % len(mid)], 1.15, 0.034, pan=0.12 if i % 2 == 0 else 0.28)
 
 
 def bar_time(bar: float, beat: float = 0.0) -> float:
@@ -213,17 +286,14 @@ def play_line(lead, notes, start_bar: int, amp: float, lift=False, thirds=False,
     for off, beat, name, dur in notes:
         n = up(name) if lift and up(name) in NOTE else name
         if (not tight) and name == 'G5' and dur <= 0.6:
-            grace = 'D6' if lift and 'D6' in NOTE else 'D5'
-            put(lead, start_bar + off, beat - 0.0625, grace, 0.125, amp * 0.32, pan=-0.08)
-        put(lead, start_bar + off, beat, n, dur, amp, pan=-0.04, human=not tight)
+            put(lead, start_bar + off, beat - 0.0625, 'D5', 0.125, amp * 0.22, pan=-0.08)
+        put(lead, start_bar + off, beat, n, dur, amp * (0.62 if lift else 1.0), pan=-0.04, human=not tight)
         if (not tight) and name == 'E5' and dur >= 1.8:
-            pedal = 'G4' if not lift else 'G5'
-            put(lead, start_bar + off, beat, pedal, dur, amp * 0.14, pan=-0.22)
-        if thirds and name == 'E5' and dur >= 1.8 and n in THIRD:
-            put(lead, start_bar + off, beat, THIRD[n], dur * 0.7, amp * 0.18, pan=0.24)
-        hi = up(n)
-        if sparkle and name == 'G5' and dur >= 1.8 and hi in NOTE:
-            put(lead, start_bar + off, beat, hi, dur * 0.5, amp * 0.14, pan=0.10)
+            put(lead, start_bar + off, beat, 'G4', dur, amp * 0.12, pan=-0.22)
+        if thirds and (not lift) and name == 'E5' and dur >= 1.8 and n in THIRD:
+            put(lead, start_bar + off, beat, THIRD[n], dur * 0.7, amp * 0.12, pan=0.24)
+        if sparkle and (not lift) and name == 'G5' and dur >= 1.8:
+            put(lead, start_bar + off, beat, 'D5', dur * 0.4, amp * 0.08, pan=0.10)
 
 
 def acc_pattern(acc, bar, tones, kind: str):
@@ -250,44 +320,45 @@ def render() -> np.ndarray:
     acc = np.zeros((N, 2), dtype=np.float64)
     lead = np.zeros((N, 2), dtype=np.float64)
     wind = np.zeros((N, 2), dtype=np.float64)
+    gtr = np.zeros((N, 2), dtype=np.float64)
     voices = voicings()
 
     for bar, tones in enumerate(voices):
         if bar < 8:
-            acc_pattern(acc, bar, tones, 'sparse')
+            kind = 'sparse'
         elif bar < 12:
-            acc_pattern(acc, bar, tones, 'walk')
-        elif bar < 16:
-            acc_pattern(acc, bar, tones, 'run')
-        elif bar < 32:
-            acc_pattern(acc, bar, tones, 'run')
+            kind = 'walk'
         elif bar < 40:
-            acc_pattern(acc, bar, tones, 'run')
+            kind = 'run'
         elif bar < 48:
-            acc_pattern(acc, bar, tones, 'peak')
+            kind = 'peak'
         elif bar < 52:
-            acc_pattern(acc, bar, tones, 'walk')
+            kind = 'walk'
         else:
-            acc_pattern(acc, bar, tones, 'sparse')
+            kind = 'sparse'
+        acc_pattern(acc, bar, tones, kind)
+        guitar_bar(gtr, bar, tones, kind)
 
     put(lead, 6, 2.0, 'E5', 2.0, 0.04, pan=0.08)
     put_flute(wind, 6, 2.0, 'E5', 2.0, 0.055, pan=0.16)
     put(lead, 14, 2.0, 'D5', 1.5, 0.08, pan=-0.06)
     put(lead, 15, 0.0, 'D5', 1.5, 0.11, pan=-0.05)
-    put(lead, 15, 1.5, 'G5', 0.5, 0.13, pan=-0.04)
+    put(lead, 15, 1.5, 'G5', 0.5, 0.09, pan=-0.04)
     put(lead, 15, 2.0, 'E5', 2.0, 0.12, pan=-0.04)
     play_flute(wind, HOOK[:3], 15, 0.06)
 
-    play_line(lead, THEME, 16, 0.17, thirds=True)
-    play_flute(wind, HOOK, 16, 0.048)
-    play_line(lead, THEME, 24, 0.145, lift=True, thirds=True)
-    play_flute(wind, THEME, 24, 0.07)
-    play_line(lead, BRIDGE, 32, 0.135)
-    play_flute(wind, BRIDGE, 32, 0.065)
+    play_line(lead, THEME, 16, 0.16, thirds=True)
+    play_flute(wind, HOOK, 16, 0.042)
+    play_line(lead, THEME, 24, 0.12, lift=True)
+    play_flute(wind, THEME, 24, 0.058)
+    play_line(lead, BRIDGE, 32, 0.125)
+    play_flute(wind, BRIDGE, 32, 0.052)
 
-    play_line(lead, THEME, 40, 0.19, thirds=True, sparkle=True, tight=True)
-    play_line(lead, THEME, 40, 0.11, lift=True, tight=True)
-    play_flute(wind, THEME, 40, 0.10)
+    play_line(lead, THEME, 40, 0.17, thirds=True, tight=True)
+    play_line(lead, THEME, 40, 0.07, lift=True, tight=True)
+    play_flute(wind, THEME, 40, 0.08)
+    mix_in(gtr, bar_time(40, 2.0), gold_harmonic(NOTE['E5'], 2.0 * BEAT, 0.055), 0.08)
+    mix_in(gtr, bar_time(44, 2.0), gold_harmonic(NOTE['E5'], 2.0 * BEAT, 0.048), 0.10)
 
     play_line(lead, HOOK, 48, 0.13)
     put(lead, 50, 0.0, 'D5', 1.0, 0.10, pan=-0.04)
@@ -303,14 +374,20 @@ def render() -> np.ndarray:
     acc[:, 1] = circ_iir(acc[:, 1], lambda x: butter_lp(x, 2400))
     lead[:, 0] = circ_iir(lead[:, 0], lambda x: butter_hp(x, 220))
     lead[:, 1] = circ_iir(lead[:, 1], lambda x: butter_hp(x, 220))
+    lead[:, 0] = circ_iir(lead[:, 0], lambda x: butter_lp(x, 3100))
+    lead[:, 1] = circ_iir(lead[:, 1], lambda x: butter_lp(x, 3100))
     wind[:, 0] = circ_iir(wind[:, 0], lambda x: butter_hp(x, 380))
     wind[:, 1] = circ_iir(wind[:, 1], lambda x: butter_hp(x, 380))
+    wind[:, 0] = circ_iir(wind[:, 0], lambda x: butter_lp(x, 2400))
+    wind[:, 1] = circ_iir(wind[:, 1], lambda x: butter_lp(x, 2400))
+    gtr[:, 0] = circ_iir(gtr[:, 0], lambda x: butter_hp(x, 200))
+    gtr[:, 1] = circ_iir(gtr[:, 1], lambda x: butter_hp(x, 200))
 
     delay = int(0.0007 * SR)
     wide = np.zeros_like(lead)
     wide[:, 0] = lead[:, 0]
     wide[:, 1] = np.roll(lead[:, 1], delay)
-    mix = 0.62 * acc + 1.12 * wide + 0.90 * wind
+    mix = 0.62 * acc + 1.12 * wide + 0.90 * wind + 0.88 * gtr
     wet = np.stack([room(mix[:, 0]), room(mix[:, 1])], axis=1)
     mix = 0.90 * mix + 0.10 * wet
 
@@ -335,8 +412,8 @@ def render() -> np.ndarray:
 
     mix[:, 0] = circ_iir(mix[:, 0], lambda x: butter_hp(x, 165))
     mix[:, 1] = circ_iir(mix[:, 1], lambda x: butter_hp(x, 165))
-    mix[:, 0] = circ_iir(mix[:, 0], lambda x: butter_lp(x, 9000))
-    mix[:, 1] = circ_iir(mix[:, 1], lambda x: butter_lp(x, 9000))
+    mix[:, 0] = circ_iir(mix[:, 0], lambda x: butter_lp(x, 7200))
+    mix[:, 1] = circ_iir(mix[:, 1], lambda x: butter_lp(x, 7200))
 
     peak = np.max(np.abs(mix)) or 1.0
     mix = np.tanh(mix * (0.80 / peak))

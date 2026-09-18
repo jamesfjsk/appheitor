@@ -25,11 +25,12 @@ import { useData } from '../../../contexts/DataContext';
 import { useClock } from '../../../contexts/ClockContext';
 import { dueTasksOn } from '../../../services/village/schedule';
 import { buildUpgrade, canBuild, setThemeRequest } from '../../../services/englishBaseService';
-import { burnWood, repairBuilding, repairLot } from '../../../services/villageService';
+import { repairBuilding, repairLot } from '../../../services/villageService';
 import { repairMaterialCost } from '../../../services/village/repair';
 import { addDays, getTodayBrazil } from '../../../utils/clock';
 import type { BuildingId } from '../../../types/english';
 import { getLevelFromXP } from '../../../utils/levelSystem';
+import type { ForgeTab } from '../../../services/village/furnace';
 
 const THEME_MAX = 30;
 
@@ -39,7 +40,7 @@ interface Props {
   onOpenMine: () => void;
   onOpenChest: () => void;
   onOpenTower: () => void;
-  onOpenWorkshop: () => void;
+  onOpenWorkshop: (tab?: ForgeTab) => void;
   onOpenQuiz: () => void;
   onOpenBank?: () => void;
   onOpenAgenda?: () => void;
@@ -383,27 +384,9 @@ const BuildingCard: React.FC<Props> = ({
 
           {id === 'fornalha' && (
             <>
-              {level >= 2 && (
-                <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenWorkshop(); }}>
-                  Fundir
-                </button>
-              )}
-              {level >= 3 && (
-                <button
-                  type="button"
-                  className="mc-btn mc-btn-gold w-full min-h-[44px] font-bold"
-                  onClick={async () => {
-                    if (!childUid) return;
-                    playClick();
-                    try {
-                      await burnWood(childUid);
-                      toast.success('5 madeira viraram 1 redstone');
-                    } catch (e) {
-                      toast.error(e instanceof Error ? e.message : 'Não deu para queimar');
-                    }
-                  }}
-                >
-                  Queimar 5 madeira
+              {level >= 1 && (
+                <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenWorkshop('fire'); }}>
+                  Abrir o fogo
                 </button>
               )}
               <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenMine(); }}>

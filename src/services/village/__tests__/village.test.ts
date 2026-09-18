@@ -10,6 +10,7 @@ import { computeTaskLoot, xpWithBoots } from '../loot';
 import { defaultHabitsForNow, noticesForNow, pickLine } from '../notices';
 import { dueTasksOn, isChestTime, nextFullDays, periodAllowedAt, rangeCoversDate, weekdayFromDate } from '../schedule';
 import { canBuy, canCraft, priceOf, tradePreview } from '../shop';
+import { burnedToday, furnaceOpensForge, forgeStartTab } from '../furnace';
 import type { NoticeContext, ScheduleTask, VillageGear } from '../../../types/village';
 
 const gear = (over: Partial<VillageGear> = {}): VillageGear => ({ ...EMPTY_GEAR, ...over });
@@ -291,6 +292,7 @@ test('priceOf com multiplicador e canCraft recusa sem ferro', () => {
   expect(tradePreview('madeira', 'pedra')).toEqual({ ok: true, fromQty: 3, toQty: 1, from: 'madeira', to: 'pedra' });
   expect(tradePreview('ferro', 'ferro').ok).toBe(false);
   expect(tradePreview('madeira', 'redstone').ok).toBe(false);
+  expect(tradePreview('redstone', 'pedra').ok).toBe(false);
   expect(canBuy({ owned: [] }, 30, 'hat_cap', undefined, 1).reason).toBe('level');
   expect(canCraft({ madeira: 10, pedra: 10, ferro: 10, redstone: 10 }, rare, 'pickaxe_iron', 1, 5).reason).toBe('level');
   expect(canCraft({ madeira: 0, pedra: 0, ferro: 14, redstone: 10 }, rare, 'pickaxe_gold', 2, 22).reason).toBe('rare');
@@ -382,8 +384,22 @@ test('ids únicos no catálogo de itens', () => {
 test('trilha da vila some na mina e na prova, e fica nas missões', () => {
   expect(bgmDuckFor(null, false)).toBe(false);
   expect(bgmDuckFor('house', false)).toBe(false);
+  expect(bgmDuckFor('workshop', false)).toBe(false);
   expect(bgmDuckFor('mine', false)).toBe(true);
   expect(bgmDuckFor(null, true)).toBe(true);
+});
+
+test('fornalha e ferraria são o mesmo fogo', () => {
+  expect(furnaceOpensForge(0, false)).toBe(false);
+  expect(furnaceOpensForge(1, false)).toBe(true);
+  expect(furnaceOpensForge(3, true)).toBe(false);
+  expect(forgeStartTab('furnace')).toBe('fire');
+  expect(forgeStartTab('fundir')).toBe('fire');
+  expect(forgeStartTab('hotbar')).toBe('gear');
+  expect(forgeStartTab('pack')).toBe('gear');
+  expect(forgeStartTab('obras')).toBe('works');
+  expect(burnedToday({ claimed: {} }, '2026-09-18')).toBe(false);
+  expect(burnedToday({ claimed: { 'burn:2026-09-18': '1' } }, '2026-09-18')).toBe(true);
 });
 
 void run();

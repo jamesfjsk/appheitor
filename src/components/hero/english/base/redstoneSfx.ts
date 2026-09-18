@@ -1,6 +1,4 @@
-// ========================================
-// Bancada: cliques, fio, erro e circuito feito. Sem arquivo de áudio.
-// ========================================
+import { N, sfxThump, sfxTone, sfxWood, withSfx } from '../../../../services/village/uiSfx';
 
 export interface RedstoneSfx {
   toggle: () => void;
@@ -12,81 +10,48 @@ export interface RedstoneSfx {
   power: () => void;
 }
 
-const semi = (n: number): number => 440 * Math.pow(2, n / 12);
-
-function tone(
-  ctx: AudioContext,
-  type: OscillatorType,
-  freq: number,
-  startAt: number,
-  durationSec: number,
-  gain: number,
-  endFreq?: number,
-): void {
-  const osc = ctx.createOscillator();
-  const g = ctx.createGain();
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, startAt);
-  if (endFreq !== undefined) osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), startAt + durationSec);
-  g.gain.setValueAtTime(0.0001, startAt);
-  g.gain.exponentialRampToValueAtTime(gain, startAt + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, startAt + durationSec);
-  osc.connect(g);
-  g.connect(ctx.destination);
-  osc.start(startAt);
-  osc.stop(startAt + durationSec + 0.02);
-}
-
 export function createRedstoneSfx(getContext: () => AudioContext | null, enabled: () => boolean): RedstoneSfx {
-  const withCtx = (fn: (ctx: AudioContext, now: number) => void): void => {
-    if (!enabled()) return;
-    let ctx: AudioContext | null = null;
-    try {
-      ctx = getContext();
-    } catch {
-      ctx = null;
-    }
-    if (!ctx) return;
-    try {
-      if (ctx.state === 'suspended') void ctx.resume();
-      fn(ctx, ctx.currentTime);
-    } catch {
-      // som opcional
-    }
+  const go = (fn: (ctx: AudioContext, now: number) => void): void => {
+    withSfx(getContext(), enabled(), fn);
   };
 
   return {
     toggle: () => {
-      withCtx((ctx, now) => {
-        tone(ctx, 'square', 180, now, 0.05, 0.12);
-        tone(ctx, 'triangle', 420, now + 0.03, 0.06, 0.08);
+      go((ctx, now) => {
+        sfxWood(ctx, now, 0.045, 1320, 0.03);
+        sfxTone(ctx, N.G4, now, 0.06, 0.03, { lp: 1600, atk: 0.005 });
       });
     },
     paint: () => {
-      withCtx((ctx, now) => tone(ctx, 'triangle', 220, now, 0.07, 0.1, 160));
+      go((ctx, now) => {
+        sfxWood(ctx, now, 0.04, 900, 0.04);
+        sfxTone(ctx, N.B4, now, 0.07, 0.04, { endFreq: N.G4, lp: 1700 });
+      });
     },
     repair: () => {
-      withCtx((ctx, now) => {
-        tone(ctx, 'square', 90, now, 0.08, 0.12);
-        tone(ctx, 'triangle', 300, now + 0.05, 0.08, 0.08);
+      go((ctx, now) => {
+        sfxThump(ctx, now, 0.08);
+        sfxTone(ctx, N.D5, now + 0.05, 0.08, 0.05, { type: 'triangle', lp: 2000 });
       });
     },
     ok: () => {
-      withCtx((ctx, now) => tone(ctx, 'square', semi(7), now, 0.07, 0.1));
+      go((ctx, now) => sfxTone(ctx, N.G5, now, 0.08, 0.06, { lp: 2200 }));
     },
     fail: () => {
-      withCtx((ctx, now) => tone(ctx, 'square', 140, now, 0.18, 0.16, 60));
+      go((ctx, now) => {
+        sfxWood(ctx, now, 0.06, 320, 0.07);
+        sfxTone(ctx, N.E5, now, 0.16, 0.06, { endFreq: N.G4, lp: 1500 });
+      });
     },
     win: () => {
-      withCtx((ctx, now) => {
-        tone(ctx, 'square', semi(0), now, 0.1, 0.1);
-        tone(ctx, 'square', semi(4), now + 0.1, 0.1, 0.1);
-        tone(ctx, 'square', semi(7), now + 0.2, 0.22, 0.12);
-        tone(ctx, 'triangle', semi(12), now + 0.28, 0.28, 0.1);
+      go((ctx, now) => {
+        sfxTone(ctx, N.D5, now, 0.12, 0.08, { lp: 2200 });
+        sfxTone(ctx, N.G5, now + 0.11, 0.12, 0.09, { lp: 2300 });
+        sfxTone(ctx, N.E5, now + 0.22, 0.32, 0.1, { lp: 2200 });
       });
     },
     power: () => {
-      withCtx((ctx, now) => tone(ctx, 'sine', 90, now, 0.12, 0.08, 220));
+      go((ctx, now) => sfxTone(ctx, N.G4, now, 0.14, 0.05, { endFreq: N.D5, lp: 1400 }));
     },
   };
 }

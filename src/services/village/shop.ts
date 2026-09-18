@@ -63,6 +63,6 @@ export function tradePreview(
   from: Material,
   to: Material
 ): { ok: boolean; fromQty: number; toQty: number; from: Material; to: Material } {
-  if (from === to || to === 'redstone') return { ok: false, fromQty: 3, toQty: 1, from, to };
+  if (from === to || from === 'redstone' || to === 'redstone') return { ok: false, fromQty: 3, toQty: 1, from, to };
   return { ok: true, fromQty: 3, toQty: 1, from, to };
 }

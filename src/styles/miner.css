@@ -2406,3 +2406,140 @@ div.mn-pack-cell {
 .mn-pack-cell.mc-slot-selected .mn-pack-name {
   color: var(--mc-gold-hi);
 }
+
+/* ---------- fogo da Ferraria (Fornalha e oficina são o mesmo lugar) ---------- */
+.mn-forge {
+  display: grid;
+  gap: 12px;
+}
+.mn-forge-mouth {
+  position: relative;
+  height: 148px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #140e0b;
+  box-shadow: inset 0 0 0 4px #17130f, inset 0 -18px 28px rgba(0, 0, 0, 0.45);
+}
+.mn-forge-sprite {
+  position: absolute;
+  inset: 8px 0 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.mn-forge-glow {
+  position: absolute;
+  left: 28%;
+  right: 28%;
+  bottom: 6%;
+  height: 42%;
+  background: radial-gradient(ellipse at 50% 80%, rgba(255, 146, 42, 0.9), rgba(255, 80, 0, 0.15) 58%, transparent 72%);
+  animation: mn-forge-flicker 0.32s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.mn-forge-mouth.is-cook .mn-forge-glow {
+  left: 18%;
+  right: 18%;
+  height: 62%;
+  background: radial-gradient(ellipse at 50% 80%, rgba(255, 210, 80, 1), rgba(255, 90, 10, 0.55) 50%, transparent 72%);
+}
+.mn-forge-puff {
+  position: absolute;
+  bottom: 34%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(210, 210, 210, 0.55);
+  animation: mn-forge-rise 0.9s ease-out forwards;
+  pointer-events: none;
+}
+.mn-forge-k {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mc-gold-hi);
+}
+.mn-forge-block {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(12, 10, 8, 0.35);
+}
+.mn-forge-block.is-lock::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: rgba(8, 6, 5, 0.45);
+  pointer-events: none;
+}
+.mn-forge-block.is-ash {
+  filter: grayscale(0.85) brightness(0.78);
+}
+.mn-forge-picks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.mn-forge-pick {
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+}
+.mn-forge-pick-n {
+  font-size: 11px;
+  font-weight: 700;
+}
+.mn-forge-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mn-forge-slot {
+  width: 52px;
+  height: 52px;
+  min-height: 44px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.mn-forge-slot img {
+  width: 28px;
+  height: 28px;
+}
+.mn-forge-slot.is-ghost {
+  opacity: 0.28;
+}
+.mn-forge-qty {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font-size: 11px;
+}
+.mn-forge-arrow {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--mc-gold-hi);
+}
+@keyframes mn-forge-flicker {
+  from { opacity: 0.72; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1.06); }
+}
+@keyframes mn-forge-rise {
+  to { transform: translateY(-64px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-forge-glow,
+  .mn-forge-puff {
+    animation: none;
+  }
+}

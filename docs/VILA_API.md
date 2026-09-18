@@ -57,7 +57,7 @@ Módulos sem Firebase, React ou `import.meta.env`. Testes: `npm run test:village
 - `priceOf(item, settings?)` — `round(base * goldPriceMultiplier)`.
 - `canBuy(village, gold, item, settings?)` — não possui e o saldo cobre.
 - `canCraft(materials, rare, gearId, currentLevel?)` — custo; picareta em ordem; recusa sem ferro.
-- `tradePreview(from, to)` — troca 3:1 (recusa se iguais).
+- `tradePreview(from, to)` — troca 3:1 (recusa se iguais ou se redstone entra/sai).
 
 ## `src/services/village/notices.ts`
 
@@ -181,7 +181,7 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 
 - `canBuy(..., level?)` — `reason: 'level'` + `minLevel`.
 - `canCraft(..., minerLevel?)` — idem.
-- `tradePreview` recusa redstone como destino.
+- `tradePreview` recusa redstone na entrada e na saída.
 
 ## Serviços Firebase
 
@@ -232,7 +232,7 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 - `Cofrinho` — abas Cofrinho / Extrato / Paciência; placa se `modules.bank === false`.
 - `Extrato` — 5 semanas; `embedded` quando dentro do Banco.
 - `Agenda` / `DesafiosCard` / `Mochila` / `ItemSlot` / `ItemCard` / `Casa`.
-- Ferraria (`Oficina.tsx`) — Forjar, Fundição (Fornalha n2), Obras só leitura.
+- Ferraria (`Oficina.tsx`) — mesmo lugar que a Fornalha: Fogo (máquina), Forjar, Obras só leitura.
 - Mercado — Loja com `ItemSlot`, Prêmios de verdade embutidos, Comerciante.
 - Cena — sprite da Casa, fumaça da chaminé, rachadura (PNG ou 3 linhas).
 

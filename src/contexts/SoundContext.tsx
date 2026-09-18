@@ -1,5 +1,17 @@
-import React, { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { readSoundPref, villageBgm, writeSoundPref } from '../services/village/bgm';
+import {
+  playUiAchieve,
+  playUiClick,
+  playUiError,
+  playUiHammer,
+  playUiLevel,
+  playUiNote,
+  playUiReward,
+  playUiTask,
+  playUiTick,
+  playUiWhistle,
+} from '../services/village/uiSfx';
 
 interface SoundContextType {
   playTaskComplete: () => void;
@@ -36,6 +48,10 @@ interface SoundProviderProps {
 export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [isSoundEnabled, setIsSoundEnabled] = useState(() => readSoundPref());
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const enabledRef = useRef(isSoundEnabled);
+  const ctxRef = useRef<AudioContext | null>(null);
+  enabledRef.current = isSoundEnabled;
+  ctxRef.current = audioContext;
 
   useEffect(() => {
     villageBgm.enable(isSoundEnabled);
@@ -78,124 +94,16 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     villageBgm.duck(key, on);
   }, []);
 
-  // Função para criar tons usando Web Audio API
-  const playTone = (frequency: number, duration: number, type: OscillatorType = 'sine', volume: number = 0.3) => {
-    if (!isSoundEnabled || !audioContext) return;
-
-    try {
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-      oscillator.type = type;
-
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
-    } catch (error) {
-      console.warn('Erro ao reproduzir som:', error);
-    }
-  };
-
-  // Função para criar sequências de tons
-  const playSequence = (notes: { freq: number; duration: number; delay: number; type?: OscillatorType; volume?: number }[]) => {
-    if (!isSoundEnabled || !audioContext) return;
-
-    notes.forEach((note) => {
-      setTimeout(() => {
-        playTone(note.freq, note.duration, note.type || 'sine', note.volume || 0.3);
-      }, note.delay);
-    });
-  };
-
-  const playTaskComplete = () => {
-    // Som de sucesso - sequência ascendente
-    playSequence([
-      { freq: 523, duration: 0.15, delay: 0 },     // C5
-      { freq: 659, duration: 0.15, delay: 100 },   // E5
-      { freq: 784, duration: 0.3, delay: 200 }     // G5
-    ]);
-  };
-
-  const playLevelUp = () => {
-    // Som épico de level up
-    playSequence([
-      { freq: 392, duration: 0.2, delay: 0, type: 'square' },    // G4
-      { freq: 523, duration: 0.2, delay: 150, type: 'square' },  // C5
-      { freq: 659, duration: 0.2, delay: 300, type: 'square' },  // E5
-      { freq: 784, duration: 0.4, delay: 450, type: 'square' },  // G5
-      { freq: 1047, duration: 0.6, delay: 600, type: 'square', volume: 0.4 } // C6
-    ]);
-  };
-
-  const playRewardUnlocked = () => {
-    // Som mágico de recompensa
-    playSequence([
-      { freq: 880, duration: 0.1, delay: 0, type: 'triangle' },
-      { freq: 1108, duration: 0.1, delay: 80, type: 'triangle' },
-      { freq: 1318, duration: 0.1, delay: 160, type: 'triangle' },
-      { freq: 1760, duration: 0.3, delay: 240, type: 'triangle', volume: 0.4 }
-    ]);
-  };
-
-  const playAchievement = () => {
-    // Fanfarra de conquista
-    playSequence([
-      { freq: 523, duration: 0.2, delay: 0, type: 'sawtooth' },   // C5
-      { freq: 659, duration: 0.2, delay: 100, type: 'sawtooth' }, // E5
-      { freq: 784, duration: 0.2, delay: 200, type: 'sawtooth' }, // G5
-      { freq: 1047, duration: 0.4, delay: 300, type: 'sawtooth', volume: 0.4 } // C6
-    ]);
-  };
-
-  const playClick = () => {
-    // Som sutil de clique
-    playTone(800, 0.05, 'square', 0.1);
-  };
-
-  const playTick = () => {
-    playTone(196, 0.045, 'square', 0.07);
-  };
-
-  const playWhistle = () => {
-    playSequence([
-      { freq: 392, duration: 0.16, delay: 0, type: 'sine', volume: 0.14 },
-      { freq: 330, duration: 0.28, delay: 140, type: 'sine', volume: 0.12 },
-    ]);
-  };
-
-  const playHammer = () => {
-    playSequence([
-      { freq: 140, duration: 0.08, delay: 0, type: 'square', volume: 0.22 },
-      { freq: 90, duration: 0.05, delay: 30, type: 'sawtooth', volume: 0.12 },
-      { freq: 148, duration: 0.08, delay: 170, type: 'square', volume: 0.22 },
-      { freq: 92, duration: 0.05, delay: 200, type: 'sawtooth', volume: 0.12 },
-      { freq: 156, duration: 0.1, delay: 340, type: 'square', volume: 0.24 },
-      { freq: 98, duration: 0.06, delay: 370, type: 'sawtooth', volume: 0.14 },
-    ]);
-  };
-
-  const playError = () => {
-    // Som de erro - tom descendente
-    playSequence([
-      { freq: 400, duration: 0.2, delay: 0, type: 'sawtooth', volume: 0.2 },
-      { freq: 300, duration: 0.3, delay: 150, type: 'sawtooth', volume: 0.2 }
-    ]);
-  };
-
-  const playNotification = () => {
-    // Som de notificação suave
-    playSequence([
-      { freq: 880, duration: 0.15, delay: 0, type: 'sine', volume: 0.2 },
-      { freq: 1108, duration: 0.15, delay: 120, type: 'sine', volume: 0.2 }
-    ]);
-  };
+  const playTaskComplete = useCallback(() => playUiTask(ctxRef.current, enabledRef.current), []);
+  const playLevelUp = useCallback(() => playUiLevel(ctxRef.current, enabledRef.current), []);
+  const playRewardUnlocked = useCallback(() => playUiReward(ctxRef.current, enabledRef.current), []);
+  const playAchievement = useCallback(() => playUiAchieve(ctxRef.current, enabledRef.current), []);
+  const playClick = useCallback(() => playUiClick(ctxRef.current, enabledRef.current), []);
+  const playTick = useCallback(() => playUiTick(ctxRef.current, enabledRef.current), []);
+  const playWhistle = useCallback(() => playUiWhistle(ctxRef.current, enabledRef.current), []);
+  const playHammer = useCallback(() => playUiHammer(ctxRef.current, enabledRef.current), []);
+  const playError = useCallback(() => playUiError(ctxRef.current, enabledRef.current), []);
+  const playNotification = useCallback(() => playUiNote(ctxRef.current, enabledRef.current), []);
 
   const value: SoundContextType = {
     playTaskComplete,

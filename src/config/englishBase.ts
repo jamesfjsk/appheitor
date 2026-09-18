@@ -97,7 +97,7 @@ export const BUILDINGS: BuildingDef[] = [
     description: 'O motor de materiais da Vila.',
     effects: [
       'Seu primeiro contrato do dia rende +1 material.',
-      'Fundição: troca 3 por 1 de madeira, pedra e ferro aqui.',
+      'Fundição: 3 viram 1 de madeira, pedra e ferro no fogo da Ferraria.',
       'Queima: 5 madeira viram 1 redstone uma vez por dia.',
     ],
     effect: 'Seu primeiro contrato do dia rende +1 material.',

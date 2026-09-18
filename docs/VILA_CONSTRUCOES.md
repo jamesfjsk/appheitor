@@ -4,7 +4,7 @@ Documento de desenho (fonte de verdade a partir de 15/09/2026). Prevalece sobre 
 
 ## Princípio
 
-Na Vila, **construção é lugar**. Cada construção tem uma função própria, e tocar nela abre essa função (o cartão da construção, `docs/etapas/ETAPA_1B_CENA_V2.md` seção 3b), nunca uma lista genérica. A Oficina vira a **Ferraria**, a casa do Ferreiro (ao lado da Fornalha na cena): forjar equipamentos, a Fundição (liberada pela Fornalha nível 2) e a visão geral das obras; desenho em `docs/VILA_ITENS.md`. Os "distritos" da grade são atalhos para lugares que não são construções (Mina, Biblioteca, Mercado, Agenda, Placa) ou atalhos para construções já feitas (Torre, Baú).
+Na Vila, **construção é lugar**. Cada construção tem uma função própria, e tocar nela abre essa função (o cartão da construção, `docs/etapas/ETAPA_1B_CENA_V2.md` seção 3b), nunca uma lista genérica. **Fornalha e Ferraria são o mesmo fogo**: o lote na cena e a casa do Ferreiro abrem a mesma oficina (`Oficina.tsx`), com abas Fogo, Forjar e Obras. Desenho em `docs/VILA_ITENS.md`. Os "distritos" da grade são atalhos para lugares que não são construções (Mina, Biblioteca, Mercado, Agenda, Placa) ou atalhos para construções já feitas (Torre, Baú).
 
 Cada nível de uma construção tem que **mudar algo que a criança sente no dia seguinte**: um material a mais, uma proteção, uma porta que abre. Nada de "efeito chega na Etapa 2" na tela: se o efeito ainda não existe em código, a construção mostra o texto do efeito e a etiqueta "em breve", e o nível não pode ser comprado até existir.
 
@@ -14,13 +14,13 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 
 ### 1. Fornalha (Furnace): o motor de materiais
 
-- **Para que serve**: transformar o trabalho em mais material. É a primeira coisa que ele constrói e a que mais usa.
-- **Nível 1**: +1 material no primeiro contrato da Mina do dia (já existe).
-- **Nível 2**: **Fundição**: libera a aba Fundição da Ferraria (troca 3 por 1 entre madeira, pedra e ferro; redstone nunca entra na troca). O botão "Fundir" do cartão da Fornalha abre essa aba.
-- **Nível 3**: **Queima**: uma vez por dia, 5 madeira viram 1 redstone (única fonte de redstone fora da Mina; chave `burn:<data>` em `village.claimed`).
-- **Ao tocar**: cartão com o nível, a fumaça acesa se nível 1 ou mais, os botões "Fundir" (nível 2) e "Queimar 5 madeira" (nível 3), e "Ir para a Mina".
+- **Para que serve**: o fogo da Ferraria. Transformar o trabalho em mais material. É a primeira coisa que ele constrói e a que mais usa. Fornalha (lote) e Ferraria (Forjar) são **o mesmo lugar**.
+- **Nível 1**: +1 material no primeiro contrato da Mina do dia. Tocar no lote abre a Ferraria na aba **Fogo** (o bônus já vale; Fundir ainda fechado).
+- **Nível 2**: **Fundição** na aba Fogo: troca 3 por 1 entre madeira, pedra e ferro; redstone nunca entra nem sai. Commit imediato, cerimônia de fogo 1,8–2,4 s.
+- **Nível 3**: **Queima** na aba Fogo: uma vez por dia, 5 madeira viram 1 redstone (única fonte de redstone fora da Mina; chave `burn:<data>` em `village.claimed`). Cinza se já queimou hoje.
+- **Ao tocar**: nível 0 ou ruína abre o cartão (Construir / Arrumar / Melhorar). Nível 1+ em pé abre a Ferraria no Fogo. O cartão tem "Abrir o fogo" e "Ir para a Mina". Melhorar volta pelo botão da aba Fogo. Tecla O / Mochila abrem a mesma Ferraria na aba Forjar.
 - **Libera**: nada por si; é pré-requisito, junto com o Baú, da Torre, da Mesa e do Campinho.
-- **Visual**: `buildings/fornalha-1..3.png`; fumaça em partículas quando construída; janela acesa à noite.
+- **Visual**: `buildings/fornalha-1..3.png`; fumaça em partículas quando construída; janela acesa à noite; boca de fogo e SFX na aba Fogo.
 
 ### 2. Baú (Storage): o armazém
 
