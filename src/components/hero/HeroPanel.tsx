@@ -120,13 +120,13 @@ const HeroPanel: React.FC = () => {
                 punished={isPunished}
               />
             </div>
+          </div>
+          <AfterOnboard>
             {todayString === CHILD_BIRTHDAY_MMDD && (
               <div className="fixed top-4 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
                 <div className="mc-panel px-6 py-3 text-white font-bold">Feliz aniversário, Heitor!</div>
               </div>
             )}
-          </div>
-          <AfterOnboard>
             <DailyQuiz onComplete={markQuizDone} openRequested={quizRequestId} />
             <LevelUpModal />
           </AfterOnboard>

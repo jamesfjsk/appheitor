@@ -12,8 +12,9 @@ import CharacterPreview from './CharacterPreview';
 import ChildSheet from './ChildSheet';
 import { dayTimeline, occurrencesBetween } from '../../../services/village/agenda';
 import { markAgendaDone } from '../../../services/agendaService';
-import { addDays, getTodayBrazil, isNightHour } from '../../../utils/clock';
+import { addDays, getTodayBrazil, isNightHour, nowBrazil } from '../../../utils/clock';
 import { submitCheckin } from '../../../services/villageService';
+import { listGoldTransactions } from '../../../services/goldTx';
 import { subscribePlan } from '../../../services/englishBaseService';
 import { FirestoreService } from '../../../services/firestoreService';
 import { getDailyQuiz } from '../../../services/dailyQuizService';
@@ -89,8 +90,18 @@ const Casa: React.FC<{
           tomorrow: d.checkin.tomorrow,
         });
       }
-      setGoldToday(d?.goldEarned || 0);
     });
+    // Ouro de hoje: soma do que entrou hoje (dailyProgress.goldEarned só existe depois do fechamento) (18/09)
+    void listGoldTransactions(childUid, 300).then((txs) => {
+      const sum = txs.reduce((acc, t) => {
+        if (t.metadata && (t.metadata as { launch?: boolean }).launch === true) return acc;
+        const raw = t.createdAt;
+        const ms = (raw instanceof Date ? raw : new Date(raw as unknown as string)).getTime();
+        if (Number.isNaN(ms) || nowBrazil(ms).date !== today) return acc;
+        return t.amount > 0 ? acc + t.amount : acc;
+      }, 0);
+      setGoldToday(sum);
+    }).catch(() => undefined);
     void getDailyQuiz(childUid, today).then((q) => {
       if (q?.completed) setQuizLine(`acertou ${q.score ?? 0} de ${q.totalQuestions || q.questions.length || 0}`);
       else setQuizLine('ainda não fez');

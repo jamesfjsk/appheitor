@@ -120,6 +120,7 @@ async function isPunishedOn(userId: string, date: string): Promise<boolean> {
     const start = data.startDate?.toDate?.() as Date | undefined;
     const end = data.endDate?.toDate?.() as Date | undefined;
     if (!start || !end) return false;
+    if (data.isActive === false && !data.deactivatedAt) return false; // inativa sem data de desativação: não vale (18/09)
     const deactivated = data.deactivatedAt?.toDate?.() as Date | undefined;
     const endMs = deactivated ? Math.min(end.getTime(), deactivated.getTime()) : end.getTime();
     return rangeCoversDate(start.getTime(), endMs, date);

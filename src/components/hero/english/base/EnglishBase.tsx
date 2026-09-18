@@ -51,7 +51,8 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
   const { childUid } = useAuth();
   const { isSoundEnabled, playClick } = useSound();
   const { progress: userProgress } = useData();
-  const { village } = useVillage();
+  const { village, modules } = useVillage();
+  const cartOn = modules.logic === true; // Vagoneta só com o módulo ligado no painel (18/09)
   const [today] = useState(() => getTodayBrazil());
   const [base, setBase] = useState<BaseDoc | null>(null);
   const [plan, setPlan] = useState<DailyPlan | null>(null);
@@ -186,7 +187,7 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
         : active?.title ?? '';
   const errorMsg = loadError ?? genError;
 
-  if (childUid && view === 'redstone') {
+  if (childUid && view === 'redstone' && cartOn) {
     return (
       <Suspense fallback={<div className="rs-play" data-testid="redstone-play"><p className="rs-banner rs-play-note">Abrindo a bancada...</p></div>}>
         <CartBench
@@ -271,14 +272,16 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
               >
                 Contratos
               </button>
-              <button
-                type="button"
-                className="mc-btn px-3 py-1.5 text-sm font-bold mc-btn-stone"
-                onClick={() => { playClick(); setView('redstone'); }}
-                data-testid="tab-redstone"
-              >
-                Vagoneta
-              </button>
+              {cartOn && (
+                <button
+                  type="button"
+                  className="mc-btn px-3 py-1.5 text-sm font-bold mc-btn-stone"
+                  onClick={() => { playClick(); setView('redstone'); }}
+                  data-testid="tab-redstone"
+                >
+                  Vagoneta
+                </button>
+              )}
             </nav>
           )}
 

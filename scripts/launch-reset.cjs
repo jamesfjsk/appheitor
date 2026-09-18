@@ -180,7 +180,7 @@ async function main() {
   ]);
 
   const pendingRedemptions = redemptions.filter((r) => (r.data.status || 'pending') === 'pending');
-  const activePunish = [...punishmentMode, ...punishments].filter((r) => r.data.isActive !== false);
+  const activePunish = [...punishmentMode, ...punishments]; // todas, ativas ou não (18/09: inativa sem deactivatedAt fechava o dia como punido)
   const activeAchs = achievements.filter((r) => r.data.isActive !== false);
   const doneTasks = tasks.filter((r) => r.data.status && r.data.status !== 'pending');
   const launchGifts = goldTxs.filter((r) => isLaunchGift(r, launch));
