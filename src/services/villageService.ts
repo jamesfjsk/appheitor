@@ -233,6 +233,7 @@ export function fromVillageDoc(uid: string, data: Record<string, unknown>): Vill
     characterName: str(data.characterName, initial.characterName),
     onboardedAt: strOrNull(data.onboardedAt),
     launchedOn: strOrNull(data.launchedOn),
+    launchedAt: strOrNull(data.launchedAt),
     rare: {
       diamante: Math.max(0, num(rawRare.diamante)),
       esmeralda: Math.max(0, num(rawRare.esmeralda)),

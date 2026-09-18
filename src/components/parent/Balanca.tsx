@@ -16,6 +16,7 @@ const Balanca: React.FC = () => {
   const { progress } = useData();
   const [txs, setTxs] = useState<GoldTransaction[]>([]);
   const [launchedOn, setLaunchedOn] = useState<string | null>(null);
+  const [launchedAt, setLaunchedAt] = useState<string | null>(null);
 
   useEffect(() => {
     if (!childUid) return;
@@ -24,10 +25,10 @@ const Balanca: React.FC = () => {
 
   useEffect(() => {
     if (!childUid) return;
-    return subscribeVillage(childUid, (v) => setLaunchedOn(v.launchedOn ?? null));
+    return subscribeVillage(childUid, (v) => { setLaunchedOn(v.launchedOn ?? null); setLaunchedAt(v.launchedAt ?? null); });
   }, [childUid]);
 
-  const cut = useMemo(() => txsLastDays(sinceLaunch(txs, launchedOn), 7), [txs, launchedOn]);
+  const cut = useMemo(() => txsLastDays(sinceLaunch(txs, launchedOn, launchedAt), 7), [txs, launchedOn, launchedAt]);
   const { earned, spent, saved, bySource, spentBy, r7, rate, gamePct } = useMemo(
     () => balancaTotals(cut, DEFAULT_ECONOMY.incomeDayGold, { launchedOn }),
     [cut, launchedOn]

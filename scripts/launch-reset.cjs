@@ -17,6 +17,7 @@ function villageReset({ uid, name, characterName, createdAt, launch, nowIso }) {
     characterName,
     onboardedAt: null,
     launchedOn: launch,
+    launchedAt: nowIso,
     rare: { diamante: 0, esmeralda: 0 },
     gear: { pickaxe: 0, helmet: 0, boots: 0, lamp: 0, cape: 0 },
     character: {
@@ -50,6 +51,62 @@ function villageReset({ uid, name, characterName, createdAt, launch, nowIso }) {
   };
 }
 
+/**
+ * Dia do lançamento: nada feito ANTES do reset conta como jogo (lição de 18/09: o reset preservou a prova e o
+ * Recado feitos no teste do pai às 8h, e o Heitor perdeu a primeira prova e o primeiro contrato).
+ * Reabre a prova e os contratos do dia; apaga sessões, conclusões, movimentos de gold e fechamento do dia
+ * anteriores ao instante do reset. O backup do dia guarda tudo.
+ */
+async function launchDayPlan(api, uid, launch, cutoffIso, goldTxs) {
+  const iso = (x) => (x ? String(x) : '');
+  const before = (x) => iso(x) && iso(x) < cutoffIso;
+  const plan = { quiz: null, contracts: [], sessions: [], completions: [], goldTx: [], progressDoc: null };
+  const quiz = await api.get(`dailyQuizzes/${uid}_${launch}`);
+  if (quiz && quiz.data && quiz.data.completed === true && before(quiz.data.completedAt)) plan.quiz = quiz;
+  const dayPlan = await api.get(`englishPlans/${uid}_${launch}`);
+  if (dayPlan && dayPlan.data && dayPlan.data.contracts && typeof dayPlan.data.contracts === 'object') {
+    for (const [id, c] of Object.entries(dayPlan.data.contracts)) {
+      const finished = c && c.result && c.result.finishedAt;
+      if (c && c.status && c.status !== 'open' && (!finished || before(finished))) plan.contracts.push(id);
+    }
+    plan.dayPlan = dayPlan;
+  }
+  const sessions = await api.queryAll('englishSessions', 'userId', uid);
+  plan.sessions = sessions.filter((r) => r.data.date === launch && before(r.data.createdAt));
+  const completions = await api.queryAll('taskCompletions', 'userId', uid);
+  plan.completions = completions.filter((r) => r.data.date === launch && before(r.data.completedAt || r.data.createdAt));
+  plan.goldTx = (goldTxs || []).filter((r) => !isLaunchGift(r, launch) && brazilDateOf(r.data.createdAt) === launch && before(r.data.createdAt));
+  const dp = await api.get(`dailyProgress/${uid}_${launch}`);
+  if (dp && dp.data && before(dp.data.updatedAt || dp.data.createdAt)) plan.progressDoc = dp;
+  return plan;
+}
+
+function describeLaunchDay(plan) {
+  return `dia do lançamento (feito antes do reset): prova ${plan.quiz ? 'reabre' : 'ok'}, contratos reabertos ${plan.contracts.length}, `
+    + `sessões ${plan.sessions.length}, conclusões ${plan.completions.length}, gold ${plan.goldTx.length}, fechamento ${plan.progressDoc ? '1' : '0'}`;
+}
+
+async function applyLaunchDay(api, uid, launch, plan) {
+  if (plan.quiz) {
+    await api.patch(`dailyQuizzes/${uid}_${launch}`, {
+      completed: false, status: 'ready', score: null, totalQuestions: null, xpEarned: null, goldEarned: null,
+      answers: null, reflection: null, completedAt: null,
+    }, ['completed', 'status', 'score', 'totalQuestions', 'xpEarned', 'goldEarned', 'answers', 'reflection', 'completedAt']);
+  }
+  if (plan.contracts.length && plan.dayPlan) {
+    const contracts = JSON.parse(JSON.stringify(plan.dayPlan.data.contracts));
+    for (const id of plan.contracts) {
+      const c = contracts[id];
+      delete c.result;
+      c.status = 'open';
+      c.retryUsed = false;
+    }
+    await api.patch(`englishPlans/${uid}_${launch}`, { contracts }, ['contracts']);
+  }
+  const names = [...plan.sessions, ...plan.completions, ...plan.goldTx, ...(plan.progressDoc ? [plan.progressDoc] : [])].map((r) => r.name);
+  if (names.length) await api.commitChunks(names.map((name) => ({ delete: name })));
+}
+
 function isLaunchGift(row, launch) {
   const meta = row.data && row.data.metadata;
   if (!meta || meta.launch !== true) return false;
@@ -58,7 +115,7 @@ function isLaunchGift(row, launch) {
   return !day || day === launch;
 }
 
-(async () => {
+async function main() {
   const args = parseArgs();
   const uid = args.uid;
   if (!uid || args.uid === true) {
@@ -180,6 +237,8 @@ function isLaunchGift(row, launch) {
   console.log('  birthdayEvents 2026 marcado concluído');
   console.log(`  settings/dailyRules.activatedOn = ${launch} (doc da família)`);
   console.log(`  goldTransactions: +${gold} type adjustment source admin_adjustment metadata.launch`);
+  const launchDay = await launchDayPlan(api, uid, launch, new Date().toISOString(), goldTxs);
+  console.log('  ' + describeLaunchDay(launchDay));
 
   if (!apply) {
     console.log('dry-run: nada gravado. para aplicar: --apply --confirm "LANCAR ' + (villageName || '<nome da vila>') + '"');
@@ -324,6 +383,8 @@ function isLaunchGift(row, launch) {
     await api.patch('settings/dailyRules', { activatedOn: launch, updatedAt: nowIso }, ['activatedOn', 'updatedAt']);
   }
 
+  await applyLaunchDay(api, uid, launch, launchDay);
+
   await api.create('goldTransactions', {
     userId: uid,
     amount: gold,
@@ -339,7 +400,13 @@ function isLaunchGift(row, launch) {
   });
 
   console.log('apply ok');
-})().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+}
+
+module.exports = { launchDayPlan, describeLaunchDay, applyLaunchDay };
+
+if (require.main === module) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

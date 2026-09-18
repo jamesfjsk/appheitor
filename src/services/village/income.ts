@@ -23,9 +23,17 @@ function ymdDiff(from: string, to: string): number {
   return Math.round(ms / 86400000);
 }
 
-export function sinceLaunch(txs: GoldTransaction[], launchedOn?: string | null): GoldTransaction[] {
+export function sinceLaunch(txs: GoldTransaction[], launchedOn?: string | null, launchedAt?: string | null): GoldTransaction[] {
+  const cutMs = launchedAt ? new Date(launchedAt).getTime() : NaN;
   return txs.filter((t) => {
     if (t.metadata && t.metadata.launch === true) return false;
+    if (!launchedOn && !launchedAt) return true;
+    // com o instante do lançamento, corta por hora: o que o teste do pai fez no mesmo dia antes do reset não conta (18/09)
+    if (!Number.isNaN(cutMs)) {
+      const raw = t.createdAt;
+      const ms = (raw instanceof Date ? raw : new Date(raw)).getTime();
+      if (!Number.isNaN(ms)) return ms >= cutMs;
+    }
     if (!launchedOn) return true;
     const day = brazilDateOfTx(t);
     return !day || day >= launchedOn;
@@ -40,10 +48,10 @@ export function daysSinceLaunch(launchedOn?: string | null, today?: string): num
 export function referenceIncome(
   transactions7d: GoldTransaction[],
   fallback: number,
-  opts?: { launchedOn?: string | null; today?: string }
+  opts?: { launchedOn?: string | null; launchedAt?: string | null; today?: string }
 ): number {
   const launchedOn = opts?.launchedOn;
-  const cut = sinceLaunch(transactions7d, launchedOn);
+  const cut = sinceLaunch(transactions7d, launchedOn, opts?.launchedAt);
   if (launchedOn) {
     const days = daysSinceLaunch(launchedOn, opts?.today);
     if (days !== null && days < 7) return Math.max(1, Math.round(fallback));

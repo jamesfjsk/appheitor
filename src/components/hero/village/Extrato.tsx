@@ -30,7 +30,7 @@ const Extrato: React.FC<{ onClose?: () => void; embedded?: boolean; monthly?: bo
   const { economy, village } = useVillage();
   const { today } = useClock();
   const [txs, setTxs] = useState<GoldTransaction[]>([]);
-  const visible = useMemo(() => sinceLaunch(txs, village.launchedOn), [txs, village.launchedOn]);
+  const visible = useMemo(() => sinceLaunch(txs, village.launchedOn, village.launchedAt), [txs, village.launchedOn, village.launchedAt]);
 
   useEffect(() => {
     if (!childUid) return;

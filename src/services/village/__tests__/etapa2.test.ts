@@ -156,6 +156,10 @@ test('R7 ignora o histórico anterior ao lançamento e o presente', () => {
   });
   const play = tx({ amount: 45, type: 'earned', source: 'task_completion', createdAt: new Date('2026-09-22T15:00:00.000Z') });
   expect(sinceLaunch([old, gift, play], '2026-09-20')).toEqual([play]);
+  // com o instante do lançamento, o que foi feito no mesmo dia antes do reset fica de fora (18/09)
+  const sameDayBefore = { ...play, createdAt: new Date('2026-09-20T11:00:00.000Z') } as typeof play;
+  const sameDayAfter = { ...play, createdAt: new Date('2026-09-20T14:00:00.000Z') } as typeof play;
+  expect(sinceLaunch([sameDayBefore, gift, sameDayAfter], '2026-09-20', '2026-09-20T13:00:00.000Z')).toEqual([sameDayAfter]);
   expect(referenceIncome([old, gift, play], 45, { launchedOn: '2026-09-20', today: '2026-09-22' })).toBe(45);
   const week = Array.from({ length: 7 }, (_, i) =>
     tx({ amount: 30, type: 'earned', source: 'task_completion', createdAt: new Date(`2026-09-${21 + i}T15:00:00.000Z`) })

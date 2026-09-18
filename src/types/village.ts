@@ -73,6 +73,8 @@ export interface VillageDoc {
   onboardedAt: string | null;
   /** YYYY-MM-DD (Brasília). Extrato, Balança e R7 ignoram o que veio antes. */
   launchedOn?: string | null;
+  /** instante do reset de lançamento (ISO); o Extrato e a Balança cortam por ele, não só pela data (18/09) */
+  launchedAt?: string | null;
   rare: VillageRare;
   gear: VillageGear;
   character: VillageCharacter;
