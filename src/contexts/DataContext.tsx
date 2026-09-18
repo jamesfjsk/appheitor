@@ -429,16 +429,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       if (levelUpCheck.leveledUp) {
         playLevelUp();
-        toast.success(`Nível ${levelUpCheck.newLevel} alcançado`, {
-          duration: 5000
-        });
         emitMinerLevelUp(levelUpCheck);
 
         const newlyUnlockedRewards = rewards.filter(r => r.active && (r.requiredLevel || 1) === levelUpCheck.newLevel);
         if (newlyUnlockedRewards.length > 0) {
           setTimeout(() => {
             newlyUnlockedRewards.forEach(reward => {
-              toast.success(`Nova recompensa liberada: ${reward.title}`);
+              toast.success(`Nova recompensa liberada: ${reward.title}`, { id: 'child-notice' });
             });
           }, 2000);
         }
@@ -450,8 +447,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       const shownQty = paid.loot?.qty || 0;
       const matLabel = shownQty > 0 && paid.loot ? `, +${shownQty} ${MATERIAL_LABELS[paid.loot.material]}` : '';
+      const listedGold = task.origin === 'child' || task.origin === 'agenda' ? 0 : goldReward;
       const goldLabel = paid.gold > 0 ? `+${paid.gold} gold` : 'sem gold';
-      toast.success(`${goldLabel}${matLabel}, +${paid.xp} XP`);
+      const cutNote = paid.gold < listedGold && listedGold > 0
+        ? (vacationActive ? ' · modo férias' : ' · teto do dia')
+        : '';
+      const levelNote = levelUpCheck.leveledUp ? `Nível ${levelUpCheck.newLevel}! ` : '';
+      toast.success(`${levelNote}${goldLabel}${cutNote}${matLabel}, +${paid.xp} XP`, { id: 'child-notice' });
 
       try {
         if ((village.cracks || []).length > 0) {
@@ -495,7 +497,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
       throw error;
     }
-  }, [childUid, tasks, rewards, progress.totalXP, playLevelUp, checkAchievements, vacationApplyXP, vacationApplyGold, isOffline]);
+  }, [childUid, tasks, rewards, progress.totalXP, playLevelUp, checkAchievements, vacationApplyXP, vacationApplyGold, vacationActive, isOffline]);
 
   const completeLateTask = useCallback(async (taskId: string) => {
     if (!childUid) throw new Error('Child UID não definido');

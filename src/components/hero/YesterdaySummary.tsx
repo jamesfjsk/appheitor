@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useVillage } from '../../contexts/VillageContext';
 import { useData } from '../../contexts/DataContext';
 import { useClock } from '../../contexts/ClockContext';
-import { addDays } from '../../utils/clock';
+import { addDays, isBeforeLaunch } from '../../utils/clock';
 import { getDayClosure, DayClosure } from '../../services/dailyRulesService';
 import { dueTasksOn } from '../../services/village/schedule';
 import { buildingSprite } from '../../config/englishBase';
@@ -33,6 +33,7 @@ const YesterdaySummary: React.FC = () => {
     return full?.status === 'done' && full.lastCompletedDate === today;
   }).length;
 
+  if (isBeforeLaunch(addDays(today, -1), village.launchedOn)) return null;
   if (!closure || closure.totalTasksAvailable === 0) return null;
   if (closure.goldPenalty === 0 && closure.allTasksBonusGold === 0 && cracks.length === 0) return null;
 

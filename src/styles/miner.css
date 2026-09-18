@@ -485,6 +485,12 @@
   padding: 8px 12px 0;
   box-sizing: border-box;
 }
+.mn-village.is-compact-hud {
+  padding: 4px 10px 0;
+}
+.mn-village.is-compact-hud .mn-stage {
+  margin-top: 4px;
+}
 .mn-village-main {
   flex: 1 1 auto;
   min-height: 0;
@@ -531,11 +537,13 @@
 }
 .mn-placa-panel {
   position: absolute;
-  top: 10px;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
-  width: min(28rem, 72%);
+  width: min(22rem, 52%);
+  max-height: 26%;
+  overflow-y: auto;
   pointer-events: auto;
 }
 .mn-speech-next {
@@ -546,8 +554,28 @@
   z-index: 5;
 }
 .mn-hud.is-compact {
-  padding: 4px 8px;
-  gap: 6px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  padding: 2px 4px;
+  gap: 8px;
+  position: relative;
+  z-index: 45;
+}
+.mn-hud.is-compact .mc-chip {
+  min-width: 0;
+  flex-shrink: 0;
+  padding: 2px 8px 2px 6px;
+}
+.mn-hud.is-compact .mc-chip img {
+  width: 22px;
+  height: 22px;
+}
+.mn-hud.is-compact .mc-btn {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
 }
 .mn-hud.is-compact .mn-hud-xp,
 .mn-hud.is-compact .mn-compact-hide {

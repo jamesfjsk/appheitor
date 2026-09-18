@@ -10,7 +10,7 @@
 import { arrayUnion, collection, doc, getDoc, onSnapshot, runTransaction, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { BaseDoc, BuildingId, Contract, ContractOutcome, ContractResult, DailyPlan, Material, MaterialCount, PlanSource, ScaffoldStage } from '../types/english';
-import { BUILDINGS, MATERIALS, baseLevel, buildingCost, buildingOpensLater, canAfford, initialBaseDoc, isBuildingUnlocked, missingMaterials } from '../config/englishBase';
+import { BUILDINGS, MATERIALS, baseLevel, buildingCost, buildingOpensLater, canAfford, initialBaseDoc, isBuildingUnlocked, keepDoneContracts, missingMaterials } from '../config/englishBase';
 import { DEFAULT_ECONOMY } from '../config/village';
 import { getSettings } from './settingsService';
 import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, applyPickaxeBonus, buildXp, rewardFor } from '../config/englishRewards';
@@ -245,10 +245,12 @@ async function acquireLease(uid: string, date: string, level: number, force: boo
     if (!force) {
       if (plan.status === 'ready') return { kind: 'ready', plan };
       if (leaseActive(plan)) return { kind: 'busy' };
-    } else if (hasDone(plan)) {
+      tx.update(ref, { status: 'generating', generatingAt: token, level });
+      return { kind: 'acquired', token, previous: Object.fromEntries(Object.values(plan.contracts).map((c) => [c.id, c.version])) };
+    }
+    if (hasDone(plan)) {
       throw new Error('Este plano já tem contrato concluído e não pode ser regenerado.');
     }
-    // As versões antigas seguem subindo para uma tela com o contrato anterior não concluir por cima
     const previous = Object.fromEntries(Object.values(plan.contracts).map((c) => [c.id, c.version]));
     tx.update(ref, { status: 'generating', generatingAt: token, level, order: [], contracts: {}, rewardedIds: [] });
     return { kind: 'acquired', token, previous };
@@ -326,12 +328,27 @@ async function generateInto(
   token: string,
   previous: Record<string, number>,
   base: BaseDoc,
-  onProgress?: (ready: number, total: number) => void
+  onProgress?: (ready: number, total: number) => void,
+  force = false
 ): Promise<DailyPlan | null> {
   const ref = planRef(uid, date);
   const withVersion = (c: Contract): Contract => ({ ...c, version: (previous[c.id] ?? 0) + 1 });
-  // Gravações parciais em andamento: o commit final espera por elas para a transação não
-  // ler o doc e vê-lo mudar antes de gravar (failed-precondition + retentativa do SDK)
+  if (!force) {
+    const current = await getPlan(uid, date);
+    if (current && Object.keys(current.contracts).length >= PLAN_SIZE) {
+      const generatedAt = current.generatedAt || nowIso();
+      const committed = await runTransaction(db, async (tx) => {
+        const snap = await tx.get(ref);
+        if (!snap.exists() || snap.data().generatingAt !== token) return false;
+        tx.update(ref, { status: 'ready', generatingAt: null, generatedAt });
+        return true;
+      });
+      if (committed) {
+        prefetchPlanAudio(current);
+        return { ...current, status: 'ready', generatingAt: null, generatedAt };
+      }
+    }
+  }
   const partialWrites: Promise<void>[] = [];
   try {
     await assertAiBudget();
@@ -357,31 +374,31 @@ async function generateInto(
     const committed = await runTransaction(db, async (tx) => {
       const snap = await tx.get(ref);
       if (!snap.exists() || snap.data().generatingAt !== token) return false;
+      const snapPlan = fromPlanDoc(snap.id, snap.data());
+      const merged = keepDoneContracts(snapPlan.contracts, contracts, built.order);
       tx.update(ref, {
         status: 'ready',
         generatingAt: null,
         generatedAt,
         level: base.level,
-        order: built.order,
-        contracts: stripUndefined(contracts),
-        rewardedIds: [],
+        order: merged.order,
+        contracts: stripUndefined(merged.contracts),
+        rewardedIds: hasDone(snapPlan) ? snapPlan.rewardedIds : [],
         source: built.source,
         themeRequest: built.themeRequest,
       });
       return true;
     });
     if (!committed) return null;
-    // O pedido da Mesa vale para um dia só: consumido, sai da base
     if (built.themeRequest && base.themeRequest === built.themeRequest) {
       await updateDoc(baseRef(uid), { themeRequest: null, updatedAt: nowIso() }).catch(() => undefined);
     }
-    prefetchPlanAudio({ date, contracts });
-    return {
+    const ready = (await getPlan(uid, date)) || {
       id: planId(uid, date),
       userId: uid,
       date,
       level: base.level,
-      status: 'ready',
+      status: 'ready' as const,
       generatingAt: null,
       order: built.order,
       contracts,
@@ -391,6 +408,8 @@ async function generateInto(
       reviewedByParent: false,
       themeRequest: built.themeRequest,
     };
+    prefetchPlanAudio(ready);
+    return ready;
   } catch (error) {
     await releaseLease(uid, date, token).catch(() => undefined);
     throw error;
@@ -411,7 +430,7 @@ async function ensurePlanInner(uid: string, date: string, onProgress?: (ready: n
       if (waited) return waited;
       continue;
     }
-    const plan = await generateInto(uid, date, lease.token, lease.previous, base, onProgress);
+    const plan = await generateInto(uid, date, lease.token, lease.previous, base, onProgress, false);
     if (plan) return plan;
     // Outra aba assumiu no meio: fica com o resultado dela
     const waited = await waitForPlan(uid, date, onProgress);
@@ -443,7 +462,7 @@ async function regeneratePlan(uid: string, date: string): Promise<DailyPlan> {
     const base = await ensureBase(uid);
     const lease = await acquireLease(uid, date, base.level, true);
     if (lease.kind !== 'acquired') throw new Error('Não foi possível assumir a regeneração do plano.');
-    const plan = await generateInto(uid, date, lease.token, lease.previous, base);
+    const plan = await generateInto(uid, date, lease.token, lease.previous, base, undefined, true);
     if (!plan) throw new Error('Outra aba assumiu a geração deste plano.');
     return plan;
   })().finally(() => inFlight.delete(key));

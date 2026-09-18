@@ -13,6 +13,7 @@ import { merchantMaterial } from '../../../../config/englishRewards';
 import { evaluateRoom } from '../../../../services/english/merchantRoom';
 import { playText, prefetchAudio, stopAudio } from '../../../../services/englishTts';
 import type { ContractScreenProps } from './ContractShell';
+import toast from 'react-hot-toast';
 
 type Placement = MerchantPlacement & { key: number };
 type Speaking = { step: number; stage: 'loading' | 'playing' } | null;
@@ -35,7 +36,9 @@ const MerchantContract: React.FC<ContractScreenProps<'merchant'>> = ({ contract,
   const [textShown, setTextShown] = useState(false);
   const [perStep, setPerStep] = useState<boolean[] | null>(null);
   const [deliveries, setDeliveries] = useState(0);
+  const [firstHits, setFirstHits] = useState<number | null>(null); // recompensa só pela primeira entrega (18/09)
   const [nextKey, setNextKey] = useState(1);
+  const [confirmWrong, setConfirmWrong] = useState(false);
 
   useEffect(() => {
     prefetchAudio(content.sentences);
@@ -79,16 +82,23 @@ const MerchantContract: React.FC<ContractScreenProps<'merchant'>> = ({ contract,
     setNextKey((k) => k + 1);
     setMenu(null);
     setSelectedItem(null);
+    setConfirmWrong(false);
     sfx.hit(0);
   };
 
   const removePlacement = (key: number) => {
     setPlacements((prev) => prev.filter((p) => p.key !== key));
     setMenu(null);
+    setConfirmWrong(false);
   };
 
   const deliver = () => {
     const ev = evaluateRoom(steps, placements);
+    if (ev.hits !== steps.length && !confirmWrong) {
+      setConfirmWrong(true);
+      toast('Tem certeza? Ouça de novo', { id: 'child-notice' });
+      return;
+    }
     const n = deliveries + 1;
     setDeliveries(n);
     const plain = placements.map(({ item, qty, relation, spot }) => ({ item, qty, relation, spot }));
@@ -96,21 +106,25 @@ const MerchantContract: React.FC<ContractScreenProps<'merchant'>> = ({ contract,
     if (ev.hits === steps.length || textShown) {
       if (ev.hits === steps.length) sfx.checkpoint();
       else sfx.miss();
+      // o que paga é a primeira entrega; a segunda serve para ver e corrigir (decisão do pai em 18/09)
+      const paidHits = firstHits === null ? ev.hits : firstHits;
       onFinish({
-        score: ev.hits,
+        score: paidHits,
         max: steps.length,
-        materialEarned: merchantMaterial(ev.hits, steps.length, textShown),
+        materialEarned: merchantMaterial(paidHits, steps.length, textShown),
         answer: summary,
-        details: { listens, textShown, deliveries: n, perStep: ev.perStep, placements: plain },
+        details: { listens, textShown, deliveries: n, perStep: ev.perStep, placements: plain, firstHits: paidHits, finalHits: ev.hits },
       });
       return;
     }
-    // 1ª entrega com erro: mostra o texto completo e libera uma nova entrega
+    // 1ª entrega com erro: mostra o texto completo e libera uma nova entrega (só treino)
     sfx.miss();
+    setFirstHits(ev.hits);
     setPerStep(ev.perStep);
     setTextShown(true);
     setMenu(null);
     setSelectedItem(null);
+    setConfirmWrong(false);
   };
 
   const maxQty = menu && selectedItem ? Math.min(3, remaining.get(selectedItem) ?? 0) : 0;

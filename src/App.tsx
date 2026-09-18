@@ -85,6 +85,8 @@ function App() {
                   </div>
                   <Toaster 
                     position="bottom-center"
+                    gutter={8}
+                    containerStyle={{ bottom: 96, zIndex: 35 }}
                     toastOptions={{
                       duration: 4000,
                       style: {

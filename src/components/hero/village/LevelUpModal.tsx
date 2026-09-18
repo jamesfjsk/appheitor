@@ -3,8 +3,9 @@ import toast from 'react-hot-toast';
 import { getLevelTitle } from '../../../utils/levelSystem';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSound } from '../../../contexts/SoundContext';
-import { grantLevelGift } from '../../../services/villageService';
-import { rareGiftForLevel } from '../../../services/village/claims';
+import { useVillage } from '../../../contexts/VillageContext';
+import { grantLevelGift, markLevelGiftPending } from '../../../services/villageService';
+import { pendingLevelGiftLevels, rareGiftForLevel } from '../../../services/village/claims';
 import { levelGift } from '../../../services/village/levels';
 import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import { COSMETIC_BY_ID } from '../../../config/village';
@@ -14,30 +15,48 @@ const PICK: Array<'madeira' | 'pedra' | 'ferro'> = ['madeira', 'pedra', 'ferro']
 
 const LevelUpModal: React.FC = () => {
   const { user } = useAuth();
+  const { village } = useVillage();
   const { playLevelUp } = useSound();
   const [queue, setQueue] = useState<number[]>([]);
   const [busy, setBusy] = useState(false);
   const level = queue[0] ?? null;
+  const uid = user?.userId;
+
+  useEffect(() => {
+    const pending = pendingLevelGiftLevels(village.claimed, village.season);
+    if (!pending.length) return;
+    setQueue((prev) => {
+      const next = [...prev];
+      for (const n of pending) if (!next.includes(n)) next.push(n);
+      return next;
+    });
+  }, [village.claimed, village.season]);
 
   useEffect(() => {
     const onUp = (ev: Event) => {
       const detail = (ev as CustomEvent<{ level?: number; levels?: number[] }>).detail;
-      const next = Array.isArray(detail?.levels) && detail.levels.length
+      const incoming = Array.isArray(detail?.levels) && detail.levels.length
         ? detail.levels.filter((n) => typeof n === 'number')
         : typeof detail?.level === 'number' ? [detail.level] : [];
-      if (!next.length) return;
-      setQueue((prev) => [...prev, ...next]);
+      if (!incoming.length) return;
+      setQueue((prev) => {
+        const next = [...prev];
+        for (const n of incoming) if (!next.includes(n)) next.push(n);
+        return next;
+      });
       playLevelUp();
+      if (uid) {
+        for (const n of incoming) void markLevelGiftPending(uid, n).catch(() => undefined);
+      }
     };
     window.addEventListener('miner-level-up', onUp);
     return () => window.removeEventListener('miner-level-up', onUp);
-  }, [playLevelUp]);
+  }, [playLevelUp, uid]);
 
   if (level == null) return null;
 
   const rare = rareGiftForLevel(level);
-  const uid = user?.userId;
-  const gift = levelGift(level, 1);
+  const gift = levelGift(level, village.season);
   const marco = gift.cosmeticId ? COSMETIC_BY_ID[gift.cosmeticId] : null;
 
   const pick = async (material: 'madeira' | 'pedra' | 'ferro') => {

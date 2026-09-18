@@ -36,6 +36,18 @@ function maintenanceActive(): boolean {
   }
 }
 
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  try {
+    const key = 'mm_vite_preload_reload';
+    if (sessionStorage.getItem(key) === '1') return;
+    sessionStorage.setItem(key, '1');
+  } catch {
+    return;
+  }
+  window.location.reload();
+});
+
 const root = document.getElementById('root')!;
 const maintenance = maintenanceActive();
 

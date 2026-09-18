@@ -24,11 +24,12 @@ export const XP_BY_MATERIAL: Record<ContractType, [number, number, number, numbe
 };
 
 /** Gold por material 0..3 (índice = material) */
+// metade desde 18/09 (decisão do pai): gold é escolha, não salário
 export const GOLD_BY_MATERIAL: Record<ContractType, [number, number, number, number]> = {
-  merchant: [0, 3, 4, 5],
-  letter: [0, 3, 4, 5],
-  forge: [0, 3, 4, 5],
-  note: [0, 4, 6, 8],
+  merchant: [0, 2, 2, 3],
+  letter: [0, 2, 2, 3],
+  forge: [0, 2, 2, 3],
+  note: [0, 2, 3, 4],
 };
 
 /** XP por nível de construção: construir não paga XP (só a construção) */

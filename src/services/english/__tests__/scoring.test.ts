@@ -113,12 +113,12 @@ test('materialFor despacha por tipo', () => {
 });
 
 test('rewardFor: tabelas de XP/gold, mínimo 5 XP, não premiado só tentativa', () => {
-  expect(rewardFor('merchant', 1)).toEqual({ xp: 8, gold: 3 });
-  expect(rewardFor('letter', 2)).toEqual({ xp: 12, gold: 4 });
-  expect(rewardFor('forge', 3)).toEqual({ xp: 16, gold: 5 });
-  expect(rewardFor('note', 1)).toEqual({ xp: 10, gold: 4 });
-  expect(rewardFor('note', 2)).toEqual({ xp: 15, gold: 6 });
-  expect(rewardFor('note', 3)).toEqual({ xp: 20, gold: 8 });
+  expect(rewardFor('merchant', 1)).toEqual({ xp: 8, gold: 2 }); // gold pela metade desde 18/09
+  expect(rewardFor('letter', 2)).toEqual({ xp: 12, gold: 2 });
+  expect(rewardFor('forge', 3)).toEqual({ xp: 16, gold: 3 });
+  expect(rewardFor('note', 1)).toEqual({ xp: 10, gold: 2 });
+  expect(rewardFor('note', 2)).toEqual({ xp: 15, gold: 3 });
+  expect(rewardFor('note', 3)).toEqual({ xp: 20, gold: 4 });
   expect(rewardFor('merchant', 0)).toEqual({ xp: MIN_XP, gold: 0 });
   expect(rewardFor('letter', 3, false)).toEqual({ xp: MIN_XP, gold: 0 });
 });

@@ -11,7 +11,7 @@
 
 import { collection, doc, getDoc, getDocs, onSnapshot, query, runTransaction, serverTimestamp, setDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { addDays, getTodayBrazil, isoWeekOf } from '../utils/clock';
+import { addDays, getTodayBrazil, isoWeekOf, isBeforeLaunch } from '../utils/clock';
 import { DAILY_RULES_DEFAULTS } from '../config/rules';
 import { dueTasksOn, nextFullDays, rangeCoversDate } from './village/schedule';
 import { fromVillageDoc } from './villageService';
@@ -172,6 +172,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
   let applied: DayClosure | null = null;
   let extendPunish = false;
   let fullDaysAfter = 0;
+  let skippedClose = skipPenalty;
 
   await runTransaction(db, async (tx) => {
     const dailySnap = await tx.get(dailyRef);
@@ -185,19 +186,23 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       : initialVillageDoc(userId, new Date().toISOString());
     const buildings = (baseSnap.data()?.buildings || {}) as Record<string, number>;
     const cerca = liveBuildingLevel(buildings, village.cracks, 'cerca');
+    const skip = skipPenalty
+      || dailySnap.data()?.skipPenalty === true
+      || isBeforeLaunch(date, village.launchedOn);
+    skippedClose = skip;
 
     let missed = missedTasks.length;
     let helmetUsed = false;
     const week = isoWeekOf(date);
-    if (!skipPenalty && missed === 1 && village.gear.helmet >= 1 && village.shield.helmetWeek !== week) {
+    if (!skip && missed === 1 && village.gear.helmet >= 1 && village.shield.helmetWeek !== week) {
       missed = 0;
       helmetUsed = true;
     }
     const dueDone = Math.max(0, due - missed);
 
-    let penaltyWanted = r.enabled && !skipPenalty ? missed * r.penaltyPerMissedTask : 0;
+    let penaltyWanted = r.enabled && !skip ? missed * r.penaltyPerMissedTask : 0;
     if (cerca >= 3 && penaltyWanted > 1) penaltyWanted = 1;
-    const bonus = r.enabled && !skipPenalty && due > 0 && dueDone >= due ? r.allDoneBonus : 0;
+    const bonus = r.enabled && !skip && due > 0 && dueDone >= due ? r.allDoneBonus : 0;
 
     const gold = Number(progressSnap.data()?.availableGold) || 0;
     const penalty = Math.min(penaltyWanted, gold);
@@ -217,6 +222,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       paused,
       punished,
       helmetUsed,
+      skipPenalty: skip,
       summaryProcessed: true,
       processedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
@@ -260,7 +266,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       });
     }
 
-    const missedIds = skipPenalty
+    const missedIds = skip
       ? []
       : helmetUsed
         ? missedTasks.slice(1).map((t) => t.id)
@@ -273,7 +279,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       claimed[punishKey] = new Date().toISOString();
       extendPunish = true;
     }
-    const lost = !skipPenalty && due > 0 && dueDone < due;
+    const lost = !skip && due > 0 && dueDone < due;
     const fenceKey = claimKey('fence', date.slice(0, 7));
     let keepTorches = false;
     if (lost && cerca >= 1 && !hasClaim(village, fenceKey)) {
@@ -287,17 +293,17 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
       fullDays: village.fullDays,
       fullDaysStart: village.fullDaysStart,
       date,
-      skip: skipPenalty || keepTorches,
+      skip: skip || keepTorches,
     });
     fullDaysAfter = torches.changed ? torches.fullDays : village.fullDays;
-    const torch = !skipPenalty && due > 0 && dueDone >= due;
+    const torch = !skip && due > 0 && dueDone >= due;
     const stats = addVillageStats(village.stats, {
       fullDaysCount: torch ? 1 : 0,
-      noPunishDays: skipPenalty ? 0 : 1,
+      noPunishDays: skip ? 0 : 1,
     });
     if (punished) stats.noPunishDays = 0;
-    if (skipPenalty) {
-      /* férias/folga/off: não mexe na sequência "sem esquecer" */
+    if (skip) {
+      /* férias/folga/off/pré-lançamento: não mexe na sequência "sem esquecer" */
     } else if (lost) {
       stats.perfectWeeks = 0;
     } else if (torch) {
@@ -334,7 +340,7 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
   if (extendPunish) {
     try { await extendActiveChallenges(userId, 1); } catch (e) { console.warn('closeDay: extend desafios', e); }
   }
-  if (applied && !skipPenalty) {
+  if (applied && !skippedClose) {
     try { await bumpChallenge(userId, 'full_days', fullDaysAfter, true); } catch (e) { console.warn('closeDay: bump full_days', e); }
   }
   try {

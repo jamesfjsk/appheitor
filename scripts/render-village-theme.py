@@ -9,7 +9,7 @@ import numpy as np
 from scipy.signal import butter, lfilter
 
 SR = 44100
-BPM = 90.0
+BPM = 88.0
 BEAT = 60.0 / BPM
 BARS = 48
 N = int(round(BARS * 4 * BEAT * SR))
@@ -36,26 +36,26 @@ PROG = (
     + ['G', 'C', 'G', 'D', 'G', 'C', 'D', 'G'] * 2
 )
 
-# Motivo: salto D→G, sorriso no E, caminha pra casa.
+# Motivo: D longo, salto no G, sorriso no E que fica. Ritmo pontuado = carimbo.
 HOOK = [
-    (0, 0.0, 'D5', 1.0), (0, 1.0, 'G5', 1.0), (0, 2.0, 'E5', 2.0),
+    (0, 0.0, 'D5', 1.5), (0, 1.5, 'G5', 0.5), (0, 2.0, 'E5', 2.0),
     (1, 0.0, 'D5', 1.0), (1, 1.0, 'B4', 1.0), (1, 2.0, 'A4', 1.0), (1, 3.0, 'G4', 1.0),
 ]
 ANSWER = [
-    (2, 0.0, 'D5', 1.0), (2, 1.0, 'G5', 0.5), (2, 1.5, 'A5', 0.5), (2, 2.0, 'G5', 2.0),
-    (3, 0.0, 'E5', 1.0), (3, 1.0, 'D5', 1.0), (3, 2.0, 'B4', 1.0), (3, 3.0, 'D5', 1.0),
+    (2, 0.0, 'D5', 1.5), (2, 1.5, 'G5', 0.5), (2, 2.0, 'A5', 1.0), (2, 3.0, 'G5', 1.0),
+    (3, 0.0, 'E5', 1.0), (3, 1.0, 'D5', 1.5), (3, 2.5, 'B4', 0.5), (3, 3.0, 'D5', 1.0),
 ]
 HOME = [
-    (4, 0.0, 'D5', 1.0), (4, 1.0, 'G5', 1.0), (4, 2.0, 'E5', 2.0),
+    (4, 0.0, 'D5', 1.5), (4, 1.5, 'G5', 0.5), (4, 2.0, 'E5', 2.0),
     (5, 0.0, 'D5', 1.0), (5, 1.0, 'B4', 1.0), (5, 2.0, 'A4', 1.0), (5, 3.0, 'G4', 1.0),
-    (6, 0.0, 'G5', 0.5), (6, 0.5, 'E5', 0.5), (6, 1.0, 'D5', 1.0), (6, 2.0, 'B4', 1.0), (6, 3.0, 'A4', 1.0),
-    (7, 0.0, 'G4', 0.5), (7, 0.5, 'B4', 0.5), (7, 1.0, 'D5', 1.0), (7, 2.0, 'G5', 2.0),
+    (6, 0.0, 'B4', 0.5), (6, 0.5, 'D5', 0.5), (6, 1.0, 'E5', 1.0), (6, 2.0, 'G5', 2.0),
+    (7, 0.0, 'D5', 1.0), (7, 1.0, 'B4', 1.0), (7, 2.0, 'G4', 2.0),
 ]
 THEME = HOOK + ANSWER + HOME
 
 # Ponte: o motivo sobe um degrau e desce andando — desenvolvimento, não outro tema.
 BRIDGE = [
-    (0, 0.0, 'E5', 1.0), (0, 1.0, 'A5', 1.0), (0, 2.0, 'Fs5', 2.0),
+    (0, 0.0, 'E5', 1.5), (0, 1.5, 'A5', 0.5), (0, 2.0, 'G5', 2.0),
     (1, 0.0, 'E5', 1.0), (1, 1.0, 'D5', 1.0), (1, 2.0, 'B4', 1.0), (1, 3.0, 'A4', 1.0),
     (2, 0.0, 'G4', 0.5), (2, 0.5, 'A4', 0.5), (2, 1.0, 'B4', 0.5), (2, 1.5, 'D5', 0.5),
     (2, 2.0, 'E5', 1.0), (2, 3.0, 'D5', 1.0),
@@ -129,7 +129,7 @@ def piano(freq: float, dur: float, amp: float) -> np.ndarray:
     hammer = np.zeros(n)
     hammer[:hammer_n] = RNG.standard_normal(hammer_n) * np.linspace(1.0, 0.0, hammer_n)
     hammer = butter_hp(butter_lp(hammer, 3800 + 800 * vel), 700) * (0.08 + 0.05 * vel)
-    body = butter_lp(amp * (env * (sig + duplex) + hammer), 5600 + 1800 * vel)
+    body = butter_lp(amp * (env * (sig + duplex) + hammer), 5000 + 1400 * vel)
     tail = int(0.05 * SR)
     if tail < n:
         body[-tail:] *= np.linspace(1.0, 0.0, tail)
@@ -181,13 +181,16 @@ def play_line(lead, notes, start_bar: int, amp: float, lift=False, thirds=False,
     last_i = len(notes) - 1
     for i, (off, beat, name, dur) in enumerate(notes):
         n = up(name) if lift and up(name) in NOTE else name
-        late = 0.018 if (rubato_end and i == last_i) else 0.0
-        put(lead, start_bar + off, beat, n, dur * 1.06, amp, pan=-0.04, rubato=late)
-        if thirds and dur >= 1.4 and n in THIRD:
-            put(lead, start_bar + off, beat, THIRD[n], dur * 0.92, amp * 0.28, pan=0.24)
+        late = 0.022 if (rubato_end and i == last_i) else 0.0
+        if name == 'G5' and dur <= 0.6:
+            grace = 'D6' if lift and 'D6' in NOTE else 'D5'
+            put(lead, start_bar + off, beat - 0.12, grace, 0.14, amp * 0.35, pan=-0.08)
+        put(lead, start_bar + off, beat, n, dur * 1.08, amp, pan=-0.04, rubato=late)
+        if thirds and name == 'E5' and dur >= 1.8 and n in THIRD:
+            put(lead, start_bar + off, beat + 0.04, THIRD[n], dur * 0.7, amp * 0.22, pan=0.26)
         hi = up(n)
-        if sparkle and dur >= 1.8 and hi in NOTE:
-            put(lead, start_bar + off, beat + 0.03, hi, dur * 0.62, amp * 0.18, pan=0.10)
+        if sparkle and name == 'G5' and dur >= 1.8 and hi in NOTE:
+            put(lead, start_bar + off, beat + 0.04, hi, dur * 0.55, amp * 0.16, pan=0.10)
 
 
 def render() -> np.ndarray:
@@ -202,49 +205,47 @@ def render() -> np.ndarray:
         if pickup:
             order = (0, 1, 2, 3, 2, 1, 3, 2)
             for i, idx in enumerate(order):
-                put(acc, bar, i * 0.5, tones[idx], 1.1, 0.050, pan=-0.16 if i % 2 == 0 else 0.18)
+                put(acc, bar, i * 0.5, tones[idx], 1.1, 0.042, pan=-0.16 if i % 2 == 0 else 0.18)
         elif lively:
             order = (0, 1, 2, 3, 2, 1, 3, 2)
             for i, idx in enumerate(order):
-                put(acc, bar, i * 0.5, tones[idx], 1.15, 0.040, pan=-0.18 if i % 2 == 0 else 0.20)
+                put(acc, bar, i * 0.5, tones[idx], 1.15, 0.032, pan=-0.18 if i % 2 == 0 else 0.20)
             if bar % 4 == 0:
-                put(acc, bar, 0.00, tones[0], 3.5, 0.030, pan=-0.10)
-                put(acc, bar, 0.08, tones[1], 3.3, 0.026, pan=0.00)
-                put(acc, bar, 0.16, tones[3], 2.9, 0.024, pan=0.12)
+                put(acc, bar, 0.00, tones[0], 3.5, 0.024, pan=-0.10)
+                put(acc, bar, 0.08, tones[1], 3.3, 0.020, pan=0.00)
+                put(acc, bar, 0.16, tones[3], 2.9, 0.018, pan=0.12)
         elif bridge:
             order = (1, 2, 3, 2)
             for i, idx in enumerate(order):
-                put(acc, bar, i, tones[idx], 2.2, 0.052, pan=-0.10 if i % 2 == 0 else 0.12)
+                put(acc, bar, i, tones[idx], 2.2, 0.044, pan=-0.10 if i % 2 == 0 else 0.12)
         else:
             order = (0, 1, 2, 1) if (bar // 8) % 2 else (0, 1, 2, 3)
             for i, idx in enumerate(order):
-                put(acc, bar, i, tones[idx], 2.45, 0.072 if i in (0, 2) else 0.055, pan=-0.12 if i % 2 == 0 else 0.14)
+                put(acc, bar, i, tones[idx], 2.45, 0.062 if i in (0, 2) else 0.046, pan=-0.12 if i % 2 == 0 else 0.14)
 
-    # antecipação do motivo no fim do A — o ouvido já espera a frase
-    put(lead, 14, 2.0, 'D5', 1.0, 0.07, pan=-0.06)
-    put(lead, 15, 0.0, 'D5', 1.0, 0.09, pan=-0.05)
-    put(lead, 15, 1.0, 'G5', 1.0, 0.10, pan=-0.04)
-    put(lead, 15, 2.0, 'E5', 2.0, 0.09, pan=-0.04)
+    # antecipação: o mesmo ritmo pontuado, ainda baixo
+    put(lead, 14, 2.0, 'D5', 1.5, 0.07, pan=-0.06)
+    put(lead, 15, 0.0, 'D5', 1.5, 0.10, pan=-0.05)
+    put(lead, 15, 1.5, 'G5', 0.5, 0.12, pan=-0.04)
+    put(lead, 15, 2.0, 'E5', 2.0, 0.11, pan=-0.04)
 
-    play_line(lead, THEME, 16, 0.155, thirds=True, sparkle=True)
-    play_line(lead, THEME, 24, 0.128, lift=True, thirds=True, sparkle=True)
-    play_line(lead, BRIDGE, 32, 0.118, thirds=False, sparkle=False)
+    play_line(lead, THEME, 16, 0.168, thirds=True, sparkle=True)
+    play_line(lead, THEME, 24, 0.138, lift=True, thirds=True, sparkle=True)
+    play_line(lead, BRIDGE, 32, 0.122, thirds=False, sparkle=False)
 
-    # resposta grave-média (ainda piano, acima de G3) depois da pergunta
-    put(acc, 17, 0.05, 'D4', 2.0, 0.045, pan=-0.22)
-    put(acc, 17, 2.05, 'G4', 2.0, 0.040, pan=-0.18)
-    put(acc, 25, 0.05, 'D5', 2.0, 0.032, pan=-0.20)
-    put(acc, 25, 2.05, 'G5', 2.0, 0.028, pan=-0.16)
+    put(acc, 17, 0.05, 'D4', 2.0, 0.038, pan=-0.22)
+    put(acc, 17, 2.05, 'G4', 2.0, 0.034, pan=-0.18)
+    put(acc, 25, 0.05, 'D5', 2.0, 0.026, pan=-0.20)
+    put(acc, 25, 2.05, 'G5', 2.0, 0.022, pan=-0.16)
 
-    # recap: o motivo inteiro, mais quieto, e a cadência pra loop
-    play_line(lead, HOOK, 40, 0.12)
-    play_line(lead, HOOK, 42, 0.11)
-    play_line(lead, HOOK[:4], 44, 0.12)
-    put(lead, 45, 0.0, 'D5', 1.0, 0.10, pan=-0.04)
-    put(lead, 45, 1.0, 'B4', 1.0, 0.09, pan=-0.04)
-    put(lead, 45, 2.0, 'A4', 1.0, 0.09, pan=-0.04)
-    put(lead, 45, 3.0, 'G4', 1.0, 0.10, pan=-0.04)
-    play_line(lead, HOOK, 46, 0.125)
+    # recap limpo: motivo, casa, motivo de novo para o loop
+    play_line(lead, HOOK, 40, 0.13)
+    put(lead, 42, 0.0, 'D5', 1.0, 0.10, pan=-0.04)
+    put(lead, 42, 1.0, 'B4', 1.0, 0.09, pan=-0.04)
+    put(lead, 42, 2.0, 'A4', 1.0, 0.09, pan=-0.04)
+    put(lead, 42, 3.0, 'G4', 2.0, 0.10, pan=-0.04)
+    play_line(lead, HOOK, 44, 0.12)
+    play_line(lead, HOOK, 46, 0.13)
 
     acc[:, 0] = butter_lp(acc[:, 0], 2400)
     acc[:, 1] = butter_lp(acc[:, 1], 2400)
@@ -256,9 +257,9 @@ def render() -> np.ndarray:
     wide = np.zeros_like(lead)
     wide[:, 0] = lead[:, 0]
     wide[delay:, 1] = lead[:-delay, 1]
-    mix = 0.78 * acc + 1.0 * wide
+    mix = 0.62 * acc + 1.12 * wide
     wet = np.stack([room(mix[:, 0]), room(mix[:, 1])], axis=1)
-    mix = 0.88 * mix + 0.12 * wet
+    mix = 0.90 * mix + 0.10 * wet
 
     # arco: A contido, B abre, ponte respira, recap assenta
     dyn = np.ones(N)

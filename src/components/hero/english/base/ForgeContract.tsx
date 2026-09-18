@@ -66,7 +66,8 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
 
   const record = (ok: boolean, triesUsed: number) => {
     if (phase === 'main') {
-      const value: Earned = ok ? (triesUsed === 1 ? 1 : 0.5) : 0;
+      // recompensa só de primeira (decisão do pai em 18/09); a segunda tentativa é treino e vai para a repescagem
+      const value: Earned = ok && triesUsed === 1 ? 1 : 0;
       setEarned((prev) => prev.map((e, i) => (i === cur ? value : e)));
     } else if (ok) {
       setRedoCorrect((n) => n + 1);

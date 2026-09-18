@@ -86,6 +86,11 @@ export function addDays(date: string, n: number): string {
   return `${utc.getUTCFullYear()}-${pad(utc.getUTCMonth() + 1)}-${pad(utc.getUTCDate())}`;
 }
 
+/** Datas ISO `YYYY-MM-DD` anteriores a `village.launchedOn` (o dia 1 não herda ontem de teste). */
+export function isBeforeLaunch(date: string, launchedOn?: string | null): boolean {
+  return Boolean(launchedOn && date < launchedOn);
+}
+
 /** 0 = domingo … 6 = sábado, no calendário civil de Brasília. */
 export function weekdayOf(date: string): number {
   if (!YMD.test(date)) throw new Error(`data ISO inválida: ${date}`);

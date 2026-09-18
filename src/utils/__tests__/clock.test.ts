@@ -2,6 +2,7 @@ import { expect, run, test } from '../../services/english/__tests__/harness';
 import {
   addDays,
   isoWeekOf,
+  isBeforeLaunch,
   msUntilNextMidnight,
   nowBrazil,
   periodOfHour,
@@ -70,6 +71,13 @@ test('msUntilNextMidnight às 23:59:30 dá 30 s', () => {
   resetClockForTests();
   const ms = Date.parse('2026-09-16T02:59:30.000Z');
   expect(msUntilNextMidnight(ms)).toBe(30_000);
+});
+
+test('isBeforeLaunch ignora o dia anterior ao lançamento', () => {
+  expect(isBeforeLaunch('2026-09-17', '2026-09-18')).toBe(true);
+  expect(isBeforeLaunch('2026-09-18', '2026-09-18')).toBe(false);
+  expect(isBeforeLaunch('2026-09-19', '2026-09-18')).toBe(false);
+  expect(isBeforeLaunch('2026-09-17', null)).toBe(false);
 });
 
 void run();

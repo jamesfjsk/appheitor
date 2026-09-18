@@ -236,6 +236,7 @@ async function main() {
   console.log('  health zerado');
   console.log('  birthdayEvents 2026 marcado concluído');
   console.log(`  settings/dailyRules.activatedOn = ${launch} (doc da família)`);
+  console.log(`  dailyProgress/${uid}_${yesterday}: skipPenalty true`);
   console.log(`  goldTransactions: +${gold} type adjustment source admin_adjustment metadata.launch`);
   const launchDay = await launchDayPlan(api, uid, launch, new Date().toISOString(), goldTxs);
   console.log('  ' + describeLaunchDay(launchDay));
@@ -384,6 +385,29 @@ async function main() {
   }
 
   await applyLaunchDay(api, uid, launch, launchDay);
+
+  const prevDp = await api.get(`dailyProgress/${uid}_${yesterday}`);
+  if (prevDp && prevDp.data) {
+    await api.patch(`dailyProgress/${uid}_${yesterday}`, { skipPenalty: true, updatedAt: nowIso }, ['skipPenalty', 'updatedAt']);
+  } else {
+    await api.put(`dailyProgress/${uid}_${yesterday}`, {
+      userId: uid,
+      date: yesterday,
+      skipPenalty: true,
+      summaryProcessed: true,
+      totalTasksAvailable: 0,
+      tasksCompleted: 0,
+      xpEarned: 0,
+      goldEarned: 0,
+      goldPenalty: 0,
+      allTasksBonusGold: 0,
+      vacation: false,
+      paused: false,
+      punished: false,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    });
+  }
 
   await api.create('goldTransactions', {
     userId: uid,

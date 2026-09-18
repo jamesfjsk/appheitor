@@ -6,8 +6,9 @@ import { useSound } from '../../contexts/SoundContext';
 import { useVillage } from '../../contexts/VillageContext';
 import { useClock } from '../../contexts/ClockContext';
 import { useData } from '../../contexts/DataContext';
+import { useVacation } from '../../contexts/VacationContext';
 import { periodAllowedAt } from '../../services/village/schedule';
-import { computeTaskLoot } from '../../services/village/loot';
+import { computeTaskLoot, xpWithBoots } from '../../services/village/loot';
 import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../config/englishBase';
 import { getTodayBrazil } from '../../utils/clock';
 import type { Period } from '../../types/village';
@@ -116,6 +117,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
   const { village, economy, settings, modules } = useVillage();
   const { tasks } = useData();
   const { hour: hourBrazil, minute, today } = useClock();
+  const { applyXP: vacationApplyXP, applyGold: vacationApplyGold } = useVacation();
   const periodOpen = periodAllowedAt(task.period, hourBrazil, economy);
   const abreHora = task.period === 'afternoon'
     ? economy.periodStartHours.afternoon
@@ -140,6 +142,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
       settings: economy,
       effectsEnabled: effectsOn,
     });
+  const listedGold = task.origin === 'child' || task.origin === 'agenda' ? 0 : (task.gold ?? TASK_DEFAULT_GOLD);
+  const goldShow = listedGold > 0 ? vacationApplyGold(listedGold) : 0;
+  const xpShow = xpWithBoots(vacationApplyXP(task.xp ?? TASK_DEFAULT_XP), village.gear, effectsOn);
   const periodLabel =
     task.period === 'morning' ? 'Manhã' :
     task.period === 'afternoon' ? 'Tarde' : 'Noite';
@@ -178,9 +183,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
               {!done && timeOverdue && <FlashIcon name="warning" className="w-3 h-3" />}
             </span>
           )}
-          <span className="mc-font text-[12px] mc-good">+{task.xp ?? TASK_DEFAULT_XP} XP</span>
-          {(task.gold ?? TASK_DEFAULT_GOLD) > 0 && (
-            <span className="mc-font text-[12px] mc-warn">+{task.gold ?? TASK_DEFAULT_GOLD} GOLD</span>
+          <span className="mc-font text-[12px] mc-good">+{xpShow} XP</span>
+          {goldShow > 0 && (
+            <span className="mc-font text-[12px] mc-warn">+{goldShow} GOLD</span>
           )}
           {loot && loot.qty > 0 && (
             <span className="inline-flex items-center gap-1 mc-font text-[12px] text-amber-200" title={loot.qty > (economy.materialsPerTask || 1) ? 'Bônus da picareta' : undefined}>

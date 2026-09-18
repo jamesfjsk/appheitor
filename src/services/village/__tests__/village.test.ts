@@ -182,13 +182,13 @@ test('baú: gold = base + tochas até o teto; 2 do material mais escasso; esmera
   const a = dailyChestContents('uid-a', '2026-09-15', v0);
   const b = dailyChestContents('uid-a', '2026-09-15', v0);
   expect(a).toEqual(b);
-  expect(a.gold).toBe(10);
+  expect(a.gold).toBe(5); // metade desde 18/09
 
   const withTorches = dailyChestContents('uid-a', '2026-09-15', { fullDays: 3, gear: gear() });
-  expect(withTorches.gold).toBe(13);
+  expect(withTorches.gold).toBe(8);
 
   const capped = dailyChestContents('uid-a', '2026-09-15', { fullDays: 20, gear: gear() });
-  expect(capped.gold).toBe(15);
+  expect(capped.gold).toBe(8);
 
   const day3 = dailyChestContents('uid-a', '2026-09-15', { fullDays: 2, gear: gear() }, DEFAULT_ECONOMY);
   expect(day3.esmeralda).toBe(1);

@@ -35,13 +35,6 @@ const closeModal = async () => {
   });
   await sleep(200);
 };
-const clickScene = async (sx, sy) => {
-  const box = await page.$eval('canvas[aria-label="Vila"]', (el) => {
-    const r = el.getBoundingClientRect();
-    return { x: r.x, y: r.y, w: r.width, h: r.height };
-  });
-  await page.mouse.click(box.x + (sx / 1280) * box.w, box.y + (sy / 640) * box.h);
-};
 
 try {
   await page.goto(`${BASE}/flash?h=14`, { waitUntil: 'domcontentloaded' });
@@ -59,6 +52,7 @@ try {
     { w: 1920, h: 1080, folder: '1080' },
   ]) {
     const dir = path.join(root, size.folder);
+    fs.mkdirSync(dir, { recursive: true });
     await page.setViewport({ width: size.w, height: size.h });
     const shot = async (name) => {
       await page.screenshot({ path: path.join(dir, `${name}.png`) });
@@ -69,22 +63,29 @@ try {
     await dismissQuiz();
     await page.waitForSelector('canvas[aria-label="Vila"]');
     await sleep(800);
-    await shot('01-vila');
+    await shot('p1-vila');
+
+    const placa = await page.$('[data-testid="placa-chip"]');
+    if (placa) {
+      await placa.click();
+      await sleep(600);
+      await shot('p1-placa');
+      await placa.click();
+      await sleep(300);
+    }
+
     await clickLabel('Missões');
     await sleep(800);
-    await shot('03-casa-missoes');
+    await shot('p1-casa-missoes');
     await closeModal();
-    await clickScene(764, 459);
-    await sleep(800);
-    await shot('14-mercado-cartao');
-    await closeModal();
-    await closeModal();
-    await clickLabel('Mais tarde');
-    await sleep(300);
-    await clickScene(640, 552);
-    await sleep(800);
-    await shot('18-cerca-cartao');
-    await closeModal();
+
+    const mine = await page.$('[data-testid="hotbar-mine"]');
+    if (mine) {
+      await mine.click();
+      await sleep(2500);
+      await shot('p1-mina');
+      await closeModal();
+    }
   }
 } catch (err) {
   console.error(err);

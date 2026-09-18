@@ -19,7 +19,7 @@ import { createMineSfx } from '../english/mine/sfx';
 import { CHILD_BIRTHDAY_MMDD } from '../../../config/rules';
 import { VILLAGE_LINES, buildLine, repairLine } from '../../../data/villageLines';
 import { HABIT_LINES } from '../../../data/habitLines';
-import { addDays, clockDriftWarning, isoWeekOf } from '../../../utils/clock';
+import { addDays, clockDriftWarning, isoWeekOf, isBeforeLaunch } from '../../../utils/clock';
 import { usePunishment } from '../../../contexts/PunishmentContext';
 import { pickDialogue, type DialogueCtx } from '../../../services/village/dialogue';
 import { sageReplyFor } from '../../../services/village/checkin';
@@ -146,13 +146,18 @@ const VillageHome: React.FC<Props> = ({
 
   useEffect(() => {
     if (!childUid) return;
-    void FirestoreService.getDailyProgress(childUid, addDays(today, -1)).then((d) => {
-      if (d?.checkin) setSageLine(sageReplyFor(d.checkin, addDays(today, -1)));
+    const yest = addDays(today, -1);
+    if (isBeforeLaunch(yest, village.launchedOn)) {
+      setYesterdayCtx({ missed: false, complete: false });
+      return;
+    }
+    void FirestoreService.getDailyProgress(childUid, yest).then((d) => {
+      if (d?.checkin) setSageLine(sageReplyFor(d.checkin, yest));
       const dueY = d?.totalTasksAvailable || 0;
       const doneY = d?.tasksCompleted || 0;
       setYesterdayCtx({ missed: dueY > 0 && doneY < dueY, complete: dueY > 0 && doneY >= dueY });
     });
-  }, [childUid, today]);
+  }, [childUid, today, village.launchedOn]);
 
   useEffect(() => {
     if (!district && !lot) return;
@@ -206,8 +211,7 @@ const VillageHome: React.FC<Props> = ({
             {item.time ? `${item.time} · ` : ''}{item.title}
             <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2" onClick={() => { toast.dismiss(t.id); setAgendaFlash(null); }}>Ok</button>
           </span>
-        ), { duration: 20000, id: 'agenda-reminder' });
-        setSpeech({ npc: 'olheiro', text: `${item.title} daqui a pouco. Já está pronto?` });
+        ), { duration: 20000, id: 'child-notice' });
         break;
       }
     };
@@ -316,7 +320,7 @@ const VillageHome: React.FC<Props> = ({
       return;
     }
     if (nightClosed && (id === 'market' || id === 'chest' || id === 'chest_streak')) {
-      toast('Por hoje é isso. Amanhã tem mais.', { id: 'night-closed' });
+      toast('Por hoje é isso. Amanhã tem mais.', { id: 'child-notice' });
       return;
     }
     const lv = (bid: BuildingId) => buildings[bid] || 0;
@@ -464,7 +468,7 @@ const VillageHome: React.FC<Props> = ({
   };
 
   return (
-    <div className="relative z-10 mn-village">
+    <div className={`relative z-10 mn-village ${compactHud ? 'is-compact-hud' : ''}`}>
       <HeroHeader
         progress={progress}
         onOpenGold={() => { if (broken('cofre')) setLot('cofre'); else setDistrict('extrato'); }}
@@ -509,7 +513,7 @@ const VillageHome: React.FC<Props> = ({
           <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-3 mn-speech-next" onClick={dismissSpeech}>Continuar</button>
         )}
         {placaOpen && (
-          <div className="mn-ticker mn-placa mn-placa-panel">
+          <div className="mn-ticker mn-placa mn-placa-panel" data-testid="placa-panel">
             <VacationBanner />
             {lockedShop && (
               <p className="text-sm mc-warn mb-2">Punição: Mercado, Baú e Loja fechados.</p>

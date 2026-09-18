@@ -257,14 +257,16 @@ const CartBench: React.FC<Props> = ({
 
   const resolveStage = (won: boolean) => {
     if (finishing.current || claimed || !noteDone) return;
+    // vagoneta carregada na segunda tentativa avança a fase, mas não paga (decisão do pai em 18/09: recompensa só de primeira)
+    const paid = won && fails === 0;
     if (stageIndexRef.current < 2) {
-      if (won) wonRef.current += 1;
+      if (paid) wonRef.current += 1;
       stageIndexRef.current += 1;
       setStageIndex(stageIndexRef.current);
       return;
     }
     if (!ended.current) {
-      if (won) wonRef.current += 1;
+      if (paid) wonRef.current += 1;
       ended.current = true;
     }
     void saveSession(wonRef.current);

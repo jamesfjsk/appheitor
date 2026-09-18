@@ -7,6 +7,7 @@
 import type {
   BaseDoc,
   BuildingId,
+  Contract,
   ContractType,
   Material,
   MerchantItem,
@@ -467,3 +468,18 @@ export interface MerchantCatalogs {
 }
 
 export const MERCHANT_CATALOGS: MerchantCatalogs = { spots: MERCHANT_SPOTS, items: MERCHANT_ITEMS };
+
+/** Regeneração / retomada: contratos `done` nunca saem do plano. */
+export function keepDoneContracts(
+  existing: Record<string, Contract>,
+  built: Record<string, Contract>,
+  builtOrder: string[],
+): { contracts: Record<string, Contract>; order: string[] } {
+  const doneEntries = Object.entries(existing).filter(([, c]) => c.status === 'done');
+  if (!doneEntries.length) return { contracts: built, order: builtOrder };
+  const done = Object.fromEntries(doneEntries);
+  const contracts = { ...built, ...done };
+  const doneIds = doneEntries.map(([id]) => id);
+  const order = [...doneIds, ...builtOrder.filter((id) => !done[id])];
+  return { contracts, order };
+}

@@ -43,9 +43,8 @@ const TOTAL_CONTRACTS = 5;
 
 const copyContract = (c: Contract): Contract => JSON.parse(JSON.stringify(c)) as Contract;
 
-/** Quadro abre com status ready ou quando os contratos da ordem já chegaram */
-const planReady = (p: DailyPlan | null): boolean =>
-  p !== null && (p.status === 'ready' || (p.order.length > 0 && p.order.every((id) => Boolean(p.contracts[id]))));
+/** Quadro só abre com o plano pronto; geração a meio fica na tela de espera. */
+const planReady = (p: DailyPlan | null): boolean => p !== null && p.status === 'ready';
 
 const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
   const { childUid } = useAuth();

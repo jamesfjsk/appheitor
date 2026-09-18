@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { addDays, nowBrazil, resetClockForTests } from '../../../utils/clock';
+import { addDays, isBeforeLaunch, nowBrazil, resetClockForTests } from '../../../utils/clock';
 import type { GoldTransaction } from '../../../types';
 import type { AgendaItem, ChallengeDoc, GoalDoc } from '../../../types/village';
 import { validateDeposit, vaultGoalCap, weeklyInterest, weeklyStatement, savingsRate } from '../bank';
@@ -13,6 +13,8 @@ import { nextFullDays } from '../schedule';
 import { lateTaskReward, lateWindow } from '../late';
 import { levelGift, minLevelFor } from '../levels';
 import { occurrencesBetween, organizationXp, reminderDue, studyPlanFor, weekOrganized, dayTimeline } from '../agenda';
+import { levelGiftClaimKey, levelGiftPendingKey, pendingLevelGiftLevels } from '../claims';
+import { keepDoneContracts } from '../../../config/englishBase';
 
 const tx = (over: Partial<GoldTransaction> & Pick<GoldTransaction, 'amount' | 'source' | 'type'>): GoldTransaction => ({
   id: over.id || 't',
@@ -328,6 +330,21 @@ test('nextQuizStreak: férias não zeram a sequência', () => {
   expect(nextQuizStreak(7, false, true)).toBe(8);
   expect(nextQuizStreak(7, true, false)).toBe(8);
   expect(nextQuizStreak(7, false, false)).toBe(1);
+});
+
+test('presente de nível pendente reabre e keepDone preserva contrato feito', () => {
+  expect(levelGiftPendingKey(1, 2)).toBe('pending:level:1:2');
+  expect(pendingLevelGiftLevels({ [levelGiftPendingKey(1, 2)]: '2026-09-18' }, 1)).toEqual([2]);
+  expect(pendingLevelGiftLevels({
+    [levelGiftPendingKey(1, 2)]: '2026-09-18',
+    [levelGiftClaimKey(1, 2)]: '2026-09-18',
+  }, 1)).toEqual([]);
+  expect(isBeforeLaunch('2026-09-17', '2026-09-18')).toBe(true);
+  const done = { id: 'c1', status: 'done' as const, result: { score: 1 } };
+  const built = { c2: { id: 'c2', status: 'open' as const } };
+  const merged = keepDoneContracts({ c1: done as never }, built as never, ['c2']);
+  expect(merged.contracts.c1.status).toBe('done');
+  expect(merged.order[0]).toBe('c1');
 });
 
 void run();

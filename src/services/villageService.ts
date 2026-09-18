@@ -52,7 +52,7 @@ import {
 import { MATERIALS, initialBaseDoc } from '../config/englishBase';
 import { MINER_MISSIONS_ACHIEVEMENTS } from '../config/villageAchievements';
 import { fromBaseDoc } from './englishBaseService';
-import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from './village/claims';
+import { claimKey, hasClaim, levelGiftClaimKey, levelGiftPendingKey, rareGiftForLevel } from './village/claims';
 import { chestAllowed, dailyChestContents } from './village/chest';
 import { canBuy, canCraft, priceOf, tradePreview } from './village/shop';
 import { dueCompletionsCount, dueTasksOn } from './village/schedule';
@@ -604,6 +604,7 @@ export async function grantLevelGift(
       if (cosmeticHasSprite(gift.cosmeticId) && !newItems.includes(gift.cosmeticId)) newItems.push(gift.cosmeticId);
     }
     const claimed = { ...village.claimed, [key]: nowIso() };
+    delete claimed[levelGiftPendingKey(village.season, level)];
     if (gift.cosmeticId) claimed[claimKey('milestone', `${village.season}:${level}`)] = nowIso();
     const rareKind = rareGiftForLevel(level);
     const rare: VillageRare = {
@@ -618,6 +619,22 @@ export async function grantLevelGift(
     else tx.update(baseRef(uid), { [`materials.${material}`]: increment(1), updatedAt: nowIso() });
   });
   return granted;
+}
+
+export async function markLevelGiftPending(uid: string, level: number): Promise<void> {
+  const n = Math.floor(level);
+  if (!Number.isFinite(n) || n < 2) return;
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(villageRef(uid));
+    const village = snap.exists() ? fromVillageDoc(uid, snap.data()) : initialVillageDoc(uid, nowIso());
+    const key = levelGiftClaimKey(village.season, n);
+    if (hasClaim(village, key)) return;
+    const pending = levelGiftPendingKey(village.season, n);
+    if (hasClaim(village, pending)) return;
+    const claimed = { ...village.claimed, [pending]: nowIso() };
+    if (!snap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, updatedAt: nowIso() }));
+    else tx.update(villageRef(uid), stripUndefined({ claimed, updatedAt: nowIso() }));
+  });
 }
 
 export async function dismissAutoNotice(uid: string, key: string): Promise<void> {

@@ -26,13 +26,11 @@ const ContractBoard: React.FC<Props> = ({ plan, base, onOpen, onRedo, onGoVillag
 
   const otherRewarded = plan.rewardedIds.filter((id) => plan.contracts[id]?.type !== 'note').length;
   const slotsLeft = Math.max(0, REWARDED_OTHER_SLOTS - otherRewarded);
-  const doneCount = plan.order.filter((id) => plan.contracts[id]?.status === 'done').length;
+  const isDone = (c: Contract | undefined): boolean => Boolean(c && (c.status === 'done' || c.result));
+  const doneCount = plan.order.filter((id) => isDone(plan.contracts[id])).length;
   const furnaceBonus = doneCount === 0 && base.buildings.fornalha >= 1 && !visibleCracks(village.cracks).includes('fornalha');
-  const openIds = plan.order.filter((id) => {
-    const c = plan.contracts[id];
-    return !c || c.status !== 'done';
-  });
-  const doneIds = plan.order.filter((id) => plan.contracts[id]?.status === 'done');
+  const openIds = plan.order.filter((id) => !isDone(plan.contracts[id]));
+  const doneIds = plan.order.filter((id) => isDone(plan.contracts[id]));
 
   /** Premiado: Recado sempre; os outros enquanto houver vaga e não for refazimento */
   const willReward = (c: Contract): boolean => {
@@ -59,7 +57,7 @@ const ContractBoard: React.FC<Props> = ({ plan, base, onOpen, onRedo, onGoVillag
         </div>
       );
     }
-    const done = c.status === 'done';
+    const done = isDone(c);
     const rewarded = willReward(c);
     const isNote = c.type === 'note';
     const result = c.result;

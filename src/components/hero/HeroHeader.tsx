@@ -62,12 +62,114 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
     return messages[Math.floor(Math.random() * messages.length)];
   });
 
+  const clockChip = (
+    <div className="mc-slot mc-chip py-1" title="Relógio da Vila, horário de Brasília">
+      <img
+        src={period === 'morning' ? SUN : period === 'afternoon' ? SUNSET : MOON}
+        alt=""
+        className="mc-pixel"
+        draggable={false}
+      />
+      <div>
+        <span className="mc-num text-white" style={{ fontSize: 12 }}>
+          {String(typeof hour === 'number' ? hour : clockHour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
+        </span>
+        <span className="mc-chip-l">
+          {WEEKDAY_SHORT[weekday] || ''} {today.slice(8, 10)}/{today.slice(5, 7)}
+        </span>
+      </div>
+    </div>
+  );
+  const torchChip = (
+    <div className="mc-slot mc-chip py-1" title={`Tochas seguidas: ${fullDays ?? 0}`}>
+      <img src={TORCH} alt="" className="mc-pixel" draggable={false} />
+      <div>
+        <span className="mc-num text-white">{fullDays ?? 0}</span>
+        <span className="mc-chip-l">{(fullDays ?? 0) === 1 ? 'tocha' : 'tochas'}</span>
+      </div>
+    </div>
+  );
+  const goldChip = (
+    <button type="button" className="mc-slot mc-chip py-1" onClick={() => { playClick(); onOpenGold?.(); }} title="Extrato">
+      <img src={GOLD} alt="" className="mc-pixel" draggable={false} />
+      <div>
+        <span className="mc-num mc-warn">{progress.availableGold || 0}</span>
+        <span className="mc-chip-l">GOLD</span>
+      </div>
+    </button>
+  );
+  const levelChip = (
+    <button type="button" className="mc-slot mc-chip py-1" onClick={() => { playClick(); onOpenTower?.(); }} title="Torre">
+      <img src={DIAMOND} alt="" className="mc-pixel" draggable={false} />
+      <div>
+        <span className="mc-num mc-diamond">Nível {levelSystem.currentLevel}</span>
+        <span className="mc-chip-l">{levelSystem.levelTitle}</span>
+      </div>
+    </button>
+  );
+  const placaChip = placaLabel ? (
+    <button type="button" className="mc-slot mc-chip py-1" data-testid="placa-chip" onClick={() => { playClick(); onOpenPlaca?.(); }} title="Placa da Vila">
+      <span className="text-sm text-white truncate max-w-[12rem]">{placaLabel}</span>
+    </button>
+  ) : null;
+  const actions = (
+    <div className="flex gap-1 shrink-0">
+      <button
+        type="button"
+        onClick={() => { playClick(); toggleSound(); }}
+        className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
+        title={isSoundEnabled ? 'Desativar música e sons' : 'Ativar música'}
+      >
+        <FlashIcon name={isSoundEnabled ? 'volume' : 'mute'} className="w-5 h-5" />
+      </button>
+      {extraButton}
+      <button
+        type="button"
+        onClick={() => { playClick(); logout(); }}
+        className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
+        title="Sair"
+      >
+        <FlashIcon name="logout" className="w-5 h-5" />
+      </button>
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <motion.header
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="mn-hud is-compact"
+        data-testid="hud-compact"
+      >
+        <button type="button" className="mc-slot w-10 h-10 p-0.5 shrink-0 overflow-hidden flex items-center justify-center" onClick={() => { playClick(); onOpenPack?.(); }} title="Mochila">
+          {avatar || (
+            <img src={avatarSrc || MINER} alt="" className="w-full h-full object-contain mc-pixel" draggable={false} />
+          )}
+        </button>
+        <p className="font-bold leading-tight text-white text-sm truncate max-w-[9rem] shrink-0">{subtitle || 'Heitor'}</p>
+        <div className="flex items-center gap-1.5 overflow-x-auto min-w-0 flex-1">
+          {levelChip}
+          {goldChip}
+          {torchChip}
+          {clockChip}
+          {placaChip}
+          {crackLine && (
+            <span className="mn-crack-line shrink-0" title={crackLine}>{crackLine}</span>
+          )}
+        </div>
+        {actions}
+      </motion.header>
+    );
+  }
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className={`mn-hud px-3 py-2 flex flex-col gap-2 ${compact ? 'is-compact' : ''}`}
+      className="mn-hud px-3 py-2 flex flex-col gap-2"
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3 min-w-0 grow">
@@ -84,87 +186,23 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
 
           <div className="min-w-0">
             <p className="mc-title text-[12px]">Miner Missions</p>
-            <h1 className={`font-bold leading-tight text-white ${compact ? 'text-base' : 'text-[26px]'}`}>
-              {compact ? (subtitle || 'Heitor') : `${getGreeting()}, Heitor!`}
+            <h1 className="font-bold leading-tight text-white text-[26px]">
+              {`${getGreeting()}, Heitor!`}
             </h1>
-            {!compact && (
-              <p className="text-sm mc-muted truncate">
-                {subtitle || line}
-              </p>
-            )}
+            <p className="text-sm mc-muted truncate">
+              {subtitle || line}
+            </p>
           </div>
         </div>
-
-        <div className="flex gap-1.5 shrink-0 overflow-x-auto">
-          <button
-            type="button"
-            onClick={() => { playClick(); toggleSound(); }}
-            className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
-            title={isSoundEnabled ? 'Desativar música e sons' : 'Ativar música'}
-          >
-            <FlashIcon name={isSoundEnabled ? 'volume' : 'mute'} className="w-5 h-5" />
-          </button>
-          {extraButton}
-          <button
-            type="button"
-            onClick={() => { playClick(); logout(); }}
-            className="mc-btn mc-btn-dark w-[44px] h-[44px] p-0"
-            title="Sair"
-          >
-            <FlashIcon name="logout" className="w-5 h-5" />
-          </button>
-        </div>
+        {actions}
       </div>
 
       <div className="flex gap-1.5 overflow-x-auto">
-        <div
-          className="mc-slot mc-chip py-1"
-          title="Relógio da Vila, horário de Brasília"
-        >
-          <img
-            src={period === 'morning' ? SUN : period === 'afternoon' ? SUNSET : MOON}
-            alt=""
-            className="mc-pixel"
-            draggable={false}
-          />
-          <div>
-            <span className="mc-num text-white" style={{ fontSize: 12 }}>
-              {String(typeof hour === 'number' ? hour : clockHour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
-            </span>
-            <span className="mc-chip-l">
-              {WEEKDAY_SHORT[weekday] || ''} {today.slice(8, 10)}/{today.slice(5, 7)}
-            </span>
-          </div>
-        </div>
-        <div
-          className="mc-slot mc-chip py-1"
-          title={`Tochas seguidas: ${fullDays ?? 0}`}
-        >
-          <img src={TORCH} alt="" className="mc-pixel" draggable={false} />
-          <div>
-            <span className="mc-num text-white">{fullDays ?? 0}</span>
-            <span className="mc-chip-l">{(fullDays ?? 0) === 1 ? 'tocha' : 'tochas'}</span>
-          </div>
-        </div>
-        <button type="button" className="mc-slot mc-chip py-1" onClick={() => { playClick(); onOpenGold?.(); }} title="Extrato">
-          <img src={GOLD} alt="" className="mc-pixel" draggable={false} />
-          <div>
-            <span className="mc-num mc-warn">{progress.availableGold || 0}</span>
-            <span className="mc-chip-l">GOLD</span>
-          </div>
-        </button>
-        <button type="button" className="mc-slot mc-chip py-1" onClick={() => { playClick(); onOpenTower?.(); }} title="Torre">
-          <img src={DIAMOND} alt="" className="mc-pixel" draggable={false} />
-          <div>
-            <span className="mc-num mc-diamond">Nível {levelSystem.currentLevel}</span>
-            <span className="mc-chip-l">{levelSystem.levelTitle}</span>
-          </div>
-        </button>
-        {placaLabel && (
-          <button type="button" className="mc-slot mc-chip py-1" onClick={() => { playClick(); onOpenPlaca?.(); }} title="Placa da Vila">
-            <span className="text-sm text-white truncate max-w-[12rem]">{placaLabel}</span>
-          </button>
-        )}
+        {clockChip}
+        {torchChip}
+        {goldChip}
+        {levelChip}
+        {placaChip}
         {nextEventLabel && (
           <div className="mc-slot mc-chip py-1" title="Próximo da Agenda">
             <span className="text-sm text-white">{nextEventLabel}</span>
@@ -176,7 +214,6 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
           </div>
         )}
       </div>
-      {!compact && (
       <div className="flex items-center gap-3 mn-hud-xp">
         <span className="mc-lbl shrink-0">XP</span>
         <div className="mc-bar flex-1">
@@ -188,7 +225,6 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
             : `${Math.round(levelSystem.currentXP - levelSystem.xpForCurrentLevel)}/${Math.round(levelSystem.xpForNextLevel - levelSystem.xpForCurrentLevel)}`}
         </span>
       </div>
-      )}
     </motion.header>
   );
 };
