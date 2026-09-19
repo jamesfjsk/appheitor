@@ -40,7 +40,7 @@ const BUILD_LINES: Record<string, [string, string, string]> = {
   torre: [
     'Torre no morro. Sobe quando quiser ver o que já ganhou.',
     'Recordes ficam lá em cima. Não perde.',
-    'Desafio e mapa de habilidades. Olha com calma.',
+    'Mapa e histórias. Olha com calma.',
   ],
   mesa: [
     'Mesa do Sábio. Amanhã a história é a que você pediu.',

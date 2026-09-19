@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Volume2 } from 'lucide-react';
 import type { MerchantPlacement, MerchantSpot, Relation } from '../../../../types/english';
-import { MERCHANT_ITEMS, RELATION_EN, RELATION_PT, type MerchantItemDef } from '../../../../config/englishBase';
+import { MERCHANT_ITEMS, MERCHANT_SPOTS, RELATION_EN, RELATION_PT, type MerchantItemDef } from '../../../../config/englishBase';
 import { merchantMaterial } from '../../../../config/englishRewards';
 import { evaluateRoom } from '../../../../services/english/merchantRoom';
 import { playText, prefetchAudio, stopAudio } from '../../../../services/englishTts';
@@ -19,6 +19,8 @@ type Placement = MerchantPlacement & { key: number };
 type Speaking = { step: number; stage: 'loading' | 'playing' } | null;
 
 const itemDef = (id: string): MerchantItemDef | undefined => MERCHANT_ITEMS.find((it) => it.id === id);
+// imagem do lugar sempre do catálogo (conjunto único de 19/09); o plano guarda o caminho antigo
+const spotImage = (id: string, stored: string): string => MERCHANT_SPOTS.find((sp) => sp.id === id)?.image || stored;
 const itemLabel = (id: string, qty: number): string => {
   const def = itemDef(id);
   if (!def) return id;
@@ -179,7 +181,7 @@ const MerchantContract: React.FC<ContractScreenProps<'merchant'>> = ({ contract,
               onClick={() => pickSpot(spot)}
               data-testid={`spot-${spot.id}`}
             >
-              <img src={spot.image} alt="" className="w-14 h-14 sm:w-16 sm:h-16 mc-pixel" draggable={false} />
+              <img src={spotImage(spot.id, spot.image)} alt="" className="w-14 h-14 sm:w-16 sm:h-16 mc-pixel" draggable={false} />
               <span className="mc-font text-[9px] text-white mt-1">{spot.label}</span>
               <div className="flex flex-wrap justify-center gap-1 mt-1 min-h-[1.5rem]">
                 {here.map((p) => (

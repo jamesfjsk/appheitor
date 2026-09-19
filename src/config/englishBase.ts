@@ -143,7 +143,7 @@ export const BUILDINGS: BuildingDef[] = [
     effects: [
       'Abre as conquistas e a estrela de temporada.',
       'Recordes e Troféu da semana.',
-      'Você pode propor desafios e vê o Mapa de habilidades.',
+      'Mapa de habilidades e Histórias dos personagens.',
     ],
     effect: 'Abre as conquistas e a estrela de temporada.',
     icon: '/assets/village/buildings/torre-1.png',
@@ -417,18 +417,18 @@ const spot = (id: string, pt: string, ptGender: PtGender, image: string, relatio
 
 /** 12 lugares; relações permitidas conforme a seção 3 (floor/wall ficaram de fora: sem imagem) */
 export const MERCHANT_SPOTS: MerchantSpotDef[] = [
-  spot('door', 'porta', 'f', '/assets/english/images/object_door.webp', ['next_to', 'under']),
-  spot('window', 'janela', 'f', '/assets/english/ui/base/s_window.webp', ['next_to', 'under']),
-  spot('fence', 'cerca', 'f', '/assets/english/ui/base/s_fence.webp', ['next_to', 'under']),
-  spot('chest', 'baú', 'm', '/assets/english/ui/chest.webp', ['in', 'on', 'next_to']),
-  spot('box', 'caixa', 'f', '/assets/english/ui/base/s_box.webp', ['in', 'on', 'next_to']),
-  spot('oven', 'forno', 'm', '/assets/english/ui/base/s_oven.webp', ['in', 'on', 'next_to']),
-  spot('barrel', 'barril', 'm', '/assets/english/ui/base/s_barrel.webp', ['in', 'on', 'next_to']),
-  spot('table', 'mesa', 'f', '/assets/english/images/object_table.webp', ['on', 'under', 'next_to']),
-  spot('bed', 'cama', 'f', '/assets/english/ui/bed.webp', ['on', 'under', 'next_to']),
-  spot('shelf', 'prateleira', 'f', '/assets/english/ui/base/s_shelf.webp', ['on', 'under', 'next_to']),
-  spot('rug', 'tapete', 'm', '/assets/english/ui/base/s_rug.webp', ['on', 'under', 'next_to']),
-  spot('bench', 'banco', 'm', '/assets/english/ui/base/s_bench.webp', ['on', 'under', 'next_to']),
+  spot('door', 'porta', 'f', '/assets/village/merchant/spot-door.png', ['next_to', 'under']),
+  spot('window', 'janela', 'f', '/assets/village/merchant/spot-window.png', ['next_to', 'under']),
+  spot('fence', 'cerca', 'f', '/assets/village/merchant/spot-fence.png', ['next_to', 'under']),
+  spot('chest', 'baú', 'm', '/assets/village/merchant/spot-chest.png', ['in', 'on', 'next_to']),
+  spot('box', 'caixa', 'f', '/assets/village/merchant/spot-box.png', ['in', 'on', 'next_to']),
+  spot('oven', 'forno', 'm', '/assets/village/merchant/spot-oven.png', ['in', 'on', 'next_to']),
+  spot('barrel', 'barril', 'm', '/assets/village/merchant/spot-barrel.png', ['in', 'on', 'next_to']),
+  spot('table', 'mesa', 'f', '/assets/village/merchant/spot-table.png', ['on', 'under', 'next_to']),
+  spot('bed', 'cama', 'f', '/assets/village/merchant/spot-bed.png', ['on', 'under', 'next_to']),
+  spot('shelf', 'prateleira', 'f', '/assets/village/merchant/spot-shelf.png', ['on', 'under', 'next_to']),
+  spot('rug', 'tapete', 'm', '/assets/village/merchant/spot-rug.png', ['on', 'under', 'next_to']),
+  spot('bench', 'banco', 'm', '/assets/village/merchant/spot-bench.png', ['on', 'under', 'next_to']),
 ];
 
 const item = (
@@ -443,23 +443,23 @@ const item = (
 
 /** 17 itens portáteis; nenhum id coincide com um lugar */
 export const MERCHANT_ITEMS: MerchantItemDef[] = [
-  item('torch', 'torches', 'tocha', 'tochas', 'f', '/assets/english/ui/torch.webp'),
-  item('sword', 'swords', 'espada', 'espadas', 'f', '/assets/english/ui/sword.webp'),
-  item('book', 'books', 'livro', 'livros', 'm', '/assets/english/images/object_book.webp'),
-  item('ball', 'balls', 'bola', 'bolas', 'f', '/assets/english/images/object_ball.webp'),
-  item('apple', 'apples', 'maçã', 'maçãs', 'f', '/assets/english/ui/apple.webp'),
-  item('banana', 'bananas', 'banana', 'bananas', 'f', '/assets/english/images/fruit_banana.webp'),
-  item('orange', 'oranges', 'laranja', 'laranjas', 'f', '/assets/english/images/fruit_orange.webp'),
-  item('map', 'maps', 'mapa', 'mapas', 'm', '/assets/english/ui/map.webp'),
-  item('clock', 'clocks', 'relógio', 'relógios', 'm', '/assets/english/ui/clock.webp'),
-  item('bucket', 'buckets', 'balde', 'baldes', 'm', '/assets/english/ui/base/i_bucket.webp'),
-  item('bone', 'bones', 'osso', 'ossos', 'm', '/assets/english/ui/base/i_bone.webp'),
-  item('cake', 'cakes', 'bolo', 'bolos', 'm', '/assets/english/ui/base/i_cake.webp'),
-  item('key', 'keys', 'chave', 'chaves', 'f', '/assets/english/ui/base/i_key.webp'),
-  item('lamp', 'lamps', 'lâmpada', 'lâmpadas', 'f', '/assets/english/ui/base/i_lamp.webp'),
-  item('boots', 'boots', 'botas', 'botas', 'f', '/assets/english/ui/base/i_boots.webp', true),
-  item('helmet', 'helmets', 'capacete', 'capacetes', 'm', '/assets/english/ui/base/i_helmet.webp'),
-  item('potion', 'potions', 'poção', 'poções', 'f', '/assets/english/ui/base/i_potion.webp'),
+  item('torch', 'torches', 'tocha', 'tochas', 'f', '/assets/village/merchant/item-torch.png'),
+  item('sword', 'swords', 'espada', 'espadas', 'f', '/assets/village/merchant/item-sword.png'),
+  item('book', 'books', 'livro', 'livros', 'm', '/assets/village/merchant/item-book.png'),
+  item('ball', 'balls', 'bola', 'bolas', 'f', '/assets/village/merchant/item-ball.png'),
+  item('apple', 'apples', 'maçã', 'maçãs', 'f', '/assets/village/merchant/item-apple.png'),
+  item('banana', 'bananas', 'banana', 'bananas', 'f', '/assets/village/merchant/item-banana.png'),
+  item('orange', 'oranges', 'laranja', 'laranjas', 'f', '/assets/village/merchant/item-orange.png'),
+  item('map', 'maps', 'mapa', 'mapas', 'm', '/assets/village/merchant/item-map.png'),
+  item('clock', 'clocks', 'relógio', 'relógios', 'm', '/assets/village/merchant/item-clock.png'),
+  item('bucket', 'buckets', 'balde', 'baldes', 'm', '/assets/village/merchant/item-bucket.png'),
+  item('bone', 'bones', 'osso', 'ossos', 'm', '/assets/village/merchant/item-bone.png'),
+  item('cake', 'cakes', 'bolo', 'bolos', 'm', '/assets/village/merchant/item-cake.png'),
+  item('key', 'keys', 'chave', 'chaves', 'f', '/assets/village/merchant/item-key.png'),
+  item('lamp', 'lamps', 'lâmpada', 'lâmpadas', 'f', '/assets/village/merchant/item-lamp.png'),
+  item('boots', 'boots', 'botas', 'botas', 'f', '/assets/village/merchant/item-boots.png', true),
+  item('helmet', 'helmets', 'capacete', 'capacetes', 'm', '/assets/village/merchant/item-helmet.png'),
+  item('potion', 'potions', 'poção', 'poções', 'f', '/assets/village/merchant/item-potion.png'),
 ];
 
 export interface MerchantCatalogs {

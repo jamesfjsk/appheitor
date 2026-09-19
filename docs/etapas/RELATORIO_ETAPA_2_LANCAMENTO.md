@@ -351,3 +351,34 @@ Itens 2, 3, 5, 8, 18b e achados A3, A4, A9, A10, A11. Sem mudança de regra, art
 
 Nenhuma que tenha impedido o pacote.
 
+## Torre — sala de troféus (19/09)
+
+Sentimento: a Torre é a sala de troféus do clube, não uma planilha.
+
+### O que mudou
+
+- `Torre.tsx` passa a `ChildSheet` (`mc-modal` + corpo com scroll). Abas numa linha, sem Lucide; as que o nível não abriu ficam apagadas e falam com a voz da Torre (`villageLines`), não "Torre nível 2".
+- Categorias com nome de mundo (`Rotina 3/20`, `Baú`, não `bau`). Lista em `mc-row` + ícone 32 px + moldura da camada. Saiu a nota "nenhuma conquista paga gold".
+- Quase lá no topo, como o doc. Aba Vida real sem título duplicado; vazio falado. Recordes, troféus, mapa e histórias com copy do mundo e nomes de NPC.
+- `englishBase.ts` n3 da Torre: sai "propor desafios", entra mapa e histórias (decisão 14).
+
+### Arquivos
+
+- `src/components/hero/village/Torre.tsx`
+- `src/components/hero/AchievementsBadges.tsx` (`embedded`)
+- `src/config/englishBase.ts`
+- fotos: `docs/exemplos/telas/cena-v2/tmp-arena/cadeado-shots/torre-01-1280.png`, `torre-02-1920.png`
+
+### Barra
+
+1–7 visual: intenção (troféus), sistema (`mc-modal`/`mc-row`/`mc-slot`), Fredoka no corpo, ícone 32 px, uma âncora (quase lá + lista), Vila atrás, 1280 e 1920 sem corte no meio da palavra.
+8–12 lógica: abas ainda batem com o nível; sem gold novo; cadeado com frase, não relatório.
+13–16: clique com som; copy do Olheiro; fotos nesta sessão na conta de teste.
+
+Frame lido: nada sobreposto, cortado ou fora do clique no quadro da Torre.
+
+### Fora
+
+Não reescrevi o catálogo (`Mão na massa 10`). Não mudei o portão do header que abre a Torre no n0.
+
+

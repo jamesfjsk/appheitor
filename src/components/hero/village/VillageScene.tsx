@@ -32,12 +32,10 @@ import {
   paintPuff,
   paintWater,
   pickHit,
-  paintGrowthMark,
   paintEmptyLot,
   paintSitLog,
   paintChestGlint,
   chestLidBob,
-  visibleGrowthMarks,
   DEFAULT_GROWTH,
   type GrowthMark,
   type HoverKind,
@@ -975,17 +973,8 @@ const VillageScene: React.FC<Props> = ({
         const layer = img(g.src, bump);
         if (layer) ctx.drawImage(layer, 0, 0, W, H);
       });
-      const growthMarks = visibleGrowthMarks(anchors.growth, sum);
-
       const layers: Layer[] = [];
       const cracks = visibleCracks(village.cracks);
-      growthMarks.forEach((mark, i) => {
-        layers.push({
-          id: `growth:${mark.kind}:${i}`,
-          y: mark.kind === 'bunting' ? Math.min(mark.y, mark.y2 ?? mark.y) : mark.y,
-          draw: (c) => paintGrowthMark(c, mark, night, elapsed),
-        });
-      });
 
       anchors.lots.forEach((lot) => {
         const bid = lot.id as BuildingId;
@@ -1656,7 +1645,7 @@ const VillageScene: React.FC<Props> = ({
       paintWind(ctx, W, H, elapsed, night, reducedMotion);
 
       if (night) {
-        const lamps = nightLamps(anchors, buildings, growthMarks.filter((m) => m.kind === 'lamp'));
+        const lamps = nightLamps(anchors, buildings);
         paintNightLighting(ctx, W, H, lamps, elapsed, reducedMotion);
         if (nightGround) paintNightSky(ctx, nightGround.stars, elapsed, reducedMotion, moon);
         if (!reducedMotion) paintFireflies(ctx, flies.current, elapsed);

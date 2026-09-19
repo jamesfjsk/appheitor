@@ -40,7 +40,7 @@ function achievementPixelSrc(achievement: Achievement): string {
   return `/assets/english/ui/${name}.webp`;
 }
 
-const AchievementsBadges: React.FC = () => {
+const AchievementsBadges: React.FC<{ embedded?: boolean }> = ({ embedded }) => {
   const { achievements, userAchievements, progress, claimAchievementReward } = useData();
   const { childUid } = useAuth();
   const { playClick } = useSound();
@@ -149,7 +149,8 @@ const AchievementsBadges: React.FC = () => {
   };
 
   return (
-    <div className="mc-panel rounded-lg p-4 text-white mc-pop">
+    <div className={embedded ? 'space-y-3' : 'mc-panel rounded-lg p-4 text-white mc-pop'}>
+      {!embedded && (
       <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <h3 className="mc-h">
           <img src={TROPHY} alt="" className="mc-pixel" draggable={false} />
@@ -164,6 +165,7 @@ const AchievementsBadges: React.FC = () => {
           <span className="mc-lbl">{completedCount} de {totalCount} desbloqueadas</span>
         </div>
       </div>
+      )}
 
       {achievementsWithProgress.length > 0 ? (
         <div className="grid grid-cols-4 gap-2">
@@ -209,8 +211,8 @@ const AchievementsBadges: React.FC = () => {
             draggable={false}
             style={{ filter: 'grayscale(1) brightness(.9)', opacity: 0.5 }}
           />
-          <p className="text-sm text-white/85">Nenhuma conquista criada ainda</p>
-          <p className="text-xs mc-muted mt-1">Peça para o papai criar algumas</p>
+          <p className="text-sm">O pai ainda não deixou nenhuma marca da vida real.</p>
+          <p className="text-sm mc-muted mt-1">Quando ele marcar, aparece aqui.</p>
         </div>
       )}
 

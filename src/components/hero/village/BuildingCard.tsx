@@ -491,12 +491,6 @@ const BuildingCard: React.FC<Props> = ({
               </button>
             </>
           )}
-
-          {id !== 'bau' && (
-            <button type="button" className="mc-btn mc-btn-stone w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenWorkshop(); }}>
-              Ferraria
-            </button>
-          )}
         </div>
       </div>
     </div>

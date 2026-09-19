@@ -36,3 +36,8 @@ Decisão do pai (15/09/2026): toda a arte é gerada por IA, sem ninguém desenha
 ## Lote gerado em 15/09 (Etapa 1)
 
 `node scripts/pixellab-gen.cjs --sheet` gerou os 79 sprites do manifesto sem falhas (folha de contato em `public/assets/village/sheet.png`; ordem: buildings, char, items, npc, pets, rewards, tiles). Dois foram refeitos depois de olhar a folha, com prompt ajustado no manifesto: `buildings/placa.png` (saiu como estacas sem placa; agora é a placa de madeira no terreno vazio) e `rewards/amigo.png` (saiu como silhuetas pretas; agora são duas crianças coloridas). Observação de curadoria: a Mesa de Encantamento nos níveis 2-3 fica roxa e diferente das outras construções de propósito (prompt "enchanting library"); se o pai não gostar, regenerar com `--only buildings/mesa --force` depois de trocar a descrição. Aprovação do lote pelo pai: pendente.
+
+## Regra de aceite do líder (19/09/2026; a Lei da Excelência de `.cursor/rules/lei-excelencia-aaa.mdc` vale para a arte)
+
+Nenhum sprite, fundo ou ícone entra no jogo sem passar por três portas: (1) gerar pelo manifesto; (2) montar a prancha (`sharp`, 96 px, fundo escuro) e **olhar** cada peça: se não se reconhece sem o nome, refaz com prompt mais concreto (caso real de 18/09: capacete virou casa, tocha virou farol, bola virou bolo; refeitos); (3) só então apontar o código para o arquivo, e fotografar a tela onde ele aparece. Conjuntos sempre no mesmo estilo (um prompt de estilo por conjunto), nunca misturar fontes (`ui/`, `images/`, `village/`) numa mesma tela. Lote do Comerciante (19/09): `public/assets/village/merchant/spot-*.png` (12 lugares, 96 px) e `item-*.png` (17 itens, 64 px), todos conferidos.
+

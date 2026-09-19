@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { execSync } from 'node:child_process';
@@ -15,9 +16,13 @@ function appVersion(): string {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
+  // Windows: se o terminal abre em c:\ (minúscula), o Vite serve tudo por /@fs/C:/... e duplica módulos
+  // (erro intermitente "useAuth deve ser usado dentro de AuthProvider" só em dev, 19/09). Raiz com a letra canônica.
+  const root = fs.realpathSync.native(process.cwd());
   const env = loadEnv(mode, process.cwd(), '');
   const isDev = mode === 'development';
   return {
+    root,
     plugins: [react()],
     optimizeDeps: {
       include: ['phaser'],

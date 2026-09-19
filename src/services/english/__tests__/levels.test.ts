@@ -210,7 +210,7 @@ test('12 lugares com relações permitidas e 17 itens sem id de lugar; imagens e
     expect(existsSync(join(pub, publicFilePath(it.image)))).toBeTruthy();
     expect(it.plural.length > 0).toBeTruthy();
   }
-  expect(MERCHANT_ITEMS.find((i) => i.id === 'apple')?.image).toBe('/assets/english/ui/apple.webp');
+  expect(MERCHANT_ITEMS.find((i) => i.id === 'apple')?.image).toBe('/assets/village/merchant/item-apple.png'); // conjunto único do Comerciante (19/09)
   Object.values(MATERIAL_ICONS).forEach((p) => expect(existsSync(join(pub, publicFilePath(p)))).toBeTruthy());
   Object.values(CONTRACT_ICONS).forEach((p) => expect(existsSync(join(pub, publicFilePath(p)))).toBeTruthy());
 });
