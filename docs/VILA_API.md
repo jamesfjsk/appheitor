@@ -49,7 +49,9 @@ Módulos sem Firebase, React ou `import.meta.env`. Testes: `npm run test:village
 
 ## `src/services/village/chest.ts`
 
-- `chestAllowed({ hourBrazil, settings, due, done, village, date })` — horário, mínimo de devidas, todas feitas, uma vez.
+- `chestAllowed({ hourBrazil, settings, due, done, village, date, bauLevel })` — Armazém n1+, horário, mínimo de devidas, metade das missões (`ceil(due * 0.5)`), uma vez.
+- `chestNeedDone` / `chestNeedLeft` / `chestNeedLine` — quantas missões faltam para o baú (metade, teto).
+- `warehouseHoldsChest(level, ruined)` / `chestMapLook` — cadeado no mapa se não há obra, se ainda não é hora ou se faltam missões; brilho só na hora e liberado.
 - `dailyChestContents(uid, date, village, settings?)` — gold, 2 materiais, esmeralda a cada N dias (`fullDays+1`), teto de gold; picareta ouro/diamante +1 material.
 
 ## `src/services/village/shop.ts`
@@ -175,6 +177,8 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 
 ## `src/services/village/chest.ts` (alterado)
 
+- `warehouseHoldsChest` / `chestMapLook` — cadeado no mapa se não há obra, se ainda não é hora ou se faltam missões; brilho só na hora e liberado.
+- `chestNeedDone` — `ceil(due * 0.5)`; `chestAllowed` recusa `incomplete` abaixo disso.
 - `dailyChestContents(uid, date, village, settings?, stock?, bauLevel?)` — gold = `min(teto, base + tochas)`; 2 do mais escasso (+1 se Armazém n2); esmeralda a cada `rareEveryNDays` (a cada 2 se Armazém n3).
 
 ## `src/services/village/shop.ts` (alterado)

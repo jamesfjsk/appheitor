@@ -1,0 +1,173 @@
+---
+description: Lei permanente — padrão indie AAA deste jogo. Visual e lógica. Refazer até excelência. A Placa oca é o crime. Aplica a todo agente.
+alwaysApply: true
+---
+
+# Lei da Excelência — Miner Missions
+
+Isto é lei, não preferência. Vale para código, UI, arte, som, copy, docs, testes e qualquer agente (Composer, Agent, subagentes). Violar o espírito é violar a lei.
+
+O jogador é o **Heitor**, 10 anos, **PC** (1280×720 e 1920×1080; não tem celular nem tablet), fã de Minecraft. Se ele precisa de manual, a tela falhou. Se o pai (diretor) recusaria um frame, **refaz**. Quantas vezes for preciso. Tempo, cansaço e "já funciona" não são desculpa.
+
+## A lei
+
+Nada sai como rascunho. Cada entrega precisa parecer obra de um estúdio indie obsessivo — o capricho de Celeste, Stardew ou Hades, não o orçamento deles. Excelência aqui é precisão, peso, clareza, suco e consistência com **este** mundo, não cutscene de 40 minutos nem feature nova.
+
+## O que isto NÃO autoriza
+
+- **Não gerar por gerar.** Não inventa feature, tela, asset, refatoração ou "melhoria" fora do pedido.
+- **Não dourar escopo.** A lei eleva a QUALIDADE do que foi pedido, não o tamanho.
+- **Não restilizar o painel do pai** (`src/components/parent/**`) a menos que o pedido seja isso. Lá o visual é outro (Tailwind limpo).
+- **Não expandir o pedido para parecer caprichoso.**
+
+## O crime (o padrão que os agentes realmente entregam)
+
+Crime real, já visto neste projeto: a Placa aberta virou um retângulo marrom liso, envelope pixel enorme no centro, título "Placa" sobreposto a outro texto ("Placaeca"), botão X solto, Vila tapada, zero recado. Código existia. Conteúdo existia. Ninguém abriu o jogo.
+
+Esse padrão se repete assim:
+
+1. Inventa um "look" com um PNG grande e um fundo `linear-gradient` marrom.
+2. Não usa o sistema que o jogo já tem (`mc-modal` + `panel-frame.png`, `mc-slot`, `mc-btn`, nota no tamanho certo).
+3. CSS novo sem teto de ícone — o `c_letter.webp` (256 px) vira o painel.
+4. Texto sobrepõe texto; declara pronto.
+5. Lógica e copy já estavam no mundo; a tela mente que está vazia.
+
+**Se o resultado parece a Placa oca, não está pronto.** Não importa o diff.
+
+Outros crimes da mesma família:
+
+- Overlay que come a cena em vez de ser um recado no mundo (`docs/VILA_MAPA.md`: a Placa é placa de madeira na cena + balão discreto, não um modal de e-mail).
+- Copy de dashboard / de IA: "Salvar alterações", "Nenhum item encontrado", "Faltam 6 missões para abrir. Abre às 18h (faltam 8h00)."
+- Texto sobreposto, cortado, "Placaeca", palavras coladas sem espaço (bug clássico deste repo quando o layout quebra).
+- Placeholder visível: lorem, ícone Lucide gigante no lugar de pixel, cor sem token, TODO na UI.
+- Clique morto: sem `playClick()`, sem `mc-pop`, sem peso.
+- Lógica nova que fura `docs/MUNDO.md`, economia ou gold.
+
+## Barra — passe TODAS, senão não está pronto
+
+### Visual
+
+1. **Intenção.** O Heitor sente o que a tela promete sem ler manual. Placa = recados do dia. Baú = tesouro. Casa = missões. Mina = contrato.
+2. **Sistema, não invenção.** Reusa `src/styles/miner.css` e `src/index.css`. Tokens `--mc-*`. Classes `mc-modal`, `mc-panel`, `mc-card`, `mc-inv`, `mc-slot`, `mc-btn` + variantes, `mc-bar`, `mc-chip`, `mc-row`, `mc-pop` / `mc-build` / `mc-shake`. Modal da criança = quadro `panel-frame.png` (9-slice), não caixa marrom.
+3. **Fonte.** Press Start 2P (`mc-title`, `mc-num`, `mc-lbl`, `mc-h`) só em título curto, rótulo e número. Corpo, recado, botão longo = Fredoka. Acento maiúsculo na pixel fica feio: caixa mista ou Fredoka.
+4. **Ícone.** Pixel de `public/assets/english/ui/` ou `village/`, `mc-pixel`, `draggable={false}`, `alt=""`. Tamanho de HUD: 24–40 px. Nunca um webp 256 px como herói do painel. Sem emoji em texto visível. Lucide só em utilitário pequeno (X, som, seta).
+5. **Hierarquia.** Uma âncora visual. O que importa agora (recado, missão, ouro) lê-se em 1 segundo. Botão 44 px. Raio máximo 8 px. Sem sombra difusa, sem gradiente de template, sem Bootstrap.
+6. **A cena continua.** HUD e painéis não apagam a Vila. Overlay é recado, não parede.
+7. **Arestas visuais.** Vazio, 0 avisos, erro, offline, 1280×720 e 1920×1080, teclado: mesmo capricho. Nada cortado, nada fora do alcance do clique, nada sobreposto; sem `zoom` nem `transform: scale` para crescer em tela larga (borra no Firefox). Vazio fala do mundo ("A placa está limpa hoje"), não "Nenhum item".
+
+### Lógica
+
+8. **Mundo.** Casa com `docs/MUNDO.md`, `docs/VILA_MAPA.md`, `docs/VILA_API.md`, `docs/VILA_CONSTRUCOES.md`, `docs/conteudo/FALAS_NPC.md`. Duas portas: lugar ≠ jogo. Gold, XP, pai e Placa ficam no React. Phaser só nas portas de jogo, e só quando o doc autorizar.
+9. **Economia e regra.** Não inventa fonte de gold, material, XP ou chave de claim. Missão de manhã = madeira, tarde = pedra, noite = ferro. Redstone não se fabrica no chute. Claim idempotente (`village.claimed`). Relógio = `ClockContext` / Brasília, não `new Date()` solto na UI da criança.
+10. **Consequência sem humilhação.** Erro do quiz, dia perdido, ruína: claros, justos, falados pelo mundo. Não castigo de formulário.
+11. **Estado honesto, voz de jogo.** A tela mostra o que o estado é. Se o baú está trancado, o Heitor entende o porquê numa frase do mundo — não num disabled mudo e não num relatório de sistema.
+12. **Mouse e teclado.** Alvo de clique 44 px. Esc fecha. Atalhos que o doc já definiu não quebram. Funciona em Chrome e Firefox.
+
+### Craft e evidência
+
+13. **Craft.** Timing, easing, som (`useSound`: `playClick` e o sfx certo), copy: nenhum fica provisório. Animação linear sem peso = falha.
+14. **Copy.** Ver **Voz** abaixo. Sem "Flash", sem heroísmo de HQ, sem jargão de settings, sem texto de IA.
+15. **Evidência.** Verificou de verdade nesta sessão: rodou o app (`npm run dev`), entrou na conta de teste (`teste@flash.com`, nunca a conta do Heitor), clicou, ouviu, olhou o frame nas duas resoluções; usou `?h=` e `?d=` depois do login quando o fluxo depende da hora. "Compila" e "os testes passam" não bastam para gameplay/UI. O relatório traz a foto de cada tela tocada em 1280×720 e 1920×1080 e uma linha "frame lido: nada sobreposto, cortado ou fora do clique".
+16. **Arestas de lógica.** Offline, IA desligada, férias, punição, primeiro dia, virada de dia (`?d=` / `?h=` se o fluxo exigir): o caminho que você tocou não mente.
+
+## Fontes de verdade e regras que nenhuma qualidade pode furar
+
+- **Ordem de leitura antes de qualquer pacote**: `docs/etapas/ETAPA_2_LANCAMENTO.md` (as decisões numeradas do pai são lei; a última é a 24), a seção do pacote em `docs/etapas/REVISAO_ETAPA_2_LANCAMENTO.md`, e os desenhos: `docs/MUNDO.md`, `docs/VILA_MAPA.md`, `docs/VILA_CONSTRUCOES.md`, `docs/VILA_CONQUISTAS.md`, `docs/VILA_ITENS.md`, `docs/MINA_CONTRATOS.md`, `docs/MISSOES_COMPROVANTE.md`, `docs/AVALIACAO_MENSAL.md`. Se o pedido contradiz um deles, para e pergunta; não escolhe.
+- **Recompensa só de primeira** (decisão 23): tentar de novo é permitido e ensina, mas não paga nem conta como acerto; sem aviso na tela. Gold pela metade; a missão da vida real pesa mais que qualquer jogo.
+- **Nada entra sem documento** (decisão 10): arquivo, tela ou mecânica nova só com linha na seção 12 do arquivo de etapa; senão sai da branch na revisão.
+- **Congelados** (só bug apontado em revisão): `src/services/village/cart.ts`, `CartBench.tsx`, o andar do Heitor em `npcBehavior.ts` (125 px/s, abre na chegada), as laterais da cena (`.mn-village .mn-stage::before`), a música (`bgm.ts`, `vila.mp3`), `src/game/**` (molde Phaser, sem import).
+- **Relatório** ao fim de cada pacote em `docs/etapas/RELATORIO_ETAPA_2_LANCAMENTO.md`: o que mudou, arquivos, fotos, a barra desta lei marcada item a item, o que ficou de fora e por quê. Depois **para** para o pai commitar; não começa o próximo pacote.
+
+## Loop obrigatório (não pular)
+
+1. Uma frase de sentimento alvo ("o baú pesa ao abrir"; "a Placa é um recado na madeira, não uma caixa de e-mail").
+2. A menor mudança que realize isso — no sistema que já existe.
+3. Verifica no caminho do jogador, no tamanho real (1280×720 e estreito). Lê o frame: texto sobreposto? ícone comendo o painel? cena tapada?
+4. Julga com a barra. Se o diretor recusaria, **não declara pronto**.
+5. Refaz só o que falhou. Sem "fica pra depois" no que você tocou.
+6. Só fecha quando 3 confirma 4.
+
+Se depois de 3 ciclos ainda estiver a Placa oca, **muda de abordagem**. Não entrega o medíocre.
+
+## Voz — texto da criança é diálogo de jogo, não de IA
+
+A lógica das telas (missão, hora, gold, material, cadeado) **vale**. A frase **não** sai dessas regras em tom de sistema. Nenhum texto visível da criança pode parecer gerado por assistente, tooltip de app ou instrução de construção.
+
+Crime real, já no ar:
+
+> "Faltam 6 missões para abrir. Abre às 18h (faltam 8h00)."
+
+Isso não é diálogo de jogo. É ticket de suporte. Um indie AAA não fala assim com uma criança de 10 anos. Se a frase parece boletim, planilha ou ChatGPT, **refaz**.
+
+Fontes da voz (usar, não inventar outra):
+
+- `docs/conteudo/FALAS_NPC.md` e `src/data/dialogue/`
+- `src/data/villageLines.ts` (`BUILD_LINES`, `buildLine`, falas curtas)
+- `src/data/habitLines.ts`
+
+A regra da tela fica; a boca muda. O baú ainda abre à noite depois das missões — a frase é do mundo, não do relógio.
+
+```
+❌ Faltam 6 missões para abrir. Abre às 18h (faltam 8h00).
+❌ Construa o Armazém para guardar o Baú do Dia.
+❌ Bloqueado. Requisitos não atendidos.
+❌ Salvar alterações / Nenhum item encontrado / Faça 5 missões
+
+✅ O Baú do Dia abre à noite, quando o trabalho acabou. (`villageLines`)
+✅ Ainda tem missão no chão. O baú espera o dia inteiro.
+✅ O sol ainda está alto. Volta quando a Vila acender as tochas.
+✅ Fornalha acesa. O ferro começa aqui. (`BUILD_LINES`)
+```
+
+Onde isso vale: Placa, Casa, obras, Baú, Mina, toasts, botões, cadeados, hover, empty state. Número pode aparecer (`mc-num`, chip). A **frase** ao redor é falada. Painel do pai pode ser direto.
+
+Antes de escrever copy nova: já existe linha em `villageLines` / diálogo? Se sim, usa ou varia no mesmo tom. Não concatena `Faltam N` + `Abre às` + `(faltam HhMM)`.
+
+## Kit obrigatório (não reinventar)
+
+| Precisa | Usa |
+|---|---|
+| Modal / folha da criança | `mc-modal` + `panel-frame.png` |
+| Cartão / HUD pedra | `mc-panel` / `mc-card` / `mn-hud` |
+| Lista do dia (ler e marcar) | `mc-inv` + `mc-row` |
+| Ícone clicável | `mc-slot` 44–52 px, pixel dentro |
+| Ação principal | `mc-btn mc-btn-green` |
+| Secundária | `mc-btn-wood` / `mc-btn-stone` |
+| Recompensa | `mc-btn-gold` |
+| Fechar / utilitário | `mc-btn-dark` 44×44 |
+| Perigo | `mc-btn-red` só sair/cancelar |
+| Número / XP / gold | `mc-num` |
+| Título curto | `mc-title` |
+| Feedback | `playClick` + `mc-pop` / `mc-shake` |
+| Recado na Placa | nota pequena (ícone 32 px + kicker + corpo), não herói 200 px |
+
+Antes de CSS novo: a classe já existe? Se sim, usa. CSS novo só para o buraco que o sistema não cobre — e com teto de tamanho no `img`.
+
+Arte nova (sprite, UI, tile): PixelLab / pipeline em `docs/ARTE_PIPELINE.md` e `docs/arte/manifesto.json`. Não inventa PNG solto nem ícone genérico. Se a ferramenta ou a chave faltar, **pede** — custo não é desculpa para entregar placeholder.
+
+## Proibido / obrigatório
+
+```
+❌ Primeira versão "funciona, depois a gente polirá"
+❌ Ícone 256 px como conteúdo do painel
+❌ Fundo marrom liso no lugar do quadro de madeira
+❌ Texto sobreposto, cortado, colado ("Placaeca")
+❌ Overlay que apaga a Vila
+❌ Placeholder, emoji, Lucide gigante, cor hex sem token
+❌ Copy de IA / app ("Faltam 6 missões para abrir. Abre às 18h (faltam 8h00).")
+❌ Animação linear; clique sem som
+❌ Dizer "pronto" sem ter aberto o fluxo nesta sessão
+❌ Feature extra para "ficar AAA"
+❌ Furar MUNDO.md / economia / claim / duas portas
+```
+
+```
+✅ Modal = panel-frame, tipo do jogo, som, easing com peso, copy de NPC
+✅ Placa = recados legíveis na madeira; a cena atrás continua viva
+✅ Fluxo clicado; frame morto corrigido; só então fechou
+✅ Vazio, erro, cadeado e offline com a mesma voz do mundo (`villageLines`, NPCs)
+```
+
+## Pare quando
+
+O pedido está feito, a barra passa, e a próxima mudança seria escopo novo — não qualidade do que já existe.

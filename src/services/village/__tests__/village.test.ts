@@ -5,7 +5,7 @@ import { ITEMS } from '../../../config/items';
 import { isoWeekOf } from '../../../utils/isoWeek';
 import { getLevelFromXP, getLevelTitle, getXPForLevel } from '../../../utils/levelSystem';
 import { claimKey, hasClaim, levelGiftClaimKey, rareGiftForLevel } from '../claims';
-import { chestAllowed, dailyChestContents } from '../chest';
+import { chestAllowed, chestMapLook, chestNeedDone, chestNeedLine, chestWaitCopy, dailyChestContents, warehouseHoldsChest } from '../chest';
 import { computeTaskLoot, xpWithBoots } from '../loot';
 import { defaultHabitsForNow, noticesForNow, pickLine } from '../notices';
 import { dueTasksOn, isChestTime, nextFullDays, periodAllowedAt, rangeCoversDate, weekdayFromDate } from '../schedule';
@@ -220,25 +220,51 @@ test('baú: gold = base + tochas até o teto; 2 do material mais escasso; esmera
     { madeira: 8, pedra: 1, ferro: 5 }
   );
   expect(diamondChest.materials.pedra).toBe(4);
+  const n2 = dailyChestContents(
+    'uid-a',
+    '2026-09-15',
+    v0,
+    DEFAULT_ECONOMY,
+    { madeira: 8, pedra: 1, ferro: 5 },
+    2,
+  );
+  expect(n2.materials.pedra).toBe(3);
 
-  const allowed = chestAllowed({
+  const ready = {
     hourBrazil: 18,
     settings: DEFAULT_ECONOMY,
     due: 6,
     done: 6,
     village: { claimed: {} },
     date: '2026-09-15',
-  });
-  expect(allowed.ok).toBe(true);
-  const early = chestAllowed({
-    hourBrazil: 10,
-    settings: DEFAULT_ECONOMY,
-    due: 6,
-    done: 6,
-    village: { claimed: {} },
-    date: '2026-09-15',
-  });
-  expect(early.reason).toBe('hour');
+  };
+  expect(chestAllowed({ ...ready, bauLevel: 1 }).ok).toBe(true);
+  expect(chestAllowed({ ...ready, bauLevel: 0 }).reason).toBe('warehouse');
+  expect(chestAllowed({ ...ready, hourBrazil: 10, bauLevel: 1 }).reason).toBe('hour');
+  expect(chestNeedDone(12)).toBe(6);
+  expect(chestNeedDone(5)).toBe(3);
+  expect(chestNeedDone(1)).toBe(1);
+  expect(chestNeedDone(0)).toBe(0);
+  expect(chestAllowed({ ...ready, due: 12, done: 6, bauLevel: 1 }).ok).toBe(true);
+  expect(chestAllowed({ ...ready, due: 12, done: 5, bauLevel: 1 }).reason).toBe('incomplete');
+  expect(chestAllowed({ ...ready, due: 5, done: 3, bauLevel: 1 }).ok).toBe(true);
+  expect(chestAllowed({ ...ready, due: 5, done: 2, bauLevel: 1 }).reason).toBe('incomplete');
+  expect(chestNeedLine(12, 0)).toBe('Faltam 6 missões');
+  expect(chestNeedLine(5, 2)).toBe('Falta 1 missão');
+  expect(chestNeedLine(6, 3)).toBe(null);
+  expect(chestWaitCopy({ due: 12, done: 0, hourBrazil: 10, chestOpenHour: 18 })).toBe('Às 18h o baú abre, se 6 missões estiverem feitas.');
+  expect(chestWaitCopy({ due: 12, done: 6, hourBrazil: 10, chestOpenHour: 18 })).toBe('Às 18h o baú abre.');
+  expect(chestWaitCopy({ due: 5, done: 2, hourBrazil: 18, chestOpenHour: 18 })).toBe('O baú abre se 3 missões estiverem feitas.');
+  expect(chestWaitCopy({ due: 1, done: 0, hourBrazil: 9, chestOpenHour: 18 })).toBe('Às 18h o baú abre, se 1 missão estiver feita.');
+  expect(chestWaitCopy({ due: 6, done: 3, hourBrazil: 18, chestOpenHour: 18 })).toBe(null);
+  expect(warehouseHoldsChest(0, false)).toBe(false);
+  expect(warehouseHoldsChest(1, false)).toBe(true);
+  expect(warehouseHoldsChest(3, true)).toBe(false);
+  expect(chestMapLook({ bauLevel: 0, ruined: false, ready: true, already: false })).toBe('locked');
+  expect(chestMapLook({ bauLevel: 1, ruined: false, ready: true, already: false })).toBe('ready');
+  expect(chestMapLook({ bauLevel: 1, ruined: false, ready: false, already: false })).toBe('wait');
+  expect(chestMapLook({ bauLevel: 1, ruined: false, ready: false, already: true })).toBe('open');
+  expect(chestMapLook({ bauLevel: 2, ruined: true, ready: true, already: false })).toBe('ruin');
 });
 
 test('claimKey estável', () => {
@@ -311,7 +337,7 @@ test('isoWeekOf em viradas de ano', () => {
 test('noticesForNow e habitsForNow e pickLine sem repetir 14 dias', () => {
   const ctx: NoticeContext = {
     due: 6,
-    done: 4,
+    done: 2,
     minDueForChest: 3,
     chestOpenHour: 18,
     birthdayMmDd: '09-18',

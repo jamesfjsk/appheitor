@@ -53,7 +53,7 @@ import { MATERIALS, initialBaseDoc } from '../config/englishBase';
 import { MINER_MISSIONS_ACHIEVEMENTS } from '../config/villageAchievements';
 import { fromBaseDoc } from './englishBaseService';
 import { claimKey, hasClaim, levelGiftClaimKey, levelGiftPendingKey, rareGiftForLevel } from './village/claims';
-import { chestAllowed, dailyChestContents } from './village/chest';
+import { chestAllowed, chestNeedLeft, dailyChestContents } from './village/chest';
 import { canBuy, canCraft, priceOf, tradePreview } from './village/shop';
 import { dueCompletionsCount, dueTasksOn } from './village/schedule';
 import { applyMaterialRepair, canRepair, isBroken, liveBuildingLevel, repairRefund, ruinUseError } from './village/repair';
@@ -518,16 +518,21 @@ export async function openDailyChest(uid: string, date: string): Promise<ReturnT
     const pSnap = await tx.get(progressRef(uid));
     const bSnap = await tx.get(baseRef(uid));
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
-    const gate = chestAllowed({ hourBrazil: hour, settings: economy, due, done, village, date: today });
+    const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
+    const liveBau = liveBuildingLevel(base.buildings, village.cracks, 'bau');
+    const gate = chestAllowed({ hourBrazil: hour, settings: economy, due, done, village, date: today, bauLevel: liveBau });
     if (!gate.ok) {
+      if (gate.reason === 'warehouse') {
+        if (isBroken(village.cracks, 'bau')) throw ruinUseError('bau');
+        throw new Error('Construa o Armazém para guardar o Baú do Dia');
+      }
       if (gate.reason === 'already') throw new Error('O Baú do Dia já foi aberto');
       if (gate.reason === 'hour') throw new Error(`Abre às ${economy.chestOpenHour}h`);
       if (gate.reason === 'min_due') throw new Error('Hoje não tem missões suficientes');
-      throw new Error(`Faltam ${due - done} missões`);
+      const left = chestNeedLeft(due, done);
+      throw new Error(left === 1 ? 'Falta 1 missão' : `Faltam ${left} missões`);
     }
-    if (isBroken(village.cracks, 'bau')) throw ruinUseError('bau');
-    const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
-    contents = dailyChestContents(uid, today, village, economy, base.materials, liveBuildingLevel(base.buildings, village.cracks, 'bau'));
+    contents = dailyChestContents(uid, today, village, economy, base.materials, liveBau);
     const cut = capGold(contents.gold, goldRoom.room);
     contents = { ...contents, gold: cut.paid };
     const gold = Number(pSnap.data()?.availableGold) || 0;

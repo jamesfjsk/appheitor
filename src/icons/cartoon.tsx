@@ -405,6 +405,14 @@ const MARKS: Record<string, () => React.ReactNode> = {
       <rect x="7.6" y="14.6" width="5.6" height="1.5" rx="0.7" fill="#FFD700" />
     </>
   ),
+  sign: () => (
+    <>
+      <rect x="10.6" y="15.6" width="2.8" height="5.4" rx="0.7" />
+      <rect x="3.8" y="3.4" width="16.4" height="12.6" rx="1.6" />
+      <rect x="6.2" y="6.6" width="11.6" height="1.7" rx="0.7" fill="#FFD700" />
+      <rect x="6.2" y="10.2" width="8.4" height="1.7" rx="0.7" fill="#FFD700" />
+    </>
+  ),
   chart: () => (
     <>
       <rect x="4.4" y="12.4" width="4" height="7.4" rx="1" />

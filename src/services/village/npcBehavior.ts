@@ -153,7 +153,8 @@ export const DEFAULT_WALK_GRAPH: WalkGraph = {
     mesa: { x: 770, y: 338 },
     w1: { x: 430, y: 348 },
     furnace: { x: 214, y: 310 },
-    chest: { x: 196, y: 440 },
+    warehouse: { x: 196, y: 440 },
+    daily: { x: 548, y: 380 },
     s1: { x: 640, y: 448 },
     coffre: { x: 524, y: 512 },
     agenda: { x: 640, y: 516 },
@@ -165,11 +166,12 @@ export const DEFAULT_WALK_GRAPH: WalkGraph = {
     tower: { x: 1054, y: 188 },
     fire: { x: 1020, y: 268 },
     lake: { x: 1168, y: 508 },
-    pack: { x: 548, y: 390 },
+    pack: { x: 448, y: 348 },
   },
   edges: [
     ['plaza', 'n1'], ['n1', 'mine'], ['n1', 'mesa'],
-    ['plaza', 'w1'], ['w1', 'furnace'], ['furnace', 'chest'], ['w1', 'chest'],
+    ['plaza', 'w1'], ['w1', 'furnace'], ['furnace', 'warehouse'], ['w1', 'warehouse'],
+    ['plaza', 'daily'],
     ['plaza', 's1'], ['s1', 'coffre'], ['s1', 'agenda'], ['s1', 'market'],
     ['plaza', 'e1'], ['e1', 'arena'], ['e1', 'market'],
     ['e1', 'porch'], ['porch', 'house'], ['porch', 'fire'],
@@ -181,7 +183,8 @@ export const DEFAULT_WALK_GRAPH: WalkGraph = {
 /** Clique → nó da porta. Sem entrada no mapa = fallback ao sul da hitbox. */
 export const HERO_DEST_NODE: Record<string, string> = {
   'build:fornalha': 'furnace',
-  'build:bau': 'chest',
+  'build:bau': 'warehouse',
+  chest: 'daily',
   'build:mesa': 'mesa',
   'build:cofre': 'coffre',
   'build:agenda': 'agenda',
@@ -191,7 +194,7 @@ export const HERO_DEST_NODE: Record<string, string> = {
   'build:torre': 'tower',
   house: 'house',
   mine: 'mine',
-  chest_streak: 'chest',
+  chest_streak: 'warehouse',
   reserva: 'n1',
   pack: 'pack',
 };
@@ -215,7 +218,7 @@ export type HeroClickPlan = {
 export function heroShakeTarget(spotId: string): string | null {
   if (spotId === 'character' || spotId.startsWith('npc:')) return null;
   if (spotId.startsWith('build:')) return spotId.slice(6);
-  if (spotId === 'house' || spotId === 'pack' || spotId === 'mine' || spotId === 'chest_streak') return spotId;
+  if (spotId === 'house' || spotId === 'pack' || spotId === 'mine' || spotId === 'chest' || spotId === 'chest_streak') return spotId;
   return null;
 }
 

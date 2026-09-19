@@ -111,11 +111,11 @@ export const BUILDINGS: BuildingDef[] = [
     labelEn: 'Storage',
     description: 'O armazém da Vila.',
     effects: [
-      'Você vê o inventário e libera Torre, Mesa e Campinho.',
+      'Guarda o Baú do Dia e libera Torre e Biblioteca.',
       'O Baú do Dia dá +1 material.',
       'A esmeralda do Baú do Dia vem a cada 2 dias completos.',
     ],
-    effect: 'Você vê o inventário e libera Torre, Mesa e Campinho.',
+    effect: 'Guarda o Baú do Dia e libera Torre e Biblioteca.',
     icon: '/assets/village/buildings/bau-1.png',
     costs: [cost(2, 0, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
     requiresCore: false,

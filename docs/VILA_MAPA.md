@@ -19,14 +19,14 @@ Documento de desenho (fonte de verdade a partir de 15/09/2026). Junto com `docs/
 | Raro | esmeralda e diamante; destravam o topo | Mochila; Torre |
 | Missões | as tarefas do dia | **Casa do Minerador** (construção fixa na cena); faixa "Hoje" compacta na Vila; hotbar; tecla M |
 | Casa do Minerador | a casa dele: missões, plano do turno, fechar o dia, diário | lote fixo da cena; cresce por temporada |
-| Baú do Dia | a recompensa de fechar todas as missões | cartão na faixa Hoje e na cena (abre às 18h) |
+| Baú do Dia | a recompensa de fechar metade das missões (teto) | na praça da cena (baú lendário); cadeado se o Armazém não existe, se ainda não é 18h ou se faltam missões; brilho às 18h se liberado |
 | Prêmios de verdade | o que o pai cadastrou e o gold compra no mundo real | Mercado, aba Prêmios |
 | Loja da Vila | roupas, acessórios e pets em gold | Mercado, aba Loja |
 | Comerciante | o NPC do Mercado; compra material sobrando (Etapa 2) | Mercado, aba Comerciante; na cena |
 | Ferraria | forjar equipamentos, fundir materiais, ver as obras | distrito Ferraria; Ferreiro na cena (antiga Oficina) |
 | Obras | as sete construções e seus níveis | cartão de cada construção; Ferraria, aba Obras |
-| Armazém | a construção que guarda as coisas (antiga construção "Baú") | lote na cena; abre a Mochila |
-| Mochila | o inventário: equipado, roupas, equipamentos, materiais e raros | distrito Mochila, Armazém, tecla I |
+| Armazém | guarda o Baú do Dia (antiga construção "Baú") | lote na cena; n0 mostra o baú com cadeado; n1+ abre o lugar do Baú |
+| Mochila | o inventário: equipado, roupas, equipamentos, materiais e raros | distrito Mochila, tecla I |
 | Banco da Vila | o Cofrinho (metas), o Bônus de paciência e o Extrato | construção Cofre; distrito Banco; chip de gold |
 | Extrato | tudo que entrou, saiu e ficou guardado, por semana | Banco, aba Extrato |
 | Torre | conquistas, recordes, troféus, habilidades | construção Torre; distrito Torre |
@@ -48,7 +48,7 @@ Esquerda: avatar (abre a Mochila, aba Equipado), saudação, nome da vila. Chips
 
 A grade de cartões de distritos abaixo da cena **sai**. Tudo se abre **dentro da cena**, tocando no lugar, e a única barra fixa é a hotbar do rodapé. Regras:
 
-- Cada lugar tem um hotspot na cena com rótulo ao passar o mouse e o mesmo cadeado da prova: Casa (missões, Linha do dia), entrada da mina (Mina), Mesa de Encantamento ou o Sábio (Biblioteca), Ferreiro ou Fornalha (Ferraria), Comerciante ou a barraca (Mercado), Cofre (Banco), Armazém ou o próprio minerador (Mochila), Torre (Torre), placa de madeira na cena (Placa da Vila com "Hoje você tem" e recados), relógio ou poste com sino perto da Casa (Agenda), arquibancada (Arena, "Em breve"). Mercado e Agenda são construções baratas do primeiro dia (Barraca do Comerciante e Sino da Vila, `VILA_CONSTRUCOES.md` 9 e 10, decisão do pai); Placa da Vila e Arena são objetos fixos da cena (âncoras `spots`, arte a gerar: placa de madeira, arquibancada).
+- Cada lugar tem um hotspot na cena com rótulo ao passar o mouse e o mesmo cadeado da prova: Casa (missões, Linha do dia), entrada da mina (Mina), Mesa de Encantamento ou o Sábio (Biblioteca), Ferreiro ou Fornalha (Ferraria), Comerciante ou a barraca (Mercado), Cofre (Banco), Armazém (Baú do Dia; cadeado se ainda não construído, brilho na hora), o minerador (Mochila), Torre (Torre), placa de madeira na cena (Placa da Vila com "Hoje você tem" e recados), relógio ou poste com sino perto da Casa (Agenda), arquibancada (Arena, "Em breve"). Mercado e Agenda são construções baratas do primeiro dia (Barraca do Comerciante e Sino da Vila, `VILA_CONSTRUCOES.md` 9 e 10, decisão do pai); Placa da Vila e Arena são objetos fixos da cena (âncoras `spots`, arte a gerar: placa de madeira, arquibancada).
 - A hotbar do rodapé continua com quatro atalhos do dia a dia: Vila, Missões (Casa), Mina, Mochila. Mercado sai do rodapé: é construção na cena.
 - O cabeçalho encolhe para uma faixa: avatar, saudação, chips (gold, tochas, nível, relógio, próximo evento) e os três botões (som, tela cheia, sair). A Placa da Vila deixa de ser um bloco fixo acima da cena: o essencial ("Hoje você tem", "Faltam N missões") vira um balão discreto no canto superior da cena que some ao clicar, e o resto mora na placa de madeira dentro da cena.
 - A cena cresce: com a grade fora e o cabeçalho menor, ela ocupa a altura que sobra em 1280 x 720 (mínimo 1280 x 640 lógicos), sem rolagem para chegar ao rodapé.

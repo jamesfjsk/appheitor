@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Maximize2 } from 'lucide-react';
+import { Maximize2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useData } from '../../../contexts/DataContext';
@@ -9,7 +9,8 @@ import { DAY_CHANGED_EVENT, useClock } from '../../../contexts/ClockContext';
 import { HOTBAR_ICONS, houseSprite, kidName, villageLabel, visibleCracks, crackedListSentence } from '../../../config/village';
 import { BUILDING_BY_ID, MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import { dueTasksOn, periodAllowedAt } from '../../../services/village/schedule';
-import { chestAllowed } from '../../../services/village/chest';
+import { chestAllowed, chestMapLook, chestWaitCopy, warehouseHoldsChest } from '../../../services/village/chest';
+import { liveBuildingLevel } from '../../../services/village/repair';
 import { noticesForNow, habitTipForNow, pickLine } from '../../../services/village/notices';
 import { nextEvents, occurrencesBetween, reminderDue } from '../../../services/village/agenda';
 import { markAgendaDone, subscribeAgenda, updateAgendaItem, weeklyOrganizedBonus } from '../../../services/agendaService';
@@ -21,13 +22,13 @@ import { VILLAGE_LINES, buildLine, repairLine } from '../../../data/villageLines
 import { HABIT_LINES } from '../../../data/habitLines';
 import { addDays, clockDriftWarning, isoWeekOf, isBeforeLaunch } from '../../../utils/clock';
 import { usePunishment } from '../../../contexts/PunishmentContext';
+import { useVacation } from '../../../contexts/VacationContext';
 import { pickDialogue, type DialogueCtx } from '../../../services/village/dialogue';
 import { sageReplyFor } from '../../../services/village/checkin';
 import { FirestoreService } from '../../../services/firestoreService';
 import type { AgendaItem, NpcId, VillageSceneEvent } from '../../../types/village';
 import HeroHeader from '../HeroHeader';
 import Casa from './Casa';
-import VacationBanner from '../VacationBanner';
 import YesterdaySummary from '../YesterdaySummary';
 import VillageScene from './VillageScene';
 import CharacterPreview from './CharacterPreview';
@@ -46,6 +47,54 @@ import type { Period } from '../../../types/village';
 import { getLevelFromXP } from '../../../utils/levelSystem';
 import { quizBlocksDest, quizGateActive } from '../../../services/village/quizGate';
 import { furnaceOpensForge, type ForgeTab } from '../../../services/village/furnace';
+
+const LETTER = '/assets/english/ui/base/c_letter.webp';
+const BOOK = '/assets/english/ui/book.webp';
+const CHEST = '/assets/english/ui/chest.webp';
+const CLOCK = '/assets/english/ui/clock.webp';
+const SUN = '/assets/english/ui/sun.webp';
+const CREEPER = '/assets/english/ui/creeper.webp';
+const CAKE = '/assets/english/ui/base/i_cake.webp';
+const TORCH = '/assets/english/ui/torch.webp';
+
+function MailNote({
+  icon,
+  kicker,
+  body,
+  meta,
+  action,
+}: {
+  icon: string;
+  kicker?: string;
+  body: string;
+  meta?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <article className="mc-paper mn-mail-note">
+      <img src={icon} alt="" className="mn-mail-note-ico mc-pixel" draggable={false} />
+      <div className="mn-mail-note-copy">
+        {kicker ? <p className="mn-mail-note-kicker">{kicker}</p> : null}
+        <p className="mn-mail-note-body">{body}</p>
+        {meta ? <p className="mn-mail-note-meta">{meta}</p> : null}
+      </div>
+      {action}
+    </article>
+  );
+}
+
+function noticeLook(key: string, kind: string): { icon: string; kicker: string } {
+  if (kind === 'father') return { icon: LETTER, kicker: 'Papai' };
+  if (key.includes(':chest:')) return { icon: CHEST, kicker: 'Baú do Dia' };
+  if (key.includes(':quiz:')) return { icon: BOOK, kicker: 'Prova' };
+  if (key.includes(':sage:')) return { icon: BOOK, kicker: 'Sábio' };
+  if (key.includes(':birthday:')) return { icon: CAKE, kicker: 'Aniversário' };
+  if (key.includes(':pause:') || key.includes(':vacation:')) return { icon: SUN, kicker: 'Folga' };
+  if (key.includes(':gold:')) return { icon: '/assets/english/ui/gold.webp', kicker: 'Gold' };
+  if (key.includes(':agenda:')) return { icon: CLOCK, kicker: 'Hoje' };
+  if (key.includes(':ruin:')) return { icon: '/assets/english/ui/crafting.webp', kicker: 'Obra' };
+  return { icon: TORCH, kicker: 'Placa' };
+}
 
 const nightInFlight = new Set<string>();
 
@@ -70,10 +119,11 @@ const VillageHome: React.FC<Props> = ({
   onOpenQuiz, quizLocked, punished = false,
 }) => {
   const { village, materials, buildings, economy, pauseDays, notices, ackNotice } = useVillage();
-  const { tasks, progress } = useData();
+  const { tasks, progress, flashReminders } = useData();
   const { playClick, playHammer, setMusicDuck } = useSound();
-  const { hour, minute, today, now, driftMs } = useClock();
+  const { hour, today, now, driftMs } = useClock();
   const { isPunished } = usePunishment();
+  const { isActive: vacationOn, config: vacation } = useVacation();
   const lockedShop = punished || isPunished;
   const driftLine = clockDriftWarning(driftMs);
   const [district, setDistrict] = useState<District>(null);
@@ -110,6 +160,16 @@ const VillageHome: React.FC<Props> = ({
     });
   }, []);
 
+  useEffect(() => {
+    if (!placaOpen) return;
+    const onDown = (ev: MouseEvent) => {
+      const node = ev.target as HTMLElement | null;
+      if (node?.closest('[data-testid="placa-panel"]') || node?.closest('[data-testid="placa-chip"]') || node?.closest('[data-testid="placa-peek"]')) return;
+      setPlacaOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [placaOpen]);
   useEffect(() => {
     if (speech) setPlacaOpen(false);
   }, [speech]);
@@ -227,7 +287,18 @@ const VillageHome: React.FC<Props> = ({
     const full = tasks.find((x) => x.id === t.id);
     return full?.status === 'done' && full.lastCompletedDate === today;
   }).length;
-  const gate = chestAllowed({ hourBrazil: hour, settings: economy, due: due.length, done, village, date: today });
+  const cracks = visibleCracks(village.cracks);
+  const broken = (bid: string) => cracks.includes(bid);
+  const liveBau = liveBuildingLevel(buildings, village.cracks, 'bau');
+  const gate = chestAllowed({
+    hourBrazil: hour, settings: economy, due: due.length, done, village, date: today, bauLevel: liveBau,
+  });
+  const chestLook = chestMapLook({
+    bauLevel: liveBau,
+    ruined: broken('bau'),
+    ready: gate.ok,
+    already: gate.reason === 'already',
+  });
   const board = noticesForNow({
     due: due.length,
     done,
@@ -261,7 +332,6 @@ const VillageHome: React.FC<Props> = ({
     } catch { /* ignore */ }
     return picked;
   }, [habit.npc, today]);
-  const ticker = board.find((item) => item.kind === 'father') || board[0];
   const turnFull = due.length > 0 && done >= due.length && gate.reason === 'already';
   const todayAgenda = occurrencesBetween(agendaItems, today, today);
   const tomorrowAgenda = occurrencesBetween(agendaItems, addDays(today, 1), addDays(today, 1));
@@ -270,9 +340,26 @@ const VillageHome: React.FC<Props> = ({
     ? `${upcoming.date === today ? 'Hoje' : upcoming.date === addDays(today, 1) ? 'Amanhã' : upcoming.date.slice(8)}: ${upcoming.title}`
     : undefined;
 
-  const cracks = visibleCracks(village.cracks);
-  const broken = (bid: string) => cracks.includes(bid);
   const quizGate = quizGateActive(quizLocked);
+  const dashReminders = flashReminders.filter((r) => r.active && r.showOnDashboard);
+  const placaCount = board.length
+    + todayAgenda.filter((item) => !item.doneAt).length
+    + (sageLine ? 1 : 0)
+    + (cracks.length > 0 || yesterdayCtx.missed ? 1 : 0)
+    + dashReminders.length;
+  const peek = (() => {
+    const item = board.find((n) => n.kind === 'father') || board[0];
+    if (item) return { key: item.key, kind: item.kind, text: item.text };
+    const undone = todayAgenda.find((n) => !n.doneAt);
+    if (undone) {
+      return { key: ':agenda:', kind: 'auto' as const, text: `${undone.time ? `${undone.time} · ` : ''}${undone.title}` };
+    }
+    if (sageLine) return { key: ':sage:', kind: 'auto' as const, text: sageLine };
+    if (dashReminders[0]) return { key: ':note:', kind: 'auto' as const, text: dashReminders[0].message || dashReminders[0].title };
+    if (cracks.length) return { key: ':ruin:', kind: 'auto' as const, text: crackedListSentence(cracks) };
+    return null;
+  })();
+  const peekLook = peek ? noticeLook(peek.key, peek.kind) : null;
   const minerLevel = getLevelFromXP(progress.totalXP || 0);
   const chestDone = gate.reason === 'already' || hasClaim(village, claimKey('daily', today));
   const quotasPaid = due.length > 0 && done >= due.length && !quizLocked && chestDone;
@@ -317,7 +404,7 @@ const VillageHome: React.FC<Props> = ({
       if (childUid) void talkToNpc(childUid, 'olheiro', today, 0, entry?.id).catch(() => undefined);
       return;
     }
-    if (lockedShop && (shopBlocksDest(id) || id === 'build:bau')) {
+    if (lockedShop && shopBlocksDest(id)) {
       toast.error('Em punição: Mercado, Baú e Loja fechados. Prova e Mina continuam abertas.');
       return;
     }
@@ -356,7 +443,7 @@ const VillageHome: React.FC<Props> = ({
       return;
     }
     if (id === 'chest' || id === 'chest_streak') {
-      if (broken('bau')) setLot('bau');
+      if (!warehouseHoldsChest(liveBau, broken('bau'))) setLot('bau');
       else setDistrict('chest');
       return;
     }
@@ -399,7 +486,7 @@ const VillageHome: React.FC<Props> = ({
     }
     // broken() deriva de village.cracks, já na lista
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildings, hour, lockedShop, onOpenQuiz, playClick, quizGate, village.cracks, village.npcs, village.fullDays, village.claimed, today, childUid, due, done, minerLevel, pauseDays.dates, now.weekday, yesterdayCtx, quizLocked, nightClosed]); // broken() usa village.cracks
+  }, [buildings, hour, lockedShop, onOpenQuiz, playClick, quizGate, village.cracks, village.npcs, village.fullDays, village.claimed, today, childUid, due, done, minerLevel, pauseDays.dates, now.weekday, yesterdayCtx, quizLocked, nightClosed, liveBau]); // broken() usa village.cracks
 
   useEffect(() => {
     if (!buildFx) return;
@@ -454,7 +541,7 @@ const VillageHome: React.FC<Props> = ({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setDistrict(null); setLot(null); return; }
+      if (e.key === 'Escape') { setPlacaOpen(false); setDistrict(null); setLot(null); return; }
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const k = e.key.toLowerCase();
       if (k === '1') { setDistrict(null); setLot(null); setDockTab('vila'); }
@@ -478,6 +565,7 @@ const VillageHome: React.FC<Props> = ({
 
   return (
     <div className={`relative z-10 mn-village ${compactHud ? 'is-compact-hud' : ''}`}>
+      <div className="mn-hud-wrap">
       <HeroHeader
         progress={progress}
         onOpenGold={() => { if (broken('cofre')) setLot('cofre'); else setDistrict('extrato'); }}
@@ -490,7 +578,8 @@ const VillageHome: React.FC<Props> = ({
         fullDays={village.fullDays}
         compact={compactHud}
         crackLine={cracks.length ? crackedListSentence(cracks) : undefined}
-        placaLabel={`Hoje você tem ${todayAgenda.length} · ${board.length} lembretes`}
+        placaCount={placaCount}
+        placaOpen={placaOpen}
         onOpenPlaca={() => setPlacaOpen((v) => !v)}
         extraButton={
           <span className="mn-fs-btn">
@@ -500,6 +589,84 @@ const VillageHome: React.FC<Props> = ({
           </span>
         }
       />
+      {placaOpen && (
+          <div className="mc-modal mc-pop mn-placa-inbox" data-testid="placa-panel" role="dialog" aria-label="Placa da Vila">
+            <div className="mn-mail-head">
+              <p className="mc-title mn-mail-head-title">Placa</p>
+              <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" onClick={() => { playClick(); setPlacaOpen(false); }} aria-label="Fechar">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {vacationOn && vacation && (
+              <MailNote icon={SUN} kicker="Férias" body={vacation.title} meta={vacation.message} />
+            )}
+            {lockedShop && (
+              <MailNote icon={CREEPER} kicker="Punição" body="Mercado, Baú e Loja fechados." />
+            )}
+            <YesterdaySummary compact />
+            {driftLine && (
+              <MailNote icon={CLOCK} kicker="Relógio" body={driftLine} />
+            )}
+            {todayAgenda.map((item) => (
+              <MailNote
+                key={item.id + item.date}
+                icon={CLOCK}
+                kicker="Hoje"
+                body={`${item.time ? `${item.time} · ` : ''}${item.title}`}
+                action={!item.doneAt && childUid ? (
+                  <button type="button" className={`mc-btn mc-btn-green min-h-[36px] px-2 shrink-0 ${agendaFlash === item.id ? 'mc-pop' : ''}`} onClick={() => {
+                    playClick();
+                    void markAgendaDone(childUid, item.id).then((xp) => {
+                      toast.success(xp >= 10 ? '+10 XP, planejou com antecedência' : '+5 XP');
+                      setAgendaFlash(null);
+                    }).catch((e) => toast.error(e instanceof Error ? e.message : 'Não deu certo'));
+                  }}>Feito</button>
+                ) : undefined}
+              />
+            ))}
+            {tomorrowAgenda.length > 0 && (
+              <MailNote icon={CLOCK} kicker="Amanhã" body={tomorrowAgenda.map((i) => i.title).join(', ')} />
+            )}
+            {board.map((item) => {
+              const look = noticeLook(item.key, item.kind);
+              return (
+                <MailNote
+                  key={item.key}
+                  icon={look.icon}
+                  kicker={look.kicker}
+                  body={item.text}
+                  action={item.kind === 'father' ? (
+                    <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2 shrink-0" onClick={() => { playClick(); void ackNotice(item.key.replace('father:', '')); }}>Combinado</button>
+                  ) : undefined}
+                />
+              );
+            })}
+            {sageLine && (
+              <MailNote icon={BOOK} kicker="Sábio" body={sageLine} />
+            )}
+            {dashReminders.map((item) => (
+              <MailNote key={item.id} icon={TORCH} kicker={item.title} body={item.message} />
+            ))}
+            {placaCount === 0 ? (
+              <MailNote icon={LETTER} body="A placa está limpa hoje." meta={habitLine.text || undefined} />
+            ) : null}
+          </div>
+      )}
+      {!placaOpen && peek && peekLook && (
+        <button
+          type="button"
+          className="mc-card mc-pop mn-mail-toast"
+          data-testid="placa-peek"
+          onClick={() => { playClick(); setPlacaOpen(true); }}
+        >
+          <img src={peekLook.icon} alt="" className="mn-mail-toast-ico mc-pixel" draggable={false} />
+          <span className="mn-mail-toast-copy">
+            <span className="mn-mail-toast-kicker">{peekLook.kicker}</span>
+            <span className="mn-mail-toast-body">{peek.text}</span>
+          </span>
+        </button>
+      )}
+      </div>
       <div className="mn-village-main">
       <div className="mn-stage mt-2">
         <VillageScene
@@ -517,55 +684,10 @@ const VillageHome: React.FC<Props> = ({
           repairFx={repairFx}
           date={today}
           event={sceneEvent}
+          chestLook={chestLook}
         />
         {speech && (
           <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-3 mn-speech-next" onClick={dismissSpeech}>Continuar</button>
-        )}
-        {placaOpen && (
-          <div className="mn-ticker mn-placa mn-placa-panel" data-testid="placa-panel">
-            <VacationBanner />
-            {lockedShop && (
-              <p className="text-sm mc-warn mb-2">Punição: Mercado, Baú e Loja fechados.</p>
-            )}
-            <YesterdaySummary />
-            {driftLine && <p className="text-sm mc-warn mb-2">{driftLine}</p>}
-            {todayAgenda.length > 0 && (
-              <div className="space-y-1 mb-2">
-                <p className="text-sm font-bold">Hoje você tem</p>
-                {todayAgenda.map((item) => (
-                  <div key={item.id + item.date} className={`flex justify-between gap-2 items-center ${agendaFlash === item.id ? 'mc-pop' : ''}`}>
-                    <p className="text-sm text-white">{item.time ? `${item.time} ` : ''}{item.title}</p>
-                    {!item.doneAt && childUid && (
-                      <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2 shrink-0" onClick={() => {
-                        void markAgendaDone(childUid, item.id).then((xp) => {
-                          toast.success(xp >= 10 ? '+10 XP, planejou com antecedência' : '+5 XP');
-                          setAgendaFlash(null);
-                        }).catch((e) => toast.error(e instanceof Error ? e.message : 'Não deu certo'));
-                      }}>Feito</button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            {tomorrowAgenda.length > 0 && (
-              <p className="text-sm text-white mb-1">Amanhã: {tomorrowAgenda.map((i) => i.title).join(', ')}</p>
-            )}
-            {sageLine && (
-              <p className="text-sm text-white mb-1">Sábio: {sageLine}</p>
-            )}
-            {ticker && (
-              <div className="flex justify-between gap-2 items-center">
-                <p className="text-sm text-white">{ticker.text}</p>
-                {ticker.kind === 'father' && (
-                  <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-3 shrink-0" onClick={() => void ackNotice(ticker.key.replace('father:', ''))}>Combinado</button>
-                )}
-              </div>
-            )}
-            {habitLine.text && (
-              <p className={`text-sm ${ticker ? 'mc-muted mt-0.5' : 'text-white'}`}>{habitLine.text}</p>
-            )}
-            <button type="button" className="mc-btn mc-btn-dark min-h-[36px] px-3 mt-2" onClick={() => setPlacaOpen(false)}>Fechar</button>
-          </div>
         )}
       </div>
       </div>
@@ -576,10 +698,12 @@ const VillageHome: React.FC<Props> = ({
             <span className="mc-num text-white">{done}/{due.length}</span>
             <span className="text-sm">{turnFull ? 'Dia completo, Baú aberto' : due.length > 0 && done >= due.length ? 'Missões feitas' : 'Ainda tem missão'}</span>
         <span className="text-sm mc-muted">
-          Baú: {gate.ok ? `${economy.dailyChestGold[0]} + ${village.fullDays} tochas = ${Math.min(economy.dailyChestGold[1], economy.dailyChestGold[0] + village.fullDays)} gold` : gate.reason === 'already' ? 'aberto' : gate.reason === 'hour' ? (() => {
-            const remain = Math.max(0, economy.chestOpenHour * 60 - (hour * 60 + minute));
-            return `abre às ${economy.chestOpenHour}h (faltam ${Math.floor(remain / 60)}h${String(remain % 60).padStart(2, '0')})`;
-          })() : 'faltam missões'}
+          {gate.ok ? `Baú: ${economy.dailyChestGold[0]} + ${village.fullDays} tochas = ${Math.min(economy.dailyChestGold[1], economy.dailyChestGold[0] + village.fullDays)} gold` : gate.reason === 'warehouse' ? 'Baú: construa o Armazém' : gate.reason === 'already' ? 'Baú: aberto' : (chestWaitCopy({
+            due: due.length,
+            done,
+            hourBrazil: hour,
+            chestOpenHour: economy.chestOpenHour,
+          }) || 'O baú ainda está fechado.')}
         </span>
             <div className="mn-dock-mats">
               {(Object.keys(MATERIAL_LABELS) as Array<keyof typeof MATERIAL_LABELS>).map((m) => (
@@ -660,7 +784,6 @@ const VillageHome: React.FC<Props> = ({
           id={lot}
           onClose={() => setLot(null)}
           onOpenMine={() => { setLot(null); openDistrict('mine'); }}
-          onOpenChest={() => { setLot(null); openDistrict('chest'); }}
           onOpenTower={() => { setLot(null); setDistrict('tower'); }}
           onOpenWorkshop={(tab?: ForgeTab) => {
             if (visibleCracks(village.cracks).includes('fornalha') || (buildings.fornalha || 0) < 1) {
@@ -697,7 +820,12 @@ const VillageHome: React.FC<Props> = ({
           }}
         />
       )}
-      {district === 'chest' && <DailyChest hour={hour} onClose={() => setDistrict(null)} />}
+      {district === 'chest' && (
+        <DailyChest
+          hour={hour}
+          onClose={() => setDistrict(null)}
+        />
+      )}
       {district === 'workshop' && (
         <Oficina
           initialTab={forgeTab}

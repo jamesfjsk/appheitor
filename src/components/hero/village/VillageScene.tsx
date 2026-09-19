@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { BuildingId } from '../../../types/english';
-import { buildingSprite, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, kidName, lookBodySrc, visibleCracks, type SceneProp } from '../../../config/village';
+import { buildingSprite, CHEST_DAILY, CHEST_DAILY_OPEN, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, kidName, lookBodySrc, visibleCracks, type SceneProp } from '../../../config/village';
 import type { NpcId, VillageDoc, VillageSceneEvent } from '../../../types/village';
+import type { ChestMapLook } from '../../../services/village/chest';
 import { npcTarget, npcTouch, npcHopPx, lookFacing, npcWalk, npcRoutine, heroClickPlan, heroGroundPlan, heroWalkAlong, heroShouldOpen, arrivePulse, DEFAULT_WALK_GRAPH, HERO_ARRIVE_HOLD_MS, type WalkGraph } from '../../../services/village/npcBehavior';
 import { buildingLevelSum, villageGrowthStage } from '../../../services/village/season';
 import { isNightHour } from '../../../utils/clock';
@@ -23,7 +24,8 @@ import {
   paintHover,
   paintHoverLabel,
   paintHourSky,
-  paintMotes,
+  paintSkyLife,
+  paintWind,
   paintPixelHeart,
   paintPixelPanel,
   paintPixelTail,
@@ -33,6 +35,8 @@ import {
   paintGrowthMark,
   paintEmptyLot,
   paintSitLog,
+  paintChestGlint,
+  chestLidBob,
   visibleGrowthMarks,
   DEFAULT_GROWTH,
   type GrowthMark,
@@ -47,9 +51,8 @@ const NPC_EYES: Record<string, { y: number; left: number; right: number }> = {
 };
 
 const BACKDROP = '/assets/village/scene/backdrop-day.png?v=arena13';
-const CLOUDS = '/assets/village/scene/clouds.png';
 const MOON = '/assets/english/ui/moon.webp';
-const ANCHORS_URL = '/assets/village/scene/anchors.json?v=cerh7';
+const ANCHORS_URL = '/assets/village/scene/anchors.json?v=chest3';
 const SKY_H = 86;
 
 function fenceSouthSrc(level: number): string {
@@ -138,6 +141,10 @@ const FALLBACK: SceneAnchors = {
     chest_streak: {
       x: 253, y: 348, w: 48, h: 48, type: 'chest_streak', label: 'Baú das tochas',
       sprite: '/assets/village/items/chest_streak.png', minFullDays: 7, door: { x: 196, y: 440 },
+    },
+    chest: {
+      x: 512, y: 300, w: 72, h: 64, type: 'chest', label: 'Baú do Dia',
+      sprite: CHEST_DAILY, door: { x: 548, y: 380 },
     },
   },
   wall: [
@@ -712,17 +719,42 @@ function paintSky(
   }
 }
 
-function paintBirds(ctx: CanvasRenderingContext2D, W: number, elapsed: number) {
-  ctx.fillStyle = '#17130f';
-  for (let i = 0; i < 2; i++) {
-    const x = Math.round(((elapsed * (28 + i * 10) + i * 420) % (W + 80)) - 40);
-    const y = Math.round(36 + i * 22 + Math.sin(elapsed * 1.4 + i) * 8);
-    ctx.fillRect(x - 6, y, 3, 2);
-    ctx.fillRect(x - 3, y - 3, 3, 2);
-    ctx.fillRect(x, y - 4, 2, 2);
-    ctx.fillRect(x + 2, y - 3, 3, 2);
-    ctx.fillRect(x + 5, y, 3, 2);
+type SkyField = { w: number; h: number; wgt: Float32Array };
+const skyFields = new Map<string, SkyField>();
+
+function bakeSkyField(source: HTMLImageElement): SkyField {
+  const key = `${source.src}|sky1`;
+  const hit = skyFields.get(key);
+  if (hit) return hit;
+  const w = source.naturalWidth || source.width;
+  const h = source.naturalHeight || source.height;
+  const field: SkyField = { w, h, wgt: new Float32Array(w * h) };
+  const c = document.createElement('canvas').getContext('2d');
+  if (!c || !w) {
+    skyFields.set(key, field);
+    return field;
   }
+  const canvas = c.canvas;
+  canvas.width = w;
+  canvas.height = h;
+  c.drawImage(source, 0, 0);
+  const d = c.getImageData(0, 0, w, h).data;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      field.wgt[y * w + x] = skyWeight(d[i], d[i + 1], d[i + 2], y);
+    }
+  }
+  skyFields.set(key, field);
+  return field;
+}
+
+function skyAt(field: SkyField | null, x: number, y: number): boolean {
+  if (!field) return y < 118;
+  const ix = Math.round(x);
+  const iy = Math.round(y);
+  if (ix < 0 || iy < 0 || ix >= field.w || iy >= field.h) return false;
+  return field.wgt[iy * field.w + ix] > 0.45;
 }
 
 interface Props {
@@ -742,10 +774,11 @@ interface Props {
   className?: string;
   date?: string;
   event?: VillageSceneEvent | null;
+  chestLook?: ChestMapLook;
 }
 
 const VillageScene: React.FC<Props> = ({
-  village, buildings, hour, gated, reducedMotion, speech, onClickSpot, onDismissSpeech, frozen = false, houseSmoke = false, buildFx = null, repairFx = null, className = '', date, event = null,
+  village, buildings, hour, gated, reducedMotion, speech, onClickSpot, onDismissSpeech, frozen = false, houseSmoke = false, buildFx = null, repairFx = null, className = '', date, event = null, chestLook = 'wait',
 }) => {
   const ref = useRef<HTMLCanvasElement>(null);
   const spots = useRef<Hotspot[]>([]);
@@ -920,24 +953,6 @@ const VillageScene: React.FC<Props> = ({
         paintSky(ctx, W, false, hour, elapsed, reducedMotion, moon);
       }
 
-      if (!reducedMotion && !night) {
-        const clouds = img(CLOUDS, bump);
-        if (clouds) {
-          ctx.save();
-          ctx.beginPath();
-          ctx.rect(0, 0, W, SKY_H);
-          ctx.clip();
-          const x1 = ((elapsed * 12) % (W + 512)) - 512;
-          const x2 = ((elapsed * 8 + 400) % (W + 512)) - 512;
-          ctx.globalAlpha = 0.55;
-          ctx.drawImage(clouds, x1, 8, 512, 128);
-          ctx.globalAlpha = 0.32;
-          ctx.drawImage(clouds, x2, 40, 512, 128);
-          ctx.restore();
-        }
-        paintBirds(ctx, W, elapsed);
-      }
-
       if (nightGround) {
         ctx.drawImage(nightGround.canvas, 0, 0, W, H);
       } else if (ground) {
@@ -945,6 +960,11 @@ const VillageScene: React.FC<Props> = ({
       } else {
         ctx.fillStyle = '#5b9b3a';
         ctx.fillRect(0, 0, W, H);
+      }
+
+      if (!night) {
+        const field = ground ? bakeSkyField(ground) : null;
+        paintSkyLife(ctx, W, elapsed, false, reducedMotion, (x, y) => skyAt(field, x, y));
       }
 
       const sum = buildingLevelSum(buildings as Record<string, number>);
@@ -1116,13 +1136,18 @@ const VillageScene: React.FC<Props> = ({
 
       Object.entries(anchors.hotspots || {}).forEach(([id, box]) => {
         const kind = box.type || id;
-        if (kind === 'chest_streak' && (village.fullDays || 0) < (box.minFullDays ?? 7)) return;
-        const label = box.label || (id === 'mine' ? 'Mina' : id);
-        const spotSprite = box.sprite ? img(box.sprite, bump) : null;
+        if (kind === 'chest_streak' && ((village.fullDays || 0) < (box.minFullDays ?? 7) || chestLook === 'ruin')) return;
+        const daily = kind === 'chest' || id === 'chest';
+        const chestSrc = daily
+          ? (chestLook === 'open' ? CHEST_DAILY_OPEN : CHEST_DAILY)
+          : box.sprite;
+        const label = daily ? 'Baú do Dia' : (box.label || (id === 'mine' ? 'Mina' : id));
+        const spotSprite = chestSrc ? img(chestSrc, bump) : null;
+        const bob = daily && chestLook === 'ready' ? chestLidBob(elapsed, reducedMotion) : 0;
         const hit: Hotspot = {
           id,
           x: box.x,
-          y: box.y,
+          y: box.y + bob,
           w: box.w,
           h: box.h,
           label: gateName(id, gated, label),
@@ -1137,11 +1162,20 @@ const VillageScene: React.FC<Props> = ({
           hit,
           draw: (c) => {
             const pulse = pulseOf(id);
-            if (box.sprite) {
-              const sprite = img(box.sprite, bump);
-              if (sprite) c.drawImage(sprite, box.x + pulse.shakeX, box.y, box.w, box.h);
+            const ox = box.x + pulse.shakeX;
+            const oy = box.y + bob;
+            if (chestSrc) {
+              const sprite = img(chestSrc, bump);
+              if (sprite) {
+                const lockIt = daily && chestLook !== 'ready' && chestLook !== 'open';
+                const drawn = lockIt
+                  ? graySprite(sprite, Math.max(1, Math.round(box.w)), Math.max(1, Math.round(box.h)))
+                  : sprite;
+                c.drawImage(drawn, ox, oy, box.w, box.h);
+                if (lockIt) paintGateLock(c, ox + box.w / 2, oy + Math.round(box.h * 0.12));
+              }
             } else if (kind === 'future') {
-              paintEmptyLot(c, box.x + pulse.shakeX, box.y, box.w, box.h, night, '#7ecb4a');
+              paintEmptyLot(c, ox, box.y, box.w, box.h, night, '#7ecb4a');
             }
             if (id === 'mine' && gated && quizBlocksDest(id)) {
               paintClosedSign(c, box.x + box.w / 2, box.y + Math.round(box.h * 0.78), 'Prova');
@@ -1429,7 +1463,9 @@ const VillageScene: React.FC<Props> = ({
       layers.forEach((layer) => layer.draw(ctx));
       const picked = layers.flatMap((layer) => (layer.hit ? [layer.hit] : []));
       spots.current = [
-        ...picked.filter((h) => h.hover !== 'npc'),
+        ...picked.filter((h) => h.hover !== 'npc' && h.id !== 'chest' && h.id !== 'character'),
+        ...picked.filter((h) => h.id === 'character'),
+        ...picked.filter((h) => h.id === 'chest'),
         ...picked.filter((h) => h.hover === 'npc'),
       ];
 
@@ -1557,7 +1593,7 @@ const VillageScene: React.FC<Props> = ({
           chimney.current = chimney.current.filter((p) => p.a > 0.04);
           chimney.current.forEach((p) => {
             p.y -= p.vy / 30;
-            p.x += Math.sin((elapsed + p.y) * 0.9) * 0.18;
+            p.x += 0.28 + Math.sin((elapsed + p.y) * 0.9) * 0.18;
             p.r += 0.05;
             p.a -= 0.007;
             paintPuff(ctx, p, 'smoke');
@@ -1617,7 +1653,7 @@ const VillageScene: React.FC<Props> = ({
       }
 
       if (!night) paintHourSky(ctx, W, H, hour);
-      paintMotes(ctx, elapsed, night, reducedMotion);
+      paintWind(ctx, W, H, elapsed, night, reducedMotion);
 
       if (night) {
         const lamps = nightLamps(anchors, buildings, growthMarks.filter((m) => m.kind === 'lamp'));
@@ -1633,6 +1669,13 @@ const VillageScene: React.FC<Props> = ({
           paintPuff(ctx, { x: forgeMouth.x, y: forgeMouth.y - 6, r: 4, a: 0.4, vy: 0 }, 'smoke');
         } else {
           smoke.current.forEach((p) => paintPuff(ctx, p, 'smoke'));
+        }
+      }
+      if (chestLook === 'ready') {
+        const box = anchors.hotspots?.chest;
+        if (box) {
+          const lidY = box.y + box.h * 0.38 + chestLidBob(elapsed, reducedMotion);
+          paintChestGlint(ctx, box.x + box.w / 2, lidY, elapsed, reducedMotion);
         }
       }
       rubble.current.forEach((p) => paintPuff(ctx, p, 'rubble'));
@@ -1657,6 +1700,7 @@ const VillageScene: React.FC<Props> = ({
       }
 
       canvas.dataset.frameMs = String(Math.round(performance.now() - frameStart));
+      canvas.dataset.breeze = String(Math.round(elapsed * 10));
       if (!hidden) raf = requestAnimationFrame(draw);
     };
 
@@ -1670,7 +1714,7 @@ const VillageScene: React.FC<Props> = ({
       document.removeEventListener('visibilitychange', onVis);
       io.disconnect();
     };
-  }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick, houseSmoke, buildFx, repairFx, event, date]);
+  }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick, houseSmoke, buildFx, repairFx, event, date, chestLook]);
 
   const sceneXY = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = ref.current;

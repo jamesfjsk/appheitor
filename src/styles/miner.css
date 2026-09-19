@@ -338,6 +338,174 @@
 }
 .mn-placa p { text-shadow: 1px 1px 0 #17130f; }
 
+.mn-hud-wrap { position: relative; z-index: 46; }
+.mn-placa-chip {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  justify-content: center;
+}
+.mn-placa-chip img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.mn-placa-chip.is-on {
+  box-shadow: 0 0 0 2px var(--mc-gold-hi);
+}
+.mn-placa-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--mc-gold);
+  color: var(--mc-edge);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+  border: 2px solid var(--mc-edge);
+}
+.mn-placa-chip.has-mail img {
+  transform-origin: 50% 80%;
+  animation: mn-placa-nudge 1.8s ease-in-out infinite;
+}
+@keyframes mn-placa-nudge {
+  0%, 70%, 100% { transform: translateY(0); }
+  76% { transform: translateY(-3px); }
+  88% { transform: translateY(1px); }
+}
+.mn-placa-inbox {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 8px;
+  left: auto;
+  z-index: 47;
+  width: min(22rem, calc(100% - 16px));
+  max-height: min(28rem, 46vh);
+  overflow-y: auto;
+  padding: 6px 8px 10px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 8px 0 var(--mc-edge);
+}
+.mn-mail-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 4px;
+}
+.mn-mail-head-title {
+  flex: 1;
+  margin: 0;
+  font-size: 11px;
+  color: var(--mc-white);
+}
+.mn-mail-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+}
+.mn-mail-note-ico {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.mn-mail-note-copy {
+  flex: 1;
+  min-width: 0;
+}
+.mn-mail-note-kicker {
+  margin: 0 0 2px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--mc-gold-lo);
+}
+.mn-mail-note-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--mc-inv-ink);
+}
+.mn-mail-note-meta {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--mc-inv-muted);
+}
+.mn-placa-inbox .mn-mail-note p {
+  text-shadow: none;
+}
+.mn-mail-toast {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 8px;
+  z-index: 47;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(20rem, calc(100% - 16px));
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.mn-mail-toast-ico {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.mn-mail-toast-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+.mn-mail-toast-kicker {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--mc-gold-hi);
+}
+.mn-mail-toast-body {
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--mc-white);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-placa-chip.has-mail img { animation: none; }
+}
+@media (max-width: 480px) {
+  .mn-placa-inbox,
+  .mn-mail-toast {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: auto;
+    max-height: 28vh;
+    margin: 6px 0 0;
+  }
+  .mn-placa-inbox .mn-mail-note {
+    padding: 6px 8px;
+  }
+}
+
 /* cabeçalho da vila: madeira em cima, pedra embaixo */
 .mn-hud {
   background:
@@ -535,17 +703,6 @@
   bottom: auto;
   flex: 0 0 auto;
 }
-.mn-placa-panel {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-  width: min(22rem, 52%);
-  max-height: 26%;
-  overflow-y: auto;
-  pointer-events: auto;
-}
 .mn-speech-next {
   position: absolute;
   left: 50%;
@@ -562,6 +719,13 @@
   gap: 8px;
   position: relative;
   z-index: 45;
+}
+.mn-hud.is-compact .mn-placa-chip {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
 }
 .mn-hud.is-compact .mc-chip {
   min-width: 0;
@@ -2540,6 +2704,108 @@ div.mn-pack-cell {
 @media (prefers-reduced-motion: reduce) {
   .mn-forge-glow,
   .mn-forge-puff {
+    animation: none;
+  }
+}
+
+/* ---------- Baú do Dia (lugar do Armazém) ---------- */
+.mn-chest-mouth {
+  position: relative;
+  height: 148px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #140e0b;
+  box-shadow: inset 0 0 0 4px #17130f, inset 0 -18px 28px rgba(0, 0, 0, 0.45);
+}
+.mn-chest-sprite {
+  position: absolute;
+  inset: 8px 0 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.mn-chest-glow {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 10%;
+  height: 52%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(255, 210, 80, 0.85), rgba(255, 160, 40, 0.18) 58%, transparent 74%);
+  pointer-events: none;
+}
+.mn-chest-mouth.is-ready .mn-chest-glow {
+  animation: mn-chest-flicker 0.7s ease-in-out infinite alternate;
+}
+.mn-chest-mouth.is-lock .mn-chest-sprite {
+  filter: grayscale(0.55) brightness(0.7);
+}
+.mn-chest-lock {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  z-index: 3;
+  width: 22px;
+  height: 28px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+.mn-chest-lock::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 0;
+  width: 12px;
+  height: 11px;
+  border: 3px solid #d4b07a;
+  border-bottom: 0;
+  border-radius: 7px 7px 0 0;
+  box-shadow: -2px 0 0 #1a140f, 2px 0 0 #1a140f, 0 -2px 0 #1a140f;
+  box-sizing: border-box;
+}
+.mn-chest-lock::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 10px;
+  width: 20px;
+  height: 16px;
+  background: #8d5728;
+  box-shadow: inset 0 2px 0 #c9a06a, inset 0 -2px 0 #5c3a1c, 0 0 0 2px #1a140f;
+}
+.mn-chest-lock-hole {
+  position: absolute;
+  left: 9px;
+  top: 14px;
+  z-index: 1;
+  width: 4px;
+  height: 6px;
+  background: #1a140f;
+}
+.mn-chest-mouth.is-done .mn-chest-glow {
+  opacity: 0.2;
+  animation: none;
+}
+.mn-chest-spark {
+  position: absolute;
+  bottom: 42%;
+  width: 4px;
+  height: 4px;
+  background: #ffe27a;
+  box-shadow: 0 0 0 1px #c9a03a;
+  animation: mn-chest-rise 0.8s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes mn-chest-flicker {
+  from { opacity: 0.55; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1.08); }
+}
+@keyframes mn-chest-rise {
+  to { transform: translateY(-56px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-chest-glow,
+  .mn-chest-spark {
     animation: none;
   }
 }

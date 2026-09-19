@@ -503,7 +503,7 @@ export const DISTRICT_ICONS: Record<string, string> = {
   pack: '/assets/village/items/mochila.png',
   agenda: '/assets/english/ui/clock.webp',
   house: '/assets/village/buildings/casa-1.png',
-  chest: '/assets/village/buildings/bau-1.png',
+  chest: '/assets/village/items/chest_daily.png',
   arena: '/assets/village/buildings/arena-1.png',
 };
 
@@ -681,7 +681,10 @@ export type SceneProp = {
   door?: { x: number; y: number };
 };
 
+export const CHEST_DAILY = '/assets/village/items/chest_daily.png';
+export const CHEST_DAILY_OPEN = '/assets/village/items/chest_daily_open.png';
+
 export const SCENE_PROPS: SceneProp[] = [
-  { id: 'pack', x: 592, y: 336, w: 48, h: 48, sprite: '/assets/village/items/mochila.png', label: 'Mochila', door: { x: 548, y: 390 } },
+  { id: 'pack', x: 430, y: 278, w: 48, h: 48, sprite: '/assets/village/items/mochila.png', label: 'Mochila', door: { x: 448, y: 348 } },
 ];
 

@@ -205,9 +205,9 @@ test('Heitor anda pelo caminho de terra, sem dash', () => {
   expect(heroClickPlan('npc:sabio', from, { x: from.x, y: from.y - 40, w: 20, h: 40 }, bounds, false).durationMs).toBe(480);
   expect(heroClickPlan('npc:ferreiro', from, { x: 78, y: 176, w: 40, h: 74 }, bounds, false).immediate).toBe(false);
   expect(heroClickPlan('character', from, lot, bounds, false).immediate).toBe(true);
-  const bag = heroClickPlan('pack', from, { x: 592, y: 336, w: 48, h: 48 }, bounds, false);
+  const bag = heroClickPlan('pack', from, { x: 430, y: 278, w: 48, h: 48 }, bounds, false);
   expect(bag.immediate).toBe(false);
-  expect(bag.to.y >= 384).toBe(true);
+  expect(bag.to.y >= 326).toBe(true);
   // "reduzir movimento" do sistema não tira o andar do Heitor (18/09)
   expect(heroClickPlan('build:fornalha', from, lot, bounds, true).immediate).toBe(false);
   const pulse = tapPulse(80, 200);

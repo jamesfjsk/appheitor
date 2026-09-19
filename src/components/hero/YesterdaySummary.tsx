@@ -14,7 +14,7 @@ import type { BuildingId } from '../../types/english';
 const TROPHY = '/assets/english/ui/trophy.webp';
 
 /** Resumo de ontem: dia completo ou lote em ruínas para reerguer hoje. */
-const YesterdaySummary: React.FC = () => {
+const YesterdaySummary: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const { childUid } = useAuth();
   const { village, buildings } = useVillage();
   const { tasks } = useData();
@@ -40,8 +40,29 @@ const YesterdaySummary: React.FC = () => {
   const full = closure.tasksCompleted >= closure.totalTasksAvailable;
   const missed = closure.totalTasksAvailable - closure.tasksCompleted;
 
+  const repairHint = missed > 0
+    ? `Ontem faltou missão. Arruma na obra com material, ou termina as de hoje: ${cracks.length === 1 ? 'reergue' : 'reerguem'} e volta metade do gold.`
+    : `Arruma na obra com material, ou termina as missões de hoje: ${cracks.length === 1 ? 'reergue' : 'reerguem'} e volta metade do gold.`;
+  const todayLine = due.length === 0
+    ? cracks.map((id) => LOT_SCENE_LABEL[id] || id).join(' · ')
+    : done >= due.length
+      ? 'Missões do dia feitas. A obra está sendo reerguida.'
+      : `${done}/${due.length} missões hoje`;
+
   if (cracks.length > 0) {
-    const names = cracks.map((id) => LOT_SCENE_LABEL[id] || id).join(' · ');
+    if (compact) {
+      return (
+        <article className="mc-paper mn-mail-note">
+          <img src={TROPHY} alt="" className="mn-mail-note-ico mc-pixel mn-obra-hurt" draggable={false} />
+          <div className="mn-mail-note-copy">
+            <p className="mn-mail-note-kicker">Obra</p>
+            <p className="mn-mail-note-body">{crackedListSentence(cracks)}</p>
+            <p className="mn-mail-note-meta">{repairHint}</p>
+            <p className="mn-mail-note-meta">{todayLine}</p>
+          </div>
+        </article>
+      );
+    }
     return (
       <div className="mc-card rounded-lg px-4 py-3 mt-2 flex items-center gap-3">
         <div className="flex shrink-0">
@@ -58,20 +79,28 @@ const YesterdaySummary: React.FC = () => {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[17px] font-bold text-white">{crackedListSentence(cracks)}</p>
-          <p className="text-sm mt-1">
-            {missed > 0
-              ? `Ontem faltou missão. Arruma na obra com material, ou termina as de hoje: ${cracks.length === 1 ? 'reergue' : 'reerguem'} e volta metade do gold.`
-              : `Arruma na obra com material, ou termina as missões de hoje: ${cracks.length === 1 ? 'reergue' : 'reerguem'} e volta metade do gold.`}
-          </p>
-          <p className="text-sm mc-muted mt-1">
-            {due.length === 0
-              ? names
-              : done >= due.length
-                ? 'Missões do dia feitas. A obra está sendo reerguida.'
-                : `${done}/${due.length} missões hoje`}
-          </p>
+          <p className="text-sm mt-1">{repairHint}</p>
+          <p className="text-sm mc-muted mt-1">{todayLine}</p>
         </div>
       </div>
+    );
+  }
+
+  if (compact) {
+    return (
+      <article className="mc-paper mn-mail-note">
+        <img src={TROPHY} alt="" className={`mn-mail-note-ico mc-pixel${full ? '' : ' mn-obra-hurt'}`} draggable={false} />
+        <div className="mn-mail-note-copy">
+          <p className="mn-mail-note-kicker">Ontem</p>
+          <p className="mn-mail-note-body">
+            {full ? 'Ontem foi dia completo!' : `Ontem faltaram ${missed} ${missed === 1 ? 'missão' : 'missões'}`}
+          </p>
+          <p className="mn-mail-note-meta">
+            {closure.tasksCompleted} de {closure.totalTasksAvailable} missões feitas
+            {full ? ` · +${closure.allTasksBonusGold} gold` : ` · -${closure.goldPenalty} gold`}
+          </p>
+        </div>
+      </article>
     );
   }
 

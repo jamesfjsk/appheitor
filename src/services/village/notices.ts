@@ -1,6 +1,7 @@
 import type { BoardItem, HabitDef, LineDef, NoticeContext, Period } from '../../types/village';
 import { HABIT_BY_ID } from '../../config/village';
 import { claimKey } from './claims';
+import { chestNeedLeft } from './chest';
 import { periodFromHour, weekdayFromDate } from './schedule';
 
 const MAX_BOARD = 3;
@@ -42,9 +43,9 @@ export function noticesForNow(ctx: NoticeContext, date: string, hour: number): B
     return items.slice(0, MAX_BOARD);
   }
 
-  const missing = Math.max(0, ctx.due - ctx.done);
+  const missing = chestNeedLeft(ctx.due, ctx.done);
   if (ctx.due >= ctx.minDueForChest && missing > 0 && hour < ctx.chestOpenHour + 6) {
-    auto('chest', `Faltam ${missing} ${missing === 1 ? 'missão' : 'missões'} para o Baú do Dia`);
+    auto('chest', `${missing === 1 ? 'Falta 1 missão' : `Faltam ${missing} missões`} para o Baú do Dia`);
   }
 
   const bdays = daysUntilBirthday(date, ctx.birthdayMmDd);

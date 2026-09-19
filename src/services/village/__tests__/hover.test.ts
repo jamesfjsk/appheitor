@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { hoverAnchor, hoverLabelPos, idleFrameIndex, idleBob, idleShift, pickHit, visibleGrowthMarks, DEFAULT_GROWTH } from '../../../components/hero/village/drawAmbient';
+import { hoverAnchor, hoverLabelPos, idleFrameIndex, idleBob, idleShift, pickHit, visibleGrowthMarks, DEFAULT_GROWTH, wrapDrift, breezeSway, paintWind, paintSkyLife } from '../../../components/hero/village/drawAmbient';
 
 test('cerca: âncora no portão, não no rodapé da caixa AABB', () => {
   const fence = { x: 400, y: 500, w: 480, h: 72, hover: 'fence' as const };
@@ -47,6 +47,58 @@ test('crescimento: estágio 1 vazio, 2 e 3 acumulam marcas', () => {
   expect(visibleGrowthMarks(DEFAULT_GROWTH, 10).some((m) => m.kind === 'bunting')).toBe(false);
   expect(visibleGrowthMarks(DEFAULT_GROWTH, 18).some((m) => m.kind === 'bunting')).toBe(true);
   expect(visibleGrowthMarks(DEFAULT_GROWTH, 18).some((m) => m.kind === 'bench')).toBe(true);
+});
+
+test('vento: deriva anda e volta ao começo', () => {
+  expect(wrapDrift(0, 100, 10, 0)).toBe(0);
+  expect(wrapDrift(2, 100, 10, 0)).toBe(20);
+  expect(wrapDrift(10, 100, 10, 0)).toBe(0);
+  expect(breezeSway(0, 0, 2)).toBe(0);
+  expect(Math.abs(breezeSway(Math.PI / 1.4, 0, 2) - 2) < 0.05).toBe(true);
+});
+
+function fakeCtx() {
+  const marks: string[] = [];
+  const ctx = {
+    fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 1,
+    lineCap: 'butt',
+    imageSmoothingEnabled: false,
+    fillRect() { marks.push('rect'); },
+    beginPath() { marks.push('path'); },
+    rect() {},
+    arc() { marks.push('arc'); },
+    moveTo() {},
+    quadraticCurveTo() {},
+    stroke() { marks.push('stroke'); },
+    fill() { marks.push('fill'); },
+    save() {},
+    restore() {},
+    translate() {},
+    scale() {},
+    rotate() {},
+    clip() {},
+    createRadialGradient() {
+      return { addColorStop() {} };
+    },
+  };
+  return { marks, ctx: ctx as unknown as CanvasRenderingContext2D };
+}
+
+test('céu e vento pintam de dia; noite some; reduced só desacelera', () => {
+  const day = fakeCtx();
+  paintSkyLife(day.ctx, 1280, 1.5, false, false, () => true);
+  expect(day.marks.filter((m) => m === 'arc').length > 10).toBe(true);
+  const night = fakeCtx();
+  paintSkyLife(night.ctx, 1280, 1.5, true, false, () => true);
+  expect(night.marks.length).toBe(0);
+  const calm = fakeCtx();
+  paintWind(calm.ctx, 1280, 640, 2, false, true);
+  expect(calm.marks.filter((m) => m === 'arc').length > 6).toBe(true);
+  const breeze = fakeCtx();
+  paintWind(breeze.ctx, 1280, 640, 2, false, false);
+  expect(breeze.marks.filter((m) => m === 'arc').length > 14).toBe(true);
 });
 
 void run();

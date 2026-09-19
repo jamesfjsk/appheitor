@@ -13,7 +13,7 @@ const SAGE = '/assets/village/npc/sabio-iso.png';
 const HOUSE = '/assets/village/buildings/casa-1.png';
 const LIB = '/assets/village/buildings/mesa-1.png';
 const MINE = '/assets/village/buildings/fornalha-1.png';
-const CHEST = '/assets/village/buildings/bau-1.png';
+const CHEST = '/assets/village/items/chest_daily.png';
 const PLACA = '/assets/village/buildings/placa-vila.png';
 
 const SAGE_STEPS = [

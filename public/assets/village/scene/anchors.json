@@ -43,6 +43,16 @@
       "sprite": "/assets/village/items/chest_streak.png",
       "minFullDays": 7,
       "door": { "x": 196, "y": 440 }
+    },
+    "chest": {
+      "x": 512,
+      "y": 300,
+      "w": 72,
+      "h": 64,
+      "type": "chest",
+      "label": "Baú do Dia",
+      "sprite": "/assets/village/items/chest_daily.png",
+      "door": { "x": 548, "y": 380 }
     }
   },
   "wall": [
@@ -92,7 +102,7 @@
   "smokeOffset": { "dx": 51, "dy": 8 },
   "house": { "id": "casa", "x": 938, "y": 110, "w": 96, "h": 74, "door": { "x": 986, "y": 204 } },
   "props": [
-    { "id": "pack", "x": 592, "y": 336, "w": 48, "h": 48, "sprite": "/assets/village/items/mochila.png", "label": "Mochila", "door": { "x": 548, "y": 390 } }
+    { "id": "pack", "x": 430, "y": 278, "w": 48, "h": 48, "sprite": "/assets/village/items/mochila.png", "label": "Mochila", "door": { "x": 448, "y": 348 } }
   ],
   "walk": {
     "nodes": {
@@ -102,7 +112,8 @@
       "mesa": { "x": 770, "y": 338 },
       "w1": { "x": 430, "y": 348 },
       "furnace": { "x": 214, "y": 310 },
-      "chest": { "x": 196, "y": 440 },
+      "warehouse": { "x": 196, "y": 440 },
+      "daily": { "x": 548, "y": 380 },
       "s1": { "x": 640, "y": 448 },
       "coffre": { "x": 524, "y": 512 },
       "agenda": { "x": 640, "y": 516 },
@@ -114,11 +125,12 @@
       "tower": { "x": 1054, "y": 188 },
       "fire": { "x": 1020, "y": 268 },
       "lake": { "x": 1168, "y": 508 },
-      "pack": { "x": 548, "y": 390 }
+      "pack": { "x": 448, "y": 348 }
     },
     "edges": [
       ["plaza", "n1"], ["n1", "mine"], ["n1", "mesa"],
-      ["plaza", "w1"], ["w1", "furnace"], ["furnace", "chest"], ["w1", "chest"],
+      ["plaza", "w1"], ["w1", "furnace"], ["furnace", "warehouse"], ["w1", "warehouse"],
+      ["plaza", "daily"],
       ["plaza", "s1"], ["s1", "coffre"], ["s1", "agenda"], ["s1", "market"],
       ["plaza", "e1"], ["e1", "arena"], ["e1", "market"],
       ["e1", "porch"], ["porch", "house"], ["porch", "fire"],

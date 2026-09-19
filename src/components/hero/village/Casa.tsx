@@ -22,7 +22,7 @@ import { hasClaim, claimKey } from '../../../services/village/claims';
 
 const MOON = '/assets/english/ui/moon.webp';
 const LANTERN = '/assets/village/items/lantern.png';
-const CHEST = '/assets/village/buildings/bau-1.png';
+const CHEST = '/assets/village/items/chest_daily.png';
 const TORCH = '/assets/english/ui/torch.webp';
 const BOOK = '/assets/english/ui/book.webp';
 const GOLD = '/assets/english/ui/gold.webp';

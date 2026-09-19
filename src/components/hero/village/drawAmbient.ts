@@ -210,6 +210,33 @@ export function paintGateLock(ctx: CanvasRenderingContext2D, cx: number, cy: num
   ctx.restore();
 }
 
+/** Brilho do Baú do Dia na hora: ouro em volta da tampa. */
+export function paintChestGlint(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  elapsed: number,
+  reduced: boolean,
+) {
+  const pulse = reduced ? 0.3 : 0.22 + 0.16 * Math.sin(elapsed * 5.4);
+  paintGlow(ctx, x, y, 36, [255, 210, 80], pulse);
+  if (reduced) return;
+  for (let i = 0; i < 7; i++) {
+    const a = elapsed * 1.9 + i * 0.9;
+    const r = 8 + (i % 3) * 7;
+    const px = Math.round(x + Math.cos(a) * r);
+    const py = Math.round(y - 6 - Math.abs(Math.sin(a * 1.35)) * 14);
+    const s = i % 2 ? 3 : 2;
+    ctx.fillStyle = i % 2 ? '#ffe27a' : '#fff6c8';
+    ctx.fillRect(px, py, s, s);
+  }
+}
+
+export function chestLidBob(elapsed: number, reduced: boolean): number {
+  if (reduced) return 0;
+  return Math.sin(elapsed * 4.4) > 0.2 ? -2 : 0;
+}
+
 export function paintCharBlink(
   ctx: CanvasRenderingContext2D,
   ox: number,
@@ -293,6 +320,167 @@ export function paintGlow(
   ctx.restore();
 }
 
+/** Brisa da Vila: da esquerda pra direita, no andamento da trilha. */
+export const BREEZE_PX = 16;
+
+export function wrapDrift(elapsed: number, span: number, speed: number, seed: number): number {
+  const x = (seed + elapsed * speed) % span;
+  return x < 0 ? x + span : x;
+}
+
+export function breezeSway(elapsed: number, seed: number, amp = 2): number {
+  return Math.sin(elapsed * 0.7 + seed) * amp;
+}
+
+function withSoft(ctx: CanvasRenderingContext2D, fn: () => void) {
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  fn();
+  ctx.restore();
+}
+
+function softOrb(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  rx: number,
+  ry: number,
+  rgb: [number, number, number],
+  a: number,
+) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(1, ry / rx);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+  g.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`);
+  g.addColorStop(0.55, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a * 0.35})`);
+  g.addColorStop(1, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, rx, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+const CLOUD_PUFFS: Array<[number, number, number, number]> = [
+  [0, 0, 92, 36],
+  [48, -14, 72, 28],
+  [-52, -10, 64, 26],
+  [22, 14, 70, 26],
+  [-28, 16, 54, 22],
+];
+
+function paintCloudPuff(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  alpha: number,
+) {
+  CLOUD_PUFFS.forEach(([dx, dy, w, h]) => {
+    softOrb(ctx, x + dx, y + dy, w * 0.55, h * 0.55, [255, 255, 255], alpha);
+  });
+}
+
+function paintBird(ctx: CanvasRenderingContext2D, x: number, y: number, flap: number) {
+  const lift = 5 + flap * 7;
+  ctx.strokeStyle = 'rgba(23, 19, 15, 0.82)';
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x - 13, y + lift * 0.2);
+  ctx.quadraticCurveTo(x - 5, y - lift, x, y);
+  ctx.quadraticCurveTo(x + 5, y - lift, x + 13, y + lift * 0.2);
+  ctx.stroke();
+}
+
+/** Nuvem e passarinho no céu — faixa de cima, sem máscara que some com o efeito. */
+export function paintSkyLife(
+  ctx: CanvasRenderingContext2D,
+  W: number,
+  elapsed: number,
+  night: boolean,
+  reduced: boolean,
+  _inSky?: (x: number, y: number) => boolean,
+) {
+  if (night) return;
+  const pace = reduced ? 0.45 : 1;
+  withSoft(ctx, () => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, W, 128);
+    ctx.clip();
+    const clouds = [
+      { seed: 40, y: 28, speed: 34 * pace, a: 0.72 },
+      { seed: 480, y: 48, speed: 48 * pace, a: 0.55 },
+      { seed: 860, y: 20, speed: 26 * pace, a: 0.64 },
+      { seed: 190, y: 62, speed: 40 * pace, a: 0.48 },
+      { seed: 1100, y: 36, speed: 30 * pace, a: 0.58 },
+    ];
+    clouds.forEach((c, i) => {
+      const x = wrapDrift(elapsed, W + 280, c.speed, c.seed) - 140;
+      const y = c.y + breezeSway(elapsed, i * 1.7, reduced ? 0.8 : 2.2);
+      paintCloudPuff(ctx, x, y, c.a);
+    });
+    ctx.restore();
+    if (reduced) return;
+    for (let i = 0; i < 4; i++) {
+      const x = wrapDrift(elapsed, W + 180, 56 + i * 10, i * 220) - 70;
+      const y = 26 + i * 18 + Math.sin(elapsed * 1.2 + i) * 7;
+      if (y > 118) continue;
+      paintBird(ctx, x, y, 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(elapsed * 7 + i)));
+    }
+  });
+}
+
+const TREE_TIPS: Array<[number, number]> = [
+  [72, 210], [120, 180], [168, 148], [248, 92], [390, 64],
+  [980, 58], [1100, 120], [1188, 168], [1240, 300], [80, 320],
+];
+
+const LEAF: Array<[number, number, number]> = [
+  [72, 140, 42],
+  [155, 196, 70],
+  [210, 150, 70],
+  [90, 120, 36],
+];
+
+/** Pólen e folha no vento — a vila respira, ninguém “pensa”. */
+export function paintWind(
+  ctx: CanvasRenderingContext2D,
+  W: number,
+  H: number,
+  elapsed: number,
+  night: boolean,
+  reduced: boolean,
+) {
+  if (night) return;
+  const pace = reduced ? 0.4 : 1;
+  withSoft(ctx, () => {
+    const motes = reduced ? 10 : 22;
+    for (let i = 0; i < motes; i++) {
+      const x = wrapDrift(elapsed, W + 50, (18 + (i % 5) * 4) * pace, i * 73) - 16;
+      const y = 190 + (i * 27) % 300 + breezeSway(elapsed, i, 10);
+      const a = 0.38 + 0.32 * (0.5 + 0.5 * Math.sin(elapsed * 1.3 + i));
+      softOrb(ctx, x, y, i % 4 === 0 ? 5.5 : 3.6, i % 4 === 0 ? 4 : 2.6, [255, 236, 170], a);
+    }
+    const tips = reduced ? TREE_TIPS.slice(0, 5) : TREE_TIPS;
+    for (let i = 0; i < tips.length; i++) {
+      const [tx, ty] = tips[i];
+      const fall = wrapDrift(elapsed, 280, (16 + (i % 3) * 4) * pace, i * 40);
+      const x = tx + wrapDrift(elapsed, 140, BREEZE_PX * 0.9 * pace, i * 17) - 30;
+      const y = ty + fall;
+      if (y > H - 70) continue;
+      const spin = elapsed * 2.1 + i;
+      const [r, g, b] = LEAF[i % LEAF.length];
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.sin(spin) * 1.1);
+      softOrb(ctx, 0, 0, 8, 4.2, [r, g, b], 0.78);
+      ctx.restore();
+    }
+  });
+}
+
 export function paintWater(
   ctx: CanvasRenderingContext2D,
   water: { x: number; y: number; w: number; h: number },
@@ -304,20 +492,24 @@ export function paintWater(
   const cy = water.y + water.h * 0.58;
   const rx = water.w * 0.38;
   const ry = water.h * 0.22;
+  const tint: [number, number, number] = night ? [186, 206, 255] : [255, 255, 255];
   if (reduced) {
-    pix(ctx, cx, cy, 2, night ? 'rgba(200,220,255,0.25)' : 'rgba(255,255,255,0.28)');
+    withSoft(ctx, () => softOrb(ctx, cx, cy, 4, 2.2, tint, 0.22));
     return;
   }
-  const n = 9;
-  for (let i = 0; i < n; i++) {
-    const t = elapsed * (0.35 + (i % 3) * 0.08) + i * 1.7;
-    const px = cx + Math.cos(t) * rx * (0.25 + 0.7 * ((i * 17) % 10) / 10);
-    const py = cy + Math.sin(t * 0.85 + i) * ry * (0.4 + 0.6 * ((i * 13) % 10) / 10);
-    const blink = 0.5 + 0.5 * Math.sin(elapsed * 3.1 + i * 1.3);
-    const a = (night ? 0.16 : 0.28) * blink;
-    if (a < 0.08) continue;
-    pix(ctx, px, py, i % 4 === 0 ? 2 : 1, `rgba(255,255,255,${a})`);
-  }
+  withSoft(ctx, () => {
+    const sheen = wrapDrift(elapsed, rx * 2, 22, 0) - rx;
+    softOrb(ctx, cx + sheen, cy - 2, 22, 6, tint, night ? 0.28 : 0.4);
+    for (let i = 0; i < 10; i++) {
+      const t = elapsed * (0.32 + (i % 3) * 0.07) + i * 1.7;
+      const px = cx + Math.cos(t) * rx * (0.25 + 0.7 * ((i * 17) % 10) / 10);
+      const py = cy + Math.sin(t * 0.85 + i) * ry * (0.4 + 0.6 * ((i * 13) % 10) / 10);
+      const blink = 0.5 + 0.5 * Math.sin(elapsed * 2.4 + i * 1.3);
+      const a = (night ? 0.22 : 0.38) * blink;
+      if (a < 0.08) continue;
+      softOrb(ctx, px, py, i % 3 === 0 ? 5 : 3.2, 2.2, tint, a);
+    }
+  });
 }
 
 export function paintHourSky(ctx: CanvasRenderingContext2D, w: number, h: number, hour: number) {
@@ -352,19 +544,15 @@ export function defaultFireflies(): Firefly[] {
 }
 
 export function paintFireflies(ctx: CanvasRenderingContext2D, flies: Firefly[], elapsed: number) {
-  flies.forEach((f, i) => {
-    const x = f.x + Math.sin(elapsed * 0.55 + f.p) * 18;
-    const y = f.y + Math.cos(elapsed * 0.42 + i) * 10;
-    const blink = 0.5 + 0.5 * Math.sin(elapsed * 5.4 + i * 2.1);
-    if (blink < 0.12) return;
-    const a = 0.45 + 0.55 * blink;
-    pix(ctx, x - 1, y - 1, 4, `rgba(255, 236, 120,${a})`);
-    if (blink > 0.4) {
-      pix(ctx, x - 3, y, 2, `rgba(255, 210, 70,${a * 0.55})`);
-      pix(ctx, x + 3, y, 2, `rgba(255, 210, 70,${a * 0.55})`);
-      pix(ctx, x, y - 3, 2, `rgba(255, 248, 180,${a * 0.75})`);
-      pix(ctx, x, y + 3, 2, `rgba(255, 210, 70,${a * 0.4})`);
-    }
+  withSoft(ctx, () => {
+    flies.forEach((f, i) => {
+      const x = f.x + Math.sin(elapsed * 0.55 + f.p) * 18;
+      const y = f.y + Math.cos(elapsed * 0.42 + i) * 10;
+      const blink = 0.5 + 0.5 * Math.sin(elapsed * 5.4 + i * 2.1);
+      if (blink < 0.12) return;
+      const a = 0.28 + 0.42 * blink;
+      softOrb(ctx, x, y, blink > 0.55 ? 8 : 5.5, blink > 0.55 ? 8 : 5.5, [255, 232, 120], a);
+    });
   });
 }
 
@@ -373,14 +561,10 @@ export function paintMotes(
   elapsed: number,
   night: boolean,
   reduced: boolean,
+  W = 1280,
+  H = 640,
 ) {
-  if (night || reduced) return;
-  for (let i = 0; i < 8; i++) {
-    const x = 160 + ((i * 97 + elapsed * 6) % 980);
-    const y = 210 + (i * 37) % 220 + Math.sin(elapsed * 0.4 + i) * 8;
-    const a = 0.08 + 0.1 * (0.5 + 0.5 * Math.sin(elapsed * 1.8 + i));
-    pix(ctx, x, y, 1, `rgba(255,248,220,${a})`);
-  }
+  paintWind(ctx, W, H, elapsed, night, reduced);
 }
 
 export function boxContains(hit: { x: number; y: number; w: number; h: number }, px: number, py: number): boolean {
@@ -696,8 +880,8 @@ export function paintSitLog(ctx: CanvasRenderingContext2D, cx: number, cy: numbe
   ctx.fillRect(x + 4, y - 3, 2, 4);
 }
 
-function paintFlowers(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  const ox = Math.round(x);
+function paintFlowers(ctx: CanvasRenderingContext2D, x: number, y: number, elapsed = 0) {
+  const ox = Math.round(x + breezeSway(elapsed, x * 0.02, 1.2));
   const oy = Math.round(y);
   ctx.fillStyle = '#3d2918';
   ctx.fillRect(ox - 10, oy + 2, 24, 8);
@@ -774,7 +958,7 @@ function paintStones(ctx: CanvasRenderingContext2D, x: number, y: number) {
   });
 }
 
-function paintBunting(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
+function paintBunting(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, elapsed = 0) {
   const span = Math.hypot(x2 - x1, y2 - y1);
   const n = Math.max(5, Math.round(span / 24));
   const colors = ['#b3261e', '#e8b923', '#5b9b3a', '#f6f2ec'];
@@ -782,7 +966,7 @@ function paintBunting(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2:
   let prevY = y1;
   for (let i = 0; i <= n; i++) {
     const t = i / n;
-    const sag = 16 * Math.sin(t * Math.PI);
+    const sag = 16 * Math.sin(t * Math.PI) + breezeSway(elapsed, i * 0.9, 2.2);
     const x = Math.round(x1 + (x2 - x1) * t);
     const y = Math.round(y1 + (y2 - y1) * t + sag);
     ctx.fillStyle = '#3f2a1a';
@@ -804,9 +988,9 @@ export function paintGrowthMark(
   night: boolean,
   elapsed: number,
 ) {
-  if (mark.kind === 'flowers') paintFlowers(ctx, mark.x, mark.y);
+  if (mark.kind === 'flowers') paintFlowers(ctx, mark.x, mark.y, elapsed);
   else if (mark.kind === 'lamp') paintLampPost(ctx, mark.x, mark.y, night, elapsed);
   else if (mark.kind === 'bench') paintBench(ctx, mark.x, mark.y);
-  else if (mark.kind === 'bunting') paintBunting(ctx, mark.x, mark.y, mark.x2 ?? mark.x + 80, mark.y2 ?? mark.y);
+  else if (mark.kind === 'bunting') paintBunting(ctx, mark.x, mark.y, mark.x2 ?? mark.x + 80, mark.y2 ?? mark.y, elapsed);
   else paintStones(ctx, mark.x, mark.y);
 }

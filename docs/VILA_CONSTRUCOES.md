@@ -19,17 +19,17 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 - **Nível 2**: **Fundição** na aba Fogo: troca 3 por 1 entre madeira, pedra e ferro; redstone nunca entra nem sai. Commit imediato, cerimônia de fogo 1,8–2,4 s.
 - **Nível 3**: **Queima** na aba Fogo: uma vez por dia, 5 madeira viram 1 redstone (única fonte de redstone fora da Mina; chave `burn:<data>` em `village.claimed`). Cinza se já queimou hoje.
 - **Ao tocar**: nível 0 ou ruína abre o cartão (Construir / Arrumar / Melhorar). Nível 1+ em pé abre a Ferraria no Fogo. O cartão tem "Abrir o fogo" e "Ir para a Mina". Melhorar volta pelo botão da aba Fogo. Tecla O / Mochila abrem a mesma Ferraria na aba Forjar.
-- **Libera**: nada por si; é pré-requisito, junto com o Baú, da Torre, da Mesa e do Campinho.
+- **Libera**: nada por si; é pré-requisito, junto com o Armazém, da Torre, da Mesa e do Campinho.
 - **Visual**: `buildings/fornalha-1..3.png`; fumaça em partículas quando construída; janela acesa à noite; boca de fogo e SFX na aba Fogo.
 
-### 2. Baú (Storage): o armazém
+### 2. Armazém (Storage): guarda o Baú do Dia
 
-- **Para que serve**: ver o que ele tem e melhorar o que o dia rende.
-- **Nível 1**: abre o **inventário** (materiais, raros, equipamentos, cosméticos) e libera Torre e Biblioteca (o Campinho saiu do texto em 17/09).
+- **Para que serve**: o lugar do **Baú do Dia**. Sem Armazém em pé, o baú existe no mapa com cadeado e não abre. Inventário é a Mochila, não esta obra.
+- **Nível 1**: guarda o Baú do Dia e libera Torre e Biblioteca.
 - **Nível 2**: o Baú do Dia dá **+1 material**.
 - **Nível 3**: a esmeralda do Baú do Dia vem a cada **2** dias completos seguidos em vez de 3.
-- **Ao tocar**: cartão com o inventário em abas (Materiais, Raros, Equipamentos, Cosméticos) e o atalho "Abrir o Baú do Dia" (mesmo modal de hoje).
-- **Visual**: `buildings/bau-1..3.png`.
+- **Ao tocar**: nível 0 ou ruína abre o cartão (Construir / Arrumar). Nível 1+ em pé abre o lugar do Baú (cerimônia, SFX). Melhorar é no lote do Armazém.
+- **Visual**: `buildings/bau-1..3.png`. No mapa o baú aparece sempre: cinza com cadeado se o Armazém não existe; brilho dourado e tampa viva só na hora, com o Armazém em pé e as missões feitas.
 
 ### 3. Cerca (Fence): a proteção
 
@@ -161,7 +161,7 @@ Entrou no Lote 2 da Etapa 2 como reforço da "consequência sem castigo" e o pai
 
 ## O que muda no código, por etapa
 
-- Etapa 1B (agora): cartão da construção com as ações que já existem (Fornalha: Ir para a Mina; Baú: inventário e Baú do Dia; Torre: conquistas; Mesa: tema de amanhã), textos de efeito deste documento, Campinho não construível, `buildings.effects[level]` em `config/englishBase.ts` reescritos com estas frases.
+- Etapa 1B (agora): cartão da construção com as ações que já existem (Fornalha: Ir para a Mina; Armazém: Baú do Dia; Torre: conquistas; Mesa: tema de amanhã), textos de efeito deste documento, Campinho não construível, `buildings.effects[level]` em `config/englishBase.ts` reescritos com estas frases.
 - Etapa 2: Casa do Minerador (as missões saem da página e entram na Casa; faixa "Hoje" compacta na Vila), Fundição e Queima na Fornalha (a troca sai da Oficina), Baú níveis 2 e 3, Cerca níveis 1 a 3, Torre níveis 2 e 3, Cofre, pré-requisitos de nível 2 e 3, custos x2; cerimônia de obra e "Vila que cresce v1" (camadas de crescimento por soma de níveis).
 - Etapa 3: Mesa níveis 2 e 3.
 - Etapa 4: Campinho.

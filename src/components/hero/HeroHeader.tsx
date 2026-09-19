@@ -15,6 +15,7 @@ const DIAMOND = '/assets/english/ui/diamond.webp';
 const SUN = '/assets/english/ui/sun.webp';
 const SUNSET = '/assets/english/ui/sunset.webp';
 const MOON = '/assets/english/ui/moon.webp';
+const LETTER = '/assets/english/ui/base/c_letter.webp';
 const WEEKDAY_SHORT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 interface HeroHeaderProps {
@@ -31,13 +32,14 @@ interface HeroHeaderProps {
   hour?: number;
   compact?: boolean;
   crackLine?: string;
-  placaLabel?: string;
+  placaCount?: number;
+  placaOpen?: boolean;
   onOpenPlaca?: () => void;
 }
 
 const HeroHeader: React.FC<HeroHeaderProps> = ({
   progress, onOpenGold, onOpenPack, onOpenTower, nextEventLabel, avatarSrc, avatar, subtitle,
-  extraButton, fullDays, hour, compact = false, crackLine, placaLabel, onOpenPlaca,
+  extraButton, fullDays, hour, compact = false, crackLine, placaCount, placaOpen, onOpenPlaca,
 }) => {
   const { hour: clockHour, minute, today, weekday, period } = useClock();
   const { logout } = useAuth();
@@ -107,13 +109,26 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
       </div>
     </button>
   );
-  const placaChip = placaLabel ? (
-    <button type="button" className="mc-slot mc-chip py-1" data-testid="placa-chip" onClick={() => { playClick(); onOpenPlaca?.(); }} title="Placa da Vila">
-      <span className="text-sm text-white truncate max-w-[12rem]">{placaLabel}</span>
+  const mail = (placaCount ?? 0) > 0;
+  const placaChip = onOpenPlaca ? (
+    <button
+      type="button"
+      className={`mc-btn mc-btn-dark w-[44px] h-[44px] p-0 mn-placa-chip${placaOpen ? ' is-on' : ''}${mail && !placaOpen ? ' has-mail' : ''}`}
+      data-testid="placa-chip"
+      onClick={() => { playClick(); onOpenPlaca(); }}
+      title={mail ? `Placa da Vila, ${placaCount} ${placaCount === 1 ? 'aviso' : 'avisos'}` : 'Placa da Vila'}
+      aria-label={mail ? `Placa da Vila, ${placaCount} avisos` : 'Placa da Vila'}
+      aria-expanded={Boolean(placaOpen)}
+    >
+      <img src={LETTER} alt="" className="mc-pixel" draggable={false} />
+      {mail && (
+        <span className="mn-placa-badge" aria-hidden>{placaCount! > 9 ? '9+' : placaCount}</span>
+      )}
     </button>
   ) : null;
   const actions = (
     <div className="flex gap-1 shrink-0">
+      {placaChip}
       <button
         type="button"
         onClick={() => { playClick(); toggleSound(); }}
@@ -154,7 +169,6 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
           {goldChip}
           {torchChip}
           {clockChip}
-          {placaChip}
           {crackLine && (
             <span className="mn-crack-line shrink-0" title={crackLine}>{crackLine}</span>
           )}
@@ -202,7 +216,6 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
         {torchChip}
         {goldChip}
         {levelChip}
-        {placaChip}
         {nextEventLabel && (
           <div className="mc-slot mc-chip py-1" title="Próximo da Agenda">
             <span className="text-sm text-white">{nextEventLabel}</span>

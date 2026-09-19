@@ -15,9 +15,8 @@ import {
   initialBaseDoc,
   missingMaterials,
 } from '../../../config/englishBase';
-import { COSMETIC_BY_ID, COSMETIC_ICON, GEAR, GEAR_SPRITE, dismissDevCrack, visibleCracks } from '../../../config/village';
+import { dismissDevCrack, visibleCracks } from '../../../config/village';
 import { RuinThumb } from './drawDamage';
-import type { CosmeticItem } from '../../../types/village';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVillage } from '../../../contexts/VillageContext';
 import { useSound } from '../../../contexts/SoundContext';
@@ -38,7 +37,6 @@ interface Props {
   id: BuildingId;
   onClose: () => void;
   onOpenMine: () => void;
-  onOpenChest: () => void;
   onOpenTower: () => void;
   onOpenWorkshop: (tab?: ForgeTab) => void;
   onOpenQuiz: () => void;
@@ -51,7 +49,7 @@ interface Props {
 }
 
 const BuildingCard: React.FC<Props> = ({
-  id, onClose, onOpenMine, onOpenChest, onOpenTower, onOpenWorkshop, onOpenQuiz,
+  id, onClose, onOpenMine, onOpenTower, onOpenWorkshop, onOpenQuiz,
   onOpenBank, onOpenAgenda, onOpenMarket, onBuilt, shopLocked = false,
 }) => {
   const { childUid } = useAuth();
@@ -60,7 +58,6 @@ const BuildingCard: React.FC<Props> = ({
   const { today } = useClock();
   const { playClick } = useSound();
   const [busy, setBusy] = useState(false);
-  const [inv, setInv] = useState(false);
   const [theme, setTheme] = useState('');
   const [savingTheme, setSavingTheme] = useState(false);
 
@@ -184,14 +181,6 @@ const BuildingCard: React.FC<Props> = ({
       setSavingTheme(false);
     }
   };
-
-  const ownedGear = GEAR.filter((g) => {
-    if (g.slot === 'pickaxe') return village.gear.pickaxe >= g.level;
-    return village.gear[g.slot] >= 1;
-  });
-  const ownedCosmetics = village.owned
-    .map((cid) => COSMETIC_BY_ID[cid])
-    .filter((c): c is CosmeticItem => Boolean(c));
 
   if (cracked) {
     return (
@@ -395,72 +384,6 @@ const BuildingCard: React.FC<Props> = ({
             </>
           )}
 
-          {id === 'bau' && (
-            <>
-              <button
-                type="button"
-                disabled={level < 1}
-                className={`mc-btn w-full min-h-[48px] font-bold ${level < 1 ? 'mc-btn-dark' : 'mc-btn-green'}`}
-                onClick={() => { playClick(); setInv((v) => !v); }}
-              >
-                {level < 1 ? 'Inventário: construa o Armazém' : inv ? 'Fechar inventário' : 'Ver meu inventário'}
-              </button>
-              <button type="button" className="mc-btn mc-btn-gold w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenChest(); }}>
-                Abrir o Baú do Dia
-              </button>
-              {inv && level >= 1 && (
-                <div className="mc-card rounded p-3 space-y-3">
-                  <div>
-                    <p className="mc-lbl mb-1">Materiais</p>
-                    <div className="flex flex-wrap gap-2">
-                      {MATERIALS.map((m) => (
-                        <span key={m} className="mc-chip mc-slot px-2 py-1 flex items-center gap-1">
-                          <img src={MATERIAL_ICONS[m]} alt="" className="w-5 h-5 mc-pixel" />
-                          <span className="mc-num text-white">{materials[m] || 0}</span>
-                          <span className="mc-chip-l">{MATERIAL_LABELS[m]}</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="mc-lbl mb-1">Raros</p>
-                    <p className="text-sm">{village.rare.diamante} diamante · {village.rare.esmeralda} esmeralda</p>
-                  </div>
-                  <div>
-                    <p className="mc-lbl mb-1">Equipamentos</p>
-                    {ownedGear.length === 0 ? (
-                      <p className="text-sm mc-muted">Nenhum craftado ainda.</p>
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {ownedGear.map((g) => (
-                          <span key={g.id} className="mc-chip mc-slot px-2 py-1 flex items-center gap-1">
-                            {GEAR_SPRITE[g.id] && <img src={GEAR_SPRITE[g.id]} alt="" className="w-5 h-5 mc-pixel" />}
-                            <span className="text-xs">{g.label}</span>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="mc-lbl mb-1">Cosméticos</p>
-                    {ownedCosmetics.length === 0 ? (
-                      <p className="text-sm mc-muted">Nenhum comprado ainda.</p>
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {ownedCosmetics.map((c) => (
-                          <span key={c.id} className="mc-chip mc-slot px-2 py-1 flex items-center gap-1">
-                            {COSMETIC_ICON[c.id] && <img src={COSMETIC_ICON[c.id]} alt="" className="w-5 h-5 mc-pixel" />}
-                            <span className="text-xs">{c.label}</span>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
           {id === 'torre' && (
             <button
               type="button"
@@ -569,9 +492,11 @@ const BuildingCard: React.FC<Props> = ({
             </>
           )}
 
-          <button type="button" className="mc-btn mc-btn-stone w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenWorkshop(); }}>
-            Ferraria
-          </button>
+          {id !== 'bau' && (
+            <button type="button" className="mc-btn mc-btn-stone w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenWorkshop(); }}>
+              Ferraria
+            </button>
+          )}
         </div>
       </div>
     </div>

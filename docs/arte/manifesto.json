@@ -721,6 +721,22 @@
       }
     },
     {
+      "file": "items/chest_daily.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "legendary closed treasure chest, dark walnut wood, ornate gold bands, ruby miner-lantern lock, gold claw feet, faint gold light at the lid seam, 3/4 view, game item sprite"
+      }
+    },
+    {
+      "file": "items/chest_daily_open.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "same legendary treasure chest with lid open, gold light and coins inside, ruby lock hanging, 3/4 view, game item sprite"
+      }
+    },
+    {
       "file": "items/chest_streak.png",
       "kind": "item",
       "endpoint": "generate-image-pixflux",

@@ -16,7 +16,7 @@ const MUSIC_KEY = 'mm_teaser_music'; // '0' = ele desligou de propósito
 const COMING = [
   { icon: ISO_MINER, title: 'Seu minerador', text: 'Crie o personagem, escolha roupa, capacete e picareta.' },
   { icon: '/assets/village/buildings/fornalha-1.png', title: 'A Vila', text: 'Cada missão do dia rende material para construir a sua base.' },
-  { icon: '/assets/village/buildings/bau-1.png', title: 'Baú do Dia', text: 'Fechou todas as missões? O baú abre à noite.' },
+  { icon: '/assets/village/items/chest_daily.png', title: 'Baú do Dia', text: 'Fechou todas as missões? O baú abre à noite.' },
   { icon: '/assets/village/items/lantern.png', title: 'A Mina', text: 'Contratos em inglês com o Comerciante, o Ferreiro e o Sábio.' },
   { icon: '/assets/village/rewards/dinheiro.png', title: 'Cofrinho', text: 'Guarde gold para algo grande e veja ele render.' },
 ];
