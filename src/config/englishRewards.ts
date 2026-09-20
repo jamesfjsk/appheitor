@@ -57,9 +57,11 @@ export function letterMaterial(hits: number, evidenceOk: boolean, total = 3): Ma
   return clampMaterial((points * MAX_MATERIAL) / total);
 }
 
-/** Recado: a nota 0-3 do juiz vira ferro na mesma medida */
+/** Recado: ferro/gold só se o pedido entrou no quadro (nota 2 ou 3). Errar o pedido (0/1) = só XP. */
 export function noteMaterial(score: number): MaterialCount {
-  return clampMaterial(score);
+  if (score >= 3) return 3;
+  if (score === 2) return 2;
+  return 0;
 }
 
 /** Ferraria: >= 5 acertos (meio ponto na 2ª tentativa) = 3; 3-4 = 2; senão 0 */

@@ -546,6 +546,347 @@
   color: var(--mc-white);
 }
 
+/* mesa da prova: moldura 9-slice sem esticar o miolo; tábuas em repeat pixelado */
+.mn-prova-sheet.mc-modal {
+  position: relative;
+  isolation: isolate;
+  background-color: #3a2416;
+  border: 28px solid transparent;
+  border-image-source: url('/assets/village/ui/panel-mesa.png');
+  border-image-slice: 24;
+  border-image-width: 28px;
+  border-image-repeat: repeat;
+  box-shadow: 0 12px 0 #0d0b0a;
+  border-radius: 0;
+}
+.mn-prova-sheet.mc-modal::before {
+  content: none;
+}
+.mn-prova-sheet.mc-modal > * {
+  position: relative;
+  z-index: 1;
+}
+.mn-prova-sheet .mn-prova-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 0;
+}
+.mn-prova-sheet .mn-prova-talk {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.mn-prova-sheet .mn-prova-who {
+  width: 96px;
+  flex-shrink: 0;
+  text-align: center;
+}
+.mn-prova-sheet .mn-prova-who img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+.mn-prova-sheet .mn-prova-say {
+  flex: 1;
+  min-width: 0;
+}
+.mn-prova-sheet.is-scroll.mc-modal {
+  position: relative;
+  isolation: isolate;
+  background-color: #4a2e1a;
+  border: 6px solid #17130f;
+  border-image: none;
+  border-radius: 0;
+  box-shadow: 0 12px 0 #0d0b0a, inset 0 3px 0 #c9a06a, inset 0 -4px 0 #2a160c;
+  max-width: 640px;
+  max-height: calc(100vh - 120px);
+  color: #1a1410;
+}
+.mn-prova-sheet.is-scroll.mc-modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url('/assets/village/ui/mesa-tabua.png');
+  background-repeat: repeat;
+  background-size: 64px 32px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+}
+.mn-prova-sheet.is-scroll .mn-prova-head {
+  display: none;
+}
+.mn-prova-sheet.is-scroll .mn-child-body {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px 6px;
+  overflow: hidden;
+  min-height: 0;
+}
+.mn-prova-sheet.is-scroll .mn-child-foot {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border: 0;
+  border-top: 3px solid #17130f;
+  box-shadow: inset 0 2px 0 rgba(201, 160, 106, 0.28);
+  background: transparent;
+  padding: 10px 12px 12px;
+}
+.mn-prova-scroll-scene {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  justify-content: center;
+}
+.mn-papiro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  filter: drop-shadow(0 6px 0 #1a1008);
+}
+.mn-papiro-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.mn-papiro-face {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.mn-papiro-head-say {
+  flex: 1;
+  min-width: 0;
+}
+.mn-papiro-who {
+  margin: 0;
+  font-family: var(--mc-pixel);
+  font-size: 10px;
+  line-height: 1.6;
+  color: #5a3d12;
+}
+.mn-papiro-kicker-line {
+  margin: 4px 0 0;
+  font-family: var(--mc-body);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  word-spacing: 0.12em;
+  color: #3d2a14;
+}
+.mn-papiro-step {
+  flex-shrink: 0;
+  color: #5a3d12;
+  font-size: 14px;
+}
+.mn-papiro-rod-img {
+  display: block;
+  position: relative;
+  z-index: 2;
+  flex: 0 0 36px;
+  width: 100%;
+  height: 36px;
+  object-fit: fill;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.mn-papiro-rod-img.is-foot {
+  margin-top: -14px;
+}
+.mn-papiro-well {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  margin: -14px 22px 0;
+  background-color: #f6edd8;
+  box-shadow: inset 8px 0 0 #e4d3ae, inset -8px 0 0 #e4d3ae, inset 0 10px 0 #efe3c4;
+}
+.mn-papiro.is-open .mn-papiro-well {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+.mn-papiro-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.mn-papiro-kicker-in {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mn-papiro-kicker .mc-torches {
+  gap: 4px;
+}
+.mn-papiro-kicker .mc-torches img {
+  width: 20px;
+  height: 20px;
+}
+.mn-papiro-title {
+  font-family: var(--mc-body);
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1410;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  word-spacing: 0.14em;
+  margin: 0 0 12px;
+}
+.mn-papiro:not(.is-open) .mn-papiro-well {
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - 36px), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - 36px), transparent 100%);
+}
+.mn-papiro-page {
+  padding: 16px 22px 22px;
+  color: #1a1410;
+  font-family: var(--mc-body);
+  font-size: 18px;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  word-spacing: 0.14em;
+  font-weight: 500;
+  white-space: normal;
+}
+.mn-papiro-page p {
+  margin: 0 0 10px;
+  letter-spacing: 0.02em;
+  word-spacing: 0.14em;
+}
+.mn-papiro-page p:last-child {
+  margin-bottom: 0;
+}
+.mn-papiro-explain {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 3px solid #17130f;
+}
+.mn-papiro-write {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  min-height: 96px;
+  padding: 10px 12px;
+  color: #1a1410;
+  font-family: var(--mc-body);
+  font-size: 18px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  word-spacing: 0.12em;
+  background: #fffdf6;
+  border: 3px solid #17130f;
+  outline: none;
+  resize: vertical;
+}
+.mn-papiro-page .mn-papiro-why {
+  margin-top: 0;
+  font-weight: 700;
+}
+.mn-papiro-page .mn-papiro-canto {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 3px solid #17130f;
+}
+.mn-papiro-page .mc-lbl {
+  color: #5a3d12;
+}
+.mn-prova-sheet .mn-prova-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+.mn-prova-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px 8px 8px;
+  text-align: left;
+  font-family: var(--mc-body);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  word-spacing: 0.12em;
+  color: #1a1410;
+  background: transparent;
+  border: 0;
+  border-left: 5px solid #c4b090;
+  box-shadow: none;
+  cursor: pointer;
+}
+.mn-prova-opt:hover {
+  background: #efe3c4;
+}
+.mn-prova-opt:focus-visible {
+  outline: 3px solid #e8b923;
+  outline-offset: 2px;
+}
+.mn-prova-opt.is-right {
+  background: #d8eeb8;
+  color: #1a3d0c;
+  border-left-color: #5b9b3a;
+}
+.mn-prova-opt.is-wrong {
+  background: #f0c4be;
+  color: #4a100c;
+  border-left-color: #b3261e;
+}
+.mn-prova-opt.is-dim {
+  opacity: 0.4;
+}
+.mn-prova-opt-letter {
+  flex: 0 0 22px;
+  width: 22px;
+  margin-top: 2px;
+  font-family: var(--mc-pixel);
+  font-size: 12px;
+  line-height: 1.4;
+  color: #5a3d12;
+}
+.mn-prova-opt.is-right .mn-prova-opt-letter {
+  color: #2f5a1c;
+}
+.mn-prova-opt.is-wrong .mn-prova-opt-letter {
+  color: #7a1c16;
+}
+.mn-prova-sheet .mn-child-foot .mc-btn {
+  min-width: 220px;
+}
+.mn-prova-ink-caret {
+  display: inline-block;
+  width: 10px;
+  height: 3px;
+  margin-left: 3px;
+  margin-bottom: 2px;
+  background: #e8c36a;
+  vertical-align: baseline;
+  animation: mn-prova-caret 0.7s steps(1, end) infinite;
+}
+@keyframes mn-prova-caret {
+  50% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-prova-ink-caret {
+    animation: none;
+    display: none;
+  }
+}
+
 .mn-casa {
   background:
     linear-gradient(180deg, rgba(255, 196, 90, 0.14) 0%, transparent 36%),
@@ -2809,3 +3150,636 @@ div.mn-pack-cell {
     animation: none;
   }
 }
+
+/* Entrega do Comerciante — tela cheia, kit da Vagoneta */
+.md-play {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  background: #080605;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+}
+.md-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+  background: #080605;
+  border-bottom: 3px solid #0d0b0a;
+}
+.md-play .mc-btn {
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  text-transform: none;
+}
+.md-bar-note {
+  min-width: 8rem;
+  text-align: right;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #cfc6b8;
+}
+.md-dots {
+  display: flex;
+  gap: 8px;
+}
+.md-dots i {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3a332e;
+  border: 2px solid #0d0b0a;
+}
+.md-dots i.is-now { background: #ffe566; }
+.md-dots i.is-done { background: #6aa84f; }
+.md-dots i.is-pop { animation: mc-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1.2); }
+.md-play.is-miss .md-stage { animation: mc-shake 0.35s ease-in-out; }
+.md-stage-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.md-stage {
+  position: relative;
+  overflow: hidden;
+  background: #1a100c;
+}
+.md-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+}
+.md-spot {
+  position: absolute;
+  z-index: 4;
+}
+.md-spot.is-hint {
+  filter: drop-shadow(0 0 8px #ffe566);
+}
+.md-spot-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  pointer-events: none;
+}
+.md-spot-img.is-wall {
+  object-position: center center;
+}
+.md-placed {
+  position: absolute;
+  width: 42%;
+  z-index: 3;
+  pointer-events: none;
+}
+.md-placed img {
+  width: 100%;
+  height: auto;
+}
+.md-placed.is-in {
+  z-index: 1;
+  clip-path: inset(45% 0 0 0);
+}
+.md-placed.is-under {
+  z-index: 1;
+}
+.md-placed b {
+  position: absolute;
+  right: -4px;
+  bottom: -2px;
+  min-width: 18px;
+  padding: 0 4px;
+  background: #1a1008;
+  color: #ffe566;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+}
+.md-pockets {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.md-pocket {
+  position: absolute;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #8a7340;
+  border-radius: 8px;
+  background: rgba(232, 210, 160, 0.22);
+}
+.md-pocket b {
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1008;
+  line-height: 1.1;
+  text-align: center;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+.md-pocket.is-faint {
+  border-color: #6a5a3a;
+  background: rgba(26, 16, 8, 0.12);
+}
+.md-pocket.is-ask {
+  border-color: #ffe566;
+  border-style: solid;
+  background: rgba(255, 229, 102, 0.38);
+  box-shadow: 0 0 0 2px #1a1008;
+}
+.md-pocket.is-hot {
+  border-color: #ffe566;
+  background: rgba(255, 229, 102, 0.55);
+}
+.md-merchant {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+}
+.md-merchant-body {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+}
+.md-speech {
+  position: absolute;
+  left: 14%;
+  top: 12px;
+  z-index: 6;
+  width: 72%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  pointer-events: none;
+}
+.md-speech .mc-btn,
+.md-speech .md-word {
+  pointer-events: auto;
+}
+.md-balloon {
+  position: relative;
+  width: 100%;
+  padding: 10px 16px 12px;
+  background: #e8d2a0;
+  border: 4px solid #1a1008;
+  border-radius: 8px;
+  color: #1a1008;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  box-shadow: 4px 4px 0 #1a1008;
+}
+.md-balloon.is-fix {
+  background: #f3d3a0;
+  animation: mc-shake 0.3s ease-in-out;
+}
+.md-balloon.is-ok {
+  background: #d4e8a8;
+  animation: mc-pop 0.3s ease-out;
+}
+.md-balloon.is-next {
+  background: #ffe566;
+  animation: mc-pop 0.3s ease-out;
+}
+.md-listen .is-wait {
+  animation: md-wait 1.1s ease-in-out infinite;
+}
+@keyframes md-wait {
+  50% { filter: brightness(1.15); box-shadow: 0 0 0 3px #ffe566; }
+}
+.md-balloon-pt,
+.md-sentence,
+.md-fix,
+.md-words {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  font-weight: 600;
+  letter-spacing: 0;
+  word-spacing: 0;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+}
+.md-words {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.22em 0.4em;
+}
+.md-tok {
+  display: inline;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  letter-spacing: 0;
+}
+.md-sentence { margin-top: 8px; }
+.md-fix {
+  margin-top: 8px;
+  color: #6b3a12;
+}
+.md-listen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: auto;
+}
+.md-word {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.md-tray {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(26, 16, 8, 0.72);
+  border: 3px solid #0d0b0a;
+  border-radius: 8px;
+}
+.md-tray-item {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  padding: 4px;
+  border: 2px solid #3a2a1c;
+  border-radius: 6px;
+  background: #2a2118;
+  cursor: grab;
+}
+.md-tray-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.md-tray-item.is-empty {
+  opacity: 0.35;
+  cursor: default;
+}
+.md-tray-n {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  color: #fff4b0;
+  font-size: 12px;
+  font-weight: 800;
+}
+.md-fly {
+  position: absolute;
+  z-index: 8;
+  pointer-events: none;
+}
+.md-tip {
+  position: absolute;
+  z-index: 9;
+  transform: translate(-50%, -100%);
+  padding: 4px 8px;
+  background: #1a1008;
+  color: #fff4b0;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 6px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.md-deliver {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 7;
+  min-height: 44px;
+  padding: 10px 22px;
+}
+.md-undo {
+  position: absolute;
+  right: 18px;
+  bottom: 72px;
+  z-index: 7;
+  min-height: 44px;
+  padding: 8px 14px;
+  background: #2a2118;
+  border: 2px solid #0d0b0a;
+  color: #f4e6c4;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 6px;
+}
+.md-finale-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.md-finale-layer .md-speech .mc-btn,
+.md-finale-layer .md-listen {
+  pointer-events: auto;
+}
+.md-confirm,
+.md-saving {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 6, 4, 0.22);
+}
+.md-saving {
+  color: #f4e6c4;
+  font-size: 16px;
+  font-weight: 700;
+}
+.md-confirm-card {
+  width: min(420px, 86vw);
+  z-index: 2;
+}
+.md-confirm-card p {
+  margin: 0;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  word-spacing: 0.16em;
+  color: #1a1008;
+}
+.md-finale-miss {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  word-spacing: 0.22em;
+}
+.md-finale-pay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.md-finale-pay .mc-chip {
+  min-width: 0;
+  padding: 4px 10px 4px 6px;
+  background: #2a2118;
+  border: 2px solid #0d0b0a;
+  border-radius: 6px;
+  color: #fff4b0;
+}
+.md-finale-pay .mc-chip img {
+  width: 24px;
+  height: 24px;
+}
+.md-finale-pay .mc-chip-l {
+  color: #cfc6b8;
+  margin-top: 0;
+}
+.md-finale-mat {
+  width: 24px;
+  height: 24px;
+}
+.md-confirm-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.md-rail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4%;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  pointer-events: none;
+  opacity: 0;
+}
+.md-rail.is-in {
+  animation: md-wagons 0.7s cubic-bezier(0.2, 0.8, 0.2, 1.15) forwards;
+}
+.md-wagon {
+  position: relative;
+  width: 88px;
+}
+.md-wagon img {
+  width: 100%;
+  height: auto;
+}
+.md-wagon-load {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 36px !important;
+  transform: translateX(-50%);
+}
+@keyframes md-wagons {
+  to { transform: translateX(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-rail.is-in { animation: none; transform: none; opacity: 1; }
+  .md-play.is-miss .md-stage,
+  .md-balloon.is-fix,
+  .md-balloon.is-ok,
+  .md-balloon.is-next,
+  .md-dots i.is-pop,
+  .md-listen .is-wait { animation: none; }
+}
+
+/* Recado: mesma sala do Comerciante. Quadro na parede, giz na bandeja. Sem scroll. */
+.nb-board {
+  position: absolute;
+  left: 22%;
+  top: 28%;
+  z-index: 4;
+  width: 56%;
+  height: 34%;
+  display: flex;
+  align-items: center;
+  padding: 18px 22px;
+  background: #163326;
+  border: 10px solid #4a301c;
+  box-shadow: inset 0 0 0 4px #2a1a10, 4px 4px 0 #1a1008;
+  overflow: hidden;
+}
+.nb-template,
+.nb-write,
+.nb-chalk {
+  width: 100%;
+  margin: 0;
+  color: #f3ead2;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  word-spacing: 0.12em;
+}
+.nb-template {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  row-gap: 14px;
+}
+.nb-template .md-tok {
+  margin-right: 0.28em;
+}
+.nb-pegs {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nb-peg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1008;
+  letter-spacing: 0;
+}
+.nb-peg i {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #1a1008;
+  background: #c4b49a;
+}
+.nb-peg.is-on i { background: #6aa84f; }
+.nb-peg.is-off i { background: #c23b22; }
+.nb-peg-pt {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nb-peg-pt strong {
+  font-weight: 700;
+}
+.nb-peg-gloss {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #3a2a18;
+}
+.nb-peg-en {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 2px solid #1a1008;
+  border-radius: 6px;
+  background: #fff8e4;
+  color: #1a1008;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.nb-peg-en:disabled { opacity: 0.6; cursor: default; }
+.nb-gap {
+  width: calc(var(--nb-ch, 8) * 0.62em);
+  min-width: 4.5rem;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 4px 12px;
+  border: none;
+  border-bottom: 3px dashed #f3ead2;
+  background: rgba(8, 20, 14, 0.35);
+  color: #ffe566;
+  font: inherit;
+  letter-spacing: 0;
+  word-spacing: 0.18em;
+  outline: none;
+}
+.nb-gap.is-focus {
+  border-bottom-style: solid;
+  box-shadow: 0 0 0 2px #ffe566;
+}
+.nb-write {
+  height: 100%;
+  resize: none;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+.nb-line {
+  margin: 0;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  word-spacing: 0.2em;
+  line-height: 1.55;
+}
+.nb-fix-line { margin-top: 10px; }
+.nb-bad {
+  color: #f3b4a8;
+  text-decoration: line-through;
+  text-decoration-color: #c23b22;
+  text-decoration-thickness: 3px;
+}
+.nb-good {
+  color: #ffe566;
+  font-weight: 700;
+}
+.nb-tray {
+  left: 14%;
+  top: 72%;
+  width: 66%;
+  height: auto;
+  min-height: 120px;
+  flex-wrap: wrap;
+  align-content: center;
+  overflow: hidden;
+}
+.nb-chip {
+  min-height: 40px;
+  padding: 6px 12px;
+  background: #e8d2a0;
+  border: 3px solid #1a1008;
+  border-radius: 6px;
+  color: #1a1008;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  word-spacing: 0;
+  cursor: grab;
+}
+.nb-chip:hover { filter: brightness(1.06); }

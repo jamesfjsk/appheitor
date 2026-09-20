@@ -1,0 +1,709 @@
+{
+ "items": [
+  {
+   "file": "tunnel/skel-run.png",
+   "reference": "char/miner-ref.png",
+   "width": 64,
+   "height": 64,
+   "direction": "east",
+   "guidance_scale": 6,
+   "seed": 61,
+   "calls": [
+    [
+     {
+      "NOSE": [
+       38,
+       13
+      ],
+      "RIGHT EYE": [
+       40,
+       12
+      ],
+      "LEFT EYE": [
+       36,
+       12
+      ],
+      "RIGHT EAR": [
+       41,
+       14
+      ],
+      "LEFT EAR": [
+       34,
+       14
+      ],
+      "NECK": [
+       34,
+       22
+      ],
+      "RIGHT SHOULDER": [
+       37,
+       25
+      ],
+      "LEFT SHOULDER": [
+       31,
+       25
+      ],
+      "RIGHT ELBOW": [
+       30,
+       31
+      ],
+      "RIGHT ARM": [
+       27,
+       36
+      ],
+      "LEFT ELBOW": [
+       39,
+       30
+      ],
+      "LEFT ARM": [
+       44,
+       33
+      ],
+      "RIGHT HIP": [
+       34,
+       40
+      ],
+      "LEFT HIP": [
+       31,
+       40
+      ],
+      "RIGHT KNEE": [
+       42,
+       47
+      ],
+      "RIGHT LEG": [
+       46,
+       56
+      ],
+      "LEFT KNEE": [
+       26,
+       49
+      ],
+      "LEFT LEG": [
+       20,
+       57
+      ]
+     },
+     {
+      "NOSE": [
+       37,
+       11
+      ],
+      "RIGHT EYE": [
+       39,
+       10
+      ],
+      "LEFT EYE": [
+       35,
+       10
+      ],
+      "RIGHT EAR": [
+       40,
+       12
+      ],
+      "LEFT EAR": [
+       33,
+       12
+      ],
+      "NECK": [
+       33,
+       20
+      ],
+      "RIGHT SHOULDER": [
+       36,
+       23
+      ],
+      "LEFT SHOULDER": [
+       30,
+       23
+      ],
+      "RIGHT ELBOW": [
+       38,
+       30
+      ],
+      "RIGHT ARM": [
+       41,
+       35
+      ],
+      "LEFT ELBOW": [
+       27,
+       30
+      ],
+      "LEFT ARM": [
+       25,
+       35
+      ],
+      "RIGHT HIP": [
+       33,
+       38
+      ],
+      "LEFT HIP": [
+       31,
+       38
+      ],
+      "RIGHT KNEE": [
+       35,
+       46
+      ],
+      "RIGHT LEG": [
+       33,
+       55
+      ],
+      "LEFT KNEE": [
+       30,
+       47
+      ],
+      "LEFT LEG": [
+       31,
+       56
+      ]
+     },
+     {
+      "NOSE": [
+       38,
+       13
+      ],
+      "RIGHT EYE": [
+       40,
+       12
+      ],
+      "LEFT EYE": [
+       36,
+       12
+      ],
+      "RIGHT EAR": [
+       41,
+       14
+      ],
+      "LEFT EAR": [
+       34,
+       14
+      ],
+      "NECK": [
+       34,
+       22
+      ],
+      "RIGHT SHOULDER": [
+       37,
+       25
+      ],
+      "LEFT SHOULDER": [
+       31,
+       25
+      ],
+      "RIGHT ELBOW": [
+       39,
+       30
+      ],
+      "RIGHT ARM": [
+       44,
+       33
+      ],
+      "LEFT ELBOW": [
+       29,
+       31
+      ],
+      "LEFT ARM": [
+       26,
+       36
+      ],
+      "RIGHT HIP": [
+       34,
+       40
+      ],
+      "LEFT HIP": [
+       31,
+       40
+      ],
+      "RIGHT KNEE": [
+       27,
+       49
+      ],
+      "RIGHT LEG": [
+       21,
+       57
+      ],
+      "LEFT KNEE": [
+       42,
+       47
+      ],
+      "LEFT LEG": [
+       46,
+       56
+      ]
+     }
+    ]
+   ]
+  },
+  {
+   "file": "tunnel/skel-hit.png",
+   "reference": "char/miner-ref.png",
+   "width": 64,
+   "height": 64,
+   "direction": "east",
+   "guidance_scale": 6,
+   "seed": 62,
+   "calls": [
+    [
+     {
+      "NOSE": [
+       35,
+       13
+      ],
+      "RIGHT EYE": [
+       37,
+       12
+      ],
+      "LEFT EYE": [
+       33,
+       12
+      ],
+      "RIGHT EAR": [
+       38,
+       14
+      ],
+      "LEFT EAR": [
+       31,
+       14
+      ],
+      "NECK": [
+       32,
+       22
+      ],
+      "RIGHT SHOULDER": [
+       35,
+       25
+      ],
+      "LEFT SHOULDER": [
+       29,
+       25
+      ],
+      "RIGHT ELBOW": [
+       38,
+       32
+      ],
+      "RIGHT ARM": [
+       40,
+       38
+      ],
+      "LEFT ELBOW": [
+       26,
+       32
+      ],
+      "LEFT ARM": [
+       24,
+       38
+      ],
+      "RIGHT HIP": [
+       34,
+       40
+      ],
+      "LEFT HIP": [
+       30,
+       40
+      ],
+      "RIGHT KNEE": [
+       35,
+       49
+      ],
+      "RIGHT LEG": [
+       35,
+       58
+      ],
+      "LEFT KNEE": [
+       29,
+       49
+      ],
+      "LEFT LEG": [
+       29,
+       58
+      ]
+     },
+     {
+      "NOSE": [
+       30,
+       14
+      ],
+      "RIGHT EYE": [
+       32,
+       13
+      ],
+      "LEFT EYE": [
+       28,
+       13
+      ],
+      "RIGHT EAR": [
+       33,
+       15
+      ],
+      "LEFT EAR": [
+       26,
+       15
+      ],
+      "NECK": [
+       29,
+       23
+      ],
+      "RIGHT SHOULDER": [
+       32,
+       26
+      ],
+      "LEFT SHOULDER": [
+       26,
+       26
+      ],
+      "RIGHT ELBOW": [
+       34,
+       32
+      ],
+      "RIGHT ARM": [
+       32,
+       29
+      ],
+      "LEFT ELBOW": [
+       23,
+       33
+      ],
+      "LEFT ARM": [
+       21,
+       39
+      ],
+      "RIGHT HIP": [
+       33,
+       41
+      ],
+      "LEFT HIP": [
+       29,
+       41
+      ],
+      "RIGHT KNEE": [
+       35,
+       50
+      ],
+      "RIGHT LEG": [
+       36,
+       58
+      ],
+      "LEFT KNEE": [
+       29,
+       50
+      ],
+      "LEFT LEG": [
+       28,
+       58
+      ]
+     },
+     {
+      "NOSE": [
+       35,
+       13
+      ],
+      "RIGHT EYE": [
+       37,
+       12
+      ],
+      "LEFT EYE": [
+       33,
+       12
+      ],
+      "RIGHT EAR": [
+       38,
+       14
+      ],
+      "LEFT EAR": [
+       31,
+       14
+      ],
+      "NECK": [
+       32,
+       22
+      ],
+      "RIGHT SHOULDER": [
+       35,
+       25
+      ],
+      "LEFT SHOULDER": [
+       29,
+       25
+      ],
+      "RIGHT ELBOW": [
+       38,
+       32
+      ],
+      "RIGHT ARM": [
+       40,
+       38
+      ],
+      "LEFT ELBOW": [
+       26,
+       32
+      ],
+      "LEFT ARM": [
+       24,
+       38
+      ],
+      "RIGHT HIP": [
+       34,
+       40
+      ],
+      "LEFT HIP": [
+       30,
+       40
+      ],
+      "RIGHT KNEE": [
+       35,
+       49
+      ],
+      "RIGHT LEG": [
+       35,
+       58
+      ],
+      "LEFT KNEE": [
+       29,
+       49
+      ],
+      "LEFT LEG": [
+       29,
+       58
+      ]
+     }
+    ]
+   ]
+  },
+  {
+   "file": "tunnel/skel-fall.png",
+   "reference": "char/miner-ref.png",
+   "width": 64,
+   "height": 64,
+   "direction": "east",
+   "guidance_scale": 6,
+   "seed": 63,
+   "calls": [
+    [
+     {
+      "NOSE": [
+       36,
+       22
+      ],
+      "RIGHT EYE": [
+       38,
+       21
+      ],
+      "LEFT EYE": [
+       34,
+       21
+      ],
+      "RIGHT EAR": [
+       39,
+       23
+      ],
+      "LEFT EAR": [
+       32,
+       23
+      ],
+      "NECK": [
+       33,
+       31
+      ],
+      "RIGHT SHOULDER": [
+       36,
+       33
+      ],
+      "LEFT SHOULDER": [
+       30,
+       33
+      ],
+      "RIGHT ELBOW": [
+       40,
+       39
+      ],
+      "RIGHT ARM": [
+       42,
+       45
+      ],
+      "LEFT ELBOW": [
+       26,
+       39
+      ],
+      "LEFT ARM": [
+       24,
+       45
+      ],
+      "RIGHT HIP": [
+       34,
+       46
+      ],
+      "LEFT HIP": [
+       30,
+       46
+      ],
+      "RIGHT KNEE": [
+       40,
+       52
+      ],
+      "RIGHT LEG": [
+       38,
+       58
+      ],
+      "LEFT KNEE": [
+       26,
+       52
+      ],
+      "LEFT LEG": [
+       28,
+       58
+      ]
+     },
+     {
+      "NOSE": [
+       34,
+       34
+      ],
+      "RIGHT EYE": [
+       36,
+       33
+      ],
+      "LEFT EYE": [
+       32,
+       33
+      ],
+      "RIGHT EAR": [
+       37,
+       35
+      ],
+      "LEFT EAR": [
+       30,
+       35
+      ],
+      "NECK": [
+       31,
+       42
+      ],
+      "RIGHT SHOULDER": [
+       34,
+       44
+      ],
+      "LEFT SHOULDER": [
+       28,
+       44
+      ],
+      "RIGHT ELBOW": [
+       38,
+       49
+      ],
+      "RIGHT ARM": [
+       42,
+       52
+      ],
+      "LEFT ELBOW": [
+       24,
+       49
+      ],
+      "LEFT ARM": [
+       20,
+       52
+      ],
+      "RIGHT HIP": [
+       32,
+       54
+      ],
+      "LEFT HIP": [
+       30,
+       54
+      ],
+      "RIGHT KNEE": [
+       42,
+       52
+      ],
+      "RIGHT LEG": [
+       48,
+       58
+      ],
+      "LEFT KNEE": [
+       22,
+       52
+      ],
+      "LEFT LEG": [
+       16,
+       58
+      ]
+     },
+     {
+      "NOSE": [
+       12,
+       50
+      ],
+      "RIGHT EYE": [
+       13,
+       48
+      ],
+      "LEFT EYE": [
+       11,
+       48
+      ],
+      "RIGHT EAR": [
+       10,
+       50
+      ],
+      "LEFT EAR": [
+       14,
+       50
+      ],
+      "NECK": [
+       19,
+       53
+      ],
+      "RIGHT SHOULDER": [
+       21,
+       51
+      ],
+      "LEFT SHOULDER": [
+       21,
+       55
+      ],
+      "RIGHT ELBOW": [
+       26,
+       49
+      ],
+      "RIGHT ARM": [
+       31,
+       48
+      ],
+      "LEFT ELBOW": [
+       26,
+       57
+      ],
+      "LEFT ARM": [
+       31,
+       58
+      ],
+      "RIGHT HIP": [
+       36,
+       53
+      ],
+      "LEFT HIP": [
+       36,
+       56
+      ],
+      "RIGHT KNEE": [
+       45,
+       52
+      ],
+      "RIGHT LEG": [
+       54,
+       52
+      ],
+      "LEFT KNEE": [
+       45,
+       56
+      ],
+      "LEFT LEG": [
+       54,
+       57
+      ]
+     }
+    ]
+   ]
+  }
+ ]
+}

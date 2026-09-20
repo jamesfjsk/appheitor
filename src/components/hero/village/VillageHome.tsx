@@ -803,7 +803,7 @@ const VillageHome: React.FC<Props> = ({
             setGoalPreset({ title, targetGold: gold, rewardId });
             if ((buildings.cofre || 0) < 1) {
               setLot('cofre');
-              toast('Construa o Cofre para guardar essa meta');
+              toast('Constrói o Cofre. Aí o gold tem onde esperar.');
               return;
             }
             setLot(null);
@@ -843,7 +843,7 @@ const VillageHome: React.FC<Props> = ({
             if ((buildings.cofre || 0) < 1) {
               setDistrict(null);
               setLot('cofre');
-              toast('Construa o Cofre para guardar essa meta');
+              toast('Constrói o Cofre. Aí o gold tem onde esperar.');
               return;
             }
             setDistrict('bank');

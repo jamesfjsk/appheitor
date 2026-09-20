@@ -1,6 +1,6 @@
 import type { EconomySettings, GoalDoc } from '../../types/village';
 import { DEFAULT_ECONOMY } from '../../config/village';
-import { isoWeekOf } from '../../utils/clock';
+import { addDays, isoWeekOf, weekdayOf } from '../../utils/clock';
 import type { GoldTransaction } from '../../types';
 
 export type DepositFail = 'amount' | 'gold' | 'closed' | 'target';
@@ -25,57 +25,114 @@ export interface InterestLine {
 }
 
 export function vaultGoalCap(vaultLevel: number): number {
-  if (vaultLevel >= 2) return 2;
-  if (vaultLevel >= 1) return 1;
+  if (vaultLevel >= 2) return 8;
+  if (vaultLevel >= 1) return 5;
+  return 0;
+}
+
+/** Paciência por nível do Cofre: n1 10%, n2 20%, n3 30%. Sem teto semanal. */
+export function vaultInterestPct(level: number): number {
+  if (level >= 3) return 30;
+  if (level >= 2) return 20;
+  if (level >= 1) return 10;
   return 0;
 }
 
 export function weeklyInterest(
   goals: Array<Pick<GoalDoc, 'id' | 'status' | 'savedGold' | 'lastInterestWeek'>>,
   weekIso: string,
-  settings: Pick<EconomySettings, 'interestRatePct' | 'interestCapGold'> = DEFAULT_ECONOMY,
+  _settings: Pick<EconomySettings, 'interestRatePct' | 'interestCapGold'> = DEFAULT_ECONOMY,
   vaultLevel?: number,
   depositedThisWeek: Record<string, number> = {},
 ): InterestLine[] {
-  if (typeof vaultLevel === 'number' && vaultLevel < 2) return [];
-  const rate = Math.max(0, settings.interestRatePct ?? 5) / 100;
-  const cap = Math.max(0, settings.interestCapGold ?? 20);
+  const ratePct = typeof vaultLevel === 'number' ? vaultInterestPct(vaultLevel) : vaultInterestPct(1);
+  if (ratePct <= 0) return [];
+  const rate = ratePct / 100;
   const eligible = goals.filter(
     (g) => g.status === 'open' && g.lastInterestWeek !== weekIso && (g.savedGold || 0) > 0
   );
-  const raw = eligible.map((g) => {
-    const deposited = Math.max(0, Math.floor(depositedThisWeek[g.id] || 0));
-    const savedBefore = Math.max(0, Math.floor(g.savedGold) - deposited);
-    return { goalId: g.id, savedBefore, interest: Math.floor(savedBefore * rate) };
-  }).filter((r) => r.savedBefore > 0);
-  const total = raw.reduce((s, r) => s + r.interest, 0);
-  const scaled =
-    total <= cap
-      ? raw
-      : raw.map((r) => ({
-          ...r,
-          interest: total === 0 ? 0 : Math.floor((r.interest * cap) / total),
-        }));
-  const paid = scaled.reduce((s, r) => s + r.interest, 0);
-  if (paid < cap && total > cap) {
-    let rest = cap - paid;
-    const order = [...scaled].sort((a, b) => b.savedBefore - a.savedBefore);
-    for (const row of order) {
-      if (rest <= 0) break;
-      const hit = scaled.find((s) => s.goalId === row.goalId);
-      if (!hit) continue;
-      hit.interest += 1;
-      rest -= 1;
-    }
-  }
-  return scaled
-    .filter((r) => r.interest > 0)
+  return eligible
+    .map((g) => {
+      const deposited = Math.max(0, Math.floor(depositedThisWeek[g.id] || 0));
+      const savedBefore = Math.max(0, Math.floor(g.savedGold) - deposited);
+      return { goalId: g.id, savedBefore, interest: Math.floor(savedBefore * rate) };
+    })
+    .filter((r) => r.savedBefore > 0 && r.interest > 0)
     .map((r) => ({
       goalId: r.goalId,
       interest: r.interest,
       savedBefore: r.savedBefore,
       savedAfter: r.savedBefore + r.interest,
     }));
+}
+
+/** Bônus se o gold ficar N semanas aplicadas (gold inteiro, sem teto). */
+export function patienceForecast(saved: number, weeks: number, ratePct: number): number {
+  const n = Math.max(0, Math.floor(weeks));
+  let pile = Math.max(0, Math.floor(saved));
+  if (n <= 0 || pile <= 0) return 0;
+  const rate = Math.max(0, ratePct) / 100;
+  if (rate <= 0) return 0;
+  let bonus = 0;
+  for (let i = 0; i < n; i++) {
+    const add = Math.floor(pile * rate);
+    if (add <= 0) break;
+    bonus += add;
+    pile += add;
+  }
+  return bonus;
+}
+
+/** Menor montinho que paga 1 gold numa semana. */
+export function minGoldForBonus(ratePct: number): number {
+  const rate = Math.max(0, ratePct) / 100;
+  if (rate <= 0) return 0;
+  return Math.ceil(1 / rate);
+}
+
+const WEEKDAY = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'] as const;
+const MONTH = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'] as const;
+
+export function unlockOnAfter(today: string, weeks: number, previous?: string | null): string {
+  const n = Math.max(1, Math.floor(weeks));
+  const next = addDays(today, n * 7);
+  if (previous && /^\d{4}-\d{2}-\d{2}$/.test(previous) && previous > next) return previous;
+  return next;
+}
+
+export function canRedeemPile(
+  goal: { status: string; savedGold: number; unlockOn?: string },
+  today: string,
+): boolean {
+  if (goal.status !== 'open') return false;
+  if ((goal.savedGold || 0) <= 0) return false;
+  if (!goal.unlockOn) return true;
+  return today >= goal.unlockOn;
+}
+
+export function redeemWaitLine(unlockOn: string, today: string): string {
+  if (today >= unlockOn) return 'Já pode resgatar. O gold volta pro bolso.';
+  return `Ainda rendendo. ${saqueWhen(unlockOn, today)}`;
+}
+
+/** Dia do saque, sem boletim. Sem prazo = já pode. */
+export function saqueLine(unlockOn: string | undefined, today: string): string {
+  if (!unlockOn || today >= unlockOn) return 'Já pode resgatar.';
+  return saqueWhen(unlockOn, today);
+}
+
+function saqueWhen(unlockOn: string, today: string): string {
+  const days = Math.round(
+    (Date.parse(`${unlockOn}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86400000,
+  );
+  if (days <= 7) {
+    const w = weekdayOf(unlockOn);
+    const prep = w === 0 || w === 6 ? 'no' : 'na';
+    return `Saque ${prep} ${WEEKDAY[w]}.`;
+  }
+  const d = Number(unlockOn.slice(8, 10));
+  const m = Number(unlockOn.slice(5, 7)) - 1;
+  return `Saque ${d} de ${MONTH[m]}.`;
 }
 
 export interface WeeklyStatement {

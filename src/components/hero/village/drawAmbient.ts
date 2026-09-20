@@ -402,6 +402,7 @@ export function paintSkyLife(
   reduced: boolean,
   _inSky?: (x: number, y: number) => boolean,
 ) {
+  void _inSky;
   if (night) return;
   const pace = reduced ? 0.45 : 1;
   withSoft(ctx, () => {

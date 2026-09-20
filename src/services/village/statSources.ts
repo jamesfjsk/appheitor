@@ -9,7 +9,7 @@ export const STAT_SOURCES: Record<string, { where: string }> = {
   perfectWeeks: { where: 'dailyRulesService.closeDay' },
   noPunishDays: { where: 'dailyRulesService.closeDay' },
   quizStreak: { where: 'dailyQuizService.completeDailyQuiz' },
-  reflections: { where: 'dailyQuizService.saveReflection' },
+  reflections: { where: 'dailyQuizService.completeDailyQuiz' },
   quizzesDone: { where: 'dailyQuizService.completeDailyQuiz' },
   quizScore: { where: 'dailyQuizService.completeDailyQuiz' },
   quizPerfect: { where: 'dailyQuizService.completeDailyQuiz' },

@@ -101,6 +101,8 @@ test('forgeMaterial e noteMaterial', () => {
   expect(forgeMaterial(3)).toBe(2);
   expect(forgeMaterial(2)).toBe(0);
   expect(noteMaterial(3)).toBe(3);
+  expect(noteMaterial(2)).toBe(2);
+  expect(noteMaterial(1)).toBe(0);
   expect(noteMaterial(0)).toBe(0);
   expect(noteMaterial(7)).toBe(3);
 });

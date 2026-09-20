@@ -77,10 +77,10 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 ### 7. Cofre (Vault): a poupança (Etapa 2)
 
 - **Para que serve**: guardar gold para algo grande e aprender paciência.
-- **Nível 1**: abre o **Cofrinho** com 1 meta e **5%** de paciência.
-- **Nível 2**: 2 metas e **8%** de bônus de paciência (juros semanais com teto).
-- **Nível 3**: **12%** de paciência, faixa **prêmio da temporada** e o Extrato mensal. **Decisão do pai em 17/09: o nível 3 fica trancado até a Etapa 3** (o cartão mostra "Abre na Etapa 3", botão desabilitado, sem custo cobrado), porque a faixa e o Extrato mensal ainda não existem.
-- **Ao tocar**: nível 0 = Construir; nível 1+ abre o Cofrinho.
+- **Nível 1**: abre o **Cofrinho**. Até **5 montinhos** ao mesmo tempo: cada Aplicar (10, 20, 30, 40 ou 50) vira um, com o gold, o + por semana e o dia do saque. **10 gold** aplicados rendem **+1** por semana.
+- **Nível 2**: até **8 montinhos**. Os mesmos 10 gold rendem **+2** por semana.
+- **Nível 3**: os mesmos 10 gold rendem **+3** por semana, faixa **prêmio da temporada** e o Extrato mensal. **Decisão do pai em 17/09: o nível 3 fica trancado até a Etapa 3** (o cartão mostra "Abre na Etapa 3", botão desabilitado, sem custo cobrado), porque a faixa e o Extrato mensal ainda não existem. **Decisão 27 (19/09): sem teto semanal de paciência; taxa por nível 10/20/30.**
+- **Ao tocar**: nível 0 = Construir; nível 1+ abre o Cofrinho. No Cofrinho: aplicar um valor redondo, esperar o prazo daquele montinho, **Resgatar** nele (volta pro bolso). Dias diferentes não se misturam.
 - **Visual**: `buildings/cofre-1..3.png`.
 - Precisa do Armazém nível 1.
 

@@ -1,7 +1,25 @@
 import { expect, run, test } from './harness';
 import type { MerchantStep } from '../../../types/english';
 import { MERCHANT_CATALOGS, MERCHANT_ITEMS, MERCHANT_SPOTS } from '../../../config/englishBase';
-import { buildMerchantContent, buildMerchantRoom, evaluateRoom, gapped, offlineSentences, roomSizeFor, stepsFor } from '../merchantRoom';
+import { buildMerchantContent, buildMerchantRoom, CONTRAST_OF, evaluateRoom, gapped, lessonRelations, merchantKey, merchantLevelFromSkill, merchantStepKey, offlineSentences, roomSizeFor, stepsFor } from '../merchantRoom';
+
+test('nível do Comerciante sobe pelo desempenho, nunca no chute', () => {
+  expect(merchantLevelFromSkill(0, 0)).toBe(1);
+  expect(merchantLevelFromSkill(2, 2)).toBe(1);
+  expect(merchantLevelFromSkill(3, 3)).toBe(2);
+  expect(merchantLevelFromSkill(7, 4)).toBe(2);
+  expect(merchantLevelFromSkill(7, 5)).toBe(3);
+});
+
+test('pedido já usado não volta; quantidade muda depois de duas entregas', () => {
+  const first = buildMerchantRoom(9, 1);
+  const key = merchantStepKey(first.steps[0]);
+  const next = buildMerchantRoom(9, 1, undefined, undefined, { done: 3, avoidSteps: [key] });
+  expect(next.steps.some((s) => merchantStepKey(s) === key)).toBeFalsy();
+  expect(next.items.length).toBe(first.items.length + 1);
+  const later = buildMerchantRoom(21, 1, undefined, undefined, { done: 2 });
+  expect(later.steps[0].qty).toBe(2);
+});
 
 test('sala válida em 1000 sementes por nível (invariantes da seção 4.2)', () => {
   for (const level of [1, 2, 3]) {
@@ -35,6 +53,29 @@ test('sala válida em 1000 sementes por nível (invariantes da seção 4.2)', ()
       if (distractor.stock < 1 || distractor.stock > 3) fail('estoque do distrator');
     }
   }
+});
+
+test('lição: n1 só in/on e a mesma regra nos dois pedidos; n2/n3 contrapõem no último', () => {
+  for (let seed = 1; seed <= 400; seed++) {
+    const a = buildMerchantRoom(seed, 1);
+    expect(a.steps).toHaveLength(2);
+    expect(a.steps[0].qty).toBe(1);
+    expect(a.steps.every((s) => lessonRelations(1).includes(s.relation))).toBeTruthy();
+    expect(a.steps[0].relation).toBe(a.steps[1].relation);
+    expect(a.steps[0].item).not.toBe(a.steps[1].item);
+    expect(a.steps[0].spot).not.toBe(a.steps[1].spot);
+    const b = buildMerchantRoom(seed, 2);
+    expect(b.steps).toHaveLength(3);
+    expect(b.steps[0].relation).toBe(b.steps[1].relation);
+    expect(b.steps[2].relation).toBe(CONTRAST_OF[b.steps[0].relation]);
+    const c = buildMerchantRoom(seed, 3);
+    expect(c.steps).toHaveLength(4);
+    expect(c.steps.slice(0, 3).every((s) => s.relation === c.steps[0].relation)).toBeTruthy();
+    expect(c.steps[3].relation).toBe(CONTRAST_OF[c.steps[0].relation]);
+  }
+  const k1 = merchantKey(buildMerchantRoom(11, 1).steps);
+  const k2 = merchantKey(buildMerchantRoom(12, 1).steps);
+  expect(k1).not.toBe(k2);
 });
 
 test('mesma semente, mesma sala; sementes diferentes variam', () => {

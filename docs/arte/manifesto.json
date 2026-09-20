@@ -873,6 +873,30 @@
       }
     },
     {
+      "file": "ui/panel-mesa.png",
+      "kind": "item",
+      "endpoint": "create_ui_asset",
+      "body": {
+        "description": "Empty Minecraft-style wooden UI window, thick oak plank frame, honey-brown plank fill, iron nails, no text"
+      }
+    },
+    {
+      "file": "ui/papiro-rolo.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "side view wooden scroll rod, long horizontal oak cylinder with knobs, pixel art, transparent background"
+      }
+    },
+    {
+      "file": "ui/papiro-folha.png",
+      "kind": "item",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "aged papyrus fiber texture, cream tan ochre stains, no ruled lines, no text"
+      }
+    },
+    {
       "file": "merchant/spot-door.png",
       "kind": "building",
       "endpoint": "generate-image-pixflux",
@@ -1245,6 +1269,70 @@
           "width": 64,
           "height": 64
         }
+      }
+    },
+    {
+      "file": "tunnel/bat-base.png",
+      "kind": "character",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a round purple cave bat with big ears, small fangs and a tiny wooden sign hanging from its feet, pixel art game enemy sprite, side view facing left, clean black outline, soft shading, transparent background, warm cozy mine palette, cute and comical, not scary",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "view": "side",
+        "direction": "west",
+        "seed": 31,
+        "negative_description": "text, watermark, scary, blood, extra limbs"
+      }
+    },
+    {
+      "file": "tunnel/golem-base.png",
+      "kind": "character",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a small golem made of rough grey stone boulders stacked together, mossy patches, glowing orange cracks between the stones, a wooden sign hanging on its chest, no metal, no armor, no robot parts, pixel art game enemy sprite, side view facing left, clean black outline, soft shading, transparent background, warm cozy mine palette, cute and comical like a children's cartoon, not scary",
+        "image_size": {
+          "width": 80,
+          "height": 80
+        },
+        "view": "side",
+        "direction": "west",
+        "seed": 42,
+        "negative_description": "text, watermark, scary, extra limbs"
+      }
+    },
+    {
+      "file": "tunnel/spider-base.png",
+      "kind": "character",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a chubby round cave spider with big friendly cartoon eyes and short stubby legs, carrying two small glowing red crystal gems on its back like a backpack, no blood, no splatter, pixel art game enemy sprite, side view facing left, clean black outline, soft shading, transparent background, warm cozy mine palette, cute and comical like a children's cartoon, not scary",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "view": "side",
+        "direction": "west",
+        "seed": 43,
+        "negative_description": "text, watermark, scary, blood, realistic"
+      }
+    },
+    {
+      "file": "tunnel/mole-boss.png",
+      "kind": "character",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "a giant chubby cartoon mole with brown fur, a big pink snout, tiny squinting eyes, huge pink digging claws, wearing a yellow miner helmet with a lamp, three wooden signs strapped to its back, pixel art game enemy sprite, side view facing left, clean black outline, soft shading, transparent background, warm cozy mine palette, cute and comical like a children's cartoon, not scary",
+        "image_size": {
+          "width": 128,
+          "height": 128
+        },
+        "view": "side",
+        "direction": "west",
+        "seed": 44,
+        "negative_description": "text, watermark, scary, blood"
       }
     }
   ]

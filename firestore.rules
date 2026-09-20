@@ -362,10 +362,19 @@ service cloud.firestore {
           && request.resource.data.savedGold == 0
         )
       );
-      allow update: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['savedGold', 'lastInterestWeek', 'interestPaid', 'status', 'cancelReason', 'updatedAt'])
-        && request.resource.data.savedGold >= resource.data.savedGold
-        && (request.resource.data.status == resource.data.status || request.resource.data.status == 'cancel_requested'));
+      allow update: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid && (
+        (
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['savedGold', 'lastInterestWeek', 'interestPaid', 'status', 'cancelReason', 'updatedAt', 'unlockOn', 'lockWeeks'])
+          && request.resource.data.savedGold >= resource.data.savedGold
+          && (request.resource.data.status == resource.data.status || request.resource.data.status == 'cancel_requested')
+        )
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt', 'updatedAt'])
+          && resource.data.status in ['open', 'cancel_requested']
+          && request.resource.data.status == 'cancelled'
+        )
+      ));
       allow delete: if isAdmin();
     }
 

@@ -25,7 +25,18 @@ type Payload = {
   temperature?: number;
   withUsage?: boolean;
   voice?: string;
+  speed?: number;
+  instructions?: string;
 };
+
+const TTS_INSTRUCTIONS =
+  'fale devagar e com clareza, tom acolhedor, para uma criança de 10 anos aprendendo inglês, pausa curta entre as palavras';
+const TTS_SPEED_DEFAULT = 0.9;
+const TTS_SPEED_SLOW = 0.75;
+
+function ttsSpeedOf(n: unknown): number {
+  return n === TTS_SPEED_SLOW ? TTS_SPEED_SLOW : TTS_SPEED_DEFAULT;
+}
 
 function addDays(date: string, n: number): string {
   const t = Date.parse(`${date}T12:00:00.000-03:00`) + n * 86400000;
@@ -162,6 +173,7 @@ export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, asyn
   if (!text.trim()) throw new HttpsError('invalid-argument', 'Texto vazio para a voz.');
   if (text.length > TTS_MAX_CHARS) throw new HttpsError('invalid-argument', `A voz aceita no máximo ${TTS_MAX_CHARS} caracteres.`);
   const ttsModel = TTS_MODELS.has(body.model || '') ? (body.model as string) : 'gpt-4o-mini-tts';
+  const ttsSpeed = ttsSpeedOf(body.speed);
   await bumpUsage(ttsModel, 0, 0, 0, text.length);
   const speech = await fetch('https://api.openai.com/v1/audio/speech', {
     method: 'POST',
@@ -169,7 +181,8 @@ export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, asyn
     body: JSON.stringify({
       model: ttsModel,
       voice: body.voice || 'nova',
-      speed: 0.95,
+      speed: ttsSpeed,
+      instructions: TTS_INSTRUCTIONS,
       input: text,
       response_format: 'mp3',
     }),
@@ -179,7 +192,7 @@ export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, asyn
     throw new HttpsError('internal', `OpenAI TTS ${speech.status}: ${detail.slice(0, 180)}`);
   }
   const buf = Buffer.from(await speech.arrayBuffer());
-  const hash = createHash('sha256').update(`${ttsModel}|${body.voice || 'nova'}|0.95|${text}`).digest('hex');
+  const hash = createHash('sha256').update(`${ttsModel}|${body.voice || 'nova'}|${ttsSpeed}|${TTS_INSTRUCTIONS}|${text}`).digest('hex');
   const path = `english/tts/${hash}.mp3`;
   const file = getStorage().bucket().file(path);
   await file.save(buf, { contentType: 'audio/mpeg', metadata: { cacheControl: 'public, max-age=31536000, immutable' } });

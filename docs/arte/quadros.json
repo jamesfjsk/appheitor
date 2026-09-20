@@ -1,0 +1,85 @@
+{
+  "hero": {
+    "ref": "public/assets/village/char/miner-ref.png",
+    "desc": "yellow hard hat with headlamp, black hair, blue shirt, brown pants, brown boots, wooden pickaxe resting on the right shoulder",
+    "cell": 64,
+    "actions": {
+      "idle": [
+        "standing at rest facing right, relaxed, pickaxe on the shoulder, chest slightly up as he breathes in",
+        "standing at rest facing right, chest slightly down as he breathes out, eyes half closed in a blink",
+        "standing at rest facing right, relaxed, glancing a little further to the right",
+        "standing at rest facing right, weight shifted onto the back foot, pickaxe on the shoulder"
+      ],
+      "attack": [
+        "wind-up: both hands on the pickaxe raised high behind his head, knees bent, facing right",
+        "pickaxe held straight up overhead, body stretched tall, about to strike",
+        "mid-swing: pickaxe coming down in front of him with a curved orange motion streak, body leaning forward",
+        "impact: pickaxe hitting low in front of him at ground level, small dust puff, body crouched forward",
+        "follow-through: pickaxe low in front, body recovering, one foot forward",
+        "back to guard: pickaxe returning to the right shoulder, standing"
+      ],
+      "special": [
+        "crouching low, gathering power, pickaxe held out to the side, small sparks",
+        "spinning with the pickaxe held straight out horizontally, seen mid-spin from the side, circular orange streak around him",
+        "spinning, seen from the back mid-turn, the pickaxe streak continuing around him",
+        "jumping up with the pickaxe raised, feet off the ground",
+        "landing in a crouch with a dust puff around the boots",
+        "victory pose standing, pickaxe raised in one hand, big smile"
+      ]
+    }
+  },
+  "bat": {
+    "ref": "public/assets/village/tunnel/bat-base.png",
+    "desc": "round purple cave bat with big ears, small fangs, yellow eyes and a tiny wooden sign hanging from its feet, facing left",
+    "cell": 64,
+    "actions": {
+      "fly": [
+        "flying to the left, wings raised high above the body",
+        "flying to the left, wings level, the little sign swinging slightly",
+        "flying to the left, wings flapped down below the body, clean solid purple wings, crisp outline, no speckles, no dust",
+        "flying to the left, wings level, body bobbing a bit higher"
+      ],
+      "attack": [
+        "diving forward to the left with fangs showing and wings swept back",
+        "biting: mouth wide open at the front, wings tight, sign trailing behind",
+        "pulling back up after the bite, wings wide"
+      ],
+      "hit": [
+        "knocked backwards to the right, eyes squeezed shut, wings crumpled",
+        "dazed with tiny stars, wobbling in the air"
+      ],
+      "fall": [
+        "tumbling upside down in the air, wings flailing, sign flying off",
+        "falling towards the ground on its back",
+        "lying flat on its back on the ground, wings spread, tongue out, tiny stars, cartoon defeat"
+      ]
+    }
+  },
+  "spider": {
+    "ref": "public/assets/village/tunnel/spider-base.png",
+    "desc": "chubby round cave spider with big friendly cartoon eyes, short stubby legs and two glowing red crystal gems on its back, facing left",
+    "cell": 64,
+    "actions": {
+      "walk": [
+        "walking to the left, front legs forward, back legs back",
+        "walking to the left, legs together under the body",
+        "walking to the left, front legs back, back legs forward",
+        "walking to the left, body bobbing slightly up"
+      ],
+      "attack": [
+        "crouching low, legs bent, about to pounce to the left",
+        "leaping forward to the left in the air, legs spread, mouth open",
+        "landing after the pounce, legs splayed"
+      ],
+      "hit": [
+        "knocked back to the right, eyes squeezed shut, legs curled",
+        "dazed, tiny stars over the head, wobbling"
+      ],
+      "fall": [
+        "flipping over in the air, legs flailing",
+        "landing on its back",
+        "lying on its back with legs curled up in the air, tiny stars, cartoon defeat"
+      ]
+    }
+  }
+}

@@ -65,12 +65,13 @@ export interface JudgePromptInput {
   text: string;
 }
 
-export const PROMPT_MAX_TOKENS: Record<ContractType | 'judge', number> = {
+export const PROMPT_MAX_TOKENS: Record<ContractType | 'judge' | 'explain', number> = {
   merchant: 400,
   letter: 1500,
   note: 700,
   forge: 1800,
-  judge: 500,
+  judge: 700,
+  explain: 280,
 };
 
 /** Quantos itens de cada tipo a Ferraria pede; alvo de ordem = só scramble */
@@ -223,24 +224,24 @@ function notePrompt(input: NotePromptInput): BuiltPrompt {
   const lv = levelFor(input.level);
   const [sMin, sMax] = lv.noteSentences;
   const sentences = sMin === sMax ? `${sMin}` : `${sMin}-${sMax}`;
-  const system = commonSystem(lv, 'You create a short writing task: the learner writes a note in English from a brief in Portuguese.');
+  const system = commonSystem(lv, 'You create a short writing task: the learner writes a real-life note in English from a brief in Portuguese. The note always teaches two things: the English of the level, and one home/school/football habit (homework first, ask politely, help at home, wait, say sorry, tell the truth). Never a mine shopping list (no torches, swords, pickaxes, caves, tunnels).');
   const user = [
     commonUser(input),
     'The brief is in Portuguese and asks the learner to write a note with exactly 3 pieces of information:',
     bullet(lv.noteInfoKinds.map((k, i) => `info ${i + 1}: ${k}`)),
     'Rules:',
     bullet([
-      '"brief": 1-2 sentences in Portuguese, natural, e.g. "Peça ao ferreiro 2 espadas e diga que são para a caverna." It mentions ONLY the 3 infos (no extra items, numbers or details) and never gives the English words.',
-      '"mustInclude": the 3 infos in the same order as the brief; "pt" is how a hint would describe it in Portuguese ("2 espadas"); "en" lists 3-5 accepted English variants of the SAME info, each 2-5 words: the first one is the exact phrase copied from the model answer, the others are short wordings a child would type ("two swords", "2 swords", "two sword"); for a recipient, place or reason include the preposition or connector ("for the dog", "to the dog", "in the cave", "because it is dark")',
-      `"model": a correct answer with ${sentences} sentences, each at most ${lv.maxWords} words, that contains WORD BY WORD one "en" variant of each info; the validator checks this literally, so if the model says "for the mine team" that exact phrase must be one of the variants`,
-      '"wordBank": 10-14 English words in base form: every content word of the model (nouns in singular, verbs, adjectives, prepositions) plus 3 distractor content words; no number words (one, two...), no digits, no a/an/the, no pronouns, no capital letters',
+      '"brief": 1-2 sentences in Portuguese, natural, e.g. "Escreva um recado para o papai. Diga que você faz a lição primeiro. Depois você joga bola." It mentions ONLY the 3 infos and never gives the English words. The note is to dad, mom, a friend, a teacher, or himself — never to the blacksmith.',
+      '"mustInclude": the 3 infos in the same order as the brief; "pt" is how a hint would describe it in Portuguese ("faço a lição"); "en" lists 3-5 accepted English variants of the SAME info, each 2-5 words: the first one is the exact phrase copied from the model answer, the others are short wordings a child would type ("my homework", "the homework", "homework first"); for a reason or deal include the connector ("because dinner is first", "for mom")',
+      `"model": a correct answer with ${sentences} sentences, each at most ${lv.maxWords} words, that contains WORD BY WORD one "en" variant of each info; the validator checks this literally, so if the model says "because dinner is first" that exact phrase must be one of the variants`,
+      '"wordBank": 10-14 English words in base form: every content word of the model (nouns in singular, verbs, adjectives, prepositions) plus 3 distractor content words from home/school/football; no number words (one, two...), no digits, no a/an/the, no pronouns, no capital letters, no mine words (torch, sword, pickaxe, cave, tunnel, miner)',
       lv.level === 3
-        ? '"hint": one line in Portuguese describing the structure to use (e.g. "Frase 1: o que está acontecendo; frase 2: quantidade; frase 3: para quê")'
+        ? '"hint": one line in Portuguese describing the structure to use (e.g. "Frase 1: o que está acontecendo agora; frase 2: to + verbo; frase 3: must")'
         : '"hint": empty string ""',
       'no forbidden grammar anywhere, including the model',
     ]),
     'Schema:',
-    '{ "brief": "...", "mustInclude": [{ "pt": "2 espadas", "en": ["two swords", "2 swords"] }, { "pt": "...", "en": ["..."] }, { "pt": "...", "en": ["..."] }], "wordBank": ["need", "sword", "..."], "model": "I need two swords. They are for the cave.", "hint": "" }',
+    '{ "brief": "...", "mustInclude": [{ "pt": "faço a lição", "en": ["my homework", "the homework"] }, { "pt": "...", "en": ["..."] }, { "pt": "...", "en": ["..."] }], "wordBank": ["do", "homework", "..."], "model": "I do my homework first. Then I play soccer.", "hint": "" }',
   ].join('\n\n');
   return { system, user, maxTokens: PROMPT_MAX_TOKENS.note };
 }
@@ -314,7 +315,7 @@ export const NOTE_ERROR_TAGS = ['plural', 'article', 'verb', 'spelling', 'word_o
 export function buildJudgePrompt(input: JudgePromptInput): BuiltPrompt {
   const lv = levelFor(input.level);
   const system = [
-    'You are an English teacher correcting a note written by a 10-year-old Brazilian beginner. Be precise, fair and brief.',
+    'You are the Capataz of the Vila teaching a 10-year-old Brazilian beginner (Heitor). The recado is a life note (homework, soccer, plate, please) — never a mine shopping list.',
     'Reply with ONE JSON object only, no markdown.',
     levelCard(lv),
     'Correction rules:',
@@ -327,7 +328,8 @@ export function buildJudgePrompt(input: JudgePromptInput): BuiltPrompt {
       'use "verb" for a missing or wrong verb, "word_order" for order that changes the meaning, "spelling" for a misspelled English word, "other" only for a Portuguese word or a wrong word that breaks the sentence (it counts as a serious error; never use it for style)',
       '"missing": the "pt" of each required info that is absent from the learner text (empty array when all are present)',
       '"corrected": the learner text with the MINIMAL edits that fix the listed errors; keep the learner wording and word order whenever it is acceptable; do not rewrite it as the model',
-      '"note": one line in Portuguese with the rule behind the main error (e.g. "Depois de two o substantivo vai para o plural: two swords."); never praise; empty string when there are no errors',
+      '"note": 2 or 3 short Portuguese sentences about the MAIN error in THIS recado. Teach the meaning using the brief. Quote a bit of what he wrote. Give the English of that piece only. Never repeat the full model. Never say "faltou dizer" or "informações". Never praise. Never a generic dictionary line that could fit any recado. Empty string when there are no errors.',
+      '"lessons": one object per required info. "pt" matches the info. "say" is one Portuguese sentence: if he got it, confirm the meaning in this recado; if missing or wrong, explain THIS meaning and THIS English. Never copy the model sentence.',
       '"isEnglish": false only when the text is not an attempt to write English (Portuguese, gibberish or empty)',
     ]),
   ].join('\n\n');
@@ -340,7 +342,33 @@ export function buildJudgePrompt(input: JudgePromptInput): BuiltPrompt {
     input.template ? `Template shown on screen: ${input.template}` : 'No template was shown.',
     `Learner text:\n"""\n${input.text}\n"""`,
     'Schema:',
-    '{ "isEnglish": true, "errors": [{ "wrong": "two sword", "fix": "two swords", "tag": "plural" }], "missing": [], "corrected": "...", "note": "..." }',
+    '{ "isEnglish": true, "errors": [{ "wrong": "I play soccer first", "fix": "I do my homework first", "tag": "word_order" }], "missing": ["faço a lição"], "corrected": "...", "note": "...", "lessons": [{ "pt": "faço a lição", "say": "..." }] }',
   ].join('\n\n');
   return { system, user, maxTokens: PROMPT_MAX_TOKENS.judge };
+}
+
+/** Primeira falta: gera a fala do Capataz para ESTE recado e ESTE pedaço. */
+export function buildExplainPrompt(input: JudgePromptInput & { missing: { pt: string; en: string[] }[] }): BuiltPrompt {
+  const first = input.missing[0];
+  const system = [
+    'You are the Capataz of the Vila. A 10-year-old Brazilian just missed a recado (a life note in English).',
+    'Reply with ONE JSON object only, no markdown.',
+    'Write the spoken correction in Portuguese: 2 or 3 short sentences. Voice of a game NPC, not a dashboard, not a dictionary.',
+    bullet([
+      'Say what the FIRST missing piece MEANS in THIS recado (use the brief).',
+      'Quote a bit of what he wrote and say why that does not carry that meaning.',
+      'Give the English of THAT piece only — never the full model sentence.',
+      'Never say "faltou dizer", "requisitos", "informações obrigatórias".',
+      'Never praise. Never emoji. Never a line that could fit any other recado.',
+    ]),
+  ].join('\n\n');
+  const user = [
+    `Brief: ${input.brief}`,
+    `Missing pieces: ${input.missing.map((m) => `${m.pt} → ${m.en.join(' / ')}`).join('; ')}`,
+    `First piece to teach: ${first ? `${first.pt} → ${first.en.join(' / ')}` : 'none'}`,
+    `Model (do not repeat it): ${input.model}`,
+    `What he wrote:\n"""\n${input.text}\n"""`,
+    'Schema: { "say": "...", "hear": "English clip of the missing piece only" }',
+  ].join('\n\n');
+  return { system, user, maxTokens: PROMPT_MAX_TOKENS.explain };
 }

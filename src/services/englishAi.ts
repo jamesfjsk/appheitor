@@ -23,7 +23,7 @@ import type {
 } from '../types/english';
 import { CONTRACT_MATERIAL, MERCHANT_CATALOGS } from '../config/englishBase';
 import { FORGE_TAG_TARGETS, LETTER_GENRES, levelFor } from '../config/englishLevels';
-import { buildMerchantRoom, offlineSentences } from './english/merchantRoom';
+import { buildMerchantRoom, merchantKey, merchantLevelFromSkill, merchantStepKey, offlineSentences } from './english/merchantRoom';
 import { normalize } from './english/notePrecheck';
 import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
@@ -44,7 +44,7 @@ const RECENT_NAMES_DAYS = 7;
 const RECENT_TAG_PLANS = 5;
 const TAG_MIN_COUNT = 2;
 /** Reserva não repete conteúdo usado neste período */
-const OFFLINE_REPEAT_DAYS = 14;
+const OFFLINE_REPEAT_DAYS = 30;
 /** Lemas conhecidos que entram no prompt (os mais vistos primeiro) */
 const VOCAB_PROMPT_MAX = 80;
 const YESTERDAY_MISTAKES = 2;
@@ -68,8 +68,10 @@ export interface GenerateInput {
   themeRequest?: string | null;
   /** Carta: gênero escolhido por buildDailyContracts (sem repetir os 2 últimos); sem ele, sorteio pela semente */
   genre?: LetterGenre;
-  /** Reserva: chaves (offlineKey) dos contratos recentes, para não repetir em 14 dias */
+  /** Reserva: chaves (offlineKey) dos contratos recentes, para não repetir */
   avoidOffline?: string[];
+  merchantDone?: number;
+  avoidMerchantSteps?: string[];
 }
 
 export interface GeneratedContract {
@@ -216,14 +218,14 @@ const EMERGENCY: Record<OfflineType, unknown> = {
       'Olá, amigo! Eu sou Bram, o velho minerador. Eu moro ao lado da caverna. Minha caverna é escura e fria. Eu tenho duas espadas e um mapa, mas preciso de uma tocha. Há três morcegos na caverna. Você pode me dar uma tocha? Obrigado, meu amigo.',
   },
   note: {
-    brief: 'Peça ao ferreiro duas espadas e uma tocha. Diga que são para a caverna.',
+    brief: 'Escreva um recado para o papai. Diga que você faz a lição primeiro. Depois você joga bola.',
     mustInclude: [
-      { pt: '2 espadas', en: ['two swords', '2 swords', 'two sword'] },
-      { pt: '1 tocha', en: ['one torch', 'a torch', '1 torch'] },
-      { pt: 'para a caverna', en: ['for the cave', 'in the cave'] },
+      { pt: 'faço a lição', en: ['my homework', 'the homework', 'do my homework'] },
+      { pt: 'primeiro', en: ['homework first', 'do first', 'first'] },
+      { pt: 'jogo bola', en: ['play soccer', 'play football', 'I play soccer'] },
     ],
-    wordBank: ['need', 'sword', 'torch', 'cave', 'for', 'they', 'are', 'have', 'want', 'map', 'book', 'give'],
-    model: 'I need two swords and one torch. They are for the cave.',
+    wordBank: ['do', 'homework', 'first', 'then', 'play', 'soccer', 'want', 'need', 'ball', 'dinner', 'book', 'help'],
+    model: 'I do my homework first. Then I play soccer.',
     hint: '',
   },
   forge: {
@@ -284,7 +286,7 @@ function bankCandidates(type: OfflineType, level: number, seed: number, avoidKey
 export function offlineKey(type: ContractType, content: Contract['content']): string {
   switch (type) {
     case 'merchant':
-      return '';
+      return merchantKey((content as MerchantContent).steps);
     case 'letter': {
       const c = content as LetterContent;
       return normalize(`${c.title} ${c.sender}`);
@@ -322,7 +324,15 @@ function offlineFor<T extends Contract['content']>(
 
 async function generateMerchant(input: GenerateInput): Promise<Generated<MerchantContent>> {
   const lv = levelFor(input.level);
-  const room = buildMerchantRoom(input.seed, lv.level);
+  const avoid = new Set(input.avoidOffline ?? []);
+  const banned = new Set((input.avoidMerchantSteps ?? []).map((k) => k.toLowerCase()));
+  const roomOpts = { done: input.merchantDone ?? 0, avoidSteps: [...banned] };
+  const clashes = (room: ReturnType<typeof buildMerchantRoom>): boolean =>
+    avoid.has(merchantKey(room.steps)) || room.steps.some((s) => banned.has(merchantStepKey(s)));
+  let room = buildMerchantRoom(input.seed, lv.level, MERCHANT_CATALOGS.spots, MERCHANT_CATALOGS.items, roomOpts);
+  for (let i = 1; i < 24 && clashes(room); i++) {
+    room = buildMerchantRoom(mixSeed(input.seed, `fresh${i}`), lv.level, MERCHANT_CATALOGS.spots, MERCHANT_CATALOGS.items, roomOpts);
+  }
   const offline = offlineSentences(room.steps, MERCHANT_CATALOGS, room.items);
   const fallback = validateMerchant({ ...room, sentences: offline.sentences, translation: offline.translations }, lv.level);
   if (!isAIConfigured()) return { content: fallback.content, source: 'offline', problems: fallback.problems };
@@ -479,6 +489,8 @@ export interface DayContext {
   forgeTarget: ForgeTarget;
   retryItems: ForgeItem[];
   avoidOffline: string[];
+  merchantDone: number;
+  avoidMerchantSteps: string[];
   /** Pedido da Mesa aplicado a este dia (só para datas depois de hoje) */
   themeRequest: string | null;
 }
@@ -544,7 +556,8 @@ function letterContextOf(contract: Contract | null): { names: string[]; items: s
 
 /** Escolhas do dia: temas, gênero da Carta, alvo da Ferraria, 5º contrato, vocabulário e nomes a evitar */
 export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' | 'base' | 'recentPlans'>): DayContext {
-  const lv = levelFor(ctx.level);
+  const playLevel = Math.max(ctx.level, merchantLevelFromSkill(ctx.base.merchantDone, ctx.base.merchantPerfect));
+  const lv = levelFor(playLevel);
   const daySeed = seedFromString(`${ctx.uid}|${ctx.date}`);
   const rng = createRng(mixSeed(daySeed, 'day'));
   const recent = ctx.recentPlans.filter((p) => p.date < ctx.date).sort((a, b) => b.date.localeCompare(a.date));
@@ -582,6 +595,11 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
       .flatMap((p) => Object.values(p.contracts).map((c) => offlineKey(c.type, c.content)))
       .filter(Boolean)
   );
+  const avoidMerchantSteps = unique(
+    contractsOf(recent, 'merchant').flatMap((c) =>
+      c.type === 'merchant' ? c.content.steps.map((s) => merchantStepKey(s)) : []
+    )
+  );
 
   // O 5º contrato alterna por paridade do dia: segundo Comerciante ou segunda Carta com outro tema
   const fifth: DaySpec = dayIndex % 2 === 0 ? { id: 'c5', type: 'merchant', theme: secondTheme } : { id: 'c5', type: 'letter', theme: secondTheme, genre: genre2 };
@@ -601,6 +619,8 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
     forgeTarget,
     retryItems: yesterdayMistakes(recent, ctx.date),
     avoidOffline,
+    merchantDone: ctx.base.merchantDone,
+    avoidMerchantSteps,
     themeRequest,
   };
 }
@@ -653,6 +673,8 @@ function inputFor(day: DayContext, spec: DaySpec, date: string, seed: number, ex
     themeRequest: day.themeRequest,
     genre: spec.genre,
     avoidOffline: day.avoidOffline,
+    merchantDone: day.merchantDone,
+    avoidMerchantSteps: day.avoidMerchantSteps,
     ...extra,
   };
 }

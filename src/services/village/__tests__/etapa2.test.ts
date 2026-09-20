@@ -2,7 +2,8 @@ import { expect, run, test } from '../../english/__tests__/harness';
 import { addDays, isBeforeLaunch, nowBrazil, resetClockForTests } from '../../../utils/clock';
 import type { GoldTransaction } from '../../../types';
 import type { AgendaItem, ChallengeDoc, GoalDoc } from '../../../types/village';
-import { validateDeposit, vaultGoalCap, weeklyInterest, weeklyStatement, savingsRate } from '../bank';
+import { DEFAULT_ECONOMY } from '../../../config/village';
+import { validateDeposit, vaultGoalCap, weeklyInterest, weeklyStatement, savingsRate, patienceForecast, minGoldForBonus, vaultInterestPct, unlockOnAfter, canRedeemPile, redeemWaitLine, saqueLine } from '../bank';
 import { applyEvent, challengeState, extendForPunishment } from '../challenges';
 import { daysToAfford, priceForDays, referenceIncome, sinceLaunch } from '../income';
 import { txsLastDays, balancaTotals } from '../balance';
@@ -68,37 +69,72 @@ test('depósito válido e recusa quando falta gold', () => {
   expect(fail.ok ? '' : fail.reason).toBe('gold');
 });
 
-test('juros 5% com teto e ignora semana já paga; virada de ano', () => {
+test('juros 10/20/30 sem teto e ignora semana já paga; virada de ano', () => {
   const week = '2026-W01';
   const a = goal({ id: 'a', savedGold: 200, lastInterestWeek: '2025-W52' });
   const b = goal({ id: 'b', savedGold: 200, lastInterestWeek: '2025-W52' });
-  const paid = weeklyInterest([a, b], week, { interestRatePct: 5, interestCapGold: 20 });
+  const paid = weeklyInterest([a, b], week, DEFAULT_ECONOMY, 2);
   const sum = paid.reduce((s, p) => s + p.interest, 0);
-  expect(sum).toBe(20);
+  expect(sum).toBe(80);
   expect(paid[0].savedBefore).toBe(200);
   const again = weeklyInterest(
     paid.map((p) => ({ id: p.goalId, status: 'open' as const, savedGold: p.savedAfter, lastInterestWeek: week })),
     week,
-    { interestRatePct: 5, interestCapGold: 20 }
+    DEFAULT_ECONOMY,
+    2,
   );
   expect(again).toHaveLength(0);
 });
 
-test('juros do Cofre: nível 1 não paga bônus; nível 2 usa 5% de settings/economy', () => {
+test('juros do Cofre: n1 10%, n2 20%, n3 30%; n0 não paga', () => {
   expect(vaultGoalCap(0)).toBe(0);
-  expect(vaultGoalCap(1)).toBe(1);
-  expect(vaultGoalCap(2)).toBe(2);
+  expect(vaultGoalCap(1)).toBe(5);
+  expect(vaultGoalCap(2)).toBe(8);
+  expect(vaultInterestPct(0)).toBe(0);
+  expect(vaultInterestPct(1)).toBe(10);
+  expect(vaultInterestPct(2)).toBe(20);
+  expect(vaultInterestPct(3)).toBe(30);
   const week = '2026-W02';
   const g = goal({ savedGold: 100, lastInterestWeek: '2026-W01' });
-  expect(weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 0)).toHaveLength(0);
-  expect(weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 1)).toHaveLength(0);
-  const n2 = weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 2);
-  expect(n2[0].interest).toBe(5);
-  const n3 = weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 3);
-  expect(n3[0].interest).toBe(5);
-  const afterDeposit = weeklyInterest([g], week, { interestRatePct: 5, interestCapGold: 20 }, 2, { g1: 80 });
+  expect(weeklyInterest([g], week, DEFAULT_ECONOMY, 0)).toHaveLength(0);
+  expect(weeklyInterest([g], week, DEFAULT_ECONOMY, 1)[0].interest).toBe(10);
+  expect(weeklyInterest([g], week, DEFAULT_ECONOMY, 2)[0].interest).toBe(20);
+  expect(weeklyInterest([g], week, DEFAULT_ECONOMY, 3)[0].interest).toBe(30);
+  const afterDeposit = weeklyInterest([g], week, DEFAULT_ECONOMY, 2, { g1: 80 });
   expect(afterDeposit[0].savedBefore).toBe(20);
-  expect(afterDeposit[0].interest).toBe(1);
+  expect(afterDeposit[0].interest).toBe(4);
+});
+
+test('previsão de paciência soma semanas sem teto', () => {
+  expect(patienceForecast(100, 1, 10)).toBe(10);
+  expect(patienceForecast(100, 2, 10)).toBe(21);
+  expect(patienceForecast(400, 1, 10)).toBe(40);
+  expect(patienceForecast(10, 1, 10)).toBe(1);
+  expect(patienceForecast(20, 1, 10)).toBe(2);
+  expect(patienceForecast(30, 1, 10)).toBe(3);
+  expect(patienceForecast(40, 1, 10)).toBe(4);
+  expect(patienceForecast(50, 1, 10)).toBe(5);
+  expect(patienceForecast(10, 4, 10)).toBe(4);
+  expect(patienceForecast(10, 4, 20)).toBe(9);
+  expect(patienceForecast(5, 1, 20)).toBe(1);
+  expect(minGoldForBonus(10)).toBe(10);
+  expect(minGoldForBonus(20)).toBe(5);
+  expect(minGoldForBonus(30)).toBe(4);
+});
+
+test('resgate: prazo de semanas e montinho antigo já pode sair', () => {
+  expect(unlockOnAfter('2026-09-19', 1)).toBe('2026-09-26');
+  expect(unlockOnAfter('2026-09-19', 4)).toBe('2026-10-17');
+  expect(unlockOnAfter('2026-09-19', 1, '2026-10-01')).toBe('2026-10-01');
+  expect(canRedeemPile({ status: 'open', savedGold: 10 }, '2026-09-19')).toBe(true);
+  expect(canRedeemPile({ status: 'open', savedGold: 10, unlockOn: '2026-09-26' }, '2026-09-19')).toBe(false);
+  expect(canRedeemPile({ status: 'open', savedGold: 10, unlockOn: '2026-09-26' }, '2026-09-26')).toBe(true);
+  expect(canRedeemPile({ status: 'cancelled', savedGold: 10 }, '2026-09-19')).toBe(false);
+  expect(redeemWaitLine('2026-09-26', '2026-09-19')).toBe('Ainda rendendo. Saque no sábado.');
+  expect(saqueLine('2026-09-26', '2026-09-19')).toBe('Saque no sábado.');
+  expect(saqueLine('2026-10-17', '2026-09-19')).toBe('Saque 17 de outubro.');
+  expect(saqueLine(undefined, '2026-09-19')).toBe('Já pode resgatar.');
+  expect(saqueLine('2026-09-19', '2026-09-19')).toBe('Já pode resgatar.');
 });
 
 test('extrato da semana e taxa de poupança', () => {

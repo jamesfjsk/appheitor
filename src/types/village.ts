@@ -157,6 +157,8 @@ export interface ModuleSettings {
   tts: boolean;
   aiGeneration: boolean;
   music: boolean;
+  /** Entrega do Comerciante em tela cheia (`MINA_CONTRATOS.md` §3.1). Padrão off até passar no teste. */
+  contractsV2: boolean;
 }
 
 export interface PauseDaysSettings {
@@ -224,6 +226,8 @@ export interface GoalDoc {
   cancelReason?: string;
   lastInterestWeek?: string;
   interestPaid: number;
+  unlockOn?: string;
+  lockWeeks?: number;
   createdAt: string;
   updatedAt: string;
   achievedAt?: string;

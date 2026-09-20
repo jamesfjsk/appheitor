@@ -8,13 +8,15 @@ import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { getTodayBrazil } from '../../utils/clock';
 import { DailyQuiz as DailyQuizDoc } from '../../types';
-import { addDays, completeDailyQuiz, ensureDailyQuiz, quizRewards, saveReflection, subscribeDailyQuiz } from '../../services/dailyQuizService';
+import { addDays, completeDailyQuiz, ensureDailyQuiz, quizRewards, subscribeDailyQuiz } from '../../services/dailyQuizService';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizOpensOnRequest } from '../../services/village/quizGate';
+import { EXPLAIN_READ_MS, LESSON_READ_MS, readingMs, reflectionOk } from '../../services/quiz/provaRules';
+import { ISO_NPC } from '../../config/village';
 
-const BOOK = '/assets/english/ui/book.webp';
 const STAR = '/assets/english/ui/star.webp';
 const GOLD = '/assets/english/ui/gold.webp';
+const PAPIRO_ROLO = '/assets/village/ui/papiro-rolo.png';
 
 interface DailyQuizProps {
   onComplete: () => void;
@@ -24,6 +26,153 @@ interface DailyQuizProps {
 type Phase = 'prompt' | 'lesson' | 'questions' | 'results';
 
 const QUIZ_DONE_KEY = (uid: string, date: string) => `quiz_completed_${uid}_${date}`;
+
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setReduced(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+  return reduced;
+}
+
+function useReadWait(text: string, min: number, max: number, active: boolean) {
+  const ms = readingMs(text || 'x', min, max);
+  const reduced = useReducedMotion();
+  const [p, setP] = useState(active ? 0 : 1);
+  const [ready, setReady] = useState(!active);
+
+  useEffect(() => {
+    if (!active) {
+      setReady(true);
+      setP(1);
+      return;
+    }
+    setReady(false);
+    setP(0);
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / ms);
+      setP(t);
+      if (t >= 1) {
+        setReady(true);
+        setP(1);
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [text, ms, active, reduced]);
+
+  return { p, ready, reduced };
+}
+
+const PapyrusUnroll: React.FC<{ open: number; children: React.ReactNode }> = ({ open, children }) => {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [full, setFull] = useState(160);
+
+  useEffect(() => {
+    const el = pageRef.current;
+    if (!el) return;
+    const sync = () => setFull(el.scrollHeight);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [children]);
+
+  const t = Math.min(1, Math.max(0, open));
+  const sliver = 120;
+  const h = Math.round(sliver + (Math.max(full, sliver) - sliver) * t);
+
+  return (
+    <div className={`mn-papiro ${t >= 0.995 ? 'is-open' : ''}`}>
+      <img src={PAPIRO_ROLO} alt="" className="mn-papiro-rod-img mc-pixel" draggable={false} />
+      <div className="mn-papiro-well" style={t >= 0.995 ? undefined : { height: h, flex: 'none' }}>
+        <div className="mn-papiro-page" ref={pageRef}>
+          {children}
+        </div>
+      </div>
+      <img src={PAPIRO_ROLO} alt="" className="mn-papiro-rod-img is-foot mc-pixel" draggable={false} />
+    </div>
+  );
+};
+
+const SageOnPaper: React.FC<{ kicker: string; step?: string }> = ({ kicker, step }) => (
+  <div className="mn-papiro-head">
+    <img src={ISO_NPC.sabio} alt="" className="mn-papiro-face mc-pixel" draggable={false} />
+    <div className="mn-papiro-head-say">
+      <p className="mn-papiro-who">Sábio</p>
+      <p className="mn-papiro-kicker-line">{kicker}</p>
+    </div>
+    {step && <p className="mc-num mn-papiro-step">{step}</p>}
+  </div>
+);
+
+const ReadWaitButton: React.FC<{
+  text?: string;
+  min?: number;
+  max?: number;
+  active?: boolean;
+  clock?: { p: number; ready: boolean; reduced: boolean };
+  disabled?: boolean;
+  className?: string;
+  onFire: () => void;
+  children: React.ReactNode;
+}> = ({ text = '', min = 0, max = 0, active = true, clock, disabled, className, onFire, children }) => {
+  const own = useReadWait(text, min, max, Boolean(active) && !clock);
+  const p = clock?.p ?? own.p;
+  const ready = clock?.ready ?? own.ready;
+  const reduced = clock?.reduced ?? own.reduced;
+
+  const locked = disabled || !ready;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.shiftKey) return;
+      if (e.target instanceof HTMLTextAreaElement) return;
+      if (locked) return;
+      e.preventDefault();
+      onFire();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [locked, onFire]);
+
+  const dash = reduced ? 0 : Math.max(0, 100 - p * 100);
+
+  return (
+    <button
+      type="button"
+      disabled={locked}
+      onClick={() => { if (!locked) onFire(); }}
+      className={`mc-btn mc-btn-read ${ready ? (className || 'mc-btn-green') : 'is-wait mc-btn-stone'} ${className?.includes('w-full') ? 'w-full' : ''} min-h-[44px] px-6`}
+    >
+      <span className="mc-read-ring" aria-hidden>
+        <svg viewBox="0 0 200 48" preserveAspectRatio="none">
+          <rect className="mc-read-track" x="3" y="3" width="194" height="42" rx="6" />
+          <rect
+            className="mc-read-fill"
+            x="3"
+            y="3"
+            width="194"
+            height="42"
+            rx="6"
+            pathLength={100}
+            strokeDasharray="100"
+            strokeDashoffset={dash}
+          />
+        </svg>
+      </span>
+      <span className="relative">{children}</span>
+    </button>
+  );
+};
 
 const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const { childUid } = useAuth();
@@ -48,16 +197,24 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const [score, setScore] = useState(0);
   const [reward, setReward] = useState({ xp: 0, gold: 0 });
   const [reflection, setReflection] = useState('');
-  const [reflectionSaved, setReflectionSaved] = useState(false);
+  const [paid, setPaid] = useState(false);
   const [saving, setSaving] = useState(false);
   const prefetched = useRef(false);
+  const stepLock = useRef(false);
+
+  const lessonText = [quiz?.theme.lesson, quiz?.theme.whyItMatters, quiz?.theme.curiosity].filter(Boolean).join(' ');
+  const lessonWait = useReadWait(
+    lessonText,
+    LESSON_READ_MS.min,
+    LESSON_READ_MS.max,
+    Boolean(enabled && open && quiz && phase === 'lesson'),
+  );
 
   useEffect(() => {
     setMusicDuck('quiz', open);
     return () => setMusicDuck('quiz', false);
   }, [open, setMusicDuck]);
 
-  // Acompanha o documento do dia
   useEffect(() => {
     if (!childUid || !enabled) return;
     const unsub = subscribeDailyQuiz(childUid, today, (q) => {
@@ -67,7 +224,6 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
     return unsub;
   }, [childUid, today, enabled]);
 
-  // Garante a prova de hoje (e prepara a de amanhã em segundo plano)
   const prepare = useCallback(async () => {
     if (!childUid) return;
     setGenerating(true);
@@ -77,7 +233,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
       setQuiz(q);
     } catch (e) {
       console.error('DailyQuiz: erro ao preparar a prova', e);
-      setError('Não consegui preparar a prova de hoje. Tente novamente.');
+      setError('A mesa ainda está vazia. Tenta de novo.');
     } finally {
       setGenerating(false);
     }
@@ -87,7 +243,6 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
     if (!loaded || !childUid || !enabled || prefetched.current) return;
     prefetched.current = true;
     if (!quiz || (quiz.questions.length === 0 && !quiz.completed)) void prepare();
-    // amanhã, sem esperar
     ensureDailyQuiz(childUid, addDays(today, 1), today, count).catch((e) => console.warn('DailyQuiz: prefetch de amanhã falhou', e));
   }, [loaded, childUid, enabled, quiz, prepare, today, count]);
 
@@ -104,14 +259,18 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   const ready = Boolean(quiz && quiz.questions.length > 0 && !quiz.completed);
   const question = quiz?.questions[current];
   const isLast = quiz ? current === quiz.questions.length - 1 : false;
+  const canLeavePrompt = Boolean(quiz?.completed || !required || !ready);
+  const canClose = Boolean(quiz?.completed && (phase === 'prompt' || paid));
+
+  const postpone = () => {
+    playClick();
+    setOpen(false);
+    if (!quiz?.completed) setPhase('prompt');
+  };
 
   const start = () => {
     playClick();
     setPhase('lesson');
-  };
-
-  const postpone = () => {
-    setOpen(false);
   };
 
   const choose = (option: string) => {
@@ -121,249 +280,268 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
     else playError();
   };
 
-  const next = async () => {
-    if (!quiz || !question || !selected) return;
+  const goNext = () => {
+    if (!quiz || !question || !selected || stepLock.current) return;
+    stepLock.current = true;
+    playClick();
     const nextAnswers = [...answers, selected];
     setAnswers(nextAnswers);
     if (!isLast) {
       setCurrent(current + 1);
       setSelected(null);
+      stepLock.current = false;
       return;
     }
-    await finish(nextAnswers);
+    const correct = nextAnswers.filter((a, i) => quiz.questions[i] && a === quiz.questions[i].answer).length;
+    setScore(correct);
+    setReward(quizRewards(correct, quiz.questions.length, economy));
+    setPhase('results');
   };
 
-  const finish = async (finalAnswers: string[]) => {
-    if (!quiz || !childUid) return;
+  const conclude = async () => {
+    if (!quiz || !childUid || paid || saving || !reflectionOk(reflection)) return;
     setSaving(true);
     try {
+      const finalAnswers = answers;
       const correct = finalAnswers.filter((a, i) => quiz.questions[i] && a === quiz.questions[i].answer).length;
       const total = quiz.questions.length;
       const r = quizRewards(correct, total, economy);
       setScore(correct);
       setReward(r);
-
-      await completeDailyQuiz(childUid, today, { score: correct, totalQuestions: total, xpEarned: r.xp, goldEarned: r.gold, answers: finalAnswers });
+      await completeDailyQuiz(childUid, today, {
+        score: correct,
+        totalQuestions: total,
+        xpEarned: r.xp,
+        goldEarned: r.gold,
+        answers: finalAnswers,
+        reflection,
+      });
       await FirestoreService.payQuizRewards(childUid, today, r.xp, r.gold);
       if (correct / total >= 0.75) playLevelUp();
       else playTaskComplete();
-      setPhase('results');
+      setPaid(true);
       localStorage.setItem(QUIZ_DONE_KEY(childUid, today), '1');
       onComplete();
     } catch (e) {
       console.error('DailyQuiz: erro ao salvar resultado', e);
-      toast.error('Erro ao salvar o resultado do quiz');
+      toast.error('A mesa não gravou. Tenta de novo.');
     } finally {
       setSaving(false);
     }
   };
 
-  const sendReflection = async () => {
-    if (!childUid || !reflection.trim()) return;
-    setSaving(true);
-    try {
-      await saveReflection(childUid, today, reflection);
-      setReflectionSaved(true);
-      toast.success('Resposta enviada!');
-    } catch (e) {
-      console.error('DailyQuiz: erro ao salvar reflexão', e);
-      toast.error('Não deu para enviar. Tente de novo.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (canClose || (phase === 'prompt' && canLeavePrompt)) postpone();
+        return;
+      }
+      if (e.key !== 'Enter' || e.shiftKey) return;
+      if (e.target instanceof HTMLTextAreaElement) return;
+      if (phase === 'prompt' && ready && !quiz?.completed) {
+        e.preventDefault();
+        start();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   if (!enabled || !open || !quiz) return null;
 
+  const explainText = selected && question ? question.explanation : '';
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-        <div className="mc-panel mn-child-sheet rounded-lg w-full max-w-2xl text-white">
-          <div className="p-4 border-b-4 border-[#17130f] flex items-center gap-3 shrink-0">
-            <img src={BOOK} alt="" className="w-10 h-10 mc-pixel shrink-0" draggable={false} />
-            <div className="flex-1 min-w-0">
-              <h2 className="mc-title text-sm">Prova do dia</h2>
-              <p className="text-white/80 text-sm truncate">{quiz.theme.title || 'Preparando o tema de hoje'}</p>
-            </div>
-            {phase === 'questions' && (
-              <span className="mc-num">{current + 1}/{quiz.questions.length}</span>
-            )}
-          </div>
-          {phase === 'questions' && (
-            <div className="px-4 pt-3">
-              <div className="mc-bar">
-                <div className="mc-bar-fill" style={{ width: `${(current / quiz.questions.length) * 100}%` }} />
-              </div>
-            </div>
-          )}
-
-          <div className="mn-child-body p-5">
-            {phase === 'prompt' && (
-              <div className="text-center py-2">
-                {quiz.completed ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 pb-24 sm:p-4 sm:pb-24 mn-veil">
+        <div className="mc-modal mn-prova-sheet is-scroll mc-pop mn-child-sheet w-full max-w-3xl" role="dialog" aria-label="Prova do dia">
+          <div className="mn-child-body">
+            <div className={`mn-prova-scroll-scene ${selected && selected !== question?.answer ? 'mc-shake' : ''} ${selected && selected === question?.answer ? 'mc-pop' : ''}`}>
+              <PapyrusUnroll open={phase === 'lesson' ? lessonWait.p : 1}>
+                {phase === 'prompt' && (
                   <>
-                    <h3 className="text-xl font-bold text-white mb-2">Prova de hoje feita</h3>
-                    <p className="text-white/85 mb-6">
-                      Prova de hoje feita: {quiz.score ?? score} de {quiz.totalQuestions || quiz.questions.length || count}
-                    </p>
-                    <button type="button" onClick={postpone} className="mc-btn mc-btn-stone px-6 py-3 font-bold">
-                      Fechar
-                    </button>
+                    <SageOnPaper kicker="Prova do dia" />
+                    {quiz.completed ? (
+                      <>
+                        <h3 className="mn-papiro-title">A prova de hoje fechou</h3>
+                        <p>{quiz.score ?? score} de {quiz.totalQuestions || quiz.questions.length || count}. O Sábio já leu.</p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="mn-papiro-title">
+                          {required ? 'A prova de hoje ainda espera' : 'A prova de hoje está na Biblioteca'}
+                        </h3>
+                        <p>
+                          {ready
+                            ? 'Uma ideia na mesa e oito perguntas. A Mina abre depois.'
+                            : generating
+                              ? 'O Sábio ainda escreve. Um instante.'
+                              : error ?? 'A mesa ainda está vazia.'}
+                        </p>
+                      </>
+                    )}
                   </>
-                ) : (
+                )}
+
+                {phase === 'lesson' && (
                   <>
-                    <h3 className="text-xl font-bold text-white mb-2">
-                      {required ? 'Hoje tem prova antes de tudo' : 'A prova de hoje está pronta'}
-                    </h3>
-                    <p className="text-white/85 mb-6">
-                      {ready
-                        ? `Uma ideia para pensar e ${quiz.questions.length} perguntas. Cada acerto vale XP e gold.`
-                        : generating
-                          ? 'Preparando a prova de hoje. Leva alguns segundos.'
-                          : error ?? 'Ainda não há prova para hoje.'}
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <button
-                        type="button"
-                        onClick={ready ? start : () => void prepare()}
-                        disabled={generating}
-                        className="mc-btn mc-btn-green px-6 py-3 font-bold"
-                      >
-                        {ready ? 'Começar' : generating ? 'Preparando...' : 'Tentar de novo'}
-                      </button>
-                      {!ready && (
-                        <button type="button" onClick={postpone} className="mc-btn mc-btn-stone px-6 py-3 font-bold">
-                          Voltar à Vila
-                        </button>
-                      )}
-                      {ready && !required && (
-                        <button type="button" onClick={postpone} className="mc-btn mc-btn-stone px-6 py-3 font-bold">
-                          Mais tarde
-                        </button>
+                    <SageOnPaper kicker="Ideia do dia" />
+                    <h3 className="mn-papiro-title">{quiz.theme.title}</h3>
+                    <p>{quiz.theme.lesson}</p>
+                    {quiz.theme.whyItMatters && (
+                      <p className="mn-papiro-why">{quiz.theme.whyItMatters}</p>
+                    )}
+                    {quiz.theme.curiosity && (
+                      <div className="mn-papiro-canto">
+                        <p className="mc-lbl mb-1">No canto da mesa</p>
+                        <p>{quiz.theme.curiosity}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {phase === 'questions' && question && (
+                  <>
+                    <SageOnPaper
+                      kicker={question.kind === 'lesson' ? 'Sobre a ideia' : question.subject}
+                      step={`${current + 1} / ${quiz.questions.length}`}
+                    />
+                    <h3 className="mn-papiro-title">{question.question}</h3>
+                    <div className="mn-prova-opts">
+                      {question.options.map((option, i) => {
+                        const isCorrect = option === question.answer;
+                        const isChosen = option === selected;
+                        let rowClass = 'mn-prova-opt';
+                        if (selected) {
+                          if (isCorrect) rowClass += ' is-right';
+                          else if (isChosen) rowClass += ' is-wrong';
+                          else rowClass += ' is-dim';
+                        }
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => choose(option)}
+                            aria-disabled={Boolean(selected)}
+                            className={rowClass}
+                          >
+                            <span className="mn-prova-opt-letter">{String.fromCharCode(65 + i)}</span>
+                            <span>{option}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selected && (
+                      <div className="mn-papiro-explain">
+                        <p className="mn-papiro-why">{selected === question.answer ? 'Isso.' : 'Não foi dessa vez.'}</p>
+                        <p>{question.explanation}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {phase === 'results' && (
+                  <>
+                    <SageOnPaper kicker="Na mesa" />
+                    <p className="mn-papiro-title">{score} de {quiz.questions.length}</p>
+                    {!paid && <p>Ainda falta contar o que ficou na cabeça.</p>}
+                    {paid && (
+                      <div className="flex gap-3 my-3 mc-pop">
+                        <span className="mc-slot flex items-center gap-1.5 px-3 py-2">
+                          <img src={STAR} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
+                          <span className="text-sm mc-good">+{reward.xp} XP</span>
+                        </span>
+                        <span className="mc-slot flex items-center gap-1.5 px-3 py-2">
+                          <img src={GOLD} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
+                          <span className="text-sm mc-warn">+{reward.gold} GOLD</span>
+                        </span>
+                      </div>
+                    )}
+                    <div className="mn-papiro-canto">
+                      <p className="mc-lbl mb-1">O Sábio pergunta</p>
+                      <p className="mn-papiro-why">{quiz.reflectionPrompt}</p>
+                      {paid ? (
+                        <p className="mt-2">O Sábio leu. A Mina abre.</p>
+                      ) : (
+                        <textarea
+                          value={reflection}
+                          onChange={(e) => setReflection(e.target.value)}
+                          placeholder="Conta com as suas palavras."
+                          rows={4}
+                          className="mn-papiro-write"
+                        />
                       )}
                     </div>
                   </>
                 )}
-              </div>
-            )}
+              </PapyrusUnroll>
+            </div>
+          </div>
 
-            {phase === 'lesson' && (
-              <div>
-                <p className="mc-lbl mb-2">Ideia do dia</p>
-                <h3 className="text-xl font-bold text-white mb-3">{quiz.theme.title}</h3>
-                <div className="mc-paper rounded-lg p-4 text-[#1f1a17]">
-                  <p className="text-lg leading-relaxed whitespace-pre-line">{quiz.theme.lesson}</p>
-                  {quiz.theme.whyItMatters && (
-                    <p className="mt-4 font-semibold">{quiz.theme.whyItMatters}</p>
-                  )}
-                </div>
+          <div className="mn-child-foot">
+            {phase === 'prompt' && quiz.completed && (
+              <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
+                Voltar à Vila
+              </button>
+            )}
+            {phase === 'prompt' && !quiz.completed && (
+              <>
                 <button
                   type="button"
-                  onClick={() => { playClick(); setPhase('questions'); }}
-                  className="mt-6 w-full mc-btn mc-btn-green px-6 py-3 font-bold"
+                  onClick={() => { if (ready) start(); else void prepare(); }}
+                  disabled={generating}
+                  className="mc-btn mc-btn-green min-h-[44px] px-6"
                 >
-                  Ir para as perguntas
+                  {ready ? 'Abrir a mesa' : generating ? 'Escrevendo...' : 'Tentar de novo'}
                 </button>
-              </div>
-            )}
-
-            {phase === 'questions' && question && (
-              <div className="mc-inv rounded-lg p-4">
-                <p className="text-xs mc-muted mb-2">
-                  {question.kind === 'lesson' ? 'Sobre a ideia do dia' : question.subject}
-                </p>
-                <h3 className="text-xl font-bold mb-4">{question.question}</h3>
-                <div className="space-y-2">
-                  {question.options.map((option) => {
-                    const isCorrect = option === question.answer;
-                    const isChosen = option === selected;
-                    let rowClass = 'mc-row rounded p-4 w-full text-left font-medium';
-                    if (selected) {
-                      if (isCorrect) rowClass += ' is-done';
-                      else if (isChosen) rowClass += ' mc-slot-bad';
-                      else rowClass += ' opacity-60';
-                    }
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => choose(option)}
-                        disabled={Boolean(selected)}
-                        className={rowClass}
-                        style={selected && isChosen && !isCorrect ? { borderColor: '#b3261e' } : undefined}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
-                </div>
-                {selected && (
-                  <div className="mc-card rounded p-4 mt-4">
-                    <p className="font-bold mb-1">{selected === question.answer ? 'Isso.' : 'Não foi dessa vez.'}</p>
-                    <p className="text-sm leading-relaxed">{question.explanation}</p>
-                  </div>
+                {canLeavePrompt && (
+                  <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
+                    Voltar à Vila
+                  </button>
                 )}
-              </div>
+              </>
             )}
-
-            {phase === 'results' && (
-              <div className="text-center">
-                <p className="mc-num mb-2" style={{ fontSize: 28 }}>{score} de {quiz.questions.length}</p>
-                <div className="flex justify-center gap-3 mb-4">
-                  <span className="mc-slot flex items-center gap-1.5 px-3 py-2">
-                    <img src={STAR} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
-                    <span className="text-sm mc-good">+{reward.xp} XP</span>
-                  </span>
-                  <span className="mc-slot flex items-center gap-1.5 px-3 py-2">
-                    <img src={GOLD} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
-                    <span className="text-sm mc-warn">+{reward.gold} GOLD</span>
-                  </span>
-                </div>
-
-                <div className="text-left mc-inv rounded-lg p-4 mb-4">
-                  <p className="text-sm font-semibold mc-muted mb-1">Para pensar</p>
-                  <p className="font-bold mb-3">{quiz.reflectionPrompt}</p>
-                  {reflectionSaved ? (
-                    <p className="mc-good font-semibold">Resposta enviada. Seu responsável vai ler.</p>
-                  ) : (
-                    <>
-                      <textarea
-                        value={reflection}
-                        onChange={(e) => setReflection(e.target.value)}
-                        placeholder="Escreva com as suas palavras..."
-                        rows={3}
-                        className="w-full p-3 rounded-md bg-white text-[#1f1a17] border-[3px] border-[#373737] outline-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => void sendReflection()}
-                        disabled={saving || reflection.trim().length < 3}
-                        className="mt-2 mc-btn mc-btn-green px-5 py-2 font-bold"
-                      >
-                        Enviar resposta
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                <button type="button" onClick={() => setOpen(false)} className="mc-btn mc-btn-stone px-6 py-3 font-bold">
-                  Fechar
-                </button>
-              </div>
+            {phase === 'lesson' && (
+              <ReadWaitButton
+                clock={lessonWait}
+                className="mc-btn-green"
+                onFire={() => {
+                  playClick();
+                  setPhase('questions');
+                }}
+              >
+                Começar
+              </ReadWaitButton>
             )}
-          </div>
-          {phase === 'questions' && (
-            <div className="mn-child-foot">
+            {phase === 'questions' && (
+              <ReadWaitButton
+                text={explainText || question?.question || ''}
+                min={EXPLAIN_READ_MS.min}
+                max={EXPLAIN_READ_MS.max}
+                active={Boolean(selected)}
+                disabled={!selected || saving}
+                className="mc-btn-green"
+                onFire={goNext}
+              >
+                {isLast ? 'Ver a nota' : 'Próxima'}
+              </ReadWaitButton>
+            )}
+            {phase === 'results' && (paid ? (
+              <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
+                Voltar à Vila
+              </button>
+            ) : (
               <button
                 type="button"
-                onClick={() => void next()}
-                disabled={!selected || saving}
-                className="w-full mc-btn mc-btn-green px-6 py-3 font-bold"
+                onClick={() => { void conclude(); }}
+                disabled={saving || !reflectionOk(reflection)}
+                className="mc-btn mc-btn-green min-h-[44px] px-6"
               >
-                {saving ? 'Salvando...' : isLast ? 'Ver resultado' : 'Próxima'}
+                {saving ? 'Guardando...' : 'Concluir a prova'}
               </button>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       </div>
     </AnimatePresence>

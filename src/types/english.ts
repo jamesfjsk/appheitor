@@ -164,6 +164,11 @@ export interface NoteError {
   tag: NoteErrorTag;
 }
 
+export interface NoteLesson {
+  pt: string;
+  say: string;
+}
+
 export interface NoteJudgement {
   isEnglish: boolean;
   errors: NoteError[];
@@ -171,8 +176,10 @@ export interface NoteJudgement {
   missing: string[];
   /** Edição mínima do texto da criança */
   corrected: string;
-  /** Regra do erro principal em PT, 1 linha */
+  /** Explicação do professor para ESTE recado e ESTE erro */
   note: string;
+  /** Uma fala por informação do pedido */
+  lessons?: NoteLesson[];
   /** Calculado em código (scoring.noteScore) */
   score: 0 | 1 | 2 | 3;
 }
@@ -233,6 +240,10 @@ export interface BaseDoc {
   /** Lemas vistos (glossário lido, itens do Comerciante, substantivos do Recado) */
   vocab: Record<string, { seen: number; lastDate: string }>;
   contractsDone: number;
+  /** Entregas do Comerciante concluídas (sobe o nível da Mina pelo desempenho) */
+  merchantDone: number;
+  /** Entregas do Comerciante com todos os pedidos de primeira */
+  merchantPerfect: number;
   daysPlayed: number;
   streakDays: number;
   lastPlayedDate: string;

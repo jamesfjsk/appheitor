@@ -282,10 +282,10 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
     }
   };
 
-  /** Palavra em inglês (mp3, ou fala en-US se ela não estiver no banco) */
+  /** Palavra em inglês: mp3 do banco ou voz nova */
   const wordAudio = (word: MineWord): Promise<void> => {
     const ew = wordById.current.get(word.id);
-    return ew ? playWordAsync(ew) : speakAsync(word.word, 'en-US');
+    return ew ? playWordAsync(ew) : speakAsync(word.word);
   };
 
   /** Áudio do pedido: sempre a palavra em inglês (o pai não quis a tradução falada em português) */
@@ -297,7 +297,7 @@ const MineRush: React.FC<Props> = ({ category, progress, onFinish, onQuit }) => 
     if (p.phase === 'announce') return;
     const ew = wordById.current.get(p.word.id);
     if (ew) playWord(ew);
-    else void speakAsync(p.word.word, 'en-US');
+    else void speakAsync(p.word.word);
   };
 
   // ---------- Início: destrava o áudio, monta a corrida e pré-carrega as imagens ----------

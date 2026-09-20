@@ -15,7 +15,7 @@ import { FAMILY_ID } from '../config/rules';
 import { DEFAULT_ECONOMY, DEFAULT_MODULES } from '../config/village';
 import type { EconomySettings, GoalDoc, GoalStatus, ModuleSettings } from '../types/village';
 import { getTodayBrazil, isoWeekOf, nowBrazil } from '../utils/clock';
-import { validateDeposit, vaultGoalCap, weeklyInterest } from './village/bank';
+import { validateDeposit, vaultGoalCap, weeklyInterest, unlockOnAfter, canRedeemPile } from './village/bank';
 import { ensureBase } from './englishBaseService';
 import { capGold } from './village/caps';
 import { getSettings } from './settingsService';
@@ -50,6 +50,8 @@ export function fromGoalDoc(id: string, data: Record<string, unknown>): GoalDoc 
     cancelReason: typeof data.cancelReason === 'string' ? data.cancelReason : undefined,
     lastInterestWeek: typeof data.lastInterestWeek === 'string' ? data.lastInterestWeek : undefined,
     interestPaid: Math.max(0, Number(data.interestPaid) || 0),
+    unlockOn: typeof data.unlockOn === 'string' ? data.unlockOn : undefined,
+    lockWeeks: Number.isInteger(Number(data.lockWeeks)) ? Number(data.lockWeeks) : undefined,
     createdAt: asIso(data.createdAt),
     updatedAt: asIso(data.updatedAt),
     achievedAt: typeof data.achievedAt === 'string' ? data.achievedAt : undefined,
@@ -78,19 +80,16 @@ export async function createGoal(
   uid: string,
   input: { title: string; targetGold: number; rewardId?: string }
 ): Promise<string> {
-  const [economy, modules] = await Promise.all([
-    getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as Promise<EconomySettings>,
-    getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as Promise<ModuleSettings>,
-  ]);
+  const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
   if (modules.bank === false) throw new Error('O Banco da Vila está desligado');
   const villageSnap = await getDoc(doc(db, 'village', uid));
   if (isBroken(cracksOf(villageSnap.data()?.cracks), 'cofre')) throw ruinUseError('cofre');
   const base = await ensureBase(uid);
-  const cap = Math.min(economy.maxOpenGoals ?? 2, vaultGoalCap(base.buildings.cofre || 0));
+  const cap = vaultGoalCap(base.buildings.cofre || 0);
   const open = (await listGoals(uid)).filter((g) => g.status === 'open' || g.status === 'cancel_requested');
   if (cap <= 0) throw new Error('Construa o Cofre para guardar gold.');
   if (open.length >= cap) {
-    throw new Error(cap === 1 ? 'O Cofre nível 1 guarda 1 meta. Melhore o Cofre para a segunda.' : 'Já tem 2 metas abertas. Feche uma antes de criar outra.');
+    throw new Error('O Cofre está cheio. Espera um montinho voltar.');
   }
   const title = input.title.trim().slice(0, 40);
   const targetGold = Math.floor(Number(input.targetGold) || 0);
@@ -114,7 +113,7 @@ export async function createGoal(
   return ref.id;
 }
 
-export async function depositGoal(uid: string, goalId: string, amount: number): Promise<void> {
+export async function depositGoal(uid: string, goalId: string, amount: number, weeks = 1, today = getTodayBrazil()): Promise<void> {
   const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
   if (modules.bank === false) throw new Error('O Banco da Vila está desligado');
   await runTransaction(db, async (tx) => {
@@ -136,9 +135,12 @@ export async function depositGoal(uid: string, goalId: string, amount: number): 
       throw new Error('Valor inválido');
     }
     const after = gold - amount;
+    const unlockOn = unlockOnAfter(today, weeks, goal.unlockOn);
     tx.update(progressRef, { availableGold: after, updatedAt: serverTimestamp() });
     tx.update(goalRef, {
       savedGold: goal.savedGold + amount,
+      unlockOn,
+      lockWeeks: Math.max(1, Math.floor(weeks)),
       updatedAt: nowBrazil().iso,
     });
     tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
@@ -157,6 +159,53 @@ export async function depositGoal(uid: string, goalId: string, amount: number): 
   });
   const { bumpVillage } = await import('./village/statsBump');
   await bumpVillage(uid, { deposits: 1, savedGold: amount });
+}
+
+export async function redeemGoal(uid: string, goalId: string, today = getTodayBrazil()): Promise<number> {
+  const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
+  if (modules.bank === false) throw new Error('O Banco da Vila está desligado');
+  let paid = 0;
+  await runTransaction(db, async (tx) => {
+    const goalRef = doc(db, 'goals', goalId);
+    const progressRef = doc(db, 'progress', uid);
+    const gSnap = await tx.get(goalRef);
+    const pSnap = await tx.get(progressRef);
+    const vSnap = await tx.get(doc(db, 'village', uid));
+    if (isBroken(cracksOf(vSnap.data()?.cracks), 'cofre')) throw ruinUseError('cofre');
+    if (!gSnap.exists()) throw new Error('Meta não encontrada');
+    const goal = fromGoalDoc(gSnap.id, gSnap.data() as Record<string, unknown>);
+    if (goal.userId !== uid) throw new Error('Meta de outro minerador');
+    if (!canRedeemPile(goal, today)) throw new Error('Ainda rendendo.');
+    const gold = Number(pSnap.data()?.availableGold) || 0;
+    const back = Math.max(0, Math.floor(goal.savedGold));
+    paid = back;
+    const after = gold + back;
+    const now = nowBrazil().iso;
+    if (pSnap.exists()) {
+      tx.update(progressRef, { availableGold: after, updatedAt: serverTimestamp() });
+    }
+    tx.update(goalRef, {
+      status: 'cancelled',
+      cancelledAt: now,
+      updatedAt: now,
+    });
+    if (back > 0) {
+      tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
+        userId: uid,
+        amount: back,
+        type: 'saved' as const,
+        source: 'goal_withdraw' as const,
+        description: `Resgatou ${back} gold do Cofre`,
+        relatedId: goalId,
+        relatedTitle: goal.title,
+        metadata: { goalId, reason: 'redeem' },
+        balanceBefore: gold,
+        balanceAfter: after,
+        createdAt: serverTimestamp(),
+      }));
+    }
+  });
+  return paid;
 }
 
 export async function requestCancel(uid: string, goalId: string, reason: string): Promise<void> {

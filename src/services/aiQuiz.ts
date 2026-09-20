@@ -8,6 +8,7 @@ import { SurpriseMissionQuestion } from '../types';
 import { childAgeToday } from '../config/rules';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../config/firebase';
+import { answerLeaksInPrompt, optionsCollide } from './quiz/provaRules';
 
 export type QuizTheme = 'daily' | 'english' | 'math' | 'general' | 'mixed';
 export type QuizDifficulty = 'easy' | 'medium' | 'hard';
@@ -92,6 +93,8 @@ export function sanitizeQuestions(raw: unknown, avoid: string[] = []): SurpriseM
     const options = Array.isArray(q.options) ? q.options.filter((o): o is string => typeof o === 'string').map((o) => o.trim()) : [];
     const unique = Array.from(new Set(options));
     if (!question || !answer || !explanation || unique.length !== 4) continue;
+    if (optionsCollide(unique)) continue;
+    if (answerLeaksInPrompt(question, answer)) continue;
     if (!unique.some((o) => normalize(o) === normalize(answer))) continue;
     const key = normalize(question);
     if (seen.has(key)) continue;

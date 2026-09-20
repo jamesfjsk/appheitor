@@ -49,7 +49,7 @@ Hoje: "Ouvir 1", "Ouvir 2", grade de quatro quadrados com nomes em inglês e uma
 
 Hoje: caixa de texto, molde com lacunas, banco de palavras, "Enviar", correção em texto.
 
-- **Cena**: o quadro-negro do Capataz na entrada da mina; o pedido em português vem no balão dele ("Peça 3 baldes e diga que 1 é azul, para o celeiro.").
+- **Cena**: o quadro-negro do Capataz na entrada da mina; o recado em português vem no balão dele ("Escreva um recado para o papai. Diga que você faz a lição primeiro. Depois você joga bola."). Não é lista da mina: é recado da vida (casa, escola, futebol). Ensina duas coisas no mesmo quadro — o inglês do nível e um combinado (lição primeiro, pedir com educação, ajudar em casa, esperar, pedir desculpa, falar a verdade).
 - **Fluxo em três degraus** (o `scaffoldStage` que já existe vira cena): (1) **montar**: o molde aparece como uma frase com lacunas no quadro e as palavras do banco como **peças de giz** que a criança arrasta para as lacunas; o quadro aceita só o que cabe; (2) **escrever**: no nível seguinte o molde some e ela escreve com o giz (teclado), com o banco ainda visível; (3) **livre**: sem banco. O nível do degrau vem do histórico (3 recados seguidos com 3/3 sobem um degrau).
 - **Correção como cena**: o Capataz lê o quadro e circula com giz vermelho o que corrigir, escrevendo a forma certa em cima ("three bucket~~s~~"); as etiquetas de erro (plural, ordem, artigo) viram uma frase dele. "De novo" uma vez.
 - **Conteúdo**: o `mustInclude` vira "o que não pode faltar" mostrado como três pregos no quadro que acendem quando a frase cobre cada item.
@@ -79,7 +79,7 @@ Hoje: grade de cartões cinza "RECADO / COMERCIANTE / CARTA / FERRARIA" com "Abr
 ## 4. Conteúdo: o que muda por dia e por nível
 
 - **Temas**: os 24 por nível de `englishLevels.ts` (a escrever) rodam sem repetir em 30 dias; o tema do dia aparece na entrada ("Hoje: a fazenda").
-- **Dificuldade** por nível da Mina (o `level` de `englishBase`): número de pedidos, preposições, degrau do Recado, perguntas da Carta, regra da Ferraria. Sobe quando a semana fecha com média acima de 80% no tipo; nunca desce no meio do dia.
+- **Dificuldade** por desempenho no tipo, no molde da Vagoneta — não por calendário e não pelo slider do pai. No Comerciante: 3 entregas com todos os pedidos de primeira sobem para o nível 2 (3 pedidos, entram under/next to); 7 entregas e 5 perfeitas sobem para o 3 (4 pedidos, sala maior). Nunca desce no meio do dia. O plano de amanhã é regenerado quando o nível sobe. Pedido já feito (item + preposição + lugar) não volta; quantidade e itens da bandeja mudam a cada dia.
 - **Vocabulário**: cada contrato usa 60% de palavras já vistas (`vocab`) e 40% novas; a palavra nova aparece primeiro na Carta (leitura), depois no Comerciante (ouvir), depois no Recado (escrever): é o caminho ler, ouvir, escrever.
 - **Erros voltam**: o que ele errou entra de novo em 3 e em 10 dias no mesmo tipo (a preposição que errou hoje volta no Comerciante de segunda), marcado como `review` no `result.details`.
 
@@ -102,3 +102,22 @@ Continua: `englishPlans/{uid}_{data}` com `content` e `result` por contrato, `en
 5. **Entrada da Mina** com as placas.
 
 Cada entrega: um tipo por vez, o antigo continua funcionando até o novo passar no teste com a conta de teste; ficha pedagógica do tipo revisada na Etapa 2 §22; fotos em 1280x720 e 1920x1080; nada de mudar a economia.
+
+## 8. A Mina de todas as matérias (pedido do pai em 19/09: "contratos de outros temas, não só inglês")
+
+**Princípio**: contrato é uma **mecânica de jogo**; a matéria é o conteúdo que entra nela. A Mina vira uma mina com **galerias**, uma por matéria, e o plano do dia mistura galerias. O inglês continua sendo uma galeria, não a Mina inteira. Tudo paga material do mesmo jeito (a economia não muda), tudo grava conteúdo e resultado item a item (`englishPlans`/`englishSessions` ganham o campo `subject`; os nomes das coleções ficam), e o currículo de temas é o mesmo da prova (`quizCurriculum.ts`, 20 categorias), então a Memória da Prova e a Expedição do Explorador enxergam a Mina também.
+
+**Galerias e mecânicas** (uma mecânica serve a mais de uma matéria; o que muda é o conteúdo e o personagem):
+
+| Galeria | Matéria | Mecânicas (as da seção 3 e as novas) | Personagem |
+|---|---|---|---|
+| Inglês | inglês | Entrega (ouvir e colocar), Recado (escrever), Ferraria (gramática), Carta (ler) | Comerciante, Capataz, Ferreiro, Carteiro |
+| Números | matemática | Vagoneta (cálculo mental, já existe); **Balança** (frações e proporção: equilibrar pesos); **Feira** (dinheiro, troco e porcentagem no balcão do Comerciante) | Ferreiro, Comerciante |
+| Lógica | lógica, redstone | Oficina de Redstone (circuitos, molde Phaser da Etapa 3); **Trilhos** (sequências e padrões: ligar os trilhos na ordem) | Ferreiro |
+| Palavras | português | Carta em português (interpretação de texto, com carimbos e evidência); Recado em português (escrever com regra: acentuação, concordância, o Capataz corrige a giz); **Bigorna das Palavras** (ortografia: a barra com a letra certa) | Capataz, Carteiro |
+| Mundo | ciências, história, geografia, Brasil, corpo, astronomia | **Mapa** (geografia: colocar o lugar certo no mapa da parede); **Linha do tempo** (história: ordenar os acontecimentos nos vagões); **Laboratório** (ciências: prever o que acontece e conferir); Carta do Mundo (ler um texto curto de ciência ou história e responder) | Sábio |
+
+**Plano do dia** (5 contratos, como hoje): 2 de inglês, 1 de números, 1 de palavras, 1 de rodízio (Mundo ou Lógica), com o Recado obrigatório podendo ser em inglês ou em português conforme o dia. A proporção fica em `settings/economy.mineMix` para o pai ajustar. A dificuldade é por galeria (`englishBase.level` vira `levels[subject]`); a rotação de temas segue a da prova (categoria nunca repete em dias seguidos; tema não repete em 30 dias na Mina). A IA gera o conteúdo por galeria com o mesmo prompt de estilo, a partir do tema do dia e do perfil de acertos; os erros voltam em 3 e 10 dias na mesma galeria.
+
+**Ordem**: a Entrega do Comerciante (inglês) é o molde e entra primeiro; logo depois, com o mesmo motor de cena, entram **Carta em português** e **Feira** (dinheiro), que reaproveitam mecânicas prontas; Mapa, Linha do tempo e Laboratório são mecânicas novas e vêm em seguida, uma por entrega, sempre com fundo e sprites do líder antes do código e ficha pedagógica por galeria. O painel do pai ganha "onde ele erra" por galeria.
+

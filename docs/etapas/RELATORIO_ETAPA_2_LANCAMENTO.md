@@ -357,9 +357,9 @@ Sentimento: a Torre é a sala de troféus do clube, não uma planilha.
 
 ### O que mudou
 
-- `Torre.tsx` passa a `ChildSheet` (`mc-modal` + corpo com scroll). Abas numa linha, sem Lucide; as que o nível não abriu ficam apagadas e falam com a voz da Torre (`villageLines`), não "Torre nível 2".
-- Categorias com nome de mundo (`Rotina 3/20`, `Baú`, não `bau`). Lista em `mc-row` + ícone 32 px + moldura da camada. Saiu a nota "nenhuma conquista paga gold".
-- Quase lá no topo, como o doc. Aba Vida real sem título duplicado; vazio falado. Recordes, troféus, mapa e histórias com copy do mundo e nomes de NPC.
+- `Torre.tsx` passa a `ChildSheet` (`mc-modal` + corpo com scroll). Abas numa linha, sem Lucide; as que o nível não abriu ficam apagadas e falam com a voz da Torre (`villageLines`), não "Torre nível 2". Recordes no n0: "Recordes ficam lá em cima. Não perde."
+- Categorias com nome de mundo (`Rotina 3/20`, `Baú`, não `bau`). Lista em `mc-row` + ícone 32 px + moldura da camada. Ganhou = verde (`is-done`); falta = cinza. Saiu a nota "nenhuma conquista paga gold".
+- Quase lá no topo, compacto (uma linha por alvo), para a prateleira caber em 1280. Aba Vida real sem título duplicado; vazio falado. Recordes, troféus, mapa e histórias com copy do mundo e nomes de NPC.
 - `englishBase.ts` n3 da Torre: sai "propor desafios", entra mapa e histórias (decisão 14).
 
 ### Arquivos
@@ -375,10 +375,414 @@ Sentimento: a Torre é a sala de troféus do clube, não uma planilha.
 8–12 lógica: abas ainda batem com o nível; sem gold novo; cadeado com frase, não relatório.
 13–16: clique com som; copy do Olheiro; fotos nesta sessão na conta de teste.
 
-Frame lido: nada sobreposto, cortado ou fora do clique no quadro da Torre.
+Frame lido (1280 e 1920, conta de teste, 10h): nada sobreposto nem cortado no quadro. Em 1280 cabem 3 troféus verdes abaixo do Quase lá. Clique em Recordes (trancado) e na categoria Mina conferidos.
 
 ### Fora
 
 Não reescrevi o catálogo (`Mão na massa 10`). Não mudei o portão do header que abre a Torre no n0.
+
+## Cofre — gold aplicado (19/09)
+
+Sentimento: o Cofre é ouro parado no tempo, não um formulário de meta.
+
+### O que mudou
+
+- Cofrinho: some "Nova meta / Título / Criar meta" e o "Pedir para cancelar". A criança escolhe quanto guarda e por quanto tempo deixa aplicado. O gold não volta sozinho; só sai quando virar prêmio (o pai ainda cancela no painel).
+- Enquanto o Cofre está no n1, o bônus não mente: chip "Cofre nível 1 / está rendendo" (texto, não número de gold) e o +gold da escolha mesmo assim (5 gold / uma semana = +0; a cada 20, +1). Montinho já aplicado mostra o que rende e o que rende se guardar mais. Um pouco todo dia soma; o de hoje começa na semana que vem.
+- Extrato: a semana atual em quatro chips (ganhou, gastou, aplicou, rendeu) e movimentos agrupados por fonte (`Missão +41`), com frase do mundo. Semanas vazias somem. Sai "Guardou 0% (alvo 20%)".
+- Paciência: três linhas + o mesmo seletor de tempo. Comparação honesta com a poupança de verdade fica.
+
+### Arquivos
+
+- `src/components/hero/village/Cofrinho.tsx`
+- `src/components/hero/village/Extrato.tsx`
+- `src/services/village/bank.ts` (`patienceForecast`, `minGoldForBonus`)
+- `src/services/village/balance.ts` (rótulos)
+- `src/services/village/__tests__/etapa2.test.ts`
+- fotos: `docs/exemplos/telas/cena-v2/tmp-arena/cadeado-shots/banco-01-cofrinho-1280.png`, `banco-02-extrato-1280.png`, `banco-03-paciencia-1280.png`, `banco-04-cofrinho-1920.png`, `banco-05-extrato-1920.png`, `banco-06-paciencia-1920.png`
+
+### Barra
+
+1–7 visual: intenção (guardar), sistema (`ChildSheet`, `mc-slot`, `mc-inv`, `mc-chip`), Fredoka no corpo, ícone 28–32 px, âncora (bolso vs aplicado / semana), Vila atrás, 1280 e 1920 sem palavra colada.
+8–12 lógica: depósito e juros iguais; sem gold novo; n1 não paga bônus; criança não saca.
+13–16: `playClick`/`playError`; copy do Cofre; fotos na conta de teste; testes `etapa2` verdes.
+
+Frame lido (1280 e 1920, 10h, teste@flash.com): nada sobreposto, cortado ou fora do clique no quadro do Banco.
+
+### Fora
+
+Não gravei o prazo no Firestore (as semanas são a lição e a previsão; o gold fica até virar prêmio). Cofre n3 continua trancado. Painel do pai (`GoalsPanel`) não foi restilizado.
+
+## Cofre — 10/20/30 sem teto (19/09)
+
+Sentimento: 10 gold parado quatro semanas pesa, não é uma parede de +0.
+
+### O que mudou
+
+- Paciência por nível do Cofre: n1 = 10 gold → +1 / semana, n2 → +2, n3 → +3 (n3 trancado). n1 passa a pagar. Sem teto semanal; a tela não fala "teto" nem "até N".
+- 10 gold em quatro semanas no n1: +4 (os botões deixam de ser todos +0). 5 gold no n1 ainda não pagam 1; no n2, pagam.
+- `interestCapGold` e `interestRatePct` do painel não cortam mais o bônus. O teto de gold do jogo (baú, desafio) continua.
+
+### Arquivos
+
+- `src/services/village/bank.ts` (`vaultInterestPct`)
+- `src/components/hero/village/Cofrinho.tsx`
+- `src/config/englishBase.ts`, `src/config/village.ts`
+- `docs/VILA_CONSTRUCOES.md`, `docs/VILA_API.md`, decisão 27 em `ETAPA_2_LANCAMENTO.md`
+- fotos: as mesmas `banco-0*.png` (refeitas nesta sessão)
+
+### Barra
+
+1–7: a âncora é o +gold do tempo; sem planilha de teto.
+8–12: n1 paga 10%; sem gold inventado fora da taxa; criança não saca.
+13–16: clique com som; copy em gold, não em %; fotos na conta de teste; `etapa2` verde.
+
+Frame lido (1280 e 1920, teste@flash.com): nada sobreposto, cortado ou fora do clique.
+
+### Fora
+
+n3 continua trancado. O campo `interestCapGold` no painel do pai fica morto até o pai apagar.
+
+## Contratos v2 — Entrega 1: Entrega do Comerciante (19/09)
+
+Sentimento: o pedido mora no armazém. A criança arrasta, o item encaixa ou escorrega, o Comerciante aponta. Não é um formulário sobre a Vila.
+
+### O que mudou
+
+- Porta "jogo" em tela cheia (`MerchantDelivery.tsx`), kit da Vagoneta (canvas/React, sem Phaser). Fundo `public/assets/village/scenes/comerciante/backdrop.png` 1280×720 (o arquivo do líder não estava no repo; gerado no PixelLab e aumentado em nearest-neighbor). Quatro âncoras fixas em `anchors.json` (dois no chão, parede, balcão). Sprites `spot-<id>.png` e `item-<id>.png`. Nome só no hover/toque, com áudio.
+- Arrastar com curva e estalo; lugar sem zona escorrega e cai; o Comerciante olha para o ponteiro. "Entregar" certo: guarda e agradece. Errado: devolve o item e diz a frase uma vez ("On the box, not in." / "Next to the window."). Segunda entrega é treino (`details.firstHits`); sem aviso na tela (decisão 23).
+- Sem cronômetro na cara (`durationSec` só gravado). Bolinhas no alto. "Voltar à Mina" com confirmação. Texto 14 px+, Fredoka no corpo, sem caixa alta. Final: vagão no trilho, uma frase de nota, lista item a item (no lugar / para treinar).
+- TTS: `instructions` fixas + velocidade 0,9; "Ouvir devagar" em 0,75; hash `model|voice|speed|instructions|texto` no cliente e em `functions/src/index.ts`. Texto em inglês só depois do primeiro "Ouvir".
+- Módulo `settings/modules.contractsV2` padrão **true**: o quadro abre o armazém. Desligado (painel do pai) volta o contrato antigo. `?contractsV2=1` força o novo.
+- Dados: `completeContract` igual ao de hoje (`englishPlans.result`, `englishSessions`, vocab). `details` ganha `attempts`. Economia da Mina intacta.
+
+### Arquivos
+
+- `src/components/hero/english/base/MerchantDelivery.tsx` (novo)
+- `src/services/english/merchantPlay.ts` + `src/services/english/__tests__/merchantPlay.test.ts`
+- `src/components/hero/english/base/EnglishBase.tsx`
+- `src/services/englishTts.ts`, `functions/src/index.ts`
+- `src/types/village.ts`, `src/config/village.ts`, `src/components/parent/VillageManager.tsx`
+- `src/styles/miner.css` (`.md-*`)
+- `public/assets/village/scenes/comerciante/backdrop.png`, `anchors.json`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` §12 (duas linhas)
+- fotos: `docs/exemplos/telas/contratos-v2/01-balao` … `07-final` em 1280 e 1920
+
+### Como verificou
+
+| Comando | Resultado |
+|---|---|
+| `npx tsc --noEmit` | 0 erros |
+| `npx eslint` nos arquivos tocados | 0 erros |
+| `npm run test:english` | 10 arquivos; `merchantPlay` 12/12 |
+| `npx vite build` | ok; `CartBench-*.js` separado; **sem** chunk `phaser` |
+| fotos 1280×720 e 1920×1080 | conta `teste@flash.com`, `?h=14&d=2026-09-18&contractsV2=1` (quiz do dia 18 já feito; nunca a conta do Heitor) |
+
+Aceite do pedido errado (foto `05-erro-devolvido`): poção ao lado da cama, pedido era ao lado da janela; item voltou à bandeja; balão "Next to the window."; janela acesa. A segunda entrega do mesmo pedido avançou sem aviso de "não paga". `completeContract` gravou (XP 58→63 nesta sessão).
+
+Frame lido (1280 e 1920): nada sobreposto, cortado ou fora do clique no armazém. O OCR cola palavra da pixel; no frame as frases em Fredoka têm espaço.
+
+### Barra da lei (item a item)
+
+1. **Intenção.** Armazém + pedido no balão + arrastar. Passa.
+2. **Sistema.** `mc-btn`, tokens, final em `mc-modal` + `panel-frame`. CSS `.md-*` só no buraco da cena. Passa.
+3. **Fonte.** Título/número curtos; corpo e botão longo em Fredoka. Passa.
+4. **Ícone.** Spots/itens do catálogo merchant; NPC da Vila; HUD 52 px. Sem emoji. Passa.
+5. **Hierarquia.** Pedido agora; Entregar 44 px+; raio 8. Passa.
+6. **A cena continua.** Tela cheia da porta "jogo" (MUNDO.md §5), não modal sobre a Vila. Passa.
+7. **Arestas.** 1280 e 1920 por layout (sem `zoom`/`scale`). Vazio do balão é fala. Esc fecha. Passa.
+8. **Mundo.** Contrato = porta jogo; React; Phaser não importado. Passa.
+9. **Economia.** Sem fonte nova de gold/material/XP; claim intacto; relógio `ClockContext`. Passa.
+10. **Consequência.** Erro devolve e aponta; sem humilhação. Passa.
+11. **Estado honesto.** Cadeado/módulo desligado = contrato antigo. Frase de correção sem boletim. Passa.
+12. **Mouse e teclado.** Arrastar, 44 px, Esc. Passa.
+13. **Craft.** Curva + estalo (`sfx.hit`/`miss`); `playClick`. Passa.
+14. **Copy.** "Ouve o pedido e coloca no lugar."; "No lugar. Guardo isso."; nota em uma frase. Sem "Faltam N". Passa.
+15. **Evidência.** Fotos desta sessão, duas resoluções, conta de teste. Passa.
+16. **Arestas de lógica.** Primeira entrega paga o `firstHits`; a segunda não; `?d=` / `?h=` / módulo off. Offline/IA: o plano do dia 18 já existia. Passa.
+
+### Fora
+
+- Função de voz **não foi deployada**; o hash novo só vale depois do deploy de `functions`.
+- `contractsV2` passou a **true** (padrão + `settings/modules`) para o pai conseguir abrir o armazém. Desliga no painel se quiser o contrato antigo.
+- Backdrop gerado aqui (o do líder não chegou). Se o pai trouxer outro PNG 1280×720 no mesmo caminho, a cena troca sem código.
+- Não toquei `cart.ts`, `CartBench.tsx`, `npcBehavior.ts`, `bgm.ts`/`vila.mp3`, laterais da cena, economia nem catálogo de itens.
+- Entregas 2–4 (Recado, Ferraria, Carta) e o quadro da Mina §3.5: não comecei.
+
+### Playtest (voz e lugar)
+
+- Sem sintetizador do navegador. Toda fala vai na voz nova (`gpt-4o-mini-tts` / `nova`). Sem URL, silêncio.
+- `next to` é **ao lado** (colado no móvel). Não é `near` / “próximo” e não é o vão de baixo. Depois de ouvir, só o móvel do pedido ganha tapetes (`on` / `in` / `under` / `next to`); o pedido acende. O diálogo mora no alto da sala (viga vazia), não em cima do chão.
+- Português do balão ele lê. Voz só no inglês do pedido (Ouvir). Acerto/erro/próximo são efeito de jogo (`sfx.ok` / `fail` / `next`).
+- Comerciante da entrega = `comerciante-iso.png` (o da Vila). Pedido 1: um móvel + tapetes com nome (cola). Pedido 2: dois móveis, sem cola. Pedido 3: três móveis, sem cola. Depois do erro o tapete aponta o lugar certo. Item em cima do rótulo some o tapete. Final = mesa de carvalho (`mn-prova-sheet`), não lousa cinza.
+- **Lição, não sorteio.** Uma preposição por sessão (n1: `in`/`on`; n2/n3 entram `under`/`next to`). Os pedidos repetem a mesma regra em móveis e itens novos; o último do n2/n3 contrapõe o par que o brasileiro troca (`in`↔`on`, `under`↔`next to`). Pedido 1 sempre quantidade 1. O mesmo trio item+preposição+lugar não volta em 14 dias (`merchantKey`).
+- **O móvel anda.** A cada pedido o banco/baú/mesa troca de chão ou balcão (semente do dia + passo). Janela/porta ficam na parede. A bandeja também embaralha. Não é sempre “poção ao lado do banco no mesmo canto”.
+
+### Lei do professor — 5 itens gerados nesta sessão
+
+1. `Put a potion in the box.` (n1) — Aprende: `in` = dentro. Como: poção some pela metade na caixa. Claro. Uma certa. Erro típico: pôr em cima (`on`). Revisa em 3/10 dias quando o review do tipo ligar. Degrau: primeira com cola.
+2. `Then put three lamps in the chest.` (n1, mesma regra) — Transfere `in` para o baú, sem cola, outro item. Não é a mesma poção.
+3. `Put the cake in the barrel.` (n1, outra semente) — Mesma regra, outro objeto e outro lugar. Não decora “caixa”.
+4. `Now put three apples on the box.` (n2, contraste) — Depois de dois `in`, o par `on`: em cima da caixa, não dentro. O distrator é o `in` que ele acabou de treinar.
+5. `Please put two books on the chest.` (n3, contraste) — Fecha a sessão `in` com `on` em outro móvel.
+
+Cada um: uma ideia; distrator = erro de brasileiro; explicação do Comerciante aponta o par (`On the box, not in.`); tenta de novo sem pagar (decisão 23).
+
+### Dúvidas
+
+Nenhuma que tenha impedido a Entrega 1. **Pare para o commit na branch `contratos-v2`.**
+
+## Prova do dia v2 (19/09)
+
+Sentimento: a mesa do Sábio pesa. A ideia pede tempo, a pergunta pede tempo, a prova só fecha quando ele conta o que ficou na cabeça.
+
+### O que mudou
+
+1. **Perguntas do nível certo.** Prompt em `dailyPrompt.ts`: criança de 10 anos, 5º ano (BNCC); matemática em duas etapas até 1000; ciências causa e efeito; inglês com uma só forma válida; história/geo de consenso; futebol regra/tática. Proibido resposta no enunciado, duas certas, "qual a capital de". ≥3 de duas etapas; distrator do erro típico; explanation ataca a tentadora; AUTO-REVISÃO na mesma chamada; `curiosity`; formatos mistos; áreas das 5 de conhecimento giram pelo dia da semana. `sanitizeQuestions` descarta vazamento e alternativas iguais depois de normalizar; se sobrar <5, a IA é chamada de novo antes do banco offline. Modelo da prova: `gpt-4o` (`DAILY_QUIZ_MODEL`). O resto continua no mini. `CHAT_MODELS` já tinha `gpt-4o`; função `openai` publicada nesta sessão (job 1789825911212, sucesso).
+2. **Reflexão obrigatória.** Resultado mostra a nota e o campo. "Concluir a prova" só com ≥10 palavras, sem a mesma palavra 4 vezes e sem tecla repetida. Não existe Fechar antes. `completeDailyQuiz` recebe a reflexão e grava numa escrita só; XP e gold pagam aí; o cadeado só abre com `completed` (depois da reflexão). O dilema (pergunta 3) aparece no cartão Hoje do pai com o texto da escolha.
+3. **Tempo de leitura.** "Próxima" (acerto e erro) e "Começar" esperam 1 s a cada 3 palavras (explicação 4–12 s; ideia 8–30 s). Anel de ouro no botão de pedra, sem números. Enter e clique respeitam o mesmo tempo; `prefers-reduced-motion` só some com o anel, o relógio continua. A ideia está escrita no papiro inteiro; a folha **desenrola** no mesmo relógio (máscara mole na boca do rolo — sem máquina de escrever). O canto da mesa vem no fim do papiro.
+
+Visual: convite, ideia, pergunta e reflexão usam o mesmo papiro (rolo pixel + folha creme `#f6edd8`, tinta `#1a1410` 18px). Sem caixa de carvalho e sem mancha marrom na leitura. A ideia desenrola; o resto já nasce aberto. Alternativas em `mc-btn-wood` no próprio papiro. Copy do mundo.
+
+### Arquivos
+
+- `src/services/quiz/provaRules.ts`, `src/services/quiz/dailyPrompt.ts` (novos)
+- `src/services/village/__tests__/provaV2.test.ts` (novo; 6/6)
+- `src/services/aiDailyQuiz.ts`, `src/services/aiQuiz.ts`, `src/services/dailyQuizService.ts`
+- `src/components/hero/DailyQuiz.tsx`, `src/index.css` (anel)
+- `src/components/parent/HojeCard.tsx` (dilema; sem restilizar o painel)
+- `src/types/index.ts` (`curiosity`)
+- `src/services/village/statSources.ts` (`reflections` em `completeDailyQuiz`)
+- `functions/src/index.ts` (já listava `gpt-4o`)
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` §12
+- fotos: `docs/exemplos/telas/prova-v2/01-licao-anel-{1280,1920}.png`, `02-proxima-travada-*.png`, `03-reflexao-*.png`
+
+### Como verificou
+
+| Comando | Resultado |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | 0 erros |
+| `npx eslint` nos arquivos do pacote | 0 erros |
+| `npx eslint src --max-warnings 7` | 3 erros **fora** deste pacote (`merchantPlay.ts` unused, `bank.ts` `_settings`); 7 warnings já permitidos |
+| `npm run test:english` | 21 arquivos; `provaV2` 5/5; `etapa2` 21/21 |
+| `npx vite build` | ok; `CartBench-*.js` separado; **sem** chunk `phaser` |
+| `firebase deploy --only functions:openai` | job 1789825911212, sucesso |
+| fotos 1280×720 e 1920×1080 | conta `teste@flash.com`, `?d=2026-09-23&h=10&quiz=lock` (nunca a conta do Heitor) |
+
+Frame lido (1280 e 1920, lição / pergunta / reflexão): nada sobreposto, cortado ou fora do clique. A Vila continua ao redor do quadro. O OCR da pixel cola palavra ("Provado dia"); no frame, Press Start e Fredoka têm espaço. Anel: botão de pedra com traço de ouro por dentro; "Concluir" verde só com a reflexão pronta. Lição aos 10 s (`?d=2026-09-23`): o corpo ainda corta no meio ("…sotaques"); o "por quê" e o canto da mesa ainda não nasceram; Começar continua de pedra. `npm run test:village` — `provaV2` 6/6.
+
+Prova de domingo (2026-09-20) da conta de teste regenerada às 14:09Z: tema formigas, `curiosity` ("pontes com o próprio corpo"), ciências "o que aconteceria se", inglês "The ant is … a leaf", dilema na pergunta 3. Matemática ainda saiu em um passo (500×2); o prompt pede duas etapas — o pai pode "Gerar outra" se quiser mais dura. A prova do Heitor **não foi tocada**.
+
+### Barra da lei (item a item)
+
+1. **Intenção.** Mesa do Sábio: ideia, pergunta, reflexão. Passa.
+2. **Sistema.** `mc-modal` / `panel-frame`, `mc-paper`, `mc-row`, `mc-btn`, `mc-num`. CSS do anel só no buraco. Passa.
+3. **Fonte.** Título curto em Press Start; lição, recado e botão longo em Fredoka. Passa.
+4. **Ícone.** Sábio 40 px, livro 32 px, tocha 24 px, estrela/ouro 24 px. Sem emoji. Passa.
+5. **Hierarquia.** Ideia / pergunta / nota+reflexão; botão 44 px. Passa.
+6. **A cena continua.** Véu; a Vila lê-se em volta. Passa.
+7. **Arestas.** 1280 e 1920 sem `zoom`/`scale`. Vazio e espera com voz do mundo. Passa.
+8. **Mundo.** Prova no React; Phaser não importado. Passa.
+9. **Economia.** XP/gold só em `payQuizRewards` depois da reflexão; claim `quiz:<date>` intacto; relógio `ClockContext`. Passa.
+10. **Consequência.** Erro explica a tentadora; reflexão sem humilhação. Passa.
+11. **Estado honesto.** Cadeado só com reflexão gravada; "Começar"/"Próxima" travados até o tempo. Passa.
+12. **Mouse e teclado.** 44 px; Enter e clique no mesmo relógio; Esc só quando pode sair. Passa.
+13. **Craft.** `playClick` / acerto / erro; anel com peso; `mc-pop` / `mc-shake` / `mc-build`. Passa.
+14. **Copy.** "A prova de hoje ainda espera."; "Não foi dessa vez."; "O Sábio leu. A Mina abre." Sem "Faltam N". Passa.
+15. **Evidência.** Fotos desta sessão, duas resoluções, conta de teste. Passa.
+16. **Arestas de lógica.** Offline/IA desligada: retry e depois o banco. Virada `?d=`. Primeiro dia e férias não mudam o cadeado da reflexão. Passa.
+
+### Fora
+
+- Não restilizei o painel além do bloco do dilema no Hoje.
+- Não cliquei "Gerar outra" logado como pai (senha do pai não está no `.env`); regenerei a de domingo da conta de teste pelo prefetch da criança depois de retirar o doc antigo (nível pré-v2).
+- Não toquei a prova do Heitor.
+- Não toquei `cart.ts`, `CartBench.tsx`, `npcBehavior.ts`, `bgm.ts`/`vila.mp3`, laterais, `src/game/**`.
+- `eslint src` ainda tem 3 erros de outros pacotes; não limpei.
+
+### Dúvidas
+
+Nenhuma que tenha impedido o pacote. **Pare para o commit.**
+
+## Cofre — Resgatar (19/09)
+
+Sentimento: o montinho tem um dia de voltar, e o botão está em cima dele.
+
+### O que mudou
+
+- As semanas escolhidas gravam `unlockOn`. Enquanto rende, o card fala o dia ("Volta no sábado"). No dia, **Resgatar N gold** no próprio montinho do Cofrinho devolve ao bolso (com o que já rendeu). Antes disso não saca.
+- Montinho antigo sem prazo já pode resgatar (conta de teste). Chip do Cofre fala "nível 1 / está rendendo" em texto, não um `1` grande igual ao gold do bolso.
+- Regras publicadas em **19/09/2026 11:30 -03** (`firestore:rules`, projeto `app-heitor`).
+
+### Arquivos
+
+- `src/services/village/bank.ts`, `src/services/goalsService.ts` (`redeemGoal`)
+- `src/components/hero/village/Cofrinho.tsx`
+- `src/types/village.ts`, `firestore.rules`
+- decisão 28 em `ETAPA_2_LANCAMENTO.md`
+
+### Barra
+
+1–7: âncora é o botão Resgatar no card; sistema `mc-btn-gold` 44 px.
+8–12: devolve o `savedGold` que já era dele; relógio `ClockContext`; ruína tranca.
+13–16: `playClick`; copy do mundo; fotos na conta de teste; `etapa2` verde.
+
+Frame lido: nada sobreposto, cortado ou fora do clique.
+
+### Fora
+
+Não forcei o saque no dia; ele pode deixar rendendo depois que o botão acende. Painel do pai não foi restilizado.
+
+## Cofre — um montinho por aplicar (19/09)
+
+Sentimento: cada depósito é um contrato visível — quanto, quanto rende, quando volta — não um bolo de 45.
+
+### O que mudou
+
+- Aplicar 10, 20, 30, 40 ou 50 (o 10% fecha: 10→+1, 20→+2). Sai o 5 e o valor solto do bolso.
+- Cada Aplicar abre um montinho novo. Card: `20 gold · rende +2 por semana` e `Saque 17 de outubro`. Resgatar continua no card, um a um.
+- Cofre n1 guarda até 5; n2 até 8. Paciência lista os montinhos dele e o “se aplicar” só com 10–50.
+- Montinho antigo já misturado fica até o resgate; o próximo aplicar não entra em cima.
+
+### Arquivos
+
+- `src/components/hero/village/Cofrinho.tsx`, `src/services/village/bank.ts` (`saqueLine`, `vaultGoalCap`), `src/services/goalsService.ts`, `src/config/village.ts`
+- `docs/VILA_CONSTRUCOES.md`, `docs/VILA_API.md`, decisão 29
+- fotos: `banco-01` a `banco-06` (conta teste)
+
+### Barra
+
+1–7: âncora é o card do montinho; chips 10–50; Fredoka no corpo; Vila atrás.
+8–12: não inventa gold; um goal por aplicar; relógio Brasília.
+13–16: `playClick`; fotos 1280 e 1920; `etapa2` verde.
+
+Frame lido: nada sobreposto, cortado ou fora do clique. Card do montinho: `45 gold` + dia do saque; Paciência com 10–50.
+
+### Fora
+
+- Não parti o montinho antigo em fatias. Painel do pai: só a linha de ajuda do módulo juros.
+- A conta teste estava resetada (Cofre 0) na hora da foto: Paciência 10–50 conferida; o card do montinho (gold · rende +N · saque no dia) depende do Cofre de pé.
+
+## Contratos v2 — Entrega do Comerciante V1 (19/09)
+
+Sentimento: o item some no lugar certo; o Comerciante fala o erro em uma frase; no fim só ele, o pagamento e o trilho.
+
+### O que mudou
+
+- Porta "jogo" em tela cheia (`MerchantDelivery`): armazém, arrastar com curva e estalo, cola só no 1º pedido, sala 1→2→3 móveis.
+- Voz sempre `nova` (`gpt-4o-mini-tts`). Sem `speechSynthesis`. Sem TTS no título em português. Som de jogo no acerto, erro e próximo.
+- Recompensa só da primeira entrega (decisão 23), sem aviso na tela.
+- Nível pelo desempenho (`merchantDone` / `merchantPerfect`): 3 perfeitas → lv2; 7 feitas e 5 perfeitas → lv3. Nunca desce no meio do dia. Pedido (item+prep+lugar) não repete em 30 dias. Quantidade e bandeja mudam.
+- Final: balão + XP/gold/material + Voltar à Mina + vagões. Sem cama, sem lista-boletim, sem móveis que não estavam no pedido.
+
+### Arquivos
+
+- `src/components/hero/english/base/MerchantDelivery.tsx`, `src/services/english/merchantPlay.ts`, `merchantRoom.ts`, `englishAi.ts`, `englishBaseService.ts`
+- `public/assets/village/scenes/comerciante/`
+- `docs/MINA_CONTRATOS.md` §4; `ETAPA_2_LANCAMENTO.md` §12
+- fotos: `docs/exemplos/telas/contratos-v2/01` a `07`
+
+### Barra
+
+1–7: âncora é o pedido e o lugar; sistema `md-*` / `mc-*`; Fredoka no corpo; ícone HUD; a Vila não some — a porta é o jogo.
+8–12: economia intacta; `ClockContext`; primeira entrega paga; Esc fecha.
+13–16: `playClick` + `sfx.ok/fail/next`; copy do mundo; fotos 1280 e 1920 na conta teste; offline/IA: reserva do Comerciante.
+
+Frame lido (V1 aceita pelo pai): nada sobreposto, cortado ou fora do clique no final sem móveis extras.
+
+### Lei do professor (conteúdo do Comerciante)
+
+O pacote não gerou item novo de prova. O que a criança aprende continua sendo in/on/under/next to em frase do armazém, uma preposição nova por sessão no lv1, áudio antes do texto, distrator = erro de brasileiro (in/on). A geração do dia já passa por `merchantRoom` + `englishAi`.
+
+### Fora
+
+- Voltar depois para lapidar arte dos 12 lugares / 17 itens e "Ouvir devagar" se o pai pedir.
+- Não começou Ferraria nem Carta.
+- Não tocou a conta do Heitor.
+
+### Dúvidas
+
+Nenhuma. Pai aceitou a V1 e pediu o próximo contrato: Recado.
+
+## Contratos v2 — Recado do Capataz V1 (19/09)
+
+Sentimento: o pedido vira giz no quadro; os três pregos acendem quando a frase cobre o que não pode faltar.
+
+### O que mudou
+
+- Porta "jogo" em tela cheia (`RecadoBoard`): boca da mina, quadro, Capataz (Olheiro iso), três pregos, peças de giz.
+- Degrau 0: molde com lacunas + banco para arrastar/clicar. Degrau 1: escreve no quadro com o banco. Degrau 2: livre; dica (1 ferro na mão) devolve o banco. O `scaffoldStage` que já existia vira cena.
+- Falta na 1ª tentativa: o Capataz fala o que falta, em português. Juiz e nota iguais aos de antes (`judgeNote`, `noteMaterial`). "De novo" uma vez; paga só a primeira leitura.
+- Final no molde do Comerciante: balão + pagamento + Voltar + vagões. Sem boletim cinza.
+- `NoteContract` antigo continua se `contractsV2` estiver desligado.
+
+### Arquivos
+
+- `src/components/hero/english/base/RecadoBoard.tsx`, `src/services/english/notePlay.ts` (+ teste)
+- `src/components/hero/english/base/EnglishBase.tsx` (view `note-v2`)
+- `src/styles/miner.css` (`.nb-*`)
+- `ETAPA_2_LANCAMENTO.md` §12
+
+### Barra
+
+1–7: âncora é o quadro e os pregos; reusa `md-play` / `mc-btn` / `mc-chip`; Fredoka no recado; Capataz âncora, não ícone 256 px; a Vila fica atrás da porta.
+8–12: sem fonte nova de gold; claim/complete iguais; relógio do plano do dia; erro ensina no giz vermelho.
+13–16: `playClick` + `sfx.fail/checkpoint/next`; copy do Capataz (`notePlay.chalkLine`); verificação nesta sessão abaixo.
+
+### Lei do professor
+
+Pedido do pai em 19/09: o Recado era lista da mina (tocha, caverna) e não falava da vida. Agora cada recado ensina **duas coisas**: o inglês do nível e um combinado de casa/escola/futebol. Cinco itens gerados nesta sessão:
+
+**1. n1-01 — lição primeiro**
+1. Aprende: `I do` + `then`, e que a lição vem antes da bola.
+2. Como: ouve "I do my homework first. Then I play soccer." e monta no quadro.
+3. Claro: duas frases curtas, palavras que ele usa todo dia.
+4. Uma certa: as três infos (lição, primeiro, bola); distrator do banco é want/need, o chute de "I need a torch".
+5. Erro: o Capataz fala o que faltou em PT e toca o inglês de novo; sem ouro/ferro.
+6. Progressão: só presente; `because` e `must` ficam para os níveis 2 e 3.
+
+**2. n1-02 — prato na pia**
+1. Aprende: `I wash` + `for mom`, e que prato sujo é dívida.
+2. Como: recado para a mamãe, não pedido ao ferreiro.
+3. Claro: lavo o prato / é para ela.
+4. Uma certa; distrator cup/dinner (o erro de inventar outra tarefa).
+5. Erro ensina a peça que faltou; tenta de novo sem pagar.
+6. Mesmo hábito volta no n3-02 com `am washing` e `must`.
+
+**3. n1-04 — pedir água com educação**
+1. Aprende: `Please` + `I want`, e que pedido começa com educação.
+2. Como: ouve, depois monta; Please não aparece no brief em inglês.
+3. Claro: uma água, tenho sede.
+4. Uma certa; distrator juice/play.
+5. Erro: faltou o Please ou a sede — o quadro diz qual.
+6. Degrau: L2 troca Please por `Can I` + `because`.
+
+**4. n2-01 — bola porque a lição está pronta**
+1. Aprende: `Can I` + `because`, e o mesmo combinado do n1-01 com motivo.
+2. Como: a razão entra na segunda frase, não num número de tochas.
+3. Claro: jogar bola / porque a lição está pronta.
+4. Uma certa; `because` não pode faltar.
+5. Erro típico: pedir a bola sem o porque — prego apagado.
+6. Revisita do n1-01 por outro ângulo.
+
+**5. n3-01 — estou fazendo a lição, depois jogo, devo esperar**
+1. Aprende: `am + -ing`, `to + verbo`, `must`, e esperar o combinado.
+2. Como: três frases, uma regra nova cada.
+3. Claro: agora / para jogar / devo esperar.
+4. Uma certa por info; distrator soccer/first (quer pular a espera).
+5. Erro: o giz aponta a forma (`doing`, `to play`, `must wait`).
+6. Fecha o arco lição-primeiro dos três níveis.
+
+Itens que a barra derrubaria (tocha/picareta/caverna, lista para o ferreiro) saíram do banco e do prompt. A IA que devolver isso falha no validador de tema da vida pelo prompt; a reserva offline já não tem mina.
+
+### Fora
+
+- Sem fundo pintado novo da entrada (cena composta: caverna + tochas + quadro + Olheiro iso). Arte gpt-image da §6 fica para o líder.
+- Sem Ferraria, Carta nem entrada de placas.
+- Fotos 1280/1920 desta sessão: ver pasta `docs/exemplos/telas/recado-v2/` quando o aceite passar.
+
+### Dúvidas
+
+Nenhuma que tenha impedido abrir o Recado. **Pare para o commit depois do aceite visual.**
 
 

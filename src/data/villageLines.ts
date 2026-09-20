@@ -58,9 +58,9 @@ const BUILD_LINES: Record<string, [string, string, string]> = {
     'A Placa avisa quando for a sua vez.',
   ],
   cofre: [
-    'Cofre no chão. Meta uma de cada vez.',
-    'Duas metas e juros. Quem guarda, constrói.',
-    'Faixa da temporada. Extrato no mês.',
+    'Cofre no chão. Cada aplicar é um montinho. 10 gold esperando viram +1 na semana.',
+    'O mesmo 10 gold agora rende +2 na semana.',
+    'O mesmo 10 rende +3. Faixa da temporada e o Extrato do mês.',
   ],
   agenda: [
     'Sino no lugar. Hoje e amanhã ficam na Placa.',

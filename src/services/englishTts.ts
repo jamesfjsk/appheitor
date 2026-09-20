@@ -1,22 +1,27 @@
 // ========================================
 // Arena de Inglês: voz das frases (seção 4.7)
-// Chave = sha256("gpt-4o-mini-tts|nova|0.95|texto normalizado"); índice em
-// englishAudio/{hash} com a URL do mp3 em english/tts/{hash}.mp3 (Storage).
-// Sem cache: gera na OpenAI, sobe o mp3 e grava o índice. Falha em qualquer
-// ponto cai na fala do navegador (speakAsync en-US). Nada aqui rejeita.
+// Chave = sha256("gpt-4o-mini-tts|nova|velocidade|instructions|texto normalizado");
+// índice em englishAudio/{hash} com a URL do mp3 em english/tts/{hash}.mp3 (Storage).
+// Sem cache: gera na OpenAI, sobe o mp3 e grava o índice. Sem fala do
+// navegador: a voz é sempre nova (gpt-4o-mini-tts). Sem URL, silêncio.
 // ========================================
 
 import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { functions, db } from '../config/firebase';
-import { speakAsync } from './englishGameService';
 import { DEFAULT_MODULES } from '../config/village';
 import { getSettings } from './settingsService';
 import type { ModuleSettings } from '../types/village';
 
 const TTS_MODEL = 'gpt-4o-mini-tts';
 const TTS_VOICE = 'nova';
-const TTS_SPEED = 0.95;
+/** Mesmo texto da função (`functions/src/index.ts`). O hash inclui isto. */
+export const TTS_INSTRUCTIONS =
+  'fale devagar e com clareza, tom acolhedor, para uma criança de 10 anos aprendendo inglês, pausa curta entre as palavras';
+export const TTS_SPEED = 0.9;
+export const TTS_SPEED_SLOW = 0.75;
+
+export type PlayTextOpts = { speed?: number };
 /** Nenhuma reprodução segura a tela por mais que isso */
 const PLAY_GUARD_MS = 60_000;
 /** Pré-busca: quantas gerações ao mesmo tempo */
@@ -42,10 +47,15 @@ async function sha256Hex(s: string): Promise<string> {
     .join('');
 }
 
-const cacheKey = (normalized: string): string => `${TTS_MODEL}|${TTS_VOICE}|${TTS_SPEED}|${normalized}`;
+const clampSpeed = (n: number | undefined): number => (n === TTS_SPEED_SLOW ? TTS_SPEED_SLOW : TTS_SPEED);
+
+const cacheKey = (normalized: string, speed: number): string =>
+  `${TTS_MODEL}|${TTS_VOICE}|${speed}|${TTS_INSTRUCTIONS}|${normalized}`;
+
+const memKey = (normalized: string, speed: number): string => `${speed}|${normalized}`;
 
 /** Lê o índice; sem entrada, gera, sobe e grava. Devolve null quando não dá para ter o mp3. */
-async function resolveUrl(hash: string, normalized: string): Promise<string | null> {
+async function resolveUrl(hash: string, normalized: string, speed: number): Promise<string | null> {
   const indexRef = doc(db, 'englishAudio', hash);
   const indexed = await getDoc(indexRef);
   if (indexed.exists()) {
@@ -55,29 +65,36 @@ async function resolveUrl(hash: string, normalized: string): Promise<string | nu
   const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
   if (modules.tts === false) return null;
   const openai = httpsCallable(functions, 'openai');
-  const result = await openai({ kind: 'tts', voice: TTS_VOICE, input: normalized, model: TTS_MODEL });
+  const result = await openai({
+    kind: 'tts',
+    voice: TTS_VOICE,
+    input: normalized,
+    model: TTS_MODEL,
+    speed,
+    instructions: TTS_INSTRUCTIONS,
+  });
   const data = result.data as { url?: string };
   return typeof data.url === 'string' && data.url ? data.url : null;
 }
 
 /** URL do mp3 do texto (cache em memória, índice no Firestore, geração quando falta); null se não der */
-export function audioUrlFor(text: string): Promise<string | null> {
+export function audioUrlFor(text: string, opts?: PlayTextOpts): Promise<string | null> {
   const normalized = normalizeText(text);
+  const speed = clampSpeed(opts?.speed);
   if (!normalized || !hasSubtle()) return Promise.resolve(null);
-  // A chave do cache em memória é o texto normalizado: o hash só existe depois de um await
-  const existing = urlCache.get(normalized);
+  const key = memKey(normalized, speed);
+  const existing = urlCache.get(key);
   if (existing) return existing;
   const task = (async () => {
-    const hash = await sha256Hex(cacheKey(normalized));
-    return resolveUrl(hash, normalized);
+    const hash = await sha256Hex(cacheKey(normalized, speed));
+    return resolveUrl(hash, normalized, speed);
   })();
   const guarded = task.catch((error: unknown) => {
     console.warn('englishTts: sem áudio para o texto', error);
-    // Libera para tentar de novo mais tarde (queda de rede, cota)
-    urlCache.delete(normalized);
+    urlCache.delete(key);
     return null;
   });
-  urlCache.set(normalized, guarded);
+  urlCache.set(key, guarded);
   return guarded;
 }
 
@@ -102,7 +119,7 @@ export function stopAudio(): void {
   if (hasSpeech()) window.speechSynthesis.cancel();
 }
 
-function playUrl(url: string, text: string): Promise<void> {
+function playUrl(url: string): Promise<void> {
   const el = audioFor(url);
   return new Promise<void>((resolve) => {
     let settled = false;
@@ -120,9 +137,7 @@ function playUrl(url: string, text: string): Promise<void> {
       resolve();
     };
     const fallback = () => {
-      if (settled) return;
-      detach();
-      void speakAsync(text, 'en-US').then(settle);
+      settle();
     };
     guard = window.setTimeout(settle, PLAY_GUARD_MS);
     el.addEventListener('ended', settle);
@@ -133,41 +148,48 @@ function playUrl(url: string, text: string): Promise<void> {
   });
 }
 
-/** Toca o texto (mp3 com cache; fala do navegador como reserva) e resolve no fim. Nunca rejeita. */
-export async function playText(text: string): Promise<void> {
+/** Toca o mp3 da voz nova. Sem URL, silêncio. Nunca rejeita. */
+export async function playText(text: string, opts?: PlayTextOpts): Promise<void> {
   stopAudio();
   const normalized = normalizeText(text);
   if (!normalized) return;
-  const url = await audioUrlFor(normalized);
-  if (!url) return speakAsync(normalized, 'en-US');
-  return playUrl(url, normalized);
+  let url = await audioUrlFor(normalized, opts);
+  if (!url) {
+    urlCache.delete(memKey(normalized, clampSpeed(opts?.speed)));
+    url = await audioUrlFor(normalized, opts);
+  }
+  if (!url) return;
+  return playUrl(url);
 }
 
 // ---------- Pré-busca ----------
 
-const prefetchQueue: string[] = [];
+const prefetchQueue: { text: string; speed: number }[] = [];
 const queued = new Set<string>();
 let prefetchRunning = 0;
 
 function pumpPrefetch(): void {
   while (prefetchRunning < PREFETCH_CONCURRENCY && prefetchQueue.length > 0) {
-    const text = prefetchQueue.shift() as string;
+    const job = prefetchQueue.shift();
+    if (!job) break;
     prefetchRunning++;
-    void audioUrlFor(text).finally(() => {
+    void audioUrlFor(job.text, { speed: job.speed }).finally(() => {
       prefetchRunning--;
-      queued.delete(text);
+      queued.delete(memKey(job.text, job.speed));
       pumpPrefetch();
     });
   }
 }
 
 /** Gera (ou confirma) o áudio das frases em segundo plano, poucas por vez, sem repetir */
-export function prefetchAudio(texts: string[]): void {
+export function prefetchAudio(texts: string[], opts?: PlayTextOpts): void {
+  const speed = clampSpeed(opts?.speed);
   for (const raw of texts) {
     const text = normalizeText(raw);
-    if (!text || queued.has(text) || urlCache.has(text)) continue;
-    queued.add(text);
-    prefetchQueue.push(text);
+    const key = memKey(text, speed);
+    if (!text || queued.has(key) || urlCache.has(key)) continue;
+    queued.add(key);
+    prefetchQueue.push({ text, speed });
   }
   pumpPrefetch();
 }

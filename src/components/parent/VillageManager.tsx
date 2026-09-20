@@ -38,7 +38,7 @@ const MODULE_HELP: Record<keyof ModuleSettings, string> = {
   shop: 'Desligado: a Loja da Vila recusa compras.',
   effects: 'Desligado: equipamentos não dão bônus (ainda dá para craftar).',
   bank: 'Cofrinho, juros e metas da criança.',
-  interest: 'Bônus de paciência (5% por semana).',
+  interest: 'Bônus de paciência no Cofre (10, 20 ou 30% conforme o nível). Sem teto. Cada aplicar é um montinho; valores 10 a 50.',
   logic: 'Vagoneta da Mina. Aparece na Mina depois do Recado do dia.',
   lines: 'Reservado para a próxima etapa.',
   dilemmas: 'Reservado para a próxima etapa.',
@@ -48,6 +48,7 @@ const MODULE_HELP: Record<keyof ModuleSettings, string> = {
   tts: 'Desligado: a Mina não fala as palavras.',
   aiGeneration: 'Desligado: a prova e o plano do dia não usam IA.',
   music: 'Trilha da Vila. Desligado: a Vila fica em silêncio (os cliques continuam).',
+  contractsV2: 'Entrega do Comerciante no armazém (tela cheia). Desligado: o contrato antigo no quadro.',
 };
 
 const VillageManager: React.FC = () => {

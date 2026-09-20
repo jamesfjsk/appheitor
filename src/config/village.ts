@@ -58,9 +58,9 @@ export const DEFAULT_ECONOMY: EconomySettings = {
   buildCostMultiplier: 2,
   merchantBuy: { materials: 10, gold: 2, dailyCap: 2 },
   savingsTargetPct: 20,
-  interestRatePct: 5,
-  interestCapGold: 10,
-  maxOpenGoals: 2,
+  interestRatePct: 10, // legado no painel; a criança usa vaultInterestPct (10/20/30)
+  interestCapGold: 0, // sem teto de paciência (decisão 27)
+  maxOpenGoals: 8,
   lateMissionUntilHour: 12,
   lateMissionGoldPct: 50,
   repairRefundPct: 50,
@@ -115,6 +115,7 @@ export const DEFAULT_MODULES: ModuleSettings = {
   tts: true,
   aiGeneration: true,
   music: true,
+  contractsV2: true,
 };
 
 export const EMPTY_GEAR: VillageGear = {

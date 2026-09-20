@@ -29,3 +29,6 @@ functions/lib
 __pycache__/
 # Backups do launch-reset (dados reais, nunca no repositório)
 backups/
+
+# Quadros brutos do gpt-image (1024 px, regeneráveis por scripts/gpt-frames.cjs); só as folhas de 64 px entram no jogo
+docs/arte/quadros/*.png

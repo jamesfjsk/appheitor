@@ -79,8 +79,8 @@ interface DataContextType {
   deleteNote: (noteId: string) => Promise<void>;
 
   // Progress methods
-  adjustUserXP: (amount: number) => Promise<void>;
-  adjustUserGold: (amount: number) => Promise<void>;
+  adjustUserXP: (amount: number, opts?: { silent?: boolean }) => Promise<void>;
+  adjustUserGold: (amount: number, opts?: { silent?: boolean }) => Promise<void>;
 
   // Utility methods
   getCalendarMonth: (year: number, month: number) => Promise<CalendarDay[]>;
@@ -1018,7 +1018,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   }, [childUid, userAchievements, achievements, progress, playAchievement, checkAchievements]);
 
-  const adjustUserXP = useCallback(async (amount: number) => {
+  const adjustUserXP = useCallback(async (amount: number, opts?: { silent?: boolean }) => {
     if (!childUid) throw new Error('Child UID não definido');
     
     try {
@@ -1058,7 +1058,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         checkAchievements();
       }, 500);
       
-      toast.success(`${amount > 0 ? '+' : ''}${amount} XP aplicado!`);
+      if (!opts?.silent) toast.success(`${amount > 0 ? '+' : ''}${amount} XP aplicado!`);
     } catch (error) {
       console.error('❌ Erro ao ajustar XP:', error);
       toast.error('Erro ao ajustar XP');
@@ -1066,7 +1066,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   }, [childUid, rewards, progress.totalXP, playLevelUp, checkAchievements]);
 
-  const adjustUserGold = useCallback(async (amount: number) => {
+  const adjustUserGold = useCallback(async (amount: number, opts?: { silent?: boolean }) => {
     if (!childUid) throw new Error('Child UID não definido');
     
     try {
@@ -1082,7 +1082,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
       
       await FirestoreService.updateUserProgress(childUid, updates);
-      toast.success(`${amount > 0 ? '+' : ''}${amount} Gold aplicado!`);
+      if (!opts?.silent) toast.success(`${amount > 0 ? '+' : ''}${amount} Gold aplicado!`);
     } catch (error) {
       console.error('❌ Erro ao ajustar Gold:', error);
       toast.error('Erro ao ajustar Gold');

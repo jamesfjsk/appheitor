@@ -8,6 +8,9 @@ import type { GoalDoc, ChallengeDoc } from '../../types/village';
 import { getTodayBrazil, addDays } from '../../utils/clock';
 import { AI_MONTHLY_CALL_CAP, currentUsageMonth, getUsage, textCallsOf } from '../../services/aiUsage';
 import { subscribeHealth } from '../../services/observability';
+import { subscribeDailyQuiz } from '../../services/dailyQuizService';
+import { dilemmaOf } from '../../services/quiz/provaRules';
+import type { DailyQuiz } from '../../types';
 
 const HojeCard: React.FC<{ onOpen: (tab: string) => void }> = ({ onOpen }) => {
   const { childUid } = useAuth();
@@ -17,6 +20,8 @@ const HojeCard: React.FC<{ onOpen: (tab: string) => void }> = ({ onOpen }) => {
   const [errors, setErrors] = useState(0);
   const [aiHot, setAiHot] = useState(false);
   const [unclosed, setUnclosed] = useState(false);
+  const [todayQuiz, setTodayQuiz] = useState<DailyQuiz | null>(null);
+  const [yestQuiz, setYestQuiz] = useState<DailyQuiz | null>(null);
   const today = getTodayBrazil();
   const soon = addDays(today, 1);
   const yesterday = addDays(today, -1);
@@ -35,12 +40,14 @@ const HojeCard: React.FC<{ onOpen: (tab: string) => void }> = ({ onOpen }) => {
     const u4 = subscribeHealth(childUid, (h) => {
       setUnclosed(Boolean(h?.lastCloseDay && h.lastCloseDay < yesterday));
     });
+    const u5 = subscribeDailyQuiz(childUid, today, setTodayQuiz);
+    const u6 = subscribeDailyQuiz(childUid, yesterday, setYestQuiz);
     void getUsage(currentUsageMonth()).then((u) => {
       if (!u) return;
       setAiHot(textCallsOf(u) >= AI_MONTHLY_CALL_CAP * 0.8);
     }).catch(() => undefined);
-    return () => { u1(); u2(); u3(); u4(); };
-  }, [childUid, yesterday]);
+    return () => { u1(); u2(); u3(); u4(); u5(); u6(); };
+  }, [childUid, yesterday, today]);
 
   const pendingRedeem = redemptions.filter((r) => r.status === 'pending');
   const achieved = goals.filter((g) => g.status === 'achieved');
@@ -61,10 +68,21 @@ const HojeCard: React.FC<{ onOpen: (tab: string) => void }> = ({ onOpen }) => {
   if (aiHot) rows.push({ text: 'Uso de IA acima de 80% do teto', tab: 'english' });
   if (unclosed) rows.push({ text: 'Há dias sem fechar', tab: 'village' });
 
+  const dilemmaSource = todayQuiz?.completed ? todayQuiz : yestQuiz?.completed ? yestQuiz : null;
+  const dilemma = dilemmaSource ? dilemmaOf(dilemmaSource) : null;
+  const dilemmaWhen = dilemmaSource?.date === today ? 'Dilema de hoje' : 'Dilema de ontem';
+
   return (
     <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
       <h2 className="text-xl font-bold text-gray-900 mb-3">Hoje</h2>
-      {rows.length === 0 && <p className="text-sm text-gray-500">Nada pendente.</p>}
+      {dilemma && (
+        <button type="button" onClick={() => onOpen('quiz')} className="mb-4 w-full text-left rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">{dilemmaWhen}</p>
+          <p className="mt-1 text-sm text-gray-800">{dilemma.question}</p>
+          <p className="mt-2 text-sm text-gray-600">Ele escolheu: “{dilemma.chosen}”</p>
+        </button>
+      )}
+      {rows.length === 0 && !dilemma && <p className="text-sm text-gray-500">Nada pendente.</p>}
       <ul className="space-y-1">
         {rows.map((r, i) => (
           <li key={i}>

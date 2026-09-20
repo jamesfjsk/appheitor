@@ -22,6 +22,8 @@ import {
 import { createMineSfx } from '../mine/sfx';
 import ContractBoard from './ContractBoard';
 import ContractShell from './ContractShell';
+import MerchantDelivery from './MerchantDelivery';
+import RecadoBoard from './RecadoBoard';
 import { useData } from '../../../../contexts/DataContext';
 import { useVillage } from '../../../../contexts/VillageContext';
 import { claimKey, hasClaim } from '../../../../services/village/claims';
@@ -36,7 +38,7 @@ interface Props {
   onOpenLot?: (id: BuildingId) => void;
 }
 
-type View = 'loading' | 'board' | 'contract' | 'redstone';
+type View = 'loading' | 'board' | 'contract' | 'redstone' | 'merchant-v2' | 'note-v2';
 
 const BANNER = '/assets/english/ui/banner.webp';
 const TOTAL_CONTRACTS = 5;
@@ -52,6 +54,9 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
   const { progress: userProgress } = useData();
   const { village, modules } = useVillage();
   const cartOn = modules.logic === true; // Vagoneta só com o módulo ligado no painel (18/09)
+  const merchantV2 =
+    modules.contractsV2 === true ||
+    new URLSearchParams(window.location.search).get('contractsV2') === '1';
   const [today] = useState(() => getTodayBrazil());
   const [base, setBase] = useState<BaseDoc | null>(null);
   const [plan, setPlan] = useState<DailyPlan | null>(null);
@@ -132,14 +137,18 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
     if (!c || c.status !== 'open') return;
     playClick();
     setActive(copyContract(c));
-    setView('contract');
+    setView(
+      merchantV2 && c.type === 'merchant' ? 'merchant-v2'
+        : merchantV2 && c.type === 'note' ? 'note-v2'
+          : 'contract'
+    );
   };
 
   const redo = async (id: string) => {
     if (!childUid) return;
     try {
       await redoContract(childUid, today, id);
-      toast.success('Contrato aberto de novo: vale só o material.');
+      toast.success('O Comerciante espera de novo.');
     } catch (e) {
       console.error('EnglishBase: erro ao refazer contrato', e);
       toast.error('Não deu para reabrir o contrato.');
@@ -165,7 +174,7 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
     }
     setBackToRedstone(true);
     setActive(copyContract(plan.contracts[id] as Contract));
-    setView('contract');
+    setView(merchantV2 ? 'note-v2' : 'contract');
   };
 
   const spendOnLot = (id: BuildingId) => {
@@ -185,6 +194,42 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
         ? `Jogos de hoje · ${pick.label}`
         : active?.title ?? '';
   const errorMsg = loadError ?? genError;
+
+  if (childUid && view === 'merchant-v2' && merchantV2 && base && active && active.type === 'merchant') {
+    return (
+      <div onPointerDownCapture={unlockAudio}>
+        <MerchantDelivery
+          uid={childUid}
+          date={today}
+          contract={active}
+          level={plan?.level ?? 1}
+          base={base}
+          sfx={sfx}
+          onDone={backToBoard}
+          onQuit={backToBoard}
+          onBuildNow={spendOnLot}
+        />
+      </div>
+    );
+  }
+
+  if (childUid && view === 'note-v2' && merchantV2 && base && active && active.type === 'note') {
+    return (
+      <div onPointerDownCapture={unlockAudio}>
+        <RecadoBoard
+          uid={childUid}
+          date={today}
+          contract={active}
+          level={plan?.level ?? 1}
+          base={base}
+          sfx={sfx}
+          onDone={backToBoard}
+          onQuit={backToBoard}
+          onBuildNow={spendOnLot}
+        />
+      </div>
+    );
+  }
 
   if (childUid && view === 'redstone' && cartOn) {
     return (

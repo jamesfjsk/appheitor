@@ -6,25 +6,27 @@
 // sai da pré-checagem e a note avisa que a correção não veio.
 // ========================================
 
-import type { NoteContent, NoteError, NoteErrorTag, NoteInfo, NoteJudgement } from '../types/english';
-import { NOTE_ERROR_TAGS, buildJudgePrompt } from './english/prompts';
+import type { NoteContent, NoteError, NoteErrorTag, NoteInfo, NoteJudgement, NoteLesson } from '../types/english';
+import { NOTE_ERROR_TAGS, buildExplainPrompt, buildJudgePrompt } from './english/prompts';
 import { missingInfos, wordDistance } from './english/notePrecheck';
+import { isLazyNote, teachFromRecado } from './english/notePlay';
 import { noteScore } from './english/scoring';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
 
 const JUDGE_MODEL = 'gpt-4.1-mini';
 const JUDGE_TEMPERATURE = 0.2;
 const JUDGE_TIMEOUT_MS = 30_000;
+const EXPLAIN_TIMEOUT_MS = 18_000;
 
-/** Texto padrão quando a IA não manda a regra do erro principal */
+/** Só entra se a IA não mandar a fala deste recado */
 const NOTE_BY_TAG: Record<NoteErrorTag, string> = {
-  plural: 'Depois de dois, três... o substantivo vai para o plural (two swords).',
-  article: 'Antes de uma coisa só usamos a/an/the (a torch, an apple, the cave).',
-  verb: 'Toda frase precisa de um verbo na forma certa (I need, it is, there are).',
-  spelling: 'Confira a grafia da palavra em inglês, letra por letra.',
-  word_order: 'Em inglês a ordem é quem faz + verbo + o quê (I need two swords).',
-  preposition: 'Lugar e destino usam in/on/under/next to/for (in the cave, for the dog).',
-  other: 'Escreva tudo em inglês, sem palavras em português.',
+  plural: 'Depois de two, three... a coisa ganha s: two plates, two bags.',
+  article: 'Antes de uma coisa só: a plate, an apple, the bag.',
+  verb: 'Toda frase precisa do verbo certo: I do, I play, I am.',
+  spelling: 'Olha a palavra em inglês, letra por letra, e escreve de novo.',
+  word_order: 'Em inglês: quem faz, o verbo, o quê. I do my homework first.',
+  preposition: 'Lugar e motivo: on the chair, for school, after dinner.',
+  other: 'Escreve em inglês. Palavra de português no quadro não conta.',
 };
 
 export interface JudgeInput {
@@ -58,6 +60,29 @@ function applyFixes(text: string, errors: NoteError[]): string {
   return out;
 }
 
+function parseLessons(raw: unknown, infos: NoteInfo[], brief: string, written: string, missingPt: string[]): NoteLesson[] {
+  const byPt = new Map<string, string>();
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      if (!isRecord(item)) continue;
+      const pt = str(item.pt);
+      const say = str(item.say);
+      if (pt && say) byPt.set(pt.toLowerCase(), say);
+    }
+  }
+  return infos.map((info) => {
+    const say = byPt.get(info.pt.toLowerCase());
+    if (say && !isLazyNote(say)) return { pt: info.pt, say };
+    const missed = missingPt.some((m) => m.toLowerCase() === info.pt.toLowerCase());
+    return {
+      pt: info.pt,
+      say: missed
+        ? teachFromRecado(info, brief, written).say
+        : `Neste recado, ${info.pt} é ${info.en[0]}.`,
+    };
+  });
+}
+
 function parseErrors(raw: unknown): NoteError[] {
   if (!Array.isArray(raw)) return [];
   const out: NoteError[] = [];
@@ -80,10 +105,12 @@ function fallbackJudgement(input: JudgeInput, missing: NoteInfo[], reason: strin
   const isEnglish = text.length > 0;
   const missingPt = missing.map((m) => m.pt);
   const score: NoteJudgement['score'] = !isEnglish ? 0 : missingPt.length === 0 ? 2 : 1;
-  const note = missingPt.length
-    ? `A correção automática não veio (${reason}). Faltou dizer: ${missingPt.join('; ')}.`
-    : `A correção automática não veio (${reason}). As três informações estão no texto.`;
-  return { isEnglish, errors: [], missing: missingPt, corrected: text, note, score };
+  const first = missing[0];
+  const note = first
+    ? teachFromRecado(first, input.content.brief, text).say
+    : `Os três pregos acenderam. A correção fina (${reason}) não veio desta vez.`;
+  const lessons = parseLessons(null, input.content.mustInclude, input.content.brief, text, missingPt);
+  return { isEnglish, errors: [], missing: missingPt, corrected: text, note, lessons, score };
 }
 
 /**
@@ -131,8 +158,60 @@ export async function judgeNote(input: JudgeInput): Promise<NoteJudgement> {
   let corrected = str(r.corrected);
   if (!corrected || wordDistance(text, corrected) > errors.length + 1) corrected = applyFixes(text, errors);
   let note = str(r.note);
-  if (!note && errors.length) note = NOTE_BY_TAG[errors[0].tag];
-  if (!note && missing.length) note = `Faltou dizer: ${missing.join('; ')}.`;
-  const partial = { isEnglish, errors, missing, corrected, note };
+  if (!note || isLazyNote(note)) {
+    const firstMiss = input.content.mustInclude.find((info) => missing.some((m) => m.toLowerCase() === info.pt.toLowerCase()));
+    if (firstMiss) note = teachFromRecado(firstMiss, input.content.brief, text).say;
+    else if (errors.length) note = NOTE_BY_TAG[errors[0].tag];
+  }
+  const lessons = parseLessons(r.lessons, input.content.mustInclude, input.content.brief, text, missing);
+  const partial = { isEnglish, errors, missing, corrected, note, lessons };
   return { ...partial, score: noteScore(partial, input.level) };
+}
+
+/** Primeira falta: gera a fala deste recado. Não fecha a nota. */
+export async function explainNoteMiss(input: {
+  text: string;
+  content: NoteContent;
+  missing: NoteInfo[];
+  level: number;
+  template?: string | null;
+}): Promise<{ say: string; hear: string }> {
+  const first = input.missing[0];
+  const fallback = first
+    ? teachFromRecado(first, input.content.brief, input.text)
+    : { say: 'O quadro ainda não falou o pedido. Ouve o inglês e tenta de novo.', hear: '' };
+  if (!first || !isAIConfigured()) return fallback;
+
+  const prompt = buildExplainPrompt({
+    level: input.level,
+    brief: input.content.brief,
+    mustInclude: input.content.mustInclude,
+    model: input.content.model,
+    template: input.template ?? null,
+    text: input.text,
+    missing: input.missing,
+  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), EXPLAIN_TIMEOUT_MS);
+  try {
+    const { json } = await callOpenAI(prompt.system, prompt.user, prompt.maxTokens, {
+      model: JUDGE_MODEL,
+      temperature: 0.35,
+      withUsage: true,
+      signal: controller.signal,
+    });
+    const r = isRecord(json) ? json : {};
+    const say = str(r.say);
+    const hear = str(r.hear) || fallback.hear;
+    if (say && !isLazyNote(say) && !input.content.model.toLowerCase().includes(say.toLowerCase())) {
+      return { say, hear };
+    }
+    if (say && !isLazyNote(say)) return { say, hear };
+    return fallback;
+  } catch (error) {
+    console.warn('englishJudge: fala da falta não veio', error);
+    return fallback;
+  } finally {
+    clearTimeout(timer);
+  }
 }

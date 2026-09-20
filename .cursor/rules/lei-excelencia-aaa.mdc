@@ -72,7 +72,7 @@ Outros crimes da mesma família:
 
 ## Fontes de verdade e regras que nenhuma qualidade pode furar
 
-- **Ordem de leitura antes de qualquer pacote**: `docs/etapas/ETAPA_2_LANCAMENTO.md` (as decisões numeradas do pai são lei; a última é a 24), a seção do pacote em `docs/etapas/REVISAO_ETAPA_2_LANCAMENTO.md`, e os desenhos: `docs/MUNDO.md`, `docs/VILA_MAPA.md`, `docs/VILA_CONSTRUCOES.md`, `docs/VILA_CONQUISTAS.md`, `docs/VILA_ITENS.md`, `docs/MINA_CONTRATOS.md`, `docs/MISSOES_COMPROVANTE.md`, `docs/AVALIACAO_MENSAL.md`. Se o pedido contradiz um deles, para e pergunta; não escolhe.
+- **Ordem de leitura antes de qualquer pacote**: `docs/etapas/ETAPA_2_LANCAMENTO.md` (as decisões numeradas do pai são lei; a última é a 26), a seção do pacote em `docs/etapas/REVISAO_ETAPA_2_LANCAMENTO.md`, e os desenhos: `docs/MUNDO.md`, `docs/VILA_MAPA.md`, `docs/VILA_CONSTRUCOES.md`, `docs/VILA_CONQUISTAS.md`, `docs/VILA_ITENS.md`, `docs/MINA_CONTRATOS.md`, `docs/MISSOES_COMPROVANTE.md`, `docs/AVALIACAO_MENSAL.md`. Se o pedido contradiz um deles, para e pergunta; não escolhe.
 - **Recompensa só de primeira** (decisão 23): tentar de novo é permitido e ensina, mas não paga nem conta como acerto; sem aviso na tela. Gold pela metade; a missão da vida real pesa mais que qualquer jogo.
 - **Nada entra sem documento** (decisão 10): arquivo, tela ou mecânica nova só com linha na seção 12 do arquivo de etapa; senão sai da branch na revisão.
 - **Congelados** (só bug apontado em revisão): `src/services/village/cart.ts`, `CartBench.tsx`, o andar do Heitor em `npcBehavior.ts` (125 px/s, abre na chegada), as laterais da cena (`.mn-village .mn-stage::before`), a música (`bgm.ts`, `vila.mp3`), `src/game/**` (molde Phaser, sem import).
@@ -123,6 +123,31 @@ Onde isso vale: Placa, Casa, obras, Baú, Mina, toasts, botões, cadeados, hover
 
 Antes de escrever copy nova: já existe linha em `villageLines` / diálogo? Se sim, usa ou varia no mesmo tom. Não concatena `Faltam N` + `Abre às` + `(faltam HhMM)`.
 
+## Conteúdo educativo — a lei do professor (pai, 19/09)
+
+Quando o pedido toca em prova, contrato, pergunta, explicação, lição, reflexão ou qualquer texto que ensina, você **não é programador montando uma questão**: você é um professor especialista em conteúdo infantil (5º ano, 10 anos) e em ensino de inglês para criança. Crime real, já no ar: "Complete: He is ___ a book" com "writes" e "writing" sem contexto nem regra; "I like soccer" e "I like football" as duas certas; "5 maçãs menos 2"; "qual o nome da técnica de driblar?" (a resposta é o nome). Isso é conteúdo robotizado, e o Heitor erra todo dia sem aprender nada. **Ele não ganha recompensa pelo erro, mas o erro tem que ensinar.**
+
+Antes de escrever ou de deixar a IA escrever qualquer item, responda por escrito no relatório, item por item:
+
+1. **O que ele aprende** aqui, em uma frase? (Se a resposta é "nada" ou "decora um fato", refaz.)
+2. **Como ele vai aprender**: a lição, a explicação ou a mecânica ensina a regra com um exemplo concreto do mundo dele (escola, futebol, Vila, casa)? Ou só diz "a certa é X"?
+3. **Está claro** para uma criança de 10 anos lendo sozinha: uma frase curta, uma ideia, palavras que ela conhece, sem duplo sentido?
+4. **A questão está bem construída**: uma só resposta certa; distratores que representam o **erro típico** de um aluno dessa idade (não bobagens); nível do 5º ano (BNCC), com pelo menos uma etapa de raciocínio; a resposta não aparece no enunciado; o fato é de consenso.
+5. **O erro vira aprendizado**: a explicação diz por que a alternativa tentadora está errada, não só por que a certa está certa; a criança pode tentar de novo depois de ler (sem recompensa); o mesmo ponto volta em 3 e 10 dias por outro ângulo (revisita).
+6. **Progressão**: o item respeita o que ele já domina e empurra um degrau, nunca dois; o que ele errou ontem aparece hoje de forma mais fácil antes de subir.
+
+Inglês, onde ele tem mais dificuldade, regras próprias:
+
+- **Uma coisa nova por vez** (uma regra ou um grupo de palavras), sempre em contexto de frase, nunca palavra solta nem lista.
+- **Ouvir antes de ler, ler antes de escrever**: toda frase tem áudio; o texto só depois; a escrita vem por último com molde.
+- **A regra tem nome e exemplo em português** na explicação ("depois de 'is' o verbo ganha -ing: He is reading"), e a mesma regra aparece em três frases diferentes na mesma sessão.
+- **Distrator = erro que um brasileiro faz** (writes/writing, in/on, a/an, plural sem s), nunca uma variante correta em outro inglês.
+- **Vocabulário do mundo dele** (Vila, mina, escola, futebol, casa); palavra nova só com imagem e áudio, e ela reaparece nos dois dias seguintes.
+
+Proibido no conteúdo: resposta ou raiz da resposta no enunciado; duas alternativas corretas ou sinônimas; conta de uma etapa para 10 anos; definição circular; fato discutível apresentado como certo; tradução literal como única opção certa; pergunta que se responde sem ler a lição; explicação que só repete a alternativa.
+
+Fontes que mandam: `docs/AVALIACAO_MENSAL.md` (BNCC 5º ano, descritores SAEB, Bloom), `src/config/quizCurriculum.ts` (temas e ângulos), `docs/conteudo/`, `docs/MINA_CONTRATOS.md`. Evidência: o relatório traz 5 itens gerados de verdade nesta sessão, cada um com as seis respostas acima; se a IA devolver item que fura a barra, o código tem que descartar e pedir outro, e o relatório mostra que descartou.
+
 ## Kit obrigatório (não reinventar)
 
 | Precisa | Usa |
@@ -159,6 +184,7 @@ Arte nova (sprite, UI, tile): PixelLab / pipeline em `docs/ARTE_PIPELINE.md` e `
 ❌ Dizer "pronto" sem ter aberto o fluxo nesta sessão
 ❌ Feature extra para "ficar AAA"
 ❌ Furar MUNDO.md / economia / claim / duas portas
+❌ Questão que não ensina: resposta no enunciado, duas certas, conta de 1ª série, explicação que só repete a alternativa
 ```
 
 ```

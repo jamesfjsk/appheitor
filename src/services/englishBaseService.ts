@@ -17,6 +17,7 @@ import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, applyPickaxeBonu
 import { cracksOf, isBroken, liveBuildingLevel, ruinUseError } from './village/repair';
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
+import { merchantLevelFromSkill } from './english/merchantRoom';
 import { normalizedTokens } from './english/notePrecheck';
 import { assertAiBudget, buildDailyContracts, regenerateSingle } from './englishAi';
 import { prefetchAudio } from './englishTts';
@@ -30,7 +31,7 @@ const PLAN_SIZE = 5;
 /** Tentativas de pegar o lease / esperar outra aba antes de desistir */
 const WAIT_ATTEMPTS = 3;
 /** Planos anteriores lidos na geração (nomes, gêneros, etiquetas, reserva sem repetir em 14 dias) */
-const RECENT_LOOKBACK_DAYS = 15;
+const RECENT_LOOKBACK_DAYS = 30;
 /** "Gerar próximos 7 dias": hoje..hoje+7 */
 const UPCOMING_MAX_DAYS = 7;
 const THEME_REQUEST_MAX = 30;
@@ -136,6 +137,8 @@ export function fromBaseDoc(uid: string, data: Record<string, unknown>): BaseDoc
     noteStreak3: num(data.noteStreak3),
     vocab,
     contractsDone: num(data.contractsDone),
+    merchantDone: num(data.merchantDone),
+    merchantPerfect: num(data.merchantPerfect),
     daysPlayed: num(data.daysPlayed),
     streakDays: num(data.streakDays),
     lastPlayedDate: str(data.lastPlayedDate),
@@ -539,6 +542,7 @@ export async function completeContract(
   let contractType = '';
   let wordsMastered = 0;
   let perfect = false;
+  let roseLevel = 0;
   let out: CompleteResult | null = null;
 
   await runTransaction(db, async (tx) => {
@@ -573,6 +577,12 @@ export async function completeContract(
     const result: ContractResult = { ...outcome, materialEarned: material, rewarded, xp, gold, durationSec, finishedAt };
     contractType = contract.type;
     perfect = Number(outcome.score) >= Number(outcome.max) && Number(outcome.max) > 0;
+    const merchantDone = base.merchantDone + (contract.type === 'merchant' ? 1 : 0);
+    const merchantPerfect = base.merchantPerfect + (contract.type === 'merchant' && perfect ? 1 : 0);
+    const nextLevel =
+      contract.type === 'merchant'
+        ? Math.max(base.level, merchantLevelFromSkill(merchantDone, merchantPerfect))
+        : base.level;
 
     const materials = { ...base.materials, [contract.material]: base.materials[contract.material] + material };
     // Recado no estágio 2: a "Dica" custa 1 ferro (a tela só a libera com ferro em caixa)
@@ -587,13 +597,17 @@ export async function completeContract(
         : { scaffoldStage: base.scaffoldStage, noteStreak3: base.noteStreak3 };
     const nextBase: BaseDoc = {
       ...base,
+      level: nextLevel,
       materials,
       vocab,
       ...scaffold,
       ...playedDay(base, today),
       contractsDone: base.contractsDone + 1,
+      merchantDone,
+      merchantPerfect,
       updatedAt: finishedAt,
     };
+    if (nextLevel > base.level) roseLevel = nextLevel;
     wordsMastered = Object.values(vocab).filter((v) => (v?.seen ?? 0) >= 3).length;
     const before = affordableIds(base);
     const unlockedBuildings = affordableIds(nextBase).filter((id) => !before.includes(id));
@@ -645,6 +659,14 @@ export async function completeContract(
     await bumpFriend(uid, 'comerciante', 2);
   } catch (e) {
     console.warn('stats contrato', e);
+  }
+  if (roseLevel > 0) {
+    for (let i = 1; i <= UPCOMING_MAX_DAYS; i++) {
+      const next = addDays(today, i);
+      const plan = await getPlan(uid, next);
+      if (!plan || plan.level === roseLevel || hasDone(plan)) continue;
+      await regeneratePlan(uid, next).catch((e) => console.warn('plano futuro', e));
+    }
   }
   return out;
 }

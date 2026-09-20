@@ -208,11 +208,11 @@ export const BUILDINGS: BuildingDef[] = [
     labelEn: 'Vault',
     description: 'A poupança da Vila.',
     effects: [
-      'Abre o Cofrinho com 1 meta.',
-      '2 metas e o bônus de paciência (5% por semana, teto 20).',
-      'Faixa prêmio da temporada e Extrato mensal.',
+      'Cofre no chão. Cada aplicar é um montinho. 10 gold esperando viram +1 na semana.',
+      'O mesmo 10 gold agora rende +2 na semana.',
+      'O mesmo 10 rende +3. Faixa da temporada e o Extrato do mês.',
     ],
-    effect: 'Abre o Cofrinho com 1 meta.',
+    effect: 'Cofre no chão. Cada aplicar é um montinho. 10 gold esperando viram +1 na semana.',
     icon: '/assets/village/buildings/cofre-1.png',
     costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
     requiresCore: false,
@@ -366,6 +366,8 @@ export function initialBaseDoc(userId: string, nowIso: string, level = 1): BaseD
     noteStreak3: 0,
     vocab: {},
     contractsDone: 0,
+    merchantDone: 0,
+    merchantPerfect: 0,
     daysPlayed: 0,
     streakDays: 0,
     lastPlayedDate: '',
@@ -386,6 +388,7 @@ export const RELATION_EN: Record<Relation, string> = {
 };
 
 /** Termina em "de" para contrair com o artigo do lugar (da mesa, do baú) */
+/** next to = ao lado (colado). near/próximo é outra palavra e não entra. */
 export const RELATION_PT: Record<Relation, string> = {
   on: 'em cima de',
   in: 'dentro de',

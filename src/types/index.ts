@@ -52,6 +52,7 @@ export interface DailyQuizTheme {
   title: string;
   lesson: string;      // a "ideia do dia": texto curto e concreto
   whyItMatters: string;
+  curiosity?: string;  // 1 ou 2 frases, depois da ideia do dia
 }
 
 export interface DailyQuiz {

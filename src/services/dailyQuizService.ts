@@ -15,6 +15,7 @@ import type { EconomySettings, ModuleSettings } from '../types/village';
 import { addDays } from '../utils/clock';
 import { bumpChallenge } from './challengesService';
 import { nextQuizStreak } from './village/stats';
+import { reflectionOk } from './quiz/provaRules';
 
 export const dailyQuizId = (userId: string, date: string) => `${userId}_${date}`;
 
@@ -106,7 +107,8 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
   const generated = await generateDailyQuiz({
     seed,
     count,
-    avoidQuestions: avoid,
+    avoidQuestions: avoid.slice(0, 60),
+    date,
     forceOffline: modules.aiGeneration === false,
   });
 
@@ -144,13 +146,21 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
   xpEarned: number;
   goldEarned: number;
   answers: string[];
+  reflection: string;
 }): Promise<void> {
+  const reflection = result.reflection.trim();
+  if (!reflectionOk(reflection)) throw new Error('A reflexão ainda não está pronta.');
   await setDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), {
     userId,
     date,
     status: 'completed',
     completed: true,
-    ...result,
+    score: result.score,
+    totalQuestions: result.totalQuestions,
+    xpEarned: result.xpEarned,
+    goldEarned: result.goldEarned,
+    answers: result.answers,
+    reflection,
     completedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }, { merge: true });
@@ -179,7 +189,7 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     const deltas: Record<string, number> = { quizzesDone: 1 };
     if (result.score >= 6) deltas.quizScore = result.score;
     if (result.score >= 8) deltas.quizPerfect = 1;
-    await bumpVillage(userId, deltas, { set: { quizStreak: nextQuizStreak(prevStreak, yesterday?.completed === true, skipped) } });
+    await bumpVillage(userId, { ...deltas, reflections: 1 }, { set: { quizStreak: nextQuizStreak(prevStreak, yesterday?.completed === true, skipped) } });
     await bumpFriend(userId, 'sabio', 2);
   } catch (e) {
     console.warn('stats prova', e);

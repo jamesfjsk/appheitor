@@ -1,0 +1,47 @@
+{
+  "items": [
+    {
+      "file": "tunnel/hero-run.png",
+      "reference": "char/miner-ref.png",
+      "description": "young miner boy, yellow hard hat with headlamp, blue shirt, brown pants, brown boots, holding a wooden pickaxe resting on his shoulder, pixel art game character, clean black outline, soft shading, transparent background",
+      "action": "running cycle to the right: legs alternate in long strides, arms pump, the pickaxe stays still resting on the shoulder, body leans slightly forward",
+      "n_frames": 6,
+      "width": 64,
+      "height": 64,
+      "seed": 51,
+      "image_guidance_scale": 2.8
+    },
+    {
+      "file": "tunnel/hero-attack.png",
+      "reference": "char/miner-ref.png",
+      "description": "young miner boy, yellow hard hat with headlamp, blue shirt, brown pants, brown boots, holding a wooden pickaxe, pixel art game character, clean black outline, soft shading, transparent background",
+      "action": "swinging the pickaxe in a big overhead strike to the right",
+      "n_frames": 6,
+      "width": 64,
+      "height": 64,
+      "seed": 22
+    },
+    {
+      "file": "tunnel/hero-hit.png",
+      "reference": "char/miner-ref.png",
+      "description": "young miner boy, yellow hard hat with headlamp, blue shirt, brown pants, brown boots, holding a wooden pickaxe resting on his shoulder, pixel art game character, clean black outline, soft shading, transparent background",
+      "action": "small backward flinch after being hit: head tilts back, one hand goes to the chest, feet stay on the ground, the pickaxe stays on the shoulder, then returns to standing",
+      "n_frames": 4,
+      "width": 64,
+      "height": 64,
+      "seed": 52,
+      "image_guidance_scale": 2.8
+    },
+    {
+      "file": "tunnel/hero-fall.png",
+      "reference": "char/miner-ref.png",
+      "description": "young miner boy, yellow hard hat with headlamp, blue shirt, brown pants, brown boots, holding a wooden pickaxe resting on his shoulder, pixel art game character, clean black outline, soft shading, transparent background",
+      "action": "knees bend, body drops down and sits on the ground, then lies down on the floor face up with the pickaxe beside him, defeated but cartoonish",
+      "n_frames": 4,
+      "width": 64,
+      "height": 64,
+      "seed": 53,
+      "image_guidance_scale": 2.6
+    }
+  ]
+}

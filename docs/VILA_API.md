@@ -124,7 +124,11 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 ## `src/services/village/bank.ts`
 
 - `validateDeposit(goal, amount, availableGold)` — recusa amount, gold, closed, target.
-- `weeklyInterest(goals, weekIso, settings)` — 5% do `savedGold` já guardado, teto, rateio, ignora semana já paga.
+- `weeklyInterest(goals, weekIso, settings, vaultLevel)` — 10/20/30% do `savedGold` já guardado conforme o nível do Cofre, sem teto, ignora semana já paga. n0 não paga.
+- `vaultInterestPct(level)` — 0 / 10 / 20 / 30.
+- `patienceForecast(saved, weeks, ratePct)` — bônus composto em gold inteiro, sem teto.
+- `unlockOnAfter` / `canRedeemPile` / `redeemWaitLine` / `saqueLine` — prazo das semanas, dia do saque e quando o Resgatar acende.
+- `vaultGoalCap(level)` — n1 = 5 montinhos, n2 = 8 (cada Aplicar é um).
 - `weeklyStatement(transactions, weekIso)` — ganhou, gastou, guardou, juros, taxa.
 - `savingsRate(transactionsMonth)`.
 
@@ -195,10 +199,10 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 
 ### `src/services/goalsService.ts`
 
-- `subscribeGoals` / `listGoals` / `createGoal` (`familyId`, recusa se já há `maxOpenGoals`).
+- `subscribeGoals` / `listGoals` / `createGoal` (`familyId`, recusa se já há `vaultGoalCap` abertas; cada Aplicar cria um montinho).
 - `depositGoal` — transação `availableGold` + `savedGold` + linha `goal_deposit` tipo `saved`.
-- `requestCancel` / `applyWeeklyInterest` (ao abrir o app; `goal_interest` com `balanceBefore == balanceAfter`; respeita teto de gold do jogo).
-- `finishGoal(id, 'achieved' | 'cancelled', adminUid)` — alcançada zera e cria `redemptions`; cancelada devolve com `goal_withdraw`.
+- `requestCancel` / `redeemGoal` / `applyWeeklyInterest` (ao abrir o app; `goal_interest` com `balanceBefore == balanceAfter`; respeita teto de gold do jogo).
+- `finishGoal(id, 'achieved' | 'cancelled', adminUid)` — alcançada zera e cria `redemptions`; cancelada devolve com `goal_withdraw`. `redeemGoal` é o resgate da criança depois de `unlockOn`.
 
 ### `src/services/challengesService.ts`
 
@@ -233,7 +237,7 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 
 ## Telas (criança)
 
-- `Cofrinho` — abas Cofrinho / Extrato / Paciência; placa se `modules.bank === false`.
+- `Cofrinho` — abas Cofrinho / Extrato / Paciência; um card por aplicação (gold, rende +N, saque no dia); valores 10–50; placa se `modules.bank === false`.
 - `Extrato` — 5 semanas; `embedded` quando dentro do Banco.
 - `Agenda` / `DesafiosCard` / `Mochila` / `ItemSlot` / `ItemCard` / `Casa`.
 - Ferraria (`Oficina.tsx`) — mesmo lugar que a Fornalha: Fogo (máquina), Forjar, Obras só leitura.
