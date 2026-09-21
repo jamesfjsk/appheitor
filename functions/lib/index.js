@@ -20,10 +20,21 @@ const TTS_MODELS = new Set(['gpt-4o-mini-tts']);
 const TTS_MAX_CHARS = 300;
 const CHAT_MAX_TOKENS = 4000;
 const TTS_INSTRUCTIONS = 'fale devagar e com clareza, tom acolhedor, para uma criança de 10 anos aprendendo inglês, pausa curta entre as palavras';
+const TTS_INSTRUCTIONS_PT = 'Português do Brasil, conversa natural com um menino de 10 anos. Tom de professor paciente. Ritmo de fala normal, não arrastado e não de locutor.';
+const TTS_VOICES = new Set(['nova', 'sage']);
 const TTS_SPEED_DEFAULT = 0.9;
 const TTS_SPEED_SLOW = 0.75;
+const TTS_SPEED_TALK = 1.05;
+const TTS_SPEEDS = new Set([TTS_SPEED_SLOW, TTS_SPEED_DEFAULT, TTS_SPEED_TALK]);
 function ttsSpeedOf(n) {
-    return n === TTS_SPEED_SLOW ? TTS_SPEED_SLOW : TTS_SPEED_DEFAULT;
+    const s = Number(n);
+    return TTS_SPEEDS.has(s) ? s : TTS_SPEED_DEFAULT;
+}
+function ttsVoiceOf(v) {
+    return TTS_VOICES.has(String(v || '')) ? v : 'nova';
+}
+function ttsInstructionsOf(voice) {
+    return voice === 'sage' ? TTS_INSTRUCTIONS_PT : TTS_INSTRUCTIONS;
 }
 function addDays(date, n) {
     const t = Date.parse(`${date}T12:00:00.000-03:00`) + n * 86400000;
@@ -157,15 +168,17 @@ exports.openai = (0, https_1.onCall)({ region: REGION, secrets: [OPENAI_API_KEY]
         throw new https_1.HttpsError('invalid-argument', `A voz aceita no máximo ${TTS_MAX_CHARS} caracteres.`);
     const ttsModel = TTS_MODELS.has(body.model || '') ? body.model : 'gpt-4o-mini-tts';
     const ttsSpeed = ttsSpeedOf(body.speed);
+    const ttsVoice = ttsVoiceOf(body.voice);
+    const ttsInstructions = ttsInstructionsOf(ttsVoice);
     await bumpUsage(ttsModel, 0, 0, 0, text.length);
     const speech = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
         body: JSON.stringify({
             model: ttsModel,
-            voice: body.voice || 'nova',
+            voice: ttsVoice,
             speed: ttsSpeed,
-            instructions: TTS_INSTRUCTIONS,
+            instructions: ttsInstructions,
             input: text,
             response_format: 'mp3',
         }),
@@ -175,7 +188,7 @@ exports.openai = (0, https_1.onCall)({ region: REGION, secrets: [OPENAI_API_KEY]
         throw new https_1.HttpsError('internal', `OpenAI TTS ${speech.status}: ${detail.slice(0, 180)}`);
     }
     const buf = Buffer.from(await speech.arrayBuffer());
-    const hash = (0, crypto_1.createHash)('sha256').update(`${ttsModel}|${body.voice || 'nova'}|${ttsSpeed}|${TTS_INSTRUCTIONS}|${text}`).digest('hex');
+    const hash = (0, crypto_1.createHash)('sha256').update(`${ttsModel}|${ttsVoice}|${ttsSpeed}|${ttsInstructions}|${text}`).digest('hex');
     const path = `english/tts/${hash}.mp3`;
     const file = (0, storage_1.getStorage)().bucket().file(path);
     await file.save(buf, { contentType: 'audio/mpeg', metadata: { cacheControl: 'public, max-age=31536000, immutable' } });

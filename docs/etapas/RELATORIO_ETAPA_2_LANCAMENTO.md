@@ -785,4 +785,30 @@ Itens que a barra derrubaria (tocha/picareta/caverna, lista para o ferreiro) sa�
 
 Nenhuma que tenha impedido abrir o Recado. **Pare para o commit depois do aceite visual.**
 
+## Hotfix — teto de 1 ruína por dia (20/09)
+
+Sentimento: o dia ruim deixa uma obra caída, não a vila inteira no chão.
+
+### O que mudou
+
+Pedido do pai (decisão 30): várias missões não feitas no mesmo dia derrubam **uma** construção, não uma por missão. Gold de penalidade, capacete, Cerca, skipPenalty e o reparo (dia completo ou 1 material) ficam iguais.
+
+### Arquivos
+
+- `src/services/village/repair.ts` (`cracksAfterClose`)
+- `src/services/village/__tests__/etapa2.test.ts`
+- `docs/VILA_CONSTRUCOES.md`, `docs/MINER_MISSIONS_ROADMAP.md`, `docs/VILA_API.md`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (decisão 30)
+
+### Como verificou
+
+| Comando | Resultado |
+|---|---|
+| `npm run test:village` | 10 arquivos, todos passaram. Caso novo: 3 missões → `['fornalha']`; ruína antiga + 3 perdidas → +1 só (`['fornalha', 'bau']`) |
+
+### Fora
+
+- Penalidade de gold por missão não feita: não pedida.
+- Ruínas de dias anteriores sem reparo continuam acumulando (1 nova por dia).
+
 

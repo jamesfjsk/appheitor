@@ -105,6 +105,7 @@ const DailyQuizManager: React.FC = () => {
             <p className="text-gray-600">+{quiz.xpEarned} XP · +{quiz.goldEarned} gold</p>
             <p className="mt-2 font-semibold text-gray-800">Reflexão: {quiz.reflectionPrompt}</p>
             <p className="mt-1 text-gray-700 italic">{quiz.reflection ? `"${quiz.reflection}"` : 'Ainda não respondeu.'}</p>
+            {quiz.reflectionNote && <p className="mt-1 text-gray-500">{quiz.reflectionNote}</p>}
           </div>
         )}
 

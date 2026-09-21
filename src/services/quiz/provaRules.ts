@@ -91,17 +91,98 @@ export function hasKeyMash(text: string): boolean {
   return /(.)\1{3,}/.test(compact);
 }
 
-export function reflectionOk(text: string): boolean {
+const FILLER = new Set([
+  'que', 'para', 'porque', 'isso', 'essa', 'esse', 'uma', 'uns', 'com', 'por', 'nao', 'sim',
+  'ele', 'ela', 'voce', 'como', 'mais', 'menos', 'muito', 'ainda', 'hoje', 'amanha', 'quando',
+  'onde', 'qual', 'quais', 'seu', 'sua', 'meu', 'minha', 'dos', 'das', 'pelo', 'pela', 'depois',
+  'antes', 'tambem', 'so', 'ja', 'eu', 'tu', 'nos', 'eles', 'elas', 'tem', 'foi', 'era', 'ser',
+  'ter', 'fazer', 'vai', 'vou', 'pra', 'pro', 'aqui', 'ali', 'la', 'de', 'da', 'do', 'em', 'no',
+  'na', 'os', 'as', 'um', 'ao', 'aos', 'mas', 'se', 'ou', 'e', 'o', 'a', 'te', 'me', 'lhe',
+]);
+
+export function uniqueWordCount(text: string): number {
+  return new Set(normalizeQuizText(text).split(' ').filter(Boolean)).size;
+}
+
+export function contentWords(text: string): string[] {
+  return normalizeQuizText(text)
+    .split(' ')
+    .filter((w) => w.length >= 4 && !FILLER.has(w));
+}
+
+/** Colou a pergunta ou um pedaço grande da ideia. */
+export function copiesSource(text: string, source: string): boolean {
+  const t = normalizeQuizText(text);
+  const s = normalizeQuizText(source);
+  if (t.length < 20 || s.length < 20) return false;
+  const tWords = t.split(' ').filter(Boolean).length;
+  const sWords = s.split(' ').filter(Boolean).length;
+  if (s.includes(t) && tWords >= 8) return true;
+  if (t.includes(s) && sWords >= 6) return true;
+  return false;
+}
+
+/** Pelo menos uma palavra de verdade em comum com a ideia ou a pergunta. */
+export function touchesIdea(text: string, about: { prompt: string; title: string; lesson: string }): boolean {
+  const aboutSet = new Set([
+    ...contentWords(about.prompt),
+    ...contentWords(about.title),
+    ...contentWords(about.lesson),
+  ]);
+  if (aboutSet.size === 0) return true;
+  return contentWords(text).some((w) => aboutSet.has(w));
+}
+
+export const REFLECT_SHORT = 'Ainda está curto. Conta o que ficou na cabeça, com as suas palavras.';
+export const REFLECT_MASH = 'Isso não é frase. Escreve de verdade, sem apertar a mesma tecla.';
+export const REFLECT_COPY = 'Isso é a pergunta, não a sua resposta. Escreve com a sua boca.';
+export const REFLECT_THIN = 'Tá repetindo a mesma palavra. Diz o que ficou, com palavras diferentes.';
+export const REFLECT_OFFTOPIC = 'Isso não fala da ideia de hoje. Lê a pergunta de novo e responde com a sua boca.';
+
+export function reflectionLocalSay(text: string, about: { prompt: string; title: string; lesson: string }): string | null {
+  const trimmed = text.trim();
+  if (wordCount(trimmed) < REFLECTION_MIN_WORDS) return REFLECT_SHORT;
+  if (hasKeyMash(trimmed)) return REFLECT_MASH;
+  if (hasRepeatedWord(trimmed, 4) || uniqueWordCount(trimmed) < 6) return REFLECT_THIN;
+  if (contentWords(trimmed).length < 3) return REFLECT_SHORT;
+  if (copiesSource(trimmed, about.prompt) || copiesSource(trimmed, about.title) || copiesSource(trimmed, about.lesson)) {
+    return REFLECT_COPY;
+  }
+  return null;
+}
+
+export function reflectionOk(text: string, about?: { prompt: string; title: string; lesson: string }): boolean {
+  if (about) return reflectionLocalSay(text, about) === null;
   const trimmed = text.trim();
   if (wordCount(trimmed) < REFLECTION_MIN_WORDS) return false;
   if (hasRepeatedWord(trimmed, 4)) return false;
   if (hasKeyMash(trimmed)) return false;
+  if (uniqueWordCount(trimmed) < 6) return false;
+  if (contentWords(trimmed).length < 3) return false;
   return true;
 }
 
 export function knowledgeAreasForWeekday(weekday: number): string[] {
   const n = ((weekday % 7) + 7) % 7;
   return [...KNOWLEDGE_AREAS.slice(n), ...KNOWLEDGE_AREAS.slice(0, n)];
+}
+
+/** Teto da função de voz (`functions/src/index.ts` TTS_MAX_CHARS). */
+export const SPEAK_MAX_CHARS = 300;
+
+function clipSpeak(text: string, max: number): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  const slice = clean.slice(0, max);
+  const stop = Math.max(slice.lastIndexOf('. '), slice.lastIndexOf('! '), slice.lastIndexOf('? '));
+  if (stop >= 40) return slice.slice(0, stop + 1).trim();
+  const sp = slice.lastIndexOf(' ');
+  return (sp > 20 ? slice.slice(0, sp) : slice).trim();
+}
+
+/** Fala só a explicação. Sem nome, sem "quase" de refrão: o carimbo já diz se acertou. */
+export function speakVerdict(explanation: string, maxChars = SPEAK_MAX_CHARS): string {
+  return clipSpeak(explanation, maxChars);
 }
 
 export function dilemmaOf(quiz: {

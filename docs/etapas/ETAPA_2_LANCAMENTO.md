@@ -48,6 +48,7 @@ Regras da semana:
 27. **Paciência do Cofre: 10/20/30 e sem teto** (pedido do pai em 19/09, ao ver 10 gold / quatro semanas em +0): o bônus deixa de ser 5% com teto semanal. Cofre n1 = 10% (10 gold → +1 por semana), n2 = 20%, n3 = 30% (n3 continua trancado até a Etapa 3). Gold inteiro; o de hoje rende na semana que vem. Sem teto de paciência na tela e na conta (`interestCapGold` não corta). O teto de gold do jogo (baú, desafio, etc.) não muda.
 28. **Resgate do Cofre** (pedido do pai em 19/09: o tempo escolhido não tinha saída): as semanas ficam gravadas (`unlockOn`). Enquanto rende, o card diz quando volta. No dia, **Resgatar** no próprio montinho do Cofrinho devolve o gold (e o que já rendeu) ao bolso. Antes disso não saca. Montinho antigo sem prazo já pode resgatar.
 29. **Um montinho por aplicar** (pedido do pai em 19/09: 45 gold num bolo e +4 sem ele entender): cada Aplicar vira um card (gold, + por semana, dia do saque). Não soma em cima do anterior. Valores só **10, 20, 30, 40, 50** (10% fecha na conta: 10→+1, 20→+2). Cofre n1 até 5 montinhos, n2 até 8. Montinho antigo misturado fica até o resgate.
+30. **No máximo 1 obra em ruínas por dia** (pedido do pai em 20/09): a decisão 2 permanece no resto (obra caída tranca Baú, Cofrinho, juros e Ferraria até o reparo; prova continua com a Mesa caída). Muda só o teto: várias missões não feitas no mesmo dia derrubam **uma** construção, não uma por missão. Gold de penalidade não muda.
 
 
 ## 2. Calendário
@@ -327,6 +328,7 @@ Não fazer nesta etapa: restilizar o painel; mexer na Vagoneta fora de bug do E2
 | `englishBase.merchantDone` / `merchantPerfect` + `merchantLevelFromSkill` | contratos-v2 | desempenho no Comerciante | sobe `englishBase.level`; amanhã regenera; pedido (item+prep+lugar) não repete | Entrega do Comerciante |
 | `settings/modules.contractsV2` (padrão true) | contratos-v2 | quadro da Mina | abre `MerchantDelivery`; desligado = contrato antigo | não ensina |
 | `src/services/quiz/provaRules.ts`, `dailyPrompt.ts` (+ `village/__tests__/provaV2.test.ts`) | prova-v2 | decisão 26 | prompt, sanitize, reflexão, tempo de leitura, cartão Hoje | prova do dia (Etapa 2, §22) |
+| `src/services/quiz/provaSpeak.ts` (+ `speakVerdict` em `provaRules.ts`) | prova-v2 | decisão 26 / lei | Sábio fala só o veredito (acerto/erro + explicação); voz `sage`; sfx de carimbo | prova do dia (Etapa 2, §22) |
 | `docs/exemplos/telas/prova-v2/` (fotos + `_shot_prova.mjs`) | prova-v2 | decisão 26 | aceite visual: convite, ideia, pergunta no mesmo papiro | prova do dia (Etapa 2, §22) |
 | `public/assets/village/ui/panel-mesa.png`, `mesa-tabua.png` | prova-v2 | lei / decisão 26 | moldura e tábua da mesa da prova | não ensina |
 | `public/assets/village/ui/papiro-rolo.png`, `papiro-folha.png` | prova-v2 | lei / decisão 26 | rolo e fibra do papiro da ideia | não ensina |

@@ -149,6 +149,19 @@ export function playUiError(ctx: AudioContext | null, on: boolean): void {
   });
 }
 
+export function playProvaHit(ctx: AudioContext | null, on: boolean): void {
+  withSfx(ctx, on, (audio, now) => {
+    sfxWood(audio, now, 0.055, 1380, 0.026);
+  });
+}
+
+export function playProvaMiss(ctx: AudioContext | null, on: boolean): void {
+  withSfx(ctx, on, (audio, now) => {
+    sfxWood(audio, now, 0.06, 640, 0.04);
+    sfxThump(audio, now, 0.07);
+  });
+}
+
 export function playUiNote(ctx: AudioContext | null, on: boolean): void {
   withSfx(ctx, on, (audio, now) => {
     sfxTone(audio, N.D5, now, 0.14, 0.07, { lp: 2200 });

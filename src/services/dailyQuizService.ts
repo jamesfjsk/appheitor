@@ -42,6 +42,7 @@ function fromDoc(id: string, data: Record<string, unknown>): DailyQuiz | null {
     goldEarned: typeof data.goldEarned === 'number' ? data.goldEarned : undefined,
     answers: Array.isArray(data.answers) ? (data.answers as string[]) : undefined,
     reflection: typeof data.reflection === 'string' ? data.reflection : undefined,
+    reflectionNote: typeof data.reflectionNote === 'string' ? data.reflectionNote : undefined,
     completedAt: (data.completedAt as Timestamp | undefined)?.toDate?.(),
   };
 }
@@ -147,9 +148,11 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
   goldEarned: number;
   answers: string[];
   reflection: string;
+  reflectionNote?: string;
 }): Promise<void> {
   const reflection = result.reflection.trim();
   if (!reflectionOk(reflection)) throw new Error('A reflexão ainda não está pronta.');
+  const reflectionNote = result.reflectionNote?.trim();
   await setDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), {
     userId,
     date,
@@ -161,6 +164,7 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     goldEarned: result.goldEarned,
     answers: result.answers,
     reflection,
+    ...(reflectionNote ? { reflectionNote } : {}),
     completedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }, { merge: true });

@@ -15,17 +15,22 @@ import type { ModuleSettings } from '../types/village';
 
 const TTS_MODEL = 'gpt-4o-mini-tts';
 const TTS_VOICE = 'nova';
+const TTS_VOICE_SAGE = 'sage';
 /** Mesmo texto da função (`functions/src/index.ts`). O hash inclui isto. */
 export const TTS_INSTRUCTIONS =
   'fale devagar e com clareza, tom acolhedor, para uma criança de 10 anos aprendendo inglês, pausa curta entre as palavras';
+/** Mesmo texto da função para a voz sage (prova do dia). */
+export const TTS_INSTRUCTIONS_PT =
+  'Português do Brasil, conversa natural com um menino de 10 anos. Tom de professor paciente. Ritmo de fala normal, não arrastado e não de locutor.';
 export const TTS_SPEED = 0.9;
 export const TTS_SPEED_SLOW = 0.75;
+export const TTS_SPEED_TALK = 1.05;
 
-export type PlayTextOpts = { speed?: number };
+export type PlayTextOpts = { speed?: number; voice?: 'nova' | 'sage'; lang?: 'en' | 'pt' };
 /** Nenhuma reprodução segura a tela por mais que isso */
 const PLAY_GUARD_MS = 60_000;
 /** Pré-busca: quantas gerações ao mesmo tempo */
-const PREFETCH_CONCURRENCY = 2;
+const PREFETCH_CONCURRENCY = 4;
 
 const hasSubtle = (): boolean => typeof crypto !== 'undefined' && typeof crypto.subtle !== 'undefined';
 const hasSpeech = (): boolean => typeof window !== 'undefined' && 'speechSynthesis' in window;
@@ -34,6 +39,7 @@ const hasSpeech = (): boolean => typeof window !== 'undefined' && 'speechSynthes
 const urlCache = new Map<string, Promise<string | null>>();
 const audioCache = new Map<string, HTMLAudioElement>();
 let current: HTMLAudioElement | null = null;
+let currentSettle: (() => void) | null = null;
 
 /** Espaços únicos e aspas retas: o mesmo texto com formatação diferente vira o mesmo áudio */
 function normalizeText(text: string): string {
@@ -47,15 +53,23 @@ async function sha256Hex(s: string): Promise<string> {
     .join('');
 }
 
-const clampSpeed = (n: number | undefined): number => (n === TTS_SPEED_SLOW ? TTS_SPEED_SLOW : TTS_SPEED);
+const clampSpeed = (n: number | undefined): number => {
+  if (n === TTS_SPEED_SLOW) return TTS_SPEED_SLOW;
+  if (n === TTS_SPEED_TALK) return TTS_SPEED_TALK;
+  return TTS_SPEED;
+};
+const clampVoice = (v: PlayTextOpts['voice']): 'nova' | 'sage' => (v === TTS_VOICE_SAGE ? TTS_VOICE_SAGE : TTS_VOICE);
+const clampLang = (l: PlayTextOpts['lang']): 'en' | 'pt' => (l === 'pt' ? 'pt' : 'en');
+const instructionsOf = (lang: 'en' | 'pt'): string => (lang === 'pt' ? TTS_INSTRUCTIONS_PT : TTS_INSTRUCTIONS);
 
-const cacheKey = (normalized: string, speed: number): string =>
-  `${TTS_MODEL}|${TTS_VOICE}|${speed}|${TTS_INSTRUCTIONS}|${normalized}`;
+const cacheKey = (normalized: string, speed: number, voice: 'nova' | 'sage', lang: 'en' | 'pt'): string =>
+  `${TTS_MODEL}|${voice}|${speed}|${instructionsOf(lang)}|${normalized}`;
 
-const memKey = (normalized: string, speed: number): string => `${speed}|${normalized}`;
+const memKey = (normalized: string, speed: number, voice: 'nova' | 'sage', lang: 'en' | 'pt'): string =>
+  `${lang}|${voice}|${speed}|${normalized}`;
 
 /** Lê o índice; sem entrada, gera, sobe e grava. Devolve null quando não dá para ter o mp3. */
-async function resolveUrl(hash: string, normalized: string, speed: number): Promise<string | null> {
+async function resolveUrl(hash: string, normalized: string, speed: number, voice: 'nova' | 'sage', lang: 'en' | 'pt'): Promise<string | null> {
   const indexRef = doc(db, 'englishAudio', hash);
   const indexed = await getDoc(indexRef);
   if (indexed.exists()) {
@@ -67,27 +81,28 @@ async function resolveUrl(hash: string, normalized: string, speed: number): Prom
   const openai = httpsCallable(functions, 'openai');
   const result = await openai({
     kind: 'tts',
-    voice: TTS_VOICE,
+    voice,
+    lang,
     input: normalized,
     model: TTS_MODEL,
     speed,
-    instructions: TTS_INSTRUCTIONS,
   });
   const data = result.data as { url?: string };
   return typeof data.url === 'string' && data.url ? data.url : null;
 }
 
-/** URL do mp3 do texto (cache em memória, índice no Firestore, geração quando falta); null se não der */
 export function audioUrlFor(text: string, opts?: PlayTextOpts): Promise<string | null> {
   const normalized = normalizeText(text);
   const speed = clampSpeed(opts?.speed);
+  const voice = clampVoice(opts?.voice);
+  const lang = clampLang(opts?.lang);
   if (!normalized || !hasSubtle()) return Promise.resolve(null);
-  const key = memKey(normalized, speed);
+  const key = memKey(normalized, speed, voice, lang);
   const existing = urlCache.get(key);
   if (existing) return existing;
   const task = (async () => {
-    const hash = await sha256Hex(cacheKey(normalized, speed));
-    return resolveUrl(hash, normalized, speed);
+    const hash = await sha256Hex(cacheKey(normalized, speed, voice, lang));
+    return resolveUrl(hash, normalized, speed, voice, lang);
   })();
   const guarded = task.catch((error: unknown) => {
     console.warn('englishTts: sem áudio para o texto', error);
@@ -116,6 +131,9 @@ export function stopAudio(): void {
     current.currentTime = 0;
     current = null;
   }
+  const settle = currentSettle;
+  currentSettle = null;
+  settle?.();
   if (hasSpeech()) window.speechSynthesis.cancel();
 }
 
@@ -134,6 +152,7 @@ function playUrl(url: string): Promise<void> {
       clearTimeout(guard);
       detach();
       if (current === el) current = null;
+      if (currentSettle === settle) currentSettle = null;
       resolve();
     };
     const fallback = () => {
@@ -142,6 +161,7 @@ function playUrl(url: string): Promise<void> {
     guard = window.setTimeout(settle, PLAY_GUARD_MS);
     el.addEventListener('ended', settle);
     el.addEventListener('error', fallback);
+    currentSettle = settle;
     current = el;
     el.currentTime = 0;
     el.play().catch(fallback);
@@ -153,9 +173,12 @@ export async function playText(text: string, opts?: PlayTextOpts): Promise<void>
   stopAudio();
   const normalized = normalizeText(text);
   if (!normalized) return;
+  const speed = clampSpeed(opts?.speed);
+  const voice = clampVoice(opts?.voice);
+  const lang = clampLang(opts?.lang);
   let url = await audioUrlFor(normalized, opts);
   if (!url) {
-    urlCache.delete(memKey(normalized, clampSpeed(opts?.speed)));
+    urlCache.delete(memKey(normalized, speed, voice, lang));
     url = await audioUrlFor(normalized, opts);
   }
   if (!url) return;
@@ -164,7 +187,7 @@ export async function playText(text: string, opts?: PlayTextOpts): Promise<void>
 
 // ---------- Pré-busca ----------
 
-const prefetchQueue: { text: string; speed: number }[] = [];
+const prefetchQueue: { text: string; speed: number; voice: 'nova' | 'sage'; lang: 'en' | 'pt' }[] = [];
 const queued = new Set<string>();
 let prefetchRunning = 0;
 
@@ -173,23 +196,24 @@ function pumpPrefetch(): void {
     const job = prefetchQueue.shift();
     if (!job) break;
     prefetchRunning++;
-    void audioUrlFor(job.text, { speed: job.speed }).finally(() => {
+    void audioUrlFor(job.text, { speed: job.speed, voice: job.voice, lang: job.lang }).finally(() => {
       prefetchRunning--;
-      queued.delete(memKey(job.text, job.speed));
+      queued.delete(memKey(job.text, job.speed, job.voice, job.lang));
       pumpPrefetch();
     });
   }
 }
 
-/** Gera (ou confirma) o áudio das frases em segundo plano, poucas por vez, sem repetir */
 export function prefetchAudio(texts: string[], opts?: PlayTextOpts): void {
   const speed = clampSpeed(opts?.speed);
+  const voice = clampVoice(opts?.voice);
+  const lang = clampLang(opts?.lang);
   for (const raw of texts) {
     const text = normalizeText(raw);
-    const key = memKey(text, speed);
+    const key = memKey(text, speed, voice, lang);
     if (!text || queued.has(key) || urlCache.has(key)) continue;
     queued.add(key);
-    prefetchQueue.push({ text, speed });
+    prefetchQueue.push({ text, speed, voice, lang });
   }
   pumpPrefetch();
 }

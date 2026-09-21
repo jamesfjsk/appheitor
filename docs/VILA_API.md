@@ -153,7 +153,7 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 ## `src/services/village/repair.ts`
 
 - `DEFAULT_LOTS_BY_PERIOD`.
-- `cracksAfterClose(cracks, missedTaskIds, lotsByPeriod)`.
+- `cracksAfterClose(cracks, missed, buildings)` — no máximo 1 obra nova por dia.
 - `canRepair` / `repairRefund`.
 
 ## `src/services/village/late.ts`

@@ -82,8 +82,8 @@ export function cracksOf(raw: unknown): string[] {
 }
 
 /**
- * Uma missão perdida derruba uma obra construída.
- * Prefere o lote do período; se já caiu ou não existe, pega a próxima de pé.
+ * Dia com missão perdida derruba no máximo uma obra construída.
+ * Prefere o lote do período da primeira missão perdida; se já caiu ou não existe, pega a próxima de pé.
  */
 export function cracksAfterClose(
   cracks: string[],
@@ -91,15 +91,13 @@ export function cracksAfterClose(
   buildings: Record<string, number> = {},
 ): string[] {
   const next = cracks.filter((id) => BREAKABLE_LOTS.includes(id as BuildingId));
+  if (missed.length === 0) return next;
   const built = BREAKABLE_LOTS.filter((id) => (buildings[id] || 0) >= 1);
-  for (const task of missed) {
-    const prefer = DEFAULT_LOTS_BY_PERIOD[task.period ?? 'morning'];
-    const lot = (built.includes(prefer) && !next.includes(prefer))
-      ? prefer
-      : built.find((id) => !next.includes(id));
-    if (!lot) break;
-    next.push(lot);
-  }
+  const prefer = DEFAULT_LOTS_BY_PERIOD[missed[0].period ?? 'morning'];
+  const lot = (built.includes(prefer) && !next.includes(prefer))
+    ? prefer
+    : built.find((id) => !next.includes(id));
+  if (lot) next.push(lot);
   return next;
 }
 

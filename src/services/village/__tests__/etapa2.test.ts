@@ -245,15 +245,20 @@ test('linha do dia ordena missão, compromisso sem hora no fim e fechar o dia', 
   expect(untimed?.sortMin).toBe(21 * 60);
 });
 
-test('uma missão perdida derruba uma obra; conserto pede o dia de hoje completo', () => {
+test('dia perdido derruba no máximo uma obra; conserto pede o dia de hoje completo', () => {
   const built = { fornalha: 1, bau: 1, cerca: 1, torre: 1, mesa: 1, cofre: 1, agenda: 1, mercado: 1, campinho: 0, arena: 0 };
   expect(cracksAfterClose([], [{ period: 'afternoon' }], built)).toEqual(['cerca']);
   expect(cracksAfterClose([], [
     { period: 'morning' },
     { period: 'morning' },
     { period: 'evening' },
-  ], built)).toEqual(['fornalha', 'bau', 'torre']);
+  ], built)).toEqual(['fornalha']);
   expect(cracksAfterClose(['fornalha'], [{ period: 'morning' }], built)).toEqual(['fornalha', 'bau']);
+  expect(cracksAfterClose(['fornalha'], [
+    { period: 'morning' },
+    { period: 'afternoon' },
+    { period: 'evening' },
+  ], built)).toEqual(['fornalha', 'bau']);
   expect(cracksAfterClose([], [{ period: 'afternoon' }], { fornalha: 1 })).toEqual(['fornalha']);
   expect(cracksAfterClose([], [{ period: 'morning' }, { period: 'evening' }], {})).toEqual([]);
   expect(liveBuildingLevel(built, ['fornalha'], 'fornalha')).toBe(0);

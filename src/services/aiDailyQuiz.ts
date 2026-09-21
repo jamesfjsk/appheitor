@@ -8,7 +8,7 @@ import { callOpenAI, isAIConfigured, loadOfflineQuestions, sanitizeQuestions } f
 import { childAgeToday } from '../config/rules';
 import { QuizThemeSeed } from '../config/quizCurriculum';
 import { weekdayOf } from '../utils/clock';
-import { DAILY_QUIZ_MODEL } from './quiz/provaRules';
+import { DAILY_QUIZ_MODEL, reflectionLocalSay, touchesIdea, REFLECT_OFFTOPIC } from './quiz/provaRules';
 import { buildPrompt } from './quiz/dailyPrompt';
 
 export { buildPrompt } from './quiz/dailyPrompt';
@@ -119,4 +119,72 @@ export async function generateDailyQuiz(opts: {
     reflectionPrompt: 'O que você aprendeu hoje que pode usar amanhã?',
     source: 'offline',
   };
+}
+
+export interface ReflectionJudge {
+  ok: boolean;
+  say: string;
+  source: 'local' | 'ai';
+}
+
+const JUDGE_TIMEOUT_MS = 18_000;
+const REFLECT_WAIT = 'O Sábio não leu desta vez. Entrega de novo daqui a um instante.';
+
+function clipSage(say: string): string {
+  const clean = say.replace(/\s+/g, ' ').trim();
+  if (clean.length <= 160) return clean;
+  const slice = clean.slice(0, 160);
+  const sp = slice.lastIndexOf(' ');
+  return (sp > 40 ? slice.slice(0, sp) : slice).trim();
+}
+
+/**
+ * A prova só conta depois desta leitura: lixo cai na hora; a IA diz se a frase
+ * responde a pergunta da ideia do dia. Sem IA, o filtro local basta.
+ */
+export async function judgeReflection(input: {
+  text: string;
+  prompt: string;
+  title: string;
+  lesson: string;
+  forceOffline?: boolean;
+}): Promise<ReflectionJudge> {
+  const about = { prompt: input.prompt, title: input.title, lesson: input.lesson };
+  const localSay = reflectionLocalSay(input.text, about);
+  if (localSay) return { ok: false, say: localSay, source: 'local' };
+  const localOk = (): ReflectionJudge => {
+    if (!touchesIdea(input.text, about)) return { ok: false, say: REFLECT_OFFTOPIC, source: 'local' };
+    return { ok: true, say: 'O Sábio leu. A Mina abre.', source: 'local' };
+  };
+  if (input.forceOffline || !isAIConfigured()) return localOk();
+
+  const lesson = input.lesson.replace(/\s+/g, ' ').trim().slice(0, 400);
+  const system = `Você é o Sábio da Vila. Lê a reflexão de um menino de 10 anos (5º ano) sobre a ideia do dia.
+
+Aceita (ok=true) se ele responde a pergunta com as próprias palavras e fala da ideia ou de como usar isso hoje (escola, casa, futebol, amigos). Tem que ter um pensamento dele.
+
+Recusa (ok=false) se for teclado, palavras soltas, recado vazio ("foi legal", "não sei"), cópia da pergunta ou da ideia, ou se não tem a ver com o tema.
+
+Voz: uma frase de jogo, sem ouro, sem pontos, sem o nome dele, sem "Salvar". Se recusou, diz o que falta. Se aceitou, diz só que leu.
+
+Responda SOMENTE JSON: {"ok": true ou false, "say": "frase curta"}`;
+  const user = `Ideia: ${input.title}\n${lesson}\n\nPergunta: ${input.prompt}\n\nEle escreveu: ${input.text.trim()}`;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), JUDGE_TIMEOUT_MS);
+  try {
+    const raw = await callOpenAI(system, user, 180, {
+      signal: controller.signal,
+      temperature: 0.2,
+    });
+    const rec = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : null;
+    if (!rec || typeof rec.ok !== 'boolean') return localOk();
+    const say = clipSage(typeof rec.say === 'string' ? rec.say : rec.ok ? 'O Sábio leu. A Mina abre.' : REFLECT_WAIT);
+    return { ok: rec.ok, say, source: 'ai' };
+  } catch (e) {
+    console.warn('judgeReflection: IA falhou, filtro local vale', e);
+    return localOk();
+  } finally {
+    clearTimeout(timer);
+  }
 }

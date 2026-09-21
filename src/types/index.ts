@@ -72,6 +72,8 @@ export interface DailyQuiz {
   goldEarned?: number;
   answers?: string[];
   reflection?: string;
+  /** Frase do Sábio ao aceitar ou recusar a reflexão. */
+  reflectionNote?: string;
   completedAt?: Date;
 }
 
