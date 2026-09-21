@@ -13,7 +13,7 @@ import { judgeReflection } from '../../services/aiDailyQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
 import { EXPLAIN_READ_MS, LESSON_READ_MS, readingMs, reflectionOk } from '../../services/quiz/provaRules';
-import { prefetchVerdicts, speakProvaVerdict, stopProvaVoice } from '../../services/quiz/provaSpeak';
+import { prefetchLesson, prefetchVerdicts, speakProvaLesson, speakProvaVerdict, stopProvaVoice } from '../../services/quiz/provaSpeak';
 import { ISO_NPC } from '../../config/village';
 
 const STAR = '/assets/english/ui/star.webp';
@@ -207,6 +207,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const [voiceDone, setVoiceDone] = useState(true);
   const prefetched = useRef(false);
   const stepLock = useRef(false);
+  const voiceTick = useRef(0);
 
   const lessonText = [quiz?.theme.lesson, quiz?.theme.whyItMatters, quiz?.theme.curiosity].filter(Boolean).join(' ');
   const lessonWait = useReadWait(
@@ -274,16 +275,39 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const isLast = quiz ? current === quiz.questions.length - 1 : false;
   const canLeavePrompt = Boolean(quiz?.completed || !required || !ready);
   const canClose = Boolean(quiz?.completed && (phase === 'prompt' || paid));
+  const lessonKey = quiz
+    ? [quiz.theme.title, quiz.theme.lesson, quiz.theme.whyItMatters, quiz.theme.curiosity].join('\n')
+    : '';
 
   useEffect(() => {
-    if (!open || !quiz || (phase !== 'lesson' && phase !== 'questions')) return;
+    if (!quiz?.theme.lesson) return;
+    prefetchLesson(quiz.theme);
     for (const q of quiz.questions) {
       if (q.explanation) prefetchVerdicts(q.explanation);
     }
-  }, [open, phase, quiz]);
+  }, [quiz?.id, lessonKey, quiz]);
+
+  useEffect(() => {
+    if (!open || phase !== 'lesson' || !quiz?.theme.lesson) return;
+    const tick = ++voiceTick.current;
+    const theme = quiz.theme;
+    if (!isSoundEnabled) {
+      setVoiceDone(true);
+      return;
+    }
+    setVoiceDone(false);
+    void speakProvaLesson(theme, true, () => voiceTick.current !== tick).finally(() => {
+      if (voiceTick.current === tick) setVoiceDone(true);
+    });
+    return () => {
+      voiceTick.current += 1;
+      stopProvaVoice();
+    };
+  }, [open, phase, lessonKey, isSoundEnabled, quiz?.theme.title, quiz?.theme.lesson, quiz?.theme.whyItMatters, quiz?.theme.curiosity]);
 
   const postpone = () => {
     playClick();
+    voiceTick.current += 1;
     stopProvaVoice();
     setVoiceDone(true);
     setOpen(false);
@@ -570,9 +594,12 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
             {phase === 'lesson' && (
               <ReadWaitButton
                 clock={lessonWait}
+                disabled={!voiceDone}
                 className="mc-btn-green"
                 onFire={() => {
                   playClick();
+                  voiceTick.current += 1;
+                  stopProvaVoice();
                   setPhase('questions');
                 }}
               >

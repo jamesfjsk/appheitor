@@ -17,10 +17,12 @@ import {
   reflectionLocalSay,
   reflectionOk,
   revealParts,
+  speakChunks,
   speakVerdict,
   takeWords,
   touchesIdea,
   wordCount,
+  lessonSpeakText,
 } from '../../quiz/provaRules';
 
 test('ideia aparece no ritmo da leitura, sem jogar o fim no começo', () => {
@@ -104,6 +106,27 @@ test('áreas de conhecimento giram pelo dia da semana e o dilema é a terceira p
   const d = dilemmaOf(quiz);
   expect(d?.question).toBe('O que você faria no vestiário?');
   expect(d?.chosen).toBe('Falar com o amigo');
+});
+
+test('ideia do dia fala inteira, em fatias de 300, sem cortar o fim', () => {
+  const theme = {
+    title: 'Por que as colmeias têm hexágonos?',
+    lesson: 'Na escola o juiz apita e todo mundo para. Esperar a vez no futebol ensina mais que gritar. Paciência é deixar o outro jogar.',
+    whyItMatters: 'Quem espera joga melhor com os amigos.',
+    curiosity: 'No canto da mesa: o apito vale na rua também.',
+  };
+  const full = lessonSpeakText(theme);
+  expect(full.startsWith('Por que as colmeias têm hexágonos?')).toBe(true);
+  expect(full.includes('Paciência')).toBe(true);
+  expect(full.includes('apito vale')).toBe(true);
+  const parts = speakChunks(full);
+  expect(parts.join(' ').replace(/\s+/g, ' ')).toBe(full);
+  expect(parts.every((p) => p.length <= 300)).toBe(true);
+  const long = `${'palavra '.repeat(80)}Fim da primeira. A segunda frase precisa aparecer depois, inteira, sem cair fora.`;
+  const chunks = speakChunks(long);
+  expect(chunks.length >= 2).toBe(true);
+  expect(chunks.every((p) => p.length <= 300)).toBe(true);
+  expect(chunks.join(' ').includes('A segunda frase precisa aparecer')).toBe(true);
 });
 
 test('veredito falado: só a explicação, sem nome e sem refrão', () => {

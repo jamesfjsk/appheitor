@@ -185,6 +185,53 @@ export function speakVerdict(explanation: string, maxChars = SPEAK_MAX_CHARS): s
   return clipSpeak(explanation, maxChars);
 }
 
+/** A ideia inteira, começando pelo título, em fatias que cabem na voz. */
+export function lessonSpeakText(theme: { title?: string; lesson?: string; whyItMatters?: string; curiosity?: string }): string {
+  const title = (theme.title ?? '').replace(/\s+/g, ' ').trim();
+  const head = title && !/[.!?]$/.test(title) ? `${title}.` : title;
+  return [head, theme.lesson, theme.whyItMatters, theme.curiosity].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+export function speakChunks(text: string, max = SPEAK_MAX_CHARS): string[] {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (!clean) return [];
+  if (clean.length <= max) return [clean];
+  const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((s) => s.trim()).filter(Boolean) ?? [clean];
+  const out: string[] = [];
+  let buf = '';
+  const pushWords = (raw: string) => {
+    let piece = '';
+    for (const w of raw.split(' ')) {
+      const next = piece ? `${piece} ${w}` : w;
+      if (next.length <= max) {
+        piece = next;
+        continue;
+      }
+      if (piece) out.push(piece);
+      piece = w.length <= max ? w : w.slice(0, max);
+    }
+    buf = piece;
+  };
+  for (const s of sentences) {
+    if (s.length > max) {
+      if (buf) {
+        out.push(buf);
+        buf = '';
+      }
+      pushWords(s);
+      continue;
+    }
+    const next = buf ? `${buf} ${s}` : s;
+    if (next.length <= max) buf = next;
+    else {
+      if (buf) out.push(buf);
+      buf = s;
+    }
+  }
+  if (buf) out.push(buf);
+  return out;
+}
+
 export function dilemmaOf(quiz: {
   questions: Array<{ kind?: string; question: string }>;
   answers?: string[];
