@@ -643,7 +643,7 @@ const Finale: React.FC<{
   reward: CompleteReward;
   wagonsIn: boolean;
   onNext: () => void;
-}> = ({ judgement, answer, brief, model, infos, reward, wagonsIn, onNext }) => {
+}> = ({ judgement, answer, model, infos, reward, wagonsIn, onNext }) => {
   const { playClick } = useSound();
   const count = Math.max(0, reward.materialEarned);
   const allIn = judgement.score >= 3;

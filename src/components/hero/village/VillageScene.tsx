@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { BuildingId } from '../../../types/english';
-import { buildingSprite, CHEST_DAILY, CHEST_DAILY_OPEN, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, kidName, lookBodySrc, visibleCracks, type SceneProp } from '../../../config/village';
+import { buildingSprite, CHEST_DAILY, CHEST_DAILY_OPEN, crackedLabel, houseSprite, ISO_MINER, ISO_MINER_IDLE, ISO_MINER_WALK, ISO_NPC, ISO_NPC_WALK, LOT_SCENE_LABEL, NPC_LABEL, PET_SPRITE, SCENE_PROPS, kidName, lookBodySrc, previewBuildingLevel, visibleCracks, type SceneProp } from '../../../config/village';
 import type { NpcId, VillageDoc, VillageSceneEvent } from '../../../types/village';
 import type { ChestMapLook } from '../../../services/village/chest';
 import { npcTarget, npcTouch, npcHopPx, lookFacing, npcWalk, npcRoutine, heroClickPlan, heroGroundPlan, heroWalkAlong, heroShouldOpen, arrivePulse, DEFAULT_WALK_GRAPH, HERO_ARRIVE_HOLD_MS, type WalkGraph } from '../../../services/village/npcBehavior';
@@ -33,6 +33,8 @@ import {
   paintWater,
   pickHit,
   paintEmptyLot,
+  skipLotSprite,
+  coverPaintedLookout,
   paintSitLog,
   paintChestGlint,
   chestLidBob,
@@ -367,6 +369,16 @@ function spriteBox(
       destH: destW,
       dx: lot.x + lot.w / 2 - destW / 2,
       dy: lot.y + lot.h - destW,
+    };
+  }
+  if (lot.id === 'torre') {
+    const destW = empty ? 72 : 104;
+    const destH = empty ? 72 : 104;
+    return {
+      destW,
+      destH,
+      dx: lot.x + lot.w / 2 - destW / 2,
+      dy: empty ? lot.y + lot.h / 2 - destW / 2 : lot.y - 8,
     };
   }
   if (lot.id === 'cerca') {
@@ -978,7 +990,7 @@ const VillageScene: React.FC<Props> = ({
 
       anchors.lots.forEach((lot) => {
         const bid = lot.id as BuildingId;
-        const level = buildings[bid] || 0;
+        const level = previewBuildingLevel(bid, buildings[bid] || 0);
         const cracked = cracks.includes(lot.id);
         const reserved = Boolean(lot.landmark);
         const visualLevel = reserved ? Math.max(1, level) : (cracked ? Math.max(1, level) : level);
@@ -988,7 +1000,7 @@ const VillageScene: React.FC<Props> = ({
         const kind = lot.id === 'campinho' ? 'campinho' : 'lot';
         const { destW, destH, dx, dy } = spriteBox(lot, empty, kind);
         const name = cracked ? crackedLabel(lot.id) : LOT_SCENE_LABEL[lot.id];
-        const skipSprite = (lot.id === 'torre' && !cracked) || (lot.id === 'cerca' && !empty);
+        const skipSprite = skipLotSprite(lot.id, empty);
         const fenceBuilt = lot.id === 'cerca' && !empty;
         const lotId = `build:${lot.id}`;
         const hit: Hotspot = skipSprite || empty
@@ -1007,7 +1019,7 @@ const VillageScene: React.FC<Props> = ({
           };
         layers.push({
           id: hit.id,
-          y: lot.y + lot.h + (empty && lot.id !== 'cerca' && lot.id !== 'torre' ? 12 : 0),
+          y: lot.id === 'torre' && !empty ? lot.y : lot.y + lot.h + (empty && lot.id !== 'cerca' && lot.id !== 'torre' ? 12 : 0),
           hit: fenceBuilt ? undefined : hit,
           draw: (c) => {
             let dw = destW;
@@ -1034,13 +1046,17 @@ const VillageScene: React.FC<Props> = ({
             const shaking = cracked && !repairing && !reducedMotion && now < crackShakeUntil.current;
             const shakeX = (shaking ? Math.sin(now / 38) * 2 : 0) + pulse.shakeX;
             const gateLot = gated && !reserved && quizBlocksDest(lotId);
+            if (lot.id === 'torre' && !empty) {
+              const plate = nightGround?.canvas || ground;
+              if (plate) coverPaintedLookout(c, plate);
+            }
             if (empty && lot.id !== 'torre') {
               paintEmptyLot(c, lot.x + pulse.shakeX, lot.y, lot.w, lot.h, night, lot.id === 'mesa' ? '#e8b923' : '#7ecb4a');
             } else if (cracked && heal < 1) {
               if (lot.id === 'torre') paintLotRuins(c, ox, oy, dw, dh, shakeX, 1 - heal);
               if (sprite) paintRuinedSprite(c, sprite, ox, oy, dw, dh, lot.id, shakeX, 1 - heal);
               else paintLotRuins(c, ox, oy, dw, dh, shakeX, 1 - heal);
-              if (heal > 0 && sprite && lot.id !== 'torre') {
+              if (heal > 0 && sprite) {
                 c.save();
                 c.globalAlpha = heal;
                 c.drawImage(gateLot ? graySprite(sprite, Math.max(1, Math.round(dw)), Math.max(1, Math.round(dh))) : sprite, ox, oy, dw, dh);
@@ -1049,6 +1065,9 @@ const VillageScene: React.FC<Props> = ({
             } else if (sprite && !skipSprite && !empty) {
               const drawn = gateLot ? graySprite(sprite, Math.max(1, Math.round(dw)), Math.max(1, Math.round(dh))) : sprite;
               c.drawImage(drawn, ox + shakeX, oy, dw, dh);
+              if (lot.id === 'torre' && night && !cracked) {
+                paintGlow(c, ox + dw / 2 + shakeX, oy + Math.round(dh * 0.12), 18, [255, 170, 55], 0.34);
+              }
             }
             if (gateLot && lot.id !== 'cerca') {
               const onPad = empty || skipSprite;

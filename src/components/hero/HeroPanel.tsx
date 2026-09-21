@@ -87,6 +87,12 @@ const HeroPanel: React.FC = () => {
     setQuizCompleted(Boolean(localStorage.getItem(quizKey)));
   }, [progress.userId, clockToday]);
 
+  const markQuizPending = useCallback(() => {
+    if (!progress.userId) return;
+    localStorage.removeItem(`quiz_completed_${progress.userId}_${getTodayBrazil()}`);
+    setQuizCompleted(false);
+  }, [progress.userId]);
+
   const markQuizDone = useCallback(() => {
     if (!progress.userId) return;
     localStorage.setItem(`quiz_completed_${progress.userId}_${getTodayBrazil()}`, '1');
@@ -120,7 +126,7 @@ const HeroPanel: React.FC = () => {
             </div>
           </div>
           <AfterOnboard>
-            <DailyQuiz onComplete={markQuizDone} openRequested={quizRequestId} />
+            <DailyQuiz onComplete={markQuizDone} onPending={markQuizPending} openRequested={quizRequestId} />
             <LevelUpModal />
           </AfterOnboard>
         </VillageShell>

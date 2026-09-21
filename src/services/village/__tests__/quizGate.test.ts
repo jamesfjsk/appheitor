@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { quizBlocksDest, quizGateActive, quizLockedFor, quizOpensOnRequest } from '../quizGate';
+import { quizBlocksDest, quizDoneToday, quizGateActive, quizLockedFor, quizOpensOnRequest } from '../quizGate';
 
 test('com prova obrigatória e Mesa caída, a Mina continua trancada e a prova abre por pedido', () => {
   const quizLocked = true;
@@ -30,6 +30,13 @@ test('arena landmark não entra no portão da prova', () => {
   expect(quizBlocksDest('build:arena')).toBe(false);
   expect(quizBlocksDest('arena')).toBe(false);
   expect(quizBlocksDest('build:mesa')).toBe(true);
+});
+
+test('a prova de ontem, ainda na aba que virou a meia-noite, não conta como feita hoje', () => {
+  expect(quizDoneToday({ completed: true, date: '2026-09-18' }, '2026-09-19')).toBe(false);
+  expect(quizDoneToday({ completed: true, date: '2026-09-19' }, '2026-09-19')).toBe(true);
+  expect(quizDoneToday({ completed: false, date: '2026-09-19' }, '2026-09-19')).toBe(false);
+  expect(quizDoneToday(null, '2026-09-19')).toBe(false);
 });
 
 run();

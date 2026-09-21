@@ -48,7 +48,7 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 - **Nível 2**: **Recordes e Troféu da semana** (Etapa 2).
 - **Nível 3**: vê o **Mapa de habilidades** (acertos por matéria, da Memória da Prova) e as **Histórias** dos personagens (pedidos cumpridos). "Propor desafios" saiu da tela em 15/09 e sai do texto do nível em 17/09.
 - **Ao tocar**: cartão com abas Conquistas, Recordes, Troféus, Habilidades (as que o nível liberou; as outras com cadeado e o nível necessário).
-- **Visual**: `buildings/torre-1..3.png`; luz no topo à noite.
+- **Visual**: `buildings/torre-1..3.png` na cena (n1 tocha, n2 telhado, n3 bandeira); o fundo pintado fica só no lote vazio. Luz no topo à noite.
 
 ### 5. Biblioteca (Library): o saber (id `mesa`)
 

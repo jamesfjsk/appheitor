@@ -811,4 +811,56 @@ Pedido do pai (decisão 30): várias missões não feitas no mesmo dia derrubam 
 - Penalidade de gold por missão não feita: não pedida.
 - Ruínas de dias anteriores sem reparo continuam acumulando (1 nova por dia).
 
+## Torre na cena (21/09)
+
+Sentimento: subir a Torre muda o morro. n1 tocha, n2 telhado, n3 bandeira.
+
+### Causa
+
+O fundo `backdrop-day.png` já tem um mirante de madeira pintado. O canvas pulava o sprite da Torre (`skipSprite` quando o lote não estava rachado), então n1, n2 e n3 eram o mesmo vigia. Os PNG `torre-1.png`, `torre-2.png` e `torre-3.png` existiam e o cartão da obra já os mostrava; a Vila não.
+
+### O que mudou
+
+- Torre construída desenha o PNG do nível (104×104 no lote).
+- O mirante pintado é coberto com um recorte do próprio fundo; no nível 0 o morro continua com o vigia de madeira.
+- O Olheiro pinta na frente (camada mais baixa) e à noite fica no topo.
+- `?torre=1|2|3` só em localhost, no mesmo espírito de `?crack=`, sem gravar no save.
+
+### Arquivos
+
+- `src/components/hero/village/drawAmbient.ts` (`skipLotSprite`, `coverPaintedLookout`)
+- `src/components/hero/village/VillageScene.tsx`
+- `src/config/village.ts` (`previewBuildingLevel`)
+- `src/services/village/__tests__/hover.test.ts`
+- `docs/VILA_CONSTRUCOES.md`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (§12)
+- `docs/exemplos/telas/cena-v2/_shot_torre.mjs`
+
+### Como verificou
+
+Conta `teste@flash.com` (uid de teste; save da Torre continua 0). Níveis 1–3 só na prévia `?torre=`. `npm run test:village` / `node scripts/run-english-tests.mjs village`: 10 arquivos, hover 10/10.
+
+| Foto | Frame |
+|---|---|
+| `cena-v2/torre-n0-morro.png` | 1280: vigia de madeira, Olheiro no alto |
+| `cena-v2/torre-n1-morro.png` | 1280: base de pedra (tocha do PNG) |
+| `cena-v2/torre-n2-morro.png` | 1280: telhado e janelas |
+| `cena-v2/torre-n3-morro.png` | 1280: bandeira |
+| `cena-v2/torre-n2-cena-1280.png` | 1280: Vila inteira, pedra no morro |
+| `cena-v2/torre-cena-1920.png` | 1920: Olheiro no topo da n2 |
+| `cena-v2/torre-noite-1280.png` | 1280 `?h=21`: Olheiro no topo, Sábio na fogueira |
+
+frame lido: nada sobreposto, cortado ou fora do clique. n0 madeira ≠ n1 pedra ≠ n2 telhado ≠ n3 bandeira. Cerca construída segue no muro.
+
+### Barra
+
+1–7: o morro mostra o nível; sprite no lote; Olheiro visível (1920 e noite); toast do Baú não come o corpo da Torre.
+8–12: sem gold novo; relógio Brasília (`?h=21`); save do Heitor e do teste intocados.
+13–16: teste `skipLotSprite` + `previewBuildingLevel`; fotos 1280 e 1920.
+
+### Fora
+
+Não apaguei o mirante pintado do arquivo de arte (é do líder). Sem `?torre=` a conta teste (nível 0) continua com o vigia de madeira — é o lote vazio. A tocha do n1 é miúda no recorte de 1280; o salto que o Heitor vê é madeira → pedra → telhado → bandeira.
+
+
 

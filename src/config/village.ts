@@ -642,6 +642,22 @@ export function crackedListSentence(ids: string[]): string {
   return `${clean.length} obras cairam.`;
 }
 
+/** Em localhost, `?torre=2` mostra o sprite do nível sem gravar no save. */
+export function previewBuildingLevel(id: string, level: number): number {
+  if (id !== 'torre') return level;
+  if (typeof window === 'undefined') return level;
+  if (!/localhost|127\.0\.0\.1/.test(window.location.hostname)) return level;
+  try {
+    const raw = new URLSearchParams(window.location.search).get('torre');
+    if (raw == null || raw === '') return level;
+    const n = Math.floor(Number(raw));
+    if (!Number.isFinite(n)) return level;
+    return Math.max(0, Math.min(3, n));
+  } catch {
+    return level;
+  }
+}
+
 /** Em localhost, `?crack=fornalha` na primeira carga mostra o dano sem gravar no save. */
 const DEV_CRACK: string[] = (() => {
   if (typeof window === 'undefined') return [];

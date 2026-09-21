@@ -27,3 +27,8 @@ export function quizGateActive(quizLocked: boolean): boolean {
 export function quizOpensOnRequest(openRequested: boolean | number | undefined): boolean {
   return Boolean(openRequested);
 }
+
+/** Só a prova de HOJE conta como feita: a de ontem, ainda na memória da aba que virou a meia-noite, não destranca o dia novo. */
+export function quizDoneToday(quiz: { completed?: boolean; date?: string } | null | undefined, today: string): boolean {
+  return Boolean(quiz?.completed && quiz.date === today);
+}

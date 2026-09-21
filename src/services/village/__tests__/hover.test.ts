@@ -1,5 +1,6 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { hoverAnchor, hoverLabelPos, idleFrameIndex, idleBob, idleShift, pickHit, visibleGrowthMarks, DEFAULT_GROWTH, wrapDrift, breezeSway, paintWind, paintSkyLife } from '../../../components/hero/village/drawAmbient';
+import { hoverAnchor, hoverLabelPos, idleFrameIndex, idleBob, idleShift, pickHit, visibleGrowthMarks, DEFAULT_GROWTH, wrapDrift, breezeSway, paintWind, paintSkyLife, skipLotSprite } from '../../../components/hero/village/drawAmbient';
+import { previewBuildingLevel } from '../../../config/village';
 
 test('cerca: âncora no portão, não no rodapé da caixa AABB', () => {
   const fence = { x: 400, y: 500, w: 480, h: 72, hover: 'fence' as const };
@@ -99,6 +100,19 @@ test('céu e vento pintam de dia; noite some; reduced só desacelera', () => {
   const breeze = fakeCtx();
   paintWind(breeze.ctx, 1280, 640, 2, false, false);
   expect(breeze.marks.filter((m) => m === 'arc').length > 14).toBe(true);
+});
+
+test('torre construída desenha o sprite do nível; cerca construída usa o muro', () => {
+  expect(skipLotSprite('torre', false)).toBe(false);
+  expect(skipLotSprite('torre', true)).toBe(false);
+  expect(skipLotSprite('cerca', false)).toBe(true);
+  expect(skipLotSprite('cerca', true)).toBe(false);
+  expect(skipLotSprite('fornalha', false)).toBe(false);
+});
+
+test('preview da Torre no localhost não mexe nos outros lotes', () => {
+  expect(previewBuildingLevel('torre', 0)).toBe(0);
+  expect(previewBuildingLevel('fornalha', 2)).toBe(2);
 });
 
 void run();

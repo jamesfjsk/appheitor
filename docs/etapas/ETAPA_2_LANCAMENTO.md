@@ -334,7 +334,7 @@ Não fazer nesta etapa: restilizar o painel; mexer na Vagoneta fora de bug do E2
 | `public/assets/village/ui/papiro-rolo.png`, `papiro-folha.png` | prova-v2 | lei / decisão 26 | rolo e fibra do papiro da ideia | não ensina |
 | `src/services/village/bank.ts` (`vaultInterestPct`) | Cofre | decisão 27 | Cofrinho, `goalsService.applyWeeklyInterest` | educação financeira (paciência) |
 | `src/services/goalsService.ts` (`redeemGoal`, `unlockOn`) | Cofre | decisão 28 | Cofrinho, `firestore.rules` | educação financeira (resgatar) |
-| `src/components/hero/village/Cofrinho.tsx` (um montinho por aplicar; 10–50) | Cofre | decisão 29 | `vaultGoalCap`, `saqueLine` | educação financeira (paciência) |
+| `src/components/hero/village/drawAmbient.ts` (`skipLotSprite`, `coverPaintedLookout`); `village.ts` (`previewBuildingLevel`) | hotfix | Heitor 21/09 | `VillageScene` desenha `torre-1..3` no morro | não ensina |
 
 ### Vagoneta da Mina: o que é e ficha pedagógica
 

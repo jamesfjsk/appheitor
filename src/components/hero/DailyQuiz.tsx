@@ -11,7 +11,7 @@ import { DailyQuiz as DailyQuizDoc } from '../../types';
 import { addDays, completeDailyQuiz, ensureDailyQuiz, quizRewards, subscribeDailyQuiz } from '../../services/dailyQuizService';
 import { judgeReflection } from '../../services/aiDailyQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
-import { quizOpensOnRequest } from '../../services/village/quizGate';
+import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
 import { EXPLAIN_READ_MS, LESSON_READ_MS, readingMs, reflectionOk } from '../../services/quiz/provaRules';
 import { prefetchVerdicts, speakProvaVerdict, stopProvaVoice } from '../../services/quiz/provaSpeak';
 import { ISO_NPC } from '../../config/village';
@@ -21,6 +21,7 @@ const GOLD = '/assets/english/ui/gold.webp';
 
 interface DailyQuizProps {
   onComplete: () => void;
+  onPending?: () => void;
   openRequested?: boolean | number;
 }
 
@@ -177,7 +178,7 @@ const ReadWaitButton: React.FC<{
   );
 };
 
-const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
+const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openRequested }) => {
   const { childUid } = useAuth();
   const { progress } = useData();
   const { economy, modules } = useVillage();
@@ -230,9 +231,11 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
     const unsub = subscribeDailyQuiz(childUid, today, (q) => {
       setQuiz(q);
       setLoaded(true);
+      // chave antiga gravada por engano (aba que virou a meia-noite) não pode manter o dia destrancado
+      if (q && !q.completed) { localStorage.removeItem(QUIZ_DONE_KEY(childUid, today)); onPending?.(); }
     }, () => setLoaded(true));
-    return unsub;
-  }, [childUid, today, enabled]);
+    return () => { unsub(); setQuiz(null); };
+  }, [childUid, today, enabled, onPending]);
 
   const prepare = useCallback(async () => {
     if (!childUid) return;
@@ -261,10 +264,10 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, openRequested }) => {
   }, [openRequested]);
 
   useEffect(() => {
-    if (!quiz?.completed || !childUid) return;
+    if (!childUid || !quizDoneToday(quiz, today)) return;
     localStorage.setItem(QUIZ_DONE_KEY(childUid, today), '1');
     onComplete();
-  }, [quiz?.completed, childUid, today, onComplete]);
+  }, [quiz, childUid, today, onComplete]);
 
   const ready = Boolean(quiz && quiz.questions.length > 0 && !quiz.completed);
   const question = quiz?.questions[current];
