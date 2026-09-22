@@ -15,6 +15,7 @@ import AchievementManager from './AchievementManager';
 import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 import BirthdayManager from './BirthdayManager';
 import DailyQuizManager from './DailyQuizManager';
+import BooksPanel from './BooksPanel';
 import DailyRulesManager from './DailyRulesManager';
 import VacationModeControl from './VacationModeControl';
 import EnglishProgressPanel from './EnglishProgressPanel';
@@ -34,7 +35,7 @@ import CharactersPanel from './CharactersPanel';
 type TabType =
   | 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz'
   | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system'
-  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters';
+  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books';
 
 const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; label: string; icon: string }> }> = [
   {
@@ -62,6 +63,7 @@ const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; labe
     label: 'Conteúdo',
     tabs: [
       { id: 'quiz', label: 'Prova', icon: 'brain' },
+      { id: 'books', label: 'Livros', icon: 'notes' },
       { id: 'reminders', label: 'Placa', icon: 'bolt' },
       { id: 'english', label: 'Mina', icon: 'gamepad' },
       { id: 'characters', label: 'Personagens', icon: 'home' },
@@ -146,6 +148,7 @@ const ParentPanel: React.FC = () => {
           )}
           {activeTab === 'characters' && <CharactersPanel />}
           {activeTab === 'quiz' && <DailyQuizManager />}
+          {activeTab === 'books' && <BooksPanel />}
           {activeTab === 'birthday' && <BirthdayManager />}
           {activeTab === 'notifications' && <NotificationSender />}
           {activeTab === 'history' && <TaskHistory tasks={tasks} />}

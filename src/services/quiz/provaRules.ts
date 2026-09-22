@@ -260,6 +260,55 @@ export function quizScoreOf(
   return { correct, total };
 }
 
+/** Falas enquanto o Sábio lê a frase. Cada uma fica SAGE_LINE_MS. A última segura. */
+export const SAGE_READ_LINES = [
+  'Deixa eu ler com calma…',
+  'Hum. Lendo de novo a sua frase…',
+  'Pensando no que você quis dizer…',
+  'Quase lá.',
+] as const;
+
+/** Tempo mínimo de cada fala. */
+export const SAGE_LINE_MS = 1600;
+/** A leitura não entrega o veredito antes disto, mesmo com a resposta já na mesa. */
+export const SAGE_READ_MIN_MS = 2400;
+/** Um ponto a mais na reticência. */
+export const SAGE_DOT_MS = 400;
+
+export type SageReadFrame =
+  | { kind: 'line'; index: number; text: string }
+  | { kind: 'verdict' };
+
+/**
+ * Qual fala está no papiro. O veredito só entra depois dos 2,4 s e depois que
+ * a fala que estava na mesa terminou os seus 1,6 s. Sem veredito, a sequência
+ * segue e a última fala fica.
+ */
+export function sageReadFrame(elapsedMs: number, verdictAtMs: number | null): SageReadFrame {
+  const elapsed = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0;
+  const slot = Math.min(SAGE_READ_LINES.length - 1, Math.floor(elapsed / SAGE_LINE_MS));
+  const line = (): SageReadFrame => ({ kind: 'line', index: slot, text: SAGE_READ_LINES[slot] });
+  if (verdictAtMs === null || !Number.isFinite(verdictAtMs)) return line();
+  const gate = Math.max(0, verdictAtMs, SAGE_READ_MIN_MS);
+  if (elapsed < gate) return line();
+  const gateSlot = Math.min(
+    SAGE_READ_LINES.length - 1,
+    Math.floor(Math.max(0, gate - 0.001) / SAGE_LINE_MS),
+  );
+  const lineEnds = (gateSlot + 1) * SAGE_LINE_MS;
+  if (elapsed < lineEnds) return line();
+  return { kind: 'verdict' };
+}
+
+/** Reticências vivas. Com reduced-motion, a fala fica como foi escrita. "Quase lá." não mexe. */
+export function sageReadSpeech(text: string, elapsedMs: number, reduced: boolean): string {
+  if (!text.endsWith('…')) return text;
+  if (reduced) return text;
+  const elapsed = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0;
+  const n = (Math.floor(elapsed / SAGE_DOT_MS) % 3) + 1;
+  return `${text.slice(0, -1)}${'.'.repeat(n)}`;
+}
+
 /**
  * Anel do "Começar" / "Próxima": 0 = cheio, 100 = vazio.
  * Nunca nasce cheio com reduced-motion; enquanto travado, teto de 75% em degraus de 25% (M3).

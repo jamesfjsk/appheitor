@@ -138,6 +138,7 @@ const GoldHistory: React.FC = () => {
       streak_chest: <Star className="w-5 h-5" />,
       trophy: <Trophy className="w-5 h-5" />,
       late_task: <Target className="w-5 h-5" />,
+      book_report: <Star className="w-5 h-5" />,
     };
 
     return iconMap[transaction.source] || <DollarSign className="w-5 h-5" />;
@@ -188,6 +189,7 @@ const GoldHistory: React.FC = () => {
       streak_chest: 'Baú das tochas',
       trophy: 'Troféu da semana',
       late_task: 'Missão recuperada',
+      book_report: 'Livro contado ao Sábio',
     };
 
     return labels[source] || source;

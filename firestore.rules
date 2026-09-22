@@ -318,6 +318,47 @@ service cloud.firestore {
       );
     }
 
+    // ---------- ESTANTE DO SÁBIO (decisão 40): livros e relatos de leitura ----------
+    match /books/{id} {
+      allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && familyHeitor() && (
+        isAdmin()
+        || (
+          request.resource.data.userId == request.auth.uid
+          && request.resource.data.addedBy == 'child'
+          && request.resource.data.status == 'to_read'
+          && !request.resource.data.keys().hasAny(['gold'])
+        )
+      );
+      // a criança só marca o livro como lido pela transação de pagamento
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'doneOn', 'updatedAt'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /bookReports/{id} {
+      allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && familyHeitor() && (
+        isAdmin()
+        || (
+          request.resource.data.userId == request.auth.uid
+          && request.resource.data.paidGold == 0
+          && request.resource.data.paidXp == 0
+          && !request.resource.data.keys().hasAny(['parentDecision'])
+        )
+      );
+      // a criança só recebe o pagamento pela transação; parentDecision é do pai
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paidGold', 'paidXp', 'accepted', 'updatedAt'])
+      );
+      allow delete: if isAdmin();
+    }
+
     match /quizBank/{id} {
       allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
       allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid)

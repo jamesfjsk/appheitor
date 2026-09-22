@@ -23,6 +23,12 @@ import {
   touchesIdea,
   wordCount,
   lessonSpeakText,
+  SAGE_DOT_MS,
+  SAGE_LINE_MS,
+  SAGE_READ_LINES,
+  SAGE_READ_MIN_MS,
+  sageReadFrame,
+  sageReadSpeech,
 } from '../../quiz/provaRules';
 
 test('ideia aparece no ritmo da leitura, sem jogar o fim no começo', () => {
@@ -163,6 +169,51 @@ test('prompt da prova fixa 5º ano, proibições, auto-revisão e giro das área
   expect(p.includes('nunca uma conta de um passo') || p.includes('Nunca uma conta de um passo')).toBe(true);
   expect(p.includes('ciências — causa e efeito')).toBe(true);
   expect(p.includes('gpt-4o')).toBe(false);
+});
+
+function lineAt(ms: number, arrived: number | null): { index: number; text: string } {
+  const frame = sageReadFrame(ms, arrived);
+  if (frame.kind !== 'line') throw new Error(`esperava fala em ${ms}`);
+  return frame;
+}
+
+test('7: o Sábio não corta a fala e espera no mínimo 2,4 s', () => {
+  expect(SAGE_LINE_MS >= 1600).toBe(true);
+  expect(SAGE_READ_MIN_MS >= 2400).toBe(true);
+  expect([...SAGE_READ_LINES]).toEqual([
+    'Deixa eu ler com calma…',
+    'Hum. Lendo de novo a sua frase…',
+    'Pensando no que você quis dizer…',
+    'Quase lá.',
+  ]);
+  expect(lineAt(0, 0).text).toBe(SAGE_READ_LINES[0]);
+  expect(lineAt(1599, 0).index).toBe(0);
+  expect(lineAt(1600, 0).text).toBe(SAGE_READ_LINES[1]);
+  expect(sageReadFrame(2399, 0).kind).toBe('line');
+  expect(sageReadFrame(SAGE_READ_MIN_MS, 0).kind).toBe('line');
+  expect(sageReadFrame(3199, 0).kind).toBe('line');
+  expect(sageReadFrame(3200, 0).kind).toBe('verdict');
+  expect(3200 >= SAGE_READ_MIN_MS).toBe(true);
+  expect(lineAt(3200, null).text).toBe(SAGE_READ_LINES[2]);
+  expect(lineAt(4800, null).text).toBe('Quase lá.');
+  expect(lineAt(9000, null).index).toBe(3);
+  expect(sageReadFrame(5000, 5000).kind).toBe('line');
+  expect(lineAt(6399, 5000).text).toBe('Quase lá.');
+  expect(sageReadFrame(6400, 5000).kind).toBe('verdict');
+  expect([0, 1600, 3200, 4800].map((t) => lineAt(t, null).index)).toEqual([0, 1, 2, 3]);
+  for (const line of SAGE_READ_LINES) {
+    expect(/processando|carregando|aguarde|spinner/i.test(line)).toBe(false);
+  }
+});
+
+test('7: reticências andam e param com reduced-motion', () => {
+  const line = SAGE_READ_LINES[0];
+  expect(sageReadSpeech(line, 0, false)).toBe('Deixa eu ler com calma.');
+  expect(sageReadSpeech(line, SAGE_DOT_MS, false)).toBe('Deixa eu ler com calma..');
+  expect(sageReadSpeech(line, SAGE_DOT_MS * 2, false)).toBe('Deixa eu ler com calma...');
+  expect(sageReadSpeech(line, SAGE_DOT_MS * 3, false)).toBe('Deixa eu ler com calma.');
+  expect(sageReadSpeech(line, SAGE_DOT_MS, true)).toBe(line);
+  expect(sageReadSpeech('Quase lá.', 800, false)).toBe('Quase lá.');
 });
 
 void run();

@@ -37,6 +37,7 @@ import Oficina from './Oficina';
 import Mercado from './Mercado';
 import EnglishBase from '../english/base/EnglishBase';
 import Torre from './Torre';
+import EstanteDoSabio from './EstanteDoSabio';
 import Cofrinho from './Cofrinho';
 import Agenda from './Agenda';
 import Mochila, { type PackTab } from './Mochila';
@@ -102,7 +103,7 @@ function shopBlocksDest(id: string): boolean {
   return id === 'market' || id === 'chest' || id === 'pack' || id === 'chest_streak';
 }
 
-type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | null;
+type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | 'books' | null;
 
 interface Props {
   selectedPeriod: Period;
@@ -785,6 +786,7 @@ const VillageHome: React.FC<Props> = ({
           onClose={() => setLot(null)}
           onOpenMine={() => { setLot(null); openDistrict('mine'); }}
           onOpenTower={() => { setLot(null); setDistrict('tower'); }}
+          onOpenBooks={() => { setLot(null); setDistrict('books'); }}
           onOpenWorkshop={(tab?: ForgeTab) => {
             if (visibleCracks(village.cracks).includes('fornalha') || (buildings.fornalha || 0) < 1) {
               setDistrict(null);
@@ -887,6 +889,7 @@ const VillageHome: React.FC<Props> = ({
         />
       )}
       {district === 'tower' && <Torre onClose={() => setDistrict(null)} />}
+      {district === 'books' && <EstanteDoSabio onClose={() => setDistrict(null)} quizLocked={quizLocked} />}
     </div>
   );
 };

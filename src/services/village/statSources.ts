@@ -13,6 +13,7 @@ export const STAT_SOURCES: Record<string, { where: string }> = {
   quizzesDone: { where: 'dailyQuizService.completeDailyQuiz' },
   quizScore: { where: 'dailyQuizService.completeDailyQuiz' },
   quizPerfect: { where: 'dailyQuizService.completeDailyQuiz' },
+  booksRead: { where: 'bookService.payBookReport' },
   contractsLetter: { where: 'englishBaseService.completeContract' },
   contractsNote: { where: 'englishBaseService.completeContract' },
   contractsForge: { where: 'englishBaseService.completeContract' },

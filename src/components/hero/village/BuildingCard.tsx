@@ -43,6 +43,7 @@ interface Props {
   onOpenBank?: () => void;
   onOpenAgenda?: () => void;
   onOpenMarket?: () => void;
+  onOpenBooks?: () => void;
   onCreateGoal?: (title: string, gold: number, rewardId?: string) => void;
   onBuilt?: (id: BuildingId, newLevel: number) => void;
   shopLocked?: boolean;
@@ -50,7 +51,7 @@ interface Props {
 
 const BuildingCard: React.FC<Props> = ({
   id, onClose, onOpenMine, onOpenTower, onOpenWorkshop, onOpenQuiz,
-  onOpenBank, onOpenAgenda, onOpenMarket, onBuilt, shopLocked = false,
+  onOpenBank, onOpenAgenda, onOpenMarket, onOpenBooks, onBuilt, shopLocked = false,
 }) => {
   const { childUid } = useAuth();
   const { village, materials, buildings, economy } = useVillage();
@@ -441,6 +442,9 @@ const BuildingCard: React.FC<Props> = ({
               )}
               <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
                 Prova do dia
+              </button>
+              <button type="button" className="mc-btn mc-btn-dark w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenBooks?.(); }} data-testid="building-books">
+                Contar um livro
               </button>
               <button type="button" className="mc-btn mc-btn-dark w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenMine(); }}>
                 Ir para a Mina

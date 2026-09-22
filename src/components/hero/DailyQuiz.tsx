@@ -9,10 +9,10 @@ import { FirestoreService } from '../../services/firestoreService';
 import { getTodayBrazil } from '../../utils/clock';
 import { DailyQuiz as DailyQuizDoc } from '../../types';
 import { addDays, completeDailyQuiz, ensureDailyQuiz, payThenComplete, quizRewards, regenerateDailyQuiz, shouldOpenReflection, stashQuizAnswers, subscribeDailyQuiz } from '../../services/dailyQuizService';
-import { judgeReflection } from '../../services/aiDailyQuiz';
+import { judgeReflection, type ReflectionJudge } from '../../services/aiDailyQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
-import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionOk } from '../../services/quiz/provaRules';
+import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionOk, SAGE_DOT_MS, SAGE_LINE_MS, sageReadFrame, sageReadSpeech } from '../../services/quiz/provaRules';
 import { prefetchLesson, prefetchVerdicts, speakProvaLesson, speakProvaVerdict, stopProvaVoice } from '../../services/quiz/provaSpeak';
 import { ISO_NPC } from '../../config/village';
 
@@ -105,9 +105,9 @@ const PapyrusUnroll: React.FC<{ open: number; children: React.ReactNode }> = ({ 
   );
 };
 
-const SageOnPaper: React.FC<{ kicker: string; step?: string }> = ({ kicker, step }) => (
+const SageOnPaper: React.FC<{ kicker: string; step?: string; reading?: boolean }> = ({ kicker, step, reading }) => (
   <div className="mn-papiro-head">
-    <img src={ISO_NPC.sabio} alt="" className="mn-papiro-face mc-pixel" draggable={false} />
+    <img src={ISO_NPC.sabio} alt="" className={`mn-papiro-face mc-pixel${reading ? ' is-reading' : ''}`} draggable={false} />
     <div className="mn-papiro-head-say">
       <p className="mn-papiro-who">Sábio</p>
       <p className="mn-papiro-kicker-line">
@@ -182,7 +182,8 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const { childUid } = useAuth();
   const { progress } = useData();
   const { economy, modules } = useVillage();
-  const { playTaskComplete, playLevelUp, playClick, playProvaHit, playProvaMiss, setMusicDuck, isSoundEnabled } = useSound();
+  const { playTaskComplete, playLevelUp, playClick, playProvaHit, playProvaMiss, playQuill, setMusicDuck, isSoundEnabled } = useSound();
+  const reducedMotion = useReducedMotion();
 
   const today = getTodayBrazil();
   const enabled = progress.quizEnabled ?? true;
@@ -204,6 +205,13 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const [judgeSay, setJudgeSay] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [readMs, setReadMs] = useState(0);
+  const [pendingVerdict, setPendingVerdict] = useState<ReflectionJudge | null>(null);
+  const readGen = useRef(0);
+  const readStarted = useRef(0);
+  const verdictAt = useRef<number | null>(null);
+  const pendingRef = useRef<ReflectionJudge | null>(null);
+  const revealLock = useRef(false);
   const [voiceDone, setVoiceDone] = useState(true);
   const prefetched = useRef<string | null>(null);
   const stepLock = useRef(false);
@@ -330,6 +338,10 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
 
   const postpone = () => {
     playClick();
+    readGen.current += 1;
+    pendingRef.current = null;
+    setPendingVerdict(null);
+    setSaving(false);
     voiceTick.current += 1;
     stopProvaVoice();
     setVoiceDone(true);
@@ -404,8 +416,16 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
       title: quiz.theme.title,
       lesson: quiz.theme.lesson,
     })) return;
-    setSaving(true);
+    const gen = ++readGen.current;
+    revealLock.current = false;
+    verdictAt.current = null;
+    pendingRef.current = null;
+    setPendingVerdict(null);
     setJudgeSay(null);
+    readStarted.current = performance.now();
+    setReadMs(0);
+    setSaving(true);
+    playQuill();
     try {
       const verdict = await judgeReflection({
         text: reflection,
@@ -414,9 +434,35 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
         lesson: quiz.theme.lesson,
         forceOffline: modules.aiGeneration === false,
       });
+      if (gen !== readGen.current) return;
+      pendingRef.current = verdict;
+      verdictAt.current = performance.now() - readStarted.current;
+      setPendingVerdict(verdict);
+    } catch (e) {
+      if (gen !== readGen.current) return;
+      console.error('DailyQuiz: erro ao salvar resultado', e);
+      toast.error('A mesa não gravou. Tenta de novo.');
+      setSaving(false);
+    }
+  };
+
+  const revealRef = useRef<() => void>(() => {});
+  revealRef.current = () => {
+    if (revealLock.current) return;
+    const verdict = pendingRef.current;
+    if (!verdict || !quiz || !childUid) return;
+    const gen = readGen.current;
+    revealLock.current = true;
+    if (verdict.ok) playProvaHit();
+    else playProvaMiss();
+    const hold = 1200;
+    window.setTimeout(() => {
+      if (readGen.current !== gen) return;
       if (!verdict.ok) {
-        playProvaMiss();
         setJudgeSay(verdict.say);
+        pendingRef.current = null;
+        setPendingVerdict(null);
+        setSaving(false);
         return;
       }
       const finalAnswers = answers;
@@ -424,39 +470,69 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
       const correct = scored.correct;
       const total = scored.total;
       const r = quizRewards(correct, total, economy);
-      setScore(correct);
-      setReward(r);
-      // paga primeiro: o pagamento é idempotente pelo claim quiz:<data>; se a aba cair entre as duas escritas,
-      // o dia não fica "concluído" sem o gold (A2 da revisão de 22/09)
-      await payThenComplete(
-        () => FirestoreService.payQuizRewards(childUid, today, r.xp, r.gold),
-        () => completeDailyQuiz(childUid, today, {
-          score: correct,
-          totalQuestions: total,
-          xpEarned: r.xp,
-          goldEarned: r.gold,
-          answers: finalAnswers,
-          reflection,
-          reflectionNote: verdict.say,
-          about: {
-            prompt: quiz.reflectionPrompt,
-            title: quiz.theme.title,
-            lesson: quiz.theme.lesson,
-          },
-        }),
-      );
-      if (correct / total >= 0.75) playLevelUp();
-      else playTaskComplete();
-      setPaid(true);
-      localStorage.setItem(QUIZ_DONE_KEY(childUid, today), '1');
-      onComplete();
-    } catch (e) {
-      console.error('DailyQuiz: erro ao salvar resultado', e);
-      toast.error('A mesa não gravou. Tenta de novo.');
-    } finally {
-      setSaving(false);
-    }
+      void (async () => {
+        try {
+          await payThenComplete(
+            () => FirestoreService.payQuizRewards(childUid, today, r.xp, r.gold),
+            () => completeDailyQuiz(childUid, today, {
+              score: correct,
+              totalQuestions: total,
+              xpEarned: r.xp,
+              goldEarned: r.gold,
+              answers: finalAnswers,
+              reflection,
+              reflectionNote: verdict.say,
+              about: {
+                prompt: quiz.reflectionPrompt,
+                title: quiz.theme.title,
+                lesson: quiz.theme.lesson,
+              },
+            }),
+          );
+          if (readGen.current !== gen) return;
+          setScore(correct);
+          setReward(r);
+          if (total > 0 && correct / total >= 0.75) playLevelUp();
+          else playTaskComplete();
+          setJudgeSay(verdict.say);
+          setPaid(true);
+          localStorage.setItem(QUIZ_DONE_KEY(childUid, today), '1');
+          onComplete();
+          setSaving(false);
+        } catch (e) {
+          if (readGen.current !== gen) return;
+          console.error('DailyQuiz: erro ao salvar resultado', e);
+          toast.error('A mesa não gravou. Tenta de novo.');
+          revealLock.current = false;
+          setSaving(false);
+        }
+      })();
+    }, hold);
   };
+
+  useEffect(() => {
+    if (!saving) return;
+    let dead = false;
+    let timer = 0;
+    const arm = () => {
+      if (dead) return;
+      const elapsed = performance.now() - readStarted.current;
+      setReadMs(elapsed);
+      const frame = sageReadFrame(elapsed, verdictAt.current);
+      if (frame.kind === 'verdict' && pendingRef.current) {
+        revealRef.current();
+        return;
+      }
+      const nextLine = (Math.floor(elapsed / SAGE_LINE_MS) + 1) * SAGE_LINE_MS;
+      const nextDot = (Math.floor(elapsed / SAGE_DOT_MS) + 1) * SAGE_DOT_MS;
+      timer = window.setTimeout(arm, Math.max(40, Math.min(nextLine, nextDot) - elapsed));
+    };
+    arm();
+    return () => {
+      dead = true;
+      window.clearTimeout(timer);
+    };
+  }, [saving, pendingVerdict]);
 
   useEffect(() => {
     if (!open) return;
@@ -475,6 +551,8 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
+
+  const readFrame = saving ? sageReadFrame(readMs, verdictAt.current) : null;
 
   if (!enabled || !open || !quiz) return null;
 
@@ -604,24 +682,44 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                             <span className="text-sm mc-warn">+{reward.gold} GOLD</span>
                           </span>
                         </div>
-                        <p>{judgeSay || 'O Sábio leu. A Mina abre.'}</p>
+                        <p className="mn-sabio-line">{judgeSay || 'O Sábio leu. A Mina abre.'}</p>
                       </>
                     ) : (
                       <>
-                        <SageOnPaper kicker="O Sábio pergunta" />
-                        <p className="mn-papiro-why">{quiz.reflectionPrompt}</p>
+                        <SageOnPaper kicker="O Sábio pergunta" reading={readFrame?.kind === 'line'} />
+                        {readFrame?.kind === 'line' && (
+                          <p
+                            key={readFrame.index}
+                            className="mn-papiro-why mn-sabio-line"
+                            data-sage={String(readFrame.index)}
+                            aria-live="polite"
+                          >
+                            {sageReadSpeech(
+                              readFrame.text,
+                              Math.max(0, readMs - readFrame.index * SAGE_LINE_MS),
+                              reducedMotion,
+                            )}
+                          </p>
+                        )}
+                        {readFrame?.kind === 'verdict' && pendingVerdict && (
+                          <p key="veredito" className="mn-papiro-why mn-sabio-line" data-sage="verdict">
+                            {pendingVerdict.say}
+                          </p>
+                        )}
+                        {!saving && <p className="mn-papiro-why">{quiz.reflectionPrompt}</p>}
                         <textarea
                           value={reflection}
+                          readOnly={saving}
                           onChange={(e) => {
                             setReflection(e.target.value);
                             if (judgeSay) setJudgeSay(null);
                           }}
                           placeholder="Com as suas palavras."
                           rows={4}
-                          className="mn-papiro-write"
+                          className={`mn-papiro-write${saving ? ' is-held' : ''}`}
                         />
-                        {judgeSay && (
-                          <div className="mn-papiro-explain">
+                        {!saving && judgeSay && (
+                          <div className="mn-papiro-explain mn-sabio-line">
                             <p className="mn-papiro-why">{judgeSay}</p>
                           </div>
                         )}
@@ -687,15 +785,19 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
               <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
                 Voltar à Vila
               </button>
+            ) : saving ? (
+              <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
+                Voltar à Vila
+              </button>
             ) : (
               <>
                 <button
                   type="button"
                   onClick={() => { void conclude(); }}
-                  disabled={saving || !canDeliver}
-                  className={`mc-btn min-h-[44px] px-6 ${canDeliver && !saving ? 'mc-btn-green' : 'mc-btn-stone'}`}
+                  disabled={!canDeliver}
+                  className={`mc-btn min-h-[44px] px-6 ${canDeliver ? 'mc-btn-green' : 'mc-btn-stone'}`}
                 >
-                  {saving ? 'O Sábio lê...' : 'Entregar'}
+                  Entregar
                 </button>
                 <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
                   Voltar à Vila

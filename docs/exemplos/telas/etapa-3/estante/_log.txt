@@ -1,0 +1,45 @@
+# Sessão de fotos da Estante do Sábio, 22/09/2026 (conta de teste, juiz gpt-4o real)
+
+## Rodada 1: casos (a) sinopse colada, (b) sem o fim, (c) texto bom — juiz e conferente antes da correção
+foto 01-estante-1280.png
+foto 02a-papiro-copiado-1280.png
+foto 03-sabio-le-1280.png
+caso copiado -> veredito
+veredito (copiado): Isso está arrumado demais. Me conta do seu jeito, como se fosse para um amigo.
+foto 04a-veredito-copiado-1280.png
+caso sem fim -> pergunta
+pergunta (sem fim): Como termina a história do queijo na escola?
+veredito (sem fim): Faltou como termina e o que você achou, e por quê. Completa aí e me entrega de novo.
+foto 04b-veredito-sem-fim-1280.png
+foto 02-papiro-1280.png
+caso bom -> pergunta
+pergunta (bom): Qual é o nome do menino maluquinho?
+foto 04-pergunta-1280.png
+veredito (bom): Hum. Isso eu não achei no livro. Me conta de novo essa parte, com o que você lembra.
+foto 05-veredito-1280.png
+foto 06-estante-com-livro-1280.png
+erros 1280: nenhum
+foto 01-estante-1920.png
+erros 1920: nenhum
+
+## Rodada 2: caso (c) de novo com o mesmo texto — barrado pela checagem de repetição (defeito 2, corrigido em seguida)
+foto 01-estante-1280.png
+foto 02-papiro-1280.png
+foto 03-sabio-le-1280.png
+caso bom -> form-say
+sábio (bom): Esse texto eu já li. Me conta com outras palavras, do jeito que você lembra.
+foto 05-veredito-1280.png
+foto 06-estante-com-livro-1280.png
+erros 1280: nenhum
+
+## Rodada 3: caso (c) com o texto completado (tentativa 2), juiz e conferente corrigidos — ACEITO, +15 gold
+foto 01-estante-1280.png
+foto 02-papiro-1280.png
+foto 03-sabio-le-1280.png
+caso bom -> pergunta
+pergunta (bom): O que o Menino Maluquinho fazia com seus amigos na escola?
+foto 04-pergunta-1280.png
+veredito (bom): Acreditei. Gostei de como você explicou o que mais gostou no livro. +15 gold.
+foto 05-veredito-1280.png
+foto 06-estante-com-livro-1280.png
+erros 1280: nenhum

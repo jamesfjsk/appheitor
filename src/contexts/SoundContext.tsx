@@ -13,6 +13,7 @@ import {
   playUiWhistle,
   playProvaHit,
   playProvaMiss,
+  playQuill,
 } from '../services/village/uiSfx';
 
 interface SoundContextType {
@@ -28,6 +29,7 @@ interface SoundContextType {
   playNotification: () => void;
   playProvaHit: () => void;
   playProvaMiss: () => void;
+  playQuill: () => void;
   isSoundEnabled: boolean;
   toggleSound: () => void;
   setBgmWanted: (on: boolean) => void;
@@ -110,6 +112,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const playNotification = useCallback(() => playUiNote(ctxRef.current, enabledRef.current), []);
   const playProvaHitSfx = useCallback(() => playProvaHit(ctxRef.current, enabledRef.current), []);
   const playProvaMissSfx = useCallback(() => playProvaMiss(ctxRef.current, enabledRef.current), []);
+  const playQuillSfx = useCallback(() => playQuill(ctxRef.current, enabledRef.current), []);
 
   const value: SoundContextType = {
     playTaskComplete,
@@ -124,6 +127,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     playNotification,
     playProvaHit: playProvaHitSfx,
     playProvaMiss: playProvaMissSfx,
+    playQuill: playQuillSfx,
     isSoundEnabled,
     toggleSound,
     setBgmWanted,

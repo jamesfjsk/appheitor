@@ -382,6 +382,7 @@ export interface GoldTransaction {
     | 'level_gift'
     | 'goal_deposit'
     | 'goal_withdraw'
+    | 'book_report'
     | 'goal_interest'
     | 'goal_achieved'
     | 'challenge'
@@ -451,4 +452,78 @@ export interface DailyProgress {
   checkin?: DailyCheckin | null;
   repaired?: boolean;
   helmetUsed?: boolean;
+}
+
+// ========================================
+// ESTANTE DO SÁBIO (decisão 40, 22/09/2026): livros cadastrados e relatos de leitura
+// ========================================
+export type BookSize = 'curto' | 'medio' | 'longo';
+export type BookStatus = 'to_read' | 'done';
+
+export interface BookDoc {
+  id: string;
+  userId: string;
+  familyId: string;
+  title: string;
+  titleKey: string;
+  pages: number;
+  size: BookSize;
+  gold?: number;              // valor definido pelo pai (1-100); sem ele, vale pelo tamanho (8/15/25)
+  addedOn: string;            // YYYY-MM-DD (quando entrou na estante)
+  addedBy: 'parent' | 'child';
+  status: BookStatus;
+  doneOn?: string;            // YYYY-MM-DD (quando o relato foi aceito)
+  parentReply?: string;       // uma linha do pai, entregue pelo Sábio
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type BookSuspect = 'nenhum' | 'copiado' | 'ia' | 'fora_do_tema';
+
+export interface BookJudge {
+  leu: 0 | 1 | 2 | 3;
+  motivo: string;
+  faltou: string[];
+  suspeito: BookSuspect;
+  comentario: string;
+  pergunta?: string;
+  respostaEsperada?: string;
+  model: string;
+}
+
+export interface BookVerify {
+  question: string;
+  expected: string;
+  answer: string;
+  ok: boolean;
+}
+
+export type BookVerdict = 'aceito' | 'falta' | 'suspeito' | 'fora' | 'colado' | 'repetido';
+
+export interface BookReportDoc {
+  id: string;
+  userId: string;
+  familyId: string;
+  bookId: string;
+  title: string;
+  titleKey: string;
+  liked: 0 | 1 | 2 | 3;       // não gostei · gostei · gostei muito · amei
+  rating: number | null;      // 0-10, opcional
+  text: string;
+  words: number;
+  typedMs: number;
+  pasted: boolean;
+  attempt: number;
+  date: string;               // YYYY-MM-DD
+  readingDays: number;
+  judge?: BookJudge;
+  verify?: BookVerify;
+  verdict: BookVerdict;
+  accepted: boolean;
+  needsParent: boolean;       // livro proposto pela criança ou texto suspeito aceito com marca
+  flagged: boolean;
+  paidGold: number;
+  paidXp: number;
+  parentDecision?: 'approved' | 'voided';
+  createdAt: Date;
 }

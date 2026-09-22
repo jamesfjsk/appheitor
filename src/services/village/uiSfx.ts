@@ -155,6 +155,32 @@ export function playProvaHit(ctx: AudioContext | null, on: boolean): void {
   });
 }
 
+/** Pena no papiro, ~300 ms. Não é voz. */
+export function playQuill(ctx: AudioContext | null, on: boolean): void {
+  withSfx(ctx, on, (audio, now) => {
+    const dur = 0.3;
+    const buf = audio.createBuffer(1, Math.floor(audio.sampleRate * dur), audio.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = audio.createBufferSource();
+    src.buffer = buf;
+    const bp = audio.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 7;
+    bp.frequency.setValueAtTime(2200, now);
+    bp.frequency.exponentialRampToValueAtTime(780, now + dur);
+    const g = audio.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.04, now + 0.025);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(audio.destination);
+    src.start(now);
+    src.stop(now + dur + 0.02);
+  });
+}
+
 export function playProvaMiss(ctx: AudioContext | null, on: boolean): void {
   withSfx(ctx, on, (audio, now) => {
     sfxWood(audio, now, 0.06, 640, 0.04);

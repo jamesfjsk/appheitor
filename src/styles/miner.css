@@ -662,6 +662,35 @@
   flex-shrink: 0;
   object-fit: contain;
 }
+.mn-papiro-face.is-reading {
+  transform-origin: 50% 82%;
+  animation: mn-sabio-lendo 1.2s ease-in-out infinite;
+}
+@keyframes mn-sabio-lendo {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+.mn-papiro-write.is-held {
+  opacity: 0.55;
+  color: #5c4a36;
+  background: #e4d7b8;
+  caret-color: transparent;
+  cursor: default;
+  resize: none;
+}
+.mn-sabio-line {
+  animation: mn-sabio-fade 0.35s ease-out;
+}
+@keyframes mn-sabio-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-papiro-face.is-reading,
+  .mn-sabio-line {
+    animation: none;
+  }
+}
 .mn-papiro-head-say {
   flex: 1;
   min-width: 0;
@@ -3784,3 +3813,7 @@ div.mn-pack-cell {
   cursor: grab;
 }
 .nb-chip:hover { filter: brightness(1.06); }
+
+/* Estante do Sábio: rostos e nota sobre o papiro (texto claro sobre o slot escuro) */
+.mn-livro-slot { color: #f3e9d2; font-weight: 600; }
+.mn-livro-slot.mc-slot-selected { color: var(--mc-gold-hi); }

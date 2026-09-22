@@ -925,6 +925,53 @@ Não gerei. A função publicada ainda é a de 800 chamadas. O script já recusa
 
 **Pare para o commit do pai.** Não começa o próximo pacote.
 
+## Pacote 7 — O Sábio lê
+
+A espera da reflexão deixa de ser o botão "O Sábio lê...". O Entregar some. A frase dele fica na caixa, esmaecida e sem edição. O balão troca de fala sozinho. Não há voz lendo o texto.
+
+### O que mudou
+
+- Falas, nesta ordem, cada uma 1,6 s: "Deixa eu ler com calma…" → "Hum. Lendo de novo a sua frase…" → "Pensando no que você quis dizer…" → "Quase lá." A última segura se a resposta demora.
+- O veredito só entra depois de 2,4 s e depois que a fala da mesa terminou os seus 1,6 s. Com a resposta na hora, isso cai em 3,2 s. A regra está em `sageReadFrame` (`provaRules.ts`), com teste.
+- As reticências ganham um ponto a cada 400 ms. Com reduced-motion, ficam como foram escritas. "Quase lá." não mexe.
+- O rosto (`.mn-papiro-face`) balança ±2° em 1,2 s enquanto lê. Para com reduced-motion.
+- Um risco de pena (~300 ms, WebAudio) no começo. Não é fala. No veredito, o carimbo que já existia (`playProvaHit` / `playProvaMiss`).
+- A frase do Sábio entra no lugar da última fala. Recusa devolve a caixa editável com o texto dele. Aceite segue para o ouro, como já era.
+- Sem "processando", "carregando", "aguarde" ou spinner.
+
+### Barra
+
+1. Intenção. Dá para ver que ele está lendo: a fala muda e o rosto mexe. Passa.
+2. Sistema. O papiro que já existia. Passa.
+3. Fonte. Fredoka na fala. "Sábio" continua na pixel, curto. Passa.
+4. Ícone. O rosto do Sábio, 56 px, no lugar de sempre. Passa.
+5. Hierarquia. A fala é a linha forte. A frase dele fica atrás, mais clara. Passa.
+6. A cena continua. O rolo não apaga a Vila. Passa.
+7. Arestas. 1280 e 1920: nada cortado, nada por cima, o Voltar cabe no clique. Frame lido: nada sobreposto, cortado ou fora do clique.
+8. Mundo. Continua a prova na Biblioteca. Passa.
+9. Economia. Sem gold novo. A recusa não paga. Passa.
+10. Consequência. A recusa devolve a frase e diz o que faltou. Passa.
+11. Estado honesto. Enquanto lê, a caixa não aceita tecla. Passa.
+12. Mouse. Entregar some. Voltar e Esc continuam. Passa.
+13. Craft. Balanço com ease-in-out, fade de 0,35 s, pena curta, carimbo no veredito. Passa.
+14. Copy. As quatro falas do pai. Sem boletim. Passa.
+15. Evidência. Conta `teste@flash.com`, `?d=2028-06-11&h=10`, Vite em `http://localhost:5175`. Fotos em `docs/exemplos/telas/etapa-3/prova/`: `sabio-0-1280`, `sabio-0-1920` (165 ms e 544 ms, "Deixa eu ler com calma"), `sabio-2-1280`, `sabio-2-1920` (a fala "Hum. Lendo de novo a sua frase"), `sabio-veredito-1280`, `sabio-veredito-1920` (a frase do Sábio no lugar da fala, a dele ainda na caixa). O veredito fotografado foi recusa: "Faltou uma reflexão pessoal sobre responsabilidade." A frase ficou. Não pagou.
+16. Offline. A leitura espera os 3,2 s mesmo quando o juiz volta na hora. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:village` — 11 arquivos, saída 0 (entram os dois casos do pacote 7 em `provaV2.test.ts`)
+
+### Fora
+
+- Voz lendo as falas. O pai pediu só o visual.
+- Pacote 8
+- As duas provas do 6b, que continuam esperando o deploy da função
+
+**Pare para o commit do pai.** Não começa o próximo pacote.
+
 
 
 
