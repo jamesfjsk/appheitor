@@ -443,8 +443,15 @@ const BuildingCard: React.FC<Props> = ({
               <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
                 Prova do dia
               </button>
-              <button type="button" className="mc-btn mc-btn-dark w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenBooks?.(); }} data-testid="building-books">
-                Contar um livro
+              <button
+                type="button"
+                disabled={level < 1}
+                className={`mc-btn w-full min-h-[44px] font-bold ${level < 1 ? 'mc-btn-stone' : 'mc-btn-dark'}`}
+                title={level < 1 ? 'A estante dos livros fica na Biblioteca. Construa para contar um livro ao Sábio.' : undefined}
+                onClick={() => { playClick(); onOpenBooks?.(); }}
+                data-testid="building-books"
+              >
+                {level < 1 ? 'Construa a Biblioteca para contar livros' : 'Contar um livro'}
               </button>
               <button type="button" className="mc-btn mc-btn-dark w-full min-h-[44px] font-bold" onClick={() => { playClick(); onOpenMine(); }}>
                 Ir para a Mina

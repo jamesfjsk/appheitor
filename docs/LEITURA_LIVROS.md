@@ -15,7 +15,7 @@ O Heitor termina um livro, vai até a Biblioteca e **conta o livro para o Sábio
 
 ## Fluxo
 
-1. Biblioteca (card da Mesa) → botão **"Contar um livro"** (44 px). Trancado se a prova do dia não foi feita (mesmo portão da Mina) e se o resgate de hoje já foi pago ("Hoje o Sábio já ouviu um livro. Amanhã tem mais.").
+1. Biblioteca (card da Mesa) → botão **"Contar um livro"** (44 px). **Só com a Biblioteca no nível 1 ou mais** (pai, 22/09: "faz sentido"; no nível 0 o botão fica cinza com "Construa a Biblioteca para contar livros"). Trancado também se a prova do dia não foi feita (mesmo portão da Mina) e se o resgate de hoje já foi pago ("Hoje o Sábio já ouviu um livro. Amanhã tem mais.").
 2. Papiro do Sábio: **Título** (texto, 3-80 caracteres); **Quantos dias você levou?** (fichas: 1-2 · 3-7 · duas semanas · um mês ou mais); **Gostou?** (4 rostos: Não gostei · Gostei · Gostei muito · Amei); **Nota** (0-10, fichas); **Conta o livro** (textarea com contador "0 / 80 palavras", molde tocável).
 3. "Entregar" → cena "O Sábio lê" (pacote 7, reaproveitada) → veredito:
    - **Aceito**: "+15 gold" com o carimbo, o livro aparece na estante (lombada com o título) e o Sábio comenta uma coisa do texto dele.
