@@ -1,8 +1,11 @@
 import { playText, prefetchAudio, stopAudio, TTS_SPEED_TALK } from '../englishTts';
 import { lessonSpeakText, speakChunks, speakVerdict } from './provaRules';
 
+/** Português falado: voz da Mina, ritmo de conversa. Prova, Recado e Comerciante. */
+export const PT_TALK = { lang: 'pt' as const, speed: TTS_SPEED_TALK, voice: 'nova' as const };
+
 /** Mesma voz da Mina (mp3 da IA), em português, ritmo de conversa. Sem voz do navegador. */
-const PROVA_VOICE = { voice: 'nova' as const, speed: TTS_SPEED_TALK, lang: 'pt' as const };
+const PROVA_VOICE = PT_TALK;
 
 export { stopAudio as stopProvaVoice };
 

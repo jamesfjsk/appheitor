@@ -1,0 +1,498 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-05",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-05",
+  "status": "ready",
+  "theme": {
+    "id": "amizade",
+    "category": "carater",
+    "title": "Amizade Verdadeira",
+    "lesson": "Imagine que você e seu amigo brigaram por causa de um jogo de futebol. Você está chateado, mas sente falta dele. Um bom amigo é leal e sabe escutar. Ele também sabe pedir desculpas quando erra. Amizades verdadeiras são construídas com pequenas ações, como essas, repetidas ao longo do tempo. Ser popular é diferente de ter amigos de verdade. Popularidade pode ser passageira, mas uma amizade verdadeira resiste até às brigas. Hoje, pense em como você pode ser um bom amigo, talvez ouvindo mais ou pedindo desculpas quando necessário.",
+    "whyItMatters": "Amizades verdadeiras trazem alegria e apoio em momentos difíceis.",
+    "curiosity": "Sabia que o elefante é um dos animais mais leais? Eles formam laços fortes e cuidam uns dos outros."
+  },
+  "questions": [
+    {
+      "question": "Qual é a função do 'árbitro' em um jogo de futebol?",
+      "options": [
+        "Marcar gols",
+        "Decidir o vencedor",
+        "Aplicar as regras",
+        "Torcer para um time"
+      ],
+      "answer": "Aplicar as regras",
+      "explanation": "O árbitro é responsável por garantir que as regras do jogo sejam seguidas.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é aplicar as regras porque o árbitro garante que o jogo seja justo e organizado.",
+      "trap": "Decidir o vencedor engana porque o árbitro não escolhe quem ganha, apenas aplica as regras.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem 800 reais e compra dois brinquedos de 300 reais cada, quanto sobra?",
+      "options": [
+        "200",
+        "300",
+        "400",
+        "100"
+      ],
+      "answer": "200",
+      "explanation": "Primeiro, 300 vezes 2 é 600. Depois, 800 menos 600 é 200.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta certa é 200 porque depois de gastar 600 reais, sobram 200 reais.",
+      "trap": "Marcar 300 erra porque confunde o valor de um brinquedo com o total gasto.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se não houvesse mais chuva?",
+      "options": [
+        "As plantas morreriam",
+        "Os rios encheriam",
+        "O ar ficaria úmido",
+        "Aumentaria a neve"
+      ],
+      "answer": "As plantas morreriam",
+      "explanation": "Sem chuva, as plantas não teriam água para sobreviver.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é que as plantas morreriam porque elas precisam de água da chuva para crescer.",
+      "trap": "Os rios encheriam engana porque sem chuva, os rios secariam, não encheriam.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Idade Média?",
+      "options": [
+        "Durou cerca de 1000 anos",
+        "Foi antes da Pré-História",
+        "Começou no século 20",
+        "Foi marcada pela Revolução Industrial"
+      ],
+      "answer": "Durou cerca de 1000 anos",
+      "explanation": "A Idade Média durou aproximadamente do século 5 ao 15.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta certa é que durou cerca de 1000 anos porque foi de aproximadamente 476 a 1453.",
+      "trap": "Foi marcada pela Revolução Industrial engana porque essa revolução ocorreu bem depois, no século 18.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Seu amigo esqueceu seu aniversário. O que você faz?",
+      "options": [
+        "Conversa com ele",
+        "Fica bravo e não fala mais",
+        "Conta para todo mundo",
+        "Finge que não se importa"
+      ],
+      "answer": "Conversa com ele",
+      "explanation": "Conversar resolve mal-entendidos e fortalece a amizade.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é 'Conversa com ele' porque isso permite esclarecer a situação e manter a amizade.",
+      "trap": "A opção 'Fica bravo e não fala mais' engana porque não resolve o problema, apenas cria distância.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Quantos gols um time precisa marcar para vencer se o adversário fez 2 gols?",
+      "options": [
+        "3",
+        "2",
+        "1",
+        "4"
+      ],
+      "answer": "3",
+      "explanation": "Para vencer, o time precisa marcar mais gols que o adversário.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 3 porque o time precisa de um gol a mais que os 2 do adversário para vencer.",
+      "trap": "A opção '2' engana porque empatar não é vencer; é preciso mais um gol.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Ao nível do mar, a água ferve a 100 °C. O que acontece no alto de uma montanha muito alta?",
+      "options": [
+        "Ela ferve com temperatura menor que 100 °C",
+        "Ela ferve com temperatura maior que 100 °C",
+        "Ela não consegue ferver",
+        "Ela ferve exatamente a 100 °C"
+      ],
+      "answer": "Ela ferve com temperatura menor que 100 °C",
+      "explanation": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "trap": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?",
+      "options": [
+        "34 cm",
+        "17 cm",
+        "60 cm",
+        "24 cm"
+      ],
+      "answer": "34 cm",
+      "explanation": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "trap": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "O que você acha que é mais importante em uma amizade verdadeira?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "definicao": 1,
+      "tipos_mistos": 1,
+      "opcao_caricata": 1,
+      "conta_nao_fecha": 1,
+      "duplicata": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "definicao"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "tipos_mistos",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "Pede o que ele faria, é opinião."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A pergunta pede o que ele faria."
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A pergunta pede o que ele faria."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 2
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Amizade Verdadeira",
+        "lesson": "Imagine que você e seu amigo brigaram por causa de um jogo de futebol. Você está chateado, mas sente falta dele. Um bom amigo é leal e sabe escutar. Ele também sabe pedir desculpas quando erra. Amizades verdadeiras são construídas com pequenas ações, como essas, repetidas ao longo do tempo. Ser popular é diferente de ter amigos de verdade. Popularidade pode ser passageira, mas uma amizade verdadeira resiste até às brigas. Hoje, pense em como você pode ser um bom amigo, talvez ouvindo mais ou pedindo desculpas quando necessário.",
+        "whyItMatters": "Amizades verdadeiras trazem alegria e apoio em momentos difíceis.",
+        "curiosity": "Sabia que o elefante é um dos animais mais leais? Eles formam laços fortes e cuidam uns dos outros."
+      },
+      "questions": [
+        {
+          "question": "O que é uma característica de um bom amigo?",
+          "options": [
+            "Lealdade",
+            "Popularidade",
+            "Riqueza",
+            "Fama"
+          ],
+          "answer": "Lealdade",
+          "explanation": "Um bom amigo é leal, o que significa que ele está ao seu lado nos bons e maus momentos.",
+          "why": "A resposta certa é lealdade porque um amigo leal apoia e escuta, enquanto popularidade não garante amizade.",
+          "trap": "Popularidade engana porque ser popular não significa ser um amigo verdadeiro, apenas conhecido por muitos.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você e seu amigo brigaram. O que você pode fazer para resolver?",
+          "options": [
+            "Pedir desculpas",
+            "Ignorar",
+            "Falar mal dele",
+            "Evitar"
+          ],
+          "answer": "Pedir desculpas",
+          "explanation": "Pedir desculpas é uma forma de mostrar que você se importa e quer resolver a situação.",
+          "why": "A resposta certa é pedir desculpas porque isso ajuda a resolver conflitos e fortalecer a amizade.",
+          "trap": "Ignorar parece mais fácil, mas não resolve o problema e pode piorar a situação.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo esqueceu de te chamar para jogar futebol. O que você faz?",
+          "options": [
+            "Conversa com ele",
+            "Fica bravo e ignora",
+            "Fala mal dele para outros",
+            "Decide não ser mais amigo"
+          ],
+          "answer": "Conversa com ele",
+          "explanation": "Conversar ajuda a entender o que aconteceu e pode evitar mal-entendidos.",
+          "why": "Conversar é a melhor opção porque resolve o problema e fortalece a amizade, enquanto ignorar cria mais conflitos.",
+          "trap": "Ficar bravo e ignorar parece uma reação natural, mas não resolve a situação e pode prejudicar a amizade.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é a função do 'árbitro' em um jogo de futebol?",
+          "options": [
+            "Marcar gols",
+            "Decidir o vencedor",
+            "Aplicar as regras",
+            "Torcer para um time"
+          ],
+          "answer": "Aplicar as regras",
+          "explanation": "O árbitro é responsável por garantir que as regras do jogo sejam seguidas.",
+          "why": "A resposta certa é aplicar as regras porque o árbitro garante que o jogo seja justo e organizado.",
+          "trap": "Decidir o vencedor engana porque o árbitro não escolhe quem ganha, apenas aplica as regras.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 800 reais e compra dois brinquedos de 300 reais cada, quanto sobra?",
+          "options": [
+            "200",
+            "300",
+            "400",
+            "100"
+          ],
+          "answer": "200",
+          "explanation": "Primeiro, 300 vezes 2 é 600. Depois, 800 menos 600 é 200.",
+          "why": "A resposta certa é 200 porque depois de gastar 600 reais, sobram 200 reais.",
+          "trap": "Marcar 300 erra porque confunde o valor de um brinquedo com o total gasto.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais chuva?",
+          "options": [
+            "As plantas morreriam",
+            "Os rios encheriam",
+            "O ar ficaria úmido",
+            "Aumentaria a neve"
+          ],
+          "answer": "As plantas morreriam",
+          "explanation": "Sem chuva, as plantas não teriam água para sobreviver.",
+          "why": "A resposta certa é que as plantas morreriam porque elas precisam de água da chuva para crescer.",
+          "trap": "Os rios encheriam engana porque sem chuva, os rios secariam, não encheriam.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Idade Média?",
+          "options": [
+            "Durou cerca de 1000 anos",
+            "Foi antes da Pré-História",
+            "Começou no século 20",
+            "Foi marcada pela Revolução Industrial"
+          ],
+          "answer": "Durou cerca de 1000 anos",
+          "explanation": "A Idade Média durou aproximadamente do século 5 ao 15.",
+          "why": "A resposta certa é que durou cerca de 1000 anos porque foi de aproximadamente 476 a 1453.",
+          "trap": "Foi marcada pela Revolução Industrial engana porque essa revolução ocorreu bem depois, no século 18.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "O que você acha que é mais importante em uma amizade verdadeira?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "O que um bom amigo faz quando você está triste?",
+          "options": [
+            "Escuta você",
+            "Ignora você",
+            "Ri de você",
+            "Sai correndo"
+          ],
+          "answer": "Escuta você",
+          "explanation": "Um bom amigo escuta quando você está triste, mostrando que se importa.",
+          "why": "A resposta certa é 'Escuta você' porque um bom amigo oferece apoio e compreensão nos momentos difíceis.",
+          "trap": "A opção 'Ignora você' engana porque um amigo verdadeiro não ignora, mas sim apoia.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você e seu amigo discutiram. O que um bom amigo faz depois?",
+          "options": [
+            "Pede desculpas",
+            "Finge que nada aconteceu",
+            "Fala mal de você",
+            "Nunca mais fala com você"
+          ],
+          "answer": "Pede desculpas",
+          "explanation": "Um bom amigo pede desculpas para resolver a situação e manter a amizade.",
+          "why": "A resposta certa é 'Pede desculpas' porque isso ajuda a resolver conflitos e fortalecer a amizade.",
+          "trap": "A opção 'Finge que nada aconteceu' engana porque não resolve o problema, apenas o ignora.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo esqueceu seu aniversário. O que você faz?",
+          "options": [
+            "Conversa com ele",
+            "Fica bravo e não fala mais",
+            "Conta para todo mundo",
+            "Finge que não se importa"
+          ],
+          "answer": "Conversa com ele",
+          "explanation": "Conversar resolve mal-entendidos e fortalece a amizade.",
+          "why": "A resposta certa é 'Conversa com ele' porque isso permite esclarecer a situação e manter a amizade.",
+          "trap": "A opção 'Fica bravo e não fala mais' engana porque não resolve o problema, apenas cria distância.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Quantos gols um time precisa marcar para vencer se o adversário fez 2 gols?",
+          "options": [
+            "3",
+            "2",
+            "1",
+            "4"
+          ],
+          "answer": "3",
+          "explanation": "Para vencer, o time precisa marcar mais gols que o adversário.",
+          "why": "A resposta certa é 3 porque o time precisa de um gol a mais que os 2 do adversário para vencer.",
+          "trap": "A opção '2' engana porque empatar não é vencer; é preciso mais um gol.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

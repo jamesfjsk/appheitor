@@ -609,13 +609,6 @@ export function skipLotSprite(id: string, empty: boolean): boolean {
   return id === 'cerca' && !empty;
 }
 
-/** Cobre o mirante de madeira pintado no fundo, senão n1/n2/n3 parecem o mesmo vigia. */
-export function coverPaintedLookout(ctx: CanvasRenderingContext2D, backdrop: CanvasImageSource): void {
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(backdrop, 1006, 62, 62, 94, 1074, 22, 88, 100);
-  ctx.drawImage(backdrop, 1038, 0, 52, 46, 1084, 0, 64, 48);
-}
-
 export function pickHit<T extends HoverHit>(spots: T[], px: number, py: number): T | undefined {
   for (let i = spots.length - 1; i >= 0; i--) {
     const s = spots[i];

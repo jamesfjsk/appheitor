@@ -1,0 +1,511 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-26",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-26",
+  "status": "ready",
+  "theme": {
+    "id": "folclore-brasileiro",
+    "category": "mitologia",
+    "title": "Mistérios da Floresta: Saci, Curupira e Boitatá",
+    "lesson": "Imagine que você está caminhando por uma floresta e, de repente, vê pegadas que parecem estar indo na direção oposta. Isso pode ser obra do Curupira, o protetor das florestas com pés virados para trás. As lendas brasileiras, como a do Curupira, Saci e Boitatá, foram criadas para explicar fenômenos naturais e proteger a natureza. O Curupira protege as árvores e os animais, o Saci prega peças e ensina lições, e o Boitatá protege as florestas de incêndios. Hoje, essas lendas nos lembram da importância de cuidar do meio ambiente e respeitar a natureza.",
+    "whyItMatters": "Conhecer essas lendas ajuda a valorizar e proteger a natureza ao nosso redor.",
+    "curiosity": "Você sabia que o Saci tem apenas uma perna e usa um gorro vermelho que lhe dá poderes mágicos?"
+  },
+  "questions": [
+    {
+      "question": "O que aconteceria se o Boitatá não existisse nas lendas?",
+      "options": [
+        "Mais incêndios na floresta",
+        "Menos animais na floresta",
+        "Mais tempestades",
+        "Menos árvores"
+      ],
+      "answer": "Mais incêndios na floresta",
+      "explanation": "O Boitatá é conhecido por proteger as florestas de incêndios.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Mais incêndios na floresta' porque o Boitatá protege contra o fogo.",
+      "trap": "Marcar 'Menos animais na floresta' erra porque o Boitatá não está relacionado diretamente aos animais.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre o Saci?",
+      "options": [
+        "Tem uma perna só",
+        "Vive no mar",
+        "É invisível",
+        "Tem dois olhos vermelhos"
+      ],
+      "answer": "Tem uma perna só",
+      "explanation": "O Saci é famoso por ter apenas uma perna e usar um gorro vermelho.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Tem uma perna só' porque é uma característica marcante do Saci.",
+      "trap": "Marcar 'É invisível' erra porque o Saci é visível, mas muito rápido e travesso.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do bandeirinha em um jogo de futebol?",
+      "options": [
+        "Marcar impedimentos",
+        "Apitar o jogo",
+        "Anotar gols",
+        "Substituir o árbitro"
+      ],
+      "answer": "Marcar impedimentos",
+      "explanation": "O bandeirinha auxilia o árbitro, especialmente em lances de impedimento.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Marcar impedimentos' porque essa é uma das principais funções do bandeirinha.",
+      "trap": "Marcar 'Apitar o jogo' erra porque essa é a função do árbitro, não do bandeirinha.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?",
+      "options": [
+        "34 cm",
+        "17 cm",
+        "60 cm",
+        "24 cm"
+      ],
+      "answer": "34 cm",
+      "explanation": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "trap": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Cada caixa guarda 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?",
+      "options": [
+        "7",
+        "6",
+        "8",
+        "5"
+      ],
+      "answer": "7",
+      "explanation": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "trap": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Quantos minutos há em 2 horas e meia?",
+      "options": [
+        "150",
+        "120",
+        "130",
+        "250"
+      ],
+      "answer": "150",
+      "explanation": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "trap": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Quais são as três cores primárias da tinta, que não nascem da mistura de outras?",
+      "options": [
+        "Vermelho, azul e amarelo",
+        "Verde, laranja e roxo",
+        "Preto, branco e cinza",
+        "Azul, verde e vermelho"
+      ],
+      "answer": "Vermelho, azul e amarelo",
+      "explanation": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "trap": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Na mitologia grega, Zeus é o rei dos deuses. Qual era a arma dele?",
+      "options": [
+        "O raio",
+        "O tridente",
+        "O martelo",
+        "O arco"
+      ],
+      "answer": "O raio",
+      "explanation": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "trap": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual lenda brasileira você mais gosta e por quê?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "duplicata": 4,
+      "certa_mais_longa": 3,
+      "conta_nao_fecha": 1,
+      "tamanho_opcoes": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "certa_mais_longa",
+          "duplicata"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "duplicata"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A pergunta pede o que você faria."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": false,
+        "motivo": "A conta não fecha."
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A certa é a única completa."
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 5
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Mistérios da Floresta: Saci, Curupira e Boitatá",
+        "lesson": "Imagine que você está caminhando por uma floresta e, de repente, vê pegadas que parecem estar indo na direção oposta. Isso pode ser obra do Curupira, o protetor das florestas com pés virados para trás. As lendas brasileiras, como a do Curupira, Saci e Boitatá, foram criadas para explicar fenômenos naturais e proteger a natureza. O Curupira protege as árvores e os animais, o Saci prega peças e ensina lições, e o Boitatá protege as florestas de incêndios. Hoje, essas lendas nos lembram da importância de cuidar do meio ambiente e respeitar a natureza.",
+        "whyItMatters": "Conhecer essas lendas ajuda a valorizar e proteger a natureza ao nosso redor.",
+        "curiosity": "Você sabia que o Saci tem apenas uma perna e usa um gorro vermelho que lhe dá poderes mágicos?"
+      },
+      "questions": [
+        {
+          "question": "Qual é a principal função do Curupira nas lendas brasileiras?",
+          "options": [
+            "Proteger a floresta",
+            "Assustar viajantes",
+            "Roubar comida",
+            "Causar tempestades"
+          ],
+          "answer": "Proteger a floresta",
+          "explanation": "O Curupira é conhecido por proteger as florestas e seus habitantes.",
+          "why": "A resposta certa é 'Proteger a floresta' porque o Curupira é um guardião da natureza nas lendas.",
+          "trap": "Marcar 'Assustar viajantes' erra porque ele só assusta quem ameaça a floresta.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você vê pegadas na floresta que parecem ir na direção oposta. O que isso pode significar?",
+          "options": [
+            "Curupira esteve por ali",
+            "Alguém está perdido",
+            "É uma armadilha",
+            "Um animal passou"
+          ],
+          "answer": "Curupira esteve por ali",
+          "explanation": "As pegadas do Curupira são conhecidas por parecerem ir na direção oposta.",
+          "why": "A resposta certa é 'Curupira esteve por ali' porque suas pegadas são famosas por enganar caçadores.",
+          "trap": "Marcar 'Alguém está perdido' erra porque as pegadas do Curupira são intencionais, não de alguém perdido.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está na floresta e vê um fogo estranho. O que você faz?",
+          "options": [
+            "Corre para longe",
+            "Tenta apagar o fogo",
+            "Chama um adulto",
+            "Fica para observar"
+          ],
+          "answer": "Chama um adulto",
+          "explanation": "Chamar um adulto é a atitude mais segura e responsável.",
+          "why": "A resposta certa é 'Chama um adulto' porque é importante ter ajuda em situações perigosas.",
+          "trap": "Marcar 'Corre para longe' erra porque, embora seguro, não resolve a situação do fogo.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "O que aconteceria se o Boitatá não existisse nas lendas?",
+          "options": [
+            "Mais incêndios na floresta",
+            "Menos animais na floresta",
+            "Mais tempestades",
+            "Menos árvores"
+          ],
+          "answer": "Mais incêndios na floresta",
+          "explanation": "O Boitatá é conhecido por proteger as florestas de incêndios.",
+          "why": "A resposta certa é 'Mais incêndios na floresta' porque o Boitatá protege contra o fogo.",
+          "trap": "Marcar 'Menos animais na floresta' erra porque o Boitatá não está relacionado diretamente aos animais.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o Saci?",
+          "options": [
+            "Tem uma perna só",
+            "Vive no mar",
+            "É invisível",
+            "Tem dois olhos vermelhos"
+          ],
+          "answer": "Tem uma perna só",
+          "explanation": "O Saci é famoso por ter apenas uma perna e usar um gorro vermelho.",
+          "why": "A resposta certa é 'Tem uma perna só' porque é uma característica marcante do Saci.",
+          "trap": "Marcar 'É invisível' erra porque o Saci é visível, mas muito rápido e travesso.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do bandeirinha em um jogo de futebol?",
+          "options": [
+            "Marcar impedimentos",
+            "Apitar o jogo",
+            "Anotar gols",
+            "Substituir o árbitro"
+          ],
+          "answer": "Marcar impedimentos",
+          "explanation": "O bandeirinha auxilia o árbitro, especialmente em lances de impedimento.",
+          "why": "A resposta certa é 'Marcar impedimentos' porque essa é uma das principais funções do bandeirinha.",
+          "trap": "Marcar 'Apitar o jogo' erra porque essa é a função do árbitro, não do bandeirinha.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma loja tem 800 produtos e vende 25% deles, quantos produtos ainda restam?",
+          "options": [
+            "600",
+            "200",
+            "400",
+            "500"
+          ],
+          "answer": "600",
+          "explanation": "25% de 800 é 200, então 800 menos 200 é 600.",
+          "why": "A resposta certa é 600 porque 800 menos 25% de 800, que é 200, resulta em 600.",
+          "trap": "Marcar 200 erra porque 200 é o número de produtos vendidos, não os restantes.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Qual lenda brasileira você mais gosta e por quê?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Qual é a principal função do Boitatá nas lendas brasileiras?",
+          "options": [
+            "Proteger as florestas",
+            "Assustar os viajantes",
+            "Proteger os campos",
+            "Causar incêndios"
+          ],
+          "answer": "Proteger os campos",
+          "explanation": "O Boitatá é conhecido por proteger os campos contra incêndios.",
+          "why": "A resposta certa é proteger os campos porque o Boitatá é uma lenda que protege contra incêndios.",
+          "trap": "Marcar proteger as florestas erra porque essa é a função do Curupira, não do Boitatá.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você está jogando futebol e vê um colega chutando a bola para o gol. O que o goleiro deve fazer?",
+          "options": [
+            "Correr para o meio do campo",
+            "Ficar parado",
+            "Tentar defender a bola",
+            "Chutar a bola para longe"
+          ],
+          "answer": "Tentar defender a bola",
+          "explanation": "O goleiro deve tentar defender a bola para evitar um gol.",
+          "why": "A resposta certa é tentar defender a bola porque essa é a principal função do goleiro no jogo.",
+          "trap": "Marcar chutar a bola para longe erra porque o goleiro primeiro precisa defender, não chutar.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está na floresta e vê pegadas que parecem ir na direção oposta. O que você faz?",
+          "options": [
+            "Segue as pegadas",
+            "Ignora as pegadas",
+            "Conta para um adulto",
+            "Tira uma foto"
+          ],
+          "answer": "Conta para um adulto",
+          "explanation": "Contar para um adulto é a atitude mais sábia para garantir segurança.",
+          "why": "A resposta certa é contar para um adulto porque é importante garantir segurança na floresta.",
+          "trap": "Marcar seguir as pegadas erra porque pode ser perigoso seguir sem saber a origem.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "O que aconteceria se o Curupira não existisse nas lendas?",
+          "options": [
+            "As florestas seriam mais protegidas",
+            "Os animais ficariam mais seguros",
+            "As florestas poderiam ser mais destruídas",
+            "Nada mudaria nas florestas"
+          ],
+          "answer": "As florestas poderiam ser mais destruídas",
+          "explanation": "Sem o Curupira, as lendas não protegeriam tanto as florestas.",
+          "why": "A resposta certa é que as florestas poderiam ser mais destruídas porque o Curupira protege as florestas.",
+          "trap": "Marcar os animais ficariam mais seguros erra porque o Curupira protege florestas, não diretamente os animais.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

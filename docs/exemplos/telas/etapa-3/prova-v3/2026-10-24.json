@@ -1,0 +1,591 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-24",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-24",
+  "status": "ready",
+  "theme": {
+    "category": "quimica",
+    "curiosity": "Sabia que o ouro do seu anel e o ferro do seu sangue foram criados em estrelas?",
+    "id": "atomos-e-elementos",
+    "lesson": "Imagine que você está montando um quebra-cabeça gigante, mas em vez de peças de papelão, você está usando átomos! Tudo ao nosso redor, desde a grama do campo de futebol até o chocolate que você adora, é feito de átomos. Existem 118 tipos diferentes de átomos, e eles se juntam de várias maneiras para formar tudo o que conhecemos. O mais incrível é que muitos desses átomos foram criados dentro de estrelas que explodiram há muito tempo. Hoje, você pode pensar nos átomos como as peças básicas que constroem o mundo ao seu redor.",
+    "title": "O Universo de Peças",
+    "whyItMatters": "Entender átomos ajuda a compreender como tudo é formado, até você mesmo!"
+  },
+  "questions": [
+    {
+      "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+      "options": [
+        "Começou na Inglaterra",
+        "Começou na França",
+        "Começou na Alemanha",
+        "Começou na Itália"
+      ],
+      "answer": "Começou na Inglaterra",
+      "explanation": "A Revolução Industrial teve início na Inglaterra.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta correta é 'Começou na Inglaterra' porque é um fato histórico amplamente reconhecido.",
+      "trap": "Marcar 'França' pode ser um erro comum devido à confusão com a Revolução Francesa.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que aconteceria se não houvesse átomos?",
+      "options": [
+        "Nada existiria",
+        "Mais estrelas",
+        "Menos planetas",
+        "Mais elementos"
+      ],
+      "answer": "Nada existiria",
+      "explanation": "Átomos são as peças básicas de tudo.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta é 'Nada existiria' porque átomos são essenciais para formar matéria.",
+      "trap": "Marcar 'mais estrelas' é um erro, pois estrelas também são feitas de átomos.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual é o papel do meio-campista em um time de futebol?",
+      "options": [
+        "Controlar o jogo",
+        "Marcar gols",
+        "Defender o gol",
+        "Apitar o jogo"
+      ],
+      "answer": "Controlar o jogo",
+      "explanation": "O meio-campista organiza e distribui jogadas.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta correta é 'Controlar o jogo' porque essa é a função principal do meio-campista.",
+      "trap": "Marcar 'marcar gols' pode ser um erro ao confundir com a função do atacante.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Quantos tipos de átomos existem que formam tudo ao nosso redor?",
+      "options": [
+        "118",
+        "100",
+        "50",
+        "200"
+      ],
+      "answer": "118",
+      "explanation": "Existem 118 tipos de átomos conhecidos que formam tudo.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 118 porque é o número total de átomos conhecidos na tabela periódica.",
+      "trap": "Quem escolhe 100 pode estar confundindo com um número redondo, mas não é o correto.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que aconteceria se as estrelas não explodissem?",
+      "options": [
+        "Menos elementos no universo",
+        "Mais estrelas no céu",
+        "Planetas maiores",
+        "Mais calor na Terra"
+      ],
+      "answer": "Menos elementos no universo",
+      "explanation": "A explosão de estrelas cria elementos pesados.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "Menos elementos no universo porque as explosões das estrelas formam muitos dos elementos que conhecemos.",
+      "trap": "Mais estrelas no céu parece lógico, mas não considera a formação de elementos.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual planeta fica entre a Terra e Júpiter na ordem de distância do Sol?",
+      "options": [
+        "Marte",
+        "Vênus",
+        "Saturno",
+        "Mercúrio"
+      ],
+      "answer": "Marte",
+      "explanation": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "trap": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você mistura tinta azul com tinta amarela. Que cor aparece?",
+      "options": [
+        "Verde",
+        "Roxo",
+        "Laranja",
+        "Marrom"
+      ],
+      "answer": "Verde",
+      "explanation": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "trap": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma música tem compassos de 4 tempos. Você bate palmas 12 vezes seguindo o pulso. Quantos compassos passaram?",
+      "options": [
+        "3",
+        "4",
+        "12",
+        "16"
+      ],
+      "answer": "3",
+      "explanation": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "trap": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que os átomos influenciam a sua vida diária?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 2,
+      "conta_nao_fecha": 1,
+      "conta_um_passo": 1,
+      "duplicata": 1,
+      "enunciado_vazou": 2,
+      "ingles_nivel": 1,
+      "sinonimas": 1,
+      "why_curto": 6,
+      "why_sem_resposta": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "enunciado_vazou",
+          "why_curto"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "why_sem_resposta",
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "why_curto",
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "sinonimas",
+          "why_curto",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "why_curto",
+          "duplicata"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": []
+      },
+      {
+        "i": 12,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": []
+      },
+      {
+        "i": 14,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 15,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A conta não fecha."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "Pede o que ele faria, opinião."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "fromOffline": 3
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Quantos tipos de átomos existem que formam tudo ao nosso redor?",
+          "options": [
+            "118",
+            "50",
+            "200",
+            "10"
+          ],
+          "answer": "118",
+          "explanation": "Existem 118 tipos de átomos conhecidos que formam tudo.",
+          "why": "A resposta 118 é correta porque é o número total de tipos de átomos conhecidos.",
+          "trap": "Marcar 50 ou 200 pode ser tentador, mas são números incorretos.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se o ferro do seu sangue vem de estrelas, de onde vem o cálcio dos seus ossos?",
+          "options": [
+            "Estrelas",
+            "Oceano",
+            "Terra",
+            "Árvores"
+          ],
+          "answer": "Estrelas",
+          "explanation": "Assim como o ferro, o cálcio também é formado em estrelas.",
+          "why": "A resposta é 'estrelas' porque tanto o ferro quanto o cálcio são formados nelas.",
+          "trap": "Marcar 'Terra' pode parecer lógico, mas é um erro comum.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está jogando futebol e seu amigo diz que tudo é feito de átomos. Como você reage?",
+          "options": [
+            "Concordo e explico mais sobre átomos.",
+            "Ignoro porque não é importante.",
+            "Riu e mudo de assunto.",
+            "Digo que ele está errado."
+          ],
+          "answer": "Concordo e explico mais sobre átomos.",
+          "explanation": "Concordar e explicar mostra interesse e conhecimento.",
+          "why": "A atitude de concordar e explicar é sábia porque promove aprendizado e curiosidade.",
+          "trap": "Rir e mudar de assunto é tentador, mas impede uma discussão interessante.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se um time de futebol ganha 5 partidas e perde 3, quantos pontos ele tem, considerando que cada vitória vale 3 pontos?",
+          "options": [
+            "15",
+            "8",
+            "18",
+            "10"
+          ],
+          "answer": "15",
+          "explanation": "Cada vitória vale 3 pontos, então 5 vitórias somam 15 pontos.",
+          "why": "A resposta correta é 15 porque 5 vitórias vezes 3 pontos cada dá 15.",
+          "trap": "Marcar 8 pode ser um erro ao confundir com o número de jogos.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as estrelas não explodissem?",
+          "options": [
+            "Menos elementos no universo",
+            "Mais planetas",
+            "Mais estrelas",
+            "Nada mudaria"
+          ],
+          "answer": "Menos elementos no universo",
+          "explanation": "A explosão de estrelas cria novos elementos.",
+          "why": "A resposta é 'menos elementos no universo' porque sem explosões, menos elementos seriam formados.",
+          "trap": "Marcar 'mais planetas' pode parecer lógico, mas não é o caso.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct in English?",
+          "options": [
+            "There is a cat on the table.",
+            "There are a cat on the table.",
+            "There is cats on the table.",
+            "There are cat on the table."
+          ],
+          "answer": "There is a cat on the table.",
+          "explanation": "The correct form is 'There is a cat' for singular.",
+          "why": "The sentence 'There is a cat on the table.' is correct because it uses singular form properly.",
+          "trap": "Choosing 'There are a cat' is incorrect due to singular/plural mismatch.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "entender",
+          "audioText": "There is a cat on the table."
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+          "options": [
+            "Começou na Inglaterra",
+            "Começou na França",
+            "Começou na Alemanha",
+            "Começou na Itália"
+          ],
+          "answer": "Começou na Inglaterra",
+          "explanation": "A Revolução Industrial teve início na Inglaterra.",
+          "why": "A resposta correta é 'Começou na Inglaterra' porque é um fato histórico amplamente reconhecido.",
+          "trap": "Marcar 'França' pode ser um erro comum devido à confusão com a Revolução Francesa.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Quantos jogadores de linha um time de futebol tem em campo?",
+          "options": [
+            "10",
+            "9",
+            "11",
+            "12"
+          ],
+          "answer": "10",
+          "explanation": "Um time tem 11 jogadores, incluindo o goleiro, então 10 são de linha.",
+          "why": "A resposta certa é 10 porque um time tem 11 jogadores no total, menos o goleiro.",
+          "trap": "Marcar 11 é um erro ao esquecer de subtrair o goleiro.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um time empata 4 jogos e perde 2, quantos pontos ele tem?",
+          "options": [
+            "4",
+            "8",
+            "2",
+            "6"
+          ],
+          "answer": "4",
+          "explanation": "Cada empate vale 1 ponto, então 4 empates somam 4 pontos.",
+          "why": "A resposta é 4 porque cada empate vale 1 ponto, e 4 empates somam 4.",
+          "trap": "Marcar 8 pode ser um erro ao confundir com o número total de jogos.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse átomos?",
+          "options": [
+            "Nada existiria",
+            "Mais estrelas",
+            "Menos planetas",
+            "Mais elementos"
+          ],
+          "answer": "Nada existiria",
+          "explanation": "Átomos são as peças básicas de tudo.",
+          "why": "A resposta é 'Nada existiria' porque átomos são essenciais para formar matéria.",
+          "trap": "Marcar 'mais estrelas' é um erro, pois estrelas também são feitas de átomos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é o papel do meio-campista em um time de futebol?",
+          "options": [
+            "Controlar o jogo",
+            "Marcar gols",
+            "Defender o gol",
+            "Apitar o jogo"
+          ],
+          "answer": "Controlar o jogo",
+          "explanation": "O meio-campista organiza e distribui jogadas.",
+          "why": "A resposta correta é 'Controlar o jogo' porque essa é a função principal do meio-campista.",
+          "trap": "Marcar 'marcar gols' pode ser um erro ao confundir com a função do atacante.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que os átomos influenciam a sua vida diária?",
+      "theme": {
+        "curiosity": "Sabia que o ouro do seu anel e o ferro do seu sangue foram criados em estrelas?",
+        "lesson": "Imagine que você está montando um quebra-cabeça gigante, mas em vez de peças de papelão, você está usando átomos! Tudo ao nosso redor, desde a grama do campo de futebol até o chocolate que você adora, é feito de átomos. Existem 118 tipos diferentes de átomos, e eles se juntam de várias maneiras para formar tudo o que conhecemos. O mais incrível é que muitos desses átomos foram criados dentro de estrelas que explodiram há muito tempo. Hoje, você pode pensar nos átomos como as peças básicas que constroem o mundo ao seu redor.",
+        "title": "O Universo de Peças",
+        "whyItMatters": "Entender átomos ajuda a compreender como tudo é formado, até você mesmo!"
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Quantos tipos de átomos existem que formam tudo ao nosso redor?",
+          "options": [
+            "118",
+            "100",
+            "50",
+            "200"
+          ],
+          "answer": "118",
+          "explanation": "Existem 118 tipos de átomos conhecidos que formam tudo.",
+          "why": "A resposta certa é 118 porque é o número total de átomos conhecidos na tabela periódica.",
+          "trap": "Quem escolhe 100 pode estar confundindo com um número redondo, mas não é o correto.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se o ferro do seu sangue vem de estrelas, de onde vem o cálcio dos seus ossos?",
+          "options": [
+            "Estrelas",
+            "Terra",
+            "Água",
+            "Plantas"
+          ],
+          "answer": "Estrelas",
+          "explanation": "O cálcio, assim como o ferro, foi formado em estrelas.",
+          "why": "A resposta é estrelas porque elementos como cálcio são formados em estrelas que explodem.",
+          "trap": "Escolher Terra pode parecer lógico, mas o cálcio foi originalmente formado em estrelas.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está jogando futebol e seu amigo diz que tudo é feito de átomos. Como você reage?",
+          "options": [
+            "Concordo e explico mais",
+            "Ignoro e continuo jogando",
+            "Rio e digo que é bobagem",
+            "Pergunto mais sobre isso"
+          ],
+          "answer": "Concordo e explico mais",
+          "explanation": "Explicar mais mostra interesse e conhecimento.",
+          "why": "Concordar e explicar mais é sábio porque demonstra que você entende e valoriza a ciência.",
+          "trap": "Rir e dizer que é bobagem subestima a importância da ciência no nosso dia a dia.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se um jogador corre 300 metros em 2 minutos, quantos metros ele corre em 10 minutos?",
+          "options": [
+            "1500",
+            "600",
+            "1200",
+            "3000"
+          ],
+          "answer": "1500",
+          "explanation": "Multiplicando a distância por 5, já que 10 é 5 vezes 2.",
+          "why": "A resposta é 1500 porque 300 vezes 5 dá 1500 metros em 10 minutos.",
+          "trap": "Escolher 3000 duplica o resultado correto, confundindo a multiplicação.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as estrelas não explodissem?",
+          "options": [
+            "Menos elementos no universo",
+            "Mais estrelas no céu",
+            "Planetas maiores",
+            "Mais calor na Terra"
+          ],
+          "answer": "Menos elementos no universo",
+          "explanation": "A explosão de estrelas cria elementos pesados.",
+          "why": "Menos elementos no universo porque as explosões das estrelas formam muitos dos elementos que conhecemos.",
+          "trap": "Mais estrelas no céu parece lógico, mas não considera a formação de elementos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        }
+      ]
+    }
+  }
+}

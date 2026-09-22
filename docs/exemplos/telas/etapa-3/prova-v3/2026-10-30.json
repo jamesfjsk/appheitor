@@ -1,0 +1,557 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-30",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-30",
+  "status": "ready",
+  "theme": {
+    "category": "geografia",
+    "curiosity": "Sabia que Belém é uma das cidades mais chuvosas do Brasil? E que Petrolina é famosa por seu clima seco?",
+    "id": "clima-e-tempo",
+    "lesson": "Imagine que você está planejando um jogo de futebol com seus amigos. Você verifica a previsão do tempo e vê que vai chover. Isso é o tempo: o que está acontecendo agora ou nos próximos dias. Já o clima é o que você espera de um lugar ao longo do ano. Por exemplo, Belém tem um clima úmido, com muita chuva, enquanto Petrolina é mais seca. Saber a diferença ajuda a entender por que o meteorologista pode errar a previsão, mas ainda assim acertar o clima de uma região. Hoje, observe o tempo e pense em como ele se encaixa no clima da sua cidade.",
+    "title": "Tempo e Clima: Entenda a Diferença",
+    "whyItMatters": "Entender a diferença entre tempo e clima ajuda a planejar melhor suas atividades."
+  },
+  "questions": [
+    {
+      "question": "Você planejou um piquenique, mas a previsão diz que pode chover. O que você faz?",
+      "options": [
+        "Levo capa de chuva e vou assim mesmo",
+        "Cancelo o piquenique sem pensar duas vezes",
+        "Espero até o último minuto para decidir",
+        "Ignoro a previsão e vou sem me preocupar"
+      ],
+      "answer": "Levo capa de chuva e vou assim mesmo",
+      "explanation": "Levar capa de chuva é sábio, pois você está preparado para o tempo e ainda pode aproveitar o dia.",
+      "kind": "dilemma",
+      "subject": "geografia",
+      "why": "Levar capa de chuva é a melhor escolha porque você se prepara para o tempo sem cancelar seus planos.",
+      "trap": "Ignorar a previsão é tentador, mas pode estragar o piquenique se chover.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Você planejou um passeio ao ar livre, mas a previsão diz que pode chover. O que você faz?",
+      "options": [
+        "Leva capa de chuva",
+        "Cancela o passeio",
+        "Ignora a previsão",
+        "Muda para um local coberto"
+      ],
+      "answer": "Leva capa de chuva",
+      "explanation": "Levar capa de chuva é a melhor opção, pois permite que você continue com o passeio preparado.",
+      "kind": "dilemma",
+      "subject": "geografia",
+      "why": "A resposta certa é levar capa de chuva porque isso permite que você esteja preparado para a chuva sem cancelar o passeio.",
+      "trap": "Marcar cancela o passeio engana porque a previsão pode errar e a chuva pode não acontecer.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "O que aconteceria se a umidade do ar fosse zero?",
+      "options": [
+        "Pele seca",
+        "Chuva forte",
+        "Ar mais quente",
+        "Mais ventos"
+      ],
+      "answer": "Pele seca",
+      "explanation": "Sem umidade, a pele e outros materiais secariam rapidamente.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é pele seca porque a umidade baixa retira a umidade da pele, causando ressecamento.",
+      "trap": "Marcar chuva forte engana porque sem umidade, a formação de chuva é impossível.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre o clima do deserto?",
+      "options": [
+        "Chove pouco",
+        "Chove muito",
+        "Sempre frio",
+        "Sempre quente"
+      ],
+      "answer": "Chove pouco",
+      "explanation": "Desertos são conhecidos por sua baixa precipitação anual.",
+      "kind": "knowledge",
+      "subject": "geografia",
+      "why": "A resposta certa é chove pouco porque desertos têm precipitação muito baixa, caracterizando seu clima árido.",
+      "trap": "Marcar sempre quente engana porque desertos podem ter noites frias, não sendo sempre quentes.",
+      "skill": "GEO.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Heitor tem o triplo da idade do primo. Juntos, eles têm 16 anos. Qual é a idade do primo?",
+      "options": [
+        "4",
+        "12",
+        "8",
+        "6"
+      ],
+      "answer": "4",
+      "explanation": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "trap": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Ache o erro: 'Hércules era famoso pela sua força e cumpriu dez trabalhos quase impossíveis.'",
+      "options": [
+        "Foram doze trabalhos, não dez",
+        "Hércules era famoso pela velocidade",
+        "Hércules era um deus do mar",
+        "Não há erro"
+      ],
+      "answer": "Foram doze trabalhos, não dez",
+      "explanation": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "trap": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Duas embalagens de suco: 1 litro por R$ 8 e 2 litros por R$ 14. Qual é mais barata por litro?",
+      "options": [
+        "A de 2 litros",
+        "A de 1 litro",
+        "As duas custam o mesmo por litro",
+        "Não dá para saber"
+      ],
+      "answer": "A de 2 litros",
+      "explanation": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "trap": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se você viajar do Amazonas até o Rio Grande do Sul, de qual região para qual região está indo?",
+      "options": [
+        "Do Norte para o Sul",
+        "Do Nordeste para o Sudeste",
+        "Do Centro-Oeste para o Sul",
+        "Do Norte para o Sudeste"
+      ],
+      "answer": "Do Norte para o Sul",
+      "explanation": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "trap": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como o conhecimento sobre tempo e clima pode ajudar você a planejar suas atividades diárias?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 2,
+      "conta_nao_fecha": 2,
+      "duplicata": 2,
+      "enunciado_vazou": 4,
+      "fato_discutivel": 1,
+      "sinonimas": 1,
+      "tamanho_opcoes": 1,
+      "why_curto": 3
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "enunciado_vazou",
+          "sinonimas"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "enunciado_vazou",
+          "fato_discutivel",
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": [
+          "why_curto",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "why_curto",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 14,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas"
+    ],
+    "fromOffline": 4
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Qual é a diferença entre tempo e clima?",
+          "options": [
+            "Tempo é imediato; clima é a longo prazo",
+            "Tempo é a longo prazo; clima é imediato",
+            "Tempo e clima são a mesma coisa",
+            "Tempo é sobre temperatura; clima é sobre chuva"
+          ],
+          "answer": "Tempo é imediato; clima é a longo prazo",
+          "explanation": "Tempo refere-se ao que acontece agora, enquanto clima é o padrão ao longo do tempo.",
+          "why": "A resposta certa é 'Tempo é imediato; clima é a longo prazo' porque tempo é o que vemos no dia a dia, enquanto clima é o padrão de anos.",
+          "trap": "Marcar 'Tempo e clima são a mesma coisa' confunde os conceitos, pois eles têm significados diferentes.",
+          "kind": "lesson",
+          "subject": "geografia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Por que Belém tem mais chuva que Petrolina?",
+          "options": [
+            "Belém está em uma região úmida",
+            "Petrolina está perto do mar",
+            "Belém é mais quente",
+            "Petrolina tem mais rios"
+          ],
+          "answer": "Belém está em uma região úmida",
+          "explanation": "Belém está na Amazônia, onde o clima é úmido e chuvoso.",
+          "why": "A resposta certa é 'Belém está em uma região úmida' porque a localização geográfica influencia o clima local.",
+          "trap": "Marcar 'Petrolina está perto do mar' é enganoso, pois Petrolina está no interior, longe do mar.",
+          "kind": "lesson",
+          "subject": "geografia",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você planejou um piquenique, mas a previsão diz que pode chover. O que você faz?",
+          "options": [
+            "Levo capa de chuva e vou assim mesmo",
+            "Cancelo o piquenique sem pensar duas vezes",
+            "Espero até o último minuto para decidir",
+            "Ignoro a previsão e vou sem me preocupar"
+          ],
+          "answer": "Levo capa de chuva e vou assim mesmo",
+          "explanation": "Levar capa de chuva é sábio, pois você está preparado para o tempo e ainda pode aproveitar o dia.",
+          "why": "Levar capa de chuva é a melhor escolha porque você se prepara para o tempo sem cancelar seus planos.",
+          "trap": "Ignorar a previsão é tentador, mas pode estragar o piquenique se chover.",
+          "kind": "dilemma",
+          "subject": "geografia",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se uma loja tem 500 produtos e vende 30% deles, quantos produtos ainda restam?",
+          "options": [
+            "350",
+            "150",
+            "200",
+            "300"
+          ],
+          "answer": "350",
+          "explanation": "Primeiro, calcule 30% de 500, que é 150. Depois, subtraia de 500 para encontrar o restante.",
+          "why": "A resposta certa é 350 porque 500 menos 150 vendidos deixa 350 produtos.",
+          "trap": "Marcar 150 erra porque é o número vendido, não o restante.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse umidade no ar?",
+          "options": [
+            "As plantas secariam",
+            "Choveria mais",
+            "O ar ficaria mais frio",
+            "Haveria mais neblina"
+          ],
+          "answer": "As plantas secariam",
+          "explanation": "Sem umidade, as plantas não teriam água suficiente para sobreviver.",
+          "why": "A resposta certa é 'As plantas secariam' porque a umidade é essencial para a vida das plantas.",
+          "trap": "Marcar 'Choveria mais' é enganoso, pois sem umidade, não há chuva.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque um cachorro usa 'is', e 'are' é para plural.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que 'are' serve para qualquer cachorro, mas 'are' pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o clima do Brasil?",
+          "options": [
+            "O Brasil tem clima tropical",
+            "O Brasil é sempre frio",
+            "O Brasil tem clima desértico",
+            "O Brasil é sempre quente"
+          ],
+          "answer": "O Brasil tem clima tropical",
+          "explanation": "O Brasil é conhecido por seu clima tropical, com temperaturas quentes e úmidas.",
+          "why": "A resposta certa é 'O Brasil tem clima tropical' porque o país está na zona tropical, com calor e umidade.",
+          "trap": "Marcar 'O Brasil é sempre quente' ignora as variações de clima em diferentes regiões.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'goal kick' no futebol?",
+          "options": [
+            "Reiniciar o jogo após um gol",
+            "Reiniciar o jogo após a bola sair pela linha de fundo",
+            "Marcar um pênalti",
+            "Iniciar o segundo tempo"
+          ],
+          "answer": "Reiniciar o jogo após a bola sair pela linha de fundo",
+          "explanation": "O 'goal kick' é usado quando a bola sai pela linha de fundo e não foi gol.",
+          "why": "A resposta certa é 'Reiniciar o jogo após a bola sair pela linha de fundo' porque é a regra para quando a bola sai sem gol.",
+          "trap": "Marcar 'Reiniciar o jogo após um gol' confunde com o 'kick-off', que é para isso.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como o conhecimento sobre tempo e clima pode ajudar você a planejar suas atividades diárias?",
+      "theme": {
+        "curiosity": "Sabia que Belém é uma das cidades mais chuvosas do Brasil? E que Petrolina é famosa por seu clima seco?",
+        "lesson": "Imagine que você está planejando um jogo de futebol com seus amigos. Você verifica a previsão do tempo e vê que vai chover. Isso é o tempo: o que está acontecendo agora ou nos próximos dias. Já o clima é o que você espera de um lugar ao longo do ano. Por exemplo, Belém tem um clima úmido, com muita chuva, enquanto Petrolina é mais seca. Saber a diferença ajuda a entender por que o meteorologista pode errar a previsão, mas ainda assim acertar o clima de uma região. Hoje, observe o tempo e pense em como ele se encaixa no clima da sua cidade.",
+        "title": "Tempo e Clima: Entenda a Diferença",
+        "whyItMatters": "Entender a diferença entre tempo e clima ajuda a planejar melhor suas atividades."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que a previsão do tempo pode errar?",
+          "options": [
+            "Mudanças rápidas no clima",
+            "Erro nos instrumentos",
+            "Falta de dados",
+            "Interferência humana"
+          ],
+          "answer": "Mudanças rápidas no clima",
+          "explanation": "Mudanças rápidas no clima são difíceis de prever com precisão.",
+          "why": "A resposta certa é mudanças rápidas no clima porque o tempo pode mudar de repente, dificultando previsões exatas.",
+          "trap": "Marcar erro nos instrumentos engana porque os instrumentos são geralmente precisos, mas o clima é imprevisível.",
+          "kind": "lesson",
+          "subject": "geografia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você está jogando futebol e começa a chover. O que isso mostra sobre tempo e clima?",
+          "options": [
+            "Tempo é imediato",
+            "Clima é imediato",
+            "Tempo é longo prazo",
+            "Clima é curto prazo"
+          ],
+          "answer": "Tempo é imediato",
+          "explanation": "A chuva durante o jogo mostra uma condição imediata, que é o tempo.",
+          "why": "A resposta certa é tempo é imediato porque a chuva durante o jogo é uma condição do momento.",
+          "trap": "Marcar clima é imediato engana porque clima refere-se a padrões de longo prazo, não a eventos imediatos.",
+          "kind": "lesson",
+          "subject": "geografia",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você planejou um passeio ao ar livre, mas a previsão diz que pode chover. O que você faz?",
+          "options": [
+            "Leva capa de chuva",
+            "Cancela o passeio",
+            "Ignora a previsão",
+            "Muda para um local coberto"
+          ],
+          "answer": "Leva capa de chuva",
+          "explanation": "Levar capa de chuva é a melhor opção, pois permite que você continue com o passeio preparado.",
+          "why": "A resposta certa é levar capa de chuva porque isso permite que você esteja preparado para a chuva sem cancelar o passeio.",
+          "trap": "Marcar cancela o passeio engana porque a previsão pode errar e a chuva pode não acontecer.",
+          "kind": "dilemma",
+          "subject": "geografia",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se uma loja tem 600 produtos e vende 20% deles, quantos produtos ainda restam?",
+          "options": [
+            "480",
+            "120",
+            "500",
+            "520"
+          ],
+          "answer": "480",
+          "explanation": "Primeiro, calcule 20% de 600, que é 120, depois subtraia de 600.",
+          "why": "A resposta certa é 480 porque 600 menos 120 vendidos resulta em 480 produtos restantes.",
+          "trap": "Marcar 120 engana porque é a quantidade vendida, não a restante.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se a umidade do ar fosse zero?",
+          "options": [
+            "Pele seca",
+            "Chuva forte",
+            "Ar mais quente",
+            "Mais ventos"
+          ],
+          "answer": "Pele seca",
+          "explanation": "Sem umidade, a pele e outros materiais secariam rapidamente.",
+          "why": "A resposta certa é pele seca porque a umidade baixa retira a umidade da pele, causando ressecamento.",
+          "trap": "Marcar chuva forte engana porque sem umidade, a formação de chuva é impossível.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro usa is, e are é para plural.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o clima do deserto?",
+          "options": [
+            "Chove pouco",
+            "Chove muito",
+            "Sempre frio",
+            "Sempre quente"
+          ],
+          "answer": "Chove pouco",
+          "explanation": "Desertos são conhecidos por sua baixa precipitação anual.",
+          "why": "A resposta certa é chove pouco porque desertos têm precipitação muito baixa, caracterizando seu clima árido.",
+          "trap": "Marcar sempre quente engana porque desertos podem ter noites frias, não sendo sempre quentes.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        }
+      ]
+    }
+  }
+}

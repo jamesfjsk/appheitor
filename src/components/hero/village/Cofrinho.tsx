@@ -197,6 +197,14 @@ const Cofrinho: React.FC<{
   const ratePct = modules.interest !== false && !ruined ? vaultInterestPct(vaultLv) : 0;
   const bankOn = modules.bank !== false;
   const applied = piles.reduce((s, g) => s + (g.savedGold || 0), 0);
+  const prizeSaved = preset
+    ? open
+      .filter((g) => g.status === 'open' && (
+        (preset.rewardId && g.rewardId === preset.rewardId)
+        || (!preset.rewardId && g.title === preset.title)
+      ))
+      .reduce((s, g) => s + (g.savedGold || 0), 0)
+    : 0;
   const stake = AMOUNTS.includes(amount) && amount <= gold ? amount : (AMOUNTS.filter((n) => n <= gold).pop() || 0);
   const demo = AMOUNTS.includes(amount) ? amount : 10;
   const minGold = minGoldForBonus(ratePct);
@@ -223,15 +231,9 @@ const Cofrinho: React.FC<{
     playClick();
     setBusy(true);
     try {
-      const prizeGoal = preset
-        ? open.find((g) => g.rewardId === preset.rewardId || g.title === preset.title)
-        : undefined;
-      let id = prizeGoal?.id;
-      if (!id) {
-        const title = (preset?.title || 'No cofre').slice(0, 40);
-        const targetGold = Math.max(20, preset?.targetGold || stake);
-        id = await createGoal(childUid, { title, targetGold, rewardId: preset?.rewardId });
-      }
+      const title = (preset?.title || 'No cofre').slice(0, 40);
+      const targetGold = Math.max(20, preset?.targetGold || stake);
+      const id = await createGoal(childUid, { title, targetGold, rewardId: preset?.rewardId });
       await depositGoal(childUid, id, stake, weeks, today);
       toast.success(`${stake} gold aplicados.`);
     } catch (e) {
@@ -396,6 +398,23 @@ const Cofrinho: React.FC<{
                     </span>
                   </div>
                 </div>
+                {preset && preset.targetGold > 0 ? (
+                  <div className="mc-card p-3 space-y-1">
+                    <p className="text-sm font-bold truncate">{preset.title}</p>
+                    <p className="text-sm">
+                      <span className="mc-num" style={{ fontSize: 14 }}>{prizeSaved}</span>
+                      {' / '}
+                      <span className="mc-num" style={{ fontSize: 14 }}>{preset.targetGold}</span>
+                      {' gold'}
+                    </p>
+                    <div className="mc-bar mt-1">
+                      <div
+                        className="mc-bar-fill is-gold"
+                        style={{ width: `${Math.min(100, Math.round((prizeSaved / preset.targetGold) * 100))}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : null}
                 {piles.map((g) => (
                   <PileView
                     key={g.id}

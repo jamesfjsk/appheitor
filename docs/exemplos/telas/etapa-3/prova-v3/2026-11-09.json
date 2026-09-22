@@ -1,0 +1,511 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-09",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-09",
+  "status": "ready",
+  "theme": {
+    "id": "sistema-solar",
+    "category": "astronomia",
+    "title": "Explorando o Espaço: Nossa Vizinhança Cósmica",
+    "lesson": "Imagine que a Terra é uma bola de gude. Se fosse assim, o Sol seria uma bola de 1,4 metros de diâmetro, localizada a 150 metros de distância. Isso nos ajuda a entender as enormes distâncias no espaço. Curiosamente, Vênus é mais quente que Mercúrio, mesmo estando mais longe do Sol. Isso acontece porque Vênus tem uma atmosfera densa que retém o calor. Hoje, podemos usar esse conhecimento para entender como a atmosfera de um planeta pode afetar sua temperatura.",
+    "whyItMatters": "Compreender o espaço nos ajuda a cuidar melhor do nosso planeta.",
+    "curiosity": "Vênus tem um dia mais longo que seu ano. Um dia lá dura 243 dias terrestres, enquanto um ano dura 225."
+  },
+  "questions": [
+    {
+      "question": "Qual fato é verdadeiro sobre a Lua?",
+      "options": [
+        "Ela não tem atmosfera",
+        "Ela é maior que a Terra",
+        "Ela tem água líquida",
+        "Ela é um planeta"
+      ],
+      "answer": "Ela não tem atmosfera",
+      "explanation": "A Lua não tem atmosfera, o que afeta sua temperatura.",
+      "kind": "lesson",
+      "subject": "geografia",
+      "why": "A resposta certa é que ela não tem atmosfera porque isso é um fato conhecido sobre a Lua.",
+      "trap": "Marcar que ela é maior que a Terra erra porque a Lua é bem menor.",
+      "skill": "GEO.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do zagueiro no futebol?",
+      "options": [
+        "Defender o gol",
+        "Marcar gols",
+        "Apitar o jogo",
+        "Treinar o time"
+      ],
+      "answer": "Defender o gol",
+      "explanation": "O zagueiro tem a função de proteger a área do gol.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é defender o gol porque essa é a principal função do zagueiro em campo.",
+      "trap": "Marcar marcar gols erra porque essa é a função principal dos atacantes, não dos zagueiros.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem 500 reais e compra dois brinquedos de 200 reais cada, quanto sobra?",
+      "options": [
+        "100 reais",
+        "200 reais",
+        "300 reais",
+        "400 reais"
+      ],
+      "answer": "100 reais",
+      "explanation": "A resposta certa é 100 reais porque 500 menos 400 (200 vezes 2) resulta em 100.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta certa é 100 reais porque 500 menos 400 (200 vezes 2) resulta em 100.",
+      "trap": "Marcar 200 reais erra porque isso ignora o custo dos dois brinquedos.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual planeta é conhecido como o 'Planeta Vermelho'?",
+      "options": [
+        "Marte",
+        "Júpiter",
+        "Saturno",
+        "Vênus"
+      ],
+      "answer": "Marte",
+      "explanation": "Marte é chamado de 'Planeta Vermelho' por causa de sua cor.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é Marte porque sua superfície tem uma coloração avermelhada devido ao óxido de ferro.",
+      "trap": "Marcar Júpiter erra porque Júpiter é conhecido por suas faixas e grande mancha vermelha, não por ser vermelho.",
+      "skill": "CIE.CAUSA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se um time faz 3 gols no primeiro tempo e 2 no segundo, quantos gols fez no total?",
+      "options": [
+        "5",
+        "3",
+        "2",
+        "6"
+      ],
+      "answer": "5",
+      "explanation": "A resposta certa é 5 porque somando 3 gols do primeiro tempo com 2 do segundo tempo resulta em 5.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 5 porque somando 3 gols do primeiro tempo com 2 do segundo tempo resulta em 5.",
+      "trap": "Marcar 3 erra porque isso só considera os gols do primeiro tempo.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual é a função do atacante no futebol?",
+      "options": [
+        "Marcar gols",
+        "Defender o gol",
+        "Apitar o jogo",
+        "Treinar o time"
+      ],
+      "answer": "Marcar gols",
+      "explanation": "O atacante tem a função de fazer gols para o time.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é marcar gols porque essa é a principal função do atacante em campo.",
+      "trap": "Marcar defender o gol erra porque essa é a função dos zagueiros e do goleiro.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Você mistura tinta azul com tinta amarela. Que cor aparece?",
+      "options": [
+        "Verde",
+        "Roxo",
+        "Laranja",
+        "Marrom"
+      ],
+      "answer": "Verde",
+      "explanation": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "trap": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma música tem compassos de 4 tempos. Você bate palmas 12 vezes seguindo o pulso. Quantos compassos passaram?",
+      "options": [
+        "3",
+        "4",
+        "12",
+        "16"
+      ],
+      "answer": "3",
+      "explanation": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "trap": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Se você pudesse visitar qualquer planeta do nosso sistema solar, qual escolheria e por quê?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "sinonimas": 2,
+      "why_curto": 1,
+      "duplicata": 3,
+      "conta_nao_fecha": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "sinonimas"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "sinonimas"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "duplicata"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "Falta consenso sobre a temperatura dos planetas."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 2
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Explorando o Espaço: Nossa Vizinhança Cósmica",
+        "lesson": "Imagine que a Terra é uma bola de gude. Se fosse assim, o Sol seria uma bola de 1,4 metros de diâmetro, localizada a 150 metros de distância. Isso nos ajuda a entender as enormes distâncias no espaço. Curiosamente, Vênus é mais quente que Mercúrio, mesmo estando mais longe do Sol. Isso acontece porque Vênus tem uma atmosfera densa que retém o calor. Hoje, podemos usar esse conhecimento para entender como a atmosfera de um planeta pode afetar sua temperatura.",
+        "whyItMatters": "Compreender o espaço nos ajuda a cuidar melhor do nosso planeta.",
+        "curiosity": "Vênus tem um dia mais longo que seu ano. Um dia lá dura 243 dias terrestres, enquanto um ano dura 225."
+      },
+      "questions": [
+        {
+          "question": "Se a Terra fosse uma bola de gude, qual seria o tamanho do Sol?",
+          "options": [
+            "1,4 metros",
+            "14 metros",
+            "140 metros",
+            "0,14 metros"
+          ],
+          "answer": "1,4 metros",
+          "explanation": "A escala diz que o Sol seria uma bola de 1,4 metros.",
+          "why": "A resposta certa é 1,4 metros porque a escala compara a Terra a uma bola de gude e o Sol a uma bola de 1,4 metros.",
+          "trap": "Marcar 14 metros erra porque exagera o tamanho do Sol na escala proposta.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Por que Vênus é mais quente que Mercúrio?",
+          "options": [
+            "Atmosfera densa",
+            "Mais próximo do Sol",
+            "Menor rotação",
+            "Mais vulcões"
+          ],
+          "answer": "Atmosfera densa",
+          "explanation": "A atmosfera densa de Vênus retém mais calor.",
+          "why": "A resposta certa é atmosfera densa porque ela retém o calor, tornando Vênus mais quente que Mercúrio.",
+          "trap": "Marcar mais próximo do Sol erra porque Mercúrio é o mais próximo, mas não o mais quente.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo diz que Mercúrio é o planeta mais quente. O que você faz?",
+          "options": [
+            "Explica sobre Vênus",
+            "Concorda com ele",
+            "Muda de assunto",
+            "Ri dele"
+          ],
+          "answer": "Explica sobre Vênus",
+          "explanation": "Explicar sobre Vênus ajuda seu amigo a entender melhor.",
+          "why": "Explicar sobre Vênus é a atitude mais sábia porque ensina algo novo ao seu amigo.",
+          "trap": "Concordar com ele erra porque não corrige a informação errada.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "O que aconteceria se a Terra não tivesse atmosfera?",
+          "options": [
+            "Temperaturas extremas",
+            "Mais oxigênio",
+            "Menos gravidade",
+            "Mais água"
+          ],
+          "answer": "Temperaturas extremas",
+          "explanation": "Sem atmosfera, a Terra teria grandes variações de temperatura.",
+          "why": "A resposta certa é temperaturas extremas porque a atmosfera regula o clima e protege contra radiação.",
+          "trap": "Marcar mais oxigênio erra porque a atmosfera é que contém o oxigênio.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a planet in the sky",
+            "There are a planet in the sky",
+            "There is planets in the sky",
+            "There are planet in the sky"
+          ],
+          "answer": "There is a planet in the sky",
+          "audioText": "There is a planet in the sky",
+          "why": "A frase certa é There is a planet in the sky porque um planeta só usa is, e are fica para quando são dois ou mais planetas.",
+          "trap": "A frase There are a planet in the sky engana quem acha que are serve para qualquer planeta, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Lua?",
+          "options": [
+            "Ela não tem atmosfera",
+            "Ela é maior que a Terra",
+            "Ela tem água líquida",
+            "Ela é um planeta"
+          ],
+          "answer": "Ela não tem atmosfera",
+          "explanation": "A Lua não tem atmosfera, o que afeta sua temperatura.",
+          "why": "A resposta certa é que ela não tem atmosfera porque isso é um fato conhecido sobre a Lua.",
+          "trap": "Marcar que ela é maior que a Terra erra porque a Lua é bem menor.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do zagueiro no futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O zagueiro tem a função de proteger a área do gol.",
+          "why": "A resposta certa é defender o gol porque essa é a principal função do zagueiro em campo.",
+          "trap": "Marcar marcar gols erra porque essa é a função principal dos atacantes, não dos zagueiros.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 500 reais e compra dois brinquedos de 200 reais cada, quanto sobra?",
+          "options": [
+            "100 reais",
+            "200 reais",
+            "300 reais",
+            "400 reais"
+          ],
+          "answer": "100 reais",
+          "why": "A resposta certa é 100 reais porque 500 menos 400 (200 vezes 2) resulta em 100.",
+          "trap": "Marcar 200 reais erra porque isso ignora o custo dos dois brinquedos.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual planeta é conhecido como o 'Planeta Vermelho'?",
+          "options": [
+            "Marte",
+            "Júpiter",
+            "Saturno",
+            "Vênus"
+          ],
+          "answer": "Marte",
+          "explanation": "Marte é chamado de 'Planeta Vermelho' por causa de sua cor.",
+          "why": "A resposta certa é Marte porque sua superfície tem uma coloração avermelhada devido ao óxido de ferro.",
+          "trap": "Marcar Júpiter erra porque Júpiter é conhecido por suas faixas e grande mancha vermelha, não por ser vermelho.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um time faz 3 gols no primeiro tempo e 2 no segundo, quantos gols fez no total?",
+          "options": [
+            "5",
+            "3",
+            "2",
+            "6"
+          ],
+          "answer": "5",
+          "why": "A resposta certa é 5 porque somando 3 gols do primeiro tempo com 2 do segundo tempo resulta em 5.",
+          "trap": "Marcar 3 erra porque isso só considera os gols do primeiro tempo.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual é a função do atacante no futebol?",
+          "options": [
+            "Marcar gols",
+            "Defender o gol",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Marcar gols",
+          "explanation": "O atacante tem a função de fazer gols para o time.",
+          "why": "A resposta certa é marcar gols porque essa é a principal função do atacante em campo.",
+          "trap": "Marcar defender o gol erra porque essa é a função dos zagueiros e do goleiro.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Se você pudesse visitar qualquer planeta do nosso sistema solar, qual escolheria e por quê?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Se a Terra fosse uma bola de gude, a que distância estaria o Sol?",
+          "options": [
+            "150 metros",
+            "15 metros",
+            "1.5 metros",
+            "1500 metros"
+          ],
+          "answer": "150 metros",
+          "explanation": "A escala correta coloca o Sol a 150 metros de distância.",
+          "why": "A resposta certa é 150 metros porque essa é a distância em escala quando a Terra é uma bola de gude.",
+          "trap": "Marcar 15 metros erra porque é uma subestimação da distância real na escala proposta.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro usa is, e are é para plural.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

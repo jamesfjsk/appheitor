@@ -1,0 +1,1447 @@
+[
+  {
+    "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-29",
+    "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+    "date": "2026-10-29",
+    "status": "ready",
+    "theme": {
+      "id": "gelo-boia",
+      "category": "cotidiano",
+      "title": "Por que o gelo flutua?",
+      "lesson": "Imagine que você coloca uma garrafa de água no congelador e, no dia seguinte, ela está estourada. Isso acontece porque, ao contrário da maioria das substâncias, a água se expande quando congela. Isso faz com que o gelo seja menos denso que a água líquida, permitindo que ele flutue. Se o gelo não flutuasse, os lagos congelariam de baixo para cima, o que seria ruim para os peixes e outros seres aquáticos. Hoje, você pode observar isso colocando um cubo de gelo em um copo de água e vendo como ele boia.",
+      "whyItMatters": "Entender por que o gelo flutua ajuda a compreender fenômenos naturais e a importância da água para a vida.",
+      "curiosity": "Sabia que o gelo é uma das poucas substâncias que flutua em seu próprio líquido? Isso é raro na natureza!"
+    },
+    "questions": [
+      {
+        "question": "Por que o gelo flutua na água?",
+        "options": [
+          "Porque é menos denso",
+          "Porque é mais pesado",
+          "Porque é mais quente",
+          "Porque é mais denso"
+        ],
+        "answer": "Porque é menos denso",
+        "explanation": "O gelo flutua porque é menos denso que a água líquida.",
+        "kind": "lesson",
+        "subject": "tema",
+        "why": "A resposta certa é 'Porque é menos denso' porque a densidade menor do gelo faz com que ele flutue.",
+        "trap": "A opção 'Porque é mais denso' engana quem não lembra que o gelo é menos denso que a água.",
+        "skill": "LIC.IDEIA",
+        "bloom": "entender"
+      },
+      {
+        "question": "Qual é a função do 'penalty kick' no futebol?",
+        "options": [
+          "Marcar um gol",
+          "Parar o jogo",
+          "Trocar de jogador",
+          "Dar cartão amarelo"
+        ],
+        "answer": "Marcar um gol",
+        "explanation": "O 'penalty kick' é uma chance de marcar um gol diretamente.",
+        "kind": "lesson",
+        "subject": "futebol",
+        "why": "A resposta certa é 'Marcar um gol' porque o 'penalty kick' é uma oportunidade direta de gol.",
+        "trap": "A opção 'Parar o jogo' engana quem não sabe que o pênalti é para marcar gol.",
+        "skill": "FUT.REGRA",
+        "bloom": "entender"
+      },
+      {
+        "question": "Se você tem 500 reais e compra dois jogos de 150 reais cada, quanto sobra?",
+        "options": [
+          "200",
+          "150",
+          "250",
+          "100"
+        ],
+        "answer": "200",
+        "explanation": "A resposta certa é 200 porque 500 menos 300 (150 vezes 2) deixa 200.",
+        "kind": "lesson",
+        "subject": "matematica",
+        "why": "A resposta certa é 200 porque 500 menos 300 (150 vezes 2) deixa 200.",
+        "trap": "Quem marca 150 erra porque subtraiu apenas um jogo de 150, não os dois.",
+        "skill": "MAT.OP2",
+        "bloom": "aplicar"
+      },
+      {
+        "question": "O que aconteceria se os lagos congelassem de baixo para cima?",
+        "options": [
+          "Peixes morreriam",
+          "Água ficaria mais quente",
+          "Gelo derreteria",
+          "Lagos secariam"
+        ],
+        "answer": "Peixes morreriam",
+        "explanation": "Os peixes morreriam porque ficariam presos sem oxigênio.",
+        "kind": "knowledge",
+        "subject": "ciencias",
+        "why": "A resposta certa é 'Peixes morreriam' porque o gelo isolaria a água líquida, impedindo a troca de oxigênio.",
+        "trap": "A opção 'Água ficaria mais quente' engana quem não pensa na falta de oxigênio.",
+        "skill": "CIE.CAUSA",
+        "bloom": "analisar"
+      },
+      {
+        "question": "Which sentence is correct?",
+        "options": [
+          "There is a dog in the park",
+          "There are a dog in the park",
+          "There is dogs in the park",
+          "There are dog in the park"
+        ],
+        "answer": "There is a dog in the park",
+        "explanation": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+        "kind": "knowledge",
+        "subject": "ingles",
+        "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+        "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+        "skill": "ING.N1.BE",
+        "bloom": "aplicar",
+        "audioText": "There is a dog in the park"
+      },
+      {
+        "question": "Qual é a função do 'goal kick' no futebol?",
+        "options": [
+          "Reiniciar o jogo",
+          "Marcar um gol",
+          "Dar cartão vermelho",
+          "Trocar de jogador"
+        ],
+        "answer": "Reiniciar o jogo",
+        "explanation": "O 'goal kick' é usado para reiniciar o jogo após a bola sair pela linha de fundo.",
+        "kind": "knowledge",
+        "subject": "futebol",
+        "why": "A resposta certa é 'Reiniciar o jogo' porque o 'goal kick' retoma o jogo após a bola sair.",
+        "trap": "A opção 'Marcar um gol' engana quem não sabe que o 'goal kick' não é para marcar gols.",
+        "skill": "FUT.REGRA",
+        "bloom": "entender"
+      },
+      {
+        "question": "Qual é a função do 'midfielder' em um time de futebol?",
+        "options": [
+          "Controlar o meio-campo",
+          "Defender o gol",
+          "Marcar gols",
+          "Dar cartões"
+        ],
+        "answer": "Controlar o meio-campo",
+        "explanation": "O 'midfielder' é responsável por controlar o meio-campo e ajudar tanto na defesa quanto no ataque.",
+        "kind": "knowledge",
+        "subject": "futebol",
+        "why": "A resposta certa é 'Controlar o meio-campo' porque o 'midfielder' organiza o jogo entre defesa e ataque.",
+        "trap": "A opção 'Marcar gols' engana quem não sabe que o 'midfielder' tem funções mais amplas.",
+        "skill": "FUT.REGRA",
+        "bloom": "entender"
+      },
+      {
+        "question": "Se uma loja tem 300 produtos e vende 40% deles, quantos produtos ainda restam?",
+        "options": [
+          "180",
+          "120",
+          "200",
+          "240"
+        ],
+        "answer": "180",
+        "explanation": "A resposta certa é 180 porque 40% de 300 é 120, e 300 menos 120 deixa 180.",
+        "kind": "knowledge",
+        "subject": "matematica",
+        "why": "A resposta certa é 180 porque 40% de 300 é 120, e 300 menos 120 deixa 180.",
+        "trap": "Quem marca 120 erra porque esqueceu de subtrair os produtos vendidos do total.",
+        "skill": "MAT.OP2",
+        "bloom": "aplicar"
+      }
+    ],
+    "reflectionPrompt": "Como você acha que a propriedade do gelo de flutuar impacta a vida aquática nos lagos?",
+    "source": "ai",
+    "sanitize": {
+      "kept": 8,
+      "dropped": {
+        "duplicata": 2,
+        "certa_mais_longa": 1,
+        "conta_nao_fecha": 2
+      },
+      "perQuestion": [
+        {
+          "i": 0,
+          "codes": []
+        },
+        {
+          "i": 1,
+          "codes": [
+            "duplicata"
+          ]
+        },
+        {
+          "i": 2,
+          "codes": [
+            "certa_mais_longa"
+          ]
+        },
+        {
+          "i": 3,
+          "codes": []
+        },
+        {
+          "i": 4,
+          "codes": [
+            "conta_nao_fecha"
+          ]
+        },
+        {
+          "i": 5,
+          "codes": []
+        },
+        {
+          "i": 6,
+          "codes": []
+        },
+        {
+          "i": 7,
+          "codes": [
+            "duplicata"
+          ]
+        },
+        {
+          "i": 8,
+          "codes": []
+        },
+        {
+          "i": 9,
+          "codes": []
+        },
+        {
+          "i": 10,
+          "codes": [
+            "conta_nao_fecha"
+          ]
+        }
+      ],
+      "review": [
+        {
+          "n": 1,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 2,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 3,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 4,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 5,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 6,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 7,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 8,
+          "ok": true,
+          "motivo": ""
+        }
+      ],
+      "batchLog": [
+        "falta_duas_etapas",
+        "falta_formato"
+      ],
+      "fromOffline": 0
+    },
+    "raw": {
+      "first": {
+        "theme": {
+          "title": "Por que o gelo flutua?",
+          "lesson": "Imagine que você coloca uma garrafa de água no congelador e, no dia seguinte, ela está estourada. Isso acontece porque, ao contrário da maioria das substâncias, a água se expande quando congela. Isso faz com que o gelo seja menos denso que a água líquida, permitindo que ele flutue. Se o gelo não flutuasse, os lagos congelariam de baixo para cima, o que seria ruim para os peixes e outros seres aquáticos. Hoje, você pode observar isso colocando um cubo de gelo em um copo de água e vendo como ele boia.",
+          "whyItMatters": "Entender por que o gelo flutua ajuda a compreender fenômenos naturais e a importância da água para a vida.",
+          "curiosity": "Sabia que o gelo é uma das poucas substâncias que flutua em seu próprio líquido? Isso é raro na natureza!"
+        },
+        "questions": [
+          {
+            "question": "Por que o gelo flutua na água?",
+            "options": [
+              "Porque é menos denso",
+              "Porque é mais pesado",
+              "Porque é mais quente",
+              "Porque é mais denso"
+            ],
+            "answer": "Porque é menos denso",
+            "explanation": "O gelo flutua porque é menos denso que a água líquida.",
+            "why": "A resposta certa é 'Porque é menos denso' porque a densidade menor do gelo faz com que ele flutue.",
+            "trap": "A opção 'Porque é mais denso' engana quem não lembra que o gelo é menos denso que a água.",
+            "kind": "lesson",
+            "subject": "tema",
+            "skill": "LIC.IDEIA",
+            "bloom": "entender"
+          },
+          {
+            "question": "O que acontece se você colocar uma garrafa cheia de água no congelador?",
+            "options": [
+              "Ela pode estourar",
+              "Ela derrete",
+              "Ela evapora",
+              "Ela fica mais leve"
+            ],
+            "answer": "Ela pode estourar",
+            "explanation": "A água se expande ao congelar, podendo estourar a garrafa.",
+            "why": "A resposta certa é 'Ela pode estourar' porque a expansão da água ao congelar aumenta a pressão interna.",
+            "trap": "A opção 'Ela derrete' engana quem não lembra que a água congela no congelador.",
+            "kind": "lesson",
+            "subject": "tema",
+            "skill": "LIC.APLICA",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "Você vê um amigo colocando uma garrafa cheia de água no congelador. O que você faz?",
+            "options": [
+              "Aviso que pode estourar",
+              "Deixo ele descobrir",
+              "Coloco outra garrafa",
+              "Faço uma aposta"
+            ],
+            "answer": "Aviso que pode estourar",
+            "explanation": "Avisar evita que a garrafa estoure e cause bagunça.",
+            "why": "Avisar que pode estourar é sábio porque previne um acidente e ensina sobre a expansão da água.",
+            "trap": "A opção 'Deixo ele descobrir' é tentadora, mas não ajuda a evitar o problema.",
+            "kind": "dilemma",
+            "subject": "tema",
+            "skill": "LIC.DILEMA",
+            "bloom": "analisar"
+          },
+          {
+            "question": "Qual é a função do 'penalty kick' no futebol?",
+            "options": [
+              "Marcar um gol",
+              "Parar o jogo",
+              "Trocar de jogador",
+              "Dar cartão amarelo"
+            ],
+            "answer": "Marcar um gol",
+            "explanation": "O 'penalty kick' é uma chance de marcar um gol diretamente.",
+            "why": "A resposta certa é 'Marcar um gol' porque o 'penalty kick' é uma oportunidade direta de gol.",
+            "trap": "A opção 'Parar o jogo' engana quem não sabe que o pênalti é para marcar gol.",
+            "kind": "knowledge",
+            "subject": "futebol",
+            "skill": "FUT.REGRA",
+            "bloom": "entender"
+          },
+          {
+            "question": "Se você tem 500 reais e compra dois jogos de 150 reais cada, quanto sobra?",
+            "options": [
+              "200",
+              "150",
+              "250",
+              "100"
+            ],
+            "answer": "200",
+            "why": "A resposta certa é 200 porque 500 menos 300 (150 vezes 2) deixa 200.",
+            "trap": "Quem marca 150 erra porque subtraiu apenas um jogo de 150, não os dois.",
+            "kind": "knowledge",
+            "subject": "matematica",
+            "skill": "MAT.OP2",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "O que aconteceria se os lagos congelassem de baixo para cima?",
+            "options": [
+              "Peixes morreriam",
+              "Água ficaria mais quente",
+              "Gelo derreteria",
+              "Lagos secariam"
+            ],
+            "answer": "Peixes morreriam",
+            "explanation": "Os peixes morreriam porque ficariam presos sem oxigênio.",
+            "why": "A resposta certa é 'Peixes morreriam' porque o gelo isolaria a água líquida, impedindo a troca de oxigênio.",
+            "trap": "A opção 'Água ficaria mais quente' engana quem não pensa na falta de oxigênio.",
+            "kind": "knowledge",
+            "subject": "ciencias",
+            "skill": "CIE.CAUSA",
+            "bloom": "analisar"
+          },
+          {
+            "question": "Which sentence is correct?",
+            "options": [
+              "There is a dog in the park",
+              "There are a dog in the park",
+              "There is dogs in the park",
+              "There are dog in the park"
+            ],
+            "answer": "There is a dog in the park",
+            "audioText": "There is a dog in the park",
+            "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+            "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+            "kind": "knowledge",
+            "subject": "ingles",
+            "skill": "ING.N1.BE",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "Qual fato é verdadeiro sobre a água?",
+            "options": [
+              "Ela se expande ao congelar",
+              "Ela encolhe ao congelar",
+              "Ela não muda ao congelar",
+              "Ela evapora ao congelar"
+            ],
+            "answer": "Ela se expande ao congelar",
+            "explanation": "A água se expande ao congelar, o que é raro entre as substâncias.",
+            "why": "A resposta certa é 'Ela se expande ao congelar' porque a água aumenta de volume quando vira gelo.",
+            "trap": "A opção 'Ela encolhe ao congelar' engana quem não sabe que a água é uma exceção.",
+            "kind": "knowledge",
+            "subject": "ciencias",
+            "skill": "CIE.CAUSA",
+            "bloom": "entender"
+          },
+          {
+            "question": "Qual é a função do 'goal kick' no futebol?",
+            "options": [
+              "Reiniciar o jogo",
+              "Marcar um gol",
+              "Dar cartão vermelho",
+              "Trocar de jogador"
+            ],
+            "answer": "Reiniciar o jogo",
+            "explanation": "O 'goal kick' é usado para reiniciar o jogo após a bola sair pela linha de fundo.",
+            "why": "A resposta certa é 'Reiniciar o jogo' porque o 'goal kick' retoma o jogo após a bola sair.",
+            "trap": "A opção 'Marcar um gol' engana quem não sabe que o 'goal kick' não é para marcar gols.",
+            "kind": "knowledge",
+            "subject": "futebol",
+            "skill": "FUT.REGRA",
+            "bloom": "entender"
+          },
+          {
+            "question": "Qual é a função do 'midfielder' em um time de futebol?",
+            "options": [
+              "Controlar o meio-campo",
+              "Defender o gol",
+              "Marcar gols",
+              "Dar cartões"
+            ],
+            "answer": "Controlar o meio-campo",
+            "explanation": "O 'midfielder' é responsável por controlar o meio-campo e ajudar tanto na defesa quanto no ataque.",
+            "why": "A resposta certa é 'Controlar o meio-campo' porque o 'midfielder' organiza o jogo entre defesa e ataque.",
+            "trap": "A opção 'Marcar gols' engana quem não sabe que o 'midfielder' tem funções mais amplas.",
+            "kind": "knowledge",
+            "subject": "futebol",
+            "skill": "FUT.REGRA",
+            "bloom": "entender"
+          },
+          {
+            "question": "Se uma loja tem 300 produtos e vende 40% deles, quantos produtos ainda restam?",
+            "options": [
+              "180",
+              "120",
+              "200",
+              "240"
+            ],
+            "answer": "180",
+            "why": "A resposta certa é 180 porque 40% de 300 é 120, e 300 menos 120 deixa 180.",
+            "trap": "Quem marca 120 erra porque esqueceu de subtrair os produtos vendidos do total.",
+            "kind": "knowledge",
+            "subject": "matematica",
+            "skill": "MAT.OP2",
+            "bloom": "aplicar"
+          }
+        ],
+        "reflectionPrompt": "Como você acha que a propriedade do gelo de flutuar impacta a vida aquática nos lagos?"
+      }
+    },
+    "generatedAt": {},
+    "completed": false
+  },
+  {
+    "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-06",
+    "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+    "date": "2026-11-06",
+    "status": "ready",
+    "theme": {
+      "id": "troco-e-conta",
+      "category": "dinheiro",
+      "title": "Troco de Cabeça: Um Jogo de Números",
+      "lesson": "Imagine que você está na padaria e compra um pão por R$ 2,50 e um suco por R$ 3,75. Você paga com uma nota de R$ 10. Como saber se o troco está certo? Primeiro, complete o valor da compra até o próximo real: R$ 2,50 para R$ 3,00 e R$ 3,75 para R$ 4,00. Depois, some os valores arredondados: R$ 3,00 + R$ 4,00 = R$ 7,00. Finalmente, subtraia do valor pago: R$ 10,00 - R$ 7,00 = R$ 3,00. Assim, você confere o troco rapidamente. Hoje, ao comprar algo, tente usar essa técnica para ver se o troco está correto.",
+      "whyItMatters": "Saber conferir o troco ajuda a evitar erros e economizar dinheiro.",
+      "curiosity": "Sabia que o troco errado é uma das principais causas de reclamações em lojas? E que a prática de conferir o troco pode melhorar suas habilidades matemáticas?"
+    },
+    "questions": [
+      {
+        "question": "Você compra um lanche por R$ 4,25 e um suco por R$ 3,50. Paga com R$ 10,00. Quanto deve receber de troco?",
+        "options": [
+          "R$ 2,25",
+          "R$ 2,75",
+          "R$ 3,00",
+          "R$ 3,25"
+        ],
+        "answer": "R$ 2,25",
+        "explanation": "O total é R$ 7,75. Subtraindo de R$ 10,00, o troco é R$ 2,25.",
+        "kind": "lesson",
+        "subject": "tema",
+        "why": "A resposta certa é R$ 2,25 porque R$ 4,25 mais R$ 3,50 dá R$ 7,75, e R$ 10,00 menos R$ 7,75 é R$ 2,25.",
+        "trap": "Marcar R$ 3,00 erra porque ignora a soma correta dos valores antes de subtrair do total pago.",
+        "skill": "LIC.IDEIA",
+        "bloom": "entender"
+      },
+      {
+        "question": "Na feira, você compra frutas por R$ 5,60 e paga com R$ 10,00. Quanto é o troco correto?",
+        "options": [
+          "R$ 4,40",
+          "R$ 4,50",
+          "R$ 4,60",
+          "R$ 4,70"
+        ],
+        "answer": "R$ 4,40",
+        "explanation": "Subtraia R$ 5,60 de R$ 10,00 para encontrar o troco.",
+        "kind": "lesson",
+        "subject": "tema",
+        "why": "A resposta certa é R$ 4,40 porque R$ 10,00 menos R$ 5,60 resulta em R$ 4,40.",
+        "trap": "Marcar R$ 4,50 erra porque arredonda o valor de forma incorreta antes de subtrair.",
+        "skill": "LIC.APLICA",
+        "bloom": "aplicar"
+      },
+      {
+        "question": "Você compra um brinquedo por R$ 45,00 e um livro por R$ 30,00. Paga com R$ 100,00. Quanto é o troco?",
+        "options": [
+          "R$ 25,00",
+          "R$ 35,00",
+          "R$ 15,00",
+          "R$ 20,00"
+        ],
+        "answer": "R$ 25,00",
+        "explanation": "O total é R$ 75,00. Subtraindo de R$ 100,00, o troco é R$ 25,00.",
+        "kind": "lesson",
+        "subject": "matematica",
+        "why": "A resposta certa é R$ 25,00 porque R$ 45,00 mais R$ 30,00 dá R$ 75,00, e R$ 100,00 menos R$ 75,00 é R$ 25,00.",
+        "trap": "Marcar R$ 35,00 erra porque ignora a soma correta dos valores antes de subtrair do total pago.",
+        "skill": "MAT.OP2",
+        "bloom": "aplicar"
+      },
+      {
+        "question": "O que aconteceria se as plantas não fizessem fotossíntese?",
+        "options": [
+          "Aumentaria o oxigênio",
+          "Diminuiria o oxigênio",
+          "Aumentaria o gás carbônico",
+          "Diminuiria o gás carbônico"
+        ],
+        "answer": "Diminuiria o oxigênio",
+        "explanation": "A fotossíntese é responsável pela produção de oxigênio.",
+        "kind": "knowledge",
+        "subject": "ciencias",
+        "why": "A resposta certa é 'Diminuiria o oxigênio' porque a fotossíntese produz oxigênio, essencial para a vida.",
+        "trap": "Marcar 'Aumentaria o oxigênio' erra porque ignora que a fotossíntese é a fonte de oxigênio.",
+        "skill": "CIE.CAUSA",
+        "bloom": "analisar"
+      },
+      {
+        "question": "Which sentence is correct?",
+        "options": [
+          "There is a dog in the park",
+          "There are a dog in the park",
+          "There is dogs in the park",
+          "There are dog in the park"
+        ],
+        "answer": "There is a dog in the park",
+        "explanation": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+        "kind": "knowledge",
+        "subject": "ingles",
+        "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+        "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+        "skill": "ING.N1.BE",
+        "bloom": "aplicar",
+        "audioText": "There is a dog in the park"
+      },
+      {
+        "question": "Qual fato é verdadeiro sobre a Revolução Francesa?",
+        "options": [
+          "Começou em 1789",
+          "Durou até 1800",
+          "Foi liderada por Napoleão",
+          "Terminou em 1785"
+        ],
+        "answer": "Começou em 1789",
+        "explanation": "A Revolução Francesa começou em 1789, marcando uma grande mudança política.",
+        "kind": "knowledge",
+        "subject": "historia",
+        "why": "A resposta certa é 'Começou em 1789' porque é um fato histórico amplamente reconhecido sobre a Revolução Francesa.",
+        "trap": "Marcar 'Durou até 1800' erra porque a Revolução terminou em 1799, não 1800.",
+        "skill": "HIS.FATO",
+        "bloom": "entender"
+      },
+      {
+        "question": "Qual é a função do 'cartão vermelho' no futebol?",
+        "options": [
+          "Expulsar um jogador",
+          "Avisar uma falta",
+          "Marcar um gol",
+          "Parar o jogo"
+        ],
+        "answer": "Expulsar um jogador",
+        "explanation": "O cartão vermelho é mostrado para expulsar um jogador do campo.",
+        "kind": "knowledge",
+        "subject": "futebol",
+        "why": "A resposta certa é 'Expulsar um jogador' porque o cartão vermelho é usado para penalizar faltas graves.",
+        "trap": "Marcar 'Avisar uma falta' erra porque o cartão amarelo é que avisa sobre faltas, não o vermelho.",
+        "skill": "FUT.REGRA",
+        "bloom": "entender"
+      },
+      {
+        "question": "O que aconteceria se a Terra não tivesse atmosfera?",
+        "options": [
+          "A temperatura seria estável",
+          "Não haveria vida",
+          "A água seria abundante",
+          "O ar seria respirável"
+        ],
+        "answer": "Não haveria vida",
+        "explanation": "A atmosfera é essencial para manter condições de vida na Terra.",
+        "kind": "knowledge",
+        "subject": "ciencias",
+        "why": "A resposta certa é 'Não haveria vida' porque a atmosfera protege e sustenta a vida com oxigênio e temperatura adequada.",
+        "trap": "Marcar 'A temperatura seria estável' erra porque a atmosfera regula a temperatura, sem ela haveria extremos.",
+        "skill": "CIE.CAUSA",
+        "bloom": "analisar"
+      }
+    ],
+    "reflectionPrompt": "Como você se sente ao conferir o troco sozinho? Isso te dá mais confiança?",
+    "source": "ai",
+    "sanitize": {
+      "kept": 8,
+      "dropped": {
+        "certa_mais_longa": 1,
+        "opcao_caricata": 1,
+        "conta_um_passo": 2
+      },
+      "perQuestion": [
+        {
+          "i": 0,
+          "codes": []
+        },
+        {
+          "i": 1,
+          "codes": []
+        },
+        {
+          "i": 2,
+          "codes": [
+            "certa_mais_longa",
+            "opcao_caricata"
+          ]
+        },
+        {
+          "i": 3,
+          "codes": []
+        },
+        {
+          "i": 4,
+          "codes": []
+        },
+        {
+          "i": 5,
+          "codes": []
+        },
+        {
+          "i": 6,
+          "codes": []
+        },
+        {
+          "i": 7,
+          "codes": []
+        },
+        {
+          "i": 8,
+          "codes": [
+            "conta_um_passo"
+          ]
+        },
+        {
+          "i": 9,
+          "codes": []
+        },
+        {
+          "i": 10,
+          "codes": [
+            "conta_um_passo"
+          ]
+        }
+      ],
+      "review": [
+        {
+          "n": 1,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 2,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 3,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 4,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 5,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 6,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 7,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 8,
+          "ok": true,
+          "motivo": ""
+        }
+      ],
+      "batchLog": [],
+      "fromOffline": 0
+    },
+    "raw": {
+      "first": {
+        "theme": {
+          "title": "Troco de Cabeça: Um Jogo de Números",
+          "lesson": "Imagine que você está na padaria e compra um pão por R$ 2,50 e um suco por R$ 3,75. Você paga com uma nota de R$ 10. Como saber se o troco está certo? Primeiro, complete o valor da compra até o próximo real: R$ 2,50 para R$ 3,00 e R$ 3,75 para R$ 4,00. Depois, some os valores arredondados: R$ 3,00 + R$ 4,00 = R$ 7,00. Finalmente, subtraia do valor pago: R$ 10,00 - R$ 7,00 = R$ 3,00. Assim, você confere o troco rapidamente. Hoje, ao comprar algo, tente usar essa técnica para ver se o troco está correto.",
+          "whyItMatters": "Saber conferir o troco ajuda a evitar erros e economizar dinheiro.",
+          "curiosity": "Sabia que o troco errado é uma das principais causas de reclamações em lojas? E que a prática de conferir o troco pode melhorar suas habilidades matemáticas?"
+        },
+        "questions": [
+          {
+            "question": "Você compra um lanche por R$ 4,25 e um suco por R$ 3,50. Paga com R$ 10,00. Quanto deve receber de troco?",
+            "options": [
+              "R$ 2,25",
+              "R$ 2,75",
+              "R$ 3,00",
+              "R$ 3,25"
+            ],
+            "answer": "R$ 2,25",
+            "explanation": "O total é R$ 7,75. Subtraindo de R$ 10,00, o troco é R$ 2,25.",
+            "why": "A resposta certa é R$ 2,25 porque R$ 4,25 mais R$ 3,50 dá R$ 7,75, e R$ 10,00 menos R$ 7,75 é R$ 2,25.",
+            "trap": "Marcar R$ 3,00 erra porque ignora a soma correta dos valores antes de subtrair do total pago.",
+            "kind": "lesson",
+            "subject": "tema",
+            "skill": "LIC.IDEIA",
+            "bloom": "entender"
+          },
+          {
+            "question": "Na feira, você compra frutas por R$ 5,60 e paga com R$ 10,00. Quanto é o troco correto?",
+            "options": [
+              "R$ 4,40",
+              "R$ 4,50",
+              "R$ 4,60",
+              "R$ 4,70"
+            ],
+            "answer": "R$ 4,40",
+            "explanation": "Subtraia R$ 5,60 de R$ 10,00 para encontrar o troco.",
+            "why": "A resposta certa é R$ 4,40 porque R$ 10,00 menos R$ 5,60 resulta em R$ 4,40.",
+            "trap": "Marcar R$ 4,50 erra porque arredonda o valor de forma incorreta antes de subtrair.",
+            "kind": "lesson",
+            "subject": "tema",
+            "skill": "LIC.APLICA",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "Você está no mercado e percebe que o troco está errado. O que você faz?",
+            "options": [
+              "Conferir o recibo e falar com o caixa",
+              "Ignorar e ir embora",
+              "Pedir para o caixa conferir de novo",
+              "Ficar com o troco errado"
+            ],
+            "answer": "Conferir o recibo e falar com o caixa",
+            "explanation": "Conferir o recibo ajuda a identificar o erro e corrigi-lo.",
+            "why": "Conferir o recibo e falar com o caixa é a atitude mais sábia porque resolve o problema de forma educada e eficaz.",
+            "trap": "Ignorar e ir embora parece mais fácil, mas você perde a chance de corrigir o erro e recuperar seu dinheiro.",
+            "kind": "dilemma",
+            "subject": "tema",
+            "skill": "LIC.DILEMA",
+            "bloom": "analisar"
+          },
+          {
+            "question": "Você compra um brinquedo por R$ 45,00 e um livro por R$ 30,00. Paga com R$ 100,00. Quanto é o troco?",
+            "options": [
+              "R$ 25,00",
+              "R$ 35,00",
+              "R$ 15,00",
+              "R$ 20,00"
+            ],
+            "answer": "R$ 25,00",
+            "explanation": "O total é R$ 75,00. Subtraindo de R$ 100,00, o troco é R$ 25,00.",
+            "why": "A resposta certa é R$ 25,00 porque R$ 45,00 mais R$ 30,00 dá R$ 75,00, e R$ 100,00 menos R$ 75,00 é R$ 25,00.",
+            "trap": "Marcar R$ 35,00 erra porque ignora a soma correta dos valores antes de subtrair do total pago.",
+            "kind": "knowledge",
+            "subject": "matematica",
+            "skill": "MAT.OP2",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "O que aconteceria se as plantas não fizessem fotossíntese?",
+            "options": [
+              "Aumentaria o oxigênio",
+              "Diminuiria o oxigênio",
+              "Aumentaria o gás carbônico",
+              "Diminuiria o gás carbônico"
+            ],
+            "answer": "Diminuiria o oxigênio",
+            "explanation": "A fotossíntese é responsável pela produção de oxigênio.",
+            "why": "A resposta certa é 'Diminuiria o oxigênio' porque a fotossíntese produz oxigênio, essencial para a vida.",
+            "trap": "Marcar 'Aumentaria o oxigênio' erra porque ignora que a fotossíntese é a fonte de oxigênio.",
+            "kind": "knowledge",
+            "subject": "ciencias",
+            "skill": "CIE.CAUSA",
+            "bloom": "analisar"
+          },
+          {
+            "question": "Which sentence is correct?",
+            "options": [
+              "There is a dog in the park",
+              "There are a dog in the park",
+              "There is dogs in the park",
+              "There are dog in the park"
+            ],
+            "answer": "There is a dog in the park",
+            "audioText": "There is a dog in the park",
+            "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+            "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+            "kind": "knowledge",
+            "subject": "ingles",
+            "skill": "ING.N1.BE",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "Qual fato é verdadeiro sobre a Revolução Francesa?",
+            "options": [
+              "Começou em 1789",
+              "Durou até 1800",
+              "Foi liderada por Napoleão",
+              "Terminou em 1785"
+            ],
+            "answer": "Começou em 1789",
+            "explanation": "A Revolução Francesa começou em 1789, marcando uma grande mudança política.",
+            "why": "A resposta certa é 'Começou em 1789' porque é um fato histórico amplamente reconhecido sobre a Revolução Francesa.",
+            "trap": "Marcar 'Durou até 1800' erra porque a Revolução terminou em 1799, não 1800.",
+            "kind": "knowledge",
+            "subject": "historia",
+            "skill": "HIS.FATO",
+            "bloom": "entender"
+          },
+          {
+            "question": "Qual é a função do 'cartão vermelho' no futebol?",
+            "options": [
+              "Expulsar um jogador",
+              "Avisar uma falta",
+              "Marcar um gol",
+              "Parar o jogo"
+            ],
+            "answer": "Expulsar um jogador",
+            "explanation": "O cartão vermelho é mostrado para expulsar um jogador do campo.",
+            "why": "A resposta certa é 'Expulsar um jogador' porque o cartão vermelho é usado para penalizar faltas graves.",
+            "trap": "Marcar 'Avisar uma falta' erra porque o cartão amarelo é que avisa sobre faltas, não o vermelho.",
+            "kind": "knowledge",
+            "subject": "futebol",
+            "skill": "FUT.REGRA",
+            "bloom": "entender"
+          },
+          {
+            "question": "Você compra um sorvete por R$ 3,75 e paga com R$ 5,00. Quanto é o troco?",
+            "options": [
+              "R$ 1,25",
+              "R$ 1,50",
+              "R$ 1,75",
+              "R$ 2,00"
+            ],
+            "answer": "R$ 1,25",
+            "explanation": "Subtraia R$ 3,75 de R$ 5,00 para encontrar o troco.",
+            "why": "A resposta certa é R$ 1,25 porque R$ 5,00 menos R$ 3,75 resulta em R$ 1,25.",
+            "trap": "Marcar R$ 1,50 erra porque arredonda o valor de forma incorreta antes de subtrair.",
+            "kind": "knowledge",
+            "subject": "matematica",
+            "skill": "MAT.OP2",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "O que aconteceria se a Terra não tivesse atmosfera?",
+            "options": [
+              "A temperatura seria estável",
+              "Não haveria vida",
+              "A água seria abundante",
+              "O ar seria respirável"
+            ],
+            "answer": "Não haveria vida",
+            "explanation": "A atmosfera é essencial para manter condições de vida na Terra.",
+            "why": "A resposta certa é 'Não haveria vida' porque a atmosfera protege e sustenta a vida com oxigênio e temperatura adequada.",
+            "trap": "Marcar 'A temperatura seria estável' erra porque a atmosfera regula a temperatura, sem ela haveria extremos.",
+            "kind": "knowledge",
+            "subject": "ciencias",
+            "skill": "CIE.CAUSA",
+            "bloom": "analisar"
+          },
+          {
+            "question": "Você compra um livro por R$ 22,00 e paga com R$ 50,00. Quanto é o troco?",
+            "options": [
+              "R$ 28,00",
+              "R$ 30,00",
+              "R$ 32,00",
+              "R$ 35,00"
+            ],
+            "answer": "R$ 28,00",
+            "explanation": "Subtraia R$ 22,00 de R$ 50,00 para encontrar o troco.",
+            "why": "A resposta certa é R$ 28,00 porque R$ 50,00 menos R$ 22,00 resulta em R$ 28,00.",
+            "trap": "Marcar R$ 30,00 erra porque ignora a subtração correta do valor pago.",
+            "kind": "knowledge",
+            "subject": "matematica",
+            "skill": "MAT.OP2",
+            "bloom": "aplicar"
+          }
+        ],
+        "reflectionPrompt": "Como você se sente ao conferir o troco sozinho? Isso te dá mais confiança?"
+      }
+    },
+    "generatedAt": {},
+    "completed": false
+  },
+  {
+    "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-16",
+    "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+    "date": "2026-11-16",
+    "status": "ready",
+    "theme": {
+      "id": "mitos-egipcios",
+      "category": "mitologia",
+      "title": "O Julgamento do Coração",
+      "lesson": "Imagine que, após a morte, seu coração é colocado em uma balança para ser pesado contra uma pena. Essa era a crença dos antigos egípcios, que acreditavam que o coração guardava as ações e intenções de uma pessoa. Se o coração fosse mais leve que a pena, a pessoa poderia entrar no paraíso. Essa ideia nos ensina a importância de viver de forma justa e honesta. Hoje, podemos usar essa lição para refletir sobre nossas ações e como elas afetam os outros ao nosso redor.",
+      "whyItMatters": "Entender essa crença nos ajuda a pensar sobre a importância de nossas ações.",
+      "curiosity": "Os egípcios mumificavam faraós e gatos para garantir que suas almas fossem preservadas para a vida após a morte."
+    },
+    "questions": [
+      {
+        "question": "O que os egípcios acreditavam que acontecia com o coração após a morte?",
+        "options": [
+          "Era pesado contra uma pena",
+          "Era enterrado com o corpo",
+          "Era queimado",
+          "Era dado aos deuses"
+        ],
+        "answer": "Era pesado contra uma pena",
+        "explanation": "Os egípcios acreditavam que o coração era pesado contra uma pena para julgar a alma.",
+        "kind": "lesson",
+        "subject": "tema",
+        "why": "A resposta certa é 'Era pesado contra uma pena' porque isso determinava se a pessoa iria para o paraíso.",
+        "trap": "Quem marca 'Era enterrado com o corpo' confunde com o processo de mumificação, que preservava o corpo.",
+        "skill": "LIC.IDEIA",
+        "bloom": "entender"
+      },
+      {
+        "question": "O que aconteceria se o Sol parasse de atravessar o céu no barco de Rá?",
+        "options": [
+          "A Terra congelaria",
+          "Nada mudaria",
+          "O Sol explodiria",
+          "A Lua desapareceria"
+        ],
+        "answer": "A Terra congelaria",
+        "explanation": "Sem o Sol, a Terra não teria calor e luz, levando ao congelamento.",
+        "kind": "lesson",
+        "subject": "ciencias",
+        "why": "A Terra congelaria porque o Sol é a principal fonte de calor e luz para o nosso planeta.",
+        "trap": "Quem marca 'Nada mudaria' ignora a importância do Sol para a vida na Terra.",
+        "skill": "CIE.CAUSA",
+        "bloom": "analisar"
+      },
+      {
+        "question": "There ___ a bird in the tree.",
+        "options": [
+          "is",
+          "are",
+          "am",
+          "be"
+        ],
+        "answer": "is",
+        "explanation": "A resposta certa é is porque there is vale para um pássaro só, e are fica para quando são dois ou mais.",
+        "kind": "lesson",
+        "subject": "ingles",
+        "why": "A resposta certa é is porque there is vale para um pássaro só, e are fica para quando são dois ou mais.",
+        "trap": "Quem marca are pensa em várias coisas e esquece que a frase fala de um pássaro só na árvore.",
+        "skill": "ING.N1.BE",
+        "bloom": "aplicar",
+        "audioText": "There is a bird in the tree."
+      },
+      {
+        "question": "Qual é a função do goleiro no futebol?",
+        "options": [
+          "Defender o gol",
+          "Marcar gols",
+          "Apitar o jogo",
+          "Treinar o time"
+        ],
+        "answer": "Defender o gol",
+        "explanation": "O goleiro é responsável por impedir que a bola entre no gol.",
+        "kind": "knowledge",
+        "subject": "futebol",
+        "why": "Defender o gol é a função do goleiro porque ele é o único jogador que pode usar as mãos dentro da área.",
+        "trap": "Quem marca 'Marcar gols' confunde a função do goleiro com a de um atacante.",
+        "skill": "FUT.REGRA",
+        "bloom": "entender"
+      },
+      {
+        "question": "Qual fato é verdadeiro sobre Rá na mitologia egípcia?",
+        "options": [
+          "Rá atravessava o céu de barco",
+          "Rá era o deus da chuva",
+          "Rá era um faraó",
+          "Rá era um animal"
+        ],
+        "answer": "Rá atravessava o céu de barco",
+        "explanation": "Rá era o deus do Sol e atravessava o céu de barco diariamente.",
+        "kind": "knowledge",
+        "subject": "historia",
+        "why": "Rá atravessava o céu de barco porque ele era o deus do Sol, responsável por trazer luz ao mundo.",
+        "trap": "Quem marca 'Rá era o deus da chuva' confunde com outra divindade, pois Rá era o deus do Sol.",
+        "skill": "HIS.FATO",
+        "bloom": "entender"
+      },
+      {
+        "question": "Se um time de futebol ganha 3 pontos por vitória e 1 ponto por empate, quantos pontos ele tem após 2 vitórias e 1 empate?",
+        "options": [
+          "7",
+          "6",
+          "5",
+          "8"
+        ],
+        "answer": "7",
+        "explanation": "Cada vitória vale 3 pontos, então 2 vitórias são 6 pontos, mais 1 ponto do empate totaliza 7.",
+        "kind": "knowledge",
+        "subject": "matematica",
+        "why": "A resposta certa é 7 porque 2 vitórias dão 6 pontos e 1 empate dá mais 1 ponto, totalizando 7.",
+        "trap": "Quem marca 6 pode ter esquecido de adicionar o ponto do empate.",
+        "skill": "MAT.OP2",
+        "bloom": "aplicar"
+      },
+      {
+        "question": "Se um time de futebol ganha 3 pontos por vitória e 1 ponto por empate, quantos pontos ele tem após 3 vitórias e 2 empates?",
+        "options": [
+          "11",
+          "10",
+          "9",
+          "12"
+        ],
+        "answer": "11",
+        "explanation": "A resposta certa é 11 porque 3 vitórias dão 9 pontos e 2 empates somam mais 2, totalizando 11 pontos.",
+        "kind": "knowledge",
+        "subject": "matematica",
+        "why": "A resposta certa é 11 porque 3 vitórias dão 9 pontos e 2 empates somam mais 2, totalizando 11 pontos.",
+        "trap": "Quem marca 10 pode ter esquecido de somar todos os pontos dos empates, considerando apenas as vitórias.",
+        "skill": "MAT.OP2",
+        "bloom": "aplicar"
+      },
+      {
+        "question": "There ___ a book on the table.",
+        "options": [
+          "is",
+          "are",
+          "am",
+          "be"
+        ],
+        "answer": "is",
+        "explanation": "A resposta certa é is porque there is vale para um livro só, e are fica para quando são dois ou mais.",
+        "kind": "knowledge",
+        "subject": "ingles",
+        "why": "A resposta certa é is porque there is vale para um livro só, e are fica para quando são dois ou mais.",
+        "trap": "Quem marca are pensa em várias coisas e esquece que a frase fala de um livro só na mesa.",
+        "skill": "ING.N1.BE",
+        "bloom": "aplicar",
+        "audioText": "There is a book on the table."
+      }
+    ],
+    "reflectionPrompt": "Como você acha que suas ações diárias poderiam ser medidas em uma balança como na mitologia egípcia?",
+    "source": "ai",
+    "sanitize": {
+      "kept": 8,
+      "dropped": {
+        "tamanho_opcoes": 3,
+        "certa_mais_longa": 1,
+        "opcao_caricata": 1,
+        "enunciado_vazou": 1,
+        "conta_nao_fecha": 1
+      },
+      "perQuestion": [
+        {
+          "i": 0,
+          "codes": []
+        },
+        {
+          "i": 1,
+          "codes": [
+            "tamanho_opcoes"
+          ]
+        },
+        {
+          "i": 2,
+          "codes": [
+            "certa_mais_longa",
+            "opcao_caricata"
+          ]
+        },
+        {
+          "i": 3,
+          "codes": []
+        },
+        {
+          "i": 4,
+          "codes": []
+        },
+        {
+          "i": 5,
+          "codes": [
+            "tamanho_opcoes"
+          ]
+        },
+        {
+          "i": 6,
+          "codes": []
+        },
+        {
+          "i": 7,
+          "codes": [
+            "enunciado_vazou",
+            "conta_nao_fecha"
+          ]
+        },
+        {
+          "i": 8,
+          "codes": [
+            "tamanho_opcoes"
+          ]
+        },
+        {
+          "i": 9,
+          "codes": []
+        },
+        {
+          "i": 10,
+          "codes": []
+        },
+        {
+          "i": 11,
+          "codes": []
+        },
+        {
+          "i": 12,
+          "codes": []
+        }
+      ],
+      "review": [
+        {
+          "n": 1,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 2,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 3,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 4,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 5,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 6,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 1,
+          "ok": true,
+          "motivo": ""
+        },
+        {
+          "n": 2,
+          "ok": true,
+          "motivo": ""
+        }
+      ],
+      "batchLog": [
+        "falta_formato"
+      ],
+      "fromOffline": 0
+    },
+    "raw": {
+      "first": {
+        "theme": {
+          "title": "O Julgamento do Coração",
+          "lesson": "Imagine que, após a morte, seu coração é colocado em uma balança para ser pesado contra uma pena. Essa era a crença dos antigos egípcios, que acreditavam que o coração guardava as ações e intenções de uma pessoa. Se o coração fosse mais leve que a pena, a pessoa poderia entrar no paraíso. Essa ideia nos ensina a importância de viver de forma justa e honesta. Hoje, podemos usar essa lição para refletir sobre nossas ações e como elas afetam os outros ao nosso redor.",
+          "whyItMatters": "Entender essa crença nos ajuda a pensar sobre a importância de nossas ações.",
+          "curiosity": "Os egípcios mumificavam faraós e gatos para garantir que suas almas fossem preservadas para a vida após a morte."
+        },
+        "questions": [
+          {
+            "question": "O que os egípcios acreditavam que acontecia com o coração após a morte?",
+            "options": [
+              "Era pesado contra uma pena",
+              "Era enterrado com o corpo",
+              "Era queimado",
+              "Era dado aos deuses"
+            ],
+            "answer": "Era pesado contra uma pena",
+            "explanation": "Os egípcios acreditavam que o coração era pesado contra uma pena para julgar a alma.",
+            "why": "A resposta certa é 'Era pesado contra uma pena' porque isso determinava se a pessoa iria para o paraíso.",
+            "trap": "Quem marca 'Era enterrado com o corpo' confunde com o processo de mumificação, que preservava o corpo.",
+            "kind": "lesson",
+            "subject": "tema",
+            "skill": "LIC.IDEIA",
+            "bloom": "entender"
+          },
+          {
+            "question": "Como podemos aplicar a ideia do julgamento do coração em nossa vida diária?",
+            "options": [
+              "Refletindo sobre nossas ações",
+              "Ignorando os outros",
+              "Focando apenas em nós mesmos",
+              "Não se importando com o que fazemos"
+            ],
+            "answer": "Refletindo sobre nossas ações",
+            "explanation": "Refletir sobre nossas ações nos ajuda a viver de forma justa e honesta.",
+            "why": "A resposta certa é 'Refletindo sobre nossas ações' porque isso nos ajuda a melhorar nossas atitudes.",
+            "trap": "Quem marca 'Ignorando os outros' pode pensar que não precisamos nos preocupar com o impacto de nossas ações.",
+            "kind": "lesson",
+            "subject": "tema",
+            "skill": "LIC.APLICA",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "Se você visse alguém sendo injusto, o que seria mais sábio fazer?",
+            "options": [
+              "Conversar com a pessoa",
+              "Ignorar a situação",
+              "Rir da situação",
+              "Fazer o mesmo"
+            ],
+            "answer": "Conversar com a pessoa",
+            "explanation": "Conversar pode ajudar a resolver a situação e promover a justiça.",
+            "why": "Conversar com a pessoa é a atitude mais sábia porque promove a compreensão e a justiça.",
+            "trap": "Ignorar a situação parece mais fácil, mas não resolve o problema e pode piorar as coisas.",
+            "kind": "dilemma",
+            "subject": "tema",
+            "skill": "LIC.DILEMA",
+            "bloom": "analisar"
+          },
+          {
+            "question": "O que aconteceria se o Sol parasse de atravessar o céu no barco de Rá?",
+            "options": [
+              "A Terra congelaria",
+              "Nada mudaria",
+              "O Sol explodiria",
+              "A Lua desapareceria"
+            ],
+            "answer": "A Terra congelaria",
+            "explanation": "Sem o Sol, a Terra não teria calor e luz, levando ao congelamento.",
+            "why": "A Terra congelaria porque o Sol é a principal fonte de calor e luz para o nosso planeta.",
+            "trap": "Quem marca 'Nada mudaria' ignora a importância do Sol para a vida na Terra.",
+            "kind": "knowledge",
+            "subject": "ciencias",
+            "skill": "CIE.CAUSA",
+            "bloom": "analisar"
+          },
+          {
+            "question": "There ___ a bird in the tree.",
+            "options": [
+              "is",
+              "are",
+              "am",
+              "be"
+            ],
+            "answer": "is",
+            "audioText": "There is a bird in the tree.",
+            "why": "A resposta certa é is porque there is vale para um pássaro só, e are fica para quando são dois ou mais.",
+            "trap": "Quem marca are pensa em várias coisas e esquece que a frase fala de um pássaro só na árvore.",
+            "kind": "knowledge",
+            "subject": "ingles",
+            "skill": "ING.N1.BE",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "Qual fato é verdadeiro sobre a mumificação no Egito?",
+            "options": [
+              "Preservava o corpo para a vida após a morte",
+              "Era feita apenas para escravos",
+              "Era uma punição",
+              "Era um ritual diário"
+            ],
+            "answer": "Preservava o corpo para a vida após a morte",
+            "explanation": "A mumificação era um processo para preservar o corpo para a vida após a morte.",
+            "why": "Preservava o corpo para a vida após a morte porque os egípcios acreditavam na importância da preservação para a alma.",
+            "trap": "Quem marca 'Era feita apenas para escravos' confunde com a hierarquia social, mas a mumificação era para nobres.",
+            "kind": "knowledge",
+            "subject": "historia",
+            "skill": "HIS.FATO",
+            "bloom": "entender"
+          },
+          {
+            "question": "Qual é a função do goleiro no futebol?",
+            "options": [
+              "Defender o gol",
+              "Marcar gols",
+              "Apitar o jogo",
+              "Treinar o time"
+            ],
+            "answer": "Defender o gol",
+            "explanation": "O goleiro é responsável por impedir que a bola entre no gol.",
+            "why": "Defender o gol é a função do goleiro porque ele é o único jogador que pode usar as mãos dentro da área.",
+            "trap": "Quem marca 'Marcar gols' confunde a função do goleiro com a de um atacante.",
+            "kind": "knowledge",
+            "subject": "futebol",
+            "skill": "FUT.REGRA",
+            "bloom": "entender"
+          },
+          {
+            "question": "Se você tem 600 reais e compra três brinquedos de 150 reais cada, quanto sobra?",
+            "options": [
+              "150",
+              "100",
+              "50",
+              "200"
+            ],
+            "answer": "150",
+            "explanation": "600 menos 450 (3 vezes 150) deixa 150.",
+            "why": "A resposta certa é 150 porque 600 menos 450 (3 vezes 150) deixa 150 reais sobrando.",
+            "trap": "Quem marca 100 pode ter calculado errado a multiplicação ou a subtração.",
+            "kind": "knowledge",
+            "subject": "matematica",
+            "skill": "MAT.OP2",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "O que aconteceria se os egípcios não mumificassem seus faraós?",
+            "options": [
+              "Acreditavam que não teriam vida após a morte",
+              "Nada mudaria",
+              "Os faraós viveriam para sempre",
+              "Os deuses ficariam zangados"
+            ],
+            "answer": "Acreditavam que não teriam vida após a morte",
+            "explanation": "A mumificação era essencial para a vida após a morte na crença egípcia.",
+            "why": "Acreditavam que não teriam vida após a morte porque a preservação do corpo era crucial para a alma.",
+            "trap": "Quem marca 'Nada mudaria' ignora a importância da mumificação na religião egípcia.",
+            "kind": "knowledge",
+            "subject": "ciencias",
+            "skill": "CIE.CAUSA",
+            "bloom": "analisar"
+          },
+          {
+            "question": "Qual fato é verdadeiro sobre Rá na mitologia egípcia?",
+            "options": [
+              "Rá atravessava o céu de barco",
+              "Rá era o deus da chuva",
+              "Rá era um faraó",
+              "Rá era um animal"
+            ],
+            "answer": "Rá atravessava o céu de barco",
+            "explanation": "Rá era o deus do Sol e atravessava o céu de barco diariamente.",
+            "why": "Rá atravessava o céu de barco porque ele era o deus do Sol, responsável por trazer luz ao mundo.",
+            "trap": "Quem marca 'Rá era o deus da chuva' confunde com outra divindade, pois Rá era o deus do Sol.",
+            "kind": "knowledge",
+            "subject": "historia",
+            "skill": "HIS.FATO",
+            "bloom": "entender"
+          },
+          {
+            "question": "Se um time de futebol ganha 3 pontos por vitória e 1 ponto por empate, quantos pontos ele tem após 2 vitórias e 1 empate?",
+            "options": [
+              "7",
+              "6",
+              "5",
+              "8"
+            ],
+            "answer": "7",
+            "explanation": "Cada vitória vale 3 pontos, então 2 vitórias são 6 pontos, mais 1 ponto do empate totaliza 7.",
+            "why": "A resposta certa é 7 porque 2 vitórias dão 6 pontos e 1 empate dá mais 1 ponto, totalizando 7.",
+            "trap": "Quem marca 6 pode ter esquecido de adicionar o ponto do empate.",
+            "kind": "knowledge",
+            "subject": "matematica",
+            "skill": "MAT.OP2",
+            "bloom": "aplicar"
+          }
+        ],
+        "reflectionPrompt": "Como você acha que suas ações diárias poderiam ser medidas em uma balança como na mitologia egípcia?"
+      },
+      "replacement": {
+        "questions": [
+          {
+            "question": "Se um time de futebol ganha 3 pontos por vitória e 1 ponto por empate, quantos pontos ele tem após 3 vitórias e 2 empates?",
+            "options": [
+              "11",
+              "10",
+              "9",
+              "12"
+            ],
+            "answer": "11",
+            "why": "A resposta certa é 11 porque 3 vitórias dão 9 pontos e 2 empates somam mais 2, totalizando 11 pontos.",
+            "trap": "Quem marca 10 pode ter esquecido de somar todos os pontos dos empates, considerando apenas as vitórias.",
+            "kind": "knowledge",
+            "subject": "matematica",
+            "skill": "MAT.OP2",
+            "bloom": "aplicar"
+          },
+          {
+            "question": "There ___ a book on the table.",
+            "options": [
+              "is",
+              "are",
+              "am",
+              "be"
+            ],
+            "answer": "is",
+            "audioText": "There is a book on the table.",
+            "why": "A resposta certa é is porque there is vale para um livro só, e are fica para quando são dois ou mais.",
+            "trap": "Quem marca are pensa em várias coisas e esquece que a frase fala de um livro só na mesa.",
+            "kind": "knowledge",
+            "subject": "ingles",
+            "skill": "ING.N1.BE",
+            "bloom": "aplicar"
+          }
+        ]
+      }
+    },
+    "generatedAt": {},
+    "completed": false
+  }
+]

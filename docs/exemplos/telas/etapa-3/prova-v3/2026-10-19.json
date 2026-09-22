@@ -1,0 +1,473 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-19",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-19",
+  "status": "ready",
+  "theme": {
+    "category": "astronomia",
+    "curiosity": "Você sabia que em Marte você pesaria menos do que na Terra? Isso acontece por causa da gravidade mais fraca lá.",
+    "id": "gravidade",
+    "lesson": "Imagine que você está jogando futebol e a bola sempre volta para o chão depois de um chute. Isso acontece por causa da gravidade, uma força que puxa tudo para o centro da Terra. Isaac Newton, um cientista famoso, descobriu isso observando uma maçã cair de uma árvore. A gravidade também faz a Lua girar em torno da Terra, como se estivesse sempre caindo, mas nunca chega ao chão. No espaço, os astronautas flutuam porque estão em queda livre, sempre caindo em direção à Terra, mas nunca a alcançando. Hoje, você pode usar essa ideia para entender por que a bola cai no jogo ou por que você não flutua como um astronauta.",
+    "title": "Por que as coisas caem?",
+    "whyItMatters": "Entender a gravidade ajuda a explicar nosso mundo e o universo."
+  },
+  "questions": [
+    {
+      "question": "Por que a bola de futebol volta ao chão após um chute?",
+      "options": [
+        "Por causa da gravidade",
+        "Por causa do vento",
+        "Porque é pesada",
+        "Porque está molhada"
+      ],
+      "answer": "Por causa da gravidade",
+      "explanation": "A gravidade é a força que puxa a bola de volta ao chão.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Por causa da gravidade' porque essa força atrai tudo em direção ao centro da Terra.",
+      "trap": "Quem escolhe 'Por causa do vento' confunde a direção do vento com a força da gravidade.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você pular, por que volta ao chão?",
+      "options": [
+        "Você é puxado pela Terra",
+        "Você não pulou alto o suficiente",
+        "O ar te empurra para baixo",
+        "Seu peso te derruba"
+      ],
+      "answer": "Você é puxado pela Terra",
+      "explanation": "A Terra te puxa de volta por causa da gravidade.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Você é puxado pela Terra' porque a gravidade é a força que te atrai de volta.",
+      "trap": "Quem escolhe 'Seu peso te derruba' confunde o efeito do peso com a causa, que é a gravidade.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre as pirâmides do Egito?",
+      "options": [
+        "Foram tumbas para faraós",
+        "São feitas de madeira",
+        "Foram construídas em 100 anos",
+        "Estão na América do Sul"
+      ],
+      "answer": "Foram tumbas para faraós",
+      "explanation": "As pirâmides eram usadas como tumbas para os faraós.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Foram tumbas para faraós' porque é um fato histórico amplamente aceito.",
+      "trap": "Escolher 'São feitas de madeira' é um erro comum, mas elas são feitas de pedra.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Quantos jogadores de linha um time de futebol tem em campo?",
+      "options": [
+        "10",
+        "11",
+        "9",
+        "12"
+      ],
+      "answer": "10",
+      "explanation": "Um time tem 11 jogadores, mas um é o goleiro.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é '10' porque são os jogadores de linha, excluindo o goleiro.",
+      "trap": "Escolher '11' é um erro comum, pois inclui o goleiro, não apenas os de linha.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual é a diferença entre o peso na Terra e em Marte?",
+      "options": [
+        "Menor em Marte",
+        "Igual nos dois",
+        "Maior em Marte",
+        "Depende do clima"
+      ],
+      "answer": "Menor em Marte",
+      "explanation": "A gravidade em Marte é menor, então o peso é menor.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Menor em Marte' porque a gravidade marciana é mais fraca que a terrestre.",
+      "trap": "Escolher 'Igual nos dois' ignora a diferença de gravidade entre os planetas.",
+      "skill": "CIE.CAUSA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você chutar uma bola para cima, o que faz ela voltar ao chão?",
+      "options": [
+        "A força do chute",
+        "A resistência do ar",
+        "A gravidade da Terra",
+        "O peso da bola"
+      ],
+      "answer": "A gravidade da Terra",
+      "explanation": "A gravidade puxa a bola de volta ao chão após o chute.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta é a gravidade da Terra, que puxa a bola de volta para baixo.",
+      "trap": "A força do chute parece tentadora, mas ela só lança a bola para cima, não a traz de volta.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que a gravidade afeta o seu dia a dia?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 6,
+    "dropped": {
+      "audio_mismatch": 1,
+      "conta_um_passo": 1,
+      "ingles_nivel": 1,
+      "tamanho_opcoes": 5,
+      "trap_sem_distrator": 3,
+      "why_curto": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "trap_sem_distrator",
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "audio_mismatch",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "why_curto",
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "trap_sem_distrator"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": [
+          "trap_sem_distrator",
+          "tamanho_opcoes"
+        ]
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "reviewFellBack": true
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Por que a bola de futebol volta ao chão após um chute?",
+          "options": [
+            "Por causa da gravidade",
+            "Por causa do vento",
+            "Porque é pesada",
+            "Porque está molhada"
+          ],
+          "answer": "Por causa da gravidade",
+          "explanation": "A gravidade é a força que puxa a bola de volta ao chão.",
+          "why": "A resposta certa é 'Por causa da gravidade' porque essa força atrai tudo em direção ao centro da Terra.",
+          "trap": "Quem escolhe 'Por causa do vento' confunde a direção do vento com a força da gravidade.",
+          "kind": "lesson",
+          "subject": "ciencias",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você pular, por que volta ao chão?",
+          "options": [
+            "Você é puxado pela Terra",
+            "Você não pulou alto o suficiente",
+            "O ar te empurra para baixo",
+            "Seu peso te derruba"
+          ],
+          "answer": "Você é puxado pela Terra",
+          "explanation": "A Terra te puxa de volta por causa da gravidade.",
+          "why": "A resposta certa é 'Você é puxado pela Terra' porque a gravidade é a força que te atrai de volta.",
+          "trap": "Quem escolhe 'Seu peso te derruba' confunde o efeito do peso com a causa, que é a gravidade.",
+          "kind": "lesson",
+          "subject": "ciencias",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Um amigo diz que os astronautas flutuam porque não há gravidade no espaço. O que você faz?",
+          "options": [
+            "Explico que eles estão em queda livre",
+            "Concordo com ele",
+            "Digo que é por causa do ar",
+            "Fico em silêncio"
+          ],
+          "answer": "Explico que eles estão em queda livre",
+          "explanation": "Os astronautas flutuam porque estão sempre caindo em direção à Terra.",
+          "why": "A atitude mais sábia é 'Explico que eles estão em queda livre' porque isso mostra a verdade sobre a gravidade no espaço.",
+          "trap": "Concordar com ele é tentador, mas incorreto, pois a gravidade ainda existe no espaço.",
+          "kind": "dilemma",
+          "subject": "ciencias",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "O que aconteceria se a gravidade da Terra desaparecesse de repente?",
+          "options": [
+            "Tudo flutuaria para o espaço",
+            "Nada mudaria",
+            "As coisas cairiam mais rápido",
+            "A Terra pararia de girar"
+          ],
+          "answer": "Tudo flutuaria para o espaço",
+          "explanation": "Sem gravidade, não haveria força puxando as coisas para o chão.",
+          "why": "A resposta certa é 'Tudo flutuaria para o espaço' porque a gravidade é o que mantém tudo no chão.",
+          "trap": "Quem escolhe 'Nada mudaria' ignora a importância da gravidade para manter as coisas no lugar.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Choose the correct sentence: 'The cat is ___ the table.'",
+          "options": [
+            "on",
+            "in",
+            "under",
+            "next"
+          ],
+          "answer": "on",
+          "explanation": "The correct preposition for something resting on a surface is 'on'.",
+          "why": "The answer is 'on' because it correctly describes the cat's position relative to the table.",
+          "trap": "Choosing 'in' is tempting but incorrect because 'in' implies being inside something.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "aplicar",
+          "audioText": "The cat is on the table."
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre as pirâmides do Egito?",
+          "options": [
+            "Foram tumbas para faraós",
+            "São feitas de madeira",
+            "Foram construídas em 100 anos",
+            "Estão na América do Sul"
+          ],
+          "answer": "Foram tumbas para faraós",
+          "explanation": "As pirâmides eram usadas como tumbas para os faraós.",
+          "why": "A resposta certa é 'Foram tumbas para faraós' porque é um fato histórico amplamente aceito.",
+          "trap": "Escolher 'São feitas de madeira' é um erro comum, mas elas são feitas de pedra.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Quantos jogadores de linha um time de futebol tem em campo?",
+          "options": [
+            "10",
+            "11",
+            "9",
+            "12"
+          ],
+          "answer": "10",
+          "explanation": "Um time tem 11 jogadores, mas um é o goleiro.",
+          "why": "A resposta certa é '10' porque são os jogadores de linha, excluindo o goleiro.",
+          "trap": "Escolher '11' é um erro comum, pois inclui o goleiro, não apenas os de linha.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se um livro custa R$ 50 e você tem R$ 200, quantos livros pode comprar?",
+          "options": [
+            "4",
+            "5",
+            "3",
+            "6"
+          ],
+          "answer": "4",
+          "explanation": "Dividindo 200 por 50, você pode comprar 4 livros.",
+          "why": "A resposta certa é '4' porque 200 dividido por 50 resulta em 4 livros.",
+          "trap": "Escolher '5' é um erro ao não dividir corretamente o valor total pelo preço do livro.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se a gravidade da Lua fosse igual à da Terra, o que mudaria?",
+          "options": [
+            "A Lua cairia na Terra",
+            "Nada mudaria",
+            "Os astronautas não flutuariam",
+            "A Terra pararia de girar"
+          ],
+          "answer": "Os astronautas não flutuariam",
+          "explanation": "Com gravidade igual à da Terra, não haveria flutuação.",
+          "why": "A resposta certa é 'Os astronautas não flutuariam' porque a gravidade maior impediria a flutuação.",
+          "trap": "Escolher 'Nada mudaria' ignora o impacto da gravidade na flutuação.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual frase é verdadeira sobre o sistema solar?",
+          "options": [
+            "A Terra é o terceiro planeta do Sol",
+            "Marte é o maior planeta",
+            "Júpiter é mais quente que a Terra",
+            "Vênus tem anéis"
+          ],
+          "answer": "A Terra é o terceiro planeta do Sol",
+          "explanation": "A Terra é o terceiro planeta em ordem de distância do Sol.",
+          "why": "A resposta certa é 'A Terra é o terceiro planeta do Sol' porque é um fato astronômico verdadeiro.",
+          "trap": "Escolher 'Marte é o maior planeta' é um erro, pois Júpiter é o maior.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a diferença entre o peso na Terra e em Marte?",
+          "options": [
+            "Menor em Marte",
+            "Igual nos dois",
+            "Maior em Marte",
+            "Depende do clima"
+          ],
+          "answer": "Menor em Marte",
+          "explanation": "A gravidade em Marte é menor, então o peso é menor.",
+          "why": "A resposta certa é 'Menor em Marte' porque a gravidade marciana é mais fraca que a terrestre.",
+          "trap": "Escolher 'Igual nos dois' ignora a diferença de gravidade entre os planetas.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que a gravidade afeta o seu dia a dia?",
+      "theme": {
+        "curiosity": "Você sabia que em Marte você pesaria menos do que na Terra? Isso acontece por causa da gravidade mais fraca lá.",
+        "lesson": "Imagine que você está jogando futebol e a bola sempre volta para o chão depois de um chute. Isso acontece por causa da gravidade, uma força que puxa tudo para o centro da Terra. Isaac Newton, um cientista famoso, descobriu isso observando uma maçã cair de uma árvore. A gravidade também faz a Lua girar em torno da Terra, como se estivesse sempre caindo, mas nunca chega ao chão. No espaço, os astronautas flutuam porque estão em queda livre, sempre caindo em direção à Terra, mas nunca a alcançando. Hoje, você pode usar essa ideia para entender por que a bola cai no jogo ou por que você não flutua como um astronauta.",
+        "title": "Por que as coisas caem?",
+        "whyItMatters": "Entender a gravidade ajuda a explicar nosso mundo e o universo."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que os astronautas flutuam na Estação Espacial Internacional?",
+          "options": [
+            "Porque não há gravidade no espaço",
+            "Porque estão sempre caindo em volta da Terra",
+            "Porque a gravidade é mais forte no espaço",
+            "Porque a estação está parada no espaço"
+          ],
+          "answer": "Porque estão sempre caindo em volta da Terra",
+          "explanation": "A estação e os astronautas estão em queda livre contínua, criando a sensação de flutuar.",
+          "why": "A resposta certa é que eles estão sempre caindo em volta da Terra, o que cria a sensação de flutuar.",
+          "trap": "Quem escolhe que não há gravidade no espaço está enganado, pois a gravidade ainda atua ali.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você chutar uma bola para cima, o que faz ela voltar ao chão?",
+          "options": [
+            "A força do chute",
+            "A resistência do ar",
+            "A gravidade da Terra",
+            "O peso da bola"
+          ],
+          "answer": "A gravidade da Terra",
+          "explanation": "A gravidade puxa a bola de volta ao chão após o chute.",
+          "why": "A resposta é a gravidade da Terra, que puxa a bola de volta para baixo.",
+          "trap": "A força do chute parece tentadora, mas ela só lança a bola para cima, não a traz de volta.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está jogando futebol e vê que a bola está prestes a sair do campo. O que você faz?",
+          "options": [
+            "Corro para tentar impedir que ela saia",
+            "Deixo a bola sair e espero o próximo lance",
+            "Chamo um amigo para pegar a bola",
+            "Fico parado e observo"
+          ],
+          "answer": "Corro para tentar impedir que ela saia",
+          "explanation": "Correr para impedir que a bola saia mantém o jogo ativo e pode evitar a perda de posse.",
+          "why": "Correr para impedir que a bola saia é sábio porque mantém o jogo ativo e pode evitar a perda de posse.",
+          "trap": "Ficar parado e observar parece fácil, mas não ajuda o time a manter a posse de bola.",
+          "kind": "dilemma",
+          "subject": "futebol",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        }
+      ]
+    }
+  }
+}

@@ -92,6 +92,21 @@ test('R1 (22/09): o prego não acende para o contrário do pedido', () => {
   expect(missingInfos('I drink water after soccer because I am thirsty.', n204.content.mustInclude).map((i) => i.pt)).toEqual(['no jogo', 'porque estou com calor']);
   expect(missingInfos('I drink water at the game because I am hot.', n204.content.mustInclude)).toEqual([]);
   expect(missingInfos('I drink water in the game. I am hot.', n204.content.mustInclude).map((i) => i.pt)).toEqual(['porque estou com calor']);
+  expect(n204.content.mustInclude[0].en.includes('water')).toBeFalsy();
+  expect(missingInfos('water at the game because I am hot', n204.content.mustInclude).map((i) => i.pt)).toContain('bebo água');
+  const n201 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-01');
+  const n203 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-03');
+  const n205 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-05');
+  if (!n201 || !n203 || !n205) throw new Error('n2-01, n2-03 ou n2-05 sumiu');
+  expect(n201.content.model).toBe('Can I play soccer now? Please, because my homework is ready.');
+  expect(missingInfos(n201.content.model, n201.content.mustInclude)).toEqual([]);
+  expect(n201.content.brief).toContain('permissão');
+  expect(n201.content.brief).toContain('lição já está pronta');
+  expect(n203.content.mustInclude.some((i) => i.en.includes('because I am new'))).toBeFalsy();
+  expect(n205.content.model).toBe('The bed is ready. I do this because I want a clean room.');
+  expect(missingInfos(n205.content.model, n205.content.mustInclude)).toEqual([]);
+  expect(n205.content.brief).toContain('quer o quarto limpo');
+  expect(n205.content.model).toContain('because');
 });
 
 void run();

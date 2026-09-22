@@ -1,0 +1,553 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-27",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-27",
+  "status": "ready",
+  "theme": {
+    "category": "carater",
+    "curiosity": "Sabia que até os super-heróis dos quadrinhos sentem medo? Eles apenas não deixam isso pará-los.",
+    "id": "coragem",
+    "lesson": "Imagine que você está prestes a apresentar um trabalho na frente da turma. O coração acelera, as mãos suam, mas você respira fundo e começa a falar. Isso é coragem: agir mesmo quando estamos com medo. Coragem não significa não ter medo, mas sim enfrentar o medo e seguir em frente. Bombeiros, por exemplo, sentem medo, mas são treinados para agir apesar disso. Hoje, pense em algo que você gostaria de fazer, mas tem medo. Dê um pequeno passo em direção a isso. Pode ser levantar a mão na aula ou tentar um novo esporte.",
+    "title": "Coragem: Agir Mesmo com Medo",
+    "whyItMatters": "Coragem ajuda você a enfrentar desafios e crescer."
+  },
+  "questions": [
+    {
+      "question": "Qual fato é verdadeiro sobre a Revolução Francesa?",
+      "options": [
+        "Começou em 1789",
+        "Foi liderada por Napoleão",
+        "Durou 50 anos",
+        "Foi pacífica"
+      ],
+      "answer": "Começou em 1789",
+      "explanation": "A Revolução Francesa começou em 1789, marcando o início de grandes mudanças na França.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Começou em 1789' porque é um fato histórico bem documentado sobre a Revolução Francesa.",
+      "trap": "A opção 'Foi liderada por Napoleão' engana quem não sabe que ele só surgiu como líder após a Revolução.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Revolução Americana?",
+      "options": [
+        "Ocorreu no século XVIII",
+        "Foi liderada por Napoleão",
+        "Começou em 1900",
+        "Terminou em 1776"
+      ],
+      "answer": "Ocorreu no século XVIII",
+      "explanation": "A Revolução Americana ocorreu no século XVIII, entre 1775 e 1783.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Ocorreu no século XVIII' porque a Revolução Americana aconteceu entre 1775 e 1783.",
+      "trap": "Quem escolhe 'Terminou em 1776' confunde o ano da Declaração de Independência com o fim da guerra.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do 'referee' em um jogo de futebol?",
+      "options": [
+        "Aplicar as regras",
+        "Marcar gols",
+        "Treinar o time",
+        "Vender ingressos"
+      ],
+      "answer": "Aplicar as regras",
+      "explanation": "O árbitro é responsável por aplicar as regras durante o jogo.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Aplicar as regras' porque o árbitro garante que o jogo siga as regras estabelecidas.",
+      "trap": "Quem escolhe 'Marcar gols' confunde a função do árbitro com a dos jogadores.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?",
+      "options": [
+        "34 cm",
+        "17 cm",
+        "60 cm",
+        "24 cm"
+      ],
+      "answer": "34 cm",
+      "explanation": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "trap": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Cada caixa guarda 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?",
+      "options": [
+        "7",
+        "6",
+        "8",
+        "5"
+      ],
+      "answer": "7",
+      "explanation": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "trap": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Quantos minutos há em 2 horas e meia?",
+      "options": [
+        "150",
+        "120",
+        "130",
+        "250"
+      ],
+      "answer": "150",
+      "explanation": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "trap": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Quais são as três cores primárias da tinta, que não nascem da mistura de outras?",
+      "options": [
+        "Vermelho, azul e amarelo",
+        "Verde, laranja e roxo",
+        "Preto, branco e cinza",
+        "Azul, verde e vermelho"
+      ],
+      "answer": "Vermelho, azul e amarelo",
+      "explanation": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "trap": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Na mitologia grega, Zeus é o rei dos deuses. Qual era a arma dele?",
+      "options": [
+        "O raio",
+        "O tridente",
+        "O martelo",
+        "O arco"
+      ],
+      "answer": "O raio",
+      "explanation": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "trap": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual foi a última vez que você agiu com coragem? Como se sentiu depois?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "conta_um_passo": 2,
+      "definicao": 2,
+      "duplicata": 3,
+      "opcao_caricata": 2,
+      "sem_licao": 2,
+      "tamanho_opcoes": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "definicao"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "opcao_caricata",
+          "sem_licao"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": [
+          "definicao"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "opcao_caricata",
+          "sem_licao"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": []
+      },
+      {
+        "i": 14,
+        "codes": [
+          "conta_um_passo"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A pergunta pede o que aconteceria, é opinião."
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 5
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "O que é coragem, segundo a ideia do dia?",
+          "options": [
+            "Agir apesar do medo",
+            "Não sentir medo",
+            "Ser o mais forte",
+            "Nunca errar"
+          ],
+          "answer": "Agir apesar do medo",
+          "explanation": "Coragem é agir mesmo quando sentimos medo.",
+          "why": "A resposta certa é 'Agir apesar do medo' porque coragem envolve enfrentar o medo, não a ausência dele.",
+          "trap": "A opção 'Não sentir medo' engana quem acha que coragem é ausência de medo, mas é agir apesar dele.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você vê um colega sendo tratado mal. O que é uma atitude corajosa?",
+          "options": [
+            "Ignorar a situação",
+            "Contar a um adulto",
+            "Rir junto com os outros",
+            "Ficar em silêncio"
+          ],
+          "answer": "Contar a um adulto",
+          "explanation": "Contar a um adulto é uma forma de agir apesar do medo de se envolver.",
+          "why": "A resposta certa é 'Contar a um adulto' porque é uma ação que ajuda a resolver a situação, mesmo com medo.",
+          "trap": "A opção 'Ignorar a situação' engana quem acha que não se envolver é mais seguro, mas não resolve o problema.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está com medo de falar em público. O que você faz?",
+          "options": [
+            "Pratica em casa e tenta",
+            "Desiste de apresentar",
+            "Finge estar doente",
+            "Pede para um amigo fazer por você"
+          ],
+          "answer": "Pratica em casa e tenta",
+          "explanation": "Praticar e tentar é enfrentar o medo, mostrando coragem.",
+          "why": "A resposta certa é 'Pratica em casa e tenta' porque é uma ação que enfrenta o medo de falar em público.",
+          "trap": "A opção 'Desiste de apresentar' engana quem acha que evitar o medo é a solução, mas não desenvolve coragem.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Francesa?",
+          "options": [
+            "Começou em 1789",
+            "Foi liderada por Napoleão",
+            "Durou 50 anos",
+            "Foi pacífica"
+          ],
+          "answer": "Começou em 1789",
+          "explanation": "A Revolução Francesa começou em 1789, marcando o início de grandes mudanças na França.",
+          "why": "A resposta certa é 'Começou em 1789' porque é um fato histórico bem documentado sobre a Revolução Francesa.",
+          "trap": "A opção 'Foi liderada por Napoleão' engana quem não sabe que ele só surgiu como líder após a Revolução.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Quantos jogadores um time de futebol tem em campo, incluindo o goleiro?",
+          "options": [
+            "11",
+            "10",
+            "12",
+            "9"
+          ],
+          "answer": "11",
+          "explanation": "Um time de futebol tem 11 jogadores em campo, incluindo o goleiro.",
+          "why": "A resposta certa é 11 porque é a quantidade oficial de jogadores em campo em um time de futebol.",
+          "trap": "A opção 10 engana quem esquece de contar o goleiro como parte do time.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um livro custa R$ 30 e você compra 3, quanto gasta no total?",
+          "options": [
+            "R$ 90",
+            "R$ 60",
+            "R$ 100",
+            "R$ 80"
+          ],
+          "answer": "R$ 90",
+          "explanation": "Multiplicando o preço do livro pela quantidade, temos o total gasto.",
+          "why": "A resposta certa é R$ 90 porque 30 vezes 3 resulta no total gasto em livros.",
+          "trap": "A opção R$ 60 engana quem calcula apenas duas vezes o preço do livro.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as plantas não fizessem fotossíntese?",
+          "options": [
+            "Faltaria oxigênio",
+            "Aumentaria a chuva",
+            "Mais plantas cresceriam",
+            "O solo ficaria mais fértil"
+          ],
+          "answer": "Faltaria oxigênio",
+          "explanation": "A fotossíntese é essencial para a produção de oxigênio pelas plantas.",
+          "why": "A resposta certa é 'Faltaria oxigênio' porque a fotossíntese é o processo que produz oxigênio no ambiente.",
+          "trap": "A opção 'Mais plantas cresceriam' engana quem não entende que a fotossíntese é vital para o crescimento das plantas.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        }
+      ],
+      "reflectionPrompt": "Qual foi a última vez que você agiu com coragem? Como se sentiu depois?",
+      "theme": {
+        "curiosity": "Sabia que até os super-heróis dos quadrinhos sentem medo? Eles apenas não deixam isso pará-los.",
+        "lesson": "Imagine que você está prestes a apresentar um trabalho na frente da turma. O coração acelera, as mãos suam, mas você respira fundo e começa a falar. Isso é coragem: agir mesmo quando estamos com medo. Coragem não significa não ter medo, mas sim enfrentar o medo e seguir em frente. Bombeiros, por exemplo, sentem medo, mas são treinados para agir apesar disso. Hoje, pense em algo que você gostaria de fazer, mas tem medo. Dê um pequeno passo em direção a isso. Pode ser levantar a mão na aula ou tentar um novo esporte.",
+        "title": "Coragem: Agir Mesmo com Medo",
+        "whyItMatters": "Coragem ajuda você a enfrentar desafios e crescer."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "O que é coragem, segundo a ideia do dia?",
+          "options": [
+            "Agir apesar do medo",
+            "Não sentir medo",
+            "Ser sempre o mais forte",
+            "Nunca errar"
+          ],
+          "answer": "Agir apesar do medo",
+          "explanation": "Coragem é agir mesmo quando se está com medo.",
+          "why": "A resposta certa é 'Agir apesar do medo' porque a coragem envolve enfrentar o medo, não a ausência dele.",
+          "trap": "Quem escolhe 'Não sentir medo' confunde coragem com ausência de medo, mas coragem é agir apesar dele.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Na escola, você vê um colega sendo tratado mal. O que é uma atitude corajosa?",
+          "options": [
+            "Defender o colega",
+            "Ignorar a situação",
+            "Rir junto com os outros",
+            "Fingir que não viu"
+          ],
+          "answer": "Defender o colega",
+          "explanation": "Defender alguém é uma atitude corajosa porque envolve enfrentar o medo de represálias.",
+          "why": "A resposta certa é 'Defender o colega' porque isso mostra coragem ao enfrentar o medo de se envolver.",
+          "trap": "Quem escolhe 'Ignorar a situação' evita o confronto, mas isso não é uma atitude corajosa.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está com medo de falar em público. O que você faz?",
+          "options": [
+            "Pratica antes",
+            "Desiste de falar",
+            "Finge estar doente",
+            "Pede para alguém falar por você"
+          ],
+          "answer": "Pratica antes",
+          "explanation": "Praticar antes ajuda a enfrentar o medo e aumenta a confiança.",
+          "why": "A resposta certa é 'Pratica antes' porque isso ajuda a enfrentar o medo e melhora a performance.",
+          "trap": "Quem escolhe 'Desiste de falar' evita enfrentar o medo, mas isso não resolve o problema.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa 'is', e 'are' fica para quando são dois ou mais cachorros.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que 'are' serve para qualquer cachorro, mas 'are' pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Americana?",
+          "options": [
+            "Ocorreu no século XVIII",
+            "Foi liderada por Napoleão",
+            "Começou em 1900",
+            "Terminou em 1776"
+          ],
+          "answer": "Ocorreu no século XVIII",
+          "explanation": "A Revolução Americana ocorreu no século XVIII, entre 1775 e 1783.",
+          "why": "A resposta certa é 'Ocorreu no século XVIII' porque a Revolução Americana aconteceu entre 1775 e 1783.",
+          "trap": "Quem escolhe 'Terminou em 1776' confunde o ano da Declaração de Independência com o fim da guerra.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'referee' em um jogo de futebol?",
+          "options": [
+            "Aplicar as regras",
+            "Marcar gols",
+            "Treinar o time",
+            "Vender ingressos"
+          ],
+          "answer": "Aplicar as regras",
+          "explanation": "O árbitro é responsável por aplicar as regras durante o jogo.",
+          "why": "A resposta certa é 'Aplicar as regras' porque o árbitro garante que o jogo siga as regras estabelecidas.",
+          "trap": "Quem escolhe 'Marcar gols' confunde a função do árbitro com a dos jogadores.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 500 reais e gasta 150 em um jogo e 100 em um livro, quanto sobra?",
+          "options": [
+            "250",
+            "350",
+            "200",
+            "300"
+          ],
+          "answer": "250",
+          "explanation": "Primeiro subtrai 150 de 500, depois subtrai 100 do resultado.",
+          "why": "A resposta certa é 250 porque 500 menos 150 dá 350, e 350 menos 100 fecha 250.",
+          "trap": "Quem marca 350 esqueceu de subtrair o valor do livro após o jogo.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  }
+}

@@ -138,39 +138,46 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
 
   const templates = [
     {
-      title: 'Hidratação Flash',
-      message: 'Beba água para manter sua energia de super-herói!',
-      icon: 'water',
+      title: 'Lição de casa',
+      message: 'Lição feita antes de qualquer tela. Terminou? Marca a missão na Casa.',
+      icon: 'folder',
       color: 'blue' as const,
-      priority: 'medium' as const
+      priority: 'high' as const
     },
     {
-      title: 'Postura de Herói',
-      message: 'Sente-se direito como um verdadeiro velocista!',
-      icon: 'hero',
-      color: 'red' as const,
-      priority: 'low' as const
-    },
-    {
-      title: 'Respiração Flash',
-      message: 'Respire fundo e mantenha o foco nas missões!',
-      icon: 'wind',
+      title: 'Missões da manhã',
+      message: 'As três missões da manhã até o almoço. Uma de cada vez.',
+      icon: 'bolt',
       color: 'green' as const,
       priority: 'medium' as const
     },
     {
-      title: 'Energia Positiva',
-      message: 'Sorria! Você está fazendo um trabalho incrível!',
-      icon: 'smile',
-      color: 'yellow' as const,
-      priority: 'high' as const
+      title: 'Arrumar o quarto',
+      message: 'Cama feita e chão livre antes de sair. Leva cinco minutos.',
+      icon: 'hero',
+      color: 'orange' as const,
+      priority: 'low' as const
     },
     {
-      title: 'Organização Flash',
-      message: 'Mantenha seu espaço organizado como a STAR Labs!',
-      icon: 'folder',
+      title: 'Leitura de 20 minutos',
+      message: 'Vinte minutos de livro, sem celular do lado. Depois escreve o que leu.',
+      icon: 'smile',
       color: 'purple' as const,
+      priority: 'medium' as const
+    },
+    {
+      title: 'Mochila pronta',
+      message: 'Mochila arrumada à noite: caderno, estojo, agenda, garrafa.',
+      icon: 'wind',
+      color: 'yellow' as const,
       priority: 'low' as const
+    },
+    {
+      title: 'Fechar o dia',
+      message: 'Antes de dormir: Baú, Fechar o dia na Casa e escovar os dentes.',
+      icon: 'water',
+      color: 'red' as const,
+      priority: 'medium' as const
     }
   ];
 
@@ -194,7 +201,7 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">
-            {reminder ? 'Editar Lembrete Flash' : 'Novo Lembrete Flash'}
+            {reminder ? 'Editar lembrete' : 'Novo lembrete'}
           </h2>
           <button
             onClick={onClose}
@@ -250,7 +257,7 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors ${
                 errors.title ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Ex: Hidratação Flash"
+              placeholder="Ex: Lição de casa"
               maxLength={30}
             />
             {errors.title && (
@@ -273,7 +280,7 @@ const FlashReminderForm: React.FC<FlashReminderFormProps> = ({ reminder, onClose
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors resize-none ${
                 errors.message ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="Mensagem motivacional curta e direta..."
+              placeholder="O que ele precisa lembrar, curto e direto."
               rows={3}
               maxLength={100}
             />

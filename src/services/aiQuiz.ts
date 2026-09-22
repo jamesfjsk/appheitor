@@ -115,6 +115,8 @@ export interface CallOpenAIOptions {
   /** Modelo diferente do padrão (gpt-4o-mini) */
   model?: string;
   temperature?: number;
+  /** Teto do cliente, em ms. A function também corta do lado dela. */
+  timeoutMs?: number;
   /** Devolve { json, usage } em vez do JSON puro (contabilidade de tokens) */
   withUsage?: true;
 }
@@ -126,7 +128,7 @@ export function callOpenAI(system: string, user: string, maxTokens: number, opts
 export function callOpenAI(system: string, user: string, maxTokens: number, opts?: AbortSignal | CallOpenAIOptions): Promise<unknown>;
 export async function callOpenAI(system: string, user: string, maxTokens: number, opts?: AbortSignal | CallOpenAIOptions): Promise<unknown> {
   const options: CallOpenAIOptions = isAbortSignal(opts) ? { signal: opts } : opts ?? {};
-  const openai = httpsCallable(functions, 'openai');
+  const openai = httpsCallable(functions, 'openai', options.timeoutMs ? { timeout: options.timeoutMs } : undefined);
   const payload = {
     kind: 'chat' as const,
     model: options.model ?? MODEL,

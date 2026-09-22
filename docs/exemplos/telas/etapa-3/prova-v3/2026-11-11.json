@@ -1,0 +1,525 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-11",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-11",
+  "status": "ready",
+  "theme": {
+    "id": "aristoteles-habito",
+    "category": "filosofia",
+    "title": "Praticando a Coragem",
+    "lesson": "Imagine que você está jogando futebol e seu time está perdendo. Você tem a chance de chutar para o gol, mas está com medo de errar. Aristóteles, um filósofo grego, dizia que ninguém nasce corajoso ou justo, mas se torna assim praticando. A virtude, segundo ele, é um hábito que fica no meio-termo entre dois exageros. A coragem, por exemplo, está entre a covardia e a imprudência. Hoje, você pode praticar a coragem tentando algo novo, mesmo que tenha medo de errar. Lembre-se, é a prática que nos torna melhores.",
+    "whyItMatters": "Entender a importância da prática ajuda você a se tornar melhor em qualquer coisa.",
+    "curiosity": "Aristóteles acreditava que a virtude é um hábito, assim como escovar os dentes ou jogar futebol."
+  },
+  "questions": [
+    {
+      "question": "O que Aristóteles acreditava sobre a coragem?",
+      "options": [
+        "É um hábito",
+        "É um talento",
+        "É um dom",
+        "É sorte"
+      ],
+      "answer": "É um hábito",
+      "explanation": "Aristóteles dizia que a coragem é um hábito que se desenvolve com a prática.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta é 'É um hábito' porque Aristóteles acreditava que a coragem se desenvolve praticando.",
+      "trap": "Marcar 'É um talento' engana porque sugere que a coragem é algo com que nascemos, mas Aristóteles acreditava que ela se desenvolve.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+      "options": [
+        "Começou na Inglaterra",
+        "Começou na França",
+        "Começou na Alemanha",
+        "Começou na Itália"
+      ],
+      "answer": "Começou na Inglaterra",
+      "explanation": "A Revolução Industrial teve início na Inglaterra no século XVIII.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta é 'Começou na Inglaterra' porque é um fato histórico amplamente aceito.",
+      "trap": "Marcar 'Começou na França' engana porque a França não foi o berço da Revolução Industrial.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do cartão amarelo no futebol?",
+      "options": [
+        "Advertir o jogador",
+        "Expulsar o jogador",
+        "Premiar o jogador",
+        "Substituir o jogador"
+      ],
+      "answer": "Advertir o jogador",
+      "explanation": "O cartão amarelo é usado para advertir jogadores por comportamento antidesportivo.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta é 'Advertir o jogador' porque o cartão amarelo serve para alertar sobre faltas.",
+      "trap": "Marcar 'Expulsar o jogador' engana porque a expulsão é feita com o cartão vermelho.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que aconteceria se não houvesse mais árvores no planeta?",
+      "options": [
+        "Menos oxigênio",
+        "Mais oxigênio",
+        "Mais água",
+        "Menos água"
+      ],
+      "answer": "Menos oxigênio",
+      "explanation": "As árvores produzem oxigênio através da fotossíntese, então sem elas haveria menos oxigênio.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta é 'Menos oxigênio' porque as árvores são essenciais para a produção de oxigênio.",
+      "trap": "Marcar 'Mais oxigênio' engana porque sugere o oposto do que realmente aconteceria.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre o sistema solar?",
+      "options": [
+        "A Terra é o terceiro planeta",
+        "A Terra é o segundo planeta",
+        "A Terra é o quarto planeta",
+        "A Terra é o quinto planeta"
+      ],
+      "answer": "A Terra é o terceiro planeta",
+      "explanation": "A Terra é o terceiro planeta a partir do Sol no sistema solar.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta é 'A Terra é o terceiro planeta' porque é a posição correta no sistema solar.",
+      "trap": "Marcar 'A Terra é o segundo planeta' engana porque Vênus é o segundo planeta.",
+      "skill": "CIE.CAUSA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Ache o erro: 'Hércules era famoso pela sua força e cumpriu dez trabalhos quase impossíveis.'",
+      "options": [
+        "Foram doze trabalhos, não dez",
+        "Hércules era famoso pela velocidade",
+        "Hércules era um deus do mar",
+        "Não há erro"
+      ],
+      "answer": "Foram doze trabalhos, não dez",
+      "explanation": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "trap": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você tem R$ 50 e quer um jogo de R$ 80. Se guardar R$ 10 por semana, em quantas semanas consegue comprar?",
+      "options": [
+        "3",
+        "8",
+        "5",
+        "2"
+      ],
+      "answer": "3",
+      "explanation": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "trap": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Duas embalagens de suco: 1 litro por R$ 8 e 2 litros por R$ 14. Qual é mais barata por litro?",
+      "options": [
+        "A de 2 litros",
+        "A de 1 litro",
+        "As duas custam o mesmo por litro",
+        "Não dá para saber"
+      ],
+      "answer": "A de 2 litros",
+      "explanation": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "trap": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você pode praticar a coragem em sua vida hoje?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "tipos_mistos": 1,
+      "why_curto": 1,
+      "conta_nao_fecha": 1,
+      "duplicata": 2,
+      "duas_certas": 1,
+      "campo_invalido": 3,
+      "enunciado_vazou": 2,
+      "opcao_caricata": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": [
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "why_curto",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "duas_certas"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "campo_invalido",
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "campo_invalido",
+          "enunciado_vazou",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": [
+          "campo_invalido",
+          "opcao_caricata"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "Pede o que faria, é opinião."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [],
+    "fromOffline": 3
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Praticando a Coragem",
+        "lesson": "Imagine que você está jogando futebol e seu time está perdendo. Você tem a chance de chutar para o gol, mas está com medo de errar. Aristóteles, um filósofo grego, dizia que ninguém nasce corajoso ou justo, mas se torna assim praticando. A virtude, segundo ele, é um hábito que fica no meio-termo entre dois exageros. A coragem, por exemplo, está entre a covardia e a imprudência. Hoje, você pode praticar a coragem tentando algo novo, mesmo que tenha medo de errar. Lembre-se, é a prática que nos torna melhores.",
+        "whyItMatters": "Entender a importância da prática ajuda você a se tornar melhor em qualquer coisa.",
+        "curiosity": "Aristóteles acreditava que a virtude é um hábito, assim como escovar os dentes ou jogar futebol."
+      },
+      "questions": [
+        {
+          "question": "O que Aristóteles acreditava sobre a coragem?",
+          "options": [
+            "É um hábito",
+            "É um talento",
+            "É um dom",
+            "É sorte"
+          ],
+          "answer": "É um hábito",
+          "explanation": "Aristóteles dizia que a coragem é um hábito que se desenvolve com a prática.",
+          "why": "A resposta é 'É um hábito' porque Aristóteles acreditava que a coragem se desenvolve praticando.",
+          "trap": "Marcar 'É um talento' engana porque sugere que a coragem é algo com que nascemos, mas Aristóteles acreditava que ela se desenvolve.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo, você tem a chance de chutar para o gol, mas está com medo. O que Aristóteles diria?",
+          "options": [
+            "Pratique a coragem",
+            "Espere outra chance",
+            "Peça ajuda",
+            "Desista"
+          ],
+          "answer": "Pratique a coragem",
+          "explanation": "Aristóteles diria para praticar a coragem, pois é assim que se desenvolve a virtude.",
+          "why": "A resposta é 'Pratique a coragem' porque Aristóteles acreditava que a virtude se desenvolve com a prática.",
+          "trap": "Marcar 'Espere outra chance' engana porque sugere evitar a prática, mas Aristóteles defendia o oposto.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo sendo injustiçado na escola. O que você faz?",
+          "options": [
+            "Defende o amigo",
+            "Finge que não viu",
+            "Conta para um adulto",
+            "Ri junto com os outros"
+          ],
+          "answer": "Defende o amigo",
+          "explanation": "Defender o amigo é a atitude mais corajosa e justa, segundo a ideia de Aristóteles.",
+          "why": "A resposta é 'Defende o amigo' porque é a atitude que mais se alinha com a prática da virtude.",
+          "trap": "Marcar 'Finge que não viu' engana porque evita a prática da coragem e justiça.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+          "options": [
+            "Começou na Inglaterra",
+            "Começou na França",
+            "Começou na Alemanha",
+            "Começou na Itália"
+          ],
+          "answer": "Começou na Inglaterra",
+          "explanation": "A Revolução Industrial teve início na Inglaterra no século XVIII.",
+          "why": "A resposta é 'Começou na Inglaterra' porque é um fato histórico amplamente aceito.",
+          "trap": "Marcar 'Começou na França' engana porque a França não foi o berço da Revolução Industrial.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do cartão amarelo no futebol?",
+          "options": [
+            "Advertir o jogador",
+            "Expulsar o jogador",
+            "Premiar o jogador",
+            "Substituir o jogador"
+          ],
+          "answer": "Advertir o jogador",
+          "explanation": "O cartão amarelo é usado para advertir jogadores por comportamento antidesportivo.",
+          "why": "A resposta é 'Advertir o jogador' porque o cartão amarelo serve para alertar sobre faltas.",
+          "trap": "Marcar 'Expulsar o jogador' engana porque a expulsão é feita com o cartão vermelho.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 700 reais e compra dois brinquedos de 250 reais cada, quanto sobra?",
+          "options": [
+            "200",
+            "150",
+            "100",
+            "50"
+          ],
+          "answer": "200",
+          "explanation": "700 menos 500 (250 vezes 2) resulta em 200 reais sobrando.",
+          "why": "A resposta é 200 porque 700 menos 500 dá 200, após comprar os brinquedos.",
+          "trap": "Marcar 150 engana porque sugere um erro na subtração dos valores.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais árvores no planeta?",
+          "options": [
+            "Menos oxigênio",
+            "Mais oxigênio",
+            "Mais água",
+            "Menos água"
+          ],
+          "answer": "Menos oxigênio",
+          "explanation": "As árvores produzem oxigênio através da fotossíntese, então sem elas haveria menos oxigênio.",
+          "why": "A resposta é 'Menos oxigênio' porque as árvores são essenciais para a produção de oxigênio.",
+          "trap": "Marcar 'Mais oxigênio' engana porque sugere o oposto do que realmente aconteceria.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque 'is' é usado para singular.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que 'are' serve para qualquer número.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a água?",
+          "options": [
+            "Congela a 0°C",
+            "Congela a 10°C",
+            "Congela a -10°C",
+            "Congela a 100°C"
+          ],
+          "answer": "Congela a 0°C",
+          "explanation": "A água congela a 0°C, que é o ponto de congelamento padrão.",
+          "why": "A resposta é 'Congela a 0°C' porque é o ponto de congelamento da água.",
+          "trap": "Marcar 'Congela a 10°C' engana porque 10°C está acima do ponto de congelamento.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do meio-campista no futebol?",
+          "options": [
+            "Controlar o jogo",
+            "Marcar gols",
+            "Defender o gol",
+            "Apitar o jogo"
+          ],
+          "answer": "Controlar o jogo",
+          "explanation": "O meio-campista é responsável por controlar o ritmo e a distribuição do jogo.",
+          "why": "A resposta é 'Controlar o jogo' porque o meio-campista organiza as jogadas.",
+          "trap": "Marcar 'Marcar gols' engana porque essa é a função principal do atacante.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.FUNCAO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o sistema solar?",
+          "options": [
+            "A Terra é o terceiro planeta",
+            "A Terra é o segundo planeta",
+            "A Terra é o quarto planeta",
+            "A Terra é o quinto planeta"
+          ],
+          "answer": "A Terra é o terceiro planeta",
+          "explanation": "A Terra é o terceiro planeta a partir do Sol no sistema solar.",
+          "why": "A resposta é 'A Terra é o terceiro planeta' porque é a posição correta no sistema solar.",
+          "trap": "Marcar 'A Terra é o segundo planeta' engana porque Vênus é o segundo planeta.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.FATO",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você pode praticar a coragem em sua vida hoje?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Qual é a ideia central de Aristóteles sobre a virtude?",
+          "options": [
+            "A virtude é um hábito",
+            "A virtude é inata",
+            "A virtude é um dom",
+            "A virtude é uma escolha"
+          ],
+          "answer": "A virtude é um hábito",
+          "explanation": "Aristóteles acreditava que a virtude se desenvolve através da prática constante.",
+          "why": "A resposta certa é 'A virtude é um hábito' porque Aristóteles defendia que a prática constante leva à virtude.",
+          "trap": "A opção 'A virtude é inata' engana quem pensa que nascemos com virtudes, mas Aristóteles dizia que elas se desenvolvem."
+        },
+        {
+          "question": "Durante um jogo, você tem a chance de passar a bola ou chutar. Qual decisão mostra coragem segundo Aristóteles?",
+          "options": [
+            "Chutar sem pensar",
+            "Passar a bola com medo",
+            "Chutar com confiança",
+            "Não fazer nada"
+          ],
+          "answer": "Chutar com confiança",
+          "explanation": "A coragem está no meio-termo entre a covardia e a imprudência, segundo Aristóteles.",
+          "why": "A resposta certa é 'Chutar com confiança' porque Aristóteles acreditava que a coragem é agir com confiança, sem ser imprudente.",
+          "trap": "A opção 'Chutar sem pensar' engana quem confunde coragem com imprudência, mas Aristóteles valorizava a confiança com reflexão."
+        },
+        {
+          "question": "Você vê um amigo sendo injustiçado na escola. O que Aristóteles sugeriria como atitude virtuosa?",
+          "options": [
+            "Ajudar seu amigo com calma",
+            "Ignorar a situação",
+            "Gritar com o injusto",
+            "Ficar com medo e fugir"
+          ],
+          "answer": "Ajudar seu amigo com calma",
+          "explanation": "Aristóteles diria que a virtude está em agir com equilíbrio e justiça.",
+          "why": "A resposta certa é 'Ajudar seu amigo com calma' porque Aristóteles valorizava a justiça e o equilíbrio nas ações.",
+          "trap": "A opção 'Gritar com o injusto' engana quem acha que reagir impulsivamente é corajoso, mas Aristóteles defendia o equilíbrio."
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

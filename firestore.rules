@@ -313,7 +313,7 @@ service cloud.firestore {
         isAdmin()
         || (
           uid == request.auth.uid
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['season', 'stars', 'launchedOn'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['season', 'stars', 'launchedOn', 'launchedAt', 'userId', 'createdAt'])
         )
       );
     }
@@ -368,6 +368,21 @@ service cloud.firestore {
             .hasOnly(['savedGold', 'lastInterestWeek', 'interestPaid', 'status', 'cancelReason', 'updatedAt', 'unlockOn', 'lockWeeks'])
           && request.resource.data.savedGold >= resource.data.savedGold
           && (request.resource.data.status == resource.data.status || request.resource.data.status == 'cancel_requested')
+          && (
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['unlockOn'])
+            || !resource.data.keys().hasAny(['unlockOn'])
+            || (
+              request.resource.data.unlockOn is string
+              && request.resource.data.unlockOn >= resource.data.unlockOn
+            )
+          )
+        )
+        || (
+          resource.data.savedGold == 0
+          && request.resource.data.savedGold == 0
+          && request.resource.data.status == 'open'
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['title', 'targetGold', 'rewardId', 'updatedAt'])
         )
         || (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt', 'updatedAt'])

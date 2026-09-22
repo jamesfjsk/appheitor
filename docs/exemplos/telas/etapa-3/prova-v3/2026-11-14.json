@@ -1,0 +1,555 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-14",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-14",
+  "status": "ready",
+  "theme": {
+    "id": "acidos-e-bases",
+    "category": "quimica",
+    "title": "A Química do Limão",
+    "lesson": "Imagine que você está tomando um suco de limão bem azedo. O que faz o limão ser tão azedo é um ácido chamado ácido cítrico. No nosso dia a dia, encontramos ácidos e bases em muitos lugares, como no vinagre e no sabão. Um jeito divertido de ver a diferença é usar suco de repolho roxo, que muda de cor quando misturado com ácidos ou bases. Nosso estômago também é ácido, mas não se digere porque tem uma camada protetora. Hoje, você pode experimentar misturar um pouco de bicarbonato de sódio com suco de limão e ver a reação efervescente!",
+    "whyItMatters": "Entender ácidos e bases ajuda a compreender reações químicas ao nosso redor.",
+    "curiosity": "Sabia que o suco de repolho roxo pode virar rosa ou verde dependendo do que você mistura com ele?"
+  },
+  "questions": [
+    {
+      "question": "O que acontece quando você mistura bicarbonato de sódio com suco de limão?",
+      "options": [
+        "Forma bolhas",
+        "Fica mais doce",
+        "Fica mais salgado",
+        "Muda de cor"
+      ],
+      "answer": "Forma bolhas",
+      "explanation": "A mistura de bicarbonato de sódio com suco de limão forma bolhas devido à reação química.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Forma bolhas' porque a reação entre ácido e base libera gás carbônico, formando bolhas.",
+      "trap": "Marcar 'Muda de cor' erra porque a cor não muda, apenas há formação de bolhas.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se o estômago não tivesse uma camada protetora?",
+      "options": [
+        "Ele se digeria",
+        "Nada aconteceria",
+        "Ficaria maior",
+        "Ficaria mais forte"
+      ],
+      "answer": "Ele se digeria",
+      "explanation": "O ácido do estômago digere alimentos e poderia digerir o próprio estômago sem proteção.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Ele se digeria' porque o ácido do estômago é forte o suficiente para digerir tecidos.",
+      "trap": "Marcar 'Nada aconteceria' erra porque o ácido causaria danos sem a proteção.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Which sentence is correct?",
+      "options": [
+        "There is a lemon on the table",
+        "There are a lemon on the table",
+        "There is lemons on the table",
+        "There are lemon on the table"
+      ],
+      "answer": "There is a lemon on the table",
+      "explanation": "A frase certa é 'There is a lemon on the table' porque um limão só usa is, e are fica para quando são dois ou mais limões.",
+      "kind": "lesson",
+      "subject": "ingles",
+      "why": "A frase certa é 'There is a lemon on the table' porque um limão só usa is, e are fica para quando são dois ou mais limões.",
+      "trap": "A frase 'There are a lemon on the table' engana quem acha que are serve para qualquer limão, mas are pede o plural.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a lemon on the table"
+    },
+    {
+      "question": "O que aconteceria se não houvesse mais água no planeta?",
+      "options": [
+        "A vida seria impossível",
+        "Nada mudaria",
+        "O planeta ficaria mais frio",
+        "O planeta ficaria mais quente"
+      ],
+      "answer": "A vida seria impossível",
+      "explanation": "A água é essencial para a vida, sem ela, a vida não poderia existir.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'A vida seria impossível' porque a água é fundamental para todos os seres vivos.",
+      "trap": "Marcar 'Nada mudaria' erra porque a ausência de água afetaria drasticamente a vida no planeta.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Quais são as três cores primárias da tinta, que não nascem da mistura de outras?",
+      "options": [
+        "Vermelho, azul e amarelo",
+        "Verde, laranja e roxo",
+        "Preto, branco e cinza",
+        "Azul, verde e vermelho"
+      ],
+      "answer": "Vermelho, azul e amarelo",
+      "explanation": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "trap": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma receita para 4 pessoas usa 2 ovos. Quantos ovos você precisa para 10 pessoas?",
+      "options": [
+        "5",
+        "4",
+        "8",
+        "6"
+      ],
+      "answer": "5",
+      "explanation": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "trap": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O Brasil faz fronteira com quase toda a América do Sul. Quais são os dois países do continente que ele NÃO toca?",
+      "options": [
+        "Chile e Equador",
+        "Argentina e Uruguai",
+        "Peru e Bolívia",
+        "Colômbia e Venezuela"
+      ],
+      "answer": "Chile e Equador",
+      "explanation": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "trap": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se você viajar do Amazonas até o Rio Grande do Sul, de qual região para qual região está indo?",
+      "options": [
+        "Do Norte para o Sul",
+        "Do Nordeste para o Sudeste",
+        "Do Centro-Oeste para o Sul",
+        "Do Norte para o Sudeste"
+      ],
+      "answer": "Do Norte para o Sul",
+      "explanation": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "trap": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que os ácidos e bases podem ser úteis no seu dia a dia?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 4,
+      "tamanho_opcoes": 1,
+      "tipos_mistos": 1,
+      "opcao_caricata": 1,
+      "enunciado_vazou": 2,
+      "conta_um_passo": 3,
+      "duplicata": 3,
+      "trap_sem_distrator": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "tamanho_opcoes",
+          "tipos_mistos",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "enunciado_vazou",
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "enunciado_vazou",
+          "trap_sem_distrator",
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 14,
+        "codes": [
+          "conta_um_passo"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [],
+    "fromOffline": 4
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "A Química do Limão",
+        "lesson": "Imagine que você está tomando um suco de limão bem azedo. O que faz o limão ser tão azedo é um ácido chamado ácido cítrico. No nosso dia a dia, encontramos ácidos e bases em muitos lugares, como no vinagre e no sabão. Um jeito divertido de ver a diferença é usar suco de repolho roxo, que muda de cor quando misturado com ácidos ou bases. Nosso estômago também é ácido, mas não se digere porque tem uma camada protetora. Hoje, você pode experimentar misturar um pouco de bicarbonato de sódio com suco de limão e ver a reação efervescente!",
+        "whyItMatters": "Entender ácidos e bases ajuda a compreender reações químicas ao nosso redor.",
+        "curiosity": "Sabia que o suco de repolho roxo pode virar rosa ou verde dependendo do que você mistura com ele?"
+      },
+      "questions": [
+        {
+          "question": "Por que o limão é azedo?",
+          "options": [
+            "Por causa do ácido cítrico",
+            "Por causa do açúcar",
+            "Por causa do sal",
+            "Por causa da água"
+          ],
+          "answer": "Por causa do ácido cítrico",
+          "explanation": "O limão é azedo devido ao ácido cítrico presente nele.",
+          "why": "A resposta certa é 'Por causa do ácido cítrico' porque esse ácido é o que dá o sabor azedo ao limão.",
+          "trap": "Marcar 'Por causa do açúcar' erra porque o açúcar é doce, não azedo.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "O que acontece quando você mistura bicarbonato de sódio com suco de limão?",
+          "options": [
+            "Forma bolhas",
+            "Fica mais doce",
+            "Fica mais salgado",
+            "Muda de cor"
+          ],
+          "answer": "Forma bolhas",
+          "explanation": "A mistura de bicarbonato de sódio com suco de limão forma bolhas devido à reação química.",
+          "why": "A resposta certa é 'Forma bolhas' porque a reação entre ácido e base libera gás carbônico, formando bolhas.",
+          "trap": "Marcar 'Muda de cor' erra porque a cor não muda, apenas há formação de bolhas.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você derramou suco de limão na mesa. O que fazer?",
+          "options": [
+            "Limpar com água e sabão",
+            "Deixar secar",
+            "Passar açúcar",
+            "Ignorar"
+          ],
+          "answer": "Limpar com água e sabão",
+          "explanation": "Limpar com água e sabão remove o ácido e evita danos.",
+          "why": "A resposta certa é 'Limpar com água e sabão' porque isso neutraliza o ácido e protege a superfície.",
+          "trap": "Marcar 'Deixar secar' erra porque o ácido pode danificar a superfície se não for limpo.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 200 reais e compra um presente de 75 reais e outro de 50 reais, quanto sobra?",
+          "options": [
+            "75",
+            "125",
+            "50",
+            "100"
+          ],
+          "answer": "75",
+          "explanation": "Primeiro, some 75 e 50, depois subtraia de 200.",
+          "why": "A resposta certa é 75 porque 200 menos 125 (75 + 50) resulta em 75.",
+          "trap": "Marcar 125 erra porque é o total gasto, não o que sobra.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se o estômago não tivesse uma camada protetora?",
+          "options": [
+            "Ele se digeria",
+            "Nada aconteceria",
+            "Ficaria maior",
+            "Ficaria mais forte"
+          ],
+          "answer": "Ele se digeria",
+          "explanation": "O ácido do estômago digere alimentos e poderia digerir o próprio estômago sem proteção.",
+          "why": "A resposta certa é 'Ele se digeria' porque o ácido do estômago é forte o suficiente para digerir tecidos.",
+          "trap": "Marcar 'Nada aconteceria' erra porque o ácido causaria danos sem a proteção.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a lemon on the table",
+            "There are a lemon on the table",
+            "There is lemons on the table",
+            "There are lemon on the table"
+          ],
+          "answer": "There is a lemon on the table",
+          "audioText": "There is a lemon on the table",
+          "why": "A frase certa é 'There is a lemon on the table' porque um limão só usa is, e are fica para quando são dois ou mais limões.",
+          "trap": "A frase 'There are a lemon on the table' engana quem acha que are serve para qualquer limão, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o descobrimento do Brasil?",
+          "options": [
+            "Foi em 1500",
+            "Foi em 1600",
+            "Foi em 1700",
+            "Foi em 1800"
+          ],
+          "answer": "Foi em 1500",
+          "explanation": "O Brasil foi descoberto por Pedro Álvares Cabral em 1500.",
+          "why": "A resposta certa é 'Foi em 1500' porque é o ano em que Pedro Álvares Cabral chegou ao Brasil.",
+          "trap": "Marcar 'Foi em 1600' erra porque esse não é o ano correto do descobrimento.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do goleiro no futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O goleiro é responsável por impedir que a bola entre no gol.",
+          "why": "A resposta certa é 'Defender o gol' porque essa é a principal função do goleiro em um jogo de futebol.",
+          "trap": "Marcar 'Marcar gols' erra porque essa não é a função principal do goleiro.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 100 reais e compra um livro por 40 reais e um brinquedo por 30 reais, quanto sobra?",
+          "options": [
+            "30",
+            "40",
+            "50",
+            "60"
+          ],
+          "answer": "30",
+          "explanation": "Primeiro, some 40 e 30, depois subtraia de 100.",
+          "why": "A resposta certa é 30 porque 100 menos 70 (40 + 30) resulta em 30.",
+          "trap": "Marcar 70 erra porque é o total gasto, não o que sobra.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais água no planeta?",
+          "options": [
+            "A vida seria impossível",
+            "Nada mudaria",
+            "O planeta ficaria mais frio",
+            "O planeta ficaria mais quente"
+          ],
+          "answer": "A vida seria impossível",
+          "explanation": "A água é essencial para a vida, sem ela, a vida não poderia existir.",
+          "why": "A resposta certa é 'A vida seria impossível' porque a água é fundamental para todos os seres vivos.",
+          "trap": "Marcar 'Nada mudaria' erra porque a ausência de água afetaria drasticamente a vida no planeta.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é a função do meio-campista no futebol?",
+          "options": [
+            "Controlar o jogo",
+            "Defender o gol",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Controlar o jogo",
+          "explanation": "O meio-campista é responsável por organizar e controlar o ritmo do jogo.",
+          "why": "A resposta certa é 'Controlar o jogo' porque o meio-campista ajuda a conectar a defesa com o ataque.",
+          "trap": "Marcar 'Defender o gol' erra porque essa é a função do goleiro, não do meio-campista.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que os ácidos e bases podem ser úteis no seu dia a dia?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que o suco de repolho roxo muda de cor com limão?",
+          "options": [
+            "Porque é um indicador de pH",
+            "Porque o limão é doce",
+            "Porque o repolho é ácido",
+            "Porque o limão é salgado"
+          ],
+          "answer": "Porque é um indicador de pH",
+          "explanation": "O suco de repolho roxo muda de cor porque reage com ácidos e bases, indicando o pH.",
+          "why": "A resposta certa é 'Porque é um indicador de pH' porque o suco de repolho roxo reage com ácidos e bases, mudando de cor.",
+          "trap": "Marcar 'Porque o limão é doce' erra porque o limão é ácido, não doce, e isso não explica a mudança de cor.",
+          "kind": "lesson",
+          "subject": "ciencias",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você está em casa e derrama suco de limão na roupa. O que fazer para limpar?",
+          "options": [
+            "Usar bicarbonato de sódio",
+            "Usar mais limão",
+            "Deixar secar",
+            "Passar vinagre"
+          ],
+          "answer": "Usar bicarbonato de sódio",
+          "explanation": "O bicarbonato de sódio neutraliza o ácido do limão, ajudando a remover a mancha.",
+          "why": "A resposta certa é 'Usar bicarbonato de sódio' porque ele neutraliza o ácido do limão, ajudando a remover manchas.",
+          "trap": "Marcar 'Usar mais limão' erra porque adicionar mais ácido não ajuda a remover a mancha, só piora.",
+          "kind": "lesson",
+          "subject": "ciencias",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo diz que beber suco de limão puro faz bem. O que você faz?",
+          "options": [
+            "Explico que pode ser ruim para os dentes",
+            "Bebo junto com ele",
+            "Ignoro e deixo ele beber",
+            "Digo que ele está errado sem explicar"
+          ],
+          "answer": "Explico que pode ser ruim para os dentes",
+          "explanation": "Explicar que o ácido pode danificar o esmalte dos dentes é a atitude mais sábia.",
+          "why": "A resposta certa é 'Explico que pode ser ruim para os dentes' porque o ácido do limão pode danificar o esmalte dental.",
+          "trap": "Marcar 'Bebo junto com ele' erra porque não considera o efeito do ácido nos dentes.",
+          "kind": "dilemma",
+          "subject": "ciencias",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Uma loja vende 3 camisetas por R$ 90. Quanto custa cada uma?",
+          "options": [
+            "R$ 30",
+            "R$ 45",
+            "R$ 60",
+            "R$ 20"
+          ],
+          "answer": "R$ 30",
+          "explanation": "Dividindo R$ 90 por 3, cada camiseta custa R$ 30.",
+          "why": "A resposta certa é R$ 30 porque dividindo o total de R$ 90 por 3 camisetas, cada uma custa R$ 30.",
+          "trap": "Marcar R$ 45 erra porque isso seria o preço de uma camiseta se o total fosse R$ 135.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

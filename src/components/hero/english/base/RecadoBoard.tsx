@@ -3,7 +3,7 @@
 // Quadro do Capataz, giz, três pregos. Recompensa só da 1ª leitura.
 // ========================================
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useData } from '../../../../contexts/DataContext';
 import { useSound } from '../../../../contexts/SoundContext';
@@ -11,9 +11,11 @@ import { FirestoreService } from '../../../../services/firestoreService';
 import { completeContract } from '../../../../services/englishBaseService';
 import { explainNoteMiss, judgeNote, precheckNote } from '../../../../services/englishJudge';
 import { playText, prefetchAudio, stopAudio, TTS_SPEED_SLOW } from '../../../../services/englishTts';
+import { PT_TALK } from '../../../../services/quiz/provaSpeak';
 import { DESIGN } from '../../../../services/english/merchantPlay';
 import {
   allPegsOn,
+  chalkDiff,
   explainJudge,
   fillTemplate,
   gapCount,
@@ -21,14 +23,15 @@ import {
   isLazyNote,
   moldFromModel,
   moldFromTemplates,
+  pegLesson,
   pegLit,
   pegReview,
   recadoGrade,
   splitTemplate,
-  trayWords,
+  trayForStage,
 } from '../../../../services/english/notePlay';
 import { seedFromString, seededShuffle } from '../../../../services/english/shuffle';
-import { noteMaterial } from '../../../../config/englishRewards';
+import { noteHelpedMaterial } from '../../../../config/englishRewards';
 import { CONTRACT_LABELS, MATERIAL_ICONS } from '../../../../config/englishBase';
 import type { BaseDoc, BuildingId, Contract, ContractOutcome, NoteInfo, NoteJudgement } from '../../../../types/english';
 import type { MineSfx } from '../mine/sfx';
@@ -72,7 +75,7 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     const framed = moldFromTemplates(content.model, content.templates);
     if (framed && gapCount(framed.mold) >= 1) return framed;
     const made = moldFromModel(content.model, content.mustInclude);
-    if (gapCount(made.mold) >= 1) return { mold: made.mold, slots: made.slots };
+    if (made.mold && gapCount(made.mold) >= 2) return { mold: made.mold, slots: made.slots };
     if (content.templates.length === 0) return { mold: null, slots: [] };
     return {
       mold: content.templates[seedFromString(`${contract.id}|${contract.theme}`) % content.templates.length],
@@ -86,10 +89,10 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
   const bank = useMemo(
     () =>
       seededShuffle(
-        trayWords(content.model, content.wordBank, content.mustInclude.flatMap((i) => i.en.slice(0, 1))),
+        trayForStage(scaffold, content.model, content.wordBank, content.mustInclude.flatMap((i) => i.en.slice(0, 1))),
         seedFromString(`${date}|${contract.id}|bank`)
       ),
-    [content.model, content.wordBank, content.mustInclude, date, contract.id]
+    [scaffold, content.model, content.wordBank, content.mustInclude, date, contract.id]
   );
 
   const [phase, setPhase] = useState<Phase>('write');
@@ -103,6 +106,10 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
   const [missing, setMissing] = useState<ReturnType<typeof precheckNote>>([]);
   const [judgement, setJudgement] = useState<NoteJudgement | null>(null);
   const [firstJudge, setFirstJudge] = useState<NoteJudgement | null>(null);
+  const [secondJudge, setSecondJudge] = useState<NoteJudgement | null>(null);
+  const [firstAnswer, setFirstAnswer] = useState('');
+  const [secondAnswer, setSecondAnswer] = useState('');
+  const [helped, setHelped] = useState(false);
   const [answer, setAnswer] = useState('');
   const [balloon, setBalloon] = useState(content.brief);
   const [beat, setBeat] = useState<Beat>(null);
@@ -117,13 +124,16 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
   const wrapRef = useRef<HTMLDivElement>(null);
   const startedAt = useRef(Date.now());
   const finishing = useRef(false);
+  const sending = useRef(false);
+  const [inFlight, setInFlight] = useState(false);
   const areaRef = useRef<HTMLTextAreaElement>(null);
 
   const written = templateUsed ? fillTemplate(templateUsed, fills) : freeText;
   const pegs = pegLit(written.replace(/___/g, ''), content.mustInclude);
   const bankOn = scaffold < 2 || hintUsed;
   const canHint = scaffold === 2 && !hintUsed && base.materials.ferro >= 1;
-  const dirty = attempts > 0 || listens > 0 || words(written.replace(/___/g, ' ')).length > 0;
+  const childWrote = templateUsed ? fills.some((f) => f.trim().length > 0) : freeText.trim().length > 0;
+  const dirty = childWrote;
   const listened = listens > 0;
 
   useEffect(() => {
@@ -140,6 +150,15 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     return () => ro.disconnect();
   }, []);
 
+  const askQuit = useCallback(() => {
+    playClick();
+    if (dirty && phase !== 'finale') setConfirmQuit(true);
+    else {
+      stopAudio();
+      onQuit();
+    }
+  }, [dirty, phase, onQuit, playClick]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
@@ -150,8 +169,7 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [confirmQuit, phase]);
+  }, [dirty, askQuit, confirmQuit, phase, onDone]);
 
   useEffect(() => {
     const bitsEn = content.mustInclude.map((i) => i.en[0]).filter(Boolean);
@@ -216,21 +234,25 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     if (!t) return;
     stopAudio();
     setSpeaking('play');
-    await playText(t);
+    await playText(t, PT_TALK);
     setSpeaking(null);
   };
 
   const submit = async () => {
     const t = written.replace(/___/g, ' ').replace(/\s+/g, ' ').trim();
-    if (phase !== 'write' || words(t).length < 2) return;
+    if (sending.current || inFlight || phase !== 'write' || words(t).length < 2) return;
+    sending.current = true;
+    setInFlight(true);
     playClick();
     setAttempts((a) => a + 1);
+    try {
     const miss = precheckNote(t, content);
     if (miss.length > 0 && !freeAttemptUsed) {
       stopAudio();
       setSpeaking(null);
       setMissing(miss);
       setFreeAttemptUsed(true);
+      setHelped(true);
       setPhase('judging');
       setBalloon('O Capataz lê o quadro...');
       const tip = await explainNoteMiss({
@@ -242,8 +264,6 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
       });
       setPhase('write');
       setBalloon(tip.say);
-      setFills((prev) => prev.map(() => ''));
-      setFreeText('');
       sfx.fail();
       pulse('miss');
       void speakLine(tip.say);
@@ -261,7 +281,13 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     });
     setAnswer(t);
     setJudgement(j);
-    if (!firstJudge) setFirstJudge(j);
+    if (!firstJudge) {
+      setFirstJudge(j);
+      setFirstAnswer(t);
+    } else {
+      setSecondJudge(j);
+      setSecondAnswer(t);
+    }
     setPhase('judged');
     const tip = explainJudge(j, content.mustInclude, content.brief, t);
     setBalloon(tip.say);
@@ -273,6 +299,10 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
       pulse('miss');
     }
     void speakLine(tip.say);
+    } finally {
+      sending.current = false;
+      setInFlight(false);
+    }
   };
 
   const redo = () => {
@@ -296,11 +326,12 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     const out: ContractOutcome = {
       score: paid.score,
       max: 3,
-      materialEarned: noteMaterial(paid.score),
-      answer,
+      materialEarned: noteHelpedMaterial(paid.score, helped),
+      answer: firstAnswer || answer,
       correction: paid,
       details: {
         hintUsed,
+        helped,
         templateUsed,
         attempts,
         listens,
@@ -308,7 +339,11 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
         scaffoldStage: scaffold,
         precheckMissing: freeAttemptUsed,
         redoUsed,
-        pegsOn: allPegsOn(answer, content.mustInclude),
+        pegsOn: allPegsOn(firstAnswer || answer, content.mustInclude),
+        firstAnswer: firstAnswer || answer,
+        firstNote: paid.note,
+        secondAnswer: secondAnswer || null,
+        secondNote: secondJudge?.note ?? null,
       },
     };
     setOutcome(out);
@@ -359,16 +394,9 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     }
   };
 
-  const askQuit = () => {
-    playClick();
-    if (dirty && phase !== 'finale') setConfirmQuit(true);
-    else {
-      stopAudio();
-      onQuit();
-    }
-  };
-
   const bits = templateUsed ? splitTemplate(templateUsed) : [];
+  const chalkPx = Math.max(14, box.h * (22 / DESIGN.h));
+  const chipPx = Math.max(12, box.h * (15 / DESIGN.h));
   const showBank = phase === 'write' && bankOn;
 
   return (
@@ -388,7 +416,11 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
       )}
 
       <div className="md-stage-wrap" ref={wrapRef}>
-        <div className="md-stage" style={{ width: box.w, height: box.h }} data-testid="recado-stage">
+        <div
+          className="md-stage"
+          style={{ width: box.w, height: box.h, ['--nb-chalk' as string]: `${chalkPx}px`, ['--nb-chip' as string]: `${chipPx}px` }}
+          data-testid="recado-stage"
+        >
           <img src={BACKDROP} alt="" className="md-backdrop mc-pixel" draggable={false} />
 
           <div
@@ -463,10 +495,15 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
             <div className="nb-board" data-testid="recado-quadro">
               {phase === 'judged' && judgement ? (
                 <div className="nb-chalk" data-testid="recado-chalk">
-                  <p className="nb-line">{answer}</p>
-                  {judgement.score < 3 && (judgement.corrected || guide) && (
-                    <p className="nb-line nb-fix-line">{judgement.corrected || guide}</p>
-                  )}
+                  <ChalkLines written={firstAnswer || answer} corrected={(judgement.corrected || guide).trim()} />
+                  <ul className="nb-pegs" data-testid="recado-pegs">
+                    {pegReview(firstAnswer || answer, content.mustInclude).map((p) => (
+                      <li key={p.pt} className={`nb-peg ${p.ok ? 'is-on' : 'is-off'}`}>
+                        <i />
+                        <span className="nb-peg-pt">{pegLesson(p, judgement, content.brief, firstAnswer || answer)}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ) : templateUsed ? (
                 <p className="nb-template" data-testid="recado-template">
@@ -578,7 +615,7 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
               type="button"
               className="mc-btn mc-btn-green md-deliver text-base font-bold"
               onClick={() => void submit()}
-              disabled={words(written.replace(/___/g, ' ')).length < 2}
+              disabled={inFlight || words(written.replace(/___/g, ' ')).length < 2}
               data-testid="recado-submit"
             >
               Enviar
@@ -588,7 +625,9 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
           {phase === 'finale' && outcome && reward && firstJudge && (
             <Finale
               judgement={firstJudge}
-              answer={answer}
+              second={secondJudge}
+              answer={firstAnswer || answer}
+              again={secondAnswer}
               brief={content.brief}
               model={guide}
               infos={content.mustInclude}
@@ -636,14 +675,16 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
 
 const Finale: React.FC<{
   judgement: NoteJudgement;
+  second: NoteJudgement | null;
   answer: string;
+  again: string;
   brief: string;
   model: string;
   infos: NoteInfo[];
   reward: CompleteReward;
   wagonsIn: boolean;
   onNext: () => void;
-}> = ({ judgement, answer, model, infos, reward, wagonsIn, onNext }) => {
+}> = ({ judgement, second, answer, again, brief, model, infos, reward, wagonsIn, onNext }) => {
   const { playClick } = useSound();
   const count = Math.max(0, reward.materialEarned);
   const allIn = judgement.score >= 3;
@@ -652,6 +693,8 @@ const Finale: React.FC<{
   const [voice, setVoice] = useState<'load' | 'play' | null>(null);
   const missed = rows.filter((r) => !r.ok);
   const grade = judgement.note && !isLazyNote(judgement.note) ? judgement.note : recadoGrade(judgement.score);
+  const gradeAgain = second ? (second.note && !isLazyNote(second.note) ? second.note : recadoGrade(second.score)) : '';
+  const pedido = brief.length > 80 ? `${brief.slice(0, 77)}…` : brief;
 
   const say = async (text: string, slow = false) => {
     const t = text.trim();
@@ -669,6 +712,10 @@ const Finale: React.FC<{
       <div className="md-speech" data-testid="recado-finale">
         <div className={`md-balloon mc-pop${allIn ? ' is-ok' : ' is-fix'}`}>
           <p className="md-balloon-pt" data-testid="recado-grade">{grade}</p>
+          <p className="md-sentence" data-testid="recado-first-line">{answer}</p>
+          {again ? <p className="md-sentence" data-testid="recado-second-line">{again}</p> : null}
+          {gradeAgain ? <p className="md-sentence" data-testid="recado-grade-2">{gradeAgain}</p> : null}
+          <p className="md-sentence" data-testid="recado-pedido">O pedido era: {pedido}</p>
           {missed.map((p) => (
             <p key={p.pt} className="md-sentence md-finale-miss">{p.en}</p>
           ))}
@@ -735,6 +782,32 @@ const Finale: React.FC<{
         ))}
       </div>
     </div>
+  );
+};
+
+const ChalkLines: React.FC<{ written: string; corrected: string }> = ({ written, corrected }) => {
+  const { left, right } = chalkDiff(written, corrected);
+  return (
+    <>
+      <p className="nb-line" data-testid="recado-chalk-left">
+        {left.map((t, i) => (
+          <span key={`l-${i}`} className={t.mark === 'bad' ? 'nb-bad' : undefined}>
+            {t.text}
+            {i < left.length - 1 ? ' ' : ''}
+          </span>
+        ))}
+      </p>
+      {corrected && corrected !== written ? (
+        <p className="nb-line nb-fix-line" data-testid="recado-chalk-right">
+          {right.map((t, i) => (
+            <span key={`r-${i}`} className={t.mark === 'good' ? 'nb-good' : undefined}>
+              {t.text}
+              {i < right.length - 1 ? ' ' : ''}
+            </span>
+          ))}
+        </p>
+      ) : null}
+    </>
   );
 };
 

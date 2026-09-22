@@ -1,0 +1,498 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-02",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-02",
+  "status": "ready",
+  "theme": {
+    "id": "medidas-e-estimativa",
+    "category": "matematica",
+    "title": "Medir sem régua: como fazer?",
+    "lesson": "Imagine que você está no parque e quer saber a altura de uma árvore sem usar régua. Você pode usar a sombra dela! Quando o sol está alto, a sombra é mais curta, mas quando está mais baixo, a sombra é mais longa. Se você medir a sua própria sombra e souber sua altura, pode comparar com a sombra da árvore para estimar a altura dela. Essa técnica é útil quando não temos ferramentas de medição por perto. Hoje, você pode tentar medir a altura de algo em casa usando sua sombra ou seu palmo.",
+    "whyItMatters": "Saber medir sem régua ajuda a resolver problemas do dia a dia.",
+    "curiosity": "Sabia que os antigos egípcios usavam sombras para medir a altura das pirâmides? E que um palmo é uma medida antiga usada até hoje?"
+  },
+  "questions": [
+    {
+      "question": "Você quer medir a largura de uma sala usando seu corpo. O que pode fazer?",
+      "options": [
+        "Usar passos",
+        "Usar uma régua",
+        "Usar uma fita métrica",
+        "Usar um lápis"
+      ],
+      "answer": "Usar passos",
+      "explanation": "Usar passos é uma forma prática de medir distâncias sem ferramentas.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "Usar passos é útil porque permite medir distâncias maiores sem precisar de instrumentos.",
+      "trap": "Usar um lápis parece útil, mas não é prático para medir grandes distâncias.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se a Terra parasse de girar de repente?",
+      "options": [
+        "Nada mudaria",
+        "Os dias seriam mais longos",
+        "Haveria um grande desastre",
+        "A Terra ficaria mais quente"
+      ],
+      "answer": "Haveria um grande desastre",
+      "explanation": "A parada repentina causaria enormes desastres naturais.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "Um grande desastre ocorreria porque a inércia faria tudo na superfície continuar se movendo.",
+      "trap": "Pensar que os dias seriam mais longos ignora os efeitos imediatos e catastróficos.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+      "options": [
+        "Começou no século XVIII",
+        "Foi liderada por Napoleão",
+        "Ocorreu no Brasil",
+        "Durou apenas 10 anos"
+      ],
+      "answer": "Começou no século XVIII",
+      "explanation": "A Revolução Industrial teve início no século XVIII na Inglaterra.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "Começou no século XVIII é correto porque marca o início das grandes mudanças industriais.",
+      "trap": "A opção que diz que foi liderada por Napoleão confunde com eventos históricos diferentes.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem 200 reais e compra dois brinquedos de 75 reais cada, quanto sobra?",
+      "options": [
+        "50",
+        "25",
+        "100",
+        "0"
+      ],
+      "answer": "50",
+      "explanation": "200 menos 150 (75 vezes 2) resulta em 50 reais sobrando.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 50 porque 200 menos 150 (75 vezes 2) deixa 50 reais.",
+      "trap": "Marcar 25 erra porque subtraiu errado ou não multiplicou 75 por 2 antes.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "What is correct?",
+      "options": [
+        "There is a book on the table",
+        "There are a book on the table",
+        "There is books on the table",
+        "There are book on the table"
+      ],
+      "answer": "There is a book on the table",
+      "explanation": "A frase certa é There is a book on the table porque um livro usa is, e are é para plural.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "why": "A frase certa é There is a book on the table porque um livro usa is, e are é para plural.",
+      "trap": "A frase There are a book on the table engana quem acha que are serve para singular, mas precisa de plural.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a book on the table"
+    },
+    {
+      "question": "Numa turma de 30 alunos, 2/5 são meninas. Quantos meninos há na turma?",
+      "options": [
+        "18",
+        "12",
+        "20",
+        "6"
+      ],
+      "answer": "18",
+      "explanation": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "trap": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "A fornalha precisa de combustível. Qual destes dura mais tempo queimando?",
+      "options": [
+        "Um bloco de carvão",
+        "Um graveto",
+        "Uma tábua",
+        "Um pedaço de carvão"
+      ],
+      "answer": "Um bloco de carvão",
+      "explanation": "Um pedaço de carvão funde 8 itens; o bloco, feito de 9 pedaços, funde 80. Juntar em bloco rende mais.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Um pedaço de carvão funde 8 itens; o bloco, feito de 9 pedaços, funde 80. Juntar em bloco rende mais.",
+      "trap": "Um pedaço de carvão funde 8 itens; o bloco, feito de 9 pedaços, funde 80. Juntar em bloco rende mais.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Um time fez 2 gols no primeiro tempo e sofreu 3 no segundo. Se o jogo terminou 4 a 3 para ele, quantos gols fez no segundo tempo?",
+      "options": [
+        "2",
+        "1",
+        "3",
+        "4"
+      ],
+      "answer": "2",
+      "explanation": "O time terminou com 4 gols e já tinha 2 no primeiro tempo, então marcou 4 − 2 = 2 no segundo. Os 3 sofridos não mudam essa conta.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "O time terminou com 4 gols e já tinha 2 no primeiro tempo, então marcou 4 − 2 = 2 no segundo. Os 3 sofridos não mudam essa conta.",
+      "trap": "O time terminou com 4 gols e já tinha 2 no primeiro tempo, então marcou 4 − 2 = 2 no segundo. Os 3 sofridos não mudam essa conta.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você pode usar seu corpo para medir algo hoje?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 4,
+      "conta_nao_fecha": 7,
+      "duplicata": 1,
+      "why_curto": 1,
+      "enunciado_vazou": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "certa_mais_longa",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "certa_mais_longa",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "enunciado_vazou",
+          "certa_mais_longa",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "certa_mais_longa",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A pergunta pede o que ele faria."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 3
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Medir sem régua: como fazer?",
+        "lesson": "Imagine que você está no parque e quer saber a altura de uma árvore sem usar régua. Você pode usar a sombra dela! Quando o sol está alto, a sombra é mais curta, mas quando está mais baixo, a sombra é mais longa. Se você medir a sua própria sombra e souber sua altura, pode comparar com a sombra da árvore para estimar a altura dela. Essa técnica é útil quando não temos ferramentas de medição por perto. Hoje, você pode tentar medir a altura de algo em casa usando sua sombra ou seu palmo.",
+        "whyItMatters": "Saber medir sem régua ajuda a resolver problemas do dia a dia.",
+        "curiosity": "Sabia que os antigos egípcios usavam sombras para medir a altura das pirâmides? E que um palmo é uma medida antiga usada até hoje?"
+      },
+      "questions": [
+        {
+          "question": "Como você pode estimar a altura de uma árvore sem subir nela?",
+          "options": [
+            "Usando a sombra dela",
+            "Usando uma régua",
+            "Subindo na árvore",
+            "Perguntando a alguém"
+          ],
+          "answer": "Usando a sombra dela",
+          "explanation": "A sombra da árvore pode ser comparada com a sua sombra para estimar a altura.",
+          "why": "Usar a sombra é eficaz porque permite comparar proporções sem precisar de ferramentas.",
+          "trap": "Subir na árvore parece uma solução, mas não é segura nem prática para medir.",
+          "kind": "lesson",
+          "subject": "matematica",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você quer medir a largura de uma sala usando seu corpo. O que pode fazer?",
+          "options": [
+            "Usar passos",
+            "Usar uma régua",
+            "Usar uma fita métrica",
+            "Usar um lápis"
+          ],
+          "answer": "Usar passos",
+          "explanation": "Usar passos é uma forma prática de medir distâncias sem ferramentas.",
+          "why": "Usar passos é útil porque permite medir distâncias maiores sem precisar de instrumentos.",
+          "trap": "Usar um lápis parece útil, mas não é prático para medir grandes distâncias.",
+          "kind": "lesson",
+          "subject": "matematica",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você e seus amigos querem saber quem consegue medir a altura de uma árvore mais precisamente. O que você faz?",
+          "options": [
+            "Usa a sombra e compara",
+            "Adivinha a altura",
+            "Escala a árvore",
+            "Usa uma fita métrica"
+          ],
+          "answer": "Usa a sombra e compara",
+          "explanation": "Comparar sombras é seguro e eficaz para estimar alturas.",
+          "why": "Usar a sombra é a atitude mais sábia porque é segura e não precisa de ferramentas.",
+          "trap": "Escalar a árvore parece divertido, mas é perigoso e não ajuda a medir com precisão.",
+          "kind": "dilemma",
+          "subject": "matematica",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "O que aconteceria se a Terra parasse de girar de repente?",
+          "options": [
+            "Nada mudaria",
+            "Os dias seriam mais longos",
+            "Haveria um grande desastre",
+            "A Terra ficaria mais quente"
+          ],
+          "answer": "Haveria um grande desastre",
+          "explanation": "A parada repentina causaria enormes desastres naturais.",
+          "why": "Um grande desastre ocorreria porque a inércia faria tudo na superfície continuar se movendo.",
+          "trap": "Pensar que os dias seriam mais longos ignora os efeitos imediatos e catastróficos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+          "options": [
+            "Começou no século XVIII",
+            "Foi liderada por Napoleão",
+            "Ocorreu no Brasil",
+            "Durou apenas 10 anos"
+          ],
+          "answer": "Começou no século XVIII",
+          "explanation": "A Revolução Industrial teve início no século XVIII na Inglaterra.",
+          "why": "Começou no século XVIII é correto porque marca o início das grandes mudanças industriais.",
+          "trap": "A opção que diz que foi liderada por Napoleão confunde com eventos históricos diferentes.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'offside' no futebol?",
+          "options": [
+            "Evitar vantagem injusta",
+            "Marcar gols",
+            "Defender o gol",
+            "Passar a bola"
+          ],
+          "answer": "Evitar vantagem injusta",
+          "explanation": "A regra do 'offside' impede que jogadores ganhem vantagem injusta.",
+          "why": "Evitar vantagem injusta é correto porque mantém o jogo justo e equilibrado.",
+          "trap": "Marcar gols parece relacionado, mas não é a função do 'offside'.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 200 reais e compra dois brinquedos de 75 reais cada, quanto sobra?",
+          "options": [
+            "50",
+            "25",
+            "100",
+            "0"
+          ],
+          "answer": "50",
+          "explanation": "200 menos 150 (75 vezes 2) resulta em 50 reais sobrando.",
+          "why": "A resposta certa é 50 porque 200 menos 150 (75 vezes 2) deixa 50 reais.",
+          "trap": "Marcar 25 erra porque subtraiu errado ou não multiplicou 75 por 2 antes.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Como você pode usar seu corpo para medir algo hoje?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Você quer medir a altura de uma árvore usando a sombra. O que você precisa fazer primeiro?",
+          "options": [
+            "Medir a sombra da árvore e a sua",
+            "Subir na árvore com uma fita métrica",
+            "Chutar a altura da árvore",
+            "Esperar até o meio-dia"
+          ],
+          "answer": "Medir a sombra da árvore e a sua",
+          "explanation": "Medir as sombras permite usar proporções para estimar a altura da árvore.",
+          "why": "A resposta certa é medir a sombra da árvore e a sua porque isso permite calcular a altura usando proporções.",
+          "trap": "Subir na árvore com uma fita métrica engana quem acha que precisa de medidas diretas, mas é perigoso.",
+          "kind": "lesson",
+          "subject": "matematica",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você está no campo de futebol e quer medir a distância entre duas traves. Como pode fazer isso sem régua?",
+          "options": [
+            "Contar seus passos entre as traves",
+            "Chutar a distância",
+            "Usar uma fita métrica",
+            "Esperar alguém medir"
+          ],
+          "answer": "Contar seus passos entre as traves",
+          "explanation": "Contar passos é uma maneira prática de estimar distâncias sem ferramentas.",
+          "why": "A resposta certa é contar seus passos entre as traves porque isso permite estimar a distância de forma prática.",
+          "trap": "Chutar a distância engana quem acha que pode adivinhar, mas isso não é preciso.",
+          "kind": "lesson",
+          "subject": "matematica",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você e seus amigos querem saber quem consegue medir a altura de uma árvore mais precisamente. O que você faz?",
+          "options": [
+            "Usa a sombra e faz cálculos",
+            "Adivinha a altura",
+            "Sobe na árvore",
+            "Espera o vento derrubar a árvore"
+          ],
+          "answer": "Usa a sombra e faz cálculos",
+          "explanation": "Usar a sombra e cálculos é seguro e preciso.",
+          "why": "A resposta certa é usar a sombra e fazer cálculos porque é seguro e fornece uma estimativa precisa.",
+          "trap": "Adivinha a altura engana quem acha que pode acertar sem medir, mas é impreciso.",
+          "kind": "dilemma",
+          "subject": "matematica",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "What is correct?",
+          "options": [
+            "There is a book on the table",
+            "There are a book on the table",
+            "There is books on the table",
+            "There are book on the table"
+          ],
+          "answer": "There is a book on the table",
+          "audioText": "There is a book on the table",
+          "why": "A frase certa é There is a book on the table porque um livro usa is, e are é para plural.",
+          "trap": "A frase There are a book on the table engana quem acha que are serve para singular, mas precisa de plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

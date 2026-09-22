@@ -195,6 +195,29 @@ test('Recado: model dentro do nível (frases, tamanho, tokens proibidos) e hint 
   }
 });
 
+test('R7: n2-01 pede permissão; n2-03 sem because I am new; n2-04 sem water solto; n2-05 desejo', () => {
+  const n201 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-01');
+  if (!n201) throw new Error('n2-01 sumiu do banco');
+  expect(n201.content.brief.toLowerCase()).toContain('permissão');
+  expect(n201.content.brief.toLowerCase()).toContain('lição');
+  expect(n201.content.model).toBe('Can I play soccer now? Please, because my homework is ready.');
+  expect(n201.content.wordBank.includes('please')).toBeTruthy();
+  expect(n201.content.wordBank.includes('ask')).toBeFalsy();
+  expect(/i can play|you can play/i.test(n201.content.model)).toBeFalsy();
+  const n203 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-03');
+  if (!n203) throw new Error('n2-03 sumiu do banco');
+  expect(n203.content.mustInclude.flatMap((i) => i.en).some((en) => /because i am new/i.test(en))).toBeFalsy();
+  const n204 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-04');
+  if (!n204) throw new Error('n2-04 sumiu do banco');
+  const drink = n204.content.mustInclude.find((i) => i.pt === 'bebo água');
+  expect(drink?.en.includes('water')).toBeFalsy();
+  const n205 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-05');
+  if (!n205) throw new Error('n2-05 sumiu do banco');
+  expect(n205.content.model).toBe('The bed is ready. I do this because I want a clean room.');
+  expect(n205.content.brief).toContain('porque você quer o quarto limpo');
+  expect(n205.content.mustInclude.some((i) => i.en.some((en) => /because i want/i.test(en)))).toBeTruthy();
+});
+
 test('Recado: brief distinto por nível (chave da regra dos 14 dias)', () => {
   for (const level of LEVEL_LIST) {
     expect(new Set(OFFLINE_NOTES[level].map((e) => e.content.brief)).size).toBe(PER_LEVEL);

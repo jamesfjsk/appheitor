@@ -1,0 +1,659 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-11",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-11",
+  "status": "ready",
+  "theme": {
+    "category": "animais",
+    "curiosity": "Corvos podem reconhecer rostos humanos e até guardar rancor contra quem os ameaça.",
+    "id": "cerebro-dos-animais",
+    "lesson": "Imagine um corvo que usa palitos para pegar larvas em troncos de árvores. Ou um polvo que consegue abrir um pote para pegar comida. Esses são exemplos de animais que surpreendem os cientistas com sua inteligência. A inteligência animal muitas vezes é medida pela capacidade de resolver problemas. Cada espécie é boa em resolver diferentes tipos de problemas, de acordo com seu ambiente e necessidades. Hoje, pense em como um animal usaria suas habilidades para resolver um problema específico. Isso nos ajuda a entender que a inteligência não é apenas uma questão de palavras ou números, mas de encontrar soluções criativas para os desafios da vida.",
+    "title": "Animais Superinteligentes",
+    "whyItMatters": "Entender inteligência ajuda a valorizar diferentes habilidades."
+  },
+  "questions": [
+    {
+      "question": "Qual fato é verdadeiro sobre o antigo Egito?",
+      "options": [
+        "Os egípcios inventaram o papel",
+        "O Rio Nilo não passava pelo Egito",
+        "Os egípcios não usavam barcos",
+        "A maioria das pirâmides eram de madeira"
+      ],
+      "answer": "Os egípcios inventaram o papel",
+      "explanation": "Os egípcios criaram um material chamado papiro, usado como papel.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "Os egípcios inventaram o papiro, um precursor do papel usado para escrita.",
+      "trap": "A opção sobre o Rio Nilo é enganosa, pois o Nilo era essencial para o Egito.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Você tem 1 diamante e quer fazer uma picareta de diamante. Quantos diamantes faltam?",
+      "options": [
+        "2",
+        "1",
+        "3",
+        "4"
+      ],
+      "answer": "2",
+      "explanation": "A picareta usa 3 diamantes e 2 gravetos. Como você já tem 1, faltam 3 − 1 = 2.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A picareta usa 3 diamantes e 2 gravetos. Como você já tem 1, faltam 3 − 1 = 2.",
+      "trap": "A picareta usa 3 diamantes e 2 gravetos. Como você já tem 1, faltam 3 − 1 = 2.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Estime: quantos blocos de terra cabem numa pilha completa do inventário?",
+      "options": [
+        "64",
+        "100",
+        "32",
+        "16"
+      ],
+      "answer": "64",
+      "explanation": "A maioria dos itens empilha até 64. Ovos e bolas de neve empilham só até 16, e ferramentas não empilham.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A maioria dos itens empilha até 64. Ovos e bolas de neve empilham só até 16, e ferramentas não empilham.",
+      "trap": "A maioria dos itens empilha até 64. Ovos e bolas de neve empilham só até 16, e ferramentas não empilham.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "No campeonato, vitória vale 3 pontos e empate vale 1. Um time com 5 vitórias, 4 empates e 3 derrotas tem quantos pontos?",
+      "options": [
+        "19",
+        "15",
+        "9",
+        "23"
+      ],
+      "answer": "19",
+      "explanation": "Vitórias: 5 × 3 = 15. Empates: 4 × 1 = 4. Derrotas não dão ponto. Total: 15 + 4 = 19.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "Vitórias: 5 × 3 = 15. Empates: 4 × 1 = 4. Derrotas não dão ponto. Total: 15 + 4 = 19.",
+      "trap": "Vitórias: 5 × 3 = 15. Empates: 4 × 1 = 4. Derrotas não dão ponto. Total: 15 + 4 = 19.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que vem depois: segunda, quarta, sexta, ...?",
+      "options": [
+        "Domingo",
+        "Sábado",
+        "Terça",
+        "Quinta"
+      ],
+      "answer": "Domingo",
+      "explanation": "A sequência pula um dia de cada vez. Depois de sexta vem sábado, que é pulado, e cai em domingo.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "A sequência pula um dia de cada vez. Depois de sexta vem sábado, que é pulado, e cai em domingo.",
+      "trap": "A sequência pula um dia de cada vez. Depois de sexta vem sábado, que é pulado, e cai em domingo.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma balança fica equilibrada com 3 maçãs de um lado e, do outro, 1 maçã mais um peso de 200 g. Quanto pesa cada maçã?",
+      "options": [
+        "100 g",
+        "200 g",
+        "50 g",
+        "300 g"
+      ],
+      "answer": "100 g",
+      "explanation": "Tire uma maçã de cada lado: sobram 2 maçãs contra 200 g. Então 2 maçãs pesam 200 g, e cada uma pesa 100 g.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Tire uma maçã de cada lado: sobram 2 maçãs contra 200 g. Então 2 maçãs pesam 200 g, e cada uma pesa 100 g.",
+      "trap": "Tire uma maçã de cada lado: sobram 2 maçãs contra 200 g. Então 2 maçãs pesam 200 g, e cada uma pesa 100 g.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Um relógio de ponteiros marca exatamente 3 horas. Quantos graus há entre o ponteiro das horas e o dos minutos?",
+      "options": [
+        "90",
+        "45",
+        "180",
+        "60"
+      ],
+      "answer": "90",
+      "explanation": "A volta inteira tem 360 graus divididos em 12 horas, ou seja, 30 graus por hora. Do 12 ao 3 são 3 × 30 = 90 graus.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "A volta inteira tem 360 graus divididos em 12 horas, ou seja, 30 graus por hora. Do 12 ao 3 são 3 × 30 = 90 graus.",
+      "trap": "A volta inteira tem 360 graus divididos em 12 horas, ou seja, 30 graus por hora. Do 12 ao 3 são 3 × 30 = 90 graus.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se hoje é quarta-feira, que dia da semana será daqui a 10 dias?",
+      "options": [
+        "Sábado",
+        "Sexta",
+        "Domingo",
+        "Quarta"
+      ],
+      "answer": "Sábado",
+      "explanation": "7 dias depois é quarta de novo. Sobram 3 dias: quinta, sexta, sábado.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "7 dias depois é quarta de novo. Sobram 3 dias: quinta, sexta, sábado.",
+      "trap": "7 dias depois é quarta de novo. Sobram 3 dias: quinta, sexta, sábado.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual animal você acha mais inteligente e por quê?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "audio_vazio": 8,
+      "certa_mais_longa": 8,
+      "conta_nao_fecha": 10,
+      "conta_um_passo": 6,
+      "definicao": 2,
+      "duas_certas": 1,
+      "enunciado_vazou": 26,
+      "fato_discutivel": 3,
+      "ingles_nivel": 7,
+      "opcao_caricata": 3,
+      "opiniao": 2,
+      "sem_licao": 1,
+      "sinonimas": 11,
+      "tamanho_opcoes": 94,
+      "tipos_mistos": 25,
+      "trap_sem_distrator": 127,
+      "why_curto": 13,
+      "why_sem_resposta": 34
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "why_curto",
+          "trap_sem_distrator"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "why_curto",
+          "tamanho_opcoes",
+          "opiniao"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "certa_mais_longa",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "why_curto",
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "why_curto",
+          "tamanho_opcoes",
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "why_curto",
+          "trap_sem_distrator"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta",
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "why_curto",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "trap_sem_distrator",
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "trap_sem_distrator"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "why_curto",
+          "sem_licao"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "opiniao"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": [
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 14,
+        "codes": [
+          "why_curto",
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 15,
+        "codes": [
+          "trap_sem_distrator",
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 16,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 17,
+        "codes": []
+      },
+      {
+        "i": 18,
+        "codes": [
+          "why_curto",
+          "trap_sem_distrator",
+          "tamanho_opcoes"
+        ]
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 7
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Por que um corvo é considerado inteligente?",
+          "options": [
+            "Usa ferramentas",
+            "Pode voar",
+            "É preto",
+            "Canta músicas"
+          ],
+          "answer": "Usa ferramentas",
+          "explanation": "Corvos usam ferramentas para conseguir comida, mostrando inteligência.",
+          "why": "Usar ferramentas é uma habilidade avançada que mostra resolução de problemas.",
+          "trap": "Voar não é um sinal de inteligência, mas uma habilidade física que muitos animais têm.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como você poderia usar a inteligência como a de um polvo no seu dia a dia?",
+          "options": [
+            "Resolver problemas de maneira criativa",
+            "Ficar debaixo d'água por horas",
+            "Mudar de cor para se camuflar",
+            "Ter muitos braços"
+          ],
+          "answer": "Resolver problemas de maneira criativa",
+          "explanation": "Polvos resolvem problemas de forma inventiva, como abrir potes.",
+          "why": "Resolver problemas de maneira criativa ajuda a superar desafios diários.",
+          "trap": "Mudar de cor é uma habilidade física, não uma habilidade intelectual que podemos aplicar.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que fazer se você encontrar um animal estranho no seu quintal?",
+          "options": [
+            "Chamar um adulto para ajudar",
+            "Tentar capturar o animal",
+            "Ignorar e sair correndo",
+            "Alimentá-lo com qualquer coisa"
+          ],
+          "answer": "Chamar um adulto para ajudar",
+          "explanation": "Um adulto pode ajudar a identificar o animal e agir com segurança.",
+          "why": "Chamar um adulto é a atitude mais responsável e segura para lidar com situações desconhecidas.",
+          "trap": "Tentar capturar o animal pode ser perigoso tanto para você quanto para o animal.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 3 caixas com 120 lápis no total e quer dividi-los igualmente, quantos lápis ficam em cada caixa?",
+          "options": [
+            "40",
+            "30",
+            "60",
+            "50"
+          ],
+          "answer": "40",
+          "explanation": "Divida 120 por 3 para encontrar a quantidade por caixa.",
+          "why": "Dividir 120 por 3 dá 40, mostrando como repartir igualmente.",
+          "trap": "60 parece certo se você multiplicar ao invés de dividir.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se os golfinhos perdessem seu habitat natural?",
+          "options": [
+            "Encontrariam novos lugares para viver",
+            "Se tornariam terrestres",
+            "Desapareceriam rapidamente",
+            "Aprenderiam a voar"
+          ],
+          "answer": "Encontrariam novos lugares para viver",
+          "explanation": "Golfinhos procurariam novos habitats adequados para sobreviver.",
+          "why": "Golfinhos são adaptáveis e procurariam novos habitats adequados.",
+          "trap": "Desaparecer rapidamente ignora a capacidade de adaptação dos golfinhos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Complete: 'There ___ a book on the table.'",
+          "options": [
+            "is",
+            "are",
+            "have",
+            "has"
+          ],
+          "answer": "is",
+          "explanation": "Use 'is' para singular: 'a book'.",
+          "why": "A frase está no singular, então 'is' é correto.",
+          "trap": "'Are' é para plural, mas 'book' é singular.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "Nível 1",
+          "bloom": "aplicar",
+          "audioText": "There is a book on the table."
+        },
+        {
+          "question": "Qual é um fato sobre o Egito Antigo?",
+          "options": [
+            "Os egípcios construíram pirâmides como tumbas",
+            "Os egípcios usavam aviões",
+            "Os egípcios inventaram o papel higiênico",
+            "Os egípcios falavam inglês"
+          ],
+          "answer": "Os egípcios construíram pirâmides como tumbas",
+          "explanation": "As pirâmides eram construídas como tumbas para os faraós.",
+          "why": "As pirâmides são um dos marcos mais conhecidos do Egito Antigo.",
+          "trap": "Aviões é um erro anacrônico, pois não existiam na época.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "O que acontece se um jogador de futebol tocar a bola com a mão intencionalmente?",
+          "options": [
+            "O jogo continua",
+            "É marcado um pênalti",
+            "O jogador é advertido ou punido",
+            "O time adversário ganha um gol"
+          ],
+          "answer": "O jogador é advertido ou punido",
+          "explanation": "Tocar a bola com a mão é falta e pode resultar em advertência.",
+          "why": "Usar a mão intencionalmente é contra as regras e resulta em penalização.",
+          "trap": "É marcado um pênalti só em algumas situações específicas, não sempre.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma loja tem 200 itens e vende 25% deles, quantos itens foram vendidos?",
+          "options": [
+            "50",
+            "25",
+            "75",
+            "100"
+          ],
+          "answer": "50",
+          "explanation": "25% de 200 é 50, pois 200 x 0,25 = 50.",
+          "why": "Calculando 25% de 200, encontramos 50 como o número vendido.",
+          "trap": "100 é 50% de 200, não 25%.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se os oceanos secassem?",
+          "options": [
+            "A temperatura global aumentaria",
+            "Os peixes aprenderiam a viver em terra",
+            "As montanhas se tornariam maiores",
+            "Os desertos desapareceriam"
+          ],
+          "answer": "A temperatura global aumentaria",
+          "explanation": "Os oceanos regulam a temperatura da Terra; sem eles, ela aumentaria.",
+          "why": "Os oceanos ajudam a regular o clima global, então sem eles a temperatura subiria.",
+          "trap": "Peixes em terra ignora a necessidade de água para a sobrevivência deles.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é a diferença entre um gol e um gol olímpico?",
+          "options": [
+            "Um é feito no campo, o outro na arquibancada",
+            "Um é um gol normal, o outro direto de escanteio",
+            "Um é feito com a cabeça, o outro com o pé",
+            "Um é feito no primeiro tempo, o outro no segundo"
+          ],
+          "answer": "Um é um gol normal, o outro direto de escanteio",
+          "explanation": "Um gol olímpico é marcado direto de um escanteio.",
+          "why": "O gol olímpico é um tipo especial de gol, direto de escanteio, diferente do normal.",
+          "trap": "Feito com a cabeça ou pé não diferencia um gol normal de um olímpico.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Qual animal você acha mais inteligente e por quê?",
+      "theme": {
+        "curiosity": "Corvos podem reconhecer rostos humanos e até guardar rancor contra quem os ameaça.",
+        "lesson": "Imagine um corvo que usa palitos para pegar larvas em troncos de árvores. Ou um polvo que consegue abrir um pote para pegar comida. Esses são exemplos de animais que surpreendem os cientistas com sua inteligência. A inteligência animal muitas vezes é medida pela capacidade de resolver problemas. Cada espécie é boa em resolver diferentes tipos de problemas, de acordo com seu ambiente e necessidades. Hoje, pense em como um animal usaria suas habilidades para resolver um problema específico. Isso nos ajuda a entender que a inteligência não é apenas uma questão de palavras ou números, mas de encontrar soluções criativas para os desafios da vida.",
+        "title": "Animais Superinteligentes",
+        "whyItMatters": "Entender inteligência ajuda a valorizar diferentes habilidades."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que os corvos são considerados inteligentes?",
+          "options": [
+            "Porque são pretos e misteriosos",
+            "Porque usam ferramentas",
+            "Porque voam muito rápido",
+            "Porque fazem ninhos grandes"
+          ],
+          "answer": "Porque usam ferramentas",
+          "explanation": "Corvos são conhecidos por usar ferramentas para resolver problemas.",
+          "why": "Corvos são considerados inteligentes porque usam ferramentas para resolver problemas.",
+          "trap": "As opções 'Porque são pretos e misteriosos' e 'Porque voam muito rápido' são enganosas porque se baseiam em atributos físicos, não em inteligência.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como você poderia usar a inteligência de um polvo no seu dia a dia?",
+          "options": [
+            "Resolver problemas de forma criativa",
+            "Nadar melhor na piscina",
+            "Mudar de cor como camuflagem",
+            "Comer mais frutos do mar"
+          ],
+          "answer": "Resolver problemas de forma criativa",
+          "explanation": "Os polvos são conhecidos por resolver problemas de maneira criativa.",
+          "why": "Usar a inteligência do polvo significa resolver problemas de forma criativa no dia a dia.",
+          "trap": "Nadar melhor na piscina parece uma opção divertida, mas não está relacionada à solução de problemas.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que você faria se encontrasse um animal estranho no quintal?",
+          "options": [
+            "Observar de longe e chamar um adulto",
+            "Tentar pegar o animal para brincar",
+            "Ignorar e voltar para dentro de casa",
+            "Gritar e correr para longe"
+          ],
+          "answer": "Observar de longe e chamar um adulto",
+          "explanation": "É importante garantir a segurança e chamar um adulto para ajudar.",
+          "why": "Observar de longe e chamar um adulto ajuda a manter a segurança para você e o animal.",
+          "trap": "Tentar pegar o animal é tentador, mas pode ser perigoso para ambos.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 360 figurinhas e quer dividir igualmente entre 4 amigos, quantas cada um receberá?",
+          "options": [
+            "80",
+            "85",
+            "90",
+            "95"
+          ],
+          "answer": "90",
+          "explanation": "Divida 360 por 4 para saber quantas figurinhas cada um receberá.",
+          "why": "Dividindo 360 figurinhas por 4, cada amigo receberá 90 figurinhas.",
+          "trap": "Escolher 80 ou 85 pode indicar erro na divisão ou na interpretação do problema.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se os polvos perdessem a capacidade de mudar de cor?",
+          "options": [
+            "Seriam mais fáceis de capturar por predadores",
+            "Nadariam mais rápido",
+            "Se tornariam venenosos",
+            "Viveriam mais tempo"
+          ],
+          "answer": "Seriam mais fáceis de capturar por predadores",
+          "explanation": "Mudar de cor ajuda os polvos a se camuflar e evitar predadores.",
+          "why": "Sem a capacidade de camuflagem, os polvos seriam mais vulneráveis aos predadores.",
+          "trap": "A opção de nadar mais rápido sugere que compensariam a perda de camuflagem de outra forma, mas não é realista.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Choose the correct sentence: There ___ a cat under the table.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "explanation": "Use 'is' para indicar singular.",
+          "why": "A frase correta é 'There is a cat under the table' porque 'cat' é singular.",
+          "trap": "A opção 'are' é tentadora, mas 'are' é usado para plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "nivel1",
+          "bloom": "aplicar",
+          "audioText": "There is a cat under the table."
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o antigo Egito?",
+          "options": [
+            "Os egípcios inventaram o papel",
+            "O Rio Nilo não passava pelo Egito",
+            "Os egípcios não usavam barcos",
+            "A maioria das pirâmides eram de madeira"
+          ],
+          "answer": "Os egípcios inventaram o papel",
+          "explanation": "Os egípcios criaram um material chamado papiro, usado como papel.",
+          "why": "Os egípcios inventaram o papiro, um precursor do papel usado para escrita.",
+          "trap": "A opção sobre o Rio Nilo é enganosa, pois o Nilo era essencial para o Egito.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um jogador de futebol intencionalmente toca a bola com a mão, o que acontece?",
+          "options": [
+            "O jogo continua normalmente",
+            "O time adversário recebe um tiro livre",
+            "O jogador é expulso imediatamente",
+            "O jogo é reiniciado do começo"
+          ],
+          "answer": "O time adversário recebe um tiro livre",
+          "explanation": "Tocar a bola com a mão resulta em um tiro livre para o adversário.",
+          "why": "Um tiro livre é concedido ao time adversário quando um jogador toca a bola intencionalmente com a mão.",
+          "trap": "A expulsão imediata seria muito severa para um toque de mão.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,568 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-15",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-15",
+  "status": "ready",
+  "theme": {
+    "id": "digestao",
+    "category": "corpo",
+    "title": "A Jornada do Pão pelo Corpo",
+    "lesson": "Imagine que você acabou de comer um pedaço de pão. A viagem dele começa na boca, onde a saliva já começa a quebrá-lo. Depois, ele desce pelo esôfago até o estômago, onde um ácido forte o transforma ainda mais. Finalmente, no intestino, trilhões de bactérias ajudam a absorver os nutrientes. Essa viagem pode levar de 24 a 72 horas! Hoje, ao comer, pense em como seu corpo trabalha duro para transformar comida em energia.",
+    "whyItMatters": "Entender como nosso corpo funciona ajuda a cuidar melhor da saúde.",
+    "curiosity": "O ácido do estômago é tão forte que pode corroer metal, mas o estômago tem uma camada protetora especial."
+  },
+  "questions": [
+    {
+      "question": "O que aconteceria se não houvesse saliva na boca?",
+      "options": [
+        "Dificuldade para engolir",
+        "Digestão mais rápida",
+        "Mais sabor nos alimentos",
+        "Menos fome"
+      ],
+      "answer": "Dificuldade para engolir",
+      "explanation": "A saliva ajuda a umedecer e quebrar os alimentos, facilitando a deglutição.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é dificuldade para engolir porque a saliva ajuda a umedecer e quebrar o alimento.",
+      "trap": "Quem marca digestão mais rápida esquece que a saliva é essencial para iniciar a digestão.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "There ___ a dog in the park.",
+      "options": [
+        "is",
+        "are",
+        "am",
+        "be"
+      ],
+      "answer": "is",
+      "explanation": "A resposta certa é is porque there is vale para um cachorro só, e are fica para quando são dois ou mais.",
+      "kind": "lesson",
+      "subject": "ingles",
+      "why": "A resposta certa é is porque there is vale para um cachorro só, e are fica para quando são dois ou mais.",
+      "trap": "Quem marca are pensa em vários cachorros e esquece que a frase fala de um só.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a dog in the park."
+    },
+    {
+      "question": "Qual é a função do meio-campo no futebol?",
+      "options": [
+        "Controlar o jogo",
+        "Marcar gols",
+        "Defender o gol",
+        "Apitar o jogo"
+      ],
+      "answer": "Controlar o jogo",
+      "explanation": "O meio-campo é responsável por controlar o ritmo e a distribuição de bola no jogo.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é controlar o jogo porque o meio-campo organiza as jogadas e distribui a bola.",
+      "trap": "Quem marca marcar gols confunde a função do meio-campo com a do atacante.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do lateral no futebol?",
+      "options": [
+        "Cobrir as laterais",
+        "Marcar gols",
+        "Defender o gol",
+        "Apitar o jogo"
+      ],
+      "answer": "Cobrir as laterais",
+      "explanation": "O lateral é responsável por defender e atacar pelas laterais do campo.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é cobrir as laterais porque o lateral atua nas bordas do campo.",
+      "trap": "Quem marca marcar gols confunde a função do lateral com a do atacante.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que acontece com o pão quando chega ao estômago?",
+      "options": [
+        "É triturado por dentes",
+        "É dissolvido por ácido",
+        "É absorvido imediatamente",
+        "É transformado em energia"
+      ],
+      "answer": "É dissolvido por ácido",
+      "explanation": "O ácido no estômago dissolve o pão, ajudando na digestão.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'É dissolvido por ácido' porque o estômago usa ácido para quebrar o pão em partes menores.",
+      "trap": "Quem marca 'É triturado por dentes' confunde o processo que acontece na boca com o do estômago.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem 200 reais e compra dois jogos de 75 reais cada, quanto sobra?",
+      "options": [
+        "50",
+        "25",
+        "100",
+        "0"
+      ],
+      "answer": "50",
+      "explanation": "Primeiro, 75 vezes 2 dá 150, depois 200 menos 150 sobra 50.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 50 porque 200 menos 150, que é o custo dos jogos, resulta em 50.",
+      "trap": "Quem marca 25 pode ter subtraído errado ou confundido as etapas da conta.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se você viajar do Brasil para o Japão, o que acontece com o relógio quando chegar lá?",
+      "options": [
+        "Ele precisa adiantar várias horas",
+        "Ele fica igual",
+        "Ele precisa atrasar várias horas",
+        "Só muda o dia da semana"
+      ],
+      "answer": "Ele precisa adiantar várias horas",
+      "explanation": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "kind": "knowledge",
+      "subject": "geografia",
+      "why": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "trap": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "skill": "GEO.FATO",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Heitor tem o triplo da idade do primo. Juntos, eles têm 16 anos. Qual é a idade do primo?",
+      "options": [
+        "4",
+        "12",
+        "8",
+        "6"
+      ],
+      "answer": "4",
+      "explanation": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "trap": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que seu corpo transforma o que você come em energia para brincar e estudar?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "campo_invalido": 3,
+      "tipos_mistos": 1,
+      "tamanho_opcoes": 1,
+      "enunciado_vazou": 1,
+      "conta_um_passo": 1,
+      "certa_mais_longa": 3,
+      "why_curto": 1,
+      "conta_nao_fecha": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "campo_invalido",
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "campo_invalido"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "campo_invalido",
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "enunciado_vazou",
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": [
+          "why_curto",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": []
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 14,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A pergunta pede o que acontece após a mastigação."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 2
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "A Jornada do Pão pelo Corpo",
+        "lesson": "Imagine que você acabou de comer um pedaço de pão. A viagem dele começa na boca, onde a saliva já começa a quebrá-lo. Depois, ele desce pelo esôfago até o estômago, onde um ácido forte o transforma ainda mais. Finalmente, no intestino, trilhões de bactérias ajudam a absorver os nutrientes. Essa viagem pode levar de 24 a 72 horas! Hoje, ao comer, pense em como seu corpo trabalha duro para transformar comida em energia.",
+        "whyItMatters": "Entender como nosso corpo funciona ajuda a cuidar melhor da saúde.",
+        "curiosity": "O ácido do estômago é tão forte que pode corroer metal, mas o estômago tem uma camada protetora especial."
+      },
+      "questions": [
+        {
+          "question": "Qual é o primeiro passo na digestão de um pedaço de pão?",
+          "options": [
+            "Saliva na boca",
+            "Ácido no estômago",
+            "Bactérias no intestino",
+            "Esôfago"
+          ],
+          "answer": "Saliva na boca",
+          "explanation": "A digestão começa na boca, onde a saliva começa a quebrar o pão.",
+          "why": "A resposta certa é saliva na boca porque a digestão começa com a quebra inicial do pão pela saliva.",
+          "trap": "Quem marca ácido no estômago esquece que a digestão começa antes, na boca, com a saliva.",
+          "kind": "lesson",
+          "subject": "corpo",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você comeu um sanduíche. Onde ele vai depois de passar pelo esôfago?",
+          "options": [
+            "Estômago",
+            "Intestino",
+            "Boca",
+            "Fígado"
+          ],
+          "answer": "Estômago",
+          "explanation": "Depois do esôfago, o sanduíche chega ao estômago para ser digerido.",
+          "why": "A resposta certa é estômago porque é o próximo passo após o esôfago na digestão.",
+          "trap": "Quem marca intestino pula o estômago, que é essencial para a digestão inicial.",
+          "kind": "lesson",
+          "subject": "corpo",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está com dor de estômago após comer. O que você faz?",
+          "options": [
+            "Descansa e bebe água",
+            "Come mais",
+            "Ignora e continua jogando",
+            "Toma remédio sem saber a causa"
+          ],
+          "answer": "Descansa e bebe água",
+          "explanation": "Descansar e beber água pode ajudar a aliviar a dor sem causar mais problemas.",
+          "why": "Descansar e beber água é sábio porque ajuda o corpo a se recuperar sem sobrecarregá-lo.",
+          "trap": "Comer mais pode piorar a dor, e tomar remédio sem saber a causa pode ser perigoso.",
+          "kind": "dilemma",
+          "subject": "corpo",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 500 reais e compra um par de chuteiras por 250 reais, quanto sobra?",
+          "options": [
+            "250",
+            "200",
+            "150",
+            "100"
+          ],
+          "answer": "250",
+          "explanation": "Subtraindo 250 de 500, sobram 250 reais.",
+          "why": "A resposta certa é 250 porque 500 menos 250 dá 250, que é o valor restante.",
+          "trap": "Quem marca 200 pode ter confundido a subtração ou feito um cálculo errado.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse saliva na boca?",
+          "options": [
+            "Dificuldade para engolir",
+            "Digestão mais rápida",
+            "Mais sabor nos alimentos",
+            "Menos fome"
+          ],
+          "answer": "Dificuldade para engolir",
+          "explanation": "A saliva ajuda a umedecer e quebrar os alimentos, facilitando a deglutição.",
+          "why": "A resposta certa é dificuldade para engolir porque a saliva ajuda a umedecer e quebrar o alimento.",
+          "trap": "Quem marca digestão mais rápida esquece que a saliva é essencial para iniciar a digestão.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There ___ a dog in the park.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a dog in the park.",
+          "why": "A resposta certa é is porque there is vale para um cachorro só, e are fica para quando são dois ou mais.",
+          "trap": "Quem marca are pensa em vários cachorros e esquece que a frase fala de um só.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o Rio Amazonas?",
+          "options": [
+            "É o mais longo do mundo",
+            "Nasce no Brasil",
+            "Deságua no Oceano Índico",
+            "Passa por apenas um país"
+          ],
+          "answer": "É o mais longo do mundo",
+          "explanation": "O Rio Amazonas é considerado o mais longo do mundo em algumas medições.",
+          "why": "A resposta certa é que é o mais longo do mundo porque algumas medições o colocam à frente do Nilo.",
+          "trap": "Quem marca nasce no Brasil confunde com o fato de que ele passa pelo Brasil, mas nasce no Peru.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do meio-campo no futebol?",
+          "options": [
+            "Controlar o jogo",
+            "Marcar gols",
+            "Defender o gol",
+            "Apitar o jogo"
+          ],
+          "answer": "Controlar o jogo",
+          "explanation": "O meio-campo é responsável por controlar o ritmo e a distribuição de bola no jogo.",
+          "why": "A resposta certa é controlar o jogo porque o meio-campo organiza as jogadas e distribui a bola.",
+          "trap": "Quem marca marcar gols confunde a função do meio-campo com a do atacante.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 100 reais e compra três camisetas de 30 reais cada, quanto sobra?",
+          "options": [
+            "10",
+            "20",
+            "30",
+            "40"
+          ],
+          "answer": "10",
+          "explanation": "Três camisetas de 30 reais custam 90 reais, sobrando 10 reais.",
+          "why": "A resposta certa é 10 porque 100 menos 90 dá 10, que é o valor restante.",
+          "trap": "Quem marca 20 pode ter calculado errado ou confundido os valores.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se o intestino não tivesse bactérias?",
+          "options": [
+            "Dificuldade em digerir alimentos",
+            "Digestão mais rápida",
+            "Mais energia",
+            "Menos fome"
+          ],
+          "answer": "Dificuldade em digerir alimentos",
+          "explanation": "As bactérias ajudam na digestão e absorção de nutrientes.",
+          "why": "A resposta certa é dificuldade em digerir alimentos porque as bactérias são essenciais para a digestão.",
+          "trap": "Quem marca digestão mais rápida esquece que as bactérias são necessárias para quebrar certos alimentos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é a função do lateral no futebol?",
+          "options": [
+            "Cobrir as laterais",
+            "Marcar gols",
+            "Defender o gol",
+            "Apitar o jogo"
+          ],
+          "answer": "Cobrir as laterais",
+          "explanation": "O lateral é responsável por defender e atacar pelas laterais do campo.",
+          "why": "A resposta certa é cobrir as laterais porque o lateral atua nas bordas do campo.",
+          "trap": "Quem marca marcar gols confunde a função do lateral com a do atacante.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que seu corpo transforma o que você come em energia para brincar e estudar?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "O que acontece com o pão quando chega ao estômago?",
+          "options": [
+            "É triturado por dentes",
+            "É dissolvido por ácido",
+            "É absorvido imediatamente",
+            "É transformado em energia"
+          ],
+          "answer": "É dissolvido por ácido",
+          "explanation": "O ácido no estômago dissolve o pão, ajudando na digestão.",
+          "why": "A resposta certa é 'É dissolvido por ácido' porque o estômago usa ácido para quebrar o pão em partes menores.",
+          "trap": "Quem marca 'É triturado por dentes' confunde o processo que acontece na boca com o do estômago.",
+          "kind": "lesson",
+          "subject": "ciencias",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você comeu um pedaço de pão. Qual é o próximo passo após a mastigação?",
+          "options": [
+            "Vai para o intestino",
+            "É engolido pelo esôfago",
+            "É absorvido pelo sangue",
+            "É transformado em energia"
+          ],
+          "answer": "É engolido pelo esôfago",
+          "explanation": "Após a mastigação, o pão é engolido e passa pelo esôfago.",
+          "why": "A resposta certa é 'É engolido pelo esôfago' porque é o caminho natural após mastigar o pão.",
+          "trap": "Quem marca 'Vai para o intestino' pula a etapa do esôfago, que vem antes do intestino.",
+          "kind": "lesson",
+          "subject": "ciencias",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você sente dor de estômago após comer muito rápido. O que você faz?",
+          "options": [
+            "Come mais devagar na próxima vez",
+            "Bebe refrigerante para aliviar",
+            "Ignora e continua comendo",
+            "Deita imediatamente para descansar"
+          ],
+          "answer": "Come mais devagar na próxima vez",
+          "explanation": "Comer devagar ajuda a evitar dores de estômago.",
+          "why": "A resposta certa é 'Come mais devagar na próxima vez' porque isso ajuda na digestão e evita desconforto.",
+          "trap": "Quem marca 'Bebe refrigerante para aliviar' pode piorar a situação, pois o gás pode aumentar o desconforto.",
+          "kind": "dilemma",
+          "subject": "ciencias",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 200 reais e compra dois jogos de 75 reais cada, quanto sobra?",
+          "options": [
+            "50",
+            "25",
+            "100",
+            "0"
+          ],
+          "answer": "50",
+          "explanation": "Primeiro, 75 vezes 2 dá 150, depois 200 menos 150 sobra 50.",
+          "why": "A resposta certa é 50 porque 200 menos 150, que é o custo dos jogos, resulta em 50.",
+          "trap": "Quem marca 25 pode ter subtraído errado ou confundido as etapas da conta.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

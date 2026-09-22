@@ -159,17 +159,29 @@ test('desbloqueio: torre/mesa/campinho só com fornalha e baú >= 1; cofre preci
   expect(baseLevel({ ...none, fornalha: 2, bau: 1 })).toBe(3);
 });
 
-test('Campinho não se constrói antes da Etapa 4; Agenda e Mercado param no nível 1; prova na Biblioteca', () => {
+test('Campinho não se constrói antes da Etapa 4; Agenda, Mercado e Biblioteca param no nível 1', () => {
   expect(buildingOpensLater('campinho', 1)).toBe('Etapa 4');
   expect(buildingOpensLater('arena', 1)).toBe('Etapa 4B');
   expect(buildingOpensLater('fornalha', 1)).toBe(null);
   expect(buildingOpensLater('agenda', 2)).toBe('Em breve');
   expect(buildingOpensLater('mercado', 2)).toBe('Em breve');
   expect(buildingOpensLater('agenda', 1)).toBe(null);
+  expect(buildingOpensLater('cofre', 2)).toBe(null);
+  expect(buildingOpensLater('cofre', 3)).toBe('Etapa 3');
+  expect(buildingOpensLater('mesa', 1)).toBe(null);
+  expect(buildingOpensLater('mesa', 2)).toBe('Etapa 3');
+  expect(buildingOpensLater('mesa', 3)).toBe('Etapa 3');
+  expect(BUILDING_BY_ID.mesa.liveMaxLevel).toBe(1);
+  expect(BUILDING_BY_ID.mesa.opensIn).toBe('Etapa 3');
   expect(buildingEffectNow('fornalha', 0)).toBe('Ainda não construída.');
   expect(buildingEffectNow('torre', 1)).toMatch(/conquistas/i);
+  expect(buildingEffectNow('torre', 3)).toMatch(/Mapa de habilidades/i);
   expect(buildingEffectNow('mesa', 1)).toMatch(/tema/i);
+  expect(buildingEffectNow('mesa', 2)).toMatch(/matéria/i);
+  expect(buildingEffectNow('mesa', 3)).toMatch(/dica grátis/i);
   expect(BUILDING_BY_ID.mesa.label).toBe('Biblioteca');
+  expect(BUILDING_BY_ID.bau.effects[0]).toMatch(/Baú do Dia/i);
+  expect(BUILDING_BY_ID.bau.effects[0].includes('Campinho')).toBeFalsy();
   for (const b of BUILDINGS) {
     expect(b.effects).toHaveLength(3);
     expect(b.labelEn.length >= 3).toBeTruthy();

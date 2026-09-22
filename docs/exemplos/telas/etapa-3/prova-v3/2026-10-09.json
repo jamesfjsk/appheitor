@@ -1,0 +1,128 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-09",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-09",
+  "status": "ready",
+  "theme": {
+    "title": "Onde a água doce se esconde",
+    "category": "geografia",
+    "lesson": "Só cerca de 1% da água do planeta é doce e acessível. De onde vem a água da torneira, para onde vai a do ralo, e por que o Aquífero Guarani está debaixo dos nossos pés.",
+    "whyItMatters": "Pensar sobre isso hoje já é um passo.",
+    "id": "rios-agua-doce"
+  },
+  "questions": [
+    {
+      "kind": "knowledge",
+      "options": [
+        "É um esporte de discussão",
+        "É só decorar frases antigas",
+        "É a arte de fazer boas perguntas e pensar com cuidado sobre elas",
+        "É uma ciência que mede coisas com régua"
+      ],
+      "answer": "É a arte de fazer boas perguntas e pensar com cuidado sobre elas",
+      "subject": "geral",
+      "question": "Qual frase é verdadeira sobre a filosofia?",
+      "explanation": "Filósofos perguntam coisas como 'o que é justiça?' e testam as respostas com argumentos. A palavra significa 'amor pelo saber'."
+    },
+    {
+      "options": [
+        "Virou gelo invisível",
+        "Foi absorvida pelo vidro",
+        "O Sol destruiu a água",
+        "Evaporou e virou vapor no ar"
+      ],
+      "kind": "knowledge",
+      "question": "Você deixa um copo de água na janela e, dias depois, tem bem menos água. Para onde ela foi?",
+      "explanation": "Mesmo sem ferver, a água vai virando vapor aos poucos, principalmente com calor e vento. É o mesmo que acontece com a roupa no varal.",
+      "subject": "geral",
+      "answer": "Evaporou e virou vapor no ar"
+    },
+    {
+      "question": "O Rio Amazonas atravessa o Brasil de oeste para leste. Em qual oceano ele deságua?",
+      "explanation": "O Amazonas nasce nos Andes, no Peru, cruza o norte do Brasil e chega ao Atlântico perto de Belém. Como corre para leste, só pode terminar no oceano do lado leste.",
+      "subject": "geral",
+      "answer": "Oceano Atlântico",
+      "kind": "knowledge",
+      "options": [
+        "Oceano Pacífico",
+        "Oceano Índico",
+        "Oceano Ártico",
+        "Oceano Atlântico"
+      ]
+    },
+    {
+      "question": "Uma pizza foi cortada em 8 fatias iguais. Heitor comeu 3 e o pai comeu 2. Que fração da pizza sobrou?",
+      "subject": "geral",
+      "answer": "3/8",
+      "explanation": "Foram comidas 3 + 2 = 5 fatias. Sobraram 8 − 5 = 3 fatias de 8, ou seja, 3/8 da pizza.",
+      "options": [
+        "2/8",
+        "5/8",
+        "3/8",
+        "1/2"
+      ],
+      "kind": "knowledge"
+    },
+    {
+      "answer": "Quando o atacante está à frente do penúltimo defensor no momento do passe",
+      "subject": "geral",
+      "question": "Quando o impedimento é marcado?",
+      "kind": "knowledge",
+      "options": [
+        "Quando o jogador chuta de muito longe",
+        "Quando o atacante está à frente do penúltimo defensor no momento do passe",
+        "Quando a bola sai pela lateral",
+        "Quando o goleiro sai da área"
+      ],
+      "explanation": "O que importa é a posição na hora em que o passe sai, não na hora em que a bola chega. Por isso o bandeirinha olha a linha do último zagueiro."
+    },
+    {
+      "kind": "knowledge",
+      "subject": "geral",
+      "question": "Um time fez 2 gols no primeiro tempo e sofreu 3 no segundo. Se o jogo terminou 4 a 3 para ele, quantos gols fez no segundo tempo?",
+      "explanation": "O time terminou com 4 gols e já tinha 2 no primeiro tempo, então marcou 4 − 2 = 2 no segundo. Os 3 sofridos não mudam essa conta.",
+      "options": [
+        "1",
+        "3",
+        "4",
+        "2"
+      ],
+      "answer": "2"
+    },
+    {
+      "question": "O que significa ser justo?",
+      "subject": "geral",
+      "explanation": "Justiça é a regra valer igual para todos. Um juiz de futebol é justo quando marca a mesma falta para os dois times.",
+      "kind": "knowledge",
+      "answer": "Tratar as pessoas com as mesmas regras e dar a cada uma o que ela merece",
+      "options": [
+        "Dar sempre razão ao mais forte",
+        "Tratar as pessoas com as mesmas regras e dar a cada uma o que ela merece",
+        "Nunca mudar de opinião",
+        "Fazer só o que é bom para si"
+      ]
+    },
+    {
+      "subject": "geral",
+      "answer": "Ela liga computadores do mundo todo por cabos e sinais",
+      "explanation": "Até o wi-fi da sua casa termina num cabo, e cabos enormes cruzam o fundo dos oceanos ligando os continentes.",
+      "options": [
+        "Ela existe desde 1900",
+        "Ela liga computadores do mundo todo por cabos e sinais",
+        "Ela funciona sem nenhum cabo em lugar nenhum",
+        "Ela foi inventada junto com a televisão"
+      ],
+      "question": "Qual frase é verdadeira sobre a internet?",
+      "kind": "knowledge"
+    }
+  ],
+  "reflectionPrompt": "O que você aprendeu hoje que pode usar amanhã?",
+  "source": "offline",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {}
+  }
+}

@@ -73,6 +73,8 @@ const BuildingCard: React.FC<Props> = ({
   const maxLive = def.liveMaxLevel ?? BUILDING_MAX_LEVEL;
   const sealed = maxLive <= 0;
   const atCap = !sealed && level >= maxLive;
+  const stageHold = atCap && maxLive < BUILDING_MAX_LEVEL;
+  const stageLine = def.opensIn ? `Abre na ${def.opensIn}.` : 'Isso abre numa etapa que ainda não chegou.';
   const cracked = visibleCracks(village.cracks).includes(id);
 
   const actionLabel = level === 0 ? 'Construir' : `Melhorar · nível ${info.nextLevel}`;
@@ -85,9 +87,11 @@ const BuildingCard: React.FC<Props> = ({
           ? 'Precisa do Armazém nível 1'
           : 'Precisa de Fornalha e Armazém nível 1'
       : null;
-  const btnLabel = atCap
-    ? 'Nível máximo'
-    : lockLabel || actionLabel;
+  const btnLabel = stageHold
+    ? (def.opensIn ? `Abre na ${def.opensIn}` : 'Abre depois')
+    : atCap
+      ? 'Nível máximo'
+      : lockLabel || actionLabel;
 
   const build = async () => {
     if (!childUid || !info.ok || cracked) return;
@@ -329,9 +333,16 @@ const BuildingCard: React.FC<Props> = ({
           </section>
 
           <section>
-            <p className="mc-lbl mb-1">{sealed ? 'Quando abre' : level <= 0 ? 'Quando construir' : 'Próximo nível'}</p>
+            <p className="mc-lbl mb-1">{sealed || stageHold ? 'Quando abre' : level <= 0 ? 'Quando construir' : 'Próximo nível'}</p>
             {sealed ? (
               <p className="text-sm">{lockLabel || (def.opensIn ? `Abre na ${def.opensIn}.` : 'Em breve.')}</p>
+            ) : stageHold ? (
+              <div className="space-y-2">
+                <p className="text-sm">{stageLine}</p>
+                <button type="button" disabled className="mc-btn mc-btn-dark w-full min-h-[48px] px-4 font-bold">
+                  {btnLabel}
+                </button>
+              </div>
             ) : atCap ? (
               <p className="text-sm">Nível máximo.</p>
             ) : (

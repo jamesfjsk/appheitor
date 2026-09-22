@@ -1,6 +1,6 @@
 import { expect, run, test } from './harness';
 import type { NoteInfo, NoteJudgement } from '../../../types/english';
-import { allPegsOn, chalkDiff, chalkLine, explainJudge, fillTemplate, gapCount, gapWidthCh, isLazyNote, missingLine, moldBySentences, moldFromModel, moldFromTemplates, pegLesson, pegLit, pegReview, pegSay, recadoGrade, splitTemplate, teachFromRecado, trayWords } from '../notePlay';
+import { allPegsOn, chalkDiff, chalkLine, explainJudge, explainSayOk, fillTemplate, gapCount, gapWidthCh, isLazyNote, missingLine, moldBySentences, moldFromModel, moldFromTemplates, pegLesson, pegLit, pegReview, pegSay, recadoGrade, splitTemplate, teachFromRecado, trayForStage, trayWords } from '../notePlay';
 
 const infos: NoteInfo[] = [
   { pt: '2 tochas', en: ['two torches', '2 torches'] },
@@ -79,6 +79,14 @@ test('moldFromModel junta buracos vizinhos: uma frase, uma lacuna', () => {
   expect(slots).toEqual(['do my homework first', 'I play soccer']);
   expect(fillTemplate(mold, slots)).toBe('I do my homework first. Then I play soccer.');
   expect(gapWidthCh(slots[0], '') > gapWidthCh('first', '')).toBeTruthy();
+  const whole = moldFromModel('Please help me.', [{ pt: 'ajuda', en: ['Please help me.'] }]);
+  expect(whole.mold).toBe('');
+  expect(whole.slots).toEqual([]);
+  const dotted = moldFromModel('I play. Then I wait.', [
+    { pt: 'jogo', en: ['I play. Then'] },
+    { pt: 'espero', en: ['I wait'] },
+  ]);
+  expect(dotted.mold).toBe('');
 });
 
 test('teachFromRecado usa este recado e o que ele escreveu', () => {
@@ -87,9 +95,11 @@ test('teachFromRecado usa este recado e o que ele escreveu', () => {
   const tip = teachFromRecado(info, brief, 'I do homework');
   expect(tip.hear).toBe('play soccer');
   expect(tip.say.toLowerCase()).toContain('play soccer');
-  expect(tip.say).toContain('lição');
   expect(tip.say).toContain('I do homework');
-  expect(tip.say.includes('I do my homework first. Then I play soccer')).toBeFalsy();
+  expect(tip.say.includes(brief)).toBeFalsy();
+  expect(tip.say.length <= 220).toBeTruthy();
+  expect(explainSayOk('O quadro pede play soccer neste recado de hoje.', 'I do my homework first. Then I play soccer.')).toBeTruthy();
+  expect(explainSayOk('I do my homework first. Then I play soccer. Copiei.', 'I do my homework first. Then I play soccer.')).toBeFalsy();
   expect(isLazyNote('Faltou dizer: jogo bola.')).toBeTruthy();
   expect(isLazyNote('Neste recado, jogo bola se diz play soccer. O pedido era a lição primeiro.')).toBeFalsy();
 });
@@ -132,18 +142,16 @@ test('pegReview e pegSay falam o que acendeu e o que faltou', () => {
   expect(pegSay(rows[2])).toContain('jogo bola');
 });
 
-test('bandeja traz a frase inteira, não só o banco pela metade', () => {
-  const tray = trayWords(
-    'I need three torches and one pickaxe. They are for the mine.',
-    ['need', 'torch', 'sword', 'dog'],
-    ['three torches', 'for the mine']
-  );
-  expect(tray).toContain('I');
-  expect(tray).toContain('three');
-  expect(tray).toContain('torches');
-  expect(tray).toContain('pickaxe');
-  expect(tray).toContain('sword');
-  expect(tray.filter((w) => w.toLowerCase() === 'need')).toHaveLength(1);
+test('R6: degrau 0 traz a frase; degrau 1 só o banco, minúsculo', () => {
+  const model = 'I need three torches and one pickaxe. They are for the mine.';
+  const bank = ['Need', 'torch', 'sword', 'dog'];
+  const full = trayWords(model, bank, ['three torches', 'for the mine']);
+  expect(full).toContain('pickaxe');
+  expect(trayForStage(0, model, bank, ['three torches']).includes('pickaxe')).toBeTruthy();
+  const step1 = trayForStage(1, model, bank);
+  expect(step1).toEqual(['need', 'torch', 'sword', 'dog']);
+  expect(step1.includes('pickaxe')).toBeFalsy();
+  expect(step1.every((w) => w === w.toLowerCase())).toBeTruthy();
 });
 
 void run();

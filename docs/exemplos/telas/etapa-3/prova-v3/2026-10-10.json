@@ -1,0 +1,589 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-10",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-10",
+  "status": "ready",
+  "theme": {
+    "category": "arte",
+    "curiosity": "Sabia que até videogames seguem essa estrutura? O jogador quer vencer, enfrenta desafios e aprende com eles.",
+    "id": "historias-estrutura",
+    "lesson": "Imagine assistir a um filme em que o herói quer salvar a cidade, mas enfrenta um vilão poderoso. No meio do caminho, o herói aprende algo novo e se transforma. Essa estrutura de querer, enfrentar e mudar está em muitos livros, filmes e até jogos. Quando você joga futebol, também segue um caminho: quer ganhar, enfrenta a defesa e precisa se adaptar. Repare hoje em uma história ou jogo e veja como essa estrutura aparece. Isso ajudará você a entender melhor as histórias e até a criar as suas próprias.",
+    "title": "A Estrutura das Histórias",
+    "whyItMatters": "Entender a estrutura ajuda a apreciar e criar histórias melhores."
+  },
+  "questions": [
+    {
+      "question": "Qual planeta fica entre a Terra e Júpiter na ordem de distância do Sol?",
+      "options": [
+        "Marte",
+        "Vênus",
+        "Saturno",
+        "Mercúrio"
+      ],
+      "answer": "Marte",
+      "explanation": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "trap": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você mistura tinta azul com tinta amarela. Que cor aparece?",
+      "options": [
+        "Verde",
+        "Roxo",
+        "Laranja",
+        "Marrom"
+      ],
+      "answer": "Verde",
+      "explanation": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "kind": "lesson",
+      "subject": "arte",
+      "why": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "trap": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma música tem compassos de 4 tempos. Você bate palmas 12 vezes seguindo o pulso. Quantos compassos passaram?",
+      "options": [
+        "3",
+        "4",
+        "12",
+        "16"
+      ],
+      "answer": "3",
+      "explanation": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "kind": "lesson",
+      "subject": "arte",
+      "why": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "trap": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Quais são as três cores primárias da tinta, que não nascem da mistura de outras?",
+      "options": [
+        "Vermelho, azul e amarelo",
+        "Verde, laranja e roxo",
+        "Preto, branco e cinza",
+        "Azul, verde e vermelho"
+      ],
+      "answer": "Vermelho, azul e amarelo",
+      "explanation": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "trap": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Na mitologia grega, Zeus é o rei dos deuses. Qual era a arma dele?",
+      "options": [
+        "O raio",
+        "O tridente",
+        "O martelo",
+        "O arco"
+      ],
+      "answer": "O raio",
+      "explanation": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "trap": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você tem R$ 50 e quer um jogo de R$ 80. Se guardar R$ 10 por semana, em quantas semanas consegue comprar?",
+      "options": [
+        "3",
+        "8",
+        "5",
+        "2"
+      ],
+      "answer": "3",
+      "explanation": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "trap": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma receita para 4 pessoas usa 2 ovos. Quantos ovos você precisa para 10 pessoas?",
+      "options": [
+        "5",
+        "4",
+        "8",
+        "6"
+      ],
+      "answer": "5",
+      "explanation": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "trap": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O Brasil faz fronteira com quase toda a América do Sul. Quais são os dois países do continente que ele NÃO toca?",
+      "options": [
+        "Chile e Equador",
+        "Argentina e Uruguai",
+        "Peru e Bolívia",
+        "Colômbia e Venezuela"
+      ],
+      "answer": "Chile e Equador",
+      "explanation": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "trap": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual foi a última história que você leu ou assistiu? Como você identificaria a estrutura de querer, enfrentar e mudar nela?",
+  "source": "offline",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "audio_vazio": 8,
+      "certa_mais_longa": 7,
+      "conta_nao_fecha": 11,
+      "conta_um_passo": 4,
+      "definicao": 2,
+      "duas_certas": 1,
+      "enunciado_vazou": 26,
+      "fato_discutivel": 3,
+      "ingles_nivel": 7,
+      "opcao_caricata": 1,
+      "opiniao": 2,
+      "sinonimas": 11,
+      "tamanho_opcoes": 93,
+      "tipos_mistos": 25,
+      "trap_sem_distrator": 121,
+      "why_curto": 15,
+      "why_sem_resposta": 40
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "why_curto",
+          "tamanho_opcoes",
+          "opiniao"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta",
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "why_curto",
+          "tamanho_opcoes",
+          "opiniao"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "why_curto",
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 14,
+        "codes": [
+          "why_curto",
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 15,
+        "codes": [
+          "why_sem_resposta",
+          "tamanho_opcoes"
+        ]
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 8
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Qual é a estrutura básica de muitas histórias?",
+          "options": [
+            "Querer, enfrentar, mudar",
+            "Começar, terminar, repetir",
+            "Ganhar, perder, desistir",
+            "Dormir, sonhar, acordar"
+          ],
+          "answer": "Querer, enfrentar, mudar",
+          "explanation": "A estrutura comum inclui um desejo, um obstáculo e uma transformação.",
+          "why": "Muitas histórias seguem essa estrutura para criar uma narrativa envolvente.",
+          "trap": "'Ganhar, perder, desistir' parece lógica, mas não inclui a transformação.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como você pode aplicar a estrutura das histórias no futebol?",
+          "options": [
+            "Planejando a estratégia do jogo",
+            "Ignorando a defesa",
+            "Fazendo sempre o mesmo movimento",
+            "Não se preocupando com o adversário"
+          ],
+          "answer": "Planejando a estratégia do jogo",
+          "explanation": "No futebol, é necessário querer vencer, enfrentar a defesa e se adaptar.",
+          "why": "Planejar a estratégia do jogo ajuda a enfrentar desafios e se adaptar.",
+          "trap": "'Fazendo sempre o mesmo movimento' é tentador, mas não permite adaptação.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Um amigo quer contar uma história, mas está com dificuldades. Como você pode ajudar?",
+          "options": [
+            "Sugiro começar pelo que ele quer",
+            "Digo para fazer qualquer coisa",
+            "Aconselho a não se preocupar com o final",
+            "Recomendo mudar de ideia sempre"
+          ],
+          "answer": "Sugiro começar pelo que ele quer",
+          "explanation": "Começar pelo desejo ajuda a estruturar a história de forma clara.",
+          "why": "Focar no desejo inicial é uma boa maneira de estruturar qualquer história.",
+          "trap": "'Digo para fazer qualquer coisa' não ajuda a criar uma estrutura coerente.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se um pacote custa R$250 e você tem um desconto de 20%, quanto você pagará?",
+          "options": [
+            "R$200",
+            "R$225",
+            "R$20",
+            "R$230"
+          ],
+          "answer": "R$200",
+          "explanation": "20% de R$250 é R$50, então paga R$200.",
+          "why": "20% de desconto em R$250 resulta em uma redução de R$50.",
+          "trap": "R$225 é um erro comum ao confundir porcentagem com valor absoluto.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as plantas parassem de fazer fotossíntese?",
+          "options": [
+            "Menos oxigênio",
+            "Mais oxigênio",
+            "Mais chuvas",
+            "Menos chuvas"
+          ],
+          "answer": "Menos oxigênio",
+          "explanation": "As plantas produzem oxigênio durante a fotossíntese.",
+          "why": "Sem fotossíntese, as plantas não produzem oxigênio essencial para a vida.",
+          "trap": "'Mais oxigênio' parece certo, mas é o oposto do que aconteceria.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There are ___ apples on the table.",
+          "options": [
+            "three",
+            "is",
+            "are",
+            "has"
+          ],
+          "answer": "three",
+          "explanation": "O uso correto é quantificar as maçãs.",
+          "why": "A frase requer um número para quantificar 'apples'.",
+          "trap": "'are' parece certo, mas não completa a frase adequadamente.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "aplicar",
+          "audioText": "There are three apples on the table."
+        },
+        {
+          "question": "Qual desses eventos aconteceu na Idade Média?",
+          "options": [
+            "Início da Revolução Industrial",
+            "Construção de muitos castelos",
+            "Descobrimento da América",
+            "Primeira Guerra Mundial"
+          ],
+          "answer": "Construção de muitos castelos",
+          "explanation": "Castelos são um símbolo da Idade Média.",
+          "why": "A construção de castelos foi um evento marcante na Idade Média.",
+          "trap": "'Descobrimento da América' ocorreu depois da Idade Média.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do goleiro em um jogo de futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Dar passes longos"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O goleiro tem a função de evitar que a bola entre no gol.",
+          "why": "O goleiro é a última linha de defesa contra os gols do adversário.",
+          "trap": "'Marcar gols' é uma função dos atacantes, não do goleiro.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Qual foi a última história que você leu ou assistiu? Como você identificaria a estrutura de querer, enfrentar e mudar nela?",
+      "theme": {
+        "curiosity": "Sabia que até videogames seguem essa estrutura? O jogador quer vencer, enfrenta desafios e aprende com eles.",
+        "lesson": "Imagine assistir a um filme em que o herói quer salvar a cidade, mas enfrenta um vilão poderoso. No meio do caminho, o herói aprende algo novo e se transforma. Essa estrutura de querer, enfrentar e mudar está em muitos livros, filmes e até jogos. Quando você joga futebol, também segue um caminho: quer ganhar, enfrenta a defesa e precisa se adaptar. Repare hoje em uma história ou jogo e veja como essa estrutura aparece. Isso ajudará você a entender melhor as histórias e até a criar as suas próprias.",
+        "title": "A Estrutura das Histórias",
+        "whyItMatters": "Entender a estrutura ajuda a apreciar e criar histórias melhores."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que muitas histórias seguem a estrutura de alguém querer algo, encontrar um obstáculo e mudar?",
+          "options": [
+            "Porque isso cria um conflito interessante.",
+            "Para deixar a história mais longa.",
+            "Para confundir o leitor.",
+            "Porque é uma regra obrigatória."
+          ],
+          "answer": "Porque isso cria um conflito interessante.",
+          "explanation": "A estrutura ajuda a criar tensão e interesse.",
+          "why": "Histórias com conflitos mantêm o interesse do leitor.",
+          "trap": "A opção 'Para deixar a história mais longa' engana porque o tamanho não é o objetivo principal.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como você pode aplicar a estrutura das histórias em um jogo de futebol?",
+          "options": [
+            "Identificando o objetivo e os desafios do time.",
+            "Fazendo uma lista dos jogadores favoritos.",
+            "Contando apenas os gols marcados.",
+            "Assistindo só aos melhores momentos."
+          ],
+          "answer": "Identificando o objetivo e os desafios do time.",
+          "explanation": "O time quer vencer (objetivo) e enfrenta adversários (desafios).",
+          "why": "Ver o objetivo e os desafios ajuda a entender o jogo.",
+          "trap": "A opção 'Contando apenas os gols marcados' engana porque não considera os desafios enfrentados.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Um amigo quer contar uma história, mas está com dificuldades. Como você pode ajudar?",
+          "options": [
+            "Sugerir que ele comece pelo objetivo do personagem.",
+            "Dizer que ele deve desistir.",
+            "Aconselhar a começar pelo final.",
+            "Pedir que ele fale só sobre o cenário."
+          ],
+          "answer": "Sugerir que ele comece pelo objetivo do personagem.",
+          "explanation": "Um ponto de partida claro ajuda a estruturar a história.",
+          "why": "Começar pelo objetivo dá direção à história e facilita o desenvolvimento.",
+          "trap": "A opção 'Aconselhar a começar pelo final' engana porque pode confundir sem contexto.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se um produto custa R$500 e você tem um desconto de 15%, quanto você pagará?",
+          "options": [
+            "R$425",
+            "R$450",
+            "R$475",
+            "R$485"
+          ],
+          "answer": "R$425",
+          "explanation": "15% de R$500 é R$75; R$500 - R$75 = R$425.",
+          "why": "Aplicar o desconto corretamente mostra o preço final.",
+          "trap": "A opção 'R$450' engana ao subtrair erroneamente 10% em vez de 15%.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se todos os vulcões do mundo entrassem em erupção ao mesmo tempo?",
+          "options": [
+            "O clima global mudaria drasticamente.",
+            "As abelhas desapareceriam.",
+            "As praias ficariam mais quentes.",
+            "Os dias ficariam mais longos."
+          ],
+          "answer": "O clima global mudaria drasticamente.",
+          "explanation": "Erupções vulcânicas liberam gases e cinzas que afetam o clima.",
+          "why": "Entender o impacto das erupções ajuda a prever mudanças ambientais.",
+          "trap": "A opção 'As praias ficariam mais quentes' engana porque não considera a influência climática global.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Choose the correct sentence: 'There ___ a cat under the table.'",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "explanation": "Use 'is' for singular nouns like 'a cat'.",
+          "why": "Correct use of 'is' shows understanding of singular subjects.",
+          "trap": "The option 'are' is tempting because it is often used with plural subjects.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "aplicar",
+          "audioText": "Choose the correct sentence."
+        },
+        {
+          "question": "Qual evento histórico ocorreu durante a Revolução Industrial?",
+          "options": [
+            "A invenção do motor a vapor.",
+            "A independência do Brasil.",
+            "A construção das pirâmides do Egito.",
+            "A descoberta da América."
+          ],
+          "answer": "A invenção do motor a vapor.",
+          "explanation": "A Revolução Industrial trouxe inovações tecnológicas como o motor a vapor.",
+          "why": "Identificar eventos da Revolução Industrial mostra entendimento histórico.",
+          "trap": "A opção 'A independência do Brasil' é tentadora, mas ocorreu em contexto diferente.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a regra do impedimento no futebol?",
+          "options": [
+            "Um jogador está impedido se estiver mais perto do gol adversário do que a bola e o penúltimo adversário.",
+            "Um jogador está impedido se tocar na bola com a mão.",
+            "Um jogador está impedido se cruzar o meio-campo antes da bola.",
+            "Um jogador está impedido se fizer um gol de cabeça."
+          ],
+          "answer": "Um jogador está impedido se estiver mais perto do gol adversário do que a bola e o penúltimo adversário.",
+          "explanation": "A regra do impedimento refere-se à posição relativa do jogador em relação à bola e aos adversários.",
+          "why": "A regra do impedimento é fundamental para entender a dinâmica do futebol.",
+          "trap": "A opção 'Um jogador está impedido se tocar na bola com a mão' é uma infração diferente.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ]
+    }
+  }
+}

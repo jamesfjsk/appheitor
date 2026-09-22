@@ -3,9 +3,9 @@
 // O mesmo documento guarda a prova gerada e, depois, o resultado.
 // ========================================
 
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { DailyQuiz, DailyQuizQuestion, DailyQuizTheme } from '../types';
+import { DailyQuiz, DailyQuizQuestion, DailyQuizSanitize, DailyQuizTheme } from '../types';
 import { generateDailyQuiz } from './aiDailyQuiz';
 import { pickThemeForDate } from '../config/quizCurriculum';
 import { DAILY_QUIZ_QUESTIONS } from '../config/rules';
@@ -15,9 +15,58 @@ import type { EconomySettings, ModuleSettings } from '../types/village';
 import { addDays } from '../utils/clock';
 import { bumpChallenge } from './challengesService';
 import { nextQuizStreak } from './village/stats';
-import { reflectionOk } from './quiz/provaRules';
+import { answersStash, completeQuizWrite, type QuizAbout } from './quiz/closeQuiz';
+
+export type { QuizAbout };
+export { payThenComplete, answersStash, shouldOpenReflection, completeQuizWrite } from './quiz/closeQuiz';
 
 export const dailyQuizId = (userId: string, date: string) => `${userId}_${date}`;
+
+function readSanitize(raw: unknown): DailyQuizSanitize | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const row = raw as {
+    kept?: unknown;
+    dropped?: unknown;
+    perQuestion?: unknown;
+    review?: unknown;
+    batchLog?: unknown;
+    fromOffline?: unknown;
+    reviewFellBack?: unknown;
+  };
+  const dropped =
+    row.dropped && typeof row.dropped === 'object'
+      ? (row.dropped as Record<string, number>)
+      : {};
+  const perQuestion = Array.isArray(row.perQuestion)
+    ? row.perQuestion.flatMap((item) => {
+        if (!item || typeof item !== 'object') return [];
+        const i = Number((item as { i?: unknown }).i);
+        const codes = (item as { codes?: unknown }).codes;
+        if (!Number.isInteger(i) || !Array.isArray(codes)) return [];
+        return [{ i, codes: codes.filter((c): c is string => typeof c === 'string') }];
+      })
+    : undefined;
+  const review = Array.isArray(row.review)
+    ? row.review.flatMap((item) => {
+        if (!item || typeof item !== 'object') return [];
+        const n = Number((item as { n?: unknown }).n);
+        const ok = (item as { ok?: unknown }).ok;
+        if (!Number.isInteger(n) || typeof ok !== 'boolean') return [];
+        const motivo = (item as { motivo?: unknown }).motivo;
+        return [{ n, ok, motivo: typeof motivo === 'string' ? motivo : '' }];
+      })
+    : undefined;
+  const batchLog = Array.isArray(row.batchLog) ? row.batchLog.filter((x): x is string => typeof x === 'string') : undefined;
+  return {
+    kept: Number(row.kept) || 0,
+    dropped,
+    ...(perQuestion ? { perQuestion } : {}),
+    ...(review && review.length ? { review } : {}),
+    ...(batchLog && batchLog.length ? { batchLog } : {}),
+    ...(typeof row.fromOffline === 'number' ? { fromOffline: row.fromOffline } : {}),
+    ...(row.reviewFellBack === true ? { reviewFellBack: true } : {}),
+  };
+}
 
 export { addDays };
 
@@ -36,14 +85,18 @@ function fromDoc(id: string, data: Record<string, unknown>): DailyQuiz | null {
     source: data.source === 'offline' ? 'offline' : 'ai',
     generatedAt: (data.generatedAt as Timestamp | undefined)?.toDate?.() ?? new Date(0),
     completed: data.completed === true,
+    awaitingReflection: data.awaitingReflection === true && data.completed !== true,
     score: typeof data.score === 'number' ? data.score : undefined,
     totalQuestions: typeof data.totalQuestions === 'number' ? data.totalQuestions : undefined,
     xpEarned: typeof data.xpEarned === 'number' ? data.xpEarned : undefined,
     goldEarned: typeof data.goldEarned === 'number' ? data.goldEarned : undefined,
     answers: Array.isArray(data.answers) ? (data.answers as string[]) : undefined,
     reflection: typeof data.reflection === 'string' ? data.reflection : undefined,
+    reflectionWords: typeof data.reflectionWords === 'number' ? data.reflectionWords : undefined,
     reflectionNote: typeof data.reflectionNote === 'string' ? data.reflectionNote : undefined,
     completedAt: (data.completedAt as Timestamp | undefined)?.toDate?.(),
+    sanitize: readSanitize(data.sanitize),
+    ...(data.raw && typeof data.raw === 'object' ? { raw: data.raw } : {}),
   };
 }
 
@@ -123,6 +176,8 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     questions: generated.questions,
     reflectionPrompt: generated.reflectionPrompt,
     source: generated.source,
+    ...(generated.sanitize ? { sanitize: generated.sanitize } : {}),
+    ...(generated.raw ? { raw: generated.raw } : {}),
     generatedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }, { merge: true });
@@ -136,9 +191,27 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     questions: generated.questions,
     reflectionPrompt: generated.reflectionPrompt,
     source: generated.source,
+    sanitize: generated.sanitize,
+    ...(generated.raw ? { raw: generated.raw } : {}),
     generatedAt: new Date(),
     completed: false,
   };
+}
+
+/** 8ª pergunta: guarda as respostas sem fechar nem pagar (M2). */
+export async function stashQuizAnswers(
+  userId: string,
+  date: string,
+  answers: string[],
+  score: number,
+  totalQuestions: number,
+): Promise<void> {
+  await setDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), {
+    userId,
+    date,
+    ...answersStash(answers, score, totalQuestions),
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
 }
 
 export async function completeDailyQuiz(userId: string, date: string, result: {
@@ -149,22 +222,17 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
   answers: string[];
   reflection: string;
   reflectionNote?: string;
+  about: QuizAbout;
 }): Promise<void> {
-  const reflection = result.reflection.trim();
-  if (!reflectionOk(reflection)) throw new Error('A reflexão ainda não está pronta.');
-  const reflectionNote = result.reflectionNote?.trim();
-  await setDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), {
+  const ref = doc(db, 'dailyQuizzes', dailyQuizId(userId, date));
+  const snap = await getDoc(ref);
+  const plan = completeQuizWrite(snap.exists() ? snap.data() : undefined, result);
+  if (plan.kind === 'skip') return;
+  if (plan.kind === 'reject') throw new Error(plan.reason);
+  await setDoc(ref, {
     userId,
     date,
-    status: 'completed',
-    completed: true,
-    score: result.score,
-    totalQuestions: result.totalQuestions,
-    xpEarned: result.xpEarned,
-    goldEarned: result.goldEarned,
-    answers: result.answers,
-    reflection,
-    ...(reflectionNote ? { reflectionNote } : {}),
+    ...plan.data,
     completedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }, { merge: true });
@@ -197,16 +265,6 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     await bumpFriend(userId, 'sabio', 2);
   } catch (e) {
     console.warn('stats prova', e);
-  }
-}
-
-export async function saveReflection(userId: string, date: string, reflection: string): Promise<void> {
-  await updateDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), { reflection: reflection.trim(), updatedAt: serverTimestamp() });
-  try {
-    const { bumpVillage } = await import('./village/statsBump');
-    await bumpVillage(userId, { reflections: 1 });
-  } catch (e) {
-    console.warn('stats reflexão', e);
   }
 }
 

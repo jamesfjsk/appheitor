@@ -1,0 +1,566 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-08",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-08",
+  "status": "ready",
+  "theme": {
+    "id": "padroes-numericos",
+    "category": "logica",
+    "title": "Desvendando Padrões Numéricos",
+    "lesson": "Imagine que você está jogando futebol e percebe que seu time sempre marca gols em intervalos regulares de tempo. Isso é um padrão! Hoje, vamos explorar como identificar padrões em sequências numéricas. Por exemplo, na sequência 2, 4, 8, 16, 32, cada número é o dobro do anterior. Já na sequência de Fibonacci, cada número é a soma dos dois anteriores: 1, 1, 2, 3, 5, 8. Descobrir esses padrões ajuda a prever o próximo número. Você pode usar isso para resolver problemas, como calcular a pontuação em um jogo ou prever resultados em ciências.",
+    "whyItMatters": "Entender padrões ajuda a resolver problemas e tomar decisões melhores.",
+    "curiosity": "A sequência de Fibonacci aparece na natureza, como na disposição das sementes de um girassol."
+  },
+  "questions": [
+    {
+      "question": "Se um time marca gols a cada 5 minutos e já marcou aos 5, 10 e 15 minutos, quando será o próximo gol?",
+      "options": [
+        "20 minutos",
+        "18 minutos",
+        "22 minutos",
+        "25 minutos"
+      ],
+      "answer": "20 minutos",
+      "explanation": "O time marca a cada 5 minutos.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é 20 minutos porque 15 mais 5 dá 20, seguindo o intervalo de 5 minutos.",
+      "trap": "Marcar 18 minutos erra porque não segue o intervalo de 5 minutos entre os gols.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Primeira Guerra Mundial?",
+      "options": [
+        "Começou em 1914",
+        "Terminou em 1912",
+        "Foi em 1939",
+        "Durou 10 anos"
+      ],
+      "answer": "Começou em 1914",
+      "explanation": "A Primeira Guerra Mundial começou em 1914.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é que começou em 1914 porque esse é o ano reconhecido do início da guerra.",
+      "trap": "Marcar que terminou em 1912 erra porque a guerra nem havia começado nesse ano.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Quantos jogadores cada time tem em campo no início de uma partida de futebol?",
+      "options": [
+        "11",
+        "10",
+        "12",
+        "9"
+      ],
+      "answer": "11",
+      "explanation": "Cada time começa com 11 jogadores em campo.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é 11 porque é o número oficial de jogadores em campo no início de um jogo de futebol.",
+      "trap": "Marcar 10 erra porque ignora o goleiro, que também conta como jogador.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se uma sequência começa com 3 e cada número seguinte é o dobro do anterior, qual é o quarto número?",
+      "options": [
+        "12",
+        "24",
+        "18",
+        "9"
+      ],
+      "answer": "24",
+      "explanation": "O quarto número é 24 porque 3, 6, 12, 24 segue o padrão de dobrar.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 24 porque 12 vezes 2 dá 24, seguindo o padrão de dobrar.",
+      "trap": "Marcar 18 erra porque não segue o padrão de dobrar, que é multiplicar por 2.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se uma sequência começa com 5 e cada número seguinte é o triplo do anterior, qual é o quarto número?",
+      "options": [
+        "135",
+        "45",
+        "15",
+        "60"
+      ],
+      "answer": "135",
+      "explanation": "A resposta certa é 135 porque 5 vezes 3 dá 15, 15 vezes 3 dá 45 e 45 vezes 3 dá 135.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta certa é 135 porque o quarto número é 5 vezes 3 três vezes, fechando 135.",
+      "trap": "Quem marca 45 parou na segunda etapa: isso é o terceiro número, não o quarto.",
+      "skill": "LIC.IDEIA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual frase é verdadeira sobre o Sol?",
+      "options": [
+        "O Sol é uma estrela",
+        "O Sol é um planeta muito quente",
+        "O Sol gira em volta da Terra",
+        "O Sol é uma bola de fogo de madeira"
+      ],
+      "answer": "O Sol é uma estrela",
+      "explanation": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "trap": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual destas funções o cérebro NÃO faz?",
+      "options": [
+        "Bombear o sangue",
+        "Controlar os movimentos",
+        "Guardar memórias",
+        "Sentir emoções"
+      ],
+      "answer": "Bombear o sangue",
+      "explanation": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "trap": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Na mitologia grega, Zeus é o rei dos deuses. Qual era a arma dele?",
+      "options": [
+        "O raio",
+        "O tridente",
+        "O martelo",
+        "O arco"
+      ],
+      "answer": "O raio",
+      "explanation": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "trap": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual padrão você já percebeu em sua vida e como ele te ajudou?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "conta_um_passo": 4,
+      "campo_invalido": 1,
+      "duplicata": 1,
+      "conta_nao_fecha": 2,
+      "certa_mais_longa": 2,
+      "fato_discutivel": 1,
+      "enunciado_vazou": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "campo_invalido"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "fato_discutivel",
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": []
+      },
+      {
+        "i": 14,
+        "codes": [
+          "enunciado_vazou",
+          "conta_um_passo"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "Pergunta pede causa e efeito, não opinião."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A pergunta pede o que ele faria."
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 3
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Desvendando Padrões Numéricos",
+        "lesson": "Imagine que você está jogando futebol e percebe que seu time sempre marca gols em intervalos regulares de tempo. Isso é um padrão! Hoje, vamos explorar como identificar padrões em sequências numéricas. Por exemplo, na sequência 2, 4, 8, 16, 32, cada número é o dobro do anterior. Já na sequência de Fibonacci, cada número é a soma dos dois anteriores: 1, 1, 2, 3, 5, 8. Descobrir esses padrões ajuda a prever o próximo número. Você pode usar isso para resolver problemas, como calcular a pontuação em um jogo ou prever resultados em ciências.",
+        "whyItMatters": "Entender padrões ajuda a resolver problemas e tomar decisões melhores.",
+        "curiosity": "A sequência de Fibonacci aparece na natureza, como na disposição das sementes de um girassol."
+      },
+      "questions": [
+        {
+          "question": "Qual é o próximo número na sequência 2, 4, 8, 16, 32?",
+          "options": [
+            "48",
+            "64",
+            "60",
+            "34"
+          ],
+          "answer": "64",
+          "explanation": "Cada número é o dobro do anterior.",
+          "why": "A resposta certa é 64 porque 32 vezes 2 dá 64, seguindo o padrão de dobrar.",
+          "trap": "Marcar 60 erra porque não segue o padrão de dobrar, que é multiplicar por 2.",
+          "kind": "lesson",
+          "subject": "matematica",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um time marca gols a cada 5 minutos e já marcou aos 5, 10 e 15 minutos, quando será o próximo gol?",
+          "options": [
+            "20 minutos",
+            "18 minutos",
+            "22 minutos",
+            "25 minutos"
+          ],
+          "answer": "20 minutos",
+          "explanation": "O time marca a cada 5 minutos.",
+          "why": "A resposta certa é 20 minutos porque 15 mais 5 dá 20, seguindo o intervalo de 5 minutos.",
+          "trap": "Marcar 18 minutos erra porque não segue o intervalo de 5 minutos entre os gols.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está jogando um jogo de tabuleiro e percebe que sempre que avança 3 casas, seu amigo avança 2. O que você faz?",
+          "options": [
+            "Continuo jogando sem me preocupar",
+            "Tento avançar mais rápido",
+            "Convido meu amigo para jogar de novo",
+            "Observo se o padrão continua"
+          ],
+          "answer": "Observo se o padrão continua",
+          "explanation": "Observar o padrão ajuda a entender o jogo.",
+          "why": "Observar o padrão é sábio porque ajuda a prever movimentos futuros e planejar melhor.",
+          "trap": "Continuar jogando sem se preocupar ignora a oportunidade de aprender com o padrão.",
+          "kind": "dilemma",
+          "subject": "jogos",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Uma loja vende 3 camisetas por R$ 90,00. Quanto custa cada camiseta?",
+          "options": [
+            "R$ 30,00",
+            "R$ 27,00",
+            "R$ 33,00",
+            "R$ 25,00"
+          ],
+          "answer": "R$ 30,00",
+          "explanation": "Divida o total pelo número de camisetas.",
+          "why": "A resposta certa é R$ 30,00 porque 90 dividido por 3 dá 30, o preço de cada camiseta.",
+          "trap": "Marcar R$ 27,00 erra porque não divide corretamente o total de R$ 90,00 por 3.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se uma planta não recebesse luz solar?",
+          "options": [
+            "Ela cresceria mais rápido",
+            "Ela não faria fotossíntese",
+            "Ela ficaria azul",
+            "Ela produziria mais flores"
+          ],
+          "answer": "Ela não faria fotossíntese",
+          "explanation": "A luz solar é essencial para a fotossíntese.",
+          "why": "A resposta certa é que ela não faria fotossíntese porque a luz solar é necessária para esse processo.",
+          "trap": "Marcar que ela cresceria mais rápido erra porque a falta de luz impede o crescimento adequado.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Primeira Guerra Mundial?",
+          "options": [
+            "Começou em 1914",
+            "Terminou em 1912",
+            "Foi em 1939",
+            "Durou 10 anos"
+          ],
+          "answer": "Começou em 1914",
+          "explanation": "A Primeira Guerra Mundial começou em 1914.",
+          "why": "A resposta certa é que começou em 1914 porque esse é o ano reconhecido do início da guerra.",
+          "trap": "Marcar que terminou em 1912 erra porque a guerra nem havia começado nesse ano.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Quantos jogadores cada time tem em campo no início de uma partida de futebol?",
+          "options": [
+            "11",
+            "10",
+            "12",
+            "9"
+          ],
+          "answer": "11",
+          "explanation": "Cada time começa com 11 jogadores em campo.",
+          "why": "A resposta certa é 11 porque é o número oficial de jogadores em campo no início de um jogo de futebol.",
+          "trap": "Marcar 10 erra porque ignora o goleiro, que também conta como jogador.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma sequência começa com 3 e cada número seguinte é o dobro do anterior, qual é o quarto número?",
+          "options": [
+            "12",
+            "24",
+            "18",
+            "9"
+          ],
+          "answer": "24",
+          "explanation": "O quarto número é 24 porque 3, 6, 12, 24 segue o padrão de dobrar.",
+          "why": "A resposta certa é 24 porque 12 vezes 2 dá 24, seguindo o padrão de dobrar.",
+          "trap": "Marcar 18 erra porque não segue o padrão de dobrar, que é multiplicar por 2.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se um rio secasse completamente?",
+          "options": [
+            "Aumentaria a biodiversidade",
+            "Diminuiria a água disponível",
+            "Aumentaria a pesca",
+            "Melhoraria a agricultura"
+          ],
+          "answer": "Diminuiria a água disponível",
+          "explanation": "A falta de água afeta o abastecimento e o ecossistema.",
+          "why": "A resposta certa é que diminuiria a água disponível porque um rio seco não fornece água para o ambiente.",
+          "trap": "Marcar que aumentaria a pesca erra porque sem água, não há peixes para pescar.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é o próximo número na sequência de Fibonacci: 1, 1, 2, 3, 5, 8?",
+          "options": [
+            "11",
+            "13",
+            "10",
+            "12"
+          ],
+          "answer": "13",
+          "explanation": "Na sequência de Fibonacci, cada número é a soma dos dois anteriores.",
+          "why": "A resposta certa é 13 porque 5 mais 8 dá 13, seguindo o padrão de Fibonacci.",
+          "trap": "Marcar 10 erra porque não é a soma dos dois números anteriores, 5 e 8.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Qual padrão você já percebeu em sua vida e como ele te ajudou?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Se uma sequência começa com 5 e cada número seguinte é o triplo do anterior, qual é o quarto número?",
+          "options": [
+            "135",
+            "45",
+            "15",
+            "60"
+          ],
+          "answer": "135",
+          "explanation": "A resposta certa é 135 porque 5 vezes 3 dá 15, 15 vezes 3 dá 45 e 45 vezes 3 dá 135.",
+          "why": "A resposta certa é 135 porque o quarto número é 5 vezes 3 três vezes, fechando 135.",
+          "trap": "Quem marca 45 parou na segunda etapa: isso é o terceiro número, não o quarto.",
+          "kind": "lesson",
+          "subject": "matematica",
+          "skill": "LIC.IDEIA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está jogando futebol e seu time está perdendo por 2 a 1. Qual é a melhor estratégia para empatar?",
+          "options": [
+            "Atacar mais e deixar a defesa",
+            "Manter a defesa e atacar com cuidado",
+            "Focar só na defesa",
+            "Trocar todos os jogadores"
+          ],
+          "answer": "Manter a defesa e atacar com cuidado",
+          "explanation": "A resposta certa é manter a defesa e atacar com cuidado para evitar levar mais gols enquanto tenta empatar.",
+          "why": "A resposta certa é manter a defesa e atacar com cuidado, equilibrando ataque e defesa para empatar.",
+          "trap": "Quem escolhe atacar mais e deixar a defesa pode levar mais gols e aumentar a desvantagem.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Você e seus amigos estão jogando um jogo de cartas e um deles sempre ganha. O que você faz?",
+          "options": [
+            "Observar como ele joga e aprender",
+            "Ficar bravo e parar de jogar",
+            "Mudar as regras do jogo",
+            "Pedir para ele te ensinar"
+          ],
+          "answer": "Observar como ele joga e aprender",
+          "explanation": "Observar como ele joga e aprender é a melhor opção para melhorar suas habilidades no jogo.",
+          "why": "Observar como ele joga e aprender ajuda a entender suas estratégias e melhorar seu próprio jogo.",
+          "trap": "Pedir para ele te ensinar pode ser útil, mas observar diretamente pode ser mais eficaz para aprender.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 200 reais e compra um brinquedo por 75 reais e um livro por 50 reais, quanto sobra?",
+          "options": [
+            "75",
+            "125",
+            "50",
+            "100"
+          ],
+          "answer": "75",
+          "explanation": "A resposta certa é 75 porque 200 menos 75 menos 50 dá 75.",
+          "why": "A resposta certa é 75 porque, após gastar 125 reais, sobram 75 reais do total de 200.",
+          "trap": "Quem marca 125 esqueceu de subtrair o valor total gasto dos 200 reais.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

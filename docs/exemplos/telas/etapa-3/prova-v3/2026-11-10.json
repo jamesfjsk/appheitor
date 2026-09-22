@@ -1,0 +1,509 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-10",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-10",
+  "status": "ready",
+  "theme": {
+    "id": "inventores",
+    "category": "invencoes",
+    "title": "Invenções que Iluminaram o Mundo",
+    "lesson": "Imagine viver em um mundo sem luz elétrica. Antes da invenção da lâmpada, as pessoas usavam velas e lampiões para iluminar suas casas. Thomas Edison, um inventor famoso, testou milhares de materiais antes de encontrar o filamento perfeito para a lâmpada elétrica. Sua persistência e criatividade mudaram a forma como vivemos, permitindo que as cidades ficassem iluminadas à noite e que as pessoas pudessem trabalhar e estudar após o pôr do sol. Hoje, a lâmpada é essencial em nossas vidas, desde iluminar nossos lares até ajudar em cirurgias complexas nos hospitais.",
+    "whyItMatters": "Entender invenções nos mostra como a persistência pode mudar o mundo.",
+    "curiosity": "Thomas Edison testou mais de 6.000 materiais antes de encontrar o filamento ideal para a lâmpada."
+  },
+  "questions": [
+    {
+      "question": "O que Thomas Edison inventou que mudou a forma como vivemos à noite?",
+      "options": [
+        "Lâmpada elétrica",
+        "Telefone",
+        "Computador",
+        "Televisão"
+      ],
+      "answer": "Lâmpada elétrica",
+      "explanation": "Edison é famoso por inventar a lâmpada elétrica, que revolucionou a iluminação.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A lâmpada elétrica é a resposta certa porque foi a invenção de Edison que permitiu iluminar casas e cidades à noite.",
+      "trap": "Marcar telefone erra porque, embora importante, não foi inventado por Edison, mas por Alexander Graham Bell.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual invenção de Edison é usada em estádios de futebol para jogos noturnos?",
+      "options": [
+        "Lâmpada elétrica",
+        "Microfone",
+        "Rádio",
+        "Câmera"
+      ],
+      "answer": "Lâmpada elétrica",
+      "explanation": "A lâmpada elétrica permite que estádios sejam iluminados para jogos à noite.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A lâmpada elétrica é usada em estádios para iluminar jogos noturnos, permitindo que aconteçam mesmo sem luz natural.",
+      "trap": "Marcar rádio erra porque ele transmite o jogo, mas não ilumina o estádio.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual é a função do bandeirinha no futebol?",
+      "options": [
+        "Marcar impedimentos",
+        "Apitar o jogo",
+        "Fazer gols",
+        "Treinar o time"
+      ],
+      "answer": "Marcar impedimentos",
+      "explanation": "O bandeirinha ajuda o árbitro, especialmente em lances de impedimento.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "Marcar impedimentos é a função do bandeirinha porque ele auxilia o árbitro em lances difíceis.",
+      "trap": "Marcar apitar o jogo erra porque essa é a função do árbitro principal, não do bandeirinha.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que aconteceria se não houvesse vacinas?",
+      "options": [
+        "Doenças se espalhariam mais",
+        "Nada mudaria",
+        "Mais pessoas teriam superpoderes",
+        "As pessoas viveriam mais"
+      ],
+      "answer": "Doenças se espalhariam mais",
+      "explanation": "Vacinas ajudam a prevenir a propagação de doenças.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "Doenças se espalhariam mais é a resposta certa porque vacinas controlam surtos e protegem a saúde pública.",
+      "trap": "Marcar nada mudaria erra porque vacinas são essenciais para prevenir doenças graves.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual é a função do juiz em um jogo de futebol?",
+      "options": [
+        "Aplicar as regras",
+        "Fazer gols",
+        "Treinar o time",
+        "Vender ingressos"
+      ],
+      "answer": "Aplicar as regras",
+      "explanation": "O juiz é responsável por garantir que as regras do jogo sejam seguidas.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "Aplicar as regras é a função do juiz porque ele deve garantir que o jogo seja justo e seguro.",
+      "trap": "Marcar fazer gols erra porque essa é a função dos jogadores, não do juiz.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do árbitro assistente no futebol?",
+      "options": [
+        "Marcar impedimentos",
+        "Apitar o jogo",
+        "Fazer gols",
+        "Treinar o time"
+      ],
+      "answer": "Marcar impedimentos",
+      "explanation": "O árbitro assistente ajuda o árbitro principal, especialmente em lances de impedimento.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "Marcar impedimentos é a função do árbitro assistente porque ele auxilia o árbitro em lances difíceis.",
+      "trap": "Marcar apitar o jogo erra porque essa é a função do árbitro principal, não do assistente.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Numa turma de 30 alunos, 2/5 são meninas. Quantos meninos há na turma?",
+      "options": [
+        "18",
+        "12",
+        "20",
+        "6"
+      ],
+      "answer": "18",
+      "explanation": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "trap": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual planeta fica entre a Terra e Júpiter na ordem de distância do Sol?",
+      "options": [
+        "Marte",
+        "Vênus",
+        "Saturno",
+        "Mercúrio"
+      ],
+      "answer": "Marte",
+      "explanation": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "trap": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual invenção você acha que mais impactou sua vida e por quê?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "duplicata": 2,
+      "tamanho_opcoes": 1,
+      "conta_um_passo": 3
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "duplicata"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": false,
+        "motivo": "Pede o que faria, é opinião."
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 2
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Invenções que Iluminaram o Mundo",
+        "lesson": "Imagine viver em um mundo sem luz elétrica. Antes da invenção da lâmpada, as pessoas usavam velas e lampiões para iluminar suas casas. Thomas Edison, um inventor famoso, testou milhares de materiais antes de encontrar o filamento perfeito para a lâmpada elétrica. Sua persistência e criatividade mudaram a forma como vivemos, permitindo que as cidades ficassem iluminadas à noite e que as pessoas pudessem trabalhar e estudar após o pôr do sol. Hoje, a lâmpada é essencial em nossas vidas, desde iluminar nossos lares até ajudar em cirurgias complexas nos hospitais.",
+        "whyItMatters": "Entender invenções nos mostra como a persistência pode mudar o mundo.",
+        "curiosity": "Thomas Edison testou mais de 6.000 materiais antes de encontrar o filamento ideal para a lâmpada."
+      },
+      "questions": [
+        {
+          "question": "O que Thomas Edison inventou que mudou a forma como vivemos à noite?",
+          "options": [
+            "Lâmpada elétrica",
+            "Telefone",
+            "Computador",
+            "Televisão"
+          ],
+          "answer": "Lâmpada elétrica",
+          "explanation": "Edison é famoso por inventar a lâmpada elétrica, que revolucionou a iluminação.",
+          "why": "A lâmpada elétrica é a resposta certa porque foi a invenção de Edison que permitiu iluminar casas e cidades à noite.",
+          "trap": "Marcar telefone erra porque, embora importante, não foi inventado por Edison, mas por Alexander Graham Bell.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual invenção de Edison é usada em estádios de futebol para jogos noturnos?",
+          "options": [
+            "Lâmpada elétrica",
+            "Microfone",
+            "Rádio",
+            "Câmera"
+          ],
+          "answer": "Lâmpada elétrica",
+          "explanation": "A lâmpada elétrica permite que estádios sejam iluminados para jogos à noite.",
+          "why": "A lâmpada elétrica é usada em estádios para iluminar jogos noturnos, permitindo que aconteçam mesmo sem luz natural.",
+          "trap": "Marcar rádio erra porque ele transmite o jogo, mas não ilumina o estádio.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se você tivesse uma ideia para uma invenção, o que seria mais sábio fazer primeiro?",
+          "options": [
+            "Testar várias soluções",
+            "Desistir se falhar",
+            "Guardar a ideia para si",
+            "Esperar alguém inventar"
+          ],
+          "answer": "Testar várias soluções",
+          "explanation": "Testar várias soluções ajuda a encontrar a melhor forma de realizar sua ideia.",
+          "why": "Testar várias soluções é a atitude mais sábia porque permite aprender com erros e melhorar a invenção.",
+          "trap": "Desistir se falhar engana porque falhas são parte do processo de aprendizado e inovação.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a book on the table",
+            "There are a book on the table",
+            "There is books on the table",
+            "There are book on the table"
+          ],
+          "answer": "There is a book on the table",
+          "audioText": "There is a book on the table",
+          "why": "A frase certa é There is a book on the table porque um livro só usa is, e are fica para quando são dois ou mais livros.",
+          "trap": "A frase There are a book on the table engana quem acha que are serve para qualquer livro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre Santos Dumont?",
+          "options": [
+            "Ele voou em público com o 14-Bis",
+            "Inventou o telefone",
+            "Criou a lâmpada elétrica",
+            "Descobriu a América"
+          ],
+          "answer": "Ele voou em público com o 14-Bis",
+          "explanation": "Santos Dumont é conhecido por seu voo público com o 14-Bis em 1906.",
+          "why": "Ele voou em público com o 14-Bis é a resposta certa porque foi um marco na história da aviação.",
+          "trap": "Marcar inventou o telefone erra porque isso foi feito por Alexander Graham Bell.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do bandeirinha no futebol?",
+          "options": [
+            "Marcar impedimentos",
+            "Apitar o jogo",
+            "Fazer gols",
+            "Treinar o time"
+          ],
+          "answer": "Marcar impedimentos",
+          "explanation": "O bandeirinha ajuda o árbitro, especialmente em lances de impedimento.",
+          "why": "Marcar impedimentos é a função do bandeirinha porque ele auxilia o árbitro em lances difíceis.",
+          "trap": "Marcar apitar o jogo erra porque essa é a função do árbitro principal, não do bandeirinha.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma loja vende 3 camisetas por R$ 50 cada e você compra 4, quanto gasta no total?",
+          "options": [
+            "R$ 200",
+            "R$ 150",
+            "R$ 100",
+            "R$ 250"
+          ],
+          "answer": "R$ 200",
+          "explanation": "Multiplique o preço de uma camiseta por quatro para achar o total.",
+          "why": "A resposta certa é R$ 200 porque 50 vezes 4 dá 200, o total gasto nas camisetas.",
+          "trap": "Marcar R$ 150 erra porque isso seria o custo de três camisetas, não quatro.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse vacinas?",
+          "options": [
+            "Doenças se espalhariam mais",
+            "Nada mudaria",
+            "Mais pessoas teriam superpoderes",
+            "As pessoas viveriam mais"
+          ],
+          "answer": "Doenças se espalhariam mais",
+          "explanation": "Vacinas ajudam a prevenir a propagação de doenças.",
+          "why": "Doenças se espalhariam mais é a resposta certa porque vacinas controlam surtos e protegem a saúde pública.",
+          "trap": "Marcar nada mudaria erra porque vacinas são essenciais para prevenir doenças graves.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é a função do juiz em um jogo de futebol?",
+          "options": [
+            "Aplicar as regras",
+            "Fazer gols",
+            "Treinar o time",
+            "Vender ingressos"
+          ],
+          "answer": "Aplicar as regras",
+          "explanation": "O juiz é responsável por garantir que as regras do jogo sejam seguidas.",
+          "why": "Aplicar as regras é a função do juiz porque ele deve garantir que o jogo seja justo e seguro.",
+          "trap": "Marcar fazer gols erra porque essa é a função dos jogadores, não do juiz.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do árbitro assistente no futebol?",
+          "options": [
+            "Marcar impedimentos",
+            "Apitar o jogo",
+            "Fazer gols",
+            "Treinar o time"
+          ],
+          "answer": "Marcar impedimentos",
+          "explanation": "O árbitro assistente ajuda o árbitro principal, especialmente em lances de impedimento.",
+          "why": "Marcar impedimentos é a função do árbitro assistente porque ele auxilia o árbitro em lances difíceis.",
+          "trap": "Marcar apitar o jogo erra porque essa é a função do árbitro principal, não do assistente.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma loja vende 3 camisetas por R$ 50 cada e você compra 4, quanto gasta no total?",
+          "options": [
+            "R$ 200",
+            "R$ 150",
+            "R$ 100",
+            "R$ 250"
+          ],
+          "answer": "R$ 200",
+          "explanation": "Multiplique o preço de uma camiseta por quatro para achar o total.",
+          "why": "A resposta certa é R$ 200 porque 50 vezes 4 dá 200, o total gasto nas camisetas.",
+          "trap": "Marcar R$ 150 erra porque isso seria o custo de três camisetas, não quatro.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Qual invenção você acha que mais impactou sua vida e por quê?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Uma lâmpada consome 60 watts por hora. Se ficar acesa por 5 horas, quantos watts ela consome?",
+          "options": [
+            "300",
+            "120",
+            "60",
+            "240"
+          ],
+          "answer": "300",
+          "why": "A resposta certa é 300 porque 60 watts por hora vezes 5 horas resulta em 300 watts consumidos.",
+          "trap": "Quem marca 60 confunde o consumo por hora com o total, esquecendo de multiplicar pelo tempo.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

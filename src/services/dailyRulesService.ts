@@ -18,7 +18,7 @@ import { fromVillageDoc } from './villageService';
 import { initialVillageDoc } from '../config/village';
 import { touchHealth } from './observability';
 import type { Period, ScheduleTask } from '../types/village';
-import { cracksAfterClose, liveBuildingLevel } from './village/repair';
+import { cracksAfterClose, cracksOf, liveBuildingLevel, RUIN_ROUND_CAP } from './village/repair';
 import { claimKey, hasClaim } from './village/claims';
 import { bumpChallenge, extendActiveChallenges } from './challengesService';
 import { addVillageStats, skipDayPenalty } from './village/stats';
@@ -147,7 +147,12 @@ async function completionsOn(userId: string, date: string): Promise<{ count: num
  * Fecha um dia: grava dailyProgress e aplica penalidade/bônus uma única vez.
  * Devolve null se o dia já estava fechado.
  */
-export async function closeDay(userId: string, date: string, rules?: DailyRules): Promise<DayClosure | null> {
+export async function closeDay(
+  userId: string,
+  date: string,
+  rules?: DailyRules,
+  opts?: { allowRuin?: boolean },
+): Promise<DayClosure | null> {
   const r = rules ?? (await getDailyRules());
   const dailyRef = doc(db, 'dailyProgress', `${userId}_${date}`);
 
@@ -272,7 +277,8 @@ export async function closeDay(userId: string, date: string, rules?: DailyRules)
         ? missedTasks.slice(1).map((t) => t.id)
         : missedTasks.map((t) => t.id);
     const missedForCrack = missedTasks.filter((t) => missedIds.includes(t.id)).map((t) => ({ period: t.period as Period }));
-    const cracks = cracksAfterClose(cerca >= 2 ? [] : village.cracks, missedForCrack, buildings);
+    const crackMissed = opts?.allowRuin === false ? [] : missedForCrack;
+    const cracks = cracksAfterClose(cerca >= 2 ? [] : village.cracks, crackMissed, buildings);
     const punishKey = claimKey('punish', date);
     const claimed = { ...village.claimed };
     if (punished && !hasClaim(village, punishKey)) {
@@ -371,9 +377,17 @@ export async function processPendingDays(userId: string): Promise<DayClosure[]> 
   if (start < floor) start = floor;
 
   const results: DayClosure[] = [];
+  const villageSnap = await getDoc(doc(db, 'village', userId));
+  let knownCracks = cracksOf(villageSnap.data()?.cracks).length;
+  let ruins = 0;
   for (let d = start; d <= yesterday; d = addDaysStr(d, 1)) {
-    const closed = await closeDay(userId, d, rules);
-    if (closed) results.push(closed);
+    const closed = await closeDay(userId, d, rules, { allowRuin: ruins < RUIN_ROUND_CAP });
+    if (!closed) continue;
+    results.push(closed);
+    const after = await getDoc(doc(db, 'village', userId));
+    const now = cracksOf(after.data()?.cracks).length;
+    if (now > knownCracks) ruins += now - knownCracks;
+    knownCracks = now;
   }
   return results;
 }

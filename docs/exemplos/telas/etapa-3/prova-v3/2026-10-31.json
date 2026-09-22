@@ -1,0 +1,628 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-31",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-31",
+  "status": "ready",
+  "theme": {
+    "category": "arte",
+    "curiosity": "Sabia que o Coliseu em Roma, construído há quase 2.000 anos, ainda está de pé? E ele não tem concreto armado!",
+    "id": "arquitetura",
+    "lesson": "Imagine um estádio de futebol lotado. Já pensou como ele fica de pé com tanta gente? Os romanos foram mestres em construir estruturas que duram até hoje, usando arcos e cúpulas. Eles descobriram que essas formas distribuem o peso de maneira uniforme, tornando os edifícios mais fortes. Hoje, usamos concreto com ferro dentro, chamado de concreto armado, para construir prédios altos e resistentes. Essa técnica moderna permite que os edifícios suportem ventos fortes e até terremotos. Então, da próxima vez que você estiver em um prédio alto, lembre-se de que ele está de pé graças a essas ideias antigas e modernas.",
+    "title": "Por que os prédios não caem?",
+    "whyItMatters": "Entender como os prédios são construídos ajuda a valorizar a engenharia e a arquitetura ao nosso redor."
+  },
+  "questions": [
+    {
+      "question": "Qual material moderno é usado para reforçar o concreto?",
+      "options": [
+        "Ferro",
+        "Madeira",
+        "Plástico",
+        "Vidro"
+      ],
+      "answer": "Ferro",
+      "explanation": "O ferro é usado dentro do concreto para torná-lo mais resistente.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta é 'Ferro' porque o concreto armado usa ferro para aumentar a resistência e durabilidade.",
+      "trap": "A opção 'Madeira' engana porque madeira não é usada para reforçar concreto, mas pode ser usada em outras partes da construção.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você está ajudando a construir um modelo de ponte. Qual material moderno é essencial?",
+      "options": [
+        "Concreto armado",
+        "Madeira",
+        "Plástico",
+        "Vidro"
+      ],
+      "answer": "Concreto armado",
+      "explanation": "Concreto armado é essencial por sua resistência e durabilidade.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Concreto armado' porque ele combina a força do concreto com a flexibilidade do ferro.",
+      "trap": "A opção 'Madeira' engana porque é tradicional, mas não tem a mesma resistência do concreto armado.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se um prédio fosse construído sem fundação?",
+      "options": [
+        "Poderia desabar",
+        "Ficaria mais bonito",
+        "Seria mais barato",
+        "Duraria mais tempo"
+      ],
+      "answer": "Poderia desabar",
+      "explanation": "A fundação é essencial para a estabilidade de um prédio.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Poderia desabar' porque a fundação distribui o peso e evita que o prédio tombe.",
+      "trap": "A opção 'Seria mais barato' engana porque, sem fundação, os custos de reparo seriam altos.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre o Império Romano?",
+      "options": [
+        "Durou mais de 500 anos",
+        "Foi fundado em 1000 a.C.",
+        "Nunca teve imperadores",
+        "Era menor que a Grécia"
+      ],
+      "answer": "Durou mais de 500 anos",
+      "explanation": "O Império Romano é conhecido por sua longa duração e influência.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta certa é 'Durou mais de 500 anos' porque o Império Romano se estendeu por séculos, influenciando muitas culturas.",
+      "trap": "A opção 'Foi fundado em 1000 a.C.' engana porque o império começou oficialmente em 27 a.C.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Uma receita para 4 pessoas usa 2 ovos. Quantos ovos você precisa para 10 pessoas?",
+      "options": [
+        "5",
+        "4",
+        "8",
+        "6"
+      ],
+      "answer": "5",
+      "explanation": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "trap": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O Brasil faz fronteira com quase toda a América do Sul. Quais são os dois países do continente que ele NÃO toca?",
+      "options": [
+        "Chile e Equador",
+        "Argentina e Uruguai",
+        "Peru e Bolívia",
+        "Colômbia e Venezuela"
+      ],
+      "answer": "Chile e Equador",
+      "explanation": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "trap": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Por que o português é a língua oficial do Brasil?",
+      "options": [
+        "Porque Portugal colonizou o Brasil",
+        "Porque é a língua mais fácil",
+        "Porque o Brasil fica perto de Portugal",
+        "Porque foi escolhida por votação em 1900"
+      ],
+      "answer": "Porque Portugal colonizou o Brasil",
+      "explanation": "Os colonizadores trouxeram a língua. Mas o português do Brasil ganhou muitas palavras indígenas e africanas, como abacaxi e moleque.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Os colonizadores trouxeram a língua. Mas o português do Brasil ganhou muitas palavras indígenas e africanas, como abacaxi e moleque.",
+      "trap": "Os colonizadores trouxeram a língua. Mas o português do Brasil ganhou muitas palavras indígenas e africanas, como abacaxi e moleque.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Estime: quantas pessoas vivem no Brasil?",
+      "options": [
+        "Cerca de 200 milhões",
+        "Cerca de 20 milhões",
+        "Cerca de 2 bilhões",
+        "Cerca de 2 milhões"
+      ],
+      "answer": "Cerca de 200 milhões",
+      "explanation": "O Brasil tem pouco mais de 200 milhões de habitantes e está entre os 7 países mais populosos do mundo.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil tem pouco mais de 200 milhões de habitantes e está entre os 7 países mais populosos do mundo.",
+      "trap": "O Brasil tem pouco mais de 200 milhões de habitantes e está entre os 7 países mais populosos do mundo.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que as técnicas de construção romanas influenciam os prédios modernos?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 5,
+      "conta_nao_fecha": 1,
+      "conta_um_passo": 2,
+      "duplicata": 4
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 14,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 15,
+        "codes": []
+      },
+      {
+        "i": 16,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 17,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A pergunta pede o que aconteceria, é opinião."
+      },
+      {
+        "n": 3,
+        "ok": false,
+        "motivo": "A pergunta pede o que aconteceria, é opinião."
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A conta não fecha."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 4
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Por que os romanos usavam arcos em suas construções?",
+          "options": [
+            "Para distribuir o peso",
+            "Para decorar",
+            "Para economizar material",
+            "Para fazer sombra"
+          ],
+          "answer": "Para distribuir o peso",
+          "explanation": "Os arcos ajudam a distribuir o peso de maneira uniforme.",
+          "why": "A resposta é 'Para distribuir o peso' porque os arcos distribuem o peso de forma mais eficiente, evitando colapsos.",
+          "trap": "A opção 'Para decorar' engana porque, embora sejam bonitos, os arcos têm uma função estrutural importante.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual material moderno é usado para reforçar o concreto?",
+          "options": [
+            "Ferro",
+            "Madeira",
+            "Plástico",
+            "Vidro"
+          ],
+          "answer": "Ferro",
+          "explanation": "O ferro é usado dentro do concreto para torná-lo mais resistente.",
+          "why": "A resposta é 'Ferro' porque o concreto armado usa ferro para aumentar a resistência e durabilidade.",
+          "trap": "A opção 'Madeira' engana porque madeira não é usada para reforçar concreto, mas pode ser usada em outras partes da construção.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo quer construir uma casa na árvore. Qual é a melhor atitude?",
+          "options": [
+            "Usar madeira forte e segura",
+            "Construir sem planejar",
+            "Usar qualquer material disponível",
+            "Fazer sozinho sem ajuda"
+          ],
+          "answer": "Usar madeira forte e segura",
+          "explanation": "Usar madeira forte garante segurança e estabilidade.",
+          "why": "Escolher 'Usar madeira forte e segura' é sábio porque garante que a casa na árvore seja segura e estável.",
+          "trap": "A opção 'Construir sem planejar' é tentadora, mas pode resultar em uma estrutura insegura.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se um retângulo tem 20 cm de comprimento e 10 cm de largura, qual é a área?",
+          "options": [
+            "200 cm²",
+            "30 cm²",
+            "60 cm²",
+            "100 cm²"
+          ],
+          "answer": "200 cm²",
+          "explanation": "A área é calculada multiplicando comprimento por largura.",
+          "why": "A resposta é '200 cm²' porque 20 vezes 10 dá 200, que é a área do retângulo.",
+          "trap": "A opção '30 cm²' engana quem soma os lados em vez de multiplicar.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se um prédio moderno não tivesse ferro no concreto?",
+          "options": [
+            "Seria menos resistente",
+            "Seria mais bonito",
+            "Seria mais leve",
+            "Seria mais caro"
+          ],
+          "answer": "Seria menos resistente",
+          "explanation": "O ferro no concreto aumenta a resistência estrutural.",
+          "why": "A resposta é 'Seria menos resistente' porque o ferro reforça o concreto, tornando-o mais forte.",
+          "trap": "A opção 'Seria mais leve' engana porque a ausência de ferro compromete a resistência, não o peso.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a book on the table",
+            "There are a book on the table",
+            "There is books on the table",
+            "There are book on the table"
+          ],
+          "answer": "There is a book on the table",
+          "audioText": "There is a book on the table",
+          "why": "A frase certa é 'There is a book on the table' porque 'is' é usado para um único livro.",
+          "trap": "A frase 'There are a book on the table' engana quem acha que 'are' serve para qualquer quantidade.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o Coliseu em Roma?",
+          "options": [
+            "Foi usado para lutas de gladiadores",
+            "É feito de madeira",
+            "Foi construído em 1990",
+            "É uma pirâmide"
+          ],
+          "answer": "Foi usado para lutas de gladiadores",
+          "explanation": "O Coliseu é famoso por suas lutas de gladiadores na Roma antiga.",
+          "why": "A resposta é 'Foi usado para lutas de gladiadores' porque o Coliseu era um anfiteatro para esses eventos.",
+          "trap": "A opção 'É feito de madeira' engana porque o Coliseu é feito de pedra e concreto.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'goalkeeper' no futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O goleiro é responsável por impedir que a bola entre no gol.",
+          "why": "A resposta é 'Defender o gol' porque essa é a principal função do goleiro em um jogo de futebol.",
+          "trap": "A opção 'Marcar gols' engana porque essa não é a função principal do goleiro.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um prédio tem 10 andares e cada andar tem 4 apartamentos, quantos apartamentos há no total?",
+          "options": [
+            "40",
+            "14",
+            "24",
+            "400"
+          ],
+          "answer": "40",
+          "explanation": "Multiplicando 10 andares por 4 apartamentos por andar, temos 40 apartamentos.",
+          "why": "A resposta é '40' porque 10 vezes 4 resulta em 40, que é o total de apartamentos.",
+          "trap": "A opção '400' engana quem multiplica por 10 duas vezes, confundindo andares com apartamentos.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se um prédio fosse construído apenas com vidro?",
+          "options": [
+            "Seria frágil",
+            "Seria mais forte",
+            "Seria mais barato",
+            "Seria mais leve"
+          ],
+          "answer": "Seria frágil",
+          "explanation": "O vidro, sem suporte, não tem resistência estrutural suficiente.",
+          "why": "A resposta é 'Seria frágil' porque o vidro sozinho não suporta peso e pressão como outros materiais.",
+          "trap": "A opção 'Seria mais leve' engana porque, embora leve, o vidro não é estruturalmente seguro sozinho.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é a função do 'corner kick' no futebol?",
+          "options": [
+            "Reiniciar o jogo",
+            "Marcar um gol",
+            "Defender o gol",
+            "Cobrar um escanteio"
+          ],
+          "answer": "Cobrar um escanteio",
+          "explanation": "O 'corner kick' é uma cobrança de escanteio no futebol.",
+          "why": "A resposta é 'Cobrar um escanteio' porque o 'corner kick' é a cobrança feita quando a bola sai pela linha de fundo.",
+          "trap": "A opção 'Reiniciar o jogo' engana porque o escanteio não é usado para reiniciar, mas para atacar.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que as técnicas de construção romanas influenciam os prédios modernos?",
+      "theme": {
+        "curiosity": "Sabia que o Coliseu em Roma, construído há quase 2.000 anos, ainda está de pé? E ele não tem concreto armado!",
+        "lesson": "Imagine um estádio de futebol lotado. Já pensou como ele fica de pé com tanta gente? Os romanos foram mestres em construir estruturas que duram até hoje, usando arcos e cúpulas. Eles descobriram que essas formas distribuem o peso de maneira uniforme, tornando os edifícios mais fortes. Hoje, usamos concreto com ferro dentro, chamado de concreto armado, para construir prédios altos e resistentes. Essa técnica moderna permite que os edifícios suportem ventos fortes e até terremotos. Então, da próxima vez que você estiver em um prédio alto, lembre-se de que ele está de pé graças a essas ideias antigas e modernas.",
+        "title": "Por que os prédios não caem?",
+        "whyItMatters": "Entender como os prédios são construídos ajuda a valorizar a engenharia e a arquitetura ao nosso redor."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que os romanos usavam cúpulas em suas construções?",
+          "options": [
+            "Para criar espaços amplos sem colunas",
+            "Para decorar os prédios",
+            "Para economizar material",
+            "Para proteger do sol"
+          ],
+          "answer": "Para criar espaços amplos sem colunas",
+          "explanation": "Cúpulas permitem cobrir grandes áreas sem a necessidade de colunas internas.",
+          "why": "A resposta certa é 'Para criar espaços amplos sem colunas' porque as cúpulas distribuem o peso de forma eficiente.",
+          "trap": "A opção 'Para decorar os prédios' engana porque cúpulas também são bonitas, mas sua função principal é estrutural.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você está ajudando a construir um modelo de ponte. Qual material moderno é essencial?",
+          "options": [
+            "Concreto armado",
+            "Madeira",
+            "Plástico",
+            "Vidro"
+          ],
+          "answer": "Concreto armado",
+          "explanation": "Concreto armado é essencial por sua resistência e durabilidade.",
+          "why": "A resposta certa é 'Concreto armado' porque ele combina a força do concreto com a flexibilidade do ferro.",
+          "trap": "A opção 'Madeira' engana porque é tradicional, mas não tem a mesma resistência do concreto armado.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo quer construir uma maquete de um prédio. O que você sugere?",
+          "options": [
+            "Usar papelão para a estrutura",
+            "Usar cola quente para tudo",
+            "Usar arcos para suportar o peso",
+            "Usar apenas fita adesiva"
+          ],
+          "answer": "Usar arcos para suportar o peso",
+          "explanation": "Arcos ajudam a distribuir o peso de forma eficiente, tornando a maquete mais estável.",
+          "why": "Usar arcos é a melhor escolha porque distribui o peso e evita que a estrutura desabe.",
+          "trap": "A opção 'Usar papelão para a estrutura' engana porque papelão é frágil sem suporte adequado.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se um ônibus leva 50 pessoas e faz 4 viagens por dia, quantas pessoas ele transporta em uma semana?",
+          "options": [
+            "1400",
+            "1000",
+            "1200",
+            "1600"
+          ],
+          "answer": "1400",
+          "explanation": "Multiplique 50 pessoas por 4 viagens e depois por 7 dias.",
+          "why": "A resposta certa é 1400 porque 50 vezes 4 dá 200 por dia, e 200 vezes 7 dias fecha 1400.",
+          "trap": "Quem marca 1000 esqueceu de multiplicar por 7 dias, considerando apenas 5 dias úteis.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se um prédio fosse construído sem fundação?",
+          "options": [
+            "Poderia desabar",
+            "Ficaria mais bonito",
+            "Seria mais barato",
+            "Duraria mais tempo"
+          ],
+          "answer": "Poderia desabar",
+          "explanation": "A fundação é essencial para a estabilidade de um prédio.",
+          "why": "A resposta certa é 'Poderia desabar' porque a fundação distribui o peso e evita que o prédio tombe.",
+          "trap": "A opção 'Seria mais barato' engana porque, sem fundação, os custos de reparo seriam altos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque 'is' é usado para singular, enquanto 'are' é para plural.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que 'are' serve para qualquer situação.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o Império Romano?",
+          "options": [
+            "Durou mais de 500 anos",
+            "Foi fundado em 1000 a.C.",
+            "Nunca teve imperadores",
+            "Era menor que a Grécia"
+          ],
+          "answer": "Durou mais de 500 anos",
+          "explanation": "O Império Romano é conhecido por sua longa duração e influência.",
+          "why": "A resposta certa é 'Durou mais de 500 anos' porque o Império Romano se estendeu por séculos, influenciando muitas culturas.",
+          "trap": "A opção 'Foi fundado em 1000 a.C.' engana porque o império começou oficialmente em 27 a.C.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        }
+      ]
+    }
+  }
+}

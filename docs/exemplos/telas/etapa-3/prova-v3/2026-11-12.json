@@ -1,0 +1,544 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-12",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-12",
+  "status": "ready",
+  "theme": {
+    "id": "ingles-descrever",
+    "category": "ingles",
+    "title": "Descrevendo com Estilo!",
+    "lesson": "Imagine que você está assistindo a um jogo de futebol com seus amigos. Você quer contar para eles sobre o jogador mais rápido em campo. Para isso, você pode usar adjetivos e comparações em inglês, como 'fast', 'faster' e 'the fastest'. Hoje, vamos aprender a usar essas palavras para descrever pessoas, lugares e até seu jogador favorito. Com essas dicas, você poderá impressionar seus amigos com descrições incríveis! Use isso hoje para descrever seu jogador favorito ou um lugar que você ama.",
+    "whyItMatters": "Saber descrever bem ajuda a compartilhar suas experiências de forma clara.",
+    "curiosity": "Sabia que o jogador mais rápido do mundo já correu a uma velocidade de 38 km/h? Isso é mais rápido que muitos animais!"
+  },
+  "questions": [
+    {
+      "question": "Você está descrevendo dois jogadores. Um é rápido e o outro é mais rápido. Como você descreve o mais rápido?",
+      "options": [
+        "Fast",
+        "Faster",
+        "The fastest",
+        "Fastest"
+      ],
+      "answer": "The fastest",
+      "explanation": "Usamos 'the fastest' para descrever o mais rápido entre todos.",
+      "kind": "lesson",
+      "subject": "ingles",
+      "why": "A resposta certa é 'the fastest' porque é o superlativo, usado para o mais rápido entre todos.",
+      "trap": "A opção 'faster' engana quem esquece que 'faster' é só para comparar dois, não todos.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar",
+      "audioText": "The fastest"
+    },
+    {
+      "question": "O que aconteceria se não houvesse mais abelhas no planeta?",
+      "options": [
+        "As flores desapareceriam",
+        "Nada mudaria",
+        "Mais mel seria produzido",
+        "As plantas cresceriam mais rápido"
+      ],
+      "answer": "As flores desapareceriam",
+      "explanation": "As abelhas são polinizadoras essenciais para muitas plantas.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'as flores desapareceriam' porque sem polinização, muitas plantas não se reproduziriam.",
+      "trap": "A opção 'nada mudaria' engana quem subestima o papel crucial das abelhas na polinização.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Segunda Guerra Mundial?",
+      "options": [
+        "Começou em 1939",
+        "Durou 20 anos",
+        "Foi a primeira guerra mundial",
+        "Terminou em 1940"
+      ],
+      "answer": "Começou em 1939",
+      "explanation": "A Segunda Guerra Mundial começou em 1939 e terminou em 1945.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'começou em 1939' porque é o ano reconhecido do início da guerra.",
+      "trap": "A opção 'durou 20 anos' engana quem não conhece a duração real da guerra, que foi de 6 anos.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do técnico no futebol?",
+      "options": [
+        "Marcar gols",
+        "Treinar o time",
+        "Apitar o jogo",
+        "Vender ingressos"
+      ],
+      "answer": "Treinar o time",
+      "explanation": "O técnico é responsável por treinar e orientar o time durante os jogos.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 'treinar o time' porque o técnico organiza estratégias e treinos.",
+      "trap": "A opção 'marcar gols' engana quem confunde a função do técnico com a dos jogadores.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do árbitro no futebol?",
+      "options": [
+        "Marcar gols",
+        "Apitar o jogo",
+        "Treinar o time",
+        "Vender ingressos"
+      ],
+      "answer": "Apitar o jogo",
+      "explanation": "O árbitro é responsável por aplicar as regras e manter a ordem durante o jogo.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 'apitar o jogo' porque o árbitro garante que as regras sejam seguidas.",
+      "trap": "A opção 'marcar gols' engana quem confunde a função do árbitro com a dos jogadores.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem 300 reais e compra dois livros de 90 reais cada, quanto sobra?",
+      "options": [
+        "120",
+        "180",
+        "90",
+        "60"
+      ],
+      "answer": "120",
+      "explanation": "A resposta certa é 120 porque primeiro 90 vezes 2 dá 180 de gasto e depois 300 menos 180 fecha 120.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 120 porque primeiro 90 vezes 2 dá 180 de gasto e depois 300 menos 180 fecha 120.",
+      "trap": "Quem marca 180 parou na primeira etapa: isso é o que você gasta, não o que sobra.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se um time jogasse sem goleiro?",
+      "options": [
+        "O time sofreria mais gols",
+        "O time marcaria mais gols",
+        "O time jogaria melhor",
+        "O time teria mais jogadores no ataque"
+      ],
+      "answer": "O time sofreria mais gols",
+      "explanation": "A resposta certa é que o time sofreria mais gols porque o goleiro é essencial para defender o gol.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é que o time sofreria mais gols porque o goleiro é essencial para defender o gol.",
+      "trap": "A opção O time teria mais jogadores no ataque engana porque parece que mais atacantes compensariam, mas a defesa ficaria vulnerável.",
+      "skill": "FUT.REGRA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Cada caixa guarda 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?",
+      "options": [
+        "7",
+        "6",
+        "8",
+        "5"
+      ],
+      "answer": "7",
+      "explanation": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "trap": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual jogador de futebol você descreveria como o melhor e por quê?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "sem_licao": 1,
+      "enunciado_vazou": 1,
+      "audio_vazio": 1,
+      "ingles_nivel": 1,
+      "certa_mais_longa": 1,
+      "duplicata": 3,
+      "conta_um_passo": 1,
+      "capital": 1,
+      "conta_nao_fecha": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "sem_licao"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "enunciado_vazou",
+          "audio_vazio",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "certa_mais_longa",
+          "duplicata"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": [
+          "capital"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas"
+    ],
+    "fromOffline": 1
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Descrevendo com Estilo!",
+        "lesson": "Imagine que você está assistindo a um jogo de futebol com seus amigos. Você quer contar para eles sobre o jogador mais rápido em campo. Para isso, você pode usar adjetivos e comparações em inglês, como 'fast', 'faster' e 'the fastest'. Hoje, vamos aprender a usar essas palavras para descrever pessoas, lugares e até seu jogador favorito. Com essas dicas, você poderá impressionar seus amigos com descrições incríveis! Use isso hoje para descrever seu jogador favorito ou um lugar que você ama.",
+        "whyItMatters": "Saber descrever bem ajuda a compartilhar suas experiências de forma clara.",
+        "curiosity": "Sabia que o jogador mais rápido do mundo já correu a uma velocidade de 38 km/h? Isso é mais rápido que muitos animais!"
+      },
+      "questions": [
+        {
+          "question": "Qual é a forma comparativa de 'big'?",
+          "options": [
+            "Bigger",
+            "Biggest",
+            "Big",
+            "More big"
+          ],
+          "answer": "Bigger",
+          "explanation": "A forma comparativa de 'big' é 'bigger'.",
+          "why": "A resposta certa é 'bigger' porque 'big' se torna 'bigger' ao comparar dois itens.",
+          "trap": "A opção 'biggest' engana quem confunde comparativo com superlativo, que é usado para mais de dois itens.",
+          "kind": "lesson",
+          "subject": "ingles",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender",
+          "audioText": "Bigger"
+        },
+        {
+          "question": "Você está descrevendo dois jogadores. Um é rápido e o outro é mais rápido. Como você descreve o mais rápido?",
+          "options": [
+            "Fast",
+            "Faster",
+            "The fastest",
+            "Fastest"
+          ],
+          "answer": "The fastest",
+          "explanation": "Usamos 'the fastest' para descrever o mais rápido entre todos.",
+          "why": "A resposta certa é 'the fastest' porque é o superlativo, usado para o mais rápido entre todos.",
+          "trap": "A opção 'faster' engana quem esquece que 'faster' é só para comparar dois, não todos.",
+          "kind": "lesson",
+          "subject": "ingles",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar",
+          "audioText": "The fastest"
+        },
+        {
+          "question": "Você e seus amigos estão escolhendo um jogador para o time. Um deles é bom, mas outro é melhor. O que você faz?",
+          "options": [
+            "Escolho o jogador bom porque é meu amigo.",
+            "Escolho o melhor jogador para ganhar o jogo.",
+            "Escolho o jogador bom porque ele é mais legal.",
+            "Escolho o jogador que trouxe lanche."
+          ],
+          "answer": "Escolho o melhor jogador para ganhar o jogo.",
+          "explanation": "Escolher o melhor jogador aumenta as chances de vitória.",
+          "why": "A resposta certa é escolher o melhor jogador porque isso ajuda o time a ter mais chances de vencer.",
+          "trap": "Escolher o jogador bom porque é amigo engana quem prioriza amizade sobre habilidade no jogo.",
+          "kind": "dilemma",
+          "subject": "ingles",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é a função do meio-campista no futebol?",
+          "options": [
+            "Marcar gols",
+            "Defender o gol",
+            "Controlar o meio de campo",
+            "Apitar o jogo"
+          ],
+          "answer": "Controlar o meio de campo",
+          "explanation": "O meio-campista é responsável por controlar o meio de campo e ajudar tanto na defesa quanto no ataque.",
+          "why": "A resposta certa é 'controlar o meio de campo' porque o meio-campista organiza o jogo e distribui a bola.",
+          "trap": "A opção 'marcar gols' engana quem pensa que todos os jogadores têm a mesma função de atacante.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 200 reais e compra um presente de 75 reais, quanto sobra?",
+          "options": [
+            "125",
+            "150",
+            "175",
+            "100"
+          ],
+          "answer": "125",
+          "explanation": "Subtraindo 75 de 200, sobra 125.",
+          "why": "A resposta certa é 125 porque 200 menos 75 resulta em 125.",
+          "trap": "A opção 150 engana quem faz a subtração incorretamente ou esquece de subtrair o valor total.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais abelhas no planeta?",
+          "options": [
+            "As flores desapareceriam",
+            "Nada mudaria",
+            "Mais mel seria produzido",
+            "As plantas cresceriam mais rápido"
+          ],
+          "answer": "As flores desapareceriam",
+          "explanation": "As abelhas são polinizadoras essenciais para muitas plantas.",
+          "why": "A resposta certa é 'as flores desapareceriam' porque sem polinização, muitas plantas não se reproduziriam.",
+          "trap": "A opção 'nada mudaria' engana quem subestima o papel crucial das abelhas na polinização.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a ball on the field",
+            "There are a ball on the field",
+            "There is balls on the field",
+            "There are ball on the field"
+          ],
+          "answer": "There is a ball on the field",
+          "audioText": "There is a ball on the field",
+          "why": "A frase certa é 'There is a ball on the field' porque 'a ball' é singular e usa 'is'.",
+          "trap": "A frase 'There are a ball on the field' engana quem acha que 'are' serve para qualquer número de bolas.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Segunda Guerra Mundial?",
+          "options": [
+            "Começou em 1939",
+            "Durou 20 anos",
+            "Foi a primeira guerra mundial",
+            "Terminou em 1940"
+          ],
+          "answer": "Começou em 1939",
+          "explanation": "A Segunda Guerra Mundial começou em 1939 e terminou em 1945.",
+          "why": "A resposta certa é 'começou em 1939' porque é o ano reconhecido do início da guerra.",
+          "trap": "A opção 'durou 20 anos' engana quem não conhece a duração real da guerra, que foi de 6 anos.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do técnico no futebol?",
+          "options": [
+            "Marcar gols",
+            "Treinar o time",
+            "Apitar o jogo",
+            "Vender ingressos"
+          ],
+          "answer": "Treinar o time",
+          "explanation": "O técnico é responsável por treinar e orientar o time durante os jogos.",
+          "why": "A resposta certa é 'treinar o time' porque o técnico organiza estratégias e treinos.",
+          "trap": "A opção 'marcar gols' engana quem confunde a função do técnico com a dos jogadores.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a capital da França?",
+          "options": [
+            "Paris",
+            "Londres",
+            "Roma",
+            "Berlim"
+          ],
+          "answer": "Paris",
+          "explanation": "Paris é a capital da França, conhecida por sua cultura e história.",
+          "why": "A resposta certa é 'Paris' porque é a capital reconhecida da França.",
+          "trap": "A opção 'Londres' engana quem confunde capitais europeias, já que Londres é a capital do Reino Unido.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do árbitro no futebol?",
+          "options": [
+            "Marcar gols",
+            "Apitar o jogo",
+            "Treinar o time",
+            "Vender ingressos"
+          ],
+          "answer": "Apitar o jogo",
+          "explanation": "O árbitro é responsável por aplicar as regras e manter a ordem durante o jogo.",
+          "why": "A resposta certa é 'apitar o jogo' porque o árbitro garante que as regras sejam seguidas.",
+          "trap": "A opção 'marcar gols' engana quem confunde a função do árbitro com a dos jogadores.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Qual jogador de futebol você descreveria como o melhor e por quê?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se você tem 300 reais e compra dois livros de 90 reais cada, quanto sobra?",
+          "options": [
+            "120",
+            "180",
+            "90",
+            "60"
+          ],
+          "answer": "120",
+          "why": "A resposta certa é 120 porque primeiro 90 vezes 2 dá 180 de gasto e depois 300 menos 180 fecha 120.",
+          "trap": "Quem marca 180 parou na primeira etapa: isso é o que você gasta, não o que sobra.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se um time jogasse sem goleiro?",
+          "options": [
+            "O time sofreria mais gols",
+            "O time marcaria mais gols",
+            "O time jogaria melhor",
+            "O time teria mais jogadores no ataque"
+          ],
+          "answer": "O time sofreria mais gols",
+          "why": "A resposta certa é que o time sofreria mais gols porque o goleiro é essencial para defender o gol.",
+          "trap": "A opção O time teria mais jogadores no ataque engana porque parece que mais atacantes compensariam, mas a defesa ficaria vulnerável.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "analisar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

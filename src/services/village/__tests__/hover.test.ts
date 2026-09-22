@@ -1,6 +1,6 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import { hoverAnchor, hoverLabelPos, idleFrameIndex, idleBob, idleShift, pickHit, visibleGrowthMarks, DEFAULT_GROWTH, wrapDrift, breezeSway, paintWind, paintSkyLife, skipLotSprite } from '../../../components/hero/village/drawAmbient';
-import { previewBuildingLevel } from '../../../config/village';
+import { previewBuildingLevel, previewLevelFrom } from '../../../config/village';
 
 test('cerca: âncora no portão, não no rodapé da caixa AABB', () => {
   const fence = { x: 400, y: 500, w: 480, h: 72, hover: 'fence' as const };
@@ -113,6 +113,13 @@ test('torre construída desenha o sprite do nível; cerca construída usa o muro
 test('preview da Torre no localhost não mexe nos outros lotes', () => {
   expect(previewBuildingLevel('torre', 0)).toBe(0);
   expect(previewBuildingLevel('fornalha', 2)).toBe(2);
+  expect(previewLevelFrom('torre', 1, 'localhost', '?torre=2')).toBe(2);
+  expect(previewLevelFrom('torre', 1, '127.0.0.1', 'torre=3')).toBe(3);
+  expect(previewLevelFrom('torre', 1, 'notlocalhost.com', '?torre=2')).toBe(1);
+  expect(previewLevelFrom('torre', 1, 'evil-localhost.net', '?torre=2')).toBe(1);
+  expect(previewLevelFrom('fornalha', 2, 'localhost', '?torre=3')).toBe(2);
+  expect(previewLevelFrom('torre', 1, 'localhost', '?torre=9')).toBe(3);
+  expect(previewLevelFrom('torre', 1, 'localhost', '')).toBe(1);
 });
 
 void run();

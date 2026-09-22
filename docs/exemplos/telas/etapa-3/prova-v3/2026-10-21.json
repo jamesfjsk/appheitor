@@ -1,0 +1,546 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-21",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-21",
+  "status": "ready",
+  "theme": {
+    "category": "filosofia",
+    "curiosity": "Epicteto foi um filósofo que nasceu escravo e, mesmo assim, suas ideias influenciaram imperadores romanos.",
+    "id": "estoicismo-controle",
+    "lesson": "Imagine que você está jogando futebol e seu time está perdendo. Você se esforçou, treinou e deu o seu melhor, mas o resultado não foi o esperado. Epicteto, um filósofo grego, ensinou que devemos separar o que podemos controlar do que não podemos. Você controla seu esforço, atitude e preparo, mas não controla o resultado ou o que os outros fazem. Hoje, ao enfrentar desafios, como uma prova difícil ou um jogo, lembre-se de focar no que está em suas mãos: sua dedicação e empenho. Isso ajuda a lidar melhor com as situações, sem se preocupar tanto com o que não depende de você.",
+    "title": "O que está nas minhas mãos?",
+    "whyItMatters": "Entender isso ajuda a lidar melhor com frustrações e desafios."
+  },
+  "questions": [
+    {
+      "question": "Qual destes eventos ocorreu na Revolução Francesa?",
+      "options": [
+        "Queda da Bastilha.",
+        "Independência dos EUA.",
+        "Descobrimento do Brasil.",
+        "Construção da Muralha da China."
+      ],
+      "answer": "Queda da Bastilha.",
+      "explanation": "A Queda da Bastilha foi um marco da Revolução Francesa.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Queda da Bastilha' porque é um evento chave da Revolução Francesa.",
+      "trap": "Independência dos EUA ocorreu antes e não está relacionada à Revolução Francesa.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se um livro custa R$ 40 e você tem R$ 100, quanto sobra após comprar dois livros?",
+      "options": [
+        "R$ 20",
+        "R$ 60",
+        "R$ 80",
+        "R$ 10"
+      ],
+      "answer": "R$ 20",
+      "explanation": "Dois livros custam R$ 80, sobrando R$ 20.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta certa é 'R$ 20' porque 100 menos 80 deixa 20 de troco.",
+      "trap": "Quem marca 'R$ 60' esqueceu de multiplicar o preço do livro por dois.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se um jogador de futebol comete falta grave, o que acontece?",
+      "options": [
+        "Recebe cartão vermelho",
+        "Ganha um gol",
+        "Recebe um prêmio",
+        "Fica com a bola"
+      ],
+      "answer": "Recebe cartão vermelho",
+      "explanation": "Uma falta grave resulta em cartão vermelho, que expulsa o jogador do jogo.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta é 'Recebe cartão vermelho' porque é a punição para faltas graves no futebol.",
+      "trap": "Escolher 'Ganha um gol' é um erro, pois faltas graves são penalizadas, não recompensadas.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Duas embalagens de suco: 1 litro por R$ 8 e 2 litros por R$ 14. Qual é mais barata por litro?",
+      "options": [
+        "A de 2 litros",
+        "A de 1 litro",
+        "As duas custam o mesmo por litro",
+        "Não dá para saber"
+      ],
+      "answer": "A de 2 litros",
+      "explanation": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "trap": "Na de 2 litros, cada litro sai a 14 ÷ 2 = 7 reais, menos que os 8 da pequena. Mas só compensa se você for usar tudo.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se você viajar do Amazonas até o Rio Grande do Sul, de qual região para qual região está indo?",
+      "options": [
+        "Do Norte para o Sul",
+        "Do Nordeste para o Sudeste",
+        "Do Centro-Oeste para o Sul",
+        "Do Norte para o Sudeste"
+      ],
+      "answer": "Do Norte para o Sul",
+      "explanation": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "trap": "O Brasil tem 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul. O Amazonas fica no Norte e o Rio Grande do Sul é o estado mais ao sul.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Por que o português é a língua oficial do Brasil?",
+      "options": [
+        "Porque Portugal colonizou o Brasil",
+        "Porque é a língua mais fácil",
+        "Porque o Brasil fica perto de Portugal",
+        "Porque foi escolhida por votação em 1900"
+      ],
+      "answer": "Porque Portugal colonizou o Brasil",
+      "explanation": "Os colonizadores trouxeram a língua. Mas o português do Brasil ganhou muitas palavras indígenas e africanas, como abacaxi e moleque.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Os colonizadores trouxeram a língua. Mas o português do Brasil ganhou muitas palavras indígenas e africanas, como abacaxi e moleque.",
+      "trap": "Os colonizadores trouxeram a língua. Mas o português do Brasil ganhou muitas palavras indígenas e africanas, como abacaxi e moleque.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Estime: quantas pessoas vivem no Brasil?",
+      "options": [
+        "Cerca de 200 milhões",
+        "Cerca de 20 milhões",
+        "Cerca de 2 bilhões",
+        "Cerca de 2 milhões"
+      ],
+      "answer": "Cerca de 200 milhões",
+      "explanation": "O Brasil tem pouco mais de 200 milhões de habitantes e está entre os 7 países mais populosos do mundo.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil tem pouco mais de 200 milhões de habitantes e está entre os 7 países mais populosos do mundo.",
+      "trap": "O Brasil tem pouco mais de 200 milhões de habitantes e está entre os 7 países mais populosos do mundo.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Estime: com dois tempos de 45 minutos e um intervalo de 15, quanto dura uma partida, sem acréscimos?",
+      "options": [
+        "Cerca de 1h45",
+        "Cerca de 1h",
+        "Cerca de 3h",
+        "Cerca de 45 minutos"
+      ],
+      "answer": "Cerca de 1h45",
+      "explanation": "45 + 45 = 90 minutos de jogo, mais 15 de intervalo, dá 105 minutos, ou seja, 1 hora e 45 minutos.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "45 + 45 = 90 minutos de jogo, mais 15 de intervalo, dá 105 minutos, ou seja, 1 hora e 45 minutos.",
+      "trap": "45 + 45 = 90 minutos de jogo, mais 15 de intervalo, dá 105 minutos, ou seja, 1 hora e 45 minutos.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Pense em algo que você não controla e como pode lidar melhor com isso.",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 1,
+      "conta_nao_fecha": 1,
+      "conta_um_passo": 1,
+      "enunciado_vazou": 2,
+      "ingles_nivel": 1,
+      "opcao_caricata": 3,
+      "tamanho_opcoes": 1,
+      "why_curto": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "enunciado_vazou",
+          "tamanho_opcoes",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "enunciado_vazou",
+          "why_curto",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": [
+          "conta_um_passo"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "Pergunta de opinião ou gosto."
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "Pergunta de opinião ou gosto."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": false,
+        "motivo": "Fato não é consenso entre professores."
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "Pergunta de opinião, não há resposta única."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 5
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "O que Epicteto nos ensina sobre controle?",
+          "options": [
+            "Controlar o que podemos e aceitar o que não podemos.",
+            "Controlar tudo ao nosso redor.",
+            "Ignorar o que não podemos controlar.",
+            "Focar apenas nos resultados."
+          ],
+          "answer": "Controlar o que podemos e aceitar o que não podemos.",
+          "explanation": "Epicteto ensina a focar no que podemos controlar.",
+          "why": "A resposta certa é 'Controlar o que podemos e aceitar o que não podemos' porque isso nos ajuda a lidar melhor com situações difíceis.",
+          "trap": "Quem marca 'Controlar tudo ao nosso redor' está ignorando que nem tudo está sob nosso controle.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo, o que você pode controlar?",
+          "options": [
+            "Seu esforço e atitude.",
+            "O resultado do jogo.",
+            "As decisões do juiz.",
+            "O desempenho dos outros jogadores."
+          ],
+          "answer": "Seu esforço e atitude.",
+          "explanation": "Você só pode controlar suas próprias ações e reações.",
+          "why": "A resposta certa é 'Seu esforço e atitude' porque essas são as únicas coisas sob seu controle direto.",
+          "trap": "Quem escolhe 'O resultado do jogo' está confundindo esforço com controle de resultado.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu time perdeu o campeonato. O que você faz?",
+          "options": [
+            "Treina mais para melhorar.",
+            "Culpa os colegas de time.",
+            "Desiste de jogar futebol.",
+            "Reclama do juiz."
+          ],
+          "answer": "Treina mais para melhorar.",
+          "explanation": "Treinar mais é focar no que você pode melhorar.",
+          "why": "A resposta certa é 'Treina mais para melhorar' porque isso foca no que você pode controlar: seu próprio desempenho.",
+          "trap": "Culpar os colegas de time ignora o que você pode fazer para se aprimorar.",
+          "kind": "dilemma",
+          "subject": "futebol",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual destes eventos ocorreu na Revolução Francesa?",
+          "options": [
+            "Queda da Bastilha.",
+            "Independência dos EUA.",
+            "Descobrimento do Brasil.",
+            "Construção da Muralha da China."
+          ],
+          "answer": "Queda da Bastilha.",
+          "explanation": "A Queda da Bastilha foi um marco da Revolução Francesa.",
+          "why": "A resposta certa é 'Queda da Bastilha' porque é um evento chave da Revolução Francesa.",
+          "trap": "Independência dos EUA ocorreu antes e não está relacionada à Revolução Francesa.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do goleiro no futebol?",
+          "options": [
+            "Defender o gol.",
+            "Marcar gols.",
+            "Apitar o jogo.",
+            "Treinar o time."
+          ],
+          "answer": "Defender o gol.",
+          "explanation": "O goleiro é responsável por defender o gol.",
+          "why": "A resposta certa é 'Defender o gol' porque essa é a principal função do goleiro no futebol.",
+          "trap": "Marcar gols é função dos atacantes, não do goleiro.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um livro custa R$ 40 e você tem R$ 100, quanto sobra após comprar dois livros?",
+          "options": [
+            "R$ 20",
+            "R$ 60",
+            "R$ 80",
+            "R$ 10"
+          ],
+          "answer": "R$ 20",
+          "explanation": "Dois livros custam R$ 80, sobrando R$ 20.",
+          "why": "A resposta certa é 'R$ 20' porque 100 menos 80 deixa 20 de troco.",
+          "trap": "Quem marca 'R$ 60' esqueceu de multiplicar o preço do livro por dois.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as abelhas desaparecessem?",
+          "options": [
+            "Menos polinização.",
+            "Mais flores.",
+            "Menos mel.",
+            "Mais abelhas."
+          ],
+          "answer": "Menos polinização.",
+          "explanation": "As abelhas são importantes polinizadoras.",
+          "why": "A resposta certa é 'Menos polinização' porque as abelhas são essenciais para o processo de polinização.",
+          "trap": "Quem marca 'Menos mel' está focando só no produto, não no impacto ecológico.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which is correct: 'There is a cat', 'There are a cat', or 'There is cats'?",
+          "options": [
+            "There is a cat",
+            "There are a cat",
+            "There is cats",
+            "There are cats"
+          ],
+          "answer": "There is a cat",
+          "explanation": "'There is' é usado com singular e 'a cat' é singular.",
+          "why": "A resposta certa é 'There is a cat' porque 'is' é usado para singular, enquanto 'are' é para plural.",
+          "trap": "Quem escolhe 'There are a cat' confunde singular com plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "aplicar",
+          "audioText": "Which is correct: 'There is a cat', 'There are a cat', or 'There is cats'?"
+        }
+      ],
+      "reflectionPrompt": "Pense em algo que você não controla e como pode lidar melhor com isso.",
+      "theme": {
+        "curiosity": "Epicteto foi um filósofo que nasceu escravo e, mesmo assim, suas ideias influenciaram imperadores romanos.",
+        "lesson": "Imagine que você está jogando futebol e seu time está perdendo. Você se esforçou, treinou e deu o seu melhor, mas o resultado não foi o esperado. Epicteto, um filósofo grego, ensinou que devemos separar o que podemos controlar do que não podemos. Você controla seu esforço, atitude e preparo, mas não controla o resultado ou o que os outros fazem. Hoje, ao enfrentar desafios, como uma prova difícil ou um jogo, lembre-se de focar no que está em suas mãos: sua dedicação e empenho. Isso ajuda a lidar melhor com as situações, sem se preocupar tanto com o que não depende de você.",
+        "title": "O que está nas minhas mãos?",
+        "whyItMatters": "Entender isso ajuda a lidar melhor com frustrações e desafios."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "O que Epicteto nos ensina sobre controle?",
+          "options": [
+            "Controlar tudo ao nosso redor",
+            "Focar no que podemos controlar",
+            "Ignorar tudo e todos",
+            "Deixar o destino decidir"
+          ],
+          "answer": "Focar no que podemos controlar",
+          "explanation": "Epicteto ensina que devemos focar no que podemos controlar, como nossas atitudes.",
+          "why": "A resposta certa é 'Focar no que podemos controlar' porque é isso que Epicteto ensinava sobre controle.",
+          "trap": "Quem escolhe 'Controlar tudo ao nosso redor' não entendeu que não podemos controlar tudo.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo de futebol, o que você pode controlar?",
+          "options": [
+            "O resultado do jogo",
+            "A atitude em campo",
+            "O desempenho dos outros jogadores",
+            "O clima no dia do jogo"
+          ],
+          "answer": "A atitude em campo",
+          "explanation": "Podemos controlar nossa atitude, mas não o resultado ou o desempenho dos outros.",
+          "why": "A resposta é 'A atitude em campo' porque é algo que está sob nosso controle direto.",
+          "trap": "Escolher 'O resultado do jogo' é um erro, pois o resultado depende de muitos fatores além do nosso controle.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você perdeu um jogo importante. O que é mais sábio fazer?",
+          "options": [
+            "Culpar o juiz pelo resultado",
+            "Refletir sobre como melhorar",
+            "Ficar bravo e não jogar mais",
+            "Ignorar e não pensar no jogo"
+          ],
+          "answer": "Refletir sobre como melhorar",
+          "explanation": "Refletir ajuda a aprender e melhorar para o futuro.",
+          "why": "Refletir sobre como melhorar é sábio porque foca no que você pode controlar: seu aprendizado.",
+          "trap": "Culpar o juiz é tentador, mas não ajuda a melhorar seu desempenho.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual destes eventos ocorreu durante a Revolução Industrial?",
+          "options": [
+            "Invenção da máquina a vapor",
+            "Descobrimento da América",
+            "Queda do Império Romano",
+            "Construção das pirâmides"
+          ],
+          "answer": "Invenção da máquina a vapor",
+          "explanation": "A máquina a vapor foi uma invenção importante da Revolução Industrial.",
+          "why": "A resposta é 'Invenção da máquina a vapor' porque isso ocorreu durante a Revolução Industrial.",
+          "trap": "Escolher 'Descobrimento da América' é um erro, pois aconteceu antes da Revolução Industrial.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um jogador de futebol comete falta grave, o que acontece?",
+          "options": [
+            "Recebe cartão vermelho",
+            "Ganha um gol",
+            "Recebe um prêmio",
+            "Fica com a bola"
+          ],
+          "answer": "Recebe cartão vermelho",
+          "explanation": "Uma falta grave resulta em cartão vermelho, que expulsa o jogador do jogo.",
+          "why": "A resposta é 'Recebe cartão vermelho' porque é a punição para faltas graves no futebol.",
+          "trap": "Escolher 'Ganha um gol' é um erro, pois faltas graves são penalizadas, não recompensadas.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Uma loja vende 3 camisetas por R$ 90. Quanto custa uma camiseta?",
+          "options": [
+            "R$ 30",
+            "R$ 60",
+            "R$ 90",
+            "R$ 120"
+          ],
+          "answer": "R$ 30",
+          "explanation": "Dividindo R$ 90 por 3, cada camiseta custa R$ 30.",
+          "why": "A resposta é 'R$ 30' porque 90 dividido por 3 dá 30, o preço de uma camiseta.",
+          "trap": "Escolher 'R$ 60' é um erro, pois isso seria o preço de duas camisetas, não uma.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  }
+}

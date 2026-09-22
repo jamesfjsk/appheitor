@@ -1,0 +1,583 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-22",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-22",
+  "status": "ready",
+  "theme": {
+    "category": "ingles",
+    "curiosity": "Sabia que 'gol' e 'pênalti' são palavras que vieram do inglês? Elas são usadas em todo o mundo!",
+    "id": "ingles-esporte",
+    "lesson": "Imagine que você está jogando futebol com amigos de outros países. Durante o jogo, alguém grita 'offside!' e você percebe que é uma palavra que já ouviu antes, mas não sabe exatamente o que significa. No futebol, muitas palavras vêm do inglês, como 'goalkeeper' (goleiro), 'kick-off' (início do jogo) e 'striker' (atacante). Hoje, vamos explorar algumas dessas palavras e aprender frases úteis para jogar com estrangeiros. Saber essas palavras pode ajudar você a entender melhor o jogo e até fazer novos amigos de diferentes países.",
+    "title": "Inglês no Futebol: Palavras e Frases",
+    "whyItMatters": "Entender inglês no futebol ajuda a se comunicar globalmente."
+  },
+  "questions": [
+    {
+      "question": "Qual é a função do 'striker' em um time de futebol?",
+      "options": [
+        "Marcar gols",
+        "Defender o gol",
+        "Apitar o jogo",
+        "Organizar a torcida"
+      ],
+      "answer": "Marcar gols",
+      "explanation": "O 'striker' é o jogador responsável por marcar gols para o time.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta é 'Marcar gols' porque o 'striker' é o atacante que tenta fazer gols.",
+      "trap": "Escolher 'Defender o gol' é um erro, pois essa é a função do goleiro.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender",
+      "audioText": "The striker's job is to score goals."
+    },
+    {
+      "question": "Se um time ganha 3 partidas e empata 2, quantos pontos tem no total?",
+      "options": [
+        "11",
+        "10",
+        "9",
+        "12"
+      ],
+      "answer": "11",
+      "explanation": "Cada vitória vale 3 pontos e cada empate vale 1 ponto.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta é 11 porque 3 vitórias (3x3) somam 9 e 2 empates (2x1) somam 2, totalizando 11.",
+      "trap": "Escolher 10 é um erro comum, esquecendo de somar os pontos dos empates.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual frase está correta em inglês?",
+      "options": [
+        "She is a goalkeeper.",
+        "She are a goalkeeper.",
+        "She am a goalkeeper.",
+        "She be a goalkeeper."
+      ],
+      "answer": "She is a goalkeeper.",
+      "explanation": "A conjugação correta do verbo 'to be' com 'she' é 'is'.",
+      "kind": "lesson",
+      "subject": "ingles",
+      "why": "A resposta é 'She is a goalkeeper' porque 'is' é a forma correta do verbo 'to be' para 'she'.",
+      "trap": "Escolher 'She are a goalkeeper' é um erro comum, confundindo 'is' com 'are'.",
+      "skill": "ING.N1.PREP",
+      "bloom": "aplicar",
+      "audioText": "She is a goalkeeper."
+    },
+    {
+      "question": "Qual é a função de um 'kick-off' no futebol?",
+      "options": [
+        "Iniciar o jogo",
+        "Marcar um gol",
+        "Apitar uma falta",
+        "Finalizar o jogo"
+      ],
+      "answer": "Iniciar o jogo",
+      "explanation": "O 'kick-off' é o chute inicial que começa o jogo ou reinicia após um gol.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta é 'Iniciar o jogo' porque 'kick-off' é o chute inicial do jogo.",
+      "trap": "Escolher 'Marcar um gol' é um erro, pois 'kick-off' não é sobre fazer gols.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do 'goalkeeper' em um time de futebol?",
+      "options": [
+        "Defender o gol",
+        "Fazer gols",
+        "Marcar jogadores",
+        "Cobrar escanteios"
+      ],
+      "answer": "Defender o gol",
+      "explanation": "O 'goalkeeper' é o jogador responsável por defender o gol do time.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta é 'Defender o gol' porque essa é a principal função do 'goalkeeper' no futebol.",
+      "trap": "Marcar jogadores pode parecer certo, mas essa não é a função principal do 'goalkeeper'.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender",
+      "audioText": "What does a goalkeeper do?"
+    },
+    {
+      "question": "Heitor tem o triplo da idade do primo. Juntos, eles têm 16 anos. Qual é a idade do primo?",
+      "options": [
+        "4",
+        "12",
+        "8",
+        "6"
+      ],
+      "answer": "4",
+      "explanation": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "trap": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Ache o erro: 'Hércules era famoso pela sua força e cumpriu dez trabalhos quase impossíveis.'",
+      "options": [
+        "Foram doze trabalhos, não dez",
+        "Hércules era famoso pela velocidade",
+        "Hércules era um deus do mar",
+        "Não há erro"
+      ],
+      "answer": "Foram doze trabalhos, não dez",
+      "explanation": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "trap": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Três caixas têm etiquetas: 'maçãs', 'laranjas' e 'mistura', mas todas estão erradas. Você tira uma fruta da caixa 'mistura' e sai uma maçã. O que há nessa caixa?",
+      "options": [
+        "Só maçãs",
+        "Só laranjas",
+        "Maçãs e laranjas misturadas",
+        "Não dá para saber"
+      ],
+      "answer": "Só maçãs",
+      "explanation": "Como a etiqueta 'mistura' está errada, a caixa não é mistura. Saiu maçã, então ela só pode ser a caixa só de maçãs.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Como a etiqueta 'mistura' está errada, a caixa não é mistura. Saiu maçã, então ela só pode ser a caixa só de maçãs.",
+      "trap": "Como a etiqueta 'mistura' está errada, a caixa não é mistura. Saiu maçã, então ela só pode ser a caixa só de maçãs.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual palavra em inglês do futebol você acha mais interessante e por quê?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "audio_mismatch": 2,
+      "certa_mais_longa": 3,
+      "conta_nao_fecha": 2,
+      "definicao": 1,
+      "enunciado_vazou": 3,
+      "ingles_nivel": 1,
+      "why_curto": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "definicao",
+          "audio_mismatch",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "enunciado_vazou",
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "enunciado_vazou",
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "audio_mismatch"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": []
+      },
+      {
+        "i": 12,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": []
+      },
+      {
+        "i": 14,
+        "codes": [
+          "why_curto",
+          "conta_nao_fecha"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "Pergunta de opinião sobre o que fazer em jogo."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": false,
+        "motivo": "Fato não é consenso entre professores."
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "É uma pergunta de opinião ou gosto."
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 3
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "O que significa 'goalkeeper' no futebol?",
+          "options": [
+            "Goleiro",
+            "Atacante",
+            "Juiz",
+            "Torcedor"
+          ],
+          "answer": "Goleiro",
+          "explanation": "A palavra 'goalkeeper' em inglês significa goleiro, que é o jogador que defende o gol.",
+          "why": "A resposta é 'Goleiro' porque o 'goalkeeper' é quem protege o gol.",
+          "trap": "Escolher 'Atacante' é um erro comum, pois o atacante tenta fazer gols, não defendê-los.",
+          "kind": "lesson",
+          "subject": "ingles",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender",
+          "audioText": "Goalkeeper is the player who defends the goal."
+        },
+        {
+          "question": "Durante um jogo, o juiz marca 'offside'. O que aconteceu?",
+          "options": [
+            "Um jogador estava em posição irregular.",
+            "O jogo começou.",
+            "Um gol foi marcado.",
+            "O tempo acabou."
+          ],
+          "answer": "Um jogador estava em posição irregular.",
+          "explanation": "O 'offside' é marcado quando um jogador está em posição irregular no campo.",
+          "why": "A resposta é 'Um jogador estava em posição irregular' porque 'offside' indica uma posição ilegal.",
+          "trap": "Marcar 'O jogo começou' é um erro, pois 'kick-off' é o termo para o início do jogo.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar",
+          "audioText": "Offside means a player is in an illegal position."
+        },
+        {
+          "question": "Você está jogando com amigos estrangeiros e alguém faz uma falta. O que você faz?",
+          "options": [
+            "Grita 'penalty' mesmo sem ter certeza.",
+            "Espera o juiz decidir.",
+            "Discute com o juiz.",
+            "Ignora e continua jogando."
+          ],
+          "answer": "Espera o juiz decidir.",
+          "explanation": "Esperar o juiz decidir é a melhor opção, pois ele é quem aplica as regras.",
+          "why": "Esperar o juiz decidir é sábio porque ele é responsável por aplicar as regras do jogo.",
+          "trap": "Gritar 'penalty' é tentador, mas pode ser precipitado se não for uma falta dentro da área.",
+          "kind": "dilemma",
+          "subject": "futebol",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar",
+          "audioText": "Wait for the referee to decide."
+        },
+        {
+          "question": "Qual é a função do 'striker' em um time de futebol?",
+          "options": [
+            "Marcar gols",
+            "Defender o gol",
+            "Apitar o jogo",
+            "Organizar a torcida"
+          ],
+          "answer": "Marcar gols",
+          "explanation": "O 'striker' é o jogador responsável por marcar gols para o time.",
+          "why": "A resposta é 'Marcar gols' porque o 'striker' é o atacante que tenta fazer gols.",
+          "trap": "Escolher 'Defender o gol' é um erro, pois essa é a função do goleiro.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender",
+          "audioText": "The striker's job is to score goals."
+        },
+        {
+          "question": "Se um time ganha 3 partidas e empata 2, quantos pontos tem no total?",
+          "options": [
+            "11",
+            "10",
+            "9",
+            "12"
+          ],
+          "answer": "11",
+          "explanation": "Cada vitória vale 3 pontos e cada empate vale 1 ponto.",
+          "why": "A resposta é 11 porque 3 vitórias (3x3) somam 9 e 2 empates (2x1) somam 2, totalizando 11.",
+          "trap": "Escolher 10 é um erro comum, esquecendo de somar os pontos dos empates.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais árvores no planeta?",
+          "options": [
+            "Aumentaria o oxigênio",
+            "Diminuiria o oxigênio",
+            "Nada mudaria",
+            "Mais animais apareceriam"
+          ],
+          "answer": "Diminuiria o oxigênio",
+          "explanation": "As árvores são essenciais para a produção de oxigênio através da fotossíntese.",
+          "why": "A resposta é 'Diminuiria o oxigênio' porque as árvores produzem oxigênio necessário para a vida.",
+          "trap": "Escolher 'Aumentaria o oxigênio' é um erro, pois sem árvores, menos oxigênio seria produzido.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual frase está correta em inglês?",
+          "options": [
+            "She is a goalkeeper.",
+            "She are a goalkeeper.",
+            "She am a goalkeeper.",
+            "She be a goalkeeper."
+          ],
+          "answer": "She is a goalkeeper.",
+          "explanation": "A conjugação correta do verbo 'to be' com 'she' é 'is'.",
+          "why": "A resposta é 'She is a goalkeeper' porque 'is' é a forma correta do verbo 'to be' para 'she'.",
+          "trap": "Escolher 'She are a goalkeeper' é um erro comum, confundindo 'is' com 'are'.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "aplicar",
+          "audioText": "She is a goalkeeper."
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a geografia do Brasil?",
+          "options": [
+            "O Brasil é o maior país da América do Sul.",
+            "O Brasil não tem praias.",
+            "O Brasil é um deserto.",
+            "O Brasil não tem florestas."
+          ],
+          "answer": "O Brasil é o maior país da América do Sul.",
+          "explanation": "O Brasil é o maior país da América do Sul em território.",
+          "why": "A resposta é 'O Brasil é o maior país da América do Sul' porque é um fato geográfico reconhecido.",
+          "trap": "Escolher 'O Brasil não tem praias' é um erro, pois o Brasil tem uma extensa costa marítima.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a tradução correta de 'corner' no contexto de futebol?",
+          "options": [
+            "Escanteio",
+            "Gol",
+            "Falta",
+            "Lateral"
+          ],
+          "answer": "Escanteio",
+          "explanation": "No futebol, 'corner' refere-se ao tiro de canto ou escanteio.",
+          "why": "A resposta é 'Escanteio' porque 'corner' é o termo em inglês para o tiro de canto.",
+          "trap": "Escolher 'Gol' é um erro comum, confundindo o termo com outra jogada.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "entender",
+          "audioText": "Corner is a kick from the corner."
+        },
+        {
+          "question": "O que acontece se um jogador de futebol fizer um gol contra?",
+          "options": [
+            "O time adversário ganha um gol.",
+            "O gol é anulado.",
+            "O jogador é expulso.",
+            "O jogo é reiniciado."
+          ],
+          "answer": "O time adversário ganha um gol.",
+          "explanation": "Um gol contra adiciona um ponto ao placar do time adversário.",
+          "why": "A resposta é 'O time adversário ganha um gol' porque um gol contra beneficia o adversário.",
+          "trap": "Escolher 'O gol é anulado' é um erro, pois o gol contra é válido para o adversário.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função de um 'kick-off' no futebol?",
+          "options": [
+            "Iniciar o jogo",
+            "Marcar um gol",
+            "Apitar uma falta",
+            "Finalizar o jogo"
+          ],
+          "answer": "Iniciar o jogo",
+          "explanation": "O 'kick-off' é o chute inicial que começa o jogo ou reinicia após um gol.",
+          "why": "A resposta é 'Iniciar o jogo' porque 'kick-off' é o chute inicial do jogo.",
+          "trap": "Escolher 'Marcar um gol' é um erro, pois 'kick-off' não é sobre fazer gols.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Qual palavra em inglês do futebol você acha mais interessante e por quê?",
+      "theme": {
+        "curiosity": "Sabia que 'gol' e 'pênalti' são palavras que vieram do inglês? Elas são usadas em todo o mundo!",
+        "lesson": "Imagine que você está jogando futebol com amigos de outros países. Durante o jogo, alguém grita 'offside!' e você percebe que é uma palavra que já ouviu antes, mas não sabe exatamente o que significa. No futebol, muitas palavras vêm do inglês, como 'goalkeeper' (goleiro), 'kick-off' (início do jogo) e 'striker' (atacante). Hoje, vamos explorar algumas dessas palavras e aprender frases úteis para jogar com estrangeiros. Saber essas palavras pode ajudar você a entender melhor o jogo e até fazer novos amigos de diferentes países.",
+        "title": "Inglês no Futebol: Palavras e Frases",
+        "whyItMatters": "Entender inglês no futebol ajuda a se comunicar globalmente."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Qual é a função do 'goalkeeper' em um time de futebol?",
+          "options": [
+            "Defender o gol",
+            "Fazer gols",
+            "Marcar jogadores",
+            "Cobrar escanteios"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O 'goalkeeper' é o jogador responsável por defender o gol do time.",
+          "why": "A resposta é 'Defender o gol' porque essa é a principal função do 'goalkeeper' no futebol.",
+          "trap": "Marcar jogadores pode parecer certo, mas essa não é a função principal do 'goalkeeper'.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender",
+          "audioText": "What does a goalkeeper do?"
+        },
+        {
+          "question": "Durante um jogo, o juiz marca 'offside'. O que aconteceu?",
+          "options": [
+            "Um jogador estava adiantado",
+            "A bola saiu do campo",
+            "Foi cometido um pênalti",
+            "Um jogador se machucou"
+          ],
+          "answer": "Um jogador estava adiantado",
+          "explanation": "O 'offside' é marcado quando um jogador está em posição adiantada no campo.",
+          "why": "A resposta é 'Um jogador estava adiantado' porque o 'offside' ocorre nessa situação.",
+          "trap": "A bola saiu do campo pode confundir, mas isso não é 'offside'.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar",
+          "audioText": "What happens at offside?"
+        },
+        {
+          "question": "Você está jogando futebol e um amigo estrangeiro não entende 'kick-off'. O que você faz?",
+          "options": [
+            "Explico que é o início do jogo",
+            "Ignoro e continuo jogando",
+            "Digo que é um tipo de falta",
+            "Peço para ele procurar na internet"
+          ],
+          "answer": "Explico que é o início do jogo",
+          "explanation": "Explicar o termo ajuda na comunicação e compreensão do jogo.",
+          "why": "Explicar que é o início do jogo ajuda seu amigo a entender e participar melhor.",
+          "trap": "Dizer que é um tipo de falta é errado e pode confundir ainda mais.",
+          "kind": "dilemma",
+          "subject": "futebol",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar",
+          "audioText": "What is a kick-off?"
+        },
+        {
+          "question": "Se um time ganha 3 partidas e empata 2, quantos pontos tem no total?",
+          "options": [
+            "11",
+            "9",
+            "10",
+            "12"
+          ],
+          "answer": "11",
+          "explanation": "Cada vitória vale 3 pontos e cada empate vale 1 ponto.",
+          "why": "A resposta é 11 porque 3 vitórias dão 9 pontos e 2 empates dão mais 2 pontos.",
+          "trap": "Quem marca 9 esqueceu de adicionar os pontos dos empates.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  }
+}

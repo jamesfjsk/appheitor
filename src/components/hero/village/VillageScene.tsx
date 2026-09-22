@@ -34,7 +34,6 @@ import {
   pickHit,
   paintEmptyLot,
   skipLotSprite,
-  coverPaintedLookout,
   paintSitLog,
   paintChestGlint,
   chestLidBob,
@@ -1046,10 +1045,6 @@ const VillageScene: React.FC<Props> = ({
             const shaking = cracked && !repairing && !reducedMotion && now < crackShakeUntil.current;
             const shakeX = (shaking ? Math.sin(now / 38) * 2 : 0) + pulse.shakeX;
             const gateLot = gated && !reserved && quizBlocksDest(lotId);
-            if (lot.id === 'torre' && !empty) {
-              const plate = nightGround?.canvas || ground;
-              if (plate) coverPaintedLookout(c, plate);
-            }
             if (empty && lot.id !== 'torre') {
               paintEmptyLot(c, lot.x + pulse.shakeX, lot.y, lot.w, lot.h, night, lot.id === 'mesa' ? '#e8b923' : '#7ecb4a');
             } else if (cracked && heal < 1) {

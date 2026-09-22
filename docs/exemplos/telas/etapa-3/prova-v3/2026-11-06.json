@@ -1,0 +1,462 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-06",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-06",
+  "status": "ready",
+  "theme": {
+    "id": "troco-e-conta",
+    "category": "dinheiro",
+    "title": "Troco de Cabeça: Um Jogo de Números",
+    "lesson": "Imagine que você está na padaria e compra um pão por R$ 2,50 e um suco por R$ 3,75. Você paga com uma nota de R$ 10. Como saber se o troco está certo? Primeiro, complete o valor da compra até o próximo real: R$ 2,50 para R$ 3,00 e R$ 3,75 para R$ 4,00. Depois, some os valores arredondados: R$ 3,00 + R$ 4,00 = R$ 7,00. Finalmente, subtraia do valor pago: R$ 10,00 - R$ 7,00 = R$ 3,00. Assim, você confere o troco rapidamente. Hoje, ao comprar algo, tente usar essa técnica para ver se o troco está correto.",
+    "whyItMatters": "Saber conferir o troco ajuda a evitar erros e economizar dinheiro.",
+    "curiosity": "Sabia que o troco errado é uma das principais causas de reclamações em lojas? E que a prática de conferir o troco pode melhorar suas habilidades matemáticas?"
+  },
+  "questions": [
+    {
+      "question": "Você compra um lanche por R$ 4,25 e um suco por R$ 3,50. Paga com R$ 10,00. Quanto deve receber de troco?",
+      "options": [
+        "R$ 2,25",
+        "R$ 2,75",
+        "R$ 3,00",
+        "R$ 3,25"
+      ],
+      "answer": "R$ 2,25",
+      "explanation": "O total é R$ 7,75. Subtraindo de R$ 10,00, o troco é R$ 2,25.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é R$ 2,25 porque R$ 4,25 mais R$ 3,50 dá R$ 7,75, e R$ 10,00 menos R$ 7,75 é R$ 2,25.",
+      "trap": "Marcar R$ 3,00 erra porque ignora a soma correta dos valores antes de subtrair do total pago.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Na feira, você compra frutas por R$ 5,60 e paga com R$ 10,00. Quanto é o troco correto?",
+      "options": [
+        "R$ 4,40",
+        "R$ 4,50",
+        "R$ 4,60",
+        "R$ 4,70"
+      ],
+      "answer": "R$ 4,40",
+      "explanation": "Subtraia R$ 5,60 de R$ 10,00 para encontrar o troco.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é R$ 4,40 porque R$ 10,00 menos R$ 5,60 resulta em R$ 4,40.",
+      "trap": "Marcar R$ 4,50 erra porque arredonda o valor de forma incorreta antes de subtrair.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você compra um brinquedo por R$ 45,00 e um livro por R$ 30,00. Paga com R$ 100,00. Quanto é o troco?",
+      "options": [
+        "R$ 25,00",
+        "R$ 35,00",
+        "R$ 15,00",
+        "R$ 20,00"
+      ],
+      "answer": "R$ 25,00",
+      "explanation": "O total é R$ 75,00. Subtraindo de R$ 100,00, o troco é R$ 25,00.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta certa é R$ 25,00 porque R$ 45,00 mais R$ 30,00 dá R$ 75,00, e R$ 100,00 menos R$ 75,00 é R$ 25,00.",
+      "trap": "Marcar R$ 35,00 erra porque ignora a soma correta dos valores antes de subtrair do total pago.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se as plantas não fizessem fotossíntese?",
+      "options": [
+        "Aumentaria o oxigênio",
+        "Diminuiria o oxigênio",
+        "Aumentaria o gás carbônico",
+        "Diminuiria o gás carbônico"
+      ],
+      "answer": "Diminuiria o oxigênio",
+      "explanation": "A fotossíntese é responsável pela produção de oxigênio.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Diminuiria o oxigênio' porque a fotossíntese produz oxigênio, essencial para a vida.",
+      "trap": "Marcar 'Aumentaria o oxigênio' erra porque ignora que a fotossíntese é a fonte de oxigênio.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Which sentence is correct?",
+      "options": [
+        "There is a dog in the park",
+        "There are a dog in the park",
+        "There is dogs in the park",
+        "There are dog in the park"
+      ],
+      "answer": "There is a dog in the park",
+      "explanation": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+      "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a dog in the park"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Revolução Francesa?",
+      "options": [
+        "Começou em 1789",
+        "Durou até 1800",
+        "Foi liderada por Napoleão",
+        "Terminou em 1785"
+      ],
+      "answer": "Começou em 1789",
+      "explanation": "A Revolução Francesa começou em 1789, marcando uma grande mudança política.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta certa é 'Começou em 1789' porque é um fato histórico amplamente reconhecido sobre a Revolução Francesa.",
+      "trap": "Marcar 'Durou até 1800' erra porque a Revolução terminou em 1799, não 1800.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do 'cartão vermelho' no futebol?",
+      "options": [
+        "Expulsar um jogador",
+        "Avisar uma falta",
+        "Marcar um gol",
+        "Parar o jogo"
+      ],
+      "answer": "Expulsar um jogador",
+      "explanation": "O cartão vermelho é mostrado para expulsar um jogador do campo.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Expulsar um jogador' porque o cartão vermelho é usado para penalizar faltas graves.",
+      "trap": "Marcar 'Avisar uma falta' erra porque o cartão amarelo é que avisa sobre faltas, não o vermelho.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que aconteceria se a Terra não tivesse atmosfera?",
+      "options": [
+        "A temperatura seria estável",
+        "Não haveria vida",
+        "A água seria abundante",
+        "O ar seria respirável"
+      ],
+      "answer": "Não haveria vida",
+      "explanation": "A atmosfera é essencial para manter condições de vida na Terra.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Não haveria vida' porque a atmosfera protege e sustenta a vida com oxigênio e temperatura adequada.",
+      "trap": "Marcar 'A temperatura seria estável' erra porque a atmosfera regula a temperatura, sem ela haveria extremos.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    }
+  ],
+  "reflectionPrompt": "Como você se sente ao conferir o troco sozinho? Isso te dá mais confiança?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 1,
+      "opcao_caricata": 1,
+      "conta_um_passo": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "certa_mais_longa",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "conta_um_passo"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 8,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [],
+    "fromOffline": 0
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Troco de Cabeça: Um Jogo de Números",
+        "lesson": "Imagine que você está na padaria e compra um pão por R$ 2,50 e um suco por R$ 3,75. Você paga com uma nota de R$ 10. Como saber se o troco está certo? Primeiro, complete o valor da compra até o próximo real: R$ 2,50 para R$ 3,00 e R$ 3,75 para R$ 4,00. Depois, some os valores arredondados: R$ 3,00 + R$ 4,00 = R$ 7,00. Finalmente, subtraia do valor pago: R$ 10,00 - R$ 7,00 = R$ 3,00. Assim, você confere o troco rapidamente. Hoje, ao comprar algo, tente usar essa técnica para ver se o troco está correto.",
+        "whyItMatters": "Saber conferir o troco ajuda a evitar erros e economizar dinheiro.",
+        "curiosity": "Sabia que o troco errado é uma das principais causas de reclamações em lojas? E que a prática de conferir o troco pode melhorar suas habilidades matemáticas?"
+      },
+      "questions": [
+        {
+          "question": "Você compra um lanche por R$ 4,25 e um suco por R$ 3,50. Paga com R$ 10,00. Quanto deve receber de troco?",
+          "options": [
+            "R$ 2,25",
+            "R$ 2,75",
+            "R$ 3,00",
+            "R$ 3,25"
+          ],
+          "answer": "R$ 2,25",
+          "explanation": "O total é R$ 7,75. Subtraindo de R$ 10,00, o troco é R$ 2,25.",
+          "why": "A resposta certa é R$ 2,25 porque R$ 4,25 mais R$ 3,50 dá R$ 7,75, e R$ 10,00 menos R$ 7,75 é R$ 2,25.",
+          "trap": "Marcar R$ 3,00 erra porque ignora a soma correta dos valores antes de subtrair do total pago.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Na feira, você compra frutas por R$ 5,60 e paga com R$ 10,00. Quanto é o troco correto?",
+          "options": [
+            "R$ 4,40",
+            "R$ 4,50",
+            "R$ 4,60",
+            "R$ 4,70"
+          ],
+          "answer": "R$ 4,40",
+          "explanation": "Subtraia R$ 5,60 de R$ 10,00 para encontrar o troco.",
+          "why": "A resposta certa é R$ 4,40 porque R$ 10,00 menos R$ 5,60 resulta em R$ 4,40.",
+          "trap": "Marcar R$ 4,50 erra porque arredonda o valor de forma incorreta antes de subtrair.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está no mercado e percebe que o troco está errado. O que você faz?",
+          "options": [
+            "Conferir o recibo e falar com o caixa",
+            "Ignorar e ir embora",
+            "Pedir para o caixa conferir de novo",
+            "Ficar com o troco errado"
+          ],
+          "answer": "Conferir o recibo e falar com o caixa",
+          "explanation": "Conferir o recibo ajuda a identificar o erro e corrigi-lo.",
+          "why": "Conferir o recibo e falar com o caixa é a atitude mais sábia porque resolve o problema de forma educada e eficaz.",
+          "trap": "Ignorar e ir embora parece mais fácil, mas você perde a chance de corrigir o erro e recuperar seu dinheiro.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Você compra um brinquedo por R$ 45,00 e um livro por R$ 30,00. Paga com R$ 100,00. Quanto é o troco?",
+          "options": [
+            "R$ 25,00",
+            "R$ 35,00",
+            "R$ 15,00",
+            "R$ 20,00"
+          ],
+          "answer": "R$ 25,00",
+          "explanation": "O total é R$ 75,00. Subtraindo de R$ 100,00, o troco é R$ 25,00.",
+          "why": "A resposta certa é R$ 25,00 porque R$ 45,00 mais R$ 30,00 dá R$ 75,00, e R$ 100,00 menos R$ 75,00 é R$ 25,00.",
+          "trap": "Marcar R$ 35,00 erra porque ignora a soma correta dos valores antes de subtrair do total pago.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as plantas não fizessem fotossíntese?",
+          "options": [
+            "Aumentaria o oxigênio",
+            "Diminuiria o oxigênio",
+            "Aumentaria o gás carbônico",
+            "Diminuiria o gás carbônico"
+          ],
+          "answer": "Diminuiria o oxigênio",
+          "explanation": "A fotossíntese é responsável pela produção de oxigênio.",
+          "why": "A resposta certa é 'Diminuiria o oxigênio' porque a fotossíntese produz oxigênio, essencial para a vida.",
+          "trap": "Marcar 'Aumentaria o oxigênio' erra porque ignora que a fotossíntese é a fonte de oxigênio.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Francesa?",
+          "options": [
+            "Começou em 1789",
+            "Durou até 1800",
+            "Foi liderada por Napoleão",
+            "Terminou em 1785"
+          ],
+          "answer": "Começou em 1789",
+          "explanation": "A Revolução Francesa começou em 1789, marcando uma grande mudança política.",
+          "why": "A resposta certa é 'Começou em 1789' porque é um fato histórico amplamente reconhecido sobre a Revolução Francesa.",
+          "trap": "Marcar 'Durou até 1800' erra porque a Revolução terminou em 1799, não 1800.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'cartão vermelho' no futebol?",
+          "options": [
+            "Expulsar um jogador",
+            "Avisar uma falta",
+            "Marcar um gol",
+            "Parar o jogo"
+          ],
+          "answer": "Expulsar um jogador",
+          "explanation": "O cartão vermelho é mostrado para expulsar um jogador do campo.",
+          "why": "A resposta certa é 'Expulsar um jogador' porque o cartão vermelho é usado para penalizar faltas graves.",
+          "trap": "Marcar 'Avisar uma falta' erra porque o cartão amarelo é que avisa sobre faltas, não o vermelho.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você compra um sorvete por R$ 3,75 e paga com R$ 5,00. Quanto é o troco?",
+          "options": [
+            "R$ 1,25",
+            "R$ 1,50",
+            "R$ 1,75",
+            "R$ 2,00"
+          ],
+          "answer": "R$ 1,25",
+          "explanation": "Subtraia R$ 3,75 de R$ 5,00 para encontrar o troco.",
+          "why": "A resposta certa é R$ 1,25 porque R$ 5,00 menos R$ 3,75 resulta em R$ 1,25.",
+          "trap": "Marcar R$ 1,50 erra porque arredonda o valor de forma incorreta antes de subtrair.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se a Terra não tivesse atmosfera?",
+          "options": [
+            "A temperatura seria estável",
+            "Não haveria vida",
+            "A água seria abundante",
+            "O ar seria respirável"
+          ],
+          "answer": "Não haveria vida",
+          "explanation": "A atmosfera é essencial para manter condições de vida na Terra.",
+          "why": "A resposta certa é 'Não haveria vida' porque a atmosfera protege e sustenta a vida com oxigênio e temperatura adequada.",
+          "trap": "Marcar 'A temperatura seria estável' erra porque a atmosfera regula a temperatura, sem ela haveria extremos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Você compra um livro por R$ 22,00 e paga com R$ 50,00. Quanto é o troco?",
+          "options": [
+            "R$ 28,00",
+            "R$ 30,00",
+            "R$ 32,00",
+            "R$ 35,00"
+          ],
+          "answer": "R$ 28,00",
+          "explanation": "Subtraia R$ 22,00 de R$ 50,00 para encontrar o troco.",
+          "why": "A resposta certa é R$ 28,00 porque R$ 50,00 menos R$ 22,00 resulta em R$ 28,00.",
+          "trap": "Marcar R$ 30,00 erra porque ignora a subtração correta do valor pago.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Como você se sente ao conferir o troco sozinho? Isso te dá mais confiança?"
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

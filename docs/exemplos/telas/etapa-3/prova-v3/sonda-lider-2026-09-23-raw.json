@@ -1,0 +1,148 @@
+{
+  "theme": {
+    "title": "Descobrindo os sotaques do Brasil",
+    "lesson": "Você já percebeu como pessoas de diferentes lugares do Brasil falam de jeitos diferentes? Isso acontece por causa dos sotaques, que são influenciados pela história de cada região. Por exemplo, o carioca fala com um 'chiado' porque no Rio de Janeiro, muitos imigrantes portugueses chegaram e influenciaram a forma de falar. Já no sul, muitos imigrantes europeus, como alemães e italianos, trouxeram o uso do 'tu'. Conhecer e respeitar essas diferenças nos ajuda a entender melhor a diversidade do nosso país. Hoje, que tal prestar atenção no jeito que seus amigos e familiares falam e descobrir de onde vêm essas influências?",
+    "whyItMatters": "Entender sotaques nos conecta e valoriza nossa diversidade.",
+    "curiosity": "Você sabia que o Brasil tem mais de 200 línguas faladas? Além do português, há línguas indígenas e de imigrantes."
+  },
+  "questions": [
+    {
+      "question": "Por que o carioca fala com 'chiado'?",
+      "options": [
+        "Influência dos imigrantes portugueses",
+        "Influência dos imigrantes alemães",
+        "Devido ao clima quente",
+        "Por causa da música local"
+      ],
+      "answer": "Influência dos imigrantes portugueses",
+      "explanation": "O sotaque carioca foi influenciado pelos portugueses que chegaram ao Rio de Janeiro.",
+      "why": "A presença de imigrantes portugueses no Rio de Janeiro influenciou o sotaque local.",
+      "trap": "A opção 'Influência dos imigrantes alemães' é um erro comum, mas eles influenciaram mais a região sul.",
+      "kind": "lesson",
+      "subject": "tema",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Como você pode aplicar o conhecimento sobre sotaques na escola?",
+      "options": [
+        "Respeitando as diferentes formas de falar dos colegas",
+        "Imitando o sotaque dos outros para brincar",
+        "Corrigindo sempre que alguém fala diferente",
+        "Evitando conversar com quem tem sotaque diferente"
+      ],
+      "answer": "Respeitando as diferentes formas de falar dos colegas",
+      "explanation": "Respeitar as diferenças de sotaque promove um ambiente mais inclusivo.",
+      "why": "Respeitar e valorizar diferentes sotaques ajuda a criar um ambiente escolar mais inclusivo.",
+      "trap": "A opção 'Imitando o sotaque dos outros para brincar' pode parecer divertida, mas pode ser desrespeitosa.",
+      "kind": "lesson",
+      "subject": "tema",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se você ouvir um amigo imitando o sotaque de outro colega de forma desrespeitosa, o que poderia fazer?",
+      "options": [
+        "Convidar os dois para uma conversa sobre respeito",
+        "Rir junto e imitar também",
+        "Ficar em silêncio para não se envolver",
+        "Contar para a professora imediatamente"
+      ],
+      "answer": "Convidar os dois para uma conversa sobre respeito",
+      "explanation": "Convidar ambos para uma conversa ajuda a resolver o problema de maneira construtiva.",
+      "why": "Uma conversa amigável pode ajudar a esclarecer e promover respeito entre os colegas.",
+      "trap": "A opção 'Rir junto e imitar também' parece divertida, mas perpetua o desrespeito.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "De onde vieram muitos dos imigrantes que influenciaram a cultura do Sul do Brasil?",
+      "options": [
+        "Portugal",
+        "Itália e Alemanha",
+        "Espanha",
+        "Japão"
+      ],
+      "answer": "Itália e Alemanha",
+      "explanation": "Imigrantes italianos e alemães influenciaram a cultura do Sul.",
+      "why": "Os imigrantes italianos e alemães trouxeram tradições e a língua, influenciando a cultura e o sotaque do Sul.",
+      "trap": "A opção 'Portugal' é uma confusão comum, mas a influência portuguesa foi mais forte no Rio.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que acontece se um jogador de futebol tocar a bola com a mão durante o jogo?",
+      "options": [
+        "O jogo continua",
+        "É marcado um pênalti",
+        "É marcada falta",
+        "O jogador é expulso"
+      ],
+      "answer": "É marcada falta",
+      "explanation": "Tocar a bola com a mão resulta em uma falta.",
+      "why": "Quando um jogador toca a bola com a mão, a regra do futebol determina que se marque falta.",
+      "trap": "A opção 'É marcado um pênalti' é errada pois só ocorre na área do goleiro.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem R$ 300 e quer comprar um brinquedo que custa R$ 125, quanto sobrará?",
+      "options": [
+        "R$ 200",
+        "R$ 175",
+        "R$ 125",
+        "R$ 50"
+      ],
+      "answer": "R$ 175",
+      "explanation": "Subtrair R$ 125 de R$ 300 resulta em R$ 175.",
+      "why": "Subtraindo o custo do brinquedo do valor total, você descobre quanto ainda terá.",
+      "trap": "A opção 'R$ 125' confunde quem só vê o preço do brinquedo.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se não houvesse plantas na Terra?",
+      "options": [
+        "Mais oxigênio no ar",
+        "Menos oxigênio no ar",
+        "Mais água potável",
+        "Menos luz solar"
+      ],
+      "answer": "Menos oxigênio no ar",
+      "explanation": "Plantas produzem oxigênio através da fotossíntese.",
+      "why": "Sem plantas, a fotossíntese não ocorreria, diminuindo o oxigênio disponível no ambiente.",
+      "trap": "A opção 'Mais oxigênio no ar' é um erro inverso comum, já que plantas produzem oxigênio.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Which sentence is correct?",
+      "options": [
+        "There is a apple on the table.",
+        "There are a book on the table.",
+        "There is an apple on the table.",
+        "There is an books on the table."
+      ],
+      "answer": "There is an apple on the table.",
+      "explanation": "Usamos 'an' antes de vogais, como em 'an apple'.",
+      "why": "A regra gramatical correta é usar 'an' antes de palavras que começam com som de vogal.",
+      "trap": "A opção 'There is a apple on the table.' parece correta, mas falta 'an' antes de 'apple'.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "skill": "NIVEL1",
+      "bloom": "aplicar",
+      "audioText": "There is an apple on the table."
+    }
+  ],
+  "reflectionPrompt": "Como você se sente quando ouve alguém falando com um sotaque diferente do seu?"
+}

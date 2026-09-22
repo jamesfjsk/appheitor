@@ -1,0 +1,562 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-13",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-13",
+  "status": "ready",
+  "theme": {
+    "id": "direitos-da-crianca",
+    "category": "cidadania",
+    "title": "Direitos das Crianças: Conheça Seus Direitos!",
+    "lesson": "Imagine que você está jogando futebol com seus amigos e, de repente, alguém diz que você não pode jogar porque precisa trabalhar. Parece estranho, não é? Isso porque, no Brasil e em muitos outros países, as crianças têm direitos especiais. Elas têm o direito de estudar, brincar, ter saúde e ser ouvidas. Essas regras existem para proteger as crianças e garantir que elas tenham uma infância feliz e segura. Se você sentir que algum desses direitos não está sendo respeitado, pode falar com um adulto de confiança ou procurar ajuda em organizações que defendem os direitos das crianças.",
+    "whyItMatters": "Saber seus direitos ajuda a garantir uma infância segura e feliz.",
+    "curiosity": "Antigamente, crianças trabalhavam em minas e fábricas por longas horas. Hoje, isso é proibido em muitos países."
+  },
+  "questions": [
+    {
+      "question": "Qual é um dos direitos fundamentais das crianças?",
+      "options": [
+        "Trabalhar",
+        "Estudar",
+        "Dirigir",
+        "Votar"
+      ],
+      "answer": "Estudar",
+      "explanation": "Estudar é um direito fundamental das crianças, garantido por leis.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "Estudar é um direito porque a educação é essencial para o desenvolvimento e futuro das crianças.",
+      "trap": "Marcar 'Trabalhar' engana porque crianças não devem trabalhar, mas sim estudar e brincar.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Declaração dos Direitos da Criança?",
+      "options": [
+        "Foi criada em 1959",
+        "Foi criada em 2000",
+        "Foi criada em 1800",
+        "Nunca foi criada"
+      ],
+      "answer": "Foi criada em 1959",
+      "explanation": "A Declaração dos Direitos da Criança foi adotada pela ONU em 1959.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é que foi criada em 1959 porque é um fato histórico reconhecido.",
+      "trap": "Marcar 'Foi criada em 2000' engana porque é uma data muito posterior à real.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do capitão no futebol?",
+      "options": [
+        "Liderar o time",
+        "Marcar gols",
+        "Apitar o jogo",
+        "Vender ingressos"
+      ],
+      "answer": "Liderar o time",
+      "explanation": "O capitão é responsável por liderar e motivar o time em campo.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é liderar o time porque o capitão tem a função de ser o líder dentro de campo.",
+      "trap": "Marcar 'Marcar gols' engana porque essa é uma função de todos os jogadores, não só do capitão.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é o direito que toda criança tem em relação ao trabalho?",
+      "options": [
+        "Não trabalhar",
+        "Trabalhar meio período",
+        "Trabalhar em tempo integral",
+        "Escolher se quer trabalhar"
+      ],
+      "answer": "Não trabalhar",
+      "explanation": "Crianças têm o direito de não trabalhar para garantir uma infância saudável.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é não trabalhar porque as leis protegem as crianças do trabalho infantil.",
+      "trap": "Marcar 'Trabalhar meio período' engana porque crianças não devem trabalhar, mas sim estudar e brincar.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Por que é importante que as crianças tenham o direito de brincar?",
+      "options": [
+        "Ajuda no desenvolvimento físico e mental",
+        "É apenas uma forma de passar o tempo",
+        "Não tem importância significativa",
+        "É uma obrigação das crianças"
+      ],
+      "answer": "Ajuda no desenvolvimento físico e mental",
+      "explanation": "Brincar é essencial para o desenvolvimento saudável das crianças.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é que brincar ajuda no desenvolvimento físico e mental, pois promove habilidades sociais e cognitivas.",
+      "trap": "A opção 'É apenas uma forma de passar o tempo' engana quem não percebe a importância do brincar no desenvolvimento.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Ao nível do mar, a água ferve a 100 °C. O que acontece no alto de uma montanha muito alta?",
+      "options": [
+        "Ela ferve com temperatura menor que 100 °C",
+        "Ela ferve com temperatura maior que 100 °C",
+        "Ela não consegue ferver",
+        "Ela ferve exatamente a 100 °C"
+      ],
+      "answer": "Ela ferve com temperatura menor que 100 °C",
+      "explanation": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "trap": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?",
+      "options": [
+        "34 cm",
+        "17 cm",
+        "60 cm",
+        "24 cm"
+      ],
+      "answer": "34 cm",
+      "explanation": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "trap": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Quantos minutos há em 2 horas e meia?",
+      "options": [
+        "150",
+        "120",
+        "130",
+        "250"
+      ],
+      "answer": "150",
+      "explanation": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "trap": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual direito das crianças você acha mais importante e por quê?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "tamanho_opcoes": 3,
+      "tipos_mistos": 3,
+      "opcao_caricata": 3,
+      "conta_um_passo": 2,
+      "certa_mais_longa": 1,
+      "duplicata": 1,
+      "enunciado_vazou": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": [
+          "tamanho_opcoes",
+          "tipos_mistos",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "tamanho_opcoes",
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": [
+          "tamanho_opcoes",
+          "tipos_mistos",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": []
+      },
+      {
+        "i": 12,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": []
+      },
+      {
+        "i": 14,
+        "codes": [
+          "conta_um_passo"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A pergunta pede o que ele faria."
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 3
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Direitos das Crianças: Conheça Seus Direitos!",
+        "lesson": "Imagine que você está jogando futebol com seus amigos e, de repente, alguém diz que você não pode jogar porque precisa trabalhar. Parece estranho, não é? Isso porque, no Brasil e em muitos outros países, as crianças têm direitos especiais. Elas têm o direito de estudar, brincar, ter saúde e ser ouvidas. Essas regras existem para proteger as crianças e garantir que elas tenham uma infância feliz e segura. Se você sentir que algum desses direitos não está sendo respeitado, pode falar com um adulto de confiança ou procurar ajuda em organizações que defendem os direitos das crianças.",
+        "whyItMatters": "Saber seus direitos ajuda a garantir uma infância segura e feliz.",
+        "curiosity": "Antigamente, crianças trabalhavam em minas e fábricas por longas horas. Hoje, isso é proibido em muitos países."
+      },
+      "questions": [
+        {
+          "question": "Qual é um dos direitos fundamentais das crianças?",
+          "options": [
+            "Trabalhar",
+            "Estudar",
+            "Dirigir",
+            "Votar"
+          ],
+          "answer": "Estudar",
+          "explanation": "Estudar é um direito fundamental das crianças, garantido por leis.",
+          "why": "Estudar é um direito porque a educação é essencial para o desenvolvimento e futuro das crianças.",
+          "trap": "Marcar 'Trabalhar' engana porque crianças não devem trabalhar, mas sim estudar e brincar.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma criança não está sendo ouvida em casa, o que ela pode fazer?",
+          "options": [
+            "Ficar calada",
+            "Conversar com um adulto de confiança",
+            "Ignorar",
+            "Fugir"
+          ],
+          "answer": "Conversar com um adulto de confiança",
+          "explanation": "Conversar com um adulto de confiança pode ajudar a resolver a situação.",
+          "why": "Conversar com um adulto de confiança é importante para garantir que a criança seja ouvida e protegida.",
+          "trap": "Marcar 'Ficar calada' engana porque não resolve o problema e a criança continua sem ser ouvida.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo trabalhando em vez de ir à escola. O que você faz?",
+          "options": [
+            "Conta para um adulto de confiança",
+            "Ignora",
+            "Diz que está tudo bem",
+            "Faz o mesmo"
+          ],
+          "answer": "Conta para um adulto de confiança",
+          "explanation": "Contar para um adulto de confiança ajuda a proteger o direito à educação do amigo.",
+          "why": "Contar para um adulto de confiança é a melhor opção porque ajuda a garantir que o amigo possa voltar a estudar.",
+          "trap": "Marcar 'Ignora' engana porque não ajuda a resolver a situação e o amigo continua sem estudar.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 200 reais e compra um par de chuteiras por 150 reais, quanto sobra?",
+          "options": [
+            "50",
+            "100",
+            "150",
+            "200"
+          ],
+          "answer": "50",
+          "explanation": "Subtraindo 150 de 200, sobra 50 reais.",
+          "why": "A resposta certa é 50 porque 200 menos 150 resulta em 50 reais sobrando.",
+          "trap": "Marcar 100 erra porque é o valor pago, não o que sobra.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as crianças não tivessem direito à saúde?",
+          "options": [
+            "Ficariam doentes com mais frequência",
+            "Seriam mais saudáveis",
+            "Teriam superpoderes",
+            "Nada mudaria"
+          ],
+          "answer": "Ficariam doentes com mais frequência",
+          "explanation": "Sem acesso à saúde, as crianças ficariam mais vulneráveis a doenças.",
+          "why": "A resposta certa é que ficariam doentes com mais frequência porque a saúde é essencial para prevenir doenças.",
+          "trap": "Marcar 'Nada mudaria' engana porque a falta de saúde afeta diretamente o bem-estar das crianças.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a ball on the field",
+            "There are a ball on the field",
+            "There is balls on the field",
+            "There are ball on the field"
+          ],
+          "answer": "There is a ball on the field",
+          "audioText": "There is a ball on the field",
+          "why": "A frase certa é There is a ball on the field porque 'is' é usado para singular, enquanto 'are' é para plural.",
+          "trap": "A frase There are a ball on the field engana quem acha que 'are' serve para qualquer quantidade.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Declaração dos Direitos da Criança?",
+          "options": [
+            "Foi criada em 1959",
+            "Foi criada em 2000",
+            "Foi criada em 1800",
+            "Nunca foi criada"
+          ],
+          "answer": "Foi criada em 1959",
+          "explanation": "A Declaração dos Direitos da Criança foi adotada pela ONU em 1959.",
+          "why": "A resposta certa é que foi criada em 1959 porque é um fato histórico reconhecido.",
+          "trap": "Marcar 'Foi criada em 2000' engana porque é uma data muito posterior à real.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do capitão no futebol?",
+          "options": [
+            "Liderar o time",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Vender ingressos"
+          ],
+          "answer": "Liderar o time",
+          "explanation": "O capitão é responsável por liderar e motivar o time em campo.",
+          "why": "A resposta certa é liderar o time porque o capitão tem a função de ser o líder dentro de campo.",
+          "trap": "Marcar 'Marcar gols' engana porque essa é uma função de todos os jogadores, não só do capitão.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma criança não pode ir à escola, o que ela deve fazer?",
+          "options": [
+            "Ficar em casa",
+            "Trabalhar",
+            "Pedir ajuda a um adulto",
+            "Ignorar"
+          ],
+          "answer": "Pedir ajuda a um adulto",
+          "explanation": "Pedir ajuda a um adulto pode ajudar a resolver o problema e garantir o direito à educação.",
+          "why": "A resposta certa é pedir ajuda a um adulto porque isso pode garantir que a criança volte a estudar.",
+          "trap": "Marcar 'Ficar em casa' engana porque não resolve o problema da falta de acesso à educação.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é o direito que toda criança tem em relação ao trabalho?",
+          "options": [
+            "Não trabalhar",
+            "Trabalhar meio período",
+            "Trabalhar em tempo integral",
+            "Escolher se quer trabalhar"
+          ],
+          "answer": "Não trabalhar",
+          "explanation": "Crianças têm o direito de não trabalhar para garantir uma infância saudável.",
+          "why": "A resposta certa é não trabalhar porque as leis protegem as crianças do trabalho infantil.",
+          "trap": "Marcar 'Trabalhar meio período' engana porque crianças não devem trabalhar, mas sim estudar e brincar.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "O que uma criança pode fazer se seus direitos não estão sendo respeitados?",
+          "options": [
+            "Ficar quieta",
+            "Procurar ajuda",
+            "Ignorar",
+            "Aceitar"
+          ],
+          "answer": "Procurar ajuda",
+          "explanation": "Procurar ajuda é importante para garantir que os direitos sejam respeitados.",
+          "why": "A resposta certa é procurar ajuda porque isso pode resolver a situação e proteger os direitos da criança.",
+          "trap": "Marcar 'Ficar quieta' engana porque não ajuda a resolver a situação e os direitos continuam não sendo respeitados.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Qual direito das crianças você acha mais importante e por quê?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que é importante que as crianças tenham o direito de brincar?",
+          "options": [
+            "Ajuda no desenvolvimento físico e mental",
+            "É apenas uma forma de passar o tempo",
+            "Não tem importância significativa",
+            "É uma obrigação das crianças"
+          ],
+          "answer": "Ajuda no desenvolvimento físico e mental",
+          "explanation": "Brincar é essencial para o desenvolvimento saudável das crianças.",
+          "why": "A resposta certa é que brincar ajuda no desenvolvimento físico e mental, pois promove habilidades sociais e cognitivas.",
+          "trap": "A opção 'É apenas uma forma de passar o tempo' engana quem não percebe a importância do brincar no desenvolvimento.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma criança está doente, qual direito ela deve exercer?",
+          "options": [
+            "Direito à saúde",
+            "Direito ao trabalho",
+            "Direito à educação",
+            "Direito ao lazer"
+          ],
+          "answer": "Direito à saúde",
+          "explanation": "Crianças doentes precisam de cuidados médicos, um direito garantido.",
+          "why": "A resposta certa é o direito à saúde, pois crianças doentes precisam de tratamento médico adequado.",
+          "trap": "A opção 'Direito à educação' engana quem não percebe que saúde é prioridade quando se está doente.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo que não quer ir à escola. O que você faz?",
+          "options": [
+            "Conversa com ele sobre a importância da escola",
+            "Ignora e vai embora",
+            "Diz para ele que escola é chata",
+            "Fala para ele não se preocupar com isso"
+          ],
+          "answer": "Conversa com ele sobre a importância da escola",
+          "explanation": "Conversar pode ajudar o amigo a entender a importância da educação.",
+          "why": "A melhor escolha é conversar sobre a importância da escola, pois isso pode motivá-lo a frequentar as aulas.",
+          "trap": "A opção 'Diz para ele que escola é chata' engana quem não percebe que isso desmotiva ainda mais.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Uma criança lê 15 páginas por dia. Quantas páginas ela lê em 4 dias?",
+          "options": [
+            "60",
+            "45",
+            "75",
+            "30"
+          ],
+          "answer": "60",
+          "explanation": "Multiplicando 15 páginas por 4 dias, temos 60 páginas.",
+          "why": "A resposta certa é 60 porque 15 vezes 4 dá 60, que é o total de páginas lidas.",
+          "trap": "Quem marca 45 pode ter confundido a multiplicação ou somado errado os dias.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

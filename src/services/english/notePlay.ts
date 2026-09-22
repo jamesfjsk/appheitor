@@ -73,6 +73,20 @@ export function missingLine(infos: NoteInfo[]): string {
   return `Isso ainda não é o recado. Faltou ${first}. Ouve o inglês e monta de novo.`;
 }
 
+/** Degrau 1: só o banco, forma base, minúsculas. O resto ele digita (R6). */
+export function trayForStage(stage: number, model: string, bank: string[], extraPhrases: string[] = []): string[] {
+  if (stage !== 1) return trayWords(model, bank, extraPhrases);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of bank) {
+    const t = raw.replace(/[.,!?;:"“”]/g, '').trim().toLowerCase();
+    if (!t || seen.has(t)) continue;
+    seen.add(t);
+    out.push(t);
+  }
+  return out;
+}
+
 /** Palavras da frase-guia + o que já vinha no banco. Sem isso a bandeja mente. */
 export function trayWords(model: string, bank: string[], extraPhrases: string[] = []): string[] {
   const seen = new Set<string>();
@@ -205,6 +219,7 @@ export function moldFromModel(model: string, infos: NoteInfo[]): MoldedNote {
   }
   const merged = mergeNeighborPicks(picks, out);
   const slots = merged.map((p) => p.en);
+  if (slots.length < 2 || slots.some((s) => /[.!?]/.test(s))) return { mold: '', slots: [] };
   [...merged].sort((a, b) => b.start - a.start).forEach((p) => {
     out = `${out.slice(0, p.start)}___${out.slice(p.end)}`;
   });
@@ -218,6 +233,7 @@ export function moldFromModel(model: string, infos: NoteInfo[]): MoldedNote {
     .replace(/([.,!?])([A-Za-z])/g, '$1 $2')
     .replace(/\s+/g, ' ')
     .trim();
+  if (gapCount(mold) < 2) return { mold: '', slots: [] };
   return { mold, slots };
 }
 
@@ -250,13 +266,21 @@ const clipQuote = (written: string): string => {
   return `"${wrote.length > 72 ? `${wrote.slice(0, 69)}…` : wrote}"`;
 };
 
-/** Fala deste recado e deste pedaço — sem glossário genérico e sem repetir o modelo. */
-export function teachFromRecado(info: NoteInfo, brief: string, written: string): { say: string; hear: string } {
+/** Fala deste recado e deste pedaço — sem glossário genérico, sem colar o pedido inteiro. */
+export function teachFromRecado(info: NoteInfo, _brief: string, written: string): { say: string; hear: string } {
   const en = info.en[0] ?? '';
-  return {
-    say: `Neste recado, ${info.pt} se diz ${en}. O pedido era: ${brief} Você escreveu ${clipQuote(written)} — isso não traz ${info.pt}. Ouve ${en} e põe no quadro.`,
-    hear: en,
-  };
+  const raw = `Neste recado, ${info.pt} se diz ${en}. Você escreveu ${clipQuote(written)} — isso não traz ${info.pt}. Ouve ${en} e põe no quadro.`;
+  const say = raw.length > 220 ? `${raw.slice(0, 217).trimEnd()}…` : raw;
+  return { say, hear: en };
+}
+
+/** A fala da falta entra se não for preguiçosa e se não couber o modelo inteiro dentro dela. */
+export function explainSayOk(say: string, model: string): boolean {
+  const said = say.trim();
+  const mold = model.trim();
+  if (!said || isLazyNote(said)) return false;
+  if (mold && said.toLowerCase().includes(mold.toLowerCase())) return false;
+  return true;
 }
 
 export function isLazyNote(note: string): boolean {

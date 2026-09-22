@@ -6,7 +6,7 @@
   "spots": [
     { "id": "floor-a", "role": "floor", "x": 320, "y": 400, "w": 150, "h": 136 },
     { "id": "floor-b", "role": "floor", "x": 540, "y": 414, "w": 168, "h": 136 },
-    { "id": "wall", "role": "wall", "x": 690, "y": 128, "w": 176, "h": 176 },
+    { "id": "wall", "role": "wall", "x": 690, "y": 128, "w": 176, "h": 176, "baseY": 440 },
     { "id": "counter", "role": "counter", "x": 920, "y": 378, "w": 168, "h": 126 }
   ]
 }

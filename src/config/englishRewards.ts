@@ -64,6 +64,13 @@ export function noteMaterial(score: number): MaterialCount {
   return 0;
 }
 
+/** Se o Capataz já ajudou na falta, o teto é o mesmo do texto mostrado no Comerciante. */
+export function noteHelpedMaterial(score: number, helped: boolean): MaterialCount {
+  const m = noteMaterial(score);
+  if (!helped) return m;
+  return Math.min(m, MERCHANT_TEXT_SHOWN_CAP) as MaterialCount;
+}
+
 /** Ferraria: >= 5 acertos de primeira = 3; 3-4 = 2; senão 0 (a 2ª tentativa é treino, não conta) */
 export function forgeMaterial(hits: number): MaterialCount {
   if (hits >= FORGE_THRESHOLDS.three) return 3;

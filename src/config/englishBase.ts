@@ -157,8 +157,8 @@ export const BUILDINGS: BuildingDef[] = [
     description: 'A casa do Sábio e da prova do dia.',
     effects: [
       'Você escolhe o tema da história de amanhã na Mina.',
-      'Estante de erros e Diário.',
-      '1 dica grátis por dia no Recado; o Sábio responde ao Diário.',
+      'Você vê como vai em cada matéria e a prova revisita um erro antigo.',
+      '1 dica grátis no Recado e a revisita paga o dobro.',
     ],
     effect: 'Você escolhe o tema da história de amanhã na Mina.',
     icon: '/assets/village/buildings/mesa-1.png',
@@ -217,6 +217,8 @@ export const BUILDINGS: BuildingDef[] = [
     costs: [cost(1, 1, 1, 0), cost(2, 1, 1, 1), cost(3, 2, 2, 1)],
     requiresCore: false,
     hideOnBaseMap: true,
+    liveMaxLevel: 2,
+    opensIn: 'Etapa 3',
   },
   {
     id: 'agenda',

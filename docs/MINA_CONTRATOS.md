@@ -31,19 +31,16 @@ Todo contrato abre em **tela cheia**, como a Vagoneta, dentro de uma cena da Min
 
 ## 3. Cada tipo, como lugar
 
-### 3.1 Entrega do comerciante (preposições de lugar)
+### 3.1 Entrega do comerciante (preposições de lugar) — o jogo entregue
 
-Hoje: "Ouvir 1", "Ouvir 2", grade de quatro quadrados com nomes em inglês e uma bandeja. É o tipo em que o Heitor mais erra (in, on, under, next to) e o mais fácil de virar jogo.
+Tela cheia no armazém (`MerchantDelivery`). Quatro âncoras da cena (`floor-a`, `floor-b`, `wall`, `counter`). O que entra no sorteio do armazém: baú, caixa, forno, barril, mesa, prateleira, tapete, banco, porta, janela. Cama e cerca ficam de fora. Preposições: **in, on, under, next to**. Sem between, behind, cores ou "in front of".
 
-- **Cena**: o armazém do Comerciante visto de frente, com os 4 lugares desenhados de verdade (uma caixa no chão, uma mesa, uma janela com parapeito, uma estante): o item **entra no lugar certo visualmente** (em cima da mesa fica em cima; dentro da caixa some pela metade; embaixo da janela fica no chão junto da parede; ao lado fica ao lado).
-- **Fluxo**: o Comerciante fala o pedido (balão com botão de ouvir; o texto aparece depois de ouvir); a criança arrasta o item da bandeja para o lugar; o item **se encaixa** com um estalo; quando termina o pedido, aperta "Entregar"; o Comerciante confere na hora: certo, ele guarda e agradece; errado, ele devolve o item para a bandeja e diz a frase certa apontando ("On the box, not in."), uma vez por pedido, e a criança tenta de novo. **A recompensa é só da primeira entrega** (decisão 23 do lançamento: tentar de novo ensina, não paga; sem aviso explícito).
-- **Conteúdo**: 2 a 4 pedidos por contrato conforme o nível; as preposições vão entrando pelo nível (in/on; depois under/next to; depois between/behind/in front of); quantidades (two lamps) e cores nos níveis altos.
-- **Mede**: por pedido, preposição certa ou errada, quantidade certa, ouvidas, texto aberto, tentativas.
-- **Os três requisitos do pai (18/09) para a mecânica ficar perfeita**:
-  1. **Áudio bom e claro**: a voz da Mina (`gpt-4o-mini-tts`, voz `nova`) passa a receber `instructions` fixas ("fale devagar e com clareza, tom acolhedor, para uma criança de 10 anos aprendendo inglês; pausa curta entre as palavras da frase") e velocidade 0,9; botão **"Ouvir devagar"** (0,75) ao lado do "Ouvir"; cada palavra do pedido também tem áudio isolado ao tocar nela (glossário sonoro); tudo em cache por hash como hoje (`functions/src/index.ts`, o hash inclui velocidade e instruções). Aceite: o pai ouve 10 pedidos e não pede para repetir nenhum.
-  2. **Imagens num padrão só**: hoje os lugares e itens vêm de quatro conjuntos diferentes (`ui/base/s_*`, `ui/base/i_*`, `ui/*.webp`, `images/object_*`) e o bolo é uma mancha escura. Todos os 12 lugares e 17 itens são gerados de novo pelo líder no PixelLab com o mesmo prompt de estilo (contorno preto simples, sombra básica, vista frontal, fundo transparente; lugares em 96 px, itens em 64 px), guardados em `public/assets/village/merchant/spot-<id>.png` e `item-<id>.png`, e o `englishBase.ts` passa a apontar para eles. Nada de item que não dê para reconhecer sem o nome.
-  3. **Nome só no toque** (mantido como está: é assim que ele aprende a palavra pelo som e pela imagem): o nome em inglês do lugar ou do item aparece ao clicar ou passar o mouse, com o áudio da palavra; nunca escrito embaixo de tudo.
-  E o acabamento de jogo: o item voa da bandeja para o lugar com uma curva e um estalo; ao cair no lugar errado ele escorrega e cai no chão; o Comerciante olha para onde a criança arrasta; ao entregar tudo certo ele bate palma e os vagões de material entram.
+- **Pedidos**: 2 (n1), 3 (n2), 4 (n3). Pedido 1 mostra 1 móvel; pedido 2 mostra 2; daí 3. Uma colocação por pedido (empilhar `qty` no mesmo tapete vale para *two apples*). Segundo tapete escorrega. `boots` só sai com qty 1. `under` não nasce em porta, janela nem cerca. `in the oven` só com item de cozinha (maçã, banana, laranja, bolo, balde).
+- **Cola**: pedido 1 sem zona acesa e sem rótulo no tapete. O rótulo da preposição (`on`, `in`…) só aparece em `padMode 'hint'` depois do erro.
+- **Ouvir**: o inglês toca primeiro; `listens` só sobe quando o áudio acabou. O texto EN aparece depois (`textShown` = a frase chegou a abrir, não marca de erro). Clique no item ou no lugar fala a palavra em inglês. Hover não fala. Fala PT com `{ lang: 'pt', speed: TTS_SPEED_TALK }`. Frase mista = duas chamadas.
+- **Erro**: o item volta à bandeja. A tela e o áudio EN mostram `correctionFix.en` ("On the box, not in."). Depois a boca em PT. Cada tentativa grava `missKind` em `details.misses`: `relation | item | qty | spot`. Ele continua até o pedido fechar. Sem aviso de que a segunda não paga (decisão 23). O Comerciante só vira a página quando a entrega acerta.
+- **Paga**: só a primeira entrega (decisão 23). Sem aviso na tela.
+- **Mede**: `listens`, `textShown`, `attempts`, `misses`, `firstHits` / `finalHits`.
 
 ### 3.2 Recado do dia (escrever)
 

@@ -1,0 +1,134 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-08",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-08",
+  "status": "ready",
+  "theme": {
+    "lesson": "O fermento faz gás dentro da massa e o calor prende as bolhas. Por que abrir o forno cedo murcha o bolo, e a diferença entre o fermento químico e o fermento vivo do pão.",
+    "curiosity": "Sabia que o fermento vivo é feito de microorganismos que respiram e liberam gás? É como se o pão tivesse um exército invisível trabalhando.",
+    "whyItMatters": "Pensar sobre isso hoje já é um passo.",
+    "title": "Por que o bolo cresce",
+    "category": "cotidiano",
+    "id": "bolo-cresce"
+  },
+  "questions": [
+    {
+      "question": "Qual frase é verdadeira sobre a internet?",
+      "options": [
+        "Ela foi inventada junto com a televisão",
+        "Ela liga computadores do mundo todo por cabos e sinais",
+        "Ela existe desde 1900",
+        "Ela funciona sem nenhum cabo em lugar nenhum"
+      ],
+      "answer": "Ela liga computadores do mundo todo por cabos e sinais",
+      "explanation": "Até o wi-fi da sua casa termina num cabo, e cabos enormes cruzam o fundo dos oceanos ligando os continentes.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "O que significa a placa 'EXIT' num shopping?",
+      "options": [
+        "Fechado",
+        "Cuidado",
+        "Entrada",
+        "Saída"
+      ],
+      "answer": "Saída",
+      "explanation": "'Exit' é saída. Entrada é 'entrance', e 'closed' é fechado.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Estime: quantos litros de água um banho de 10 minutos gasta num chuveiro comum?",
+      "options": [
+        "Cerca de 2 litros",
+        "Cerca de 100 litros",
+        "Cerca de 1.000 litros",
+        "Cerca de 10 litros"
+      ],
+      "answer": "Cerca de 100 litros",
+      "explanation": "Um chuveiro comum solta uns 8 a 10 litros por minuto. Em 10 minutos, dá perto de 100 litros, o mesmo que 50 garrafas de 2 litros.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Ache o erro: 'Hércules era famoso pela sua força e cumpriu dez trabalhos quase impossíveis.'",
+      "options": [
+        "Não há erro",
+        "Foram doze trabalhos, não dez",
+        "Hércules era um deus do mar",
+        "Hércules era famoso pela velocidade"
+      ],
+      "answer": "Foram doze trabalhos, não dez",
+      "explanation": "Os doze trabalhos de Hércules incluíam vencer o leão de Nemeia e limpar os estábulos de Áugias em um dia.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Um time começa com 11 jogadores e tem 2 expulsos. Com quantos fica, e o jogo continua?",
+      "options": [
+        "9, e o jogo continua",
+        "9, e o jogo acaba",
+        "8, e o jogo continua",
+        "10, e o jogo continua"
+      ],
+      "answer": "9, e o jogo continua",
+      "explanation": "11 − 2 = 9 jogadores. A partida só é encerrada se um time ficar com menos de 7 em campo.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Heitor tem o triplo da idade do primo. Juntos, eles têm 16 anos. Qual é a idade do primo?",
+      "options": [
+        "12",
+        "4",
+        "8",
+        "6"
+      ],
+      "answer": "4",
+      "explanation": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Uma vela acesa é coberta por um pote de vidro fechado. Depois de um tempo ela apaga. Por quê?",
+      "options": [
+        "O vidro esfria a chama",
+        "A cera derreteu toda",
+        "O oxigênio dentro do pote acabou",
+        "O pote é feito de material que apaga fogo"
+      ],
+      "answer": "O oxigênio dentro do pote acabou",
+      "explanation": "O fogo precisa de oxigênio para continuar queimando. Quando ele acaba dentro do pote, a chama morre, mesmo com cera sobrando.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "O que aconteceria se todo mundo mentisse o tempo todo?",
+      "options": [
+        "Ninguém confiaria em ninguém e as promessas perderiam valor",
+        "As pessoas seriam mais felizes",
+        "As mentiras virariam verdades",
+        "Nada mudaria"
+      ],
+      "answer": "Ninguém confiaria em ninguém e as promessas perderiam valor",
+      "explanation": "A mentira só funciona porque a maioria fala a verdade. Se todos mentissem, nem a mentira funcionaria mais.",
+      "kind": "knowledge",
+      "subject": "geral"
+    }
+  ],
+  "reflectionPrompt": "O que você aprendeu hoje que pode usar amanhã?",
+  "source": "offline",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 1,
+    "dropped": {
+      "conta_nao_fecha": 1,
+      "sinonimas": 1,
+      "why_curto": 1,
+      "why_sem_resposta": 5
+    }
+  }
+}

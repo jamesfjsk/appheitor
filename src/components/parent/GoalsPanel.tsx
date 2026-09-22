@@ -26,8 +26,8 @@ const GoalsPanel: React.FC = () => {
   return (
     <div className="bg-white rounded-lg shadow p-4 space-y-3">
       <h3 className="text-lg font-semibold text-gray-900">Cofrinho</h3>
-      {goals.length === 0 && <p className="text-sm text-gray-500">Nenhuma meta ainda.</p>}
-      {goals.map((g) => (
+      {goals.filter((g) => g.status !== 'cancelled').length === 0 && <p className="text-sm text-gray-500">Nenhuma meta ainda.</p>}
+      {goals.filter((g) => g.status !== 'cancelled').map((g) => (
         <div key={g.id} className="border border-gray-200 rounded p-3 flex flex-wrap justify-between gap-2">
           <div>
             <p className="font-medium">{g.title}</p>

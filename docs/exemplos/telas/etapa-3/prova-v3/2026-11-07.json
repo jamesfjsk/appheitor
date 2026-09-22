@@ -1,0 +1,511 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-07",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-07",
+  "status": "ready",
+  "theme": {
+    "id": "futebol-tatica",
+    "category": "futebol",
+    "title": "Ler o Jogo: A Arte de Não Correr",
+    "lesson": "Imagine um time de futebol que parece não correr muito, mas ainda assim vence o jogo. Isso acontece porque eles sabem se posicionar bem e usar a linha de passe. A linha de passe é quando os jogadores passam a bola rapidamente entre si, fazendo a bola correr mais do que eles. Isso cansa menos e pode ser mais eficiente. O zagueiro, por exemplo, observa o movimento dos atacantes e a posição da bola para se antecipar. Hoje, ao assistir ou jogar futebol, observe como os jogadores se posicionam e como a bola se move pelo campo.",
+    "whyItMatters": "Entender como ler o jogo ajuda a tomar decisões melhores e mais rápidas.",
+    "curiosity": "Sabia que a bola pode alcançar velocidades de até 120 km/h em um chute? Isso é mais rápido do que qualquer jogador pode correr!"
+  },
+  "questions": [
+    {
+      "question": "Por que um time que 'não corre' pode ganhar?",
+      "options": [
+        "Eles se posicionam bem",
+        "Eles têm sorte",
+        "Eles têm jogadores altos",
+        "Eles jogam em casa"
+      ],
+      "answer": "Eles se posicionam bem",
+      "explanation": "O posicionamento permite que o time use a linha de passe de forma eficiente.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Eles se posicionam bem' porque isso permite que usem a linha de passe e economizem energia.",
+      "trap": "A opção 'Eles têm sorte' engana quem pensa que ganhar depende apenas de sorte, mas estratégia é crucial.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que aconteceria se não houvesse gravidade na Terra?",
+      "options": [
+        "Tudo flutuaria",
+        "Nada mudaria",
+        "A água ferveria",
+        "O ar sumiria"
+      ],
+      "answer": "Tudo flutuaria",
+      "explanation": "A gravidade mantém tudo no chão; sem ela, tudo flutuaria.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Tudo flutuaria' porque a gravidade é o que nos mantém no chão.",
+      "trap": "A opção 'Nada mudaria' engana quem não entende a importância da gravidade.",
+      "skill": "CIE.CAUSA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre o descobrimento do Brasil?",
+      "options": [
+        "Foi em 1500",
+        "Foi em 1600",
+        "Foi em 1700",
+        "Foi em 1800"
+      ],
+      "answer": "Foi em 1500",
+      "explanation": "O Brasil foi descoberto por Pedro Álvares Cabral em 1500.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Foi em 1500' porque esse é o ano em que Pedro Álvares Cabral chegou ao Brasil.",
+      "trap": "A opção 'Foi em 1600' engana quem confunde com outros eventos históricos.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do goleiro no futebol?",
+      "options": [
+        "Defender o gol",
+        "Marcar gols",
+        "Apitar o jogo",
+        "Treinar o time"
+      ],
+      "answer": "Defender o gol",
+      "explanation": "O goleiro é responsável por impedir que a bola entre no gol.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Defender o gol' porque essa é a principal função do goleiro em um time.",
+      "trap": "A opção 'Marcar gols' engana quem não conhece bem as posições no futebol.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que aconteceria se o Sol apagasse de repente?",
+      "options": [
+        "A Terra esfriaria",
+        "Nada mudaria",
+        "O ar sumiria",
+        "A água ferveria"
+      ],
+      "answer": "A Terra esfriaria",
+      "explanation": "O Sol é a principal fonte de calor da Terra.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'A Terra esfriaria' porque o Sol fornece calor e luz essenciais para a vida.",
+      "trap": "A opção 'Nada mudaria' engana quem não percebe a importância do Sol para o clima.",
+      "skill": "CIE.CAUSA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do meio-campista no futebol?",
+      "options": [
+        "Controlar o jogo",
+        "Defender o gol",
+        "Marcar gols",
+        "Apitar o jogo"
+      ],
+      "answer": "Controlar o jogo",
+      "explanation": "O meio-campista ajuda a organizar o time e distribuir a bola.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Controlar o jogo' porque o meio-campista organiza e distribui a bola no campo.",
+      "trap": "A opção 'Marcar gols' engana quem acha que todos os jogadores têm essa função principal.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você viajar do Brasil para o Japão, o que acontece com o relógio quando chegar lá?",
+      "options": [
+        "Ele precisa adiantar várias horas",
+        "Ele fica igual",
+        "Ele precisa atrasar várias horas",
+        "Só muda o dia da semana"
+      ],
+      "answer": "Ele precisa adiantar várias horas",
+      "explanation": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "kind": "knowledge",
+      "subject": "geografia",
+      "why": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "trap": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "skill": "GEO.FATO",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Heitor tem o triplo da idade do primo. Juntos, eles têm 16 anos. Qual é a idade do primo?",
+      "options": [
+        "4",
+        "12",
+        "8",
+        "6"
+      ],
+      "answer": "4",
+      "explanation": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "trap": "Se o primo tem 1 parte, Heitor tem 3 partes: são 4 partes no total. 16 ÷ 4 = 4, então o primo tem 4 anos e Heitor, 12.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você pode usar a ideia de ler o jogo em outras áreas da sua vida?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "tamanho_opcoes": 1,
+      "conta_um_passo": 3,
+      "duplicata": 2,
+      "why_curto": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": [
+          "why_curto",
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "duplicata"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "Pede o que ele faria, não é um fato."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas"
+    ],
+    "fromOffline": 2
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Ler o Jogo: A Arte de Não Correr",
+        "lesson": "Imagine um time de futebol que parece não correr muito, mas ainda assim vence o jogo. Isso acontece porque eles sabem se posicionar bem e usar a linha de passe. A linha de passe é quando os jogadores passam a bola rapidamente entre si, fazendo a bola correr mais do que eles. Isso cansa menos e pode ser mais eficiente. O zagueiro, por exemplo, observa o movimento dos atacantes e a posição da bola para se antecipar. Hoje, ao assistir ou jogar futebol, observe como os jogadores se posicionam e como a bola se move pelo campo.",
+        "whyItMatters": "Entender como ler o jogo ajuda a tomar decisões melhores e mais rápidas.",
+        "curiosity": "Sabia que a bola pode alcançar velocidades de até 120 km/h em um chute? Isso é mais rápido do que qualquer jogador pode correr!"
+      },
+      "questions": [
+        {
+          "question": "Por que um time que 'não corre' pode ganhar?",
+          "options": [
+            "Eles se posicionam bem",
+            "Eles têm sorte",
+            "Eles têm jogadores altos",
+            "Eles jogam em casa"
+          ],
+          "answer": "Eles se posicionam bem",
+          "explanation": "O posicionamento permite que o time use a linha de passe de forma eficiente.",
+          "why": "A resposta certa é 'Eles se posicionam bem' porque isso permite que usem a linha de passe e economizem energia.",
+          "trap": "A opção 'Eles têm sorte' engana quem pensa que ganhar depende apenas de sorte, mas estratégia é crucial.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo, o que um zagueiro deve observar?",
+          "options": [
+            "A posição da bola e dos atacantes",
+            "A cor do uniforme",
+            "O placar do jogo",
+            "A torcida"
+          ],
+          "answer": "A posição da bola e dos atacantes",
+          "explanation": "Observar a bola e os atacantes ajuda o zagueiro a se antecipar.",
+          "why": "A resposta certa é 'A posição da bola e dos atacantes' porque isso permite ao zagueiro se antecipar e defender melhor.",
+          "trap": "A opção 'O placar do jogo' engana quem acha que isso é mais importante do que a posição dos jogadores.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você está jogando futebol e seu time está cansado. O que você faz?",
+          "options": [
+            "Passa a bola rapidamente",
+            "Corre mais rápido",
+            "Chuta de qualquer lugar",
+            "Fica parado"
+          ],
+          "answer": "Passa a bola rapidamente",
+          "explanation": "Passar a bola rapidamente usa menos energia e mantém o controle do jogo.",
+          "why": "Passar a bola rapidamente é a melhor escolha porque economiza energia e mantém o controle do jogo.",
+          "trap": "Correr mais rápido parece ajudar, mas cansa o time ainda mais, sem garantir o controle da bola.",
+          "kind": "dilemma",
+          "subject": "futebol",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 500 reais e compra um jogo por 150 reais e um livro por 100 reais, quanto sobra?",
+          "options": [
+            "250",
+            "350",
+            "200",
+            "300"
+          ],
+          "answer": "250",
+          "explanation": "Primeiro subtraia 150 de 500, depois subtraia 100 do resultado.",
+          "why": "A resposta certa é 250 porque 500 menos 150 é 350, e 350 menos 100 é 250.",
+          "trap": "Quem marca 350 esqueceu de subtrair o preço do livro após o jogo.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse gravidade na Terra?",
+          "options": [
+            "Tudo flutuaria",
+            "Nada mudaria",
+            "A água ferveria",
+            "O ar sumiria"
+          ],
+          "answer": "Tudo flutuaria",
+          "explanation": "A gravidade mantém tudo no chão; sem ela, tudo flutuaria.",
+          "why": "A resposta certa é 'Tudo flutuaria' porque a gravidade é o que nos mantém no chão.",
+          "trap": "A opção 'Nada mudaria' engana quem não entende a importância da gravidade.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque 'is' é usado para singular.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que 'are' serve para qualquer substantivo.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o descobrimento do Brasil?",
+          "options": [
+            "Foi em 1500",
+            "Foi em 1600",
+            "Foi em 1700",
+            "Foi em 1800"
+          ],
+          "answer": "Foi em 1500",
+          "explanation": "O Brasil foi descoberto por Pedro Álvares Cabral em 1500.",
+          "why": "A resposta certa é 'Foi em 1500' porque esse é o ano em que Pedro Álvares Cabral chegou ao Brasil.",
+          "trap": "A opção 'Foi em 1600' engana quem confunde com outros eventos históricos.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do goleiro no futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O goleiro é responsável por impedir que a bola entre no gol.",
+          "why": "A resposta certa é 'Defender o gol' porque essa é a principal função do goleiro em um time.",
+          "trap": "A opção 'Marcar gols' engana quem não conhece bem as posições no futebol.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um time faz 3 gols no primeiro tempo e 2 no segundo, quantos gols fez no total?",
+          "options": [
+            "5",
+            "3",
+            "2",
+            "6"
+          ],
+          "answer": "5",
+          "explanation": "Some os gols do primeiro e do segundo tempo.",
+          "why": "A resposta certa é 5 porque 3 mais 2 é igual a 5.",
+          "trap": "Quem marca 3 esqueceu de somar os gols do segundo tempo.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se o Sol apagasse de repente?",
+          "options": [
+            "A Terra esfriaria",
+            "Nada mudaria",
+            "O ar sumiria",
+            "A água ferveria"
+          ],
+          "answer": "A Terra esfriaria",
+          "explanation": "O Sol é a principal fonte de calor da Terra.",
+          "why": "A resposta certa é 'A Terra esfriaria' porque o Sol fornece calor e luz essenciais para a vida.",
+          "trap": "A opção 'Nada mudaria' engana quem não percebe a importância do Sol para o clima.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do meio-campista no futebol?",
+          "options": [
+            "Controlar o jogo",
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo"
+          ],
+          "answer": "Controlar o jogo",
+          "explanation": "O meio-campista ajuda a organizar o time e distribuir a bola.",
+          "why": "A resposta certa é 'Controlar o jogo' porque o meio-campista organiza e distribui a bola no campo.",
+          "trap": "A opção 'Marcar gols' engana quem acha que todos os jogadores têm essa função principal.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você pode usar a ideia de ler o jogo em outras áreas da sua vida?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Se um time faz 2 gols no primeiro tempo e 3 no segundo, quantos gols fez no total?",
+          "options": [
+            "5",
+            "4",
+            "6",
+            "3"
+          ],
+          "answer": "5",
+          "explanation": "A resposta certa é 5 porque 2 mais 3 somam 5 gols no total.",
+          "why": "A resposta certa é 5 porque somamos 2 gols do primeiro tempo com 3 do segundo tempo.",
+          "trap": "Quem marca 4 pode ter somado errado, esquecendo de um dos gols do segundo tempo.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the yard",
+            "There are a dog in the yard",
+            "There is dogs in the yard",
+            "There are dog in the yard"
+          ],
+          "answer": "There is a dog in the yard",
+          "audioText": "There is a dog in the yard",
+          "why": "A frase certa é There is a dog in the yard porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the yard engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

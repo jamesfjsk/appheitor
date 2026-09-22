@@ -80,6 +80,17 @@ export function stepsFor(level: number): number {
 /** Chance de a bandeja ter 1 unidade a mais do item pedido (obriga a contar) */
 const EXTRA_STOCK_CHANCE = 0.35;
 
+export const KITCHEN_ITEMS = new Set(['apple', 'banana', 'orange', 'cake', 'bucket']);
+const SKIP_WAREHOUSE = new Set(['bed', 'fence']);
+const NO_UNDER = new Set(['door', 'window', 'fence']);
+
+/** Cama e cerca fora do armazém; under só em móvel, não em porta/janela/cerca (F12). */
+export function warehouseSpots(catalog: MerchantSpotDef[]): MerchantSpotDef[] {
+  return catalog
+    .filter((s) => !SKIP_WAREHOUSE.has(s.id))
+    .map((s) => (NO_UNDER.has(s.id) ? { ...s, relations: s.relations.filter((r) => r !== 'under') } : s));
+}
+
 const toSpot = (s: MerchantSpotDef): MerchantSpot => ({ id: s.id, label: s.label, image: s.image, relations: [...s.relations] });
 
 /**
@@ -90,10 +101,11 @@ const toSpot = (s: MerchantSpotDef): MerchantSpot => ({ id: s.id, label: s.label
 export function buildMerchantRoom(
   seed: number,
   level: number,
-  spotsCatalog: MerchantSpotDef[] = MERCHANT_CATALOGS.spots,
+  spotsCatalogIn: MerchantSpotDef[] = MERCHANT_CATALOGS.spots,
   itemsCatalog: MerchantItemDef[] = MERCHANT_CATALOGS.items,
   opts: MerchantRoomOpts = {}
 ): MerchantRoom {
+  const spotsCatalog = warehouseSpots(spotsCatalogIn);
   const rng = createRng(seed);
   const lv = clampLevel(level);
   const done = Math.max(0, Math.floor(opts.done ?? 0));
@@ -124,17 +136,18 @@ export function buildMerchantRoom(
       if (!spots.some((s) => s.id === held.id)) spots[spots.length - 1] = held;
     }
   }
-  const extraTray = Math.min(2, Math.floor(done / 3));
+    const extraTray = Math.min(2, Math.floor(done / 3));
   const chosen = seededShuffle(itemsCatalog, rng).slice(0, count + 1 + extraTray);
   const usedSpots = new Set<string>();
   const steps: MerchantStep[] = [];
   for (let i = 0; i < count; i++) {
     const canContrast = i === count - 1 && Boolean(reservedId);
     const want: Relation = canContrast ? contrast : focus;
-    const itemId = chosen[i].id;
+    let itemId = chosen[i].id;
+    const fitsOven = (s: MerchantSpotDef) => s.id !== 'oven' || want !== 'in' || KITCHEN_ITEMS.has(itemId);
     const free = (list: typeof spots) =>
-      list.filter((s) => !banned.has(merchantStepKey({ item: itemId, relation: want, spot: s.id })));
-    const open = free(
+      list.filter((s) => !banned.has(merchantStepKey({ item: itemId, relation: want, spot: s.id })) && fitsOven(s));
+    let open = free(
       spots.filter(
         (s) =>
           s.relations.includes(want) &&
@@ -142,12 +155,33 @@ export function buildMerchantRoom(
           (canContrast || !reservedId || s.id !== reservedId)
       )
     );
-    const fallback = free(spots.filter((s) => s.relations.includes(want)));
-    const spot = pickOne(rng, open.length ? open : fallback.length ? fallback : spots);
+    let fallback = free(spots.filter((s) => s.relations.includes(want)));
+    if (!open.length && !fallback.length && want === 'in' && !KITCHEN_ITEMS.has(itemId)) {
+      const swap = chosen.findIndex((it, j) => j > i && j < count && KITCHEN_ITEMS.has(it.id));
+      if (swap >= 0) {
+        const tmp = chosen[i];
+        chosen[i] = chosen[swap];
+        chosen[swap] = tmp;
+        itemId = chosen[i].id;
+        open = free(
+          spots.filter(
+            (s) =>
+              s.relations.includes(want) &&
+              !usedSpots.has(s.id) &&
+              (canContrast || !reservedId || s.id !== reservedId)
+          )
+        );
+        fallback = free(spots.filter((s) => s.relations.includes(want)));
+      }
+    }
+    const pool = open.length ? open : fallback.length ? fallback : spots.filter(fitsOven);
+    const spot = pickOne(rng, pool.length ? pool : spots);
     const qtyMax = lv === 1 ? 2 : 3;
-    const qty = (
+    const pluralOnly = itemsCatalog.find((it) => it.id === itemId)?.pluralOnly === true;
+    const rawQty = (
       i === 0 && done < 2 ? 1 : i === 0 ? ((done % 2 === 0 ? 2 : 1) as 1 | 2) : randInt(rng, 1, qtyMax)
     ) as 1 | 2 | 3;
+    const qty = pluralOnly ? 1 : rawQty;
     steps.push({ item: itemId, qty, relation: want, spot: spot.id });
     usedSpots.add(spot.id);
   }
@@ -248,6 +282,9 @@ export function gapped(sentences: string[], steps: MerchantStep[], catalogs: Mer
 
 /** Compara o estado final da sala com os passos (item, qty, relação, lugar); cada colocação vale uma vez */
 export function evaluateRoom(steps: MerchantStep[], placements: MerchantPlacement[]): RoomEvaluation {
+  if (steps.length === 1 && new Set(placements.map((p) => `${p.spot}:${p.relation}`)).size > 1) {
+    return { hits: 0, perStep: [false] };
+  }
   const used = new Set<number>();
   const perStep = steps.map((step) => {
     const idx = placements.findIndex(

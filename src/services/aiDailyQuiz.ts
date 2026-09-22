@@ -3,13 +3,23 @@
 // Roda com antecedência (em segundo plano ou pelo painel), nunca na hora de abrir.
 // ========================================
 
-import { DailyQuizQuestion, DailyQuizTheme } from '../types';
+import { DailyQuizQuestion, DailyQuizSanitize, DailyQuizTheme } from '../types';
 import { callOpenAI, isAIConfigured, loadOfflineQuestions, sanitizeQuestions } from './aiQuiz';
 import { childAgeToday } from '../config/rules';
 import { QuizThemeSeed } from '../config/quizCurriculum';
 import { weekdayOf } from '../utils/clock';
-import { DAILY_QUIZ_MODEL, reflectionLocalSay, touchesIdea, REFLECT_OFFTOPIC } from './quiz/provaRules';
+import { DAILY_QUIZ_MODEL, normalizeQuizText, reflectionLocalSay, touchesIdea, REFLECT_OFFTOPIC } from './quiz/provaRules';
 import { buildPrompt } from './quiz/dailyPrompt';
+import { QUIZ_SPARE, QUIZ_VALIDATOR_ENFORCE, quizMaxTokens } from './quiz/quizTokens';
+import { applyReview, parseReview, REVIEWER_MODEL, reviewBatch, reviewSystem, type ReviewItem } from './quiz/reviewer';
+import {
+  canonSubject,
+  fillToCount,
+  hashOf,
+  selectValidQuestions,
+  SUBJECTS,
+  type RawQuestion,
+} from './quiz/validateQuestion';
 
 export { buildPrompt } from './quiz/dailyPrompt';
 
@@ -18,9 +28,40 @@ export interface GeneratedDailyQuiz {
   questions: DailyQuizQuestion[];
   reflectionPrompt: string;
   source: 'ai' | 'offline';
+  sanitize?: DailyQuizSanitize;
+  /** Saída crua da IA, para calibrar o validador. */
+  raw?: unknown;
 }
 
 const LESSON_QUESTIONS = 3;
+
+function toDaily(q: RawQuestion, i: number): DailyQuizQuestion {
+  const kind =
+    q.kind === 'dilemma' || q.skill === 'LIC.DILEMA'
+      ? 'dilemma'
+      : q.kind === 'lesson' || i < LESSON_QUESTIONS
+        ? 'lesson'
+        : 'knowledge';
+  const explanation =
+    typeof q.explanation === 'string' && q.explanation.trim()
+      ? q.explanation.trim()
+      : typeof q.why === 'string'
+        ? q.why.trim()
+        : '';
+  return {
+    question: String(q.question ?? '').trim(),
+    options: (q.options ?? []).map((o) => String(o)),
+    answer: String(q.answer ?? ''),
+    explanation,
+    kind,
+    subject: typeof q.subject === 'string' && q.subject.trim() ? q.subject : kind === 'lesson' ? 'tema' : 'geral',
+    ...(q.why ? { why: q.why } : {}),
+    ...(q.trap ? { trap: q.trap } : {}),
+    ...(q.skill ? { skill: q.skill } : {}),
+    ...(q.bloom ? { bloom: q.bloom } : {}),
+    ...(q.audioText ? { audioText: q.audioText } : {}),
+  };
+}
 
 function coerceQuestions(raw: unknown, count: number, avoid: string[]): DailyQuizQuestion[] {
   const base = sanitizeQuestions(raw, avoid);
@@ -48,35 +89,107 @@ function themeFrom(parsed: Record<string, unknown>, seed: QuizThemeSeed): DailyQ
   };
 }
 
-async function askAi(
-  seed: QuizThemeSeed,
-  count: number,
-  age: number,
-  weekday: number,
-  avoid: string[],
+const REFLECTION_FALLBACK = 'O que você aprendeu hoje que pode usar amanhã?';
+
+function reflectionOf(parsed: Record<string, unknown>): string {
+  return typeof parsed.reflectionPrompt === 'string' && parsed.reflectionPrompt.trim()
+    ? parsed.reflectionPrompt.trim()
+    : REFLECTION_FALLBACK;
+}
+
+async function reviewApproved(questions: RawQuestion[], level: number, signal?: AbortSignal): Promise<ReviewItem[] | null> {
+  if (questions.length === 0) return [];
+  const user = questions
+    .map((q, i) =>
+      JSON.stringify({
+        n: i + 1,
+        question: q.question,
+        options: q.options,
+        answer: q.answer,
+        why: q.why,
+        subject: q.subject,
+        skill: q.skill,
+      }),
+    )
+    .join('\n');
+  try {
+    const raw = await callOpenAI(reviewSystem(level), user, 900, {
+      signal,
+      model: REVIEWER_MODEL,
+      temperature: 0,
+      timeoutMs: 45000,
+    });
+    return parseReview(raw);
+  } catch (error) {
+    console.warn('aiDailyQuiz: revisor sem resposta, vale o validador local', error);
+    return null;
+  }
+}
+
+function bumpDropped(into: Record<string, number>, from: Record<string, number>) {
+  for (const [code, n] of Object.entries(from)) into[code] = (into[code] ?? 0) + n;
+}
+
+function discardLines(
+  list: RawQuestion[],
+  perQuestion: { i: number; codes: string[] }[],
+  motivos: { n: number; motivo: string; question: string }[],
+): string[] {
+  const lines = perQuestion
+    .filter((row) => row.codes.length > 0)
+    .map((row) => `${row.codes.join('+')} — ${String(list[row.i]?.question ?? '').slice(0, 140)}`);
+  for (const m of motivos) lines.push(`revisor: ${m.motivo} — ${m.question.slice(0, 140)}`);
+  return lines;
+}
+
+async function loadOfflineCandidates(avoid: string[]): Promise<RawQuestion[]> {
+  try {
+    const response = await fetch('/data/quizData.json');
+    if (!response.ok) return [];
+    const data = (await response.json()) as unknown;
+    if (!Array.isArray(data)) return [];
+    const skip = new Set(avoid.map((q) => normalizeQuizText(q)));
+    const out: RawQuestion[] = [];
+    for (const item of data) {
+      if (!item || typeof item !== 'object') continue;
+      const row = item as Record<string, unknown>;
+      const question = typeof row.question === 'string' ? row.question.trim() : '';
+      const answer = typeof row.answer === 'string' ? row.answer.trim() : '';
+      const explanation = typeof row.explanation === 'string' ? row.explanation.trim() : '';
+      const options = Array.isArray(row.options) ? row.options.filter((o): o is string => typeof o === 'string') : [];
+      if (!question || !answer || options.length !== 4 || skip.has(normalizeQuizText(question))) continue;
+      const mapped = canonSubject(typeof row.category === 'string' ? row.category : '');
+      const subject = SUBJECTS.has(mapped) ? mapped : 'tema';
+      out.push({
+        question,
+        options,
+        answer,
+        explanation,
+        why: explanation,
+        trap: explanation,
+        subject,
+        kind: 'knowledge',
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+async function callQuiz(
+  system: string,
+  user: string,
+  tokens: number,
   signal?: AbortSignal,
-): Promise<{ theme: DailyQuizTheme; questions: DailyQuizQuestion[]; reflectionPrompt: string } | null> {
-  const system = buildPrompt(seed, count, age, weekday);
-  const recent = avoid.slice(0, 60);
-  const avoidText = recent.length
-    ? `Perguntas já usadas (não repita nem parafraseie):\n- ${recent.join('\n- ')}`
-    : 'Primeira prova: capriche.';
-  const parsed = (await callOpenAI(system, avoidText, 260 * count + 1100, {
+): Promise<Record<string, unknown> | null> {
+  const parsed = (await callOpenAI(system, user, tokens, {
     signal,
     model: DAILY_QUIZ_MODEL,
-    temperature: 0.7,
-  })) as Record<string, unknown>;
-  const theme = themeFrom(parsed, seed);
-  const questions = coerceQuestions(parsed.questions, count, avoid);
-  if (!theme || questions.length < Math.min(count, 5)) return null;
-  return {
-    theme,
-    questions,
-    reflectionPrompt:
-      typeof parsed.reflectionPrompt === 'string' && parsed.reflectionPrompt.trim()
-        ? parsed.reflectionPrompt.trim()
-        : 'O que você aprendeu hoje que pode usar amanhã?',
-  };
+    temperature: 0.2,
+    timeoutMs: 100000,
+  })) as Record<string, unknown> | null;
+  return parsed && typeof parsed === 'object' ? parsed : null;
 }
 
 export async function generateDailyQuiz(opts: {
@@ -86,38 +199,167 @@ export async function generateDailyQuiz(opts: {
   date: string;
   signal?: AbortSignal;
   forceOffline?: boolean;
+  englishLevel?: number;
 }): Promise<GeneratedDailyQuiz> {
   const age = childAgeToday();
   const weekday = weekdayOf(opts.date);
-  if (!opts.forceOffline && isAIConfigured()) {
+  const englishLevel = opts.englishLevel ?? 1;
+  const avoidHashes = opts.avoidQuestions.map(hashOf);
+  const ctx = {
+    englishLevel,
+    avoidHashes: new Set(avoidHashes),
+  };
+
+  const offlineQuiz = async (sanitize?: DailyQuizSanitize): Promise<GeneratedDailyQuiz> => {
+    const offline = await loadOfflineQuestions(opts.count, opts.avoidQuestions);
+    const questions = coerceQuestions(
+      offline.map((q) => ({ ...q, kind: 'knowledge', subject: 'geral' })),
+      opts.count,
+      opts.avoidQuestions,
+    );
+    return {
+      theme: {
+        id: opts.seed.id,
+        category: opts.seed.category,
+        title: opts.seed.title,
+        lesson: opts.seed.seed,
+        whyItMatters: 'Pensar sobre isso hoje já é um passo.',
+      },
+      questions,
+      reflectionPrompt: REFLECTION_FALLBACK,
+      source: 'offline',
+      sanitize: sanitize ?? { kept: questions.length, dropped: {} },
+    };
+  };
+
+  if (opts.forceOffline || !isAIConfigured()) return offlineQuiz();
+
+  const system = buildPrompt({
+    seed: opts.seed,
+    count: opts.count,
+    spare: QUIZ_SPARE,
+    age,
+    weekday,
+    englishLevel,
+    avoidHashes,
+  });
+  const asked = opts.count + QUIZ_SPARE;
+  const recent = opts.avoidQuestions.slice(0, 60);
+  const avoidText = recent.length
+    ? `Perguntas já usadas (não repita nem parafraseie):\n- ${recent.join('\n- ')}`
+    : 'Primeira prova: capriche.';
+  const userOrder = `${avoidText}\n\nO array questions tem exatamente ${asked} objetos. ${opts.count} não basta: faltam as ${QUIZ_SPARE} de folga. Conte os objetos antes de responder.`;
+
+  let first: Record<string, unknown> | null = null;
+  try {
+    first = await callQuiz(system, userOrder, quizMaxTokens(opts.count, QUIZ_SPARE), opts.signal);
+  } catch (error) {
+    console.warn('aiDailyQuiz: falha na IA, usando offline', error);
+    return offlineQuiz();
+  }
+  const theme = first ? themeFrom(first, opts.seed) : null;
+  if (!first || !theme) return offlineQuiz();
+
+  const dropped: Record<string, number> = {};
+  const perQuestion: { i: number; codes: string[] }[] = [];
+  const local = selectValidQuestions(first.questions, { ...ctx, lesson: theme.lesson }, QUIZ_VALIDATOR_ENFORCE);
+  bumpDropped(dropped, local.dropped);
+  perQuestion.push(...local.perQuestion);
+  const review = await reviewApproved(local.kept, englishLevel, opts.signal);
+  const judged = applyReview(local.kept, review);
+  let pool = judged.kept;
+  const motivos = [...judged.motivos];
+  const reviewLog: ReviewItem[] = review ?? [];
+  let reviewFellBack = review === null;
+
+  let replacement: Record<string, unknown> | null = null;
+  if (pool.length < opts.count) {
+    const missing = opts.count - pool.length;
+    const firstList = Array.isArray(first.questions) ? (first.questions as RawQuestion[]) : [];
+    const reasons = discardLines(firstList, local.perQuestion, motivos);
+    const fallen = local.perQuestion
+      .filter((row) => row.codes.some((code) => code !== 'conta_nao_fecha'))
+      .map((row) => String(firstList[row.i]?.question ?? '').trim())
+      .filter(Boolean);
+    const approved = pool.map((q) => String(q.question ?? '')).filter(Boolean);
+    const user = `Faltam ${missing} perguntas NOVAS. Devolva JSON {"questions":[ exatamente ${missing} objetos ]} no mesmo formato da prova.
+Cada why e cada trap em português, com 16 palavras ou mais, no tamanho do modelo da abelha. A opção certa não pode ser a única mais longa. Matemática em duas etapas, nunca 90 dividido por 3. Inglês: why em português, frase de no máximo 7 palavras.
+Não devolva de novo uma pergunta que já caiu. Escreva outro enunciado.
+Caíram por isto:
+${reasons.slice(0, 24).join('\n') || 'o validador recusou o lote'}
+Proibido repetir:
+${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${q}`).join('\n')}`;
     try {
-      let got = await askAi(opts.seed, opts.count, age, weekday, opts.avoidQuestions, opts.signal);
-      if (!got || got.questions.length < 5) {
-        const extraAvoid = [...opts.avoidQuestions, ...(got?.questions.map((q) => q.question) ?? [])];
-        const again = await askAi(opts.seed, opts.count, age, weekday, extraAvoid, opts.signal);
-        if (again && again.questions.length >= 5) got = again;
-      }
-      if (got && got.questions.length >= 5) {
-        return { ...got, source: 'ai' };
-      }
-      console.warn('aiDailyQuiz: resposta incompleta da IA, usando offline', { n: got?.questions.length ?? 0 });
+      replacement = await callQuiz(
+        buildPrompt({
+          seed: opts.seed,
+          count: missing,
+          spare: 0,
+          age,
+          weekday,
+          englishLevel,
+          avoidHashes,
+        }),
+        user,
+        quizMaxTokens(missing, 0),
+        opts.signal,
+      );
     } catch (error) {
-      console.warn('aiDailyQuiz: falha na IA, usando offline', error);
+      console.warn('aiDailyQuiz: substituição falhou', error);
+    }
+    if (replacement) {
+      const avoid = new Set(ctx.avoidHashes);
+      for (const q of pool) avoid.add(hashOf(String(q.question ?? '')));
+      const extra = selectValidQuestions(
+        replacement.questions,
+        { ...ctx, avoidHashes: avoid, lesson: theme.lesson },
+        QUIZ_VALIDATOR_ENFORCE,
+      );
+      const offset = perQuestion.length;
+      bumpDropped(dropped, extra.dropped);
+      for (const row of extra.perQuestion) perQuestion.push({ i: row.i + offset, codes: row.codes });
+      const extraReview = await reviewApproved(extra.kept, englishLevel, opts.signal);
+      const extraJudged = applyReview(extra.kept, extraReview);
+      pool = [...pool, ...extraJudged.kept];
+      motivos.push(...extraJudged.motivos);
+      if (extraReview) reviewLog.push(...extraReview);
+      else reviewFellBack = true;
     }
   }
 
-  const offline = await loadOfflineQuestions(opts.count, opts.avoidQuestions);
+  let fromOffline = 0;
+  if (pool.length < opts.count) {
+    const candidates = await loadOfflineCandidates([...opts.avoidQuestions, ...pool.map((q) => String(q.question ?? ''))]);
+    const passed = selectValidQuestions(candidates, ctx, true);
+    const filled = fillToCount(pool, passed.kept, opts.count);
+    pool = filled.questions;
+    fromOffline = filled.fromOffline;
+  } else {
+    pool = pool.slice(0, opts.count);
+  }
+
+  if (pool.length === 0) return offlineQuiz({ kept: 0, dropped, perQuestion });
+
+  const questions = pool.map(toDaily);
+  const aiKept = questions.length - fromOffline;
   return {
-    theme: {
-      id: opts.seed.id,
-      category: opts.seed.category,
-      title: opts.seed.title,
-      lesson: opts.seed.seed,
-      whyItMatters: 'Pensar sobre isso hoje já é um passo.',
+    theme,
+    questions,
+    reflectionPrompt: reflectionOf(first),
+    source: aiKept > 0 ? 'ai' : 'offline',
+    sanitize: {
+      kept: questions.length,
+      dropped,
+      perQuestion,
+      ...(reviewLog.length ? { review: reviewLog } : {}),
+      ...(reviewFellBack ? { reviewFellBack: true } : {}),
+      batchLog: reviewBatch(pool, theme.lesson),
+      fromOffline,
     },
-    questions: offline.map((q) => ({ ...q, kind: 'knowledge' as const, subject: 'geral' })),
-    reflectionPrompt: 'O que você aprendeu hoje que pode usar amanhã?',
-    source: 'offline',
+    raw: {
+      first,
+      ...(replacement ? { replacement } : {}),
+    },
   };
 }
 

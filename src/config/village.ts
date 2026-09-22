@@ -331,10 +331,7 @@ export const ISO_NPC: Record<string, string> = {
   olheiro: '/assets/village/npc/olheiro-iso.png',
 };
 /** Folha 8×64: walk cycle (PixelLab). Só quem troca de posto na cena. */
-export const ISO_NPC_WALK: Record<string, string> = {
-  sabio: '/assets/village/npc/sabio-walk.png?v=1',
-  comerciante: '/assets/village/npc/comerciante-walk.png?v=1',
-};
+export const ISO_NPC_WALK: Record<string, string> = {};
 
 export const NPC_LABEL: Record<string, string> = {
   sabio: 'Sábio',
@@ -642,13 +639,14 @@ export function crackedListSentence(ids: string[]): string {
   return `${clean.length} obras cairam.`;
 }
 
-/** Em localhost, `?torre=2` mostra o sprite do nível sem gravar no save. */
-export function previewBuildingLevel(id: string, level: number): number {
+/** Host âncora: só `localhost` ou `127.0.0.1`, não substring. */
+export function previewLevelFrom(id: string, level: number, hostname: string, search: string): number {
   if (id !== 'torre') return level;
-  if (typeof window === 'undefined') return level;
-  if (!/localhost|127\.0\.0\.1/.test(window.location.hostname)) return level;
+  const host = hostname.split(':')[0].toLowerCase();
+  if (host !== 'localhost' && host !== '127.0.0.1') return level;
   try {
-    const raw = new URLSearchParams(window.location.search).get('torre');
+    const q = search.startsWith('?') ? search.slice(1) : search;
+    const raw = new URLSearchParams(q).get('torre');
     if (raw == null || raw === '') return level;
     const n = Math.floor(Number(raw));
     if (!Number.isFinite(n)) return level;
@@ -656,6 +654,14 @@ export function previewBuildingLevel(id: string, level: number): number {
   } catch {
     return level;
   }
+}
+
+const PREVIEW_HOST = typeof window === 'undefined' ? '' : window.location.hostname;
+const PREVIEW_SEARCH = typeof window === 'undefined' ? '' : window.location.search;
+
+/** Em localhost, `?torre=2` mostra o sprite do nível sem gravar no save. */
+export function previewBuildingLevel(id: string, level: number): number {
+  return previewLevelFrom(id, level, PREVIEW_HOST, PREVIEW_SEARCH);
 }
 
 /** Em localhost, `?crack=fornalha` na primeira carga mostra o dano sem gravar no save. */

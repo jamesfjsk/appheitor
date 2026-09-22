@@ -6,8 +6,10 @@ import {
   addPlacement,
   assignAnchors,
   buildMerchantOutcome,
+  correctionFix,
   correctionLine,
   gradeLine,
+  missKind,
   praiseLine,
   hitSlot,
   itemDrawPos,
@@ -200,6 +202,7 @@ test('buildMerchantOutcome: firstHits paga; attempts entra em details', () => {
     deliveries: 3,
     textShown: true,
     glossaryHovers: ['box'],
+    misses: [[], ['relation']],
   });
   expect(out.score).toBe(1);
   expect(out.max).toBe(2);
@@ -207,14 +210,36 @@ test('buildMerchantOutcome: firstHits paga; attempts entra em details', () => {
   expect(out.details?.finalHits).toBe(2);
   expect(out.details?.attempts).toEqual([1, 2]);
   expect(out.details?.textShown).toBe(true);
+  expect(out.details?.misses).toEqual([{ step: 0, kinds: [] }, { step: 1, kinds: ['relation'] }]);
   expect(out.materialEarned).toBe(2);
 });
 
-test('addPlacement soma quantidade no mesmo lugar', () => {
+test('addPlacement soma quantidade no mesmo lugar e recusa o segundo tapete', () => {
   const a = addPlacement([], { item: 'apple', qty: 1, relation: 'on', spot: 'table' });
   const b = addPlacement(a, { item: 'apple', qty: 1, relation: 'on', spot: 'table' });
   expect(b).toEqual([{ item: 'apple', qty: 2, relation: 'on', spot: 'table' }]);
   expect(remainingStock([{ id: 'apple', stock: 3 }], b).get('apple')).toBe(1);
+  const refused = addPlacement(a, { item: 'apple', qty: 1, relation: 'in', spot: 'box' });
+  expect(refused).toBe(a);
+  expect(refused).toEqual([{ item: 'apple', qty: 1, relation: 'on', spot: 'table' }]);
+});
+
+test('missKind e correctionFix: en na tela, pt na boca', () => {
+  const step: MerchantStep = { item: 'lamp', qty: 1, relation: 'on', spot: 'box' };
+  expect(missKind(step, { item: 'lamp', qty: 1, relation: 'in', spot: 'box' })).toBe('relation');
+  expect(missKind(step, { item: 'key', qty: 1, relation: 'on', spot: 'box' })).toBe('item');
+  expect(missKind(step, { item: 'lamp', qty: 2, relation: 'on', spot: 'box' })).toBe('qty');
+  expect(missKind(step, { item: 'lamp', qty: 1, relation: 'on', spot: 'table' })).toBe('spot');
+  const fix = correctionFix(step, { item: 'lamp', qty: 1, relation: 'in', spot: 'box' });
+  expect(fix.en).toBe('On the box, not in.');
+  expect(fix.pt).toContain('em cima');
+});
+
+test('under da parede usa baseY', () => {
+  const wall = DEFAULT_MERCHANT_SCENE.spots.find((s) => s.id === 'wall');
+  expect(wall?.baseY).toBe(440);
+  const z = zonesFor(wall!, ['under']);
+  expect(z[0].rect.y).toBe(440);
 });
 
 test('sentenceBits marca palavra e pontuação', () => {

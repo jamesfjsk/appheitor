@@ -3421,8 +3421,9 @@ div.mn-pack-cell {
 }
 .md-tray-item {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 8.39%;
+  height: auto;
+  aspect-ratio: 1;
   padding: 4px;
   border: 2px solid #3a2a1c;
   border-radius: 6px;
@@ -3444,7 +3445,6 @@ div.mn-pack-cell {
   right: 2px;
   bottom: 0;
   color: #fff4b0;
-  font-size: 12px;
   font-weight: 800;
 }
 .md-fly {
@@ -3630,10 +3630,12 @@ div.mn-pack-cell {
 .nb-write,
 .nb-chalk {
   width: 100%;
+  max-height: 100%;
+  overflow: auto;
   margin: 0;
   color: #f3ead2;
   font-family: Fredoka, "Comic Neue", sans-serif;
-  font-size: 22px;
+  font-size: var(--nb-chalk, 22px);
   font-weight: 600;
   line-height: 1.55;
   letter-spacing: 0.02em;
@@ -3663,7 +3665,7 @@ div.mn-pack-cell {
   gap: 8px;
   min-height: 36px;
   font-family: Fredoka, "Comic Neue", sans-serif;
-  font-size: 15px;
+  font-size: var(--nb-chip, 15px);
   font-weight: 600;
   color: #1a1008;
   letter-spacing: 0;
@@ -3676,6 +3678,8 @@ div.mn-pack-cell {
   border: 2px solid #1a1008;
   background: #c4b49a;
 }
+.nb-chalk .nb-peg { color: #f3ead2; min-height: 22px; }
+.nb-chalk .nb-peg i { border-color: #c4b49a; }
 .nb-peg.is-on i { background: #6aa84f; }
 .nb-peg.is-off i { background: #c23b22; }
 .nb-peg-pt {
@@ -3738,7 +3742,7 @@ div.mn-pack-cell {
 .nb-line {
   margin: 0;
   font-family: Fredoka, "Comic Neue", sans-serif;
-  font-size: 22px;
+  font-size: var(--nb-chalk, 22px);
   font-weight: 600;
   letter-spacing: 0.03em;
   word-spacing: 0.2em;
@@ -3756,7 +3760,7 @@ div.mn-pack-cell {
   font-weight: 700;
 }
 .nb-tray {
-  left: 14%;
+  left: 22%;
   top: 72%;
   width: 66%;
   height: auto;
@@ -3773,7 +3777,7 @@ div.mn-pack-cell {
   border-radius: 6px;
   color: #1a1008;
   font-family: Fredoka, "Comic Neue", sans-serif;
-  font-size: 15px;
+  font-size: var(--nb-chip, 15px);
   font-weight: 700;
   letter-spacing: 0;
   word-spacing: 0;

@@ -10,6 +10,7 @@ import { useSound } from '../../../../contexts/SoundContext';
 import { FirestoreService } from '../../../../services/firestoreService';
 import { completeContract } from '../../../../services/englishBaseService';
 import { playText, prefetchAudio, stopAudio, TTS_SPEED_SLOW } from '../../../../services/englishTts';
+import { PT_TALK } from '../../../../services/quiz/provaSpeak';
 import { evaluateRoom } from '../../../../services/english/merchantRoom';
 import {
   DEFAULT_MERCHANT_SCENE,
@@ -20,8 +21,9 @@ import {
   addPlacement,
   assignAnchors,
   buildMerchantOutcome,
-  correctionLine,
+  correctionFix,
   gradeLine,
+  missKind,
   praiseLine,
   hitSlot,
   itemDrawPos,
@@ -33,6 +35,7 @@ import {
   NEXT_ORDER,
   zonesFor,
   type MerchantSceneDef,
+  type MissKind,
   type StageSlot,
 } from '../../../../services/english/merchantPlay';
 import type { BaseDoc, BuildingId, Contract, ContractOutcome, MerchantPlacement } from '../../../../types/english';
@@ -119,7 +122,14 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
   const { adjustUserXP, adjustUserGold } = useData();
   const { playClick, playTaskComplete } = useSound();
   const { content } = contract;
-  const steps = content.steps;
+  const floorShot = import.meta.env.DEV && new URLSearchParams(window.location.search).get('f9') === 'floor';
+  const floorItem = content.items[0]?.id ?? 'potion';
+  const steps = useMemo(
+    () => (floorShot
+      ? [{ item: floorItem, qty: 1 as const, relation: 'under' as const, spot: 'window' }]
+      : content.steps),
+    [floorShot, floorItem, content.steps],
+  );
   const [scene, setScene] = useState<MerchantSceneDef>(DEFAULT_MERCHANT_SCENE);
   const [phase, setPhase] = useState<Phase>('play');
   const [stepIndex, setStepIndex] = useState(0);
@@ -144,8 +154,8 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
   const [outcome, setOutcome] = useState<ContractOutcome | null>(null);
   const [wagonsIn, setWagonsIn] = useState(false);
   const [deliveries, setDeliveries] = useState(0);
-  const [textShown, setTextShown] = useState(false);
   const [glossary, setGlossary] = useState<string[]>([]);
+  const [misses, setMisses] = useState<MissKind[][]>(() => steps.map(() => []));
   const [flyPos, setFlyPos] = useState<{ x: number; y: number; scale: number } | null>(null);
   const [beat, setBeat] = useState<Beat>(null);
   const [busy, setBusy] = useState(false);
@@ -154,6 +164,7 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
   const startedAt = useRef(Date.now());
   const finishing = useRef(false);
   const resolving = useRef(false);
+  const draggingItem = useRef(false);
   const [box, setBox] = useState({ w: DESIGN.w, h: DESIGN.h });
 
   const layoutSeed = useMemo(
@@ -165,8 +176,10 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     [content, scene.spots]
   );
   const liveSpots = useMemo(
-    () => liveSlotsForStep(baseSlots, steps[stepIndex], stepIndex).map((s) => s.spot),
-    [baseSlots, steps, stepIndex]
+    () => (floorShot
+      ? [{ id: 'window', label: 'window', image: '', relations: ['under' as const] }]
+      : liveSlotsForStep(baseSlots, steps[stepIndex], stepIndex).map((s) => s.spot)),
+    [floorShot, baseSlots, steps, stepIndex]
   );
   const live = useMemo(
     () => assignAnchors(liveSpots, scene.spots, mixSeed(layoutSeed, stepIndex)),
@@ -269,18 +282,24 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
   const speakSentence = async (index: number, slow = false) => {
     if (speaking) return;
     setSpeaking('load');
-    setListens((prev) => prev.map((n, i) => (i === index ? n + 1 : n)));
     const t = window.setTimeout(() => setSpeaking((s) => (s === 'load' ? 'play' : s)), 500);
-    await playText(content.sentences[index], slow ? { speed: TTS_SPEED_SLOW } : undefined);
-    window.clearTimeout(t);
-    setSpeaking(null);
-    setTextOpen((prev) => prev.map((v, i) => (i === index ? true : v)));
-    setBalloon(content.translation[index] || 'Coloca o que pedi no lugar.');
-    prefetchAudio([
-      correctionLine(steps[index], null),
-      praiseLine(steps[index], index),
-      content.translation[index] || '',
-    ]);
+    try {
+      const heard = floorShot ? `Put the ${floorItem} under the window.` : content.sentences[index];
+      await playText(heard, slow ? { speed: TTS_SPEED_SLOW, lang: 'en' } : { lang: 'en' });
+      setListens((prev) => prev.map((n, i) => (i === index ? n + 1 : n)));
+      setTextOpen((prev) => prev.map((v, i) => (i === index ? true : v)));
+    } finally {
+      window.clearTimeout(t);
+      setSpeaking(null);
+    }
+    const floorDef = MERCHANT_ITEMS.find((it) => it.id === floorItem);
+    const floorAsk = floorDef
+      ? `Por favor, coloca ${floorDef.ptGender === 'f' ? 'a' : 'o'} ${floorDef.pt} embaixo da janela.`
+      : 'Por favor, coloca isso embaixo da janela.';
+    setBalloon(floorShot ? floorAsk : (content.translation[index] || 'Coloca o que pedi no lugar.'));
+    const fix = correctionFix(steps[index], null);
+    prefetchAudio([fix.en], { lang: 'en' });
+    prefetchAudio([fix.pt, praiseLine(steps[index], index), content.translation[index] || ''], PT_TALK);
   };
 
   const listen = async (slow = false) => {
@@ -289,13 +308,18 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     await speakSentence(stepIndex, slow);
   };
 
+  const dragOrigin = useRef<{ x: number; y: number } | null>(null);
+
   const startDrag = (id: string, ev: React.PointerEvent) => {
     if ((stock.get(id) ?? 0) <= 0 || fly || phase !== 'play' || busy) return;
+    if (placements.length > 0 && placements[0].item !== id) return;
     if (!listened) {
       setBalloon('Ouve o pedido primeiro.');
       return;
     }
     ev.currentTarget.setPointerCapture(ev.pointerId);
+    draggingItem.current = false;
+    dragOrigin.current = { x: ev.clientX, y: ev.clientY };
     const p = toStage(ev.clientX, ev.clientY);
     setDrag({ id, x: p.x, y: p.y });
     setLook(p);
@@ -304,6 +328,12 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
 
   const moveDrag = (ev: React.PointerEvent) => {
     if (!drag) return;
+    const origin = dragOrigin.current;
+    if (origin) {
+      const dx = ev.clientX - origin.x;
+      const dy = ev.clientY - origin.y;
+      if (dx * dx + dy * dy > 36) draggingItem.current = true;
+    }
     const p = toStage(ev.clientX, ev.clientY);
     setDrag({ ...drag, x: p.x, y: p.y });
     setLook(p);
@@ -311,12 +341,30 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
 
   const endDrag = (ev: React.PointerEvent) => {
     if (!drag) return;
+    if (!draggingItem.current) {
+      dragOrigin.current = null;
+      setDrag(null);
+      return;
+    }
     const p = toStage(ev.clientX, ev.clientY);
     const hit = hitSlot(p.x, p.y, live);
     const from = { x: drag.x, y: drag.y };
     const itemId = drag.id;
     setDrag(null);
     if (!hit) {
+      sfx.miss();
+      setFly({
+        itemId,
+        kind: 'slip',
+        from,
+        to: { x: p.x, y: Math.min(DESIGN.h - 80, p.y + 90) },
+        started: performance.now(),
+        dur: 420,
+      });
+      return;
+    }
+    const next = { item: itemId, qty: 1, relation: hit.relation, spot: hit.slot.spot.id };
+    if (addPlacement(placements, next) === placements) {
       sfx.miss();
       setFly({
         itemId,
@@ -336,7 +384,7 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
       to: { x: pos.x, y: pos.y },
       started: performance.now(),
       dur: 320,
-      placement: { item: itemId, qty: 1, relation: hit.relation, spot: hit.slot.spot.id },
+      placement: next,
     });
   };
 
@@ -355,7 +403,8 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     listenArr: number[],
     attemptArr: number[],
     deliveryCount: number,
-    gloss: string[]
+    gloss: string[],
+    missRows: MissKind[][]
   ) => {
     if (n < steps.length - 1) {
       setStepIndex(n + 1);
@@ -366,7 +415,7 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
       sfx.next();
       return;
     }
-    void finishRound(first, last, keptNext, shown, listenArr, attemptArr, deliveryCount, gloss);
+    void finishRound(first, last, keptNext, shown, listenArr, attemptArr, deliveryCount, gloss, missRows);
   };
 
   const deliver = () => {
@@ -387,7 +436,12 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     setLastOk(nextLast);
     const nextKept = kept.map((v, i) => (i === stepIndex ? (ok ? placements[0] : v) : v));
     setKept(nextKept);
-    let shown = textShown;
+    const shown = textOpen.some(Boolean);
+    const kind = ok ? null : missKind(step, placements[0] ?? null);
+    const nextMisses = kind
+      ? misses.map((row, i) => (i === stepIndex ? [...row, kind] : row))
+      : misses;
+    if (kind) setMisses(nextMisses);
     resolving.current = true;
     setBusy(true);
     const doneResolve = () => {
@@ -417,24 +471,22 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
       });
       void (async () => {
         setSpeaking('play');
-        await playText(praise);
+        await playText(praise, PT_TALK);
         setSpeaking(null);
         setPlacements([]);
-        advance(stepIndex, shown, nextFirst, nextLast, nextKept, listens, nextAttempts, n, glossary);
+        advance(stepIndex, shown, nextFirst, nextLast, nextKept, listens, nextAttempts, n, glossary, nextMisses);
         doneResolve();
       })();
       return;
     }
     sfx.fail();
-    shown = true;
-    setTextShown(true);
     setBeat('miss');
-    const phrase = correctionLine(step, placements[0] ?? null);
-    setCorrection(phrase);
+    const fix = correctionFix(step, placements[0] ?? null);
+    setCorrection(fix.en);
     if (!saidFix[stepIndex]) {
       setSaidFix((prev) => prev.map((v, i) => (i === stepIndex ? true : v)));
     }
-    setBalloon(phrase);
+    setBalloon(fix.en);
     const slot = live.find((s) => s.spot.id === step.spot);
     if (slot) setLook({ x: slot.anchor.x + slot.anchor.w / 2, y: slot.anchor.y + slot.anchor.h / 2 });
     const returning = [...placements];
@@ -458,11 +510,9 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     }
     void (async () => {
       setSpeaking('play');
-      await playText(phrase);
+      await playText(fix.en, { lang: 'en' });
+      await playText(fix.pt, PT_TALK);
       setSpeaking(null);
-      if (tries >= 2) {
-        advance(stepIndex, shown, nextFirst, nextLast, nextKept, listens, nextAttempts, n, glossary);
-      }
       doneResolve();
     })();
   };
@@ -475,7 +525,8 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     listenArr: number[],
     attemptArr: number[],
     deliveryCount: number,
-    gloss: string[]
+    gloss: string[],
+    missRows: MissKind[][]
   ) => {
     if (finishing.current) return;
     finishing.current = true;
@@ -494,6 +545,7 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
       deliveries: deliveryCount,
       textShown: shown,
       glossaryHovers: gloss,
+      misses: missRows,
     });
     setOutcome(out);
     let got: CompleteReward;
@@ -567,15 +619,22 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
 
   const lookLeft = look.x < scene.merchant.x + scene.merchant.w * 0.45;
   const askSlot = live.find((s) => s.spot.id === steps[stepIndex]?.spot) ?? null;
-  const padMode: 'teach' | 'faint' | 'hint' =
-    correction ? 'hint' : stepIndex === 0 ? 'teach' : 'faint';
+  const padMode: 'faint' | 'hint' = correction ? 'hint' : 'faint';
   const padSlots = !listened && !correction ? [] : padMode === 'faint' ? live : askSlot ? [askSlot] : [];
-  const sentence = content.sentences[stepIndex] ?? '';
+  const sentence = floorShot
+    ? `Put the ${floorItem} under the window.`
+    : (content.sentences[stepIndex] ?? '');
+  const typePx = Math.max(10, box.h * (14 / DESIGN.h));
+  const trayPx = Math.max(10, box.h * (12 / DESIGN.h));
 
   const onWord = (w: string) => {
     playClick();
     setGlossary((g) => (g.includes(w) ? g : [...g, w]));
-    void playText(w);
+    void playText(w, { lang: 'en' });
+  };
+
+  const sayEn = (word: string) => {
+    void playText(word, { lang: 'en' });
   };
 
   return (
@@ -618,7 +677,7 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
             return (
               <div
                 key={slot.spot.id}
-                className={`md-spot${(padMode === 'teach' || padMode === 'hint') && askSlot?.spot.id === slot.spot.id ? ' is-hint' : ''}${stepIndex > 0 ? ' mc-pop' : ''}`}
+                className={`md-spot${padMode === 'hint' && askSlot?.spot.id === slot.spot.id ? ' is-hint' : ''}${stepIndex > 0 ? ' mc-pop' : ''}`}
                 style={{
                   left: pct(slot.anchor.x, DESIGN.w),
                   top: pct(slot.anchor.y, DESIGN.h),
@@ -628,7 +687,7 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
                 data-testid={`spot-${slot.spot.id}`}
                 onMouseEnter={() => markHover(slot.spot.label, slot.anchor.x + slot.anchor.w / 2, slot.anchor.y)}
                 onMouseLeave={() => setHover((h) => (h?.label === slot.spot.label ? null : h))}
-                onClick={() => markHover(slot.spot.label, slot.anchor.x + slot.anchor.w / 2, slot.anchor.y)}
+                onClick={() => sayEn(slot.spot.label)}
               >
                 {under.map((p, i) => (
                   <PlacedItem key={`u-${p.item}-${i}`} placement={p} slot={slot} stack={i} under />
@@ -656,21 +715,23 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
                     return true;
                   })
                   .map((z) => {
-                    const ask = padMode === 'teach' && z.relation === steps[stepIndex]?.relation;
                     const hint = padMode === 'hint' && z.relation === steps[stepIndex]?.relation;
                     const hot = Boolean(drag && hitSlot(drag.x, drag.y, [slot])?.relation === z.relation);
                     return (
                       <div
                         key={`${slot.spot.id}-${z.relation}`}
-                        className={`md-pocket${padMode === 'faint' ? ' is-faint' : ''}${ask || hint ? ' is-ask' : ''}${hot ? ' is-hot' : ''}`}
+                        className={`md-pocket${padMode === 'faint' ? ' is-faint' : ''}${hint ? ' is-ask' : ''}${hot ? ' is-hot' : ''}`}
+                        data-relation={z.relation}
+                        data-spot={slot.spot.id}
                         style={{
                           left: pct(z.rect.x, DESIGN.w),
                           top: pct(z.rect.y, DESIGN.h),
                           width: pct(z.rect.w, DESIGN.w),
                           height: pct(z.rect.h, DESIGN.h),
+                          fontSize: typePx,
                         }}
                       >
-                        <b>{RELATION_EN[z.relation]}</b>
+                        {padMode === 'hint' ? <b>{RELATION_EN[z.relation]}</b> : null}
                       </div>
                     );
                   })
@@ -700,9 +761,9 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
           {phase === 'play' && (
           <div className="md-speech">
             <div className={`md-balloon${beat === 'miss' || correction ? ' is-fix' : ''}${beat === 'ok' ? ' is-ok' : ''}${beat === 'next' ? ' is-next' : ''}`} data-testid="merchant-balloon">
-              <p className="md-balloon-pt" data-testid={correction ? 'merchant-fix' : undefined}>{balloon}</p>
+              <p className="md-balloon-pt" data-testid={correction ? 'merchant-fix' : undefined} style={{ fontSize: typePx }}>{balloon}</p>
               {phase === 'play' && textOpen[stepIndex] && (
-                <p className="md-sentence" data-testid="merchant-sentence">
+                <p className="md-sentence" data-testid="merchant-sentence" style={{ fontSize: typePx }}>
                   {sentenceBits(sentence).map((bit, i) =>
                     bit.word ? (
                       <button key={i} type="button" className="md-word" onClick={() => onWord(bit.text)}>
@@ -759,15 +820,22 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
                 <button
                   key={it.id}
                   type="button"
-                  className={`md-tray-item${vis <= 0 ? ' is-empty' : ''}`}
-                  disabled={left <= 0 || phase !== 'play'}
+                  className={`md-tray-item${vis <= 0 || (placements.length > 0 && placements[0].item !== it.id) ? ' is-empty' : ''}`}
+                  disabled={left <= 0 || phase !== 'play' || (placements.length > 0 && placements[0].item !== it.id)}
                   onPointerDown={(e) => startDrag(it.id, e)}
+                  onClick={() => {
+                    if (draggingItem.current) {
+                      draggingItem.current = false;
+                      return;
+                    }
+                    sayEn(ITEM_NAME(it.id));
+                  }}
                   onMouseEnter={() => markHover(ITEM_NAME(it.id), scene.tray.x + 40, scene.tray.y)}
                   onMouseLeave={() => setHover((h) => (h?.label === ITEM_NAME(it.id) ? null : h))}
                   data-testid={`item-${it.id}`}
                 >
                   <img src={ITEM_IMG(it.id)} alt="" className="mc-pixel" draggable={false} />
-                  <span className="md-tray-n">{vis > 0 ? vis : ''}</span>
+                  <span className="md-tray-n" style={{ fontSize: trayPx }}>{vis > 0 ? vis : ''}</span>
                 </button>
               );
             })}

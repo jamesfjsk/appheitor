@@ -1,0 +1,485 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-13",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-13",
+  "status": "ready",
+  "theme": {
+    "category": "historia",
+    "curiosity": "Sabia que as primeiras locomotivas a vapor eram chamadas de 'cavalos de ferro'? Elas podiam puxar cargas pesadas e viajar longas distâncias.",
+    "id": "revolucao-industrial",
+    "lesson": "Imagine viver em uma cidade pequena, onde tudo é feito à mão. De repente, grandes fábricas surgem, trazendo máquinas a vapor que produzem roupas, móveis e até alimentos muito mais rápido. Isso aconteceu há cerca de 200 anos e mudou o mundo. As pessoas começaram a trabalhar nas fábricas, inclusive crianças, e as cidades cresceram rapidamente. Hoje, entendemos que as máquinas podem facilitar a vida, mas também precisamos cuidar para que o trabalho seja justo e seguro para todos.",
+    "title": "A Revolução das Máquinas",
+    "whyItMatters": "Entender como as máquinas mudaram o mundo ajuda a valorizar o que temos hoje."
+  },
+  "questions": [
+    {
+      "question": "Qual dessas invenções surgiu por causa das máquinas a vapor?",
+      "options": [
+        "Locomotiva",
+        "Avião",
+        "Carro elétrico",
+        "Televisão"
+      ],
+      "answer": "Locomotiva",
+      "explanation": "As locomotivas foram uma das primeiras aplicações das máquinas a vapor.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Locomotiva' porque foi uma das primeiras invenções a usar máquinas a vapor.",
+      "trap": "Quem escolhe 'Avião' pode pensar em transporte, mas aviões vieram bem depois.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se um produto custa R$120 e está com 25% de desconto, quanto você paga?",
+      "options": [
+        "R$90",
+        "R$95",
+        "R$100",
+        "R$105"
+      ],
+      "answer": "R$90",
+      "explanation": "25% de R$120 é R$30, então você paga R$120 - R$30.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta certa é 'R$90' porque 25% de desconto em R$120 reduz o preço em R$30.",
+      "trap": "Quem escolhe 'R$100' pode calcular errado o desconto, pensando em 20% ao invés de 25%.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se não houvesse mais trens?",
+      "options": [
+        "Menos poluição",
+        "Mais engarrafamentos",
+        "Mais aviões",
+        "Menos empregos"
+      ],
+      "answer": "Mais engarrafamentos",
+      "explanation": "Sem trens, mais pessoas usariam carros, aumentando o tráfego.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Mais engarrafamentos' porque trens transportam muitas pessoas que usariam carros.",
+      "trap": "Quem escolhe 'Menos poluição' pode pensar que trens poluem, mas carros poluem mais.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "O que as máquinas a vapor permitiram nas cidades do século XIX?",
+      "options": [
+        "Mais fábricas",
+        "Menos poluição",
+        "Menos pessoas",
+        "Mais florestas"
+      ],
+      "answer": "Mais fábricas",
+      "explanation": "As máquinas a vapor permitiram a criação de mais fábricas, aumentando a produção.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Mais fábricas' porque as máquinas a vapor aumentaram a capacidade de produção nas cidades.",
+      "trap": "Quem escolhe 'Menos poluição' se engana porque as fábricas aumentaram a poluição, não diminuíram.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Na escola, você está fazendo um projeto sobre invenções. Qual delas foi impulsionada pelas máquinas a vapor?",
+      "options": [
+        "Trens",
+        "Telefones",
+        "Computadores",
+        "Internet"
+      ],
+      "answer": "Trens",
+      "explanation": "Os trens foram uma das invenções impulsionadas pelas máquinas a vapor.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Trens' porque as máquinas a vapor foram essenciais para o desenvolvimento dos trens.",
+      "trap": "Quem escolhe 'Telefones' confunde invenções tecnológicas, mas os telefones não dependiam de máquinas a vapor.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você vê um amigo copiando a lição de casa. O que você faz?",
+      "options": [
+        "Finge que não viu",
+        "Conversa com ele sobre honestidade",
+        "Conta para o professor",
+        "Ajuda ele a copiar mais rápido"
+      ],
+      "answer": "Conversa com ele sobre honestidade",
+      "explanation": "Conversar sobre honestidade ajuda a entender o valor do trabalho próprio.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é 'Conversa com ele sobre honestidade' porque ajuda a refletir sobre a importância de ser honesto.",
+      "trap": "Quem escolhe 'Finge que não viu' evita o problema, mas não ajuda o amigo a melhorar.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?",
+      "options": [
+        "34 cm",
+        "17 cm",
+        "60 cm",
+        "24 cm"
+      ],
+      "answer": "34 cm",
+      "explanation": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "trap": "Perímetro é a soma de todos os lados: 12 + 5 + 12 + 5 = 34 cm. Não confunda com a área, que seria 12 × 5 = 60 cm².",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Numa turma de 30 alunos, 2/5 são meninas. Quantos meninos há na turma?",
+      "options": [
+        "18",
+        "12",
+        "20",
+        "6"
+      ],
+      "answer": "18",
+      "explanation": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "trap": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que a tecnologia pode melhorar a vida das pessoas hoje?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "conta_nao_fecha": 1,
+      "ingles_nivel": 1,
+      "tamanho_opcoes": 1,
+      "tipos_mistos": 4,
+      "trap_sem_distrator": 1,
+      "why_sem_resposta": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "tamanho_opcoes",
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "trap_sem_distrator"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "why_sem_resposta",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "tipos_mistos"
+        ]
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 2
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "O que a chegada das máquinas a vapor trouxe para as cidades?",
+          "options": [
+            "Crescimento rápido",
+            "Desaparecimento das fábricas",
+            "Menos empregos",
+            "Menos pessoas"
+          ],
+          "answer": "Crescimento rápido",
+          "explanation": "As máquinas a vapor permitiram a produção em massa, atraindo mais pessoas para as cidades.",
+          "why": "A resposta certa é 'Crescimento rápido' porque as fábricas atraíram muitas pessoas para trabalhar, aumentando as cidades.",
+          "trap": "Quem escolhe 'Menos empregos' pode pensar que as máquinas substituíram pessoas, mas elas criaram mais empregos nas fábricas.",
+          "kind": "lesson",
+          "subject": "historia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como a invenção das máquinas a vapor impactou o futebol?",
+          "options": [
+            "Mais pessoas assistiam aos jogos",
+            "Menos campos de futebol",
+            "Jogos mais curtos",
+            "Menos jogadores"
+          ],
+          "answer": "Mais pessoas assistiam aos jogos",
+          "explanation": "Com o crescimento das cidades, mais pessoas tinham acesso ao futebol como entretenimento.",
+          "why": "A resposta certa é 'Mais pessoas assistiam aos jogos' porque as cidades maiores tinham mais público para os jogos.",
+          "trap": "Quem escolhe 'Menos campos de futebol' pode pensar que as cidades cresceram sem espaço, mas o futebol se popularizou.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você trabalha em uma fábrica e vê uma criança de 8 anos trabalhando. O que você faz?",
+          "options": [
+            "Ignoro, é normal.",
+            "Chamo um adulto responsável.",
+            "Ofereço ajuda para ela.",
+            "Faço o trabalho dela."
+          ],
+          "answer": "Chamo um adulto responsável.",
+          "explanation": "Chamar um adulto responsável pode ajudar a resolver a situação de forma correta.",
+          "why": "Chamar um adulto responsável é a melhor opção porque crianças não devem trabalhar em fábricas.",
+          "trap": "Oferecer ajuda pode parecer bom, mas não resolve o problema de a criança estar trabalhando.",
+          "kind": "dilemma",
+          "subject": "historia",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Choose the correct sentence: 'There ___ a cat on the roof.'",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "explanation": "'There is' é usado para singular, como 'a cat'.",
+          "why": "A resposta certa é 'is' porque 'There is' é usado para uma única coisa, como 'a cat'.",
+          "trap": "Quem escolhe 'are' pode confundir com plural, mas 'a cat' é singular.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "aplicar",
+          "audioText": "There is a cat on the roof."
+        },
+        {
+          "question": "Qual dessas invenções surgiu por causa das máquinas a vapor?",
+          "options": [
+            "Locomotiva",
+            "Avião",
+            "Carro elétrico",
+            "Televisão"
+          ],
+          "answer": "Locomotiva",
+          "explanation": "As locomotivas foram uma das primeiras aplicações das máquinas a vapor.",
+          "why": "A resposta certa é 'Locomotiva' porque foi uma das primeiras invenções a usar máquinas a vapor.",
+          "trap": "Quem escolhe 'Avião' pode pensar em transporte, mas aviões vieram bem depois.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do goleiro no futebol?",
+          "options": [
+            "Marcar gols",
+            "Defender o gol",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O goleiro é responsável por evitar que a bola entre no gol.",
+          "why": "A resposta certa é 'Defender o gol' porque essa é a principal função do goleiro no jogo.",
+          "trap": "Quem escolhe 'Marcar gols' pode confundir com atacantes, mas o goleiro defende.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um produto custa R$120 e está com 25% de desconto, quanto você paga?",
+          "options": [
+            "R$90",
+            "R$95",
+            "R$100",
+            "R$105"
+          ],
+          "answer": "R$90",
+          "explanation": "25% de R$120 é R$30, então você paga R$120 - R$30.",
+          "why": "A resposta certa é 'R$90' porque 25% de desconto em R$120 reduz o preço em R$30.",
+          "trap": "Quem escolhe 'R$100' pode calcular errado o desconto, pensando em 20% ao invés de 25%.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais trens?",
+          "options": [
+            "Menos poluição",
+            "Mais engarrafamentos",
+            "Mais aviões",
+            "Menos empregos"
+          ],
+          "answer": "Mais engarrafamentos",
+          "explanation": "Sem trens, mais pessoas usariam carros, aumentando o tráfego.",
+          "why": "A resposta certa é 'Mais engarrafamentos' porque trens transportam muitas pessoas que usariam carros.",
+          "trap": "Quem escolhe 'Menos poluição' pode pensar que trens poluem, mas carros poluem mais.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que a tecnologia pode melhorar a vida das pessoas hoje?",
+      "theme": {
+        "curiosity": "Sabia que as primeiras locomotivas a vapor eram chamadas de 'cavalos de ferro'? Elas podiam puxar cargas pesadas e viajar longas distâncias.",
+        "lesson": "Imagine viver em uma cidade pequena, onde tudo é feito à mão. De repente, grandes fábricas surgem, trazendo máquinas a vapor que produzem roupas, móveis e até alimentos muito mais rápido. Isso aconteceu há cerca de 200 anos e mudou o mundo. As pessoas começaram a trabalhar nas fábricas, inclusive crianças, e as cidades cresceram rapidamente. Hoje, entendemos que as máquinas podem facilitar a vida, mas também precisamos cuidar para que o trabalho seja justo e seguro para todos.",
+        "title": "A Revolução das Máquinas",
+        "whyItMatters": "Entender como as máquinas mudaram o mundo ajuda a valorizar o que temos hoje."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "O que as máquinas a vapor permitiram nas cidades do século XIX?",
+          "options": [
+            "Mais fábricas",
+            "Menos poluição",
+            "Menos pessoas",
+            "Mais florestas"
+          ],
+          "answer": "Mais fábricas",
+          "explanation": "As máquinas a vapor permitiram a criação de mais fábricas, aumentando a produção.",
+          "why": "A resposta certa é 'Mais fábricas' porque as máquinas a vapor aumentaram a capacidade de produção nas cidades.",
+          "trap": "Quem escolhe 'Menos poluição' se engana porque as fábricas aumentaram a poluição, não diminuíram.",
+          "kind": "lesson",
+          "subject": "historia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Na escola, você está fazendo um projeto sobre invenções. Qual delas foi impulsionada pelas máquinas a vapor?",
+          "options": [
+            "Trens",
+            "Telefones",
+            "Computadores",
+            "Internet"
+          ],
+          "answer": "Trens",
+          "explanation": "Os trens foram uma das invenções impulsionadas pelas máquinas a vapor.",
+          "why": "A resposta certa é 'Trens' porque as máquinas a vapor foram essenciais para o desenvolvimento dos trens.",
+          "trap": "Quem escolhe 'Telefones' confunde invenções tecnológicas, mas os telefones não dependiam de máquinas a vapor.",
+          "kind": "lesson",
+          "subject": "historia",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo copiando a lição de casa. O que você faz?",
+          "options": [
+            "Finge que não viu",
+            "Conversa com ele sobre honestidade",
+            "Conta para o professor",
+            "Ajuda ele a copiar mais rápido"
+          ],
+          "answer": "Conversa com ele sobre honestidade",
+          "explanation": "Conversar sobre honestidade ajuda a entender o valor do trabalho próprio.",
+          "why": "A resposta certa é 'Conversa com ele sobre honestidade' porque ajuda a refletir sobre a importância de ser honesto.",
+          "trap": "Quem escolhe 'Finge que não viu' evita o problema, mas não ajuda o amigo a melhorar.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Choose the correct sentence: 'There ___ two books on the table.'",
+          "options": [
+            "are",
+            "is",
+            "am",
+            "be"
+          ],
+          "answer": "are",
+          "explanation": "We use 'are' for plural nouns like 'books'.",
+          "why": "The correct answer is 'are' because 'books' is plural, requiring the plural verb form.",
+          "trap": "Choosing 'is' is incorrect because 'is' is used with singular nouns, not plural like 'books'.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ENG.STRUCTURE",
+          "bloom": "aplicar",
+          "audioText": "There are two books on the table."
+        },
+        {
+          "question": "Qual invenção foi crucial para o crescimento das cidades no século XIX?",
+          "options": [
+            "Máquina a vapor",
+            "Telefone",
+            "Internet",
+            "Carro"
+          ],
+          "answer": "Máquina a vapor",
+          "explanation": "A máquina a vapor permitiu o funcionamento de fábricas e trens.",
+          "why": "A resposta certa é 'Máquina a vapor' porque ela foi essencial para a industrialização e urbanização.",
+          "trap": "Quem escolhe 'Telefone' erra porque, apesar de importante, não foi crucial para o crescimento das cidades no século XIX.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        }
+      ]
+    }
+  }
+}

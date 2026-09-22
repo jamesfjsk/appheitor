@@ -1,0 +1,535 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-28",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-28",
+  "status": "ready",
+  "theme": {
+    "category": "minecraft",
+    "curiosity": "O carvão mineral é tão antigo que vem de florestas que existiram antes dos dinossauros!",
+    "id": "carvao-como-se-forma",
+    "lesson": "Imagine uma floresta densa e cheia de vida há 300 milhões de anos. Com o tempo, essa floresta foi coberta por camadas de terra e rocha, transformando-se em carvão mineral. Já o carvão vegetal é feito de madeira queimada sem ar. Durante a Revolução Industrial, o carvão foi essencial para mover máquinas e trens, mas hoje buscamos alternativas mais limpas para proteger o planeta. Entender a diferença entre esses carvões nos ajuda a ver como o passado ainda influencia nosso presente e futuro.",
+    "title": "De Floresta a Carvão: O Poder do Passado",
+    "whyItMatters": "Saber sobre carvão ajuda a entender escolhas energéticas e ambientais."
+  },
+  "questions": [
+    {
+      "question": "Por que o carvão foi importante na Revolução Industrial?",
+      "options": [
+        "Movia máquinas e trens",
+        "Era barato e fácil de encontrar",
+        "Tinha cheiro agradável",
+        "Era usado como alimento"
+      ],
+      "answer": "Movia máquinas e trens",
+      "explanation": "O carvão foi a principal fonte de energia para máquinas a vapor.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "Movia máquinas e trens, essenciais para a Revolução Industrial, transformando produção e transporte.",
+      "trap": "Era barato e fácil de encontrar engana porque, embora verdade, não é a razão principal.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual é a função do 'corner kick' no futebol?",
+      "options": [
+        "Reiniciar o jogo",
+        "Marcar um gol",
+        "Dar posse ao adversário",
+        "Recompensar uma falta"
+      ],
+      "answer": "Reiniciar o jogo",
+      "explanation": "Um 'corner kick' reinicia o jogo após a bola sair pela linha de fundo.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "Reiniciar o jogo após a bola sair pela linha de fundo é a função do 'corner kick'.",
+      "trap": "Marcar um gol engana, pois o 'corner kick' não garante um gol diretamente.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do 'goalkeeper' no futebol?",
+      "options": [
+        "Defender o gol",
+        "Marcar gols",
+        "Apitar o jogo",
+        "Treinar o time"
+      ],
+      "answer": "Defender o gol",
+      "explanation": "O 'goalkeeper' é responsável por impedir que a bola entre no gol.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Defender o gol' porque essa é a principal função do goleiro no futebol.",
+      "trap": "Marcar 'Marcar gols' erra porque essa é a função dos atacantes, não do goleiro.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você viajar do Brasil para o Japão, o que acontece com o relógio quando chegar lá?",
+      "options": [
+        "Ele precisa adiantar várias horas",
+        "Ele fica igual",
+        "Ele precisa atrasar várias horas",
+        "Só muda o dia da semana"
+      ],
+      "answer": "Ele precisa adiantar várias horas",
+      "explanation": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "kind": "knowledge",
+      "subject": "geografia",
+      "why": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "trap": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "skill": "GEO.FATO",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Ao nível do mar, a água ferve a 100 °C. O que acontece no alto de uma montanha muito alta?",
+      "options": [
+        "Ela ferve com temperatura menor que 100 °C",
+        "Ela ferve com temperatura maior que 100 °C",
+        "Ela não consegue ferver",
+        "Ela ferve exatamente a 100 °C"
+      ],
+      "answer": "Ela ferve com temperatura menor que 100 °C",
+      "explanation": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "trap": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual frase é verdadeira sobre o Sol?",
+      "options": [
+        "O Sol é uma estrela",
+        "O Sol é um planeta muito quente",
+        "O Sol gira em volta da Terra",
+        "O Sol é uma bola de fogo de madeira"
+      ],
+      "answer": "O Sol é uma estrela",
+      "explanation": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "trap": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual destas funções o cérebro NÃO faz?",
+      "options": [
+        "Bombear o sangue",
+        "Controlar os movimentos",
+        "Guardar memórias",
+        "Sentir emoções"
+      ],
+      "answer": "Bombear o sangue",
+      "explanation": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "trap": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você tem R$ 50 e quer um jogo de R$ 80. Se guardar R$ 10 por semana, em quantas semanas consegue comprar?",
+      "options": [
+        "3",
+        "8",
+        "5",
+        "2"
+      ],
+      "answer": "3",
+      "explanation": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "trap": "Faltam 80 − 50 = 30 reais. Guardando 10 por semana, 30 ÷ 10 = 3 semanas.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que o uso de carvão impacta o meio ambiente hoje?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 1,
+      "conta_nao_fecha": 1,
+      "duplicata": 2,
+      "enunciado_vazou": 2,
+      "opcao_caricata": 1,
+      "tipos_mistos": 1,
+      "trap_sem_distrator": 1,
+      "why_curto": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "why_curto",
+          "duplicata"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "trap_sem_distrator"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": false,
+        "motivo": "A conta não fecha."
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A conta não fecha."
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 5
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Qual é a diferença entre carvão mineral e carvão vegetal?",
+          "options": [
+            "Origem e processo de formação",
+            "Cor e cheiro",
+            "Peso e tamanho",
+            "Uso e preço"
+          ],
+          "answer": "Origem e processo de formação",
+          "explanation": "Carvão mineral vem de florestas antigas, enquanto o vegetal é madeira queimada.",
+          "why": "A diferença está na origem e formação: mineral de florestas antigas, vegetal de madeira queimada.",
+          "trap": "Peso e tamanho engana porque ambos podem variar, mas não definem a diferença principal.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Por que o carvão foi importante na Revolução Industrial?",
+          "options": [
+            "Movia máquinas e trens",
+            "Era barato e fácil de encontrar",
+            "Tinha cheiro agradável",
+            "Era usado como alimento"
+          ],
+          "answer": "Movia máquinas e trens",
+          "explanation": "O carvão foi a principal fonte de energia para máquinas a vapor.",
+          "why": "Movia máquinas e trens, essenciais para a Revolução Industrial, transformando produção e transporte.",
+          "trap": "Era barato e fácil de encontrar engana porque, embora verdade, não é a razão principal.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo quer usar carvão para uma fogueira no quintal. O que você sugere?",
+          "options": [
+            "Usar carvão vegetal e explicar por quê",
+            "Usar carvão mineral porque é mais antigo",
+            "Não usar carvão e procurar outra fonte",
+            "Deixar ele decidir sem interferir"
+          ],
+          "answer": "Usar carvão vegetal e explicar por quê",
+          "explanation": "Carvão vegetal é mais adequado para fogueiras caseiras.",
+          "why": "Usar carvão vegetal é mais seguro e adequado para fogueiras, evitando poluição do mineral.",
+          "trap": "Usar carvão mineral porque é mais antigo engana, pois não é adequado para fogueiras caseiras.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+          "options": [
+            "Começou na Inglaterra",
+            "Foi liderada pela França",
+            "Usou energia solar",
+            "Ocorreu no século 21"
+          ],
+          "answer": "Começou na Inglaterra",
+          "explanation": "A Revolução Industrial teve início na Inglaterra no século 18.",
+          "why": "Começou na Inglaterra, onde o carvão impulsionou o desenvolvimento industrial.",
+          "trap": "Foi liderada pela França engana, pois a França não foi o país pioneiro.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'corner kick' no futebol?",
+          "options": [
+            "Reiniciar o jogo",
+            "Marcar um gol",
+            "Dar posse ao adversário",
+            "Recompensar uma falta"
+          ],
+          "answer": "Reiniciar o jogo",
+          "explanation": "Um 'corner kick' reinicia o jogo após a bola sair pela linha de fundo.",
+          "why": "Reiniciar o jogo após a bola sair pela linha de fundo é a função do 'corner kick'.",
+          "trap": "Marcar um gol engana, pois o 'corner kick' não garante um gol diretamente.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um bolo custa R$ 50 e você tem R$ 120, quanto sobra após comprar dois bolos?",
+          "options": [
+            "R$ 20",
+            "R$ 70",
+            "R$ 50",
+            "R$ 100"
+          ],
+          "answer": "R$ 20",
+          "explanation": "Dois bolos custam R$ 100, sobrando R$ 20 dos R$ 120.",
+          "why": "A resposta é R$ 20 porque 120 menos 100 (dois bolos) deixa 20.",
+          "trap": "R$ 70 engana quem subtrai o preço de um bolo, não dois.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não usássemos mais carvão mineral?",
+          "options": [
+            "Menos poluição",
+            "Mais florestas",
+            "Mais carros",
+            "Menos eletricidade"
+          ],
+          "answer": "Menos poluição",
+          "explanation": "Parar de usar carvão mineral reduziria a poluição do ar.",
+          "why": "Menos poluição porque o carvão mineral é uma grande fonte de poluentes.",
+          "trap": "Menos eletricidade engana, pois existem outras fontes de energia disponíveis.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que o uso de carvão impacta o meio ambiente hoje?",
+      "theme": {
+        "curiosity": "O carvão mineral é tão antigo que vem de florestas que existiram antes dos dinossauros!",
+        "lesson": "Imagine uma floresta densa e cheia de vida há 300 milhões de anos. Com o tempo, essa floresta foi coberta por camadas de terra e rocha, transformando-se em carvão mineral. Já o carvão vegetal é feito de madeira queimada sem ar. Durante a Revolução Industrial, o carvão foi essencial para mover máquinas e trens, mas hoje buscamos alternativas mais limpas para proteger o planeta. Entender a diferença entre esses carvões nos ajuda a ver como o passado ainda influencia nosso presente e futuro.",
+        "title": "De Floresta a Carvão: O Poder do Passado",
+        "whyItMatters": "Saber sobre carvão ajuda a entender escolhas energéticas e ambientais."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que o carvão mineral foi importante na Revolução Industrial?",
+          "options": [
+            "Era barato e abundante",
+            "Era raro e caro",
+            "Era usado para cozinhar",
+            "Era usado para construir casas"
+          ],
+          "answer": "Era barato e abundante",
+          "explanation": "O carvão mineral era barato e abundante, o que facilitou seu uso em larga escala.",
+          "why": "A resposta certa é 'Era barato e abundante' porque isso permitiu que fosse usado em máquinas e fábricas.",
+          "trap": "Marcar 'Era raro e caro' erra porque isso tornaria seu uso limitado, não impulsionando a indústria.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é uma aplicação do carvão vegetal hoje em dia?",
+          "options": [
+            "Aquecimento de casas",
+            "Produção de eletricidade",
+            "Fabricação de aço",
+            "Churrasco"
+          ],
+          "answer": "Churrasco",
+          "explanation": "O carvão vegetal é comumente usado em churrascos por ser fácil de acender e controlar.",
+          "why": "A resposta certa é 'Churrasco' porque o carvão vegetal é popular para cozinhar ao ar livre.",
+          "trap": "Marcar 'Produção de eletricidade' erra porque esse uso é mais comum para o carvão mineral.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo quer usar carvão mineral para um projeto escolar. O que você sugere?",
+          "options": [
+            "Explicar os impactos ambientais",
+            "Ignorar e deixar ele usar",
+            "Ajudar a encontrar carvão vegetal",
+            "Dizer que é perigoso"
+          ],
+          "answer": "Explicar os impactos ambientais",
+          "explanation": "Explicar os impactos ambientais ajuda seu amigo a entender as consequências do uso do carvão mineral.",
+          "why": "A resposta certa é 'Explicar os impactos ambientais' porque educa sobre os efeitos negativos do carvão mineral.",
+          "trap": "Marcar 'Ignorar e deixar ele usar' erra porque não ajuda a entender os problemas ambientais.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a geografia do Brasil?",
+          "options": [
+            "O Brasil tem cinco regiões",
+            "O Brasil não tem litoral",
+            "O Brasil é uma ilha",
+            "O Brasil tem apenas um rio"
+          ],
+          "answer": "O Brasil tem cinco regiões",
+          "explanation": "O Brasil é dividido em cinco regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul.",
+          "why": "A resposta certa é 'O Brasil tem cinco regiões' porque essa é a divisão oficial do país.",
+          "trap": "Marcar 'O Brasil não tem litoral' erra porque o Brasil tem uma extensa costa atlântica.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'goalkeeper' no futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O 'goalkeeper' é responsável por impedir que a bola entre no gol.",
+          "why": "A resposta certa é 'Defender o gol' porque essa é a principal função do goleiro no futebol.",
+          "trap": "Marcar 'Marcar gols' erra porque essa é a função dos atacantes, não do goleiro.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 200 reais e compra um livro por 45 reais e um jogo por 75 reais, quanto sobra?",
+          "options": [
+            "80",
+            "70",
+            "90",
+            "100"
+          ],
+          "answer": "80",
+          "explanation": "Primeiro, some 45 e 75 para obter 120. Depois, subtraia de 200 para encontrar o restante.",
+          "why": "A resposta certa é 80 porque 200 menos 120, que é a soma das compras, resulta em 80.",
+          "trap": "Marcar 70 erra porque é resultado de uma soma incorreta dos valores dos itens comprados.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  }
+}

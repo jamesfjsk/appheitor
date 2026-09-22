@@ -16,7 +16,7 @@ const REGION = 'southamerica-east1';
 const CHAT_MODELS = new Set(['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini']);
 const TTS_MODELS = new Set(['gpt-4o-mini-tts']);
 const TTS_MAX_CHARS = 300;
-const CHAT_MAX_TOKENS = 4000;
+const CHAT_MAX_TOKENS = 6000;
 
 type Payload = {
   kind?: 'chat' | 'tts';

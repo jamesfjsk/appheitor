@@ -103,7 +103,7 @@ test('áreas de conhecimento giram pelo dia da semana e o dilema é a terceira p
     questions: [
       { kind: 'lesson', question: 'ideia 1' },
       { kind: 'lesson', question: 'ideia 2' },
-      { kind: 'lesson', question: 'O que você faria no vestiário?' },
+      { kind: 'dilemma', question: 'O que você faria no vestiário?' },
       { kind: 'knowledge', question: 'conta' },
     ],
     answers: ['a', 'b', 'Falar com o amigo', '5'],
@@ -111,6 +111,15 @@ test('áreas de conhecimento giram pelo dia da semana e o dilema é a terceira p
   const d = dilemmaOf(quiz);
   expect(d?.question).toBe('O que você faria no vestiário?');
   expect(d?.chosen).toBe('Falar com o amigo');
+  const discarded = {
+    questions: [
+      { kind: 'lesson', question: 'ideia 1' },
+      { kind: 'knowledge', question: 'conta de duas etapas' },
+      { kind: 'knowledge', question: 'Quanto é 6 vezes 5 vezes 4?' },
+    ],
+    answers: ['a', 'b', '120'],
+  };
+  expect(dilemmaOf(discarded)).toBe(null);
 });
 
 test('ideia do dia fala inteira, em fatias de 300, sem cortar o fim', () => {
@@ -147,7 +156,7 @@ test('veredito falado: só a explicação, sem nome e sem refrão', () => {
 });
 
 test('prompt da prova fixa 5º ano, proibições, auto-revisão e giro das áreas', () => {
-  const p = buildPrompt(QUIZ_THEMES[0], 8, 10, 1);
+  const p = buildPrompt({ seed: QUIZ_THEMES[0], count: 8, spare: 3, age: 10, weekday: 1, englishLevel: 1 });
   expect(p.includes('5º ano do ensino fundamental')).toBe(true);
   expect(p.includes('AUTO-REVISÃO')).toBe(true);
   expect(p.includes('qual a capital de')).toBe(true);

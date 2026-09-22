@@ -21,6 +21,8 @@ export interface Rect {
 export interface MerchantAnchor extends Rect {
   id: string;
   role: AnchorRole;
+  /** Chão da parede: o tapete under senta aqui (F9). */
+  baseY?: number;
 }
 
 export interface MerchantSceneDef {
@@ -63,7 +65,7 @@ export const DEFAULT_MERCHANT_SCENE: MerchantSceneDef = {
   spots: [
     { id: 'floor-a', role: 'floor', x: 320, y: 400, w: 150, h: 136 },
     { id: 'floor-b', role: 'floor', x: 540, y: 414, w: 168, h: 136 },
-    { id: 'wall', role: 'wall', x: 690, y: 128, w: 176, h: 176 },
+    { id: 'wall', role: 'wall', x: 690, y: 128, w: 176, h: 176, baseY: 440 },
     { id: 'counter', role: 'counter', x: 920, y: 378, w: 168, h: 126 },
   ],
 };
@@ -95,7 +97,10 @@ export function parseMerchantScene(raw: unknown): MerchantSceneDef | null {
     merchant: o.merchant,
     tray: o.tray,
     rail: o.rail,
-    spots: spots.slice(0, 4),
+    spots: spots.slice(0, 4).map((s) => ({
+      ...s,
+      ...(typeof s.baseY === 'number' ? { baseY: s.baseY } : {}),
+    })),
   };
 }
 
@@ -215,9 +220,10 @@ export function zonesFor(
     relation: 'in',
     rect: { x: x + w * 0.22, y: y + h * 0.3, w: w * 0.56, h: h * 0.44 },
   };
+  const wallFloor = typeof anchor.baseY === 'number' ? anchor.baseY : Math.max(y + h + 28, 348);
   const under: ZoneHit =
     role === 'wall'
-      ? { relation: 'under', rect: { x: x + w * 0.12, y: Math.max(y + h + 28, 348), w: w * 0.76, h: 64 } }
+      ? { relation: 'under', rect: { x: x + w * 0.12, y: wallFloor, w: w * 0.76, h: 64 } }
       : { relation: 'under', rect: { x: x + w * 0.22, y: y + h * 0.98, w: w * 0.56, h: Math.max(48, h * 0.38) } };
   const next_to: ZoneHit = {
     relation: 'next_to',
@@ -301,12 +307,31 @@ function placePt(relation: Relation, spot: MerchantSpotDef): string {
   return `${base.slice(0, -2)}d${spot.ptGender === 'f' ? 'a' : 'o'} ${spot.pt}`;
 }
 
+export type MissKind = 'relation' | 'item' | 'qty' | 'spot';
+
+/** Mesma ordem da correção: preposição, item, quantidade, lugar (F4). */
+export function missKind(step: MerchantStep, placed: MerchantPlacement | null): MissKind {
+  if (placed && placed.relation !== step.relation) return 'relation';
+  if (placed && placed.item !== step.item) return 'item';
+  if (placed && placed.qty !== step.qty) return 'qty';
+  return 'spot';
+}
+
 /** Em português: traduz a palavra e aponta o lugar. Ensina a acertar de novo. */
 export function correctionLine(
   step: MerchantStep,
   placed: MerchantPlacement | null,
   catalogs: MerchantCatalogs = MERCHANT_CATALOGS
 ): string {
+  return correctionFix(step, placed, catalogs).pt;
+}
+
+/** en na tela e no áudio; pt na segunda chamada (F6). */
+export function correctionFix(
+  step: MerchantStep,
+  placed: MerchantPlacement | null,
+  catalogs: MerchantCatalogs = MERCHANT_CATALOGS
+): { en: string; pt: string } {
   const spot = catalogs.spots.find((s) => s.id === step.spot);
   const item = catalogs.items.find((i) => i.id === step.item);
   const enRel = RELATION_EN[step.relation];
@@ -316,18 +341,21 @@ export function correctionLine(
   const itemEn = item?.label ?? step.item;
   const itemWord = item?.pt ?? step.item;
   const where = spot ? placePt(step.relation, spot) : `${ptRel} ${spotWord}`;
-
-  if (placed && placed.relation !== step.relation) {
-    return `${cap(enRel)} é ${ptRel}, não ${prepPt(placed.relation)}. ${cap(spotEn)} é ${spotWord}. ${cap(where)}.`;
-  }
-  if (placed && placed.item !== step.item) {
-    return `${cap(itemEn)} é ${itemWord}. ${cap(enRel)} é ${ptRel}. ${cap(where)}.`;
-  }
-  if (placed && placed.qty !== step.qty) {
+  const kind = missKind(step, placed);
+  let en = `${cap(enRel)} the ${spotEn}.`;
+  let pt = `${cap(spotEn)} é ${spotWord}. ${cap(enRel)} é ${ptRel}. ${cap(where)}.`;
+  if (kind === 'relation' && placed) {
+    en = `${cap(enRel)} the ${spotEn}, not ${RELATION_EN[placed.relation]}.`;
+    pt = `${cap(enRel)} é ${ptRel}, não ${prepPt(placed.relation)}. ${cap(spotEn)} é ${spotWord}. ${cap(where)}.`;
+  } else if (kind === 'item') {
+    en = `${cap(itemEn)}. ${cap(enRel)} the ${spotEn}.`;
+    pt = `${cap(itemEn)} é ${itemWord}. ${cap(enRel)} é ${ptRel}. ${cap(where)}.`;
+  } else if (kind === 'qty') {
     const n = NUMBER_WORDS[step.qty] ?? String(step.qty);
-    return `Pediu ${n}. ${cap(enRel)} é ${ptRel}. ${cap(where)}.`;
+    en = `${cap(n)}. ${cap(enRel)} the ${spotEn}.`;
+    pt = `Pediu ${n}. ${cap(enRel)} é ${ptRel}. ${cap(where)}.`;
   }
-  return `${cap(spotEn)} é ${spotWord}. ${cap(enRel)} é ${ptRel}. ${cap(where)}.`;
+  return { en, pt };
 }
 
 const PT_N = ['Nenhuma', 'Uma', 'Duas', 'Três', 'Quatro'];
@@ -380,8 +408,9 @@ export function praiseLine(
 export const NEXT_ORDER = 'Outro pedido. Ouve de novo.';
 
 export function addPlacement(prev: MerchantPlacement[], next: MerchantPlacement): MerchantPlacement[] {
+  if (prev.length === 0) return [next];
   const i = prev.findIndex((p) => p.item === next.item && p.relation === next.relation && p.spot === next.spot);
-  if (i < 0) return [...prev, next];
+  if (i < 0) return prev;
   const copy = [...prev];
   copy[i] = { ...copy[i], qty: copy[i].qty + next.qty };
   return copy;
@@ -416,6 +445,7 @@ export function buildMerchantOutcome(args: {
   deliveries: number;
   textShown: boolean;
   glossaryHovers: string[];
+  misses?: MissKind[][];
 }): ContractOutcome {
   const firstHits = args.firstOk.filter(Boolean).length;
   const finalHits = args.lastOk.filter(Boolean).length;
@@ -435,6 +465,8 @@ export function buildMerchantOutcome(args: {
       finalHits,
       attempts: args.attempts,
       glossaryHovers: args.glossaryHovers,
+      // Firestore recusa array dentro de array. Cada pedido vira um mapa.
+      misses: (args.misses ?? []).map((kinds, step) => ({ step, kinds })),
     },
   };
 }

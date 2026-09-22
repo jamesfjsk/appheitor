@@ -233,14 +233,42 @@ export function speakChunks(text: string, max = SPEAK_MAX_CHARS): string[] {
   return out;
 }
 
+/** Terceira pergunta só entra no cartão Hoje quando é o dilema (decisão 33). Lição ou conta no slot 2 devolve null. */
 export function dilemmaOf(quiz: {
   questions: Array<{ kind?: string; question: string }>;
   answers?: string[];
 }): { question: string; chosen: string } | null {
-  let i = quiz.questions.findIndex((q, idx) => q.kind === 'lesson' && idx === 2);
-  if (i < 0) i = 2;
-  const q = quiz.questions[i];
-  const chosen = quiz.answers?.[i]?.trim();
-  if (!q || !chosen) return null;
+  const q = quiz.questions[2];
+  if (!q || q.kind !== 'dilemma') return null;
+  const chosen = quiz.answers?.[2]?.trim();
+  if (!chosen) return null;
   return { question: q.question, chosen };
+}
+
+/** O dilema não entra na nota nem no gold (M8). */
+export function quizScoreOf(
+  questions: Array<{ kind?: string; answer: string }>,
+  answers: string[],
+): { correct: number; total: number } {
+  let correct = 0;
+  let total = 0;
+  questions.forEach((q, i) => {
+    if (q.kind === 'dilemma') return;
+    total += 1;
+    if (answers[i] === q.answer) correct += 1;
+  });
+  return { correct, total };
+}
+
+/**
+ * Anel do "Começar" / "Próxima": 0 = cheio, 100 = vazio.
+ * Nunca nasce cheio com reduced-motion; enquanto travado, teto de 75% em degraus de 25% (M3).
+ */
+export function readRingDash(p: number, reduced: boolean, locked: boolean): number {
+  const t = Math.min(1, Math.max(0, p));
+  if (locked) {
+    const shown = reduced ? Math.min(0.75, Math.floor(t * 4) / 4) : Math.min(0.75, t);
+    return Math.max(0, 100 - shown * 100);
+  }
+  return Math.max(0, 100 - t * 100);
 }

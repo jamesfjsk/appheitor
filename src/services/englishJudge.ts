@@ -9,7 +9,7 @@
 import type { NoteContent, NoteError, NoteErrorTag, NoteInfo, NoteJudgement, NoteLesson } from '../types/english';
 import { NOTE_ERROR_TAGS, buildExplainPrompt, buildJudgePrompt } from './english/prompts';
 import { missingInfos, wordDistance } from './english/notePrecheck';
-import { isLazyNote, teachFromRecado } from './english/notePlay';
+import { explainSayOk, isLazyNote, teachFromRecado } from './english/notePlay';
 import { noteScore } from './english/scoring';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
 
@@ -203,10 +203,7 @@ export async function explainNoteMiss(input: {
     const r = isRecord(json) ? json : {};
     const say = str(r.say);
     const hear = str(r.hear) || fallback.hear;
-    if (say && !isLazyNote(say) && !input.content.model.toLowerCase().includes(say.toLowerCase())) {
-      return { say, hear };
-    }
-    if (say && !isLazyNote(say)) return { say, hear };
+    if (explainSayOk(say, input.content.model)) return { say, hear };
     return fallback;
   } catch (error) {
     console.warn('englishJudge: fala da falta não veio', error);

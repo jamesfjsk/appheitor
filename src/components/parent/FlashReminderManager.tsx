@@ -80,7 +80,7 @@ const FlashReminderManager: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Lembretes Flash</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Lembretes da rotina</h2>
           <p className="text-gray-600">Gerencie lembretes motivacionais para o Heitor</p>
         </div>
         
@@ -255,13 +255,13 @@ const FlashReminderManager: React.FC = () => {
         <div className="flex items-start gap-2">
           <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
           <div>
-            <h4 className="font-semibold text-yellow-900 mb-2">💡 Dicas para Lembretes Flash:</h4>
+            <h4 className="font-semibold text-yellow-900 mb-2">Como usar os lembretes da rotina</h4>
             <ul className="text-sm text-yellow-800 space-y-1">
-              <li>• <strong>Alta prioridade:</strong> Lembretes importantes que piscam</li>
-              <li>• <strong>Mostrar no painel:</strong> Aparece na lateral do painel do Heitor</li>
-              <li>• <strong>Rotação automática:</strong> Lembretes alternam a cada 8 segundos</li>
-              <li>• <strong>Mensagens curtas:</strong> Mantenha entre 30-80 caracteres</li>
-              <li>• <strong>Emojis:</strong> Use emojis para tornar mais divertido</li>
+              <li>• <strong>Para que servem:</strong> tarefas de casa e as missões do dia (lição, quarto, leitura, mochila, fechar o dia)</li>
+              <li>• <strong>Alta prioridade:</strong> o lembrete pisca na Placa</li>
+              <li>• <strong>Mostrar na Placa:</strong> aparece na Placa da Vila do Heitor</li>
+              <li>• <strong>Mensagem curta:</strong> uma ordem direta, 30 a 80 caracteres, sem "super-herói"</li>
+              <li>• <strong>Quantos:</strong> dois ou três de cada vez; mais do que isso ninguém lê</li>
             </ul>
           </div>
         </div>

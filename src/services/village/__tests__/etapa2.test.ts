@@ -2,12 +2,12 @@ import { expect, run, test } from '../../english/__tests__/harness';
 import { addDays, isBeforeLaunch, nowBrazil, resetClockForTests } from '../../../utils/clock';
 import type { GoldTransaction } from '../../../types';
 import type { AgendaItem, ChallengeDoc, GoalDoc } from '../../../types/village';
-import { validateDeposit, vaultGoalCap, weeklyInterest, weeklyStatement, savingsRate, patienceForecast, minGoldForBonus, vaultInterestPct, unlockOnAfter, canRedeemPile, redeemWaitLine, saqueLine } from '../bank';
+import { pickGhostPile, validateDeposit, vaultGoalCap, weeklyInterest, weeklyStatement, savingsRate, patienceForecast, minGoldForBonus, vaultInterestPct, unlockOnAfter, canRedeemPile, redeemWaitLine, saqueLine } from '../bank';
 import { applyEvent, challengeState, extendForPunishment } from '../challenges';
 import { daysToAfford, priceForDays, referenceIncome, sinceLaunch } from '../income';
 import { txsLastDays, balancaTotals } from '../balance';
 import { capGold, gameGoldRoom } from '../caps';
-import { applyMaterialRepair, canRepair, cracksAfterClose, isBroken, liveBuildingLevel, repairMaterialCost, repairRefund, BREAKABLE_LOTS } from '../repair';
+import { applyMaterialRepair, canRepair, cracksAfterClose, cracksForPendingRound, isBroken, liveBuildingLevel, repairMaterialCost, repairRefund, BREAKABLE_LOTS } from '../repair';
 import { nextQuizStreak, skipDayPenalty } from '../stats';
 import { nextFullDays } from '../schedule';
 import { lateTaskReward, lateWindow } from '../late';
@@ -59,6 +59,15 @@ const challenge = (over: Partial<ChallengeDoc> = {}): ChallengeDoc => ({
   createdAt: '2026-09-14',
   updatedAt: '2026-09-14',
   ...over,
+});
+
+test('pickGhostPile pega o montinho aberto sem gold, antes do teto', () => {
+  const ghost = goal({ id: 'ghost', savedGold: 0, status: 'open' });
+  const full = goal({ id: 'full', savedGold: 10, status: 'open' });
+  const dead = goal({ id: 'dead', savedGold: 0, status: 'cancelled' });
+  expect(pickGhostPile([full, dead, ghost])?.id).toBe('ghost');
+  expect(pickGhostPile([full, dead])).toBe(undefined);
+  expect(pickGhostPile([])).toBe(undefined);
 });
 
 test('depósito válido e recusa quando falta gold', () => {
@@ -266,6 +275,21 @@ test('dia perdido derruba no máximo uma obra; conserto pede o dia de hoje compl
   expect(canRepair(cracks, 6, 6)).toBe(true);
   expect(canRepair(cracks, 6, 5)).toBe(false);
   expect(repairRefund(4)).toBe(2);
+});
+
+test('decisão 36: sete dias atrasados derrubam no máximo duas obras; férias não derrubam', () => {
+  const built = { fornalha: 1, bau: 1, cerca: 1, torre: 1, mesa: 1, cofre: 1, agenda: 1, mercado: 1 };
+  const lost = { skip: false, missed: [{ period: 'morning' as const }] };
+  const week = Array.from({ length: 7 }, () => lost);
+  const cracks = cracksForPendingRound(week, built);
+  expect(cracks).toHaveLength(2);
+  expect(cracksForPendingRound(week, built)).toEqual(cracksForPendingRound(week, built));
+  const vacation = [{ skip: true, missed: [{ period: 'afternoon' as const }] }, ...week];
+  expect(cracksForPendingRound(vacation, built)).toHaveLength(2);
+  expect(cracksForPendingRound([
+    { skip: true, missed: [{ period: 'morning' as const }] },
+    { skip: true, missed: [{ period: 'evening' as const }] },
+  ], built)).toEqual([]);
 });
 
 test('arrumar com material tira só aquela obra e cobra 1 do material do nível', () => {

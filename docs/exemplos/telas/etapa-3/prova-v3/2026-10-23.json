@@ -1,0 +1,502 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-23",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-23",
+  "status": "ready",
+  "theme": {
+    "category": "cidadania",
+    "curiosity": "Na Grécia Antiga, as leis eram escritas em pedras para que todos pudessem ver. Já pensou se fosse assim hoje?",
+    "id": "leis-e-regras",
+    "lesson": "Imagine que você está jogando futebol e, de repente, alguém pega a bola com as mãos e corre até o gol. Isso não seria justo, certo? As regras existem para que todos saibam o que é certo e errado, garantindo que o jogo seja justo para todos. Assim como no futebol, temos leis na escola e no país para garantir que todos saibam como se comportar. Sem elas, haveria confusão e injustiça. Hoje, pense em como as regras ajudam a manter as coisas organizadas e justas, seja na escola ou em casa.",
+    "title": "Por que temos leis?",
+    "whyItMatters": "Entender por que existem leis ajuda você a respeitar e seguir as regras."
+  },
+  "questions": [
+    {
+      "question": "Por que existem regras em jogos como o futebol?",
+      "options": [
+        "Para garantir justiça",
+        "Para complicar o jogo",
+        "Para deixar mais divertido",
+        "Para confundir os jogadores"
+      ],
+      "answer": "Para garantir justiça",
+      "explanation": "As regras garantem que todos os jogadores saibam o que é permitido e o que não é.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta é 'Para garantir justiça' porque as regras ajudam a manter o jogo justo e organizado.",
+      "trap": "A opção 'Para complicar o jogo' parece tentadora, mas as regras existem para simplificar e organizar.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função das regras na escola?",
+      "options": [
+        "Garantir segurança",
+        "Deixar a escola chata",
+        "Impedir diversão",
+        "Confundir os alunos"
+      ],
+      "answer": "Garantir segurança",
+      "explanation": "As regras na escola ajudam a manter um ambiente seguro e organizado para todos.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta 'Garantir segurança' é correta porque as regras ajudam a proteger e organizar o ambiente escolar.",
+      "trap": "A opção 'Deixar a escola chata' é enganosa, pois as regras não são feitas para isso.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se você tem 300 reais e compra dois jogos de 120 reais cada, quanto sobra?",
+      "options": [
+        "60",
+        "80",
+        "100",
+        "40"
+      ],
+      "answer": "60",
+      "explanation": "Primeiro, calcule 120 vezes 2, que dá 240. Depois, subtraia de 300.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta é 60 porque 300 menos 240 (120 vezes 2) resulta em 60.",
+      "trap": "A opção 80 pode enganar quem esquece de multiplicar antes de subtrair.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se não houvesse leis de trânsito?",
+      "options": [
+        "Mais acidentes",
+        "Menos acidentes",
+        "Trânsito mais rápido",
+        "Trânsito mais lento"
+      ],
+      "answer": "Mais acidentes",
+      "explanation": "As leis de trânsito ajudam a organizar o fluxo de veículos e evitar colisões.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "Sem leis de trânsito, haveria 'Mais acidentes' porque as regras ajudam a evitar colisões e confusões.",
+      "trap": "A opção 'Trânsito mais rápido' parece boa, mas ignora os riscos de acidentes.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Na escola, qual regra ajuda a manter a sala de aula organizada?",
+      "options": [
+        "Fazer silêncio durante a aula",
+        "Usar o celular o tempo todo",
+        "Conversar sempre que quiser",
+        "Comer na sala de aula"
+      ],
+      "answer": "Fazer silêncio durante a aula",
+      "explanation": "O silêncio ajuda todos a se concentrarem e aprenderem melhor.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Fazer silêncio durante a aula' porque isso permite que todos prestem atenção e aprendam.",
+      "trap": "Quem escolhe 'Conversar sempre que quiser' pode pensar que é bom, mas atrapalha a concentração.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se uma loja tem 500 produtos e vende 60% deles, quantos produtos ainda restam?",
+      "options": [
+        "200",
+        "300",
+        "100",
+        "150"
+      ],
+      "answer": "200",
+      "explanation": "Primeiro, calcule 60% de 500, que são 300 vendidos. Sobram 200.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 200 porque, após vender 300 produtos, restam 200 dos 500 originais.",
+      "trap": "Quem marca 300 pode ter calculado a quantidade vendida, não a que restou.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma receita para 4 pessoas usa 2 ovos. Quantos ovos você precisa para 10 pessoas?",
+      "options": [
+        "5",
+        "4",
+        "8",
+        "6"
+      ],
+      "answer": "5",
+      "explanation": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "trap": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O Brasil faz fronteira com quase toda a América do Sul. Quais são os dois países do continente que ele NÃO toca?",
+      "options": [
+        "Chile e Equador",
+        "Argentina e Uruguai",
+        "Peru e Bolívia",
+        "Colômbia e Venezuela"
+      ],
+      "answer": "Chile e Equador",
+      "explanation": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "trap": "O Brasil encosta em 10 países. O Chile fica escondido atrás da Argentina, e o Equador, atrás do Peru e da Colômbia.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Qual regra ou lei você acha mais importante e por quê?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 2,
+      "conta_nao_fecha": 2,
+      "ingles_nivel": 1,
+      "opcao_caricata": 2,
+      "sinonimas": 1,
+      "tipos_mistos": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "certa_mais_longa",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "sinonimas",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "certa_mais_longa",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": false,
+        "motivo": "A certa é a única completa."
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A pergunta pede uma opinião sobre a importância."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 2
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Por que existem regras em jogos como o futebol?",
+          "options": [
+            "Para garantir justiça",
+            "Para complicar o jogo",
+            "Para deixar mais divertido",
+            "Para confundir os jogadores"
+          ],
+          "answer": "Para garantir justiça",
+          "explanation": "As regras garantem que todos os jogadores saibam o que é permitido e o que não é.",
+          "why": "A resposta é 'Para garantir justiça' porque as regras ajudam a manter o jogo justo e organizado.",
+          "trap": "A opção 'Para complicar o jogo' parece tentadora, mas as regras existem para simplificar e organizar.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função das regras na escola?",
+          "options": [
+            "Garantir segurança",
+            "Deixar a escola chata",
+            "Impedir diversão",
+            "Confundir os alunos"
+          ],
+          "answer": "Garantir segurança",
+          "explanation": "As regras na escola ajudam a manter um ambiente seguro e organizado para todos.",
+          "why": "A resposta 'Garantir segurança' é correta porque as regras ajudam a proteger e organizar o ambiente escolar.",
+          "trap": "A opção 'Deixar a escola chata' é enganosa, pois as regras não são feitas para isso.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se você vê alguém quebrando uma regra no jogo, o que você deve fazer?",
+          "options": [
+            "Ignorar e continuar jogando",
+            "Avisar o árbitro ou professor",
+            "Fazer o mesmo",
+            "Reclamar com os amigos"
+          ],
+          "answer": "Avisar o árbitro ou professor",
+          "explanation": "Avisar alguém responsável ajuda a resolver a situação de forma justa.",
+          "why": "A melhor atitude é 'Avisar o árbitro ou professor' porque isso ajuda a manter o jogo justo.",
+          "trap": "A opção 'Ignorar e continuar jogando' parece mais fácil, mas não resolve o problema.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se você tem 300 reais e compra dois jogos de 120 reais cada, quanto sobra?",
+          "options": [
+            "60",
+            "80",
+            "100",
+            "40"
+          ],
+          "answer": "60",
+          "explanation": "Primeiro, calcule 120 vezes 2, que dá 240. Depois, subtraia de 300.",
+          "why": "A resposta é 60 porque 300 menos 240 (120 vezes 2) resulta em 60.",
+          "trap": "A opção 80 pode enganar quem esquece de multiplicar antes de subtrair.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse leis de trânsito?",
+          "options": [
+            "Mais acidentes",
+            "Menos acidentes",
+            "Trânsito mais rápido",
+            "Trânsito mais lento"
+          ],
+          "answer": "Mais acidentes",
+          "explanation": "As leis de trânsito ajudam a organizar o fluxo de veículos e evitar colisões.",
+          "why": "Sem leis de trânsito, haveria 'Mais acidentes' porque as regras ajudam a evitar colisões e confusões.",
+          "trap": "A opção 'Trânsito mais rápido' parece boa, mas ignora os riscos de acidentes.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a cat on the table",
+            "There are a cat on the table",
+            "There is cats on the table",
+            "There are cat on the table"
+          ],
+          "answer": "There is a cat on the table",
+          "explanation": "Use 'there is' for singular nouns like 'a cat'.",
+          "why": "The correct sentence is 'There is a cat on the table' because 'a cat' is singular.",
+          "trap": "The option 'There are a cat on the table' is tempting but 'are' is for plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "Nível 1",
+          "bloom": "entender",
+          "audioText": "There is a cat on the table"
+        },
+        {
+          "question": "Qual desses eventos ocorreu na Idade Média?",
+          "options": [
+            "Invenção da imprensa",
+            "Revolução Industrial",
+            "Descobrimento da América",
+            "Queda de Roma"
+          ],
+          "answer": "Invenção da imprensa",
+          "explanation": "A imprensa foi inventada por Gutenberg durante a Idade Média.",
+          "why": "A resposta é 'Invenção da imprensa' porque ocorreu na Idade Média, ao contrário das outras opções.",
+          "trap": "A opção 'Queda de Roma' é tentadora, mas ocorreu antes da Idade Média.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "O que acontece se a bola sai pela linha lateral no futebol?",
+          "options": [
+            "Arremesso lateral",
+            "Tiro de meta",
+            "Escanteio",
+            "Pênalti"
+          ],
+          "answer": "Arremesso lateral",
+          "explanation": "Quando a bola sai pela lateral, o jogo recomeça com um arremesso.",
+          "why": "A resposta é 'Arremesso lateral' porque é assim que o jogo reinicia quando a bola sai pela lateral.",
+          "trap": "A opção 'Tiro de meta' é enganosa, pois ocorre quando a bola sai pela linha de fundo.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Qual regra ou lei você acha mais importante e por quê?",
+      "theme": {
+        "curiosity": "Na Grécia Antiga, as leis eram escritas em pedras para que todos pudessem ver. Já pensou se fosse assim hoje?",
+        "lesson": "Imagine que você está jogando futebol e, de repente, alguém pega a bola com as mãos e corre até o gol. Isso não seria justo, certo? As regras existem para que todos saibam o que é certo e errado, garantindo que o jogo seja justo para todos. Assim como no futebol, temos leis na escola e no país para garantir que todos saibam como se comportar. Sem elas, haveria confusão e injustiça. Hoje, pense em como as regras ajudam a manter as coisas organizadas e justas, seja na escola ou em casa.",
+        "title": "Por que temos leis?",
+        "whyItMatters": "Entender por que existem leis ajuda você a respeitar e seguir as regras."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que as leis de trânsito são importantes?",
+          "options": [
+            "Para evitar acidentes",
+            "Para deixar o trânsito mais lento",
+            "Para punir motoristas",
+            "Para aumentar multas"
+          ],
+          "answer": "Para evitar acidentes",
+          "explanation": "As leis de trânsito existem para garantir a segurança de todos.",
+          "why": "A resposta certa é 'Para evitar acidentes' porque as leis ajudam a organizar o trânsito e prevenir colisões.",
+          "trap": "Quem escolhe 'Para punir motoristas' pode achar que o foco das leis é a punição, mas é a segurança.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Na escola, qual regra ajuda a manter a sala de aula organizada?",
+          "options": [
+            "Fazer silêncio durante a aula",
+            "Usar o celular o tempo todo",
+            "Conversar sempre que quiser",
+            "Comer na sala de aula"
+          ],
+          "answer": "Fazer silêncio durante a aula",
+          "explanation": "O silêncio ajuda todos a se concentrarem e aprenderem melhor.",
+          "why": "A resposta certa é 'Fazer silêncio durante a aula' porque isso permite que todos prestem atenção e aprendam.",
+          "trap": "Quem escolhe 'Conversar sempre que quiser' pode pensar que é bom, mas atrapalha a concentração.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se você vê um colega quebrando uma regra na escola, o que é mais sábio fazer?",
+          "options": [
+            "Conversar com ele sobre a regra",
+            "Ignorar o que ele fez",
+            "Contar para todos os amigos",
+            "Fazer o mesmo que ele"
+          ],
+          "answer": "Conversar com ele sobre a regra",
+          "explanation": "Conversar pode ajudar o colega a entender a importância da regra.",
+          "why": "A resposta certa é 'Conversar com ele sobre a regra' porque isso pode ajudar a resolver o problema de forma amigável.",
+          "trap": "Quem escolhe 'Ignorar o que ele fez' pode achar que não é problema seu, mas isso não ajuda a melhorar a situação.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se uma loja tem 500 produtos e vende 60% deles, quantos produtos ainda restam?",
+          "options": [
+            "200",
+            "300",
+            "100",
+            "150"
+          ],
+          "answer": "200",
+          "explanation": "Primeiro, calcule 60% de 500, que são 300 vendidos. Sobram 200.",
+          "why": "A resposta certa é 200 porque, após vender 300 produtos, restam 200 dos 500 originais.",
+          "trap": "Quem marca 300 pode ter calculado a quantidade vendida, não a que restou.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  }
+}

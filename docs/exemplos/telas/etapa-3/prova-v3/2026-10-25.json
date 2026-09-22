@@ -1,0 +1,542 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-25",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-25",
+  "status": "ready",
+  "theme": {
+    "category": "corpo",
+    "curiosity": "Você sabia que o corpo humano tem mais bactérias do que células humanas? E a maioria delas é amiga!",
+    "id": "sistema-imune",
+    "lesson": "Imagine que você está jogando futebol e, de repente, começa a sentir febre. Parece ruim, mas, na verdade, seu corpo está lutando contra um invasor, como um vírus ou bactéria. A febre é uma arma poderosa do nosso sistema imunológico. Vacinas são como treinadores que ensinam nosso corpo a reconhecer inimigos antes de eles atacarem. Por isso, depois de ter catapora, você não pega de novo: seu corpo já sabe como vencer. Hoje, pense em como seu corpo é incrível por se proteger o tempo todo, mesmo quando você não percebe.",
+    "title": "O exército dentro de você",
+    "whyItMatters": "Entender como seu corpo se defende ajuda você a cuidar melhor dele."
+  },
+  "questions": [
+    {
+      "question": "Por que a febre é importante para o corpo?",
+      "options": [
+        "Ajuda a lutar contra infecções",
+        "É um defeito do corpo",
+        "Causa doenças",
+        "É sempre perigosa"
+      ],
+      "answer": "Ajuda a lutar contra infecções",
+      "explanation": "A febre aumenta a temperatura do corpo para ajudar a combater vírus e bactérias.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta é 'Ajuda a lutar contra infecções' porque a febre é uma resposta natural do corpo para enfrentar invasores.",
+      "trap": "Quem escolhe 'É um defeito do corpo' não entende que a febre é uma defesa, não um erro.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Como uma vacina ajuda o sistema imunológico?",
+      "options": [
+        "Ensina a reconhecer vírus",
+        "Aumenta a febre",
+        "Causa doenças",
+        "Remove todas as bactérias"
+      ],
+      "answer": "Ensina a reconhecer vírus",
+      "explanation": "Vacinas treinam o sistema imunológico para reconhecer e combater vírus.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta correta é 'Ensina a reconhecer vírus' porque vacinas preparam o corpo para lutar contra infecções futuras.",
+      "trap": "Quem escolhe 'Remove todas as bactérias' erra porque vacinas não eliminam bactérias, apenas treinam o corpo.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Seu amigo está com medo de tomar vacina. O que você faz?",
+      "options": [
+        "Explico como vacinas ajudam",
+        "Digo para ele não tomar",
+        "Ignoro o medo dele",
+        "Faço piada sobre isso"
+      ],
+      "answer": "Explico como vacinas ajudam",
+      "explanation": "Explicar ajuda a diminuir o medo e mostra a importância das vacinas.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A melhor escolha é 'Explico como vacinas ajudam' porque informar pode tranquilizar e encorajar decisões saudáveis.",
+      "trap": "Escolher 'Digo para ele não tomar' é ruim porque ignora os benefícios das vacinas.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Independência do Brasil?",
+      "options": [
+        "Ocorreu em 7 de setembro",
+        "Foi em 1825",
+        "Aconteceu sem conflitos",
+        "Foi liderada por Dom Pedro II"
+      ],
+      "answer": "Ocorreu em 7 de setembro",
+      "explanation": "A independência do Brasil foi declarada em 7 de setembro de 1822.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta correta é 'Ocorreu em 7 de setembro' porque é a data oficial da independência.",
+      "trap": "Escolher 'Foi em 1825' está errado porque a data correta é 1822.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual jogador é responsável por defender o gol?",
+      "options": [
+        "Goleiro",
+        "Atacante",
+        "Meio-campista",
+        "Zagueiro"
+      ],
+      "answer": "Goleiro",
+      "explanation": "O goleiro é o único jogador que pode usar as mãos para defender o gol.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta é 'Goleiro' porque ele é o principal responsável por evitar que a bola entre no gol.",
+      "trap": "Escolher 'Zagueiro' está errado porque, embora defenda, não é o principal responsável pelo gol.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que acontece quando o corpo detecta um vírus?",
+      "options": [
+        "Aumenta a temperatura",
+        "Diminui a temperatura",
+        "Nada acontece",
+        "Aumenta a fome"
+      ],
+      "answer": "Aumenta a temperatura",
+      "explanation": "A febre é uma resposta do corpo para combater vírus e bactérias.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Aumenta a temperatura' porque a febre ajuda a combater infecções.",
+      "trap": "Quem escolhe 'Nada acontece' ignora que a febre é uma resposta ativa do corpo.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Você está jogando futebol e começa a se sentir febril. O que seu corpo está fazendo?",
+      "options": [
+        "Combatendo uma infecção",
+        "Ficando mais forte",
+        "Perdendo energia",
+        "Ficando mais lento"
+      ],
+      "answer": "Combatendo uma infecção",
+      "explanation": "A febre indica que o corpo está lutando contra algo.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Combatendo uma infecção' porque a febre é uma defesa do corpo.",
+      "trap": "Quem escolhe 'Perdendo energia' pode confundir o cansaço com a causa da febre.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Numa turma de 30 alunos, 2/5 são meninas. Quantos meninos há na turma?",
+      "options": [
+        "18",
+        "12",
+        "20",
+        "6"
+      ],
+      "answer": "18",
+      "explanation": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "trap": "Primeiro ache as meninas: 30 ÷ 5 = 6, e 6 × 2 = 12. Depois tire das 30: 30 − 12 = 18 meninos.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que seu corpo se defende de doenças todos os dias?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 2,
+      "conta_nao_fecha": 1,
+      "conta_um_passo": 1,
+      "ingles_nivel": 1,
+      "sinonimas": 1,
+      "tamanho_opcoes": 2,
+      "why_curto": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": [
+          "why_curto",
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "sinonimas",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "why_curto",
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": []
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 1
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "Por que a febre é importante para o corpo?",
+          "options": [
+            "Ajuda a lutar contra infecções",
+            "É um defeito do corpo",
+            "Causa doenças",
+            "É sempre perigosa"
+          ],
+          "answer": "Ajuda a lutar contra infecções",
+          "explanation": "A febre aumenta a temperatura do corpo para ajudar a combater vírus e bactérias.",
+          "why": "A resposta é 'Ajuda a lutar contra infecções' porque a febre é uma resposta natural do corpo para enfrentar invasores.",
+          "trap": "Quem escolhe 'É um defeito do corpo' não entende que a febre é uma defesa, não um erro.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como uma vacina ajuda o sistema imunológico?",
+          "options": [
+            "Ensina a reconhecer vírus",
+            "Aumenta a febre",
+            "Causa doenças",
+            "Remove todas as bactérias"
+          ],
+          "answer": "Ensina a reconhecer vírus",
+          "explanation": "Vacinas treinam o sistema imunológico para reconhecer e combater vírus.",
+          "why": "A resposta correta é 'Ensina a reconhecer vírus' porque vacinas preparam o corpo para lutar contra infecções futuras.",
+          "trap": "Quem escolhe 'Remove todas as bactérias' erra porque vacinas não eliminam bactérias, apenas treinam o corpo.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo está com medo de tomar vacina. O que você faz?",
+          "options": [
+            "Explico como vacinas ajudam",
+            "Digo para ele não tomar",
+            "Ignoro o medo dele",
+            "Faço piada sobre isso"
+          ],
+          "answer": "Explico como vacinas ajudam",
+          "explanation": "Explicar ajuda a diminuir o medo e mostra a importância das vacinas.",
+          "why": "A melhor escolha é 'Explico como vacinas ajudam' porque informar pode tranquilizar e encorajar decisões saudáveis.",
+          "trap": "Escolher 'Digo para ele não tomar' é ruim porque ignora os benefícios das vacinas.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Uma loja vende 3 camisetas por R$ 90. Quanto custa cada uma?",
+          "options": [
+            "R$ 30",
+            "R$ 45",
+            "R$ 60",
+            "R$ 90"
+          ],
+          "answer": "R$ 30",
+          "explanation": "Divida o preço total pelo número de camisetas.",
+          "why": "A resposta é 'R$ 30' porque 90 dividido por 3 é 30.",
+          "trap": "Escolher 'R$ 45' erra porque 45 vezes 3 não dá 90.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que acontece se você não tiver febre durante uma infecção?",
+          "options": [
+            "O corpo pode demorar mais para reagir",
+            "Você fica mais forte",
+            "A infecção desaparece sozinha",
+            "Você nunca fica doente"
+          ],
+          "answer": "O corpo pode demorar mais para reagir",
+          "explanation": "Sem febre, o corpo pode não combater a infecção tão rapidamente.",
+          "why": "A resposta é 'O corpo pode demorar mais para reagir' porque a febre acelera a resposta imunológica.",
+          "trap": "Escolher 'A infecção desaparece sozinha' ignora que a febre ajuda o corpo a lutar.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a cat on the mat",
+            "There are a cat on the mat",
+            "There is cats on the mat",
+            "There are cat on the mat"
+          ],
+          "answer": "There is a cat on the mat",
+          "explanation": "Use 'there is' for singular nouns.",
+          "why": "The correct sentence is 'There is a cat on the mat' because it correctly uses 'there is' with a singular noun.",
+          "trap": "Choosing 'There are a cat on the mat' is wrong because 'are' is for plurals.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "NIVEL1",
+          "bloom": "entender",
+          "audioText": "Which sentence is correct?"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Independência do Brasil?",
+          "options": [
+            "Ocorreu em 7 de setembro",
+            "Foi em 1825",
+            "Aconteceu sem conflitos",
+            "Foi liderada por Dom Pedro II"
+          ],
+          "answer": "Ocorreu em 7 de setembro",
+          "explanation": "A independência do Brasil foi declarada em 7 de setembro de 1822.",
+          "why": "A resposta correta é 'Ocorreu em 7 de setembro' porque é a data oficial da independência.",
+          "trap": "Escolher 'Foi em 1825' está errado porque a data correta é 1822.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "O que acontece se um jogador de futebol tocar a bola com a mão?",
+          "options": [
+            "O jogo para e é falta",
+            "O time ganha um ponto",
+            "Nada acontece",
+            "O jogador é expulso"
+          ],
+          "answer": "O jogo para e é falta",
+          "explanation": "Tocar a bola com a mão é falta e o jogo para.",
+          "why": "A resposta é 'O jogo para e é falta' porque tocar a bola com a mão é contra as regras.",
+          "trap": "Escolher 'O time ganha um ponto' está errado porque isso não acontece com falta.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Quantos dias há em duas semanas?",
+          "options": [
+            "14",
+            "10",
+            "12",
+            "7"
+          ],
+          "answer": "14",
+          "explanation": "Uma semana tem 7 dias, então duas semanas têm 14 dias.",
+          "why": "A resposta é '14' porque 7 vezes 2 é 14.",
+          "trap": "Escolher '10' erra porque isso é menos que duas semanas completas.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse vacinas?",
+          "options": [
+            "Mais pessoas ficariam doentes",
+            "As doenças desapareceriam",
+            "A saúde melhoraria",
+            "Nada mudaria"
+          ],
+          "answer": "Mais pessoas ficariam doentes",
+          "explanation": "Vacinas ajudam a prevenir doenças, então sem elas, mais pessoas adoeceriam.",
+          "why": "A resposta é 'Mais pessoas ficariam doentes' porque vacinas previnem doenças, reduzindo a incidência de infecções.",
+          "trap": "Escolher 'As doenças desapareceriam' ignora que vacinas são essenciais para controle de doenças.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual jogador é responsável por defender o gol?",
+          "options": [
+            "Goleiro",
+            "Atacante",
+            "Meio-campista",
+            "Zagueiro"
+          ],
+          "answer": "Goleiro",
+          "explanation": "O goleiro é o único jogador que pode usar as mãos para defender o gol.",
+          "why": "A resposta é 'Goleiro' porque ele é o principal responsável por evitar que a bola entre no gol.",
+          "trap": "Escolher 'Zagueiro' está errado porque, embora defenda, não é o principal responsável pelo gol.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que seu corpo se defende de doenças todos os dias?",
+      "theme": {
+        "curiosity": "Você sabia que o corpo humano tem mais bactérias do que células humanas? E a maioria delas é amiga!",
+        "lesson": "Imagine que você está jogando futebol e, de repente, começa a sentir febre. Parece ruim, mas, na verdade, seu corpo está lutando contra um invasor, como um vírus ou bactéria. A febre é uma arma poderosa do nosso sistema imunológico. Vacinas são como treinadores que ensinam nosso corpo a reconhecer inimigos antes de eles atacarem. Por isso, depois de ter catapora, você não pega de novo: seu corpo já sabe como vencer. Hoje, pense em como seu corpo é incrível por se proteger o tempo todo, mesmo quando você não percebe.",
+        "title": "O exército dentro de você",
+        "whyItMatters": "Entender como seu corpo se defende ajuda você a cuidar melhor dele."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "O que acontece quando o corpo detecta um vírus?",
+          "options": [
+            "Aumenta a temperatura",
+            "Diminui a temperatura",
+            "Nada acontece",
+            "Aumenta a fome"
+          ],
+          "answer": "Aumenta a temperatura",
+          "explanation": "A febre é uma resposta do corpo para combater vírus e bactérias.",
+          "why": "A resposta certa é 'Aumenta a temperatura' porque a febre ajuda a combater infecções.",
+          "trap": "Quem escolhe 'Nada acontece' ignora que a febre é uma resposta ativa do corpo.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você está jogando futebol e começa a se sentir febril. O que seu corpo está fazendo?",
+          "options": [
+            "Combatendo uma infecção",
+            "Ficando mais forte",
+            "Perdendo energia",
+            "Ficando mais lento"
+          ],
+          "answer": "Combatendo uma infecção",
+          "explanation": "A febre indica que o corpo está lutando contra algo.",
+          "why": "A resposta certa é 'Combatendo uma infecção' porque a febre é uma defesa do corpo.",
+          "trap": "Quem escolhe 'Perdendo energia' pode confundir o cansaço com a causa da febre.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo não quer tomar vacina. O que você faz?",
+          "options": [
+            "Explica como a vacina ajuda",
+            "Diz para ele não se preocupar",
+            "Fica em silêncio",
+            "Ri dele"
+          ],
+          "answer": "Explica como a vacina ajuda",
+          "explanation": "Explicar pode ajudar seu amigo a entender a importância da vacina.",
+          "why": "A resposta certa é 'Explica como a vacina ajuda' porque isso pode tranquilizá-lo e incentivá-lo a se vacinar.",
+          "trap": "Quem escolhe 'Diz para ele não se preocupar' ignora a importância de informar corretamente.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        }
+      ]
+    }
+  }
+}

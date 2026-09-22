@@ -35,7 +35,22 @@ export interface UserProgress {
 // ========================================
 // QUIZ DIÁRIO (prova gerada com antecedência e guardada em dailyQuizzes)
 // ========================================
-export type DailyQuizQuestionKind = 'lesson' | 'knowledge';
+export type DailyQuizQuestionKind = 'lesson' | 'knowledge' | 'dilemma';
+
+export interface DailyQuizSanitize {
+  kept: number;
+  dropped: Record<string, number>;
+  /** Códigos do validador, na ordem da IA. Vazio = a pergunta passou. */
+  perQuestion?: { i: number; codes: string[] }[];
+  /** Revisor (gpt-4o-mini): o lote inteiro. ok false sai da prova. */
+  review?: { n: number; ok: boolean; motivo: string }[];
+  /** A resposta do revisor veio quebrada: vale o validador local. */
+  reviewFellBack?: boolean;
+  /** reviewBatch local, log, não decide a prova. */
+  batchLog?: string[];
+  /** Quantas das perguntas publicadas vieram do banco, depois do validador. */
+  fromOffline?: number;
+}
 
 export interface DailyQuizQuestion {
   question: string;
@@ -44,6 +59,11 @@ export interface DailyQuizQuestion {
   explanation: string;
   kind: DailyQuizQuestionKind;
   subject: string;
+  why?: string;
+  trap?: string;
+  skill?: string;
+  bloom?: string;
+  audioText?: string;
 }
 
 export interface DailyQuizTheme {
@@ -64,14 +84,21 @@ export interface DailyQuiz {
   questions: DailyQuizQuestion[];
   reflectionPrompt: string;
   source: 'ai' | 'offline';
+  sanitize?: DailyQuizSanitize;
+  /** Saída crua da IA (primeira chamada e, se houve, a substituição). */
+  raw?: unknown;
   generatedAt: Date;
   completed: boolean;
+  /** 8 respostas gravadas; a prova ainda não pagou nem fechou (M2). */
+  awaitingReflection?: boolean;
   score?: number;
   totalQuestions?: number;
   xpEarned?: number;
   goldEarned?: number;
   answers?: string[];
   reflection?: string;
+  /** Contagem gravada, não recalculada (B4). */
+  reflectionWords?: number;
   /** Frase do Sábio ao aceitar ou recusar a reflexão. */
   reflectionNote?: string;
   completedAt?: Date;

@@ -101,6 +101,31 @@ export function cracksAfterClose(
   return next;
 }
 
+/** Rodada de dias atrasados: no máximo duas obras caem; o resto só perde tocha (decisão 36). */
+export const RUIN_ROUND_CAP = 2;
+
+export interface PendingRuinDay {
+  skip: boolean;
+  missed: Array<{ period?: Period }>;
+}
+
+export function cracksForPendingRound(
+  days: PendingRuinDay[],
+  buildings: Record<string, number> = {},
+  start: string[] = [],
+): string[] {
+  let cracks = [...start];
+  let ruins = 0;
+  for (const day of days) {
+    if (day.skip) continue;
+    const allow = ruins < RUIN_ROUND_CAP;
+    const next = cracksAfterClose(cracks, allow ? day.missed : [], buildings);
+    ruins += Math.max(0, next.length - cracks.length);
+    cracks = next;
+  }
+  return cracks;
+}
+
 export function canRepair(cracks: string[], dueToday: number, doneToday: number): boolean {
   return cracks.length > 0 && dueToday > 0 && doneToday >= dueToday;
 }

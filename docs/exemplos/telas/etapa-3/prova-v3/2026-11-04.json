@@ -1,0 +1,559 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-04",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-04",
+  "status": "ready",
+  "theme": {
+    "id": "escravidao-e-abolicao",
+    "category": "brasil",
+    "title": "A Influência Africana no Brasil",
+    "lesson": "Imagine um jogo de futebol onde cada jogador traz uma habilidade única. Assim é o Brasil, com sua cultura rica e diversa, influenciada por muitos povos. Durante quase 350 anos, pessoas africanas foram trazidas à força para trabalhar aqui. Elas resistiram, criando quilombos e lutando por liberdade. Em 1888, a Lei Áurea aboliu a escravidão, mas as marcas desse período ainda estão presentes. Hoje, a cultura africana está em nossa música, comida e dança, como a capoeira. Entender essa história nos ajuda a valorizar a diversidade e lutar contra as desigualdades atuais.",
+    "whyItMatters": "Compreender a história ajuda a construir um futuro mais justo.",
+    "curiosity": "Você sabia que a capoeira, uma mistura de dança e luta, foi criada por escravizados como forma de resistência?"
+  },
+  "questions": [
+    {
+      "question": "O que foi a Lei Áurea?",
+      "options": [
+        "Abolição da escravidão",
+        "Início da escravidão",
+        "Lei de imigração",
+        "Lei de terras"
+      ],
+      "answer": "Abolição da escravidão",
+      "explanation": "A Lei Áurea foi assinada em 1888 e aboliu a escravidão no Brasil.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Abolição da escravidão' porque a Lei Áurea, assinada em 1888, acabou com a escravidão no Brasil.",
+      "trap": "Marcar 'Início da escravidão' erra porque a Lei Áurea encerrou a escravidão, não a iniciou.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Como a cultura africana aparece no Brasil hoje?",
+      "options": [
+        "Capoeira e samba",
+        "Ópera e balé",
+        "Rock e jazz",
+        "Fado e flamenco"
+      ],
+      "answer": "Capoeira e samba",
+      "explanation": "Capoeira e samba são expressões culturais de origem africana presentes no Brasil.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta 'Capoeira e samba' é certa porque ambas são manifestações culturais de origem africana no Brasil.",
+      "trap": "Marcar 'Ópera e balé' erra porque essas são tradições europeias, não africanas.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual é a função do 'offside' no futebol?",
+      "options": [
+        "Evitar vantagem injusta",
+        "Marcar gol",
+        "Defender o gol",
+        "Fazer falta"
+      ],
+      "answer": "Evitar vantagem injusta",
+      "explanation": "O 'offside' impede que um jogador fique em posição vantajosa sem a bola.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta 'Evitar vantagem injusta' é certa porque o 'offside' impede que um jogador se posicione injustamente perto do gol adversário.",
+      "trap": "Marcar 'Marcar gol' erra porque o 'offside' não tem relação direta com marcar gols.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem 600 reais e compra dois brinquedos de 250 reais cada, quanto sobra?",
+      "options": [
+        "100",
+        "50",
+        "200",
+        "150"
+      ],
+      "answer": "100",
+      "explanation": "600 menos 500 (250 vezes 2) deixa 100.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 100 porque 600 menos 500 (250 vezes 2) deixa 100.",
+      "trap": "Marcar 50 erra porque isso ignora a soma correta dos preços dos brinquedos.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual frase é verdadeira sobre a Lei Áurea?",
+      "options": [
+        "Aboliu a escravidão no Brasil",
+        "Criou novas leis de trabalho",
+        "Estabeleceu o voto feminino",
+        "Iniciou a colonização do Brasil"
+      ],
+      "answer": "Aboliu a escravidão no Brasil",
+      "explanation": "A Lei Áurea, assinada em 1888, aboliu a escravidão no Brasil.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta certa é 'Aboliu a escravidão no Brasil' porque a Lei Áurea oficialmente encerrou a escravidão no país.",
+      "trap": "A opção 'Criou novas leis de trabalho' engana quem confunde a abolição com reformas trabalhistas.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Cada caixa guarda 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?",
+      "options": [
+        "7",
+        "6",
+        "8",
+        "5"
+      ],
+      "answer": "7",
+      "explanation": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "trap": "40 ÷ 6 = 6 caixas cheias e sobram 4 ovos. Esses 4 precisam de mais uma caixa, então são 7.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Quantos minutos há em 2 horas e meia?",
+      "options": [
+        "150",
+        "120",
+        "130",
+        "250"
+      ],
+      "answer": "150",
+      "explanation": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "trap": "Cada hora tem 60 minutos: 2 × 60 = 120. Meia hora são 30 minutos, e 120 + 30 = 150.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Quais são as três cores primárias da tinta, que não nascem da mistura de outras?",
+      "options": [
+        "Vermelho, azul e amarelo",
+        "Verde, laranja e roxo",
+        "Preto, branco e cinza",
+        "Azul, verde e vermelho"
+      ],
+      "answer": "Vermelho, azul e amarelo",
+      "explanation": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "trap": "Com vermelho, azul e amarelo dá para misturar quase todas as outras cores. Verde, laranja e roxo são as secundárias.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que a história da escravidão influencia o Brasil de hoje?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "fato_discutivel": 2,
+      "conta_nao_fecha": 1,
+      "certa_mais_longa": 3,
+      "duplicata": 3
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": [
+          "fato_discutivel"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "fato_discutivel"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 13,
+        "codes": []
+      },
+      {
+        "i": 14,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": false,
+        "motivo": "Pede o que você faria, é opinião."
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "Pede o que ele faria, é opinião."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 3
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "A Influência Africana no Brasil",
+        "lesson": "Imagine um jogo de futebol onde cada jogador traz uma habilidade única. Assim é o Brasil, com sua cultura rica e diversa, influenciada por muitos povos. Durante quase 350 anos, pessoas africanas foram trazidas à força para trabalhar aqui. Elas resistiram, criando quilombos e lutando por liberdade. Em 1888, a Lei Áurea aboliu a escravidão, mas as marcas desse período ainda estão presentes. Hoje, a cultura africana está em nossa música, comida e dança, como a capoeira. Entender essa história nos ajuda a valorizar a diversidade e lutar contra as desigualdades atuais.",
+        "whyItMatters": "Compreender a história ajuda a construir um futuro mais justo.",
+        "curiosity": "Você sabia que a capoeira, uma mistura de dança e luta, foi criada por escravizados como forma de resistência?"
+      },
+      "questions": [
+        {
+          "question": "O que foi a Lei Áurea?",
+          "options": [
+            "Abolição da escravidão",
+            "Início da escravidão",
+            "Lei de imigração",
+            "Lei de terras"
+          ],
+          "answer": "Abolição da escravidão",
+          "explanation": "A Lei Áurea foi assinada em 1888 e aboliu a escravidão no Brasil.",
+          "why": "A resposta certa é 'Abolição da escravidão' porque a Lei Áurea, assinada em 1888, acabou com a escravidão no Brasil.",
+          "trap": "Marcar 'Início da escravidão' erra porque a Lei Áurea encerrou a escravidão, não a iniciou.",
+          "kind": "lesson",
+          "subject": "historia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como a cultura africana aparece no Brasil hoje?",
+          "options": [
+            "Capoeira e samba",
+            "Ópera e balé",
+            "Rock e jazz",
+            "Fado e flamenco"
+          ],
+          "answer": "Capoeira e samba",
+          "explanation": "Capoeira e samba são expressões culturais de origem africana presentes no Brasil.",
+          "why": "A resposta 'Capoeira e samba' é certa porque ambas são manifestações culturais de origem africana no Brasil.",
+          "trap": "Marcar 'Ópera e balé' erra porque essas são tradições europeias, não africanas.",
+          "kind": "lesson",
+          "subject": "ciencias",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo sofrendo bullying por causa de sua origem africana. O que você faz?",
+          "options": [
+            "Defende e apoia o amigo",
+            "Ignora a situação",
+            "Ri junto com os outros",
+            "Conta para um adulto"
+          ],
+          "answer": "Defende e apoia o amigo",
+          "explanation": "Defender o amigo ajuda a combater o preconceito e promove respeito.",
+          "why": "A melhor atitude é 'Defende e apoia o amigo' porque isso mostra solidariedade e ajuda a combater o preconceito.",
+          "trap": "Marcar 'Ignora a situação' erra porque isso não ajuda a resolver o problema e pode piorar a situação.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual foi o principal motivo para a vinda de africanos ao Brasil durante a escravidão?",
+          "options": [
+            "Trabalho forçado",
+            "Turismo",
+            "Estudos",
+            "Comércio"
+          ],
+          "answer": "Trabalho forçado",
+          "explanation": "Africanos foram trazidos ao Brasil para trabalhar como escravizados.",
+          "why": "A resposta 'Trabalho forçado' é certa porque africanos foram trazidos ao Brasil para serem escravizados.",
+          "trap": "Marcar 'Turismo' erra porque africanos não vieram por vontade própria, mas sim forçados.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'offside' no futebol?",
+          "options": [
+            "Evitar vantagem injusta",
+            "Marcar gol",
+            "Defender o gol",
+            "Fazer falta"
+          ],
+          "answer": "Evitar vantagem injusta",
+          "explanation": "O 'offside' impede que um jogador fique em posição vantajosa sem a bola.",
+          "why": "A resposta 'Evitar vantagem injusta' é certa porque o 'offside' impede que um jogador se posicione injustamente perto do gol adversário.",
+          "trap": "Marcar 'Marcar gol' erra porque o 'offside' não tem relação direta com marcar gols.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 600 reais e compra dois brinquedos de 250 reais cada, quanto sobra?",
+          "options": [
+            "100",
+            "50",
+            "200",
+            "150"
+          ],
+          "answer": "100",
+          "explanation": "600 menos 500 (250 vezes 2) deixa 100.",
+          "why": "A resposta certa é 100 porque 600 menos 500 (250 vezes 2) deixa 100.",
+          "trap": "Marcar 50 erra porque isso ignora a soma correta dos preços dos brinquedos.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais chuva no planeta?",
+          "options": [
+            "Seca e falta de água",
+            "Mais florestas",
+            "Aumento dos rios",
+            "Mais neve"
+          ],
+          "answer": "Seca e falta de água",
+          "explanation": "Sem chuva, haveria seca e falta de água para plantas e animais.",
+          "why": "A resposta 'Seca e falta de água' é certa porque a chuva é essencial para manter o ciclo da água e a vida.",
+          "trap": "Marcar 'Mais florestas' erra porque sem chuva as florestas não conseguiriam sobreviver.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the yard",
+            "There are a dog in the yard",
+            "There is dogs in the yard",
+            "There are dog in the yard"
+          ],
+          "answer": "There is a dog in the yard",
+          "audioText": "There is a dog in the yard",
+          "why": "A frase certa é 'There is a dog in the yard' porque 'is' é usado para singular, enquanto 'are' é para plural.",
+          "trap": "A frase 'There are a dog in the yard' engana quem acha que 'are' serve para qualquer situação, mas 'are' pede plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual é a principal função do 'goalkeeper' no futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Passar a bola",
+            "Fazer faltas"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O 'goalkeeper' é responsável por impedir que a bola entre no gol.",
+          "why": "A resposta 'Defender o gol' é certa porque o 'goalkeeper' tem a função principal de proteger o gol.",
+          "trap": "Marcar 'Marcar gols' erra porque essa não é a função principal do 'goalkeeper'.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'referee' em um jogo de futebol?",
+          "options": [
+            "Aplicar as regras",
+            "Marcar gols",
+            "Defender o gol",
+            "Treinar o time"
+          ],
+          "answer": "Aplicar as regras",
+          "explanation": "O 'referee' é responsável por garantir que as regras do jogo sejam seguidas.",
+          "why": "A resposta 'Aplicar as regras' é certa porque o 'referee' garante que o jogo siga as regras corretamente.",
+          "trap": "Marcar 'Marcar gols' erra porque o 'referee' não participa do jogo como jogador.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'corner kick' no futebol?",
+          "options": [
+            "Reiniciar o jogo",
+            "Marcar gol",
+            "Defender o gol",
+            "Fazer falta"
+          ],
+          "answer": "Reiniciar o jogo",
+          "explanation": "O 'corner kick' é usado para reiniciar o jogo após a bola sair pela linha de fundo.",
+          "why": "A resposta 'Reiniciar o jogo' é certa porque o 'corner kick' acontece quando a bola sai pela linha de fundo e é tocada por um defensor.",
+          "trap": "Marcar 'Marcar gol' erra porque o 'corner kick' não garante um gol, apenas reinicia o jogo.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que a história da escravidão influencia o Brasil de hoje?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Qual foi a importância dos quilombos na resistência à escravidão no Brasil?",
+          "options": [
+            "Eram locais de refúgio e resistência",
+            "Eram fazendas de plantação",
+            "Eram mercados de escravos",
+            "Eram escolas para crianças"
+          ],
+          "answer": "Eram locais de refúgio e resistência",
+          "explanation": "Os quilombos eram comunidades formadas por escravos fugitivos que resistiam à escravidão.",
+          "why": "A resposta certa é 'Eram locais de refúgio e resistência' porque os quilombos ofereciam abrigo e proteção aos escravos fugitivos.",
+          "trap": "A opção 'Eram fazendas de plantação' engana quem não conhece o papel dos quilombos na resistência.",
+          "kind": "lesson",
+          "subject": "historia",
+          "skill": "HIS.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como a capoeira, uma arte marcial brasileira, está ligada à história da escravidão?",
+          "options": [
+            "Era uma forma de dança disfarçada",
+            "Era um jogo de tabuleiro",
+            "Era uma técnica de plantio",
+            "Era um tipo de música"
+          ],
+          "answer": "Era uma forma de dança disfarçada",
+          "explanation": "A capoeira era praticada como dança para disfarçar seu uso como arte marcial.",
+          "why": "A resposta certa é 'Era uma forma de dança disfarçada' porque os escravos usavam a capoeira para treinar luta sem serem percebidos.",
+          "trap": "A opção 'Era um tipo de música' engana quem associa capoeira apenas ao ritmo musical, sem saber da luta.",
+          "kind": "lesson",
+          "subject": "historia",
+          "skill": "HIS.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um colega sendo excluído por causa de sua origem africana. O que você faz?",
+          "options": [
+            "Convida ele para brincar",
+            "Ignora a situação",
+            "Ri junto com os outros",
+            "Conta para um adulto"
+          ],
+          "answer": "Convida ele para brincar",
+          "explanation": "Convidar o colega para brincar ajuda a incluí-lo e combater a exclusão.",
+          "why": "A resposta certa é 'Convida ele para brincar' porque isso promove inclusão e amizade, combatendo a exclusão.",
+          "trap": "A opção 'Ignora a situação' engana quem acha que não fazer nada não tem impacto negativo.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual frase é verdadeira sobre a Lei Áurea?",
+          "options": [
+            "Aboliu a escravidão no Brasil",
+            "Criou novas leis de trabalho",
+            "Estabeleceu o voto feminino",
+            "Iniciou a colonização do Brasil"
+          ],
+          "answer": "Aboliu a escravidão no Brasil",
+          "explanation": "A Lei Áurea, assinada em 1888, aboliu a escravidão no Brasil.",
+          "why": "A resposta certa é 'Aboliu a escravidão no Brasil' porque a Lei Áurea oficialmente encerrou a escravidão no país.",
+          "trap": "A opção 'Criou novas leis de trabalho' engana quem confunde a abolição com reformas trabalhistas.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

@@ -8,6 +8,9 @@
 import { doc, getDoc, increment, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getTodayBrazil } from '../utils/timezone';
+import { AI_MONTHLY_CALL_CAP } from './aiCost';
+
+export { AI_MONTHLY_CALL_CAP, estimateCostUsd } from './aiCost';
 
 export interface AiUsageDoc {
   calls: number;
@@ -25,14 +28,8 @@ export interface UsageEntry {
   ttsChars?: number;
 }
 
-/** Chamadas de texto por mês antes de recusar a geração de contratos */
-export const AI_MONTHLY_CALL_CAP = 800;
-
 /** Modelos de voz: as chamadas deles não entram no teto */
 const TTS_MODEL_PREFIXES = ['gpt-4o-mini-tts', 'tts-'];
-
-/** Tabela fixa em dólares por milhão (gpt-4.1-mini para tokens; TTS por caractere) */
-const USD_PER_MILLION = { inputTokens: 0.4, outputTokens: 1.6, ttsChars: 15 };
 
 export const usageMonthOf = (date: string): string => date.slice(0, 7);
 export const currentUsageMonth = (): string => usageMonthOf(getTodayBrazil());
@@ -101,11 +98,4 @@ export function textCallsOf(u: AiUsageDoc): number {
 
 export function isOverCap(u: AiUsageDoc | null): boolean {
   return u !== null && textCallsOf(u) >= AI_MONTHLY_CALL_CAP;
-}
-
-export function estimateCostUsd(u: AiUsageDoc): number {
-  const cost =
-    (u.inputTokens * USD_PER_MILLION.inputTokens + u.outputTokens * USD_PER_MILLION.outputTokens + u.ttsChars * USD_PER_MILLION.ttsChars) /
-    1_000_000;
-  return Math.round(cost * 10_000) / 10_000;
 }

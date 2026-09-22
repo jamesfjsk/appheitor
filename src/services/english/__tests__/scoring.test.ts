@@ -13,7 +13,7 @@ import {
   rewardFor,
   applyPickaxeBonus,
 } from '../scoring';
-import { BUILD_XP, MIN_XP, buildXp } from '../../../config/englishRewards';
+import { BUILD_XP, MIN_XP, buildXp, noteHelpedMaterial } from '../../../config/englishRewards';
 
 const judge = (errors: NoteError[], missing: string[] = [], isEnglish = true): Omit<NoteJudgement, 'score'> => ({
   isEnglish,
@@ -105,6 +105,9 @@ test('forgeMaterial e noteMaterial', () => {
   expect(noteMaterial(1)).toBe(0);
   expect(noteMaterial(0)).toBe(0);
   expect(noteMaterial(7)).toBe(3);
+  expect(noteHelpedMaterial(3, false)).toBe(3);
+  expect(noteHelpedMaterial(3, true)).toBe(2);
+  expect(noteHelpedMaterial(1, true)).toBe(0);
 });
 
 test('materialFor despacha por tipo', () => {

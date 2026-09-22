@@ -609,6 +609,7 @@ interface UsageCardProps {
 const UsageCard = ({ usage, month, capReached, nearCap }: UsageCardProps) => {
   const pct = Math.min(100, (usage.calls / AI_MONTHLY_CALL_CAP) * 100);
   const models = Object.entries(usage.byModel).sort((a, b) => b[1] - a[1]);
+  const provaCalls = usage.byModel['gpt-4o'] ?? 0;
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6">
       <div className="mb-1 flex items-center gap-3">
@@ -616,10 +617,11 @@ const UsageCard = ({ usage, month, capReached, nearCap }: UsageCardProps) => {
         <h3 className="text-lg font-bold text-gray-900">Uso de IA em {monthLabel(month)}</h3>
       </div>
       <p className="mb-4 text-sm text-gray-500">
-        Contratos, juiz do Recado e voz. Teto de {fmtInt(AI_MONTHLY_CALL_CAP)} chamadas por mês; a estimativa em dólares usa uma tabela fixa de preços.
+        Contratos, juiz do Recado, Prova do dia e voz. Teto de {fmtInt(AI_MONTHLY_CALL_CAP)} chamadas por mês; a Prova usa gpt-4o e entra no mesmo teto. A estimativa em dólares usa uma tabela fixa (gpt-4o custa 6,25 vezes o mini na entrada).
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Stat label="Chamadas" value={`${fmtInt(usage.calls)} / ${fmtInt(AI_MONTHLY_CALL_CAP)}`} />
+        <Stat label="Prova (gpt-4o)" value={fmtInt(provaCalls)} />
         <Stat label="Tokens de entrada" value={fmtInt(usage.inputTokens)} />
         <Stat label="Tokens de saída" value={fmtInt(usage.outputTokens)} />
         <Stat label="Caracteres de voz" value={fmtInt(usage.ttsChars)} />

@@ -1,0 +1,552 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-01",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-01",
+  "status": "ready",
+  "theme": {
+    "category": "animais",
+    "curiosity": "Sabia que a presença dos lobos em Yellowstone ajudou a aumentar a população de castores? Eles usaram as novas árvores para construir suas tocas.",
+    "id": "cadeia-alimentar",
+    "lesson": "Quando os lobos voltaram ao Parque de Yellowstone, nos Estados Unidos, algo incrível aconteceu. Os cervos, que antes pastavam livremente, começaram a evitar certas áreas, permitindo que a vegetação crescesse novamente. Com mais árvores e plantas, pequenos animais voltaram, e até os rios mudaram de curso devido à nova vegetação. Isso mostra como cada animal tem um papel importante na natureza. Quando um animal desaparece, todo o ecossistema pode mudar. Hoje, pense em como cada parte da natureza, por menor que seja, tem sua importância.",
+    "title": "O Retorno dos Lobos",
+    "whyItMatters": "Entender a natureza ajuda a cuidar melhor do nosso planeta."
+  },
+  "questions": [
+    {
+      "question": "Como a volta dos lobos pode afetar um parque local?",
+      "options": [
+        "Aumenta a biodiversidade",
+        "Os animais fogem",
+        "Nada acontece",
+        "As árvores morrem"
+      ],
+      "answer": "Aumenta a biodiversidade",
+      "explanation": "Os lobos controlam a população de cervos, permitindo que outras espécies prosperem.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é que aumenta a biodiversidade, pois os lobos ajudam a manter o equilíbrio ecológico.",
+      "trap": "A opção 'Nada acontece' engana quem não entende o impacto dos predadores no ecossistema.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Se um campo de futebol não tiver goleiro, o que pode acontecer?",
+      "options": [
+        "Mais gols serão marcados",
+        "O jogo será mais lento",
+        "Menos gols serão marcados",
+        "Os jogadores ficarão confusos"
+      ],
+      "answer": "Mais gols serão marcados",
+      "explanation": "Sem goleiro, é mais fácil para o time adversário marcar gols.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é que mais gols serão marcados porque sem goleiro, a defesa do gol fica vulnerável.",
+      "trap": "Marcar 'O jogo será mais lento' ignora que a ausência do goleiro facilita o ataque, não o retarda.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se todas as árvores de uma floresta fossem cortadas?",
+      "options": [
+        "Aumentaria a erosão do solo",
+        "O ar ficaria mais puro",
+        "Os animais teriam mais abrigo",
+        "As chuvas aumentariam"
+      ],
+      "answer": "Aumentaria a erosão do solo",
+      "explanation": "Sem árvores, o solo fica desprotegido e mais suscetível à erosão.",
+      "kind": "lesson",
+      "subject": "ciencias",
+      "why": "A resposta certa é que aumentaria a erosão do solo porque as raízes das árvores ajudam a manter o solo firme.",
+      "trap": "Marcar 'O ar ficaria mais puro' ignora que as árvores são essenciais para a purificação do ar.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual planeta fica entre a Terra e Júpiter na ordem de distância do Sol?",
+      "options": [
+        "Marte",
+        "Vênus",
+        "Saturno",
+        "Mercúrio"
+      ],
+      "answer": "Marte",
+      "explanation": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "trap": "A ordem é Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Marte é o vizinho de fora da Terra.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você mistura tinta azul com tinta amarela. Que cor aparece?",
+      "options": [
+        "Verde",
+        "Roxo",
+        "Laranja",
+        "Marrom"
+      ],
+      "answer": "Verde",
+      "explanation": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "trap": "Azul e amarelo formam verde. Azul com vermelho dá roxo, e vermelho com amarelo dá laranja.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma música tem compassos de 4 tempos. Você bate palmas 12 vezes seguindo o pulso. Quantos compassos passaram?",
+      "options": [
+        "3",
+        "4",
+        "12",
+        "16"
+      ],
+      "answer": "3",
+      "explanation": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "kind": "knowledge",
+      "subject": "arte",
+      "why": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "trap": "Cada compasso tem 4 batidas, então 12 ÷ 4 = 3 compassos. Contar '1, 2, 3, 4' repetidamente é como os músicos se organizam.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Você tem 1 diamante e quer fazer uma picareta de diamante. Quantos diamantes faltam?",
+      "options": [
+        "2",
+        "1",
+        "3",
+        "4"
+      ],
+      "answer": "2",
+      "explanation": "A picareta usa 3 diamantes e 2 gravetos. Como você já tem 1, faltam 3 − 1 = 2.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "A picareta usa 3 diamantes e 2 gravetos. Como você já tem 1, faltam 3 − 1 = 2.",
+      "trap": "A picareta usa 3 diamantes e 2 gravetos. Como você já tem 1, faltam 3 − 1 = 2.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Estime: quantos blocos de terra cabem numa pilha completa do inventário?",
+      "options": [
+        "64",
+        "100",
+        "32",
+        "16"
+      ],
+      "answer": "64",
+      "explanation": "A maioria dos itens empilha até 64. Ovos e bolas de neve empilham só até 16, e ferramentas não empilham.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "A maioria dos itens empilha até 64. Ovos e bolas de neve empilham só até 16, e ferramentas não empilham.",
+      "trap": "A maioria dos itens empilha até 64. Ovos e bolas de neve empilham só até 16, e ferramentas não empilham.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que a presença de um animal pode mudar o ambiente ao seu redor?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 2,
+      "conta_um_passo": 2,
+      "duplicata": 5,
+      "opcao_caricata": 1,
+      "tamanho_opcoes": 2,
+      "why_curto": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "tamanho_opcoes",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "why_curto",
+          "duplicata"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 14,
+        "codes": [
+          "duplicata"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "Pede o que ele faria, opinião."
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 5
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "O que aconteceu quando os lobos voltaram a Yellowstone?",
+          "options": [
+            "Os cervos mudaram de comportamento",
+            "Os lobos foram embora de novo",
+            "Nada mudou",
+            "Os rios secaram"
+          ],
+          "answer": "Os cervos mudaram de comportamento",
+          "explanation": "Os cervos começaram a evitar certas áreas, permitindo que a vegetação crescesse.",
+          "why": "A resposta certa é que os cervos mudaram de comportamento, pois isso permitiu que a vegetação se recuperasse.",
+          "trap": "A opção 'Nada mudou' engana quem não percebe a importância dos lobos no ecossistema.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Como a volta dos lobos pode afetar um parque local?",
+          "options": [
+            "Aumenta a biodiversidade",
+            "Os animais fogem",
+            "Nada acontece",
+            "As árvores morrem"
+          ],
+          "answer": "Aumenta a biodiversidade",
+          "explanation": "Os lobos controlam a população de cervos, permitindo que outras espécies prosperem.",
+          "why": "A resposta certa é que aumenta a biodiversidade, pois os lobos ajudam a manter o equilíbrio ecológico.",
+          "trap": "A opção 'Nada acontece' engana quem não entende o impacto dos predadores no ecossistema.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se você fosse um guarda florestal, como lidaria com a volta dos lobos?",
+          "options": [
+            "Observaria os efeitos na natureza",
+            "Tentaria afastar os lobos",
+            "Ignoraria a situação",
+            "Alertaria os visitantes para evitar a área"
+          ],
+          "answer": "Observaria os efeitos na natureza",
+          "explanation": "Observar os efeitos ajuda a entender o impacto positivo dos lobos no ecossistema.",
+          "why": "Observar os efeitos na natureza é sábio, pois permite aprender e proteger o ecossistema.",
+          "trap": "A opção 'Tentaria afastar os lobos' engana quem não percebe o papel positivo dos lobos.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se uma loja vende 3 camisetas por R$ 90, quanto custa cada uma?",
+          "options": [
+            "R$ 30",
+            "R$ 45",
+            "R$ 60",
+            "R$ 90"
+          ],
+          "answer": "R$ 30",
+          "explanation": "Dividindo R$ 90 por 3, cada camiseta custa R$ 30.",
+          "why": "A resposta certa é R$ 30 porque R$ 90 dividido por 3 dá o preço de cada camiseta.",
+          "trap": "A opção R$ 45 engana quem divide errado ou confunde com outro cálculo.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se todos os predadores desaparecessem de um ecossistema?",
+          "options": [
+            "A população de presas aumentaria",
+            "Nada mudaria",
+            "As plantas morreriam",
+            "Os rios secariam"
+          ],
+          "answer": "A população de presas aumentaria",
+          "explanation": "Sem predadores, as presas se multiplicariam sem controle.",
+          "why": "A resposta certa é que a população de presas aumentaria, pois não haveria controle natural.",
+          "trap": "A opção 'Nada mudaria' engana quem não entende o papel dos predadores no equilíbrio.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+          "options": [
+            "Começou no século XVIII",
+            "Foi liderada por Napoleão",
+            "Ocorreu no século XX",
+            "Teve início na Ásia"
+          ],
+          "answer": "Começou no século XVIII",
+          "explanation": "A Revolução Industrial começou no século XVIII na Inglaterra.",
+          "why": "A resposta certa é que começou no século XVIII, pois é um fato histórico bem documentado.",
+          "trap": "A opção 'Foi liderada por Napoleão' engana quem confunde eventos históricos.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'goalkeeper' no futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O goleiro tem a função de impedir que a bola entre no gol.",
+          "why": "A resposta certa é defender o gol, pois essa é a principal função do goleiro em um jogo.",
+          "trap": "A opção 'Marcar gols' engana quem não conhece bem as posições no futebol.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que a presença de um animal pode mudar o ambiente ao seu redor?",
+      "theme": {
+        "curiosity": "Sabia que a presença dos lobos em Yellowstone ajudou a aumentar a população de castores? Eles usaram as novas árvores para construir suas tocas.",
+        "lesson": "Quando os lobos voltaram ao Parque de Yellowstone, nos Estados Unidos, algo incrível aconteceu. Os cervos, que antes pastavam livremente, começaram a evitar certas áreas, permitindo que a vegetação crescesse novamente. Com mais árvores e plantas, pequenos animais voltaram, e até os rios mudaram de curso devido à nova vegetação. Isso mostra como cada animal tem um papel importante na natureza. Quando um animal desaparece, todo o ecossistema pode mudar. Hoje, pense em como cada parte da natureza, por menor que seja, tem sua importância.",
+        "title": "O Retorno dos Lobos",
+        "whyItMatters": "Entender a natureza ajuda a cuidar melhor do nosso planeta."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "O que acontece quando um predador é removido de um ecossistema?",
+          "options": [
+            "As presas aumentam descontroladamente",
+            "Nada muda",
+            "As plantas desaparecem",
+            "Os rios secam"
+          ],
+          "answer": "As presas aumentam descontroladamente",
+          "explanation": "Sem predadores, as presas se multiplicam rapidamente, causando desequilíbrio no ecossistema.",
+          "why": "A resposta certa é que as presas aumentam descontroladamente porque sem predadores, não há controle populacional.",
+          "trap": "Marcar 'Nada muda' ignora o impacto significativo que a ausência de predadores tem no equilíbrio ecológico.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se um campo de futebol não tiver goleiro, o que pode acontecer?",
+          "options": [
+            "Mais gols serão marcados",
+            "O jogo será mais lento",
+            "Menos gols serão marcados",
+            "Os jogadores ficarão confusos"
+          ],
+          "answer": "Mais gols serão marcados",
+          "explanation": "Sem goleiro, é mais fácil para o time adversário marcar gols.",
+          "why": "A resposta certa é que mais gols serão marcados porque sem goleiro, a defesa do gol fica vulnerável.",
+          "trap": "Marcar 'O jogo será mais lento' ignora que a ausência do goleiro facilita o ataque, não o retarda.",
+          "kind": "lesson",
+          "subject": "futebol",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo jogando lixo no chão. O que você faz?",
+          "options": [
+            "Conversa com ele sobre o impacto do lixo",
+            "Ignora e continua andando",
+            "Joga mais lixo para acompanhar",
+            "Chama a atenção dele na frente de todos"
+          ],
+          "answer": "Conversa com ele sobre o impacto do lixo",
+          "explanation": "Conversar pode conscientizar seu amigo sobre a importância de manter o ambiente limpo.",
+          "why": "A melhor escolha é conversar porque educar sobre o impacto do lixo pode mudar comportamentos futuros.",
+          "trap": "Marcar 'Ignora e continua andando' evita o confronto, mas não ajuda a resolver o problema do lixo.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Se um ônibus leva 30 minutos para ir de A a B e 45 minutos para voltar, quanto tempo leva a viagem completa?",
+          "options": [
+            "75 minutos",
+            "60 minutos",
+            "90 minutos",
+            "45 minutos"
+          ],
+          "answer": "75 minutos",
+          "explanation": "A soma dos tempos de ida e volta resulta no tempo total da viagem.",
+          "why": "A resposta certa é 75 minutos porque 30 minutos de ida mais 45 minutos de volta somam 75 minutos.",
+          "trap": "Marcar 60 minutos ignora o tempo adicional necessário para a volta, que é maior que a ida.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se todas as árvores de uma floresta fossem cortadas?",
+          "options": [
+            "Aumentaria a erosão do solo",
+            "O ar ficaria mais puro",
+            "Os animais teriam mais abrigo",
+            "As chuvas aumentariam"
+          ],
+          "answer": "Aumentaria a erosão do solo",
+          "explanation": "Sem árvores, o solo fica desprotegido e mais suscetível à erosão.",
+          "why": "A resposta certa é que aumentaria a erosão do solo porque as raízes das árvores ajudam a manter o solo firme.",
+          "trap": "Marcar 'O ar ficaria mais puro' ignora que as árvores são essenciais para a purificação do ar.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Francesa?",
+          "options": [
+            "Começou em 1789",
+            "Durou 50 anos",
+            "Foi liderada por Napoleão",
+            "Terminou em 1800"
+          ],
+          "answer": "Começou em 1789",
+          "explanation": "A Revolução Francesa teve início em 1789, marcando uma grande mudança política e social na França.",
+          "why": "A resposta certa é que começou em 1789 porque esse é o ano reconhecido como o início da Revolução Francesa.",
+          "trap": "Marcar 'Foi liderada por Napoleão' ignora que ele só ganhou destaque após a revolução, não durante seu início.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        }
+      ]
+    }
+  }
+}

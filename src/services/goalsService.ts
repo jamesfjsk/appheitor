@@ -8,6 +8,7 @@ import {
   runTransaction,
   serverTimestamp,
   setDoc,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -15,7 +16,7 @@ import { FAMILY_ID } from '../config/rules';
 import { DEFAULT_ECONOMY, DEFAULT_MODULES } from '../config/village';
 import type { EconomySettings, GoalDoc, GoalStatus, ModuleSettings } from '../types/village';
 import { getTodayBrazil, isoWeekOf, nowBrazil } from '../utils/clock';
-import { validateDeposit, vaultGoalCap, weeklyInterest, unlockOnAfter, canRedeemPile } from './village/bank';
+import { pickGhostPile, validateDeposit, vaultGoalCap, weeklyInterest, unlockOnAfter, canRedeemPile } from './village/bank';
 import { ensureBase } from './englishBaseService';
 import { capGold } from './village/caps';
 import { getSettings } from './settingsService';
@@ -86,17 +87,28 @@ export async function createGoal(
   if (isBroken(cracksOf(villageSnap.data()?.cracks), 'cofre')) throw ruinUseError('cofre');
   const base = await ensureBase(uid);
   const cap = vaultGoalCap(base.buildings.cofre || 0);
-  const open = (await listGoals(uid)).filter((g) => g.status === 'open' || g.status === 'cancel_requested');
+  const listed = await listGoals(uid);
+  const open = listed.filter((g) => g.status === 'open' || g.status === 'cancel_requested');
   if (cap <= 0) throw new Error('Construa o Cofre para guardar gold.');
-  if (open.length >= cap) {
-    throw new Error('O Cofre está cheio. Espera um montinho voltar.');
-  }
   const title = input.title.trim().slice(0, 40);
   const targetGold = Math.floor(Number(input.targetGold) || 0);
   if (!title) throw new Error('Dê um nome para a meta');
   if (targetGold < 20) throw new Error('A meta precisa de pelo menos 20 gold');
-  const ref = doc(collection(db, 'goals'));
+  const ghost = pickGhostPile(open);
   const now = nowBrazil().iso;
+  if (ghost) {
+    await updateDoc(doc(db, 'goals', ghost.id), stripUndefined({
+      title,
+      targetGold,
+      rewardId: input.rewardId || null,
+      updatedAt: now,
+    }));
+    return ghost.id;
+  }
+  if (open.length >= cap) {
+    throw new Error('O Cofre está cheio. Espera um montinho voltar.');
+  }
+  const ref = doc(collection(db, 'goals'));
   await setDoc(ref, stripUndefined({
     userId: uid,
     familyId: FAMILY_ID,
@@ -173,6 +185,7 @@ export async function redeemGoal(uid: string, goalId: string, today = getTodayBr
     const vSnap = await tx.get(doc(db, 'village', uid));
     if (isBroken(cracksOf(vSnap.data()?.cracks), 'cofre')) throw ruinUseError('cofre');
     if (!gSnap.exists()) throw new Error('Meta não encontrada');
+    if (!pSnap.exists()) throw new Error('O bolso do minerador não apareceu.');
     const goal = fromGoalDoc(gSnap.id, gSnap.data() as Record<string, unknown>);
     if (goal.userId !== uid) throw new Error('Meta de outro minerador');
     if (!canRedeemPile(goal, today)) throw new Error('Ainda rendendo.');
@@ -181,9 +194,7 @@ export async function redeemGoal(uid: string, goalId: string, today = getTodayBr
     paid = back;
     const after = gold + back;
     const now = nowBrazil().iso;
-    if (pSnap.exists()) {
-      tx.update(progressRef, { availableGold: after, updatedAt: serverTimestamp() });
-    }
+    tx.update(progressRef, { availableGold: after, updatedAt: serverTimestamp() });
     tx.update(goalRef, {
       status: 'cancelled',
       cancelledAt: now,

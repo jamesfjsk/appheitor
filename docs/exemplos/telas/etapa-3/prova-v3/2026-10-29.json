@@ -1,0 +1,466 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-29",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-29",
+  "status": "ready",
+  "theme": {
+    "id": "gelo-boia",
+    "category": "cotidiano",
+    "title": "Por que o gelo flutua?",
+    "lesson": "Imagine que você coloca uma garrafa de água no congelador e, no dia seguinte, ela está estourada. Isso acontece porque, ao contrário da maioria das substâncias, a água se expande quando congela. Isso faz com que o gelo seja menos denso que a água líquida, permitindo que ele flutue. Se o gelo não flutuasse, os lagos congelariam de baixo para cima, o que seria ruim para os peixes e outros seres aquáticos. Hoje, você pode observar isso colocando um cubo de gelo em um copo de água e vendo como ele boia.",
+    "whyItMatters": "Entender por que o gelo flutua ajuda a compreender fenômenos naturais e a importância da água para a vida.",
+    "curiosity": "Sabia que o gelo é uma das poucas substâncias que flutua em seu próprio líquido? Isso é raro na natureza!"
+  },
+  "questions": [
+    {
+      "question": "Por que o gelo flutua na água?",
+      "options": [
+        "Porque é menos denso",
+        "Porque é mais pesado",
+        "Porque é mais quente",
+        "Porque é mais denso"
+      ],
+      "answer": "Porque é menos denso",
+      "explanation": "O gelo flutua porque é menos denso que a água líquida.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Porque é menos denso' porque a densidade menor do gelo faz com que ele flutue.",
+      "trap": "A opção 'Porque é mais denso' engana quem não lembra que o gelo é menos denso que a água.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do 'penalty kick' no futebol?",
+      "options": [
+        "Marcar um gol",
+        "Parar o jogo",
+        "Trocar de jogador",
+        "Dar cartão amarelo"
+      ],
+      "answer": "Marcar um gol",
+      "explanation": "O 'penalty kick' é uma chance de marcar um gol diretamente.",
+      "kind": "lesson",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Marcar um gol' porque o 'penalty kick' é uma oportunidade direta de gol.",
+      "trap": "A opção 'Parar o jogo' engana quem não sabe que o pênalti é para marcar gol.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem 500 reais e compra dois jogos de 150 reais cada, quanto sobra?",
+      "options": [
+        "200",
+        "150",
+        "250",
+        "100"
+      ],
+      "answer": "200",
+      "explanation": "A resposta certa é 200 porque 500 menos 300 (150 vezes 2) deixa 200.",
+      "kind": "lesson",
+      "subject": "matematica",
+      "why": "A resposta certa é 200 porque 500 menos 300 (150 vezes 2) deixa 200.",
+      "trap": "Quem marca 150 erra porque subtraiu apenas um jogo de 150, não os dois.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se os lagos congelassem de baixo para cima?",
+      "options": [
+        "Peixes morreriam",
+        "Água ficaria mais quente",
+        "Gelo derreteria",
+        "Lagos secariam"
+      ],
+      "answer": "Peixes morreriam",
+      "explanation": "Os peixes morreriam porque ficariam presos sem oxigênio.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Peixes morreriam' porque o gelo isolaria a água líquida, impedindo a troca de oxigênio.",
+      "trap": "A opção 'Água ficaria mais quente' engana quem não pensa na falta de oxigênio.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Which sentence is correct?",
+      "options": [
+        "There is a dog in the park",
+        "There are a dog in the park",
+        "There is dogs in the park",
+        "There are dog in the park"
+      ],
+      "answer": "There is a dog in the park",
+      "explanation": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+      "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a dog in the park"
+    },
+    {
+      "question": "Qual é a função do 'goal kick' no futebol?",
+      "options": [
+        "Reiniciar o jogo",
+        "Marcar um gol",
+        "Dar cartão vermelho",
+        "Trocar de jogador"
+      ],
+      "answer": "Reiniciar o jogo",
+      "explanation": "O 'goal kick' é usado para reiniciar o jogo após a bola sair pela linha de fundo.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Reiniciar o jogo' porque o 'goal kick' retoma o jogo após a bola sair.",
+      "trap": "A opção 'Marcar um gol' engana quem não sabe que o 'goal kick' não é para marcar gols.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual é a função do 'midfielder' em um time de futebol?",
+      "options": [
+        "Controlar o meio-campo",
+        "Defender o gol",
+        "Marcar gols",
+        "Dar cartões"
+      ],
+      "answer": "Controlar o meio-campo",
+      "explanation": "O 'midfielder' é responsável por controlar o meio-campo e ajudar tanto na defesa quanto no ataque.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 'Controlar o meio-campo' porque o 'midfielder' organiza o jogo entre defesa e ataque.",
+      "trap": "A opção 'Marcar gols' engana quem não sabe que o 'midfielder' tem funções mais amplas.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se uma loja tem 300 produtos e vende 40% deles, quantos produtos ainda restam?",
+      "options": [
+        "180",
+        "120",
+        "200",
+        "240"
+      ],
+      "answer": "180",
+      "explanation": "A resposta certa é 180 porque 40% de 300 é 120, e 300 menos 120 deixa 180.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 180 porque 40% de 300 é 120, e 300 menos 120 deixa 180.",
+      "trap": "Quem marca 120 erra porque esqueceu de subtrair os produtos vendidos do total.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que a propriedade do gelo de flutuar impacta a vida aquática nos lagos?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "duplicata": 2,
+      "certa_mais_longa": 1,
+      "conta_nao_fecha": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 8,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 0
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Por que o gelo flutua?",
+        "lesson": "Imagine que você coloca uma garrafa de água no congelador e, no dia seguinte, ela está estourada. Isso acontece porque, ao contrário da maioria das substâncias, a água se expande quando congela. Isso faz com que o gelo seja menos denso que a água líquida, permitindo que ele flutue. Se o gelo não flutuasse, os lagos congelariam de baixo para cima, o que seria ruim para os peixes e outros seres aquáticos. Hoje, você pode observar isso colocando um cubo de gelo em um copo de água e vendo como ele boia.",
+        "whyItMatters": "Entender por que o gelo flutua ajuda a compreender fenômenos naturais e a importância da água para a vida.",
+        "curiosity": "Sabia que o gelo é uma das poucas substâncias que flutua em seu próprio líquido? Isso é raro na natureza!"
+      },
+      "questions": [
+        {
+          "question": "Por que o gelo flutua na água?",
+          "options": [
+            "Porque é menos denso",
+            "Porque é mais pesado",
+            "Porque é mais quente",
+            "Porque é mais denso"
+          ],
+          "answer": "Porque é menos denso",
+          "explanation": "O gelo flutua porque é menos denso que a água líquida.",
+          "why": "A resposta certa é 'Porque é menos denso' porque a densidade menor do gelo faz com que ele flutue.",
+          "trap": "A opção 'Porque é mais denso' engana quem não lembra que o gelo é menos denso que a água.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "O que acontece se você colocar uma garrafa cheia de água no congelador?",
+          "options": [
+            "Ela pode estourar",
+            "Ela derrete",
+            "Ela evapora",
+            "Ela fica mais leve"
+          ],
+          "answer": "Ela pode estourar",
+          "explanation": "A água se expande ao congelar, podendo estourar a garrafa.",
+          "why": "A resposta certa é 'Ela pode estourar' porque a expansão da água ao congelar aumenta a pressão interna.",
+          "trap": "A opção 'Ela derrete' engana quem não lembra que a água congela no congelador.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo colocando uma garrafa cheia de água no congelador. O que você faz?",
+          "options": [
+            "Aviso que pode estourar",
+            "Deixo ele descobrir",
+            "Coloco outra garrafa",
+            "Faço uma aposta"
+          ],
+          "answer": "Aviso que pode estourar",
+          "explanation": "Avisar evita que a garrafa estoure e cause bagunça.",
+          "why": "Avisar que pode estourar é sábio porque previne um acidente e ensina sobre a expansão da água.",
+          "trap": "A opção 'Deixo ele descobrir' é tentadora, mas não ajuda a evitar o problema.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Qual é a função do 'penalty kick' no futebol?",
+          "options": [
+            "Marcar um gol",
+            "Parar o jogo",
+            "Trocar de jogador",
+            "Dar cartão amarelo"
+          ],
+          "answer": "Marcar um gol",
+          "explanation": "O 'penalty kick' é uma chance de marcar um gol diretamente.",
+          "why": "A resposta certa é 'Marcar um gol' porque o 'penalty kick' é uma oportunidade direta de gol.",
+          "trap": "A opção 'Parar o jogo' engana quem não sabe que o pênalti é para marcar gol.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 500 reais e compra dois jogos de 150 reais cada, quanto sobra?",
+          "options": [
+            "200",
+            "150",
+            "250",
+            "100"
+          ],
+          "answer": "200",
+          "why": "A resposta certa é 200 porque 500 menos 300 (150 vezes 2) deixa 200.",
+          "trap": "Quem marca 150 erra porque subtraiu apenas um jogo de 150, não os dois.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se os lagos congelassem de baixo para cima?",
+          "options": [
+            "Peixes morreriam",
+            "Água ficaria mais quente",
+            "Gelo derreteria",
+            "Lagos secariam"
+          ],
+          "answer": "Peixes morreriam",
+          "explanation": "Os peixes morreriam porque ficariam presos sem oxigênio.",
+          "why": "A resposta certa é 'Peixes morreriam' porque o gelo isolaria a água líquida, impedindo a troca de oxigênio.",
+          "trap": "A opção 'Água ficaria mais quente' engana quem não pensa na falta de oxigênio.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é 'There is a dog in the park' porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase 'There are a dog in the park' engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a água?",
+          "options": [
+            "Ela se expande ao congelar",
+            "Ela encolhe ao congelar",
+            "Ela não muda ao congelar",
+            "Ela evapora ao congelar"
+          ],
+          "answer": "Ela se expande ao congelar",
+          "explanation": "A água se expande ao congelar, o que é raro entre as substâncias.",
+          "why": "A resposta certa é 'Ela se expande ao congelar' porque a água aumenta de volume quando vira gelo.",
+          "trap": "A opção 'Ela encolhe ao congelar' engana quem não sabe que a água é uma exceção.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'goal kick' no futebol?",
+          "options": [
+            "Reiniciar o jogo",
+            "Marcar um gol",
+            "Dar cartão vermelho",
+            "Trocar de jogador"
+          ],
+          "answer": "Reiniciar o jogo",
+          "explanation": "O 'goal kick' é usado para reiniciar o jogo após a bola sair pela linha de fundo.",
+          "why": "A resposta certa é 'Reiniciar o jogo' porque o 'goal kick' retoma o jogo após a bola sair.",
+          "trap": "A opção 'Marcar um gol' engana quem não sabe que o 'goal kick' não é para marcar gols.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'midfielder' em um time de futebol?",
+          "options": [
+            "Controlar o meio-campo",
+            "Defender o gol",
+            "Marcar gols",
+            "Dar cartões"
+          ],
+          "answer": "Controlar o meio-campo",
+          "explanation": "O 'midfielder' é responsável por controlar o meio-campo e ajudar tanto na defesa quanto no ataque.",
+          "why": "A resposta certa é 'Controlar o meio-campo' porque o 'midfielder' organiza o jogo entre defesa e ataque.",
+          "trap": "A opção 'Marcar gols' engana quem não sabe que o 'midfielder' tem funções mais amplas.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se uma loja tem 300 produtos e vende 40% deles, quantos produtos ainda restam?",
+          "options": [
+            "180",
+            "120",
+            "200",
+            "240"
+          ],
+          "answer": "180",
+          "why": "A resposta certa é 180 porque 40% de 300 é 120, e 300 menos 120 deixa 180.",
+          "trap": "Quem marca 120 erra porque esqueceu de subtrair os produtos vendidos do total.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que a propriedade do gelo de flutuar impacta a vida aquática nos lagos?"
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

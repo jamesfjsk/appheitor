@@ -1,0 +1,136 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-07",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-07",
+  "status": "ready",
+  "theme": {
+    "id": "obsidiana-e-lava",
+    "category": "minecraft",
+    "whyItMatters": "Pensar sobre isso hoje já é um passo.",
+    "title": "Obsidiana: o vidro do vulcão",
+    "curiosity": "Sabia que facas de obsidiana são mais afiadas que bisturis médicos? Isso mostra o quanto a natureza pode ser surpreendente!",
+    "lesson": "Obsidiana é lava que esfriou rápido demais para formar cristais: vira vidro natural. Os astecas faziam facas mais afiadas do que bisturi. O que a lava vira quando esfria devagar: granito."
+  },
+  "questions": [
+    {
+      "question": "Qual bioma brasileiro é a maior floresta tropical do mundo?",
+      "options": [
+        "Amazônia",
+        "Pantanal",
+        "Caatinga",
+        "Cerrado"
+      ],
+      "answer": "Amazônia",
+      "explanation": "A Amazônia cobre quase metade do Brasil e avança por outros 8 países. Ela abriga mais espécies do que qualquer outro lugar da Terra.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Ache o erro: 'O Brasil foi colonizado por Portugal e ficou independente em 1500.'",
+      "options": [
+        "O Brasil nunca foi colônia",
+        "O Brasil foi colonizado pela Espanha",
+        "Não há erro",
+        "1500 é a chegada dos portugueses; a independência foi em 1822"
+      ],
+      "answer": "1500 é a chegada dos portugueses; a independência foi em 1822",
+      "explanation": "Entre 1500 e 1822 se passaram mais de 300 anos de colônia. A independência foi declarada por Dom Pedro I em 7 de setembro de 1822.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "O que representam as estrelas da bandeira do Brasil?",
+      "options": [
+        "Os estados e o Distrito Federal",
+        "As cinco regiões",
+        "Os presidentes",
+        "Os maiores rios"
+      ],
+      "answer": "Os estados e o Distrito Federal",
+      "explanation": "São 27 estrelas, uma para cada estado e uma para o Distrito Federal, desenhadas como o céu do Rio de Janeiro em 15 de novembro de 1889.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "O que vem depois: 1, 1, 2, 3, 5, 8, ...?",
+      "options": [
+        "13",
+        "11",
+        "16",
+        "12"
+      ],
+      "answer": "13",
+      "explanation": "Cada número é a soma dos dois anteriores: 5 + 8 = 13. É a sequência de Fibonacci, que aparece em conchas e girassóis.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "No verão, o Polo Norte tem Sol por meses seguidos. Por que mesmo assim faz tanto frio lá?",
+      "options": [
+        "O gelo apaga o calor do Sol",
+        "O Sol fica mais longe do Polo",
+        "O vento vem do espaço",
+        "Os raios do Sol chegam muito inclinados e espalham pouco calor"
+      ],
+      "answer": "Os raios do Sol chegam muito inclinados e espalham pouco calor",
+      "explanation": "Nos polos, a luz chega quase deitada, então a mesma quantidade de Sol se espalha por uma área grande e aquece pouco. Perto do Equador, a luz cai de cima e concentra o calor.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Por que não existem pinguins selvagens no Polo Norte?",
+      "options": [
+        "Porque as focas não deixam",
+        "Eles evoluíram no hemisfério sul e nunca cruzaram o Equador quente",
+        "Porque no norte não há gelo",
+        "Porque eles não sabem nadar em água fria"
+      ],
+      "answer": "Eles evoluíram no hemisfério sul e nunca cruzaram o Equador quente",
+      "explanation": "Pinguins vivem na Antártida, na África do Sul e até no Brasil. Ursos polares vivem só no norte, então os dois nunca se encontram na natureza.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "'Dog' vira 'dogs' no plural. Como fica o plural de 'box' (caixa)?",
+      "options": [
+        "boxs",
+        "box",
+        "boxes",
+        "boxies"
+      ],
+      "answer": "boxes",
+      "explanation": "Palavras terminadas em x, s, ch e sh ganham 'es' no plural: boxes, buses, watches, dishes.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Qual frase é verdadeira sobre os rios?",
+      "options": [
+        "Rios correm sempre do sul para o norte",
+        "Rios correm mais rápido em terreno plano",
+        "Rios correm sempre do lugar mais alto para o mais baixo",
+        "Rios nascem no mar e sobem para as montanhas"
+      ],
+      "answer": "Rios correm sempre do lugar mais alto para o mais baixo",
+      "explanation": "A gravidade puxa a água para baixo, então todo rio nasce em um lugar alto e desce até o mar, um lago ou outro rio.",
+      "kind": "knowledge",
+      "subject": "geral"
+    }
+  ],
+  "reflectionPrompt": "O que você aprendeu hoje que pode usar amanhã?",
+  "source": "offline",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 2,
+    "dropped": {
+      "audio_mismatch": 1,
+      "conta_nao_fecha": 1,
+      "definicao": 1,
+      "sinonimas": 1,
+      "why_curto": 6,
+      "why_sem_resposta": 1
+    }
+  }
+}

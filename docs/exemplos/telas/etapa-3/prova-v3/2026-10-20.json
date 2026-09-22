@@ -1,0 +1,544 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-10-20",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-10-20",
+  "status": "ready",
+  "theme": {
+    "category": "invencoes",
+    "curiosity": "Existem mais de 400 cabos submarinos que conectam continentes. Sem eles, a internet não funcionaria como conhecemos.",
+    "id": "internet-como-funciona",
+    "lesson": "Imagine que você está enviando uma mensagem para um amigo que mora em outro país. Essa mensagem não viaja inteira de uma vez. Ela é dividida em pequenos pacotes que são enviados por cabos no fundo do mar e passam por vários computadores chamados servidores até chegar ao destino. Cada dispositivo conectado à internet tem um endereço IP, como se fosse um número de telefone, que ajuda a identificar para onde os pacotes devem ir. É por isso que sua senha é importante: ela protege o caminho que esses pacotes fazem, garantindo que só você possa acessar suas informações.",
+    "title": "Como a Internet Viaja",
+    "whyItMatters": "Entender a internet ajuda a usar a tecnologia de forma segura e eficiente."
+  },
+  "questions": [
+    {
+      "question": "Você recebeu um e-mail estranho pedindo sua senha. O que você faz?",
+      "options": [
+        "Ignora o e-mail",
+        "Responde com a senha",
+        "Conta para um adulto",
+        "Clica no link"
+      ],
+      "answer": "Conta para um adulto",
+      "explanation": "Contar para um adulto ajuda a proteger suas informações.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é 'conta para um adulto' porque é importante pedir ajuda quando algo parece suspeito.",
+      "trap": "A opção 'clica no link' é perigosa, pois pode levar a sites que roubam informações.",
+      "skill": "LIC.DILEMA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre o Brasil?",
+      "options": [
+        "Faz fronteira com o Chile",
+        "Tem a maior floresta tropical",
+        "É uma ilha",
+        "Fica na Europa"
+      ],
+      "answer": "Tem a maior floresta tropical",
+      "explanation": "O Brasil abriga a Floresta Amazônica, a maior floresta tropical do mundo.",
+      "kind": "lesson",
+      "subject": "geografia",
+      "why": "A resposta certa é 'tem a maior floresta tropical' porque a Amazônia está no Brasil.",
+      "trap": "A opção 'faz fronteira com o Chile' é enganosa, pois o Brasil não toca o Chile.",
+      "skill": "GEO.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Você recebe uma mensagem pedindo sua senha para um jogo. O que você faz?",
+      "options": [
+        "Ignora e não responde",
+        "Responde com a senha",
+        "Pergunta ao amigo se é seguro",
+        "Procura na internet a resposta"
+      ],
+      "answer": "Ignora e não responde",
+      "explanation": "Ignorar é a melhor opção porque pode ser uma tentativa de roubo de senha.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é ignorar e não responder porque compartilhar senhas pode comprometer sua segurança.",
+      "trap": "Quem escolhe 'Responde com a senha' pode achar que é seguro, mas isso pode ser um golpe.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Quantos jogadores um time de futebol tem em campo, incluindo o goleiro?",
+      "options": [
+        "11",
+        "10",
+        "9",
+        "12"
+      ],
+      "answer": "11",
+      "explanation": "Um time de futebol tem 11 jogadores em campo, incluindo o goleiro.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "A resposta certa é 11 porque é o número total de jogadores permitidos por equipe em campo.",
+      "trap": "Quem escolhe 10 pode esquecer de contar o goleiro, que também joga.",
+      "skill": "FUT.REGRA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você viajar do Brasil para o Japão, o que acontece com o relógio quando chegar lá?",
+      "options": [
+        "Ele precisa adiantar várias horas",
+        "Ele fica igual",
+        "Ele precisa atrasar várias horas",
+        "Só muda o dia da semana"
+      ],
+      "answer": "Ele precisa adiantar várias horas",
+      "explanation": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "kind": "knowledge",
+      "subject": "geografia",
+      "why": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "trap": "O Japão fica muito a leste do Brasil, e quanto mais a leste, mais cedo o Sol nasce. Lá o relógio está 12 horas adiantado em relação a Brasília.",
+      "skill": "GEO.FATO",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Ao nível do mar, a água ferve a 100 °C. O que acontece no alto de uma montanha muito alta?",
+      "options": [
+        "Ela ferve com temperatura menor que 100 °C",
+        "Ela ferve com temperatura maior que 100 °C",
+        "Ela não consegue ferver",
+        "Ela ferve exatamente a 100 °C"
+      ],
+      "answer": "Ela ferve com temperatura menor que 100 °C",
+      "explanation": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "trap": "Lá em cima, o ar pesa menos sobre a água, então ela ferve antes de chegar a 100 °C. Por isso o macarrão demora mais para cozinhar na montanha.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual frase é verdadeira sobre o Sol?",
+      "options": [
+        "O Sol é uma estrela",
+        "O Sol é um planeta muito quente",
+        "O Sol gira em volta da Terra",
+        "O Sol é uma bola de fogo de madeira"
+      ],
+      "answer": "O Sol é uma estrela",
+      "explanation": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "trap": "O Sol é uma estrela comum, só que muito perto de nós. As outras estrelas parecem pontinhos porque estão a trilhões de quilômetros.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual destas funções o cérebro NÃO faz?",
+      "options": [
+        "Bombear o sangue",
+        "Controlar os movimentos",
+        "Guardar memórias",
+        "Sentir emoções"
+      ],
+      "answer": "Bombear o sangue",
+      "explanation": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "kind": "knowledge",
+      "subject": "tema",
+      "why": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "trap": "Bombear sangue é trabalho do coração. O cérebro comanda movimentos, memória, emoções e até a respiração.",
+      "skill": "GEN.CONH",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que a internet ajuda no seu dia a dia?",
+  "source": "ai",
+  "generatedAt": {},
+  "completed": false,
+  "awaitingReflection": false,
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "certa_mais_longa": 1,
+      "conta_um_passo": 1,
+      "definicao": 1,
+      "duplicata": 1,
+      "ingles_nivel": 3,
+      "why_curto": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "definicao"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": [
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "why_curto",
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "ingles_nivel",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "Pergunta de opinião sobre segurança digital."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": false,
+        "motivo": "Fato não é consenso entre professores."
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A resposta não é consenso entre professores."
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": false,
+        "motivo": "O fato não é consenso entre professores."
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 4
+  },
+  "raw": {
+    "first": {
+      "questions": [
+        {
+          "question": "O que é um endereço IP?",
+          "options": [
+            "Um número de telefone",
+            "Um tipo de cabo",
+            "Um servidor",
+            "Uma senha"
+          ],
+          "answer": "Um número de telefone",
+          "explanation": "Um endereço IP é como um número de telefone para dispositivos na internet.",
+          "why": "A resposta certa é 'um número de telefone' porque o endereço IP identifica dispositivos na rede, assim como um número de telefone identifica uma pessoa.",
+          "trap": "A opção 'um servidor' é tentadora, mas servidores são computadores que ajudam a enviar pacotes, não o identificador.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Por que é importante ter uma senha forte?",
+          "options": [
+            "Para decorar",
+            "Para proteger dados",
+            "Para ser legal",
+            "Para ganhar prêmios"
+          ],
+          "answer": "Para proteger dados",
+          "explanation": "Uma senha forte protege suas informações na internet.",
+          "why": "A resposta certa é 'para proteger dados' porque senhas fortes evitam que outras pessoas acessem suas informações pessoais.",
+          "trap": "A opção 'para decorar' pode parecer divertida, mas não é a função de uma senha.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você recebeu um e-mail estranho pedindo sua senha. O que você faz?",
+          "options": [
+            "Ignora o e-mail",
+            "Responde com a senha",
+            "Conta para um adulto",
+            "Clica no link"
+          ],
+          "answer": "Conta para um adulto",
+          "explanation": "Contar para um adulto ajuda a proteger suas informações.",
+          "why": "A resposta certa é 'conta para um adulto' porque é importante pedir ajuda quando algo parece suspeito.",
+          "trap": "A opção 'clica no link' é perigosa, pois pode levar a sites que roubam informações.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "What color is the sky on a clear day?",
+          "options": [
+            "Blue",
+            "Green",
+            "Red",
+            "Yellow"
+          ],
+          "answer": "Blue",
+          "explanation": "The sky appears blue due to the scattering of sunlight.",
+          "why": "The correct answer is 'Blue' because the sky looks blue when there are no clouds.",
+          "trap": "The option 'Green' might seem tempting, but the sky never appears green on a clear day.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ENG.COLOR",
+          "bloom": "entender",
+          "audioText": "What color is the sky?"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o Brasil?",
+          "options": [
+            "Faz fronteira com o Chile",
+            "Tem a maior floresta tropical",
+            "É uma ilha",
+            "Fica na Europa"
+          ],
+          "answer": "Tem a maior floresta tropical",
+          "explanation": "O Brasil abriga a Floresta Amazônica, a maior floresta tropical do mundo.",
+          "why": "A resposta certa é 'tem a maior floresta tropical' porque a Amazônia está no Brasil.",
+          "trap": "A opção 'faz fronteira com o Chile' é enganosa, pois o Brasil não toca o Chile.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Quantos jogadores de linha um time de futebol tem em campo?",
+          "options": [
+            "10",
+            "11",
+            "9",
+            "12"
+          ],
+          "answer": "10",
+          "explanation": "Um time de futebol tem 11 jogadores, mas um é o goleiro.",
+          "why": "A resposta certa é '10' porque, além do goleiro, há 10 jogadores de linha.",
+          "trap": "A opção '11' é tentadora, mas inclui o goleiro, que não é jogador de linha.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Heitor tem 5 reais e ganha mais 7. Quanto ele tem agora?",
+          "options": [
+            "12",
+            "10",
+            "11",
+            "13"
+          ],
+          "answer": "12",
+          "explanation": "Heitor tinha 5 reais e ganhou mais 7, totalizando 12.",
+          "why": "A resposta certa é '12' porque 5 mais 7 resulta em 12.",
+          "trap": "A opção '10' pode confundir, mas é uma soma incorreta.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais cabos submarinos?",
+          "options": [
+            "Internet mais rápida",
+            "Internet mais lenta",
+            "Mais servidores",
+            "Menos servidores"
+          ],
+          "answer": "Internet mais lenta",
+          "explanation": "Sem cabos submarinos, a internet ficaria mais lenta devido à falta de conexão eficiente entre continentes.",
+          "why": "A resposta certa é 'Internet mais lenta' porque os cabos são essenciais para conexões rápidas entre continentes.",
+          "trap": "A opção 'Internet mais rápida' é enganosa, pois a ausência de cabos prejudicaria a velocidade.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que a internet ajuda no seu dia a dia?",
+      "theme": {
+        "curiosity": "Existem mais de 400 cabos submarinos que conectam continentes. Sem eles, a internet não funcionaria como conhecemos.",
+        "lesson": "Imagine que você está enviando uma mensagem para um amigo que mora em outro país. Essa mensagem não viaja inteira de uma vez. Ela é dividida em pequenos pacotes que são enviados por cabos no fundo do mar e passam por vários computadores chamados servidores até chegar ao destino. Cada dispositivo conectado à internet tem um endereço IP, como se fosse um número de telefone, que ajuda a identificar para onde os pacotes devem ir. É por isso que sua senha é importante: ela protege o caminho que esses pacotes fazem, garantindo que só você possa acessar suas informações.",
+        "title": "Como a Internet Viaja",
+        "whyItMatters": "Entender a internet ajuda a usar a tecnologia de forma segura e eficiente."
+      }
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Quando você envia uma mensagem, o que acontece com ela na internet?",
+          "options": [
+            "Vira pacotes e viaja por cabos",
+            "Vira um e-mail automaticamente",
+            "Desaparece e reaparece no destino",
+            "É enviada por correio"
+          ],
+          "answer": "Vira pacotes e viaja por cabos",
+          "explanation": "A mensagem é dividida em pacotes e viaja por cabos submarinos e servidores.",
+          "why": "A resposta certa é que ela vira pacotes e viaja por cabos porque é assim que a internet transporta dados.",
+          "trap": "Quem escolhe 'Desaparece e reaparece no destino' pode pensar que a internet é mágica, mas ela usa cabos e servidores.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Você está jogando online e a conexão está lenta. O que pode estar acontecendo?",
+          "options": [
+            "Problema nos cabos submarinos",
+            "Seu endereço IP mudou",
+            "Seu computador está desligado",
+            "Você está sem energia elétrica"
+          ],
+          "answer": "Problema nos cabos submarinos",
+          "explanation": "A conexão lenta pode ser causada por problemas nos cabos que transmitem dados.",
+          "why": "A resposta certa é problema nos cabos submarinos porque eles são responsáveis por transmitir dados ao redor do mundo.",
+          "trap": "Quem escolhe 'Seu endereço IP mudou' pode pensar que isso afeta a velocidade, mas não é o caso.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você recebe uma mensagem pedindo sua senha para um jogo. O que você faz?",
+          "options": [
+            "Ignora e não responde",
+            "Responde com a senha",
+            "Pergunta ao amigo se é seguro",
+            "Procura na internet a resposta"
+          ],
+          "answer": "Ignora e não responde",
+          "explanation": "Ignorar é a melhor opção porque pode ser uma tentativa de roubo de senha.",
+          "why": "A resposta certa é ignorar e não responder porque compartilhar senhas pode comprometer sua segurança.",
+          "trap": "Quem escolhe 'Responde com a senha' pode achar que é seguro, mas isso pode ser um golpe.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Where is the book? It is ___ the table.",
+          "options": [
+            "on",
+            "in",
+            "under",
+            "next"
+          ],
+          "answer": "on",
+          "explanation": "The book is placed on top of the table.",
+          "why": "The correct answer is 'on' because it indicates the book is resting on the surface.",
+          "trap": "Choosing 'under' might seem right if you think the book is below, but it's on top.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "Nível 1",
+          "bloom": "analisar",
+          "audioText": "Where is the book? It is on the table."
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a internet?",
+          "options": [
+            "Ela depende de cabos submarinos",
+            "Ela foi inventada por um só país",
+            "Ela não precisa de energia elétrica",
+            "Ela só funciona em cidades grandes"
+          ],
+          "answer": "Ela depende de cabos submarinos",
+          "explanation": "A internet usa cabos submarinos para conectar continentes.",
+          "why": "A resposta certa é que ela depende de cabos submarinos porque eles são essenciais para a conexão global.",
+          "trap": "Quem escolhe 'Ela foi inventada por um só país' pode achar que a internet tem um único criador, mas é uma colaboração global.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Quantos jogadores um time de futebol tem em campo, incluindo o goleiro?",
+          "options": [
+            "11",
+            "10",
+            "9",
+            "12"
+          ],
+          "answer": "11",
+          "explanation": "Um time de futebol tem 11 jogadores em campo, incluindo o goleiro.",
+          "why": "A resposta certa é 11 porque é o número total de jogadores permitidos por equipe em campo.",
+          "trap": "Quem escolhe 10 pode esquecer de contar o goleiro, que também joga.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que a internet ajuda a conectar pessoas ao redor do mundo?"
+    }
+  }
+}

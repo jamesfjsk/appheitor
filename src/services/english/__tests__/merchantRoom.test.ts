@@ -1,7 +1,7 @@
 import { expect, run, test } from './harness';
 import type { MerchantStep } from '../../../types/english';
 import { MERCHANT_CATALOGS, MERCHANT_ITEMS, MERCHANT_SPOTS } from '../../../config/englishBase';
-import { buildMerchantContent, buildMerchantRoom, CONTRAST_OF, evaluateRoom, gapped, lessonRelations, merchantKey, merchantLevelFromSkill, merchantStepKey, offlineSentences, roomSizeFor, stepsFor } from '../merchantRoom';
+import { buildMerchantContent, buildMerchantRoom, CONTRAST_OF, evaluateRoom, gapped, KITCHEN_ITEMS, lessonRelations, merchantKey, merchantLevelFromSkill, merchantStepKey, offlineSentences, roomSizeFor, stepsFor, warehouseSpots } from '../merchantRoom';
 
 test('nível do Comerciante sobe pelo desempenho, nunca no chute', () => {
   expect(merchantLevelFromSkill(0, 0)).toBe(1);
@@ -148,6 +148,36 @@ test('evaluateRoom compara item, quantidade, relação e lugar; colocação vale
   expect(evaluateRoom(steps, []).hits).toBe(0);
   const twin: MerchantStep[] = [steps[0], { ...steps[0], item: 'sword' }];
   expect(evaluateRoom(twin, [{ item: 'torch', qty: 1, relation: 'next_to', spot: 'door' }]).hits).toBe(1);
+  const spread = evaluateRoom(
+    [{ item: 'apple', qty: 1, relation: 'on', spot: 'table' }],
+    [
+      { item: 'apple', qty: 1, relation: 'on', spot: 'table' },
+      { item: 'apple', qty: 1, relation: 'in', spot: 'box' },
+    ]
+  );
+  expect(spread).toEqual({ hits: 0, perStep: [false] });
+});
+
+test('F11 F12: boots qty 1; cama e cerca fora; under só em móvel; forno in só com comida', () => {
+  const filtered = warehouseSpots(MERCHANT_SPOTS);
+  expect(filtered.some((s) => s.id === 'bed' || s.id === 'fence')).toBeFalsy();
+  expect(filtered.find((s) => s.id === 'door')?.relations.includes('under')).toBeFalsy();
+  expect(filtered.find((s) => s.id === 'window')?.relations.includes('under')).toBeFalsy();
+  for (let seed = 1; seed <= 400; seed++) {
+    for (const level of [1, 2, 3] as const) {
+      const room = buildMerchantRoom(seed, level);
+      expect(room.spots.some((s) => s.id === 'bed' || s.id === 'fence')).toBeFalsy();
+      for (const step of room.steps) {
+        if (step.item === 'boots') expect(step.qty).toBe(1);
+        if (step.relation === 'under') {
+          expect(['door', 'window', 'fence'].includes(step.spot)).toBeFalsy();
+        }
+        if (step.spot === 'oven' && step.relation === 'in') {
+          expect(KITCHEN_ITEMS.has(step.item)).toBeTruthy();
+        }
+      }
+    }
+  }
 });
 
 test('buildMerchantContent monta o contrato inteiro', () => {

@@ -1,0 +1,470 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-11-03",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-11-03",
+  "status": "ready",
+  "theme": {
+    "id": "segunda-guerra",
+    "category": "historia",
+    "title": "A Maior Guerra da História",
+    "lesson": "Em 1939, a Segunda Guerra Mundial começou quando a Alemanha invadiu a Polônia. Isso levou muitos países a se envolverem em uma guerra que durou até 1945. O Brasil também participou, enviando soldados para lutar na Itália. Durante a guerra, ocorreu o Holocausto, uma tragédia onde milhões de judeus foram mortos. Após a guerra, o mundo criou a ONU para tentar evitar novos conflitos. Hoje, a ONU trabalha para manter a paz e resolver problemas globais.",
+    "whyItMatters": "Entender a Segunda Guerra Mundial ajuda a evitar que erros do passado se repitam.",
+    "curiosity": "Você sabia que o Brasil enviou mais de 25 mil soldados para lutar na Itália durante a Segunda Guerra Mundial?"
+  },
+  "questions": [
+    {
+      "question": "Por que a Segunda Guerra Mundial começou?",
+      "options": [
+        "A Alemanha invadiu a Polônia",
+        "O Brasil declarou guerra",
+        "A ONU foi criada",
+        "O Japão atacou os EUA"
+      ],
+      "answer": "A Alemanha invadiu a Polônia",
+      "explanation": "A guerra começou quando a Alemanha invadiu a Polônia em 1939.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'A Alemanha invadiu a Polônia' porque esse evento marcou o início da Segunda Guerra Mundial.",
+      "trap": "Marcar 'O Japão atacou os EUA' erra porque isso aconteceu depois, em 1941, não no início da guerra.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Qual organização foi criada após a Segunda Guerra Mundial para manter a paz?",
+      "options": [
+        "ONU",
+        "NATO",
+        "OEA",
+        "UE"
+      ],
+      "answer": "ONU",
+      "explanation": "A ONU foi criada em 1945 para promover a paz e a cooperação internacional.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'ONU' porque ela foi criada após a guerra para evitar novos conflitos.",
+      "trap": "Marcar 'NATO' erra porque a NATO foi criada depois, em 1949, e tem um foco militar.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Qual foi o evento que marcou o início da Segunda Guerra Mundial?",
+      "options": [
+        "Invasão da Polônia",
+        "Ataque a Pearl Harbor",
+        "Batalha de Stalingrado",
+        "Criação da ONU"
+      ],
+      "answer": "Invasão da Polônia",
+      "explanation": "A invasão da Polônia pela Alemanha em 1939 deu início à guerra.",
+      "kind": "lesson",
+      "subject": "historia",
+      "why": "A resposta certa é 'Invasão da Polônia' porque foi o evento que desencadeou a guerra.",
+      "trap": "Marcar 'Ataque a Pearl Harbor' erra porque isso aconteceu em 1941, não no início da guerra.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Se você tem 300 reais e compra dois jogos de 120 reais cada, quanto sobra?",
+      "options": [
+        "60",
+        "40",
+        "80",
+        "100"
+      ],
+      "answer": "60",
+      "explanation": "Primeiro, 2 vezes 120 dá 240. Depois, 300 menos 240 sobra 60.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 60 porque, após gastar 240 reais, sobram 60 reais dos 300 iniciais.",
+      "trap": "Marcar 40 erra porque isso ignora a soma correta dos dois jogos antes de subtrair do total.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se todas as abelhas desaparecessem?",
+      "options": [
+        "Menos polinização",
+        "Mais flores",
+        "Mais mel",
+        "Menos frutas"
+      ],
+      "answer": "Menos polinização",
+      "explanation": "As abelhas são importantes para a polinização de muitas plantas.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Menos polinização' porque as abelhas são essenciais para esse processo em muitas plantas.",
+      "trap": "Marcar 'Mais flores' erra porque, sem polinização, haveria menos flores e frutos.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Durante a Segunda Guerra Mundial, qual país foi invadido primeiro pela Alemanha?",
+      "options": [
+        "Polônia",
+        "França",
+        "Inglaterra",
+        "Itália"
+      ],
+      "answer": "Polônia",
+      "explanation": "A Alemanha invadiu a Polônia em 1939, marcando o início da Segunda Guerra Mundial.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta certa é Polônia porque foi o primeiro país invadido pela Alemanha, iniciando a guerra.",
+      "trap": "A opção França engana porque também foi invadida, mas depois da Polônia, não primeiro.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "No campeonato, vitória vale 3 pontos e empate vale 1. Um time com 5 vitórias, 4 empates e 3 derrotas tem quantos pontos?",
+      "options": [
+        "19",
+        "15",
+        "9",
+        "23"
+      ],
+      "answer": "19",
+      "explanation": "Vitórias: 5 × 3 = 15. Empates: 4 × 1 = 4. Derrotas não dão ponto. Total: 15 + 4 = 19.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "Vitórias: 5 × 3 = 15. Empates: 4 × 1 = 4. Derrotas não dão ponto. Total: 15 + 4 = 19.",
+      "trap": "Vitórias: 5 × 3 = 15. Empates: 4 × 1 = 4. Derrotas não dão ponto. Total: 15 + 4 = 19.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Estime: com dois tempos de 45 minutos e um intervalo de 15, quanto dura uma partida, sem acréscimos?",
+      "options": [
+        "Cerca de 1h45",
+        "Cerca de 1h",
+        "Cerca de 3h",
+        "Cerca de 45 minutos"
+      ],
+      "answer": "Cerca de 1h45",
+      "explanation": "45 + 45 = 90 minutos de jogo, mais 15 de intervalo, dá 105 minutos, ou seja, 1 hora e 45 minutos.",
+      "kind": "knowledge",
+      "subject": "futebol",
+      "why": "45 + 45 = 90 minutos de jogo, mais 15 de intervalo, dá 105 minutos, ou seja, 1 hora e 45 minutos.",
+      "trap": "45 + 45 = 90 minutos de jogo, mais 15 de intervalo, dá 105 minutos, ou seja, 1 hora e 45 minutos.",
+      "skill": "FUT.REGRA",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que a criação da ONU ajuda a manter a paz no mundo hoje?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {
+      "fato_discutivel": 1,
+      "opcao_caricata": 1,
+      "duplicata": 3,
+      "conta_nao_fecha": 2
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "fato_discutivel",
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 10,
+        "codes": [
+          "conta_nao_fecha"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": ""
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "A conta não fecha."
+      }
+    ],
+    "batchLog": [
+      "falta_duas_etapas",
+      "falta_formato"
+    ],
+    "fromOffline": 2
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "A Maior Guerra da História",
+        "lesson": "Em 1939, a Segunda Guerra Mundial começou quando a Alemanha invadiu a Polônia. Isso levou muitos países a se envolverem em uma guerra que durou até 1945. O Brasil também participou, enviando soldados para lutar na Itália. Durante a guerra, ocorreu o Holocausto, uma tragédia onde milhões de judeus foram mortos. Após a guerra, o mundo criou a ONU para tentar evitar novos conflitos. Hoje, a ONU trabalha para manter a paz e resolver problemas globais.",
+        "whyItMatters": "Entender a Segunda Guerra Mundial ajuda a evitar que erros do passado se repitam.",
+        "curiosity": "Você sabia que o Brasil enviou mais de 25 mil soldados para lutar na Itália durante a Segunda Guerra Mundial?"
+      },
+      "questions": [
+        {
+          "question": "Por que a Segunda Guerra Mundial começou?",
+          "options": [
+            "A Alemanha invadiu a Polônia",
+            "O Brasil declarou guerra",
+            "A ONU foi criada",
+            "O Japão atacou os EUA"
+          ],
+          "answer": "A Alemanha invadiu a Polônia",
+          "explanation": "A guerra começou quando a Alemanha invadiu a Polônia em 1939.",
+          "why": "A resposta certa é 'A Alemanha invadiu a Polônia' porque esse evento marcou o início da Segunda Guerra Mundial.",
+          "trap": "Marcar 'O Japão atacou os EUA' erra porque isso aconteceu depois, em 1941, não no início da guerra.",
+          "kind": "lesson",
+          "subject": "historia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual organização foi criada após a Segunda Guerra Mundial para manter a paz?",
+          "options": [
+            "ONU",
+            "NATO",
+            "OEA",
+            "UE"
+          ],
+          "answer": "ONU",
+          "explanation": "A ONU foi criada em 1945 para promover a paz e a cooperação internacional.",
+          "why": "A resposta certa é 'ONU' porque ela foi criada após a guerra para evitar novos conflitos.",
+          "trap": "Marcar 'NATO' erra porque a NATO foi criada depois, em 1949, e tem um foco militar.",
+          "kind": "lesson",
+          "subject": "historia",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se você estivesse em um time de futebol e alguém começasse uma briga, o que seria mais sábio fazer?",
+          "options": [
+            "Tentar acalmar a situação",
+            "Entrar na briga para ajudar seu amigo",
+            "Ignorar e continuar jogando",
+            "Chamar o treinador para resolver"
+          ],
+          "answer": "Tentar acalmar a situação",
+          "explanation": "Acalmar a situação ajuda a evitar punições e mantém o foco no jogo.",
+          "why": "A resposta certa é 'Tentar acalmar a situação' porque evita problemas maiores e mantém a paz.",
+          "trap": "Marcar 'Chamar o treinador para resolver' erra porque pode demorar e a situação pode piorar antes disso.",
+          "kind": "dilemma",
+          "subject": "futebol",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a book on the table",
+            "There are a book on the table",
+            "There is books on the table",
+            "There are book on the table"
+          ],
+          "answer": "There is a book on the table",
+          "audioText": "There is a book on the table",
+          "why": "A frase certa é 'There is a book on the table' porque 'is' é usado para um único livro.",
+          "trap": "A frase 'There are a book on the table' engana quem acha que 'are' serve para qualquer situação, mas 'are' pede plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual foi o evento que marcou o início da Segunda Guerra Mundial?",
+          "options": [
+            "Invasão da Polônia",
+            "Ataque a Pearl Harbor",
+            "Batalha de Stalingrado",
+            "Criação da ONU"
+          ],
+          "answer": "Invasão da Polônia",
+          "explanation": "A invasão da Polônia pela Alemanha em 1939 deu início à guerra.",
+          "why": "A resposta certa é 'Invasão da Polônia' porque foi o evento que desencadeou a guerra.",
+          "trap": "Marcar 'Ataque a Pearl Harbor' erra porque isso aconteceu em 1941, não no início da guerra.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Qual é a função do 'goalkeeper' no futebol?",
+          "options": [
+            "Defender o gol",
+            "Marcar gols",
+            "Apitar o jogo",
+            "Treinar o time"
+          ],
+          "answer": "Defender o gol",
+          "explanation": "O goleiro é responsável por impedir que a bola entre no gol.",
+          "why": "A resposta certa é 'Defender o gol' porque essa é a principal função do goleiro em um time.",
+          "trap": "Marcar 'Marcar gols' erra porque essa não é a função principal do goleiro, mas sim dos atacantes.",
+          "kind": "knowledge",
+          "subject": "futebol",
+          "skill": "FUT.REGRA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você tem 300 reais e compra dois jogos de 120 reais cada, quanto sobra?",
+          "options": [
+            "60",
+            "40",
+            "80",
+            "100"
+          ],
+          "answer": "60",
+          "explanation": "Primeiro, 2 vezes 120 dá 240. Depois, 300 menos 240 sobra 60.",
+          "why": "A resposta certa é 60 porque, após gastar 240 reais, sobram 60 reais dos 300 iniciais.",
+          "trap": "Marcar 40 erra porque isso ignora a soma correta dos dois jogos antes de subtrair do total.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se todas as abelhas desaparecessem?",
+          "options": [
+            "Menos polinização",
+            "Mais flores",
+            "Mais mel",
+            "Menos frutas"
+          ],
+          "answer": "Menos polinização",
+          "explanation": "As abelhas são importantes para a polinização de muitas plantas.",
+          "why": "A resposta certa é 'Menos polinização' porque as abelhas são essenciais para esse processo em muitas plantas.",
+          "trap": "Marcar 'Mais flores' erra porque, sem polinização, haveria menos flores e frutos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que a criação da ONU ajuda a manter a paz no mundo hoje?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Durante a Segunda Guerra Mundial, qual país foi invadido primeiro pela Alemanha?",
+          "options": [
+            "Polônia",
+            "França",
+            "Inglaterra",
+            "Itália"
+          ],
+          "answer": "Polônia",
+          "explanation": "A Alemanha invadiu a Polônia em 1939, marcando o início da Segunda Guerra Mundial.",
+          "why": "A resposta certa é Polônia porque foi o primeiro país invadido pela Alemanha, iniciando a guerra.",
+          "trap": "A opção França engana porque também foi invadida, mas depois da Polônia, não primeiro.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Which sentence is correct?",
+          "options": [
+            "There is a dog in the park",
+            "There are a dog in the park",
+            "There is dogs in the park",
+            "There are dog in the park"
+          ],
+          "answer": "There is a dog in the park",
+          "audioText": "There is a dog in the park",
+          "why": "A frase certa é There is a dog in the park porque um cachorro só usa is, e are fica para quando são dois ou mais cachorros.",
+          "trap": "A frase There are a dog in the park engana quem acha que are serve para qualquer cachorro, mas are pede o plural.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Se você tem 500 reais e compra dois jogos de 180 reais cada, quanto sobra?",
+          "options": [
+            "140",
+            "160",
+            "200",
+            "180"
+          ],
+          "answer": "140",
+          "explanation": "Primeiro, calcule 180 vezes 2, que dá 360. Depois, subtraia de 500, sobrando 140.",
+          "why": "A resposta certa é 140 porque 500 menos 360, que é o total gasto, resulta em 140.",
+          "trap": "A opção 160 engana quem erra a subtração final, esquecendo de calcular corretamente o que sobra.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    }
+  },
+  "generatedAt": {},
+  "completed": false
+}

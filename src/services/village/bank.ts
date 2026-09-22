@@ -23,6 +23,11 @@ export interface InterestLine {
   savedAfter: number;
 }
 
+/** Montinho vazio ainda aberto: reaproveita antes de bater no teto. */
+export function pickGhostPile<T extends { status: string; savedGold: number }>(piles: T[]): T | undefined {
+  return piles.find((p) => p.status === 'open' && p.savedGold === 0);
+}
+
 export function vaultGoalCap(vaultLevel: number): number {
   if (vaultLevel >= 2) return 8;
   if (vaultLevel >= 1) return 5;

@@ -120,6 +120,13 @@ const DailyQuizManager: React.FC = () => {
               ))}
             </ol>
             <p className="font-semibold text-gray-800">Reflexão: {quiz!.reflectionPrompt}</p>
+            {quiz!.sanitize && (
+              <p className="text-xs text-gray-500">
+                sanitize kept {quiz!.sanitize.kept} · dropped {JSON.stringify(quiz!.sanitize.dropped)}
+                {quiz!.sanitize.perQuestion ? ` · por pergunta ${JSON.stringify(quiz!.sanitize.perQuestion)}` : ''}
+                {quiz!.sanitize.review?.length ? ` · revisor ${JSON.stringify(quiz!.sanitize.review)}` : ''}
+              </p>
+            )}
           </div>
         )}
 

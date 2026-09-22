@@ -689,14 +689,14 @@ const NOTES_2: OfflineNote[] = [
     level: 2,
     theme: 'bola depois da lição',
     content: {
-      brief: 'Escreva um recado para o papai. Peça para jogar bola. Explique que é porque a lição já está pronta.',
+      brief: 'Escreva um recado para o papai. Peça permissão para jogar bola. Diga que a lição já está pronta.',
       mustInclude: [
         { pt: 'jogar bola', en: ['play soccer', 'play football', 'Can I play soccer'] },
         { pt: 'a lição', en: ['my homework', 'the homework', 'homework'] },
         { pt: 'porque a lição está pronta', en: ['because my homework is ready', 'because homework is ready', 'because it is ready'] },
       ],
-      wordBank: ['play', 'soccer', 'now', 'because', 'homework', 'ready', 'want', 'ball', 'dinner', 'help', 'first', 'wait'],
-      model: 'Can I play soccer now? I can play because my homework is ready.',
+      wordBank: ['can', 'play', 'soccer', 'now', 'please', 'because', 'homework', 'ready', 'want', 'ball', 'dinner', 'help'],
+      model: 'Can I play soccer now? Please, because my homework is ready.',
       hint: '',
     },
   },
@@ -725,7 +725,7 @@ const NOTES_2: OfflineNote[] = [
       mustInclude: [
         { pt: 'ajuda', en: ['help me', 'Please help me', 'help'] },
         { pt: 'esta palavra', en: ['this word', 'the word', 'word'] },
-        { pt: 'porque é nova', en: ['because this word is new', 'because it is new', 'because I am new'] },
+        { pt: 'porque é nova', en: ['because this word is new', 'because it is new'] },
       ],
       wordBank: ['please', 'help', 'word', 'hard', 'because', 'new', 'book', 'school', 'want', 'read', 'write', 'now'],
       model: 'Please help me with this word. It is hard because this word is new.',
@@ -739,7 +739,7 @@ const NOTES_2: OfflineNote[] = [
     content: {
       brief: 'Escreva um recado para o time. Diga que você bebe água no jogo. Explique que é porque você está com calor.',
       mustInclude: [
-        { pt: 'bebo água', en: ['drink water', 'I drink water', 'water'] },
+        { pt: 'bebo água', en: ['drink water', 'I drink water'] },
         { pt: 'no jogo', en: ['at the game', 'in the game', 'at soccer', 'at the soccer game'] },
         { pt: 'porque estou com calor', en: ['because I am hot', 'because it is hot', 'because I feel hot'] },
       ],
@@ -753,14 +753,14 @@ const NOTES_2: OfflineNote[] = [
     level: 2,
     theme: 'a cama feita',
     content: {
-      brief: 'Escreva um recado para a mamãe. Diga que a cama está pronta. Explique que é porque o quarto fica limpo.',
+      brief: 'Escreva um recado para a mamãe. Diga que a cama está pronta. Explique que é porque você quer o quarto limpo.',
       mustInclude: [
         { pt: 'a cama está pronta', en: ['The bed is ready', 'bed is ready', 'the bed'] },
-        { pt: 'o quarto', en: ['the room', 'room'] },
-        { pt: 'porque o quarto fica limpo', en: ['because the room is clean', 'the room is clean'] },
+        { pt: 'o quarto', en: ['a clean room', 'the room', 'room'] },
+        { pt: 'porque você quer', en: ['because I want a clean room', 'because I want', 'I want a clean room'] },
       ],
       wordBank: ['bed', 'ready', 'because', 'room', 'clean', 'want', 'help', 'now', 'first', 'chair', 'bag', 'school'],
-      model: 'The bed is ready. I do this because the room is clean.',
+      model: 'The bed is ready. I do this because I want a clean room.',
       hint: '',
     },
   },
