@@ -861,6 +861,70 @@ Perto, e ainda em 7: 2026-12-21 e 2026-12-31 (posições 1 e 2 certas, a oitava 
 
 **Pare para o commit do pai.** Não começa o próximo pacote.
 
+## Pacote 6c — teto de IA em dólares (decisão 39)
+
+O teto de 800 chamadas saiu. A função `openai` só recusa quando o custo estimado do mês chega a US$ 50, com a frase "Teto mensal de IA: US$ 50". A checagem vem antes de separar chat e voz, porque os dois gastam. O aviso do painel começa em US$ 40.
+
+### O que mudou
+
+- `functions/src/aiPrices.ts` (novo): a tabela por milhão — `gpt-4o` 2,50/10,00, `gpt-4o-mini` 0,15/0,60, `gpt-4.1-mini` 0,40/1,60, voz `gpt-4o-mini-tts` 15,00 por milhão de caracteres — e `estimateMonthUsd`.
+- `functions/src/index.ts`: `AI_MONTHLY_CALL_CAP` apagado. `bumpUsage` continua somando o total e agora grava `tokensByModel.<modelo>.in/out` com o nome literal do modelo. A voz passa a contar 1 chamada (antes gravava 0), para o painel separar texto e voz.
+- `src/services/aiCost.ts`: `AI_MONTHLY_USD_CAP = 50`, `AI_MONTHLY_USD_WARN = 40`. Com tokens por modelo, a conta usa a tabela. Sem eles, fica a média antiga (entrada ponderada pelas chamadas, saída 1,60), para o mês já gravado não pular de preço.
+- `isOverCap` olha o custo. `assertAiBudget` recusa com a mesma frase.
+- Painel, sem restilo: "Gasto estimado: US$ X de 50", barra, chamadas de texto e de voz, custo por modelo quando os tokens vierem separados. O cartão Hoje avisa "Gasto de IA passou de US$ 40".
+- `_gen_prova_v3.mjs` exige `SHOT_DATES` com 1 a 3 datas. Sem lote.
+
+§12 de `ETAPA_2_LANCAMENTO.md`: linha de `aiCost.ts` atualizada e linha nova de `functions/src/aiPrices.ts`. A decisão 39 já estava no §1.
+
+### O que a conta faz além da letra
+
+- 1 000 tokens de entrada em `gpt-4o` custam 6,25 vezes o `gpt-4.1-mini` (2,50 / 0,40). Teste no cliente e na função.
+- Um mês só com o total (é o caso de setembro, sem `tokensByModel`) continua na média antiga. Não regravei o documento.
+- `byModel` segue com o ponto trocado por underline (`gpt-4_1-mini`). `tokensByModel` usa o nome com ponto, porque é chave de mapa, não caminho de campo.
+- Chamada que atravessa os US$ 50 ainda passa. A seguinte é recusada.
+- Voz antiga, gravada com 0 chamadas, não aparece no contador de voz. Os caracteres continuam na conta do dólar.
+- `gpt-4o-mini` de texto não entra no prefixo da voz.
+
+### As duas provas do 6b
+
+Não gerei. A função publicada ainda é a de 800 chamadas. O script já recusa lote. Depois do deploy, duas datas novas (não 2027-01-09 nem 2027-01-10), `SHOT_BUNDLE=tres-provas-6b.json`, e o raw, os códigos, as dúvidas e as 8 finais entram no relatório do 6b.
+
+### Barra
+
+1. Intenção. O pai lê o gasto em dólares. Passa.
+2. Sistema. O cartão branco do painel, `Stat`, a barra de 8 px. Sem tela nova. Passa.
+3. Fonte. Painel do pai, texto direto. Sem frase nova para o Heitor. Passa.
+4. Ícone. O Sparkles que já estava no cartão. Passa.
+5. Hierarquia. O gasto é a primeira linha e o primeiro número. Passa.
+6. A cena continua. A Vila não foi tocada. Passa.
+7. Arestas. Sem frame novo. O painel não foi aberto nesta sessão: não há ferramenta de navegador aqui, e a criança não ganhou tela.
+8. Mundo. Prova, contrato, juiz e voz continuam na mesma função. Passa.
+9. Economia. Sem gold. O teto é custo de IA. Passa.
+10. Consequência. Recusa só no caso alarmante, com a frase do teto. Passa.
+11. Estado honesto. Mês antigo usa a média. Mês novo usa a tabela. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação. Passa.
+14. Copy. "Gasto estimado: US$ X de 50" e "Gasto de IA passou de US$ 40". Painel do pai. Passa.
+15. Evidência. Testes abaixo. Sem foto: a tela da criança não mudou, e o painel não foi clicado.
+16. Offline. O caminho da prova offline não mudou. As duas gerações que faltam esperam o deploy.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx tsc --noEmit -p functions/tsconfig.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:village` — 11 arquivos, saída 0 (entra `aiPrices.test.ts`, 3 casos)
+- `node scripts/run-english-tests.mjs quiz` — 5 arquivos, saída 0 (entra o teto de US$ 50 em `quizTokens.test.ts`)
+
+### Fora
+
+- Deploy da função e o limite rígido da OpenAI em US$ 60 — o pai
+- As duas provas que faltam do aceite do 6b, depois desse deploy
+- Pacote 7
+- Regravar `aiUsage/2026-09` com tokens por modelo
+
+**Pare para o commit do pai.** Não começa o próximo pacote.
+
 
 
 

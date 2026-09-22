@@ -6,7 +6,7 @@ import { subscribeChallenges } from '../../services/challengesService';
 import { subscribeClientErrors } from '../../services/observability';
 import type { GoalDoc, ChallengeDoc } from '../../types/village';
 import { getTodayBrazil, addDays } from '../../utils/clock';
-import { AI_MONTHLY_CALL_CAP, currentUsageMonth, getUsage, textCallsOf } from '../../services/aiUsage';
+import { AI_MONTHLY_USD_WARN, currentUsageMonth, estimateCostUsd, getUsage } from '../../services/aiUsage';
 import { subscribeHealth } from '../../services/observability';
 import { subscribeDailyQuiz } from '../../services/dailyQuizService';
 import { dilemmaOf } from '../../services/quiz/provaRules';
@@ -44,7 +44,7 @@ const HojeCard: React.FC<{ onOpen: (tab: string) => void }> = ({ onOpen }) => {
     const u6 = subscribeDailyQuiz(childUid, yesterday, setYestQuiz);
     void getUsage(currentUsageMonth()).then((u) => {
       if (!u) return;
-      setAiHot(textCallsOf(u) >= AI_MONTHLY_CALL_CAP * 0.8);
+      setAiHot(estimateCostUsd(u) >= AI_MONTHLY_USD_WARN);
     }).catch(() => undefined);
     return () => { u1(); u2(); u3(); u4(); u5(); u6(); };
   }, [childUid, yesterday, today]);
@@ -65,7 +65,7 @@ const HojeCard: React.FC<{ onOpen: (tab: string) => void }> = ({ onOpen }) => {
     ...ending.map((c) => ({ text: `Desafio vence: ${c.title}`, tab: 'challenges' })),
   ];
   if (errors) rows.push({ text: `${errors} erro(s) do app nas últimas 24h`, tab: 'system' });
-  if (aiHot) rows.push({ text: 'Uso de IA acima de 80% do teto', tab: 'english' });
+  if (aiHot) rows.push({ text: 'Gasto de IA passou de US$ 40', tab: 'english' });
   if (unclosed) rows.push({ text: 'Há dias sem fechar', tab: 'village' });
 
   const dilemmaSource = todayQuiz?.completed ? todayQuiz : yestQuiz?.completed ? yestQuiz : null;

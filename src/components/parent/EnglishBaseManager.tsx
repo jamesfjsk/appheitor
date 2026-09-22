@@ -35,14 +35,12 @@ import {
   subscribeBase,
   subscribePlan,
 } from '../../services/englishBaseService';
-import { AI_MONTHLY_CALL_CAP, estimateCostUsd, subscribeUsage, type AiUsageDoc } from '../../services/aiUsage';
+import { AI_MONTHLY_USD_CAP, AI_MONTHLY_USD_WARN, TTS_USD_PER_MILLION_CHARS, estimateCostUsd, subscribeUsage, textCallsOf, usdOfModel, voiceCallsOf, type AiUsageDoc } from '../../services/aiUsage';
 
 const PLAN_SIZE = 5;
 const UPCOMING_DAYS = 7;
 const NOTE_HISTORY_DAYS = 30;
 const TOP_TAGS = 3;
-/** Acima desta fração do teto mensal o painel avisa antes de gerar */
-const NEAR_CAP_RATIO = 0.8;
 
 const BTN_PRIMARY = 'px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-60 inline-flex items-center gap-2';
 const BTN_SMALL = 'px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 disabled:opacity-60 inline-flex items-center gap-1.5';
@@ -74,7 +72,7 @@ const SCAFFOLD_LABELS: Record<BaseDoc['scaffoldStage'], string> = {
 };
 
 /** Mês sem documento em aiUsage: zero em tudo */
-const EMPTY_USAGE: AiUsageDoc = { calls: 0, inputTokens: 0, outputTokens: 0, ttsChars: 0, byModel: {} };
+const EMPTY_USAGE: AiUsageDoc = { calls: 0, inputTokens: 0, outputTokens: 0, ttsChars: 0, byModel: {}, tokensByModel: {} };
 
 const fmtDate = (iso: string) => iso.split('-').reverse().join('/');
 const fmtInt = (n: number) => n.toLocaleString('pt-BR');
@@ -141,8 +139,8 @@ const CapWarning = ({ capReached }: { capReached: boolean }) => (
   <p className={`mt-3 inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold ${capReached ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-900'}`}>
     <AlertTriangle className="w-4 h-4 shrink-0" />
     {capReached
-      ? `Teto mensal de ${fmtInt(AI_MONTHLY_CALL_CAP)} chamadas atingido: a geração por IA fica bloqueada até o mês virar.`
-      : `Perto do teto mensal de ${fmtInt(AI_MONTHLY_CALL_CAP)} chamadas de IA.`}
+      ? 'Teto mensal de IA: US$ 50. A geração fica bloqueada até o mês virar.'
+      : 'Gasto de IA passou de US$ 40.'}
   </p>
 );
 
@@ -607,9 +605,19 @@ interface UsageCardProps {
 }
 
 const UsageCard = ({ usage, month, capReached, nearCap }: UsageCardProps) => {
-  const pct = Math.min(100, (usage.calls / AI_MONTHLY_CALL_CAP) * 100);
-  const models = Object.entries(usage.byModel).sort((a, b) => b[1] - a[1]);
-  const provaCalls = usage.byModel['gpt-4o'] ?? 0;
+  const usd = estimateCostUsd(usage);
+  const pct = Math.min(100, (usd / AI_MONTHLY_USD_CAP) * 100);
+  const models = Object.entries(usage.byModel)
+    .filter(([m]) => !m.startsWith('gpt-4o-mini-tts') && !m.startsWith('tts-'))
+    .sort((a, b) => b[1] - a[1]);
+  const voiceUsd = (usage.ttsChars * TTS_USD_PER_MILLION_CHARS) / 1_000_000;
+  const modelLine = [
+    ...models.map(([m, n]) => {
+      const part = usdOfModel(usage, m);
+      return part > 0 ? `${m} ${fmtInt(n)} · US$ ${part.toFixed(2)}` : `${m} ${fmtInt(n)}`;
+    }),
+    ...(voiceUsd > 0 ? [`voz US$ ${voiceUsd.toFixed(2)}`] : []),
+  ];
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6">
       <div className="mb-1 flex items-center gap-3">
@@ -617,20 +625,20 @@ const UsageCard = ({ usage, month, capReached, nearCap }: UsageCardProps) => {
         <h3 className="text-lg font-bold text-gray-900">Uso de IA em {monthLabel(month)}</h3>
       </div>
       <p className="mb-4 text-sm text-gray-500">
-        Contratos, juiz do Recado, Prova do dia e voz. Teto de {fmtInt(AI_MONTHLY_CALL_CAP)} chamadas por mês; a Prova usa gpt-4o e entra no mesmo teto. A estimativa em dólares usa uma tabela fixa (gpt-4o custa 6,25 vezes o mini na entrada).
+        Contratos, juiz do Recado, Prova do dia e voz. Gasto estimado: US$ {usd.toFixed(2)} de {AI_MONTHLY_USD_CAP}.
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <Stat label="Chamadas" value={`${fmtInt(usage.calls)} / ${fmtInt(AI_MONTHLY_CALL_CAP)}`} />
-        <Stat label="Prova (gpt-4o)" value={fmtInt(provaCalls)} />
+        <Stat label="Gasto estimado" value={`US$ ${usd.toFixed(2)} de ${AI_MONTHLY_USD_CAP}`} />
+        <Stat label="Chamadas de texto" value={fmtInt(textCallsOf(usage))} />
+        <Stat label="Chamadas de voz" value={fmtInt(voiceCallsOf(usage))} />
         <Stat label="Tokens de entrada" value={fmtInt(usage.inputTokens)} />
         <Stat label="Tokens de saída" value={fmtInt(usage.outputTokens)} />
         <Stat label="Caracteres de voz" value={fmtInt(usage.ttsChars)} />
-        <Stat label="Estimativa" value={`US$ ${estimateCostUsd(usage).toFixed(2)}`} />
       </div>
       <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-200">
         <div className={`h-full ${capReached ? 'bg-red-500' : nearCap ? 'bg-amber-500' : 'bg-blue-500'}`} style={{ width: `${pct}%` }} />
       </div>
-      {models.length > 0 && <p className="mt-2 text-sm text-gray-500">Por modelo: {models.map(([m, n]) => `${m} ${fmtInt(n)}`).join(' · ')}</p>}
+      {modelLine.length > 0 && <p className="mt-2 text-sm text-gray-500">Por modelo: {modelLine.join(' · ')}</p>}
       {(capReached || nearCap) && <CapWarning capReached={capReached} />}
     </div>
   );
@@ -687,8 +695,9 @@ const EnglishBaseManager: React.FC = () => {
   }, [loadRecent]);
 
   const usageDoc = usage ?? EMPTY_USAGE;
-  const capReached = usageDoc.calls >= AI_MONTHLY_CALL_CAP;
-  const nearCap = !capReached && usageDoc.calls >= AI_MONTHLY_CALL_CAP * NEAR_CAP_RATIO;
+  const spent = estimateCostUsd(usageDoc);
+  const capReached = spent >= AI_MONTHLY_USD_CAP;
+  const nearCap = !capReached && spent >= AI_MONTHLY_USD_WARN;
 
   // O plano de hoje vem da assinatura (ao vivo); os anteriores da busca única
   const historyPlans = useMemo(() => {

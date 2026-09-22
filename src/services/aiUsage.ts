@@ -1,16 +1,16 @@
 // ========================================
 // Uso de IA por mês: aiUsage/{yyyy-mm}
-// Contadores com increment() (chamadas, tokens, caracteres de TTS) e byModel com
-// chamadas por modelo. O teto mensal (AI_MONTHLY_CALL_CAP) vale para as chamadas de
-// texto: o TTS conta em ttsChars e é descontado das chamadas na hora de comparar.
+// Contadores com increment() (chamadas, tokens, caracteres de TTS), byModel com
+// chamadas por modelo e tokensByModel com entrada/saída. O teto é o custo
+// estimado do mês (AI_MONTHLY_USD_CAP), igual para texto e voz.
 // ========================================
 
 import { doc, getDoc, increment, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getTodayBrazil } from '../utils/timezone';
-import { AI_MONTHLY_CALL_CAP } from './aiCost';
+import { AI_MONTHLY_USD_CAP, estimateCostUsd, type TokenBucket } from './aiCost';
 
-export { AI_MONTHLY_CALL_CAP, estimateCostUsd } from './aiCost';
+export { AI_MONTHLY_USD_CAP, AI_MONTHLY_USD_WARN, TTS_USD_PER_MILLION_CHARS, estimateCostUsd, usdOfModel } from './aiCost';
 
 export interface AiUsageDoc {
   calls: number;
@@ -18,6 +18,7 @@ export interface AiUsageDoc {
   outputTokens: number;
   ttsChars: number;
   byModel: Record<string, number>;
+  tokensByModel?: Record<string, TokenBucket>;
 }
 
 export interface UsageEntry {
@@ -41,12 +42,22 @@ function parse(data: Record<string, unknown> | undefined): AiUsageDoc | null {
   const byModelRaw = typeof data.byModel === 'object' && data.byModel !== null ? (data.byModel as Record<string, unknown>) : {};
   const byModel: Record<string, number> = {};
   for (const [k, v] of Object.entries(byModelRaw)) byModel[k] = num(v);
+  const tokensRaw = typeof data.tokensByModel === 'object' && data.tokensByModel !== null
+    ? (data.tokensByModel as Record<string, unknown>)
+    : {};
+  const tokensByModel: Record<string, TokenBucket> = {};
+  for (const [k, v] of Object.entries(tokensRaw)) {
+    if (!v || typeof v !== 'object') continue;
+    const row = v as { in?: unknown; out?: unknown };
+    tokensByModel[k] = { in: num(row.in), out: num(row.out) };
+  }
   return {
     calls: num(data.calls),
     inputTokens: num(data.inputTokens),
     outputTokens: num(data.outputTokens),
     ttsChars: num(data.ttsChars),
     byModel,
+    tokensByModel,
   };
 }
 
@@ -66,6 +77,12 @@ export async function recordUsage(entry: UsageEntry): Promise<void> {
         outputTokens: increment(entry.outputTokens ?? 0),
         ttsChars: increment(entry.ttsChars ?? 0),
         byModel: { [entry.model]: increment(calls) },
+        tokensByModel: {
+          [entry.model]: {
+            in: increment(entry.inputTokens ?? 0),
+            out: increment(entry.outputTokens ?? 0),
+          },
+        },
         updatedAt: new Date().toISOString(),
       },
       { merge: true }
@@ -88,14 +105,22 @@ export async function getUsage(month: string): Promise<AiUsageDoc | null> {
   return parse(snap.exists() ? snap.data() : undefined);
 }
 
-/** Chamadas de texto (sem TTS), que é o que o teto mensal limita */
+function isTtsModel(model: string): boolean {
+  return TTS_MODEL_PREFIXES.some((p) => model.startsWith(p));
+}
+
+/** Chamadas de texto, sem a voz. O teto não usa este número. */
 export function textCallsOf(u: AiUsageDoc): number {
-  const tts = Object.entries(u.byModel)
-    .filter(([model]) => TTS_MODEL_PREFIXES.some((p) => model.startsWith(p)))
+  return Math.max(0, u.calls - voiceCallsOf(u));
+}
+
+/** Chamadas de voz gravadas em byModel. */
+export function voiceCallsOf(u: AiUsageDoc): number {
+  return Object.entries(u.byModel)
+    .filter(([model]) => isTtsModel(model))
     .reduce((sum, [, n]) => sum + n, 0);
-  return Math.max(0, u.calls - tts);
 }
 
 export function isOverCap(u: AiUsageDoc | null): boolean {
-  return u !== null && textCallsOf(u) >= AI_MONTHLY_CALL_CAP;
+  return u !== null && estimateCostUsd(u) >= AI_MONTHLY_USD_CAP;
 }

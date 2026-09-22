@@ -7,7 +7,11 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 mkdirSync(root, { recursive: true });
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const BASE = process.env.SHOT_BASE || 'http://localhost:5175';
-const DATES = (process.env.SHOT_DATES || '2026-10-07,2026-10-08,2026-10-09').split(',');
+const DATES = (process.env.SHOT_DATES || '').split(',').map((d) => d.trim()).filter(Boolean);
+if (DATES.length === 0 || DATES.length > 3) {
+  console.error('SHOT_DATES precisa ter 1 a 3 datas do aceite. Nada de lote.');
+  process.exit(1);
+}
 
 const browser = await puppeteer.launch({
   executablePath: CHROME,

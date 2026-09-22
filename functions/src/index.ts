@@ -6,12 +6,12 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { defineSecret } from 'firebase-functions/params';
 import { createHash } from 'crypto';
+import { AI_MONTHLY_USD_CAP, estimateMonthUsd } from './aiPrices';
 import { nowBrazil } from './clock';
 
 initializeApp();
 const db = getFirestore();
 const OPENAI_API_KEY = defineSecret('OPENAI_API_KEY');
-const AI_MONTHLY_CALL_CAP = 800;
 const REGION = 'southamerica-east1';
 const CHAT_MODELS = new Set(['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini']);
 const TTS_MODELS = new Set(['gpt-4o-mini-tts']);
@@ -94,10 +94,10 @@ async function modulesOf(): Promise<{ aiGeneration: boolean; tts: boolean }> {
   };
 }
 
-async function monthCalls(): Promise<number> {
+async function monthUsage(): Promise<Record<string, unknown>> {
   const month = nowBrazil().date.slice(0, 7);
   const snap = await db.doc(`aiUsage/${month}`).get();
-  return Number(snap.data()?.calls) || 0;
+  return (snap.data() as Record<string, unknown> | undefined) ?? {};
 }
 
 async function bumpUsage(model: string, calls: number, inputTokens = 0, outputTokens = 0, ttsChars = 0): Promise<void> {
@@ -109,6 +109,12 @@ async function bumpUsage(model: string, calls: number, inputTokens = 0, outputTo
     outputTokens: FieldValue.increment(outputTokens),
     ttsChars: FieldValue.increment(ttsChars),
     [`byModel.${model.replace(/\./g, '_')}`]: FieldValue.increment(calls),
+    tokensByModel: {
+      [model]: {
+        in: FieldValue.increment(inputTokens),
+        out: FieldValue.increment(outputTokens),
+      },
+    },
   }, { merge: true });
 }
 
@@ -144,9 +150,9 @@ export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, asyn
   const key = OPENAI_API_KEY.value();
   if (!key) throw new HttpsError('failed-precondition', 'A chave da OpenAI ainda não foi configurada no servidor.');
 
-  const used = await monthCalls();
-  if (used >= AI_MONTHLY_CALL_CAP) {
-    throw new HttpsError('resource-exhausted', 'Teto mensal de IA atingido.');
+  // Custo, não chamadas: vale para chat e voz. Só recusa no caso alarmante.
+  if (estimateMonthUsd(await monthUsage()) >= AI_MONTHLY_USD_CAP) {
+    throw new HttpsError('resource-exhausted', 'Teto mensal de IA: US$ 50');
   }
 
   if (kind === 'chat') {
@@ -194,7 +200,7 @@ export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, asyn
   const ttsSpeed = ttsSpeedOf(body.speed);
   const ttsVoice = ttsVoiceOf(body.voice);
   const ttsInstructions = ttsInstructionsOf(ttsLangOf(body.lang));
-  await bumpUsage(ttsModel, 0, 0, 0, text.length);
+  await bumpUsage(ttsModel, 1, 0, 0, text.length);
   const speech = await fetch('https://api.openai.com/v1/audio/speech', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },

@@ -29,7 +29,7 @@ import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
 import { validateForge, validateLetter, validateMerchant, validateNote, type MerchantValidation, type ValidationResult } from './english/validators';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
-import { AI_MONTHLY_CALL_CAP, currentUsageMonth, getUsage, isOverCap, textCallsOf } from './aiUsage';
+import { currentUsageMonth, getUsage, isOverCap } from './aiUsage';
 import { addDays } from './dailyQuizService';
 import { getTodayBrazil } from '../utils/timezone';
 
@@ -118,14 +118,12 @@ const themeOf = (input: GenerateInput): string => input.themeRequest?.trim() || 
 
 // ---------- teto mensal ----------
 
-/** Recusa gerar quando as chamadas de texto do mês passam do teto (mensagem em PT para o painel) */
+/** Recusa gerar quando o custo estimado do mês passa de US$ 50. */
 export async function assertAiBudget(): Promise<void> {
   if (!isAIConfigured()) return;
   const usage = await getUsage(currentUsageMonth());
   if (usage && isOverCap(usage)) {
-    throw new Error(
-      `Teto mensal de IA atingido (${textCallsOf(usage)} de ${AI_MONTHLY_CALL_CAP} chamadas). A geração volta no mês que vem ou quando o teto for ampliado.`
-    );
+    throw new Error('Teto mensal de IA: US$ 50');
   }
 }
 
