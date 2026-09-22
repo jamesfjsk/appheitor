@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Reward } from '../../types';
 import { REWARD_ICONS } from '../../config/rewardIcons';
 import { DEFAULT_ECONOMY, PRICE_BANDS } from '../../config/village';
+import { LEVEL_CAP } from '../../config/rules';
 import { listGoldTransactions } from '../../services/goldTx';
 import { priceForDays, referenceIncome } from '../../services/village/income';
 import { getVillage } from '../../services/villageService';
@@ -117,8 +118,8 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
       newErrors.goldCost = 'Gold deve estar entre 5 e 10.000';
     }
 
-    if (formData.requiredLevel < 1 || formData.requiredLevel > 100) {
-      newErrors.requiredLevel = 'Nível deve estar entre 1 e 100';
+    if (formData.requiredLevel < 1 || formData.requiredLevel > LEVEL_CAP) {
+      newErrors.requiredLevel = `Nível deve estar entre 1 e ${LEVEL_CAP}`;
     }
 
     if (!formData.icon?.trim()) {
@@ -316,7 +317,7 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
               <input
                 type="number"
                 min="1"
-                max="100"
+                max={LEVEL_CAP}
                 value={formData.requiredLevel}
                 onChange={(e) => handleInputChange('requiredLevel', parseInt(e.target.value) || 1)}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors ${
@@ -326,7 +327,9 @@ const RewardForm: React.FC<RewardFormProps> = ({ reward, initialData, onClose, i
               {errors.requiredLevel && (
                 <p className="mt-1 text-sm text-red-600">{errors.requiredLevel}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">Nível 1-100 para desbloquear</p>
+              <p className="mt-1 text-xs text-gray-500">
+                1 a {LEVEL_CAP} (o jogo vai até o nível {LEVEL_CAP}). Abaixo desse nível a recompensa aparece com cadeado na loja dele e não pode ser resgatada; 1 = sempre liberada.
+              </p>
             </div>
             {/* Categoria */}
             <div>

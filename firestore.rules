@@ -103,10 +103,12 @@ service cloud.firestore {
 
       // Admin cria/edita/exclui recompensas (para um ownerId=uid do filho)
       // Regras mínimas de integridade: ownerId (string), createdAt (timestamp)
-      allow create, update, delete: if isAdmin()
+      allow create, update: if isAdmin()
         && request.resource.data.ownerId is string
         && request.resource.data.ownerId.size() > 0
         && request.resource.data.createdAt is timestamp;
+      // No delete não existe request.resource: a regra antiga negava toda exclusão ("Erro ao excluir recompensa", 22/09)
+      allow delete: if isAdmin();
     }
 
     // ---------- REDEMPTIONS (resgates) ----------
