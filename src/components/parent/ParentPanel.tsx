@@ -11,7 +11,6 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { ReadyBoot } from '../common/useDismissBoot';
 import NotificationSender from './NotificationSender';
 import AdminControls from './AdminControls';
-import AchievementManager from './AchievementManager';
 import SurpriseMissionConfigComponent from './SurpriseMissionConfig';
 import BirthdayManager from './BirthdayManager';
 import DailyQuizManager from './DailyQuizManager';
@@ -33,7 +32,7 @@ import WeeklyReport from './WeeklyReport';
 import CharactersPanel from './CharactersPanel';
 
 type TabType =
-  | 'dashboard' | 'village' | 'tasks' | 'rewards' | 'achievements' | 'reminders' | 'surprise' | 'quiz'
+  | 'dashboard' | 'village' | 'tasks' | 'rewards' | 'reminders' | 'surprise' | 'quiz'
   | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system'
   | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books';
 
@@ -67,7 +66,6 @@ const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; labe
       { id: 'reminders', label: 'Placa', icon: 'bolt' },
       { id: 'english', label: 'Mina', icon: 'gamepad' },
       { id: 'characters', label: 'Personagens', icon: 'home' },
-      { id: 'achievements', label: 'Vida real', icon: 'trophy' },
     ],
   },
   {
@@ -137,7 +135,6 @@ const ParentPanel: React.FC = () => {
           {activeTab === 'agenda' && <AgendaManager />}
           {activeTab === 'tasks' && <TaskManager tasks={tasks} />}
           {activeTab === 'rewards' && <RewardManager />}
-          {activeTab === 'achievements' && <AchievementManager />}
           {activeTab === 'reminders' && <PlacaManager />}
           {activeTab === 'surprise' && <SurpriseMissionConfigComponent />}
           {activeTab === 'english' && (

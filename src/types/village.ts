@@ -277,6 +277,9 @@ export type AchievementTier = 'bronze' | 'prata' | 'ouro' | 'exclusiva';
 
 export interface GameAchievementReward {
   xp: number;
+  /** só nas categorias de vida real (decisão 38); pago dentro do teto semanal `achievementGoldCap` */
+  gold?: number;
+  /** quantidade; o material em si é o do nível da Ferraria na hora do pagamento */
   material?: number;
   rare?: 'esmeralda' | 'diamante';
   cosmetic?: string;

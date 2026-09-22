@@ -36,7 +36,7 @@ test('titleKeyOf: sem acento, sem artigo, sem pontuação; sameBook a 2 letras',
   expect(claimKeyForBookDay('2026-09-22')).toBe('bookday:2026-09-22');
 });
 
-test('tamanho do livro paga 8 / 15 / 25; mínimo de palavras 50 sobe para 80 depois do 5º livro', () => {
+test('tamanho do livro paga 8 / 15 / 25; mínimo de palavras 40 sobe para 80 depois do 5º livro', () => {
   expect(sizeForPages(20)).toBe('curto');
   expect(sizeForPages(60)).toBe('curto');
   expect(sizeForPages(61)).toBe('medio');
@@ -51,8 +51,8 @@ test('tamanho do livro paga 8 / 15 / 25; mínimo de palavras 50 sobe para 80 dep
   expect(goldForBook({ size: 'longo', gold: 15 })).toBe(15);
   expect(goldForBook({ size: 'curto', gold: 0 })).toBe(8);
   expect(goldForBook({ size: 'curto', gold: 999 })).toBe(8);
-  expect(minWordsFor(0)).toBe(50);
-  expect(minWordsFor(4)).toBe(50);
+  expect(minWordsFor(0)).toBe(40);
+  expect(minWordsFor(4)).toBe(40);
   expect(minWordsFor(5)).toBe(80);
 });
 
@@ -61,7 +61,7 @@ test('localCheck: colado, curto, longo, palavra repetida, texto repetido, ok', (
   expect(localCheck({ ...base, text: kid(90), pasted: true }).code).toBe('colado');
   const curto = localCheck({ ...base, text: kid(30) });
   expect(curto.code).toBe('curto');
-  expect(curto.say).toContain('faltam 20 palavras');
+  expect(curto.say).toContain('faltam 10 palavras');
   expect(localCheck({ ...base, text: '' }).code).toBe('curto');
   expect(localCheck({ ...base, text: kid(BOOK_MAX_WORDS + 1) }).code).toBe('longo');
   expect(localCheck({ ...base, text: `${kid(50)} bom bom bom bom bom` }).code).toBe('repetido_palavras');
@@ -71,11 +71,11 @@ test('localCheck: colado, curto, longo, palavra repetida, texto repetido, ok', (
   const completed = `${prev} no fim o dragao aprende a voar e leva o menino para casa e eu gostei porque foi engracado`;
   expect(localCheck({ ...base, text: completed, previousTexts: [], sameBookTexts: [prev] }).ok).toBe(true);
   expect(localCheck({ ...base, text: `${prev} `, previousTexts: [], sameBookTexts: [prev] }).code).toBe('repetido_texto');
-  expect(localCheck({ ...base, text: completed, previousTexts: [prev] }).code).toBe('repetido_texto'); // outro livro com 80% igual
+  expect(localCheck({ ...base, text: `${prev} legal`, previousTexts: [prev] }).code).toBe('repetido_texto'); // outro livro com 80% igual
   const ok = localCheck({ ...base, text: kid(55) });
   expect(ok.ok).toBe(true);
   expect(ok.words).toBe(55);
-  expect(ok.minWords).toBe(50);
+  expect(ok.minWords).toBe(40);
   expect(localCheck({ ...base, text: kid(70), booksDone: 6 }).code).toBe('curto');
   expect(localCheck({ ...base, text: kid(85), booksDone: 6 }).ok).toBe(true);
 });

@@ -10,7 +10,7 @@ O Heitor termina um livro, vai até a Biblioteca e **conta o livro para o Sábio
 - **Como**: molde na tela ("O livro conta a história de… No começo… Depois… No fim… O que eu mais gostei foi…"), contador de palavras, e a devolutiva do Sábio quando falta alguma parte ("Você não contou o fim. Como termina?").
 - **Erro ensina**: recusa nunca vem com nota nem castigo; o Sábio diz **o que faltou** e o texto fica na tela para ele completar. Pode tentar de novo (até 3 vezes no dia, o mesmo livro).
 - **Mede**: título, dias de leitura, gostou (4 faces), nota, texto, palavras, veredito do Sábio (0-3), o que faltou, sinal de suspeita, tentativas, data. Tudo em `bookReports` para o pai ler.
-- **Progressão**: mínimo de 50 palavras nos primeiros 5 livros, 80 depois (o pai baixou de 80/120 em 22/09); o molde some depois do 5º livro aceito (Biblioteca n2 pode voltar a mostrar).
+- **Progressão**: mínimo de 40 palavras nos primeiros 5 livros, 80 depois (o pai baixou de 80/120 em 22/09); o molde some depois do 5º livro aceito (Biblioteca n2 pode voltar a mostrar).
 - **Nunca**: cobrar gold, humilhar, dizer "você copiou". Se o texto parece de adulto ou de IA, o Sábio pede para reescrever "como se estivesse contando para um amigo" e marca para o pai.
 
 ## Fluxo
@@ -36,7 +36,7 @@ O Heitor termina um livro, vai até a Biblioteca e **conta o livro para o Sábio
 
 Critérios do prompt: (a) o texto traz detalhes que só quem leu sabe (nomes, o que acontece, onde, como termina) — se o livro for conhecido, confira contra ele; se não for, confira coerência interna; resumo genérico que caberia em qualquer livro = 1; (b) tem começo, meio, fim e uma opinião com motivo; (c) escrita de criança de 10 anos: erros de ortografia e frases simples são **esperados** — texto sem erro nenhum, com vocabulário e pontuação de adulto ou estrutura de resenha, marca `ia`/`copiado`; cópia da sinopse da capa marca `copiado`; (d) `fora_do_tema` quando o texto não fala do livro do título. Aceita quando `leu >= 2` e `suspeito == "nenhum"`.
 
-Local, antes do juiz (sem IA): 50/80 palavras mínimo, 600 máximo; título normalizado (minúsculas, sem acento, sem "o/a/os/as" inicial) igual ou a 2 letras de um já aceito = repetido; texto 80% igual a um relato de **outro** livro = repetido; no **mesmo** livro só o texto idêntico barra (completar o texto depois de "faltou" é o fluxo esperado); 5 palavras iguais seguidas = pede outra coisa.
+Local, antes do juiz (sem IA): 40/80 palavras mínimo, 600 máximo; título normalizado (minúsculas, sem acento, sem "o/a/os/as" inicial) igual ou a 2 letras de um já aceito = repetido; texto 80% igual a um relato de **outro** livro = repetido; no **mesmo** livro só o texto idêntico barra (completar o texto depois de "faltou" é o fluxo esperado); 5 palavras iguais seguidas = pede outra coisa.
 
 ## Dados e regras
 

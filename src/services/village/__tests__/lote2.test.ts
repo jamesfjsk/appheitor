@@ -102,7 +102,7 @@ test('check-in: 5 XP se respondeu, 0 se não; amanhã pede 3 palavras', () => {
   expect(sageReplyFor({ mood: 'dificil', tomorrow: ok.tomorrow }, '2026-09-16').length > 0).toBe(true);
 });
 
-test('conquistas: destrava no alvo e não antes; escondidas; nunca gold', () => {
+test('conquistas: destrava no alvo e não antes; escondidas; gold só na vida real (decisão 38)', () => {
   const first = GAME_ACHIEVEMENTS.find((x) => x.id === 'primeira_picaretada')!;
   expect(progressOf({ missionsDone: 0 }, first).current).toBe(0);
   expect(evaluateAchievements({ missionsDone: 0 }, {}).length).toBe(0);
@@ -111,14 +111,14 @@ test('conquistas: destrava no alvo e não antes; escondidas; nunca gold', () => 
   expect(evaluateAchievements({ missionsDone: 1 }, { primeira_picaretada: '2026-09-15' }).some((x) => x.id === 'primeira_picaretada')).toBe(false);
   expect(visibleAchievements({}).some((x) => x.id === 'lua_da_vila')).toBe(false);
   expect(visibleAchievements({ lua_da_vila: '2026-09-15' }).some((x) => x.id === 'lua_da_vila')).toBe(true);
-  for (const ach of GAME_ACHIEVEMENTS) expect(rewardHasGold(ach)).toBe(false);
-  expect('gold' in (first.reward as object) ? (first.reward as { gold?: number }).gold : undefined).toBe(undefined);
+  const REAL = new Set(['rotina', 'agenda', 'bau', 'biblioteca']);
+  for (const ach of GAME_ACHIEVEMENTS) expect(rewardHasGold(ach)).toBe(REAL.has(ach.category));
+  expect(first.reward).toEqual({ xp: 30, gold: 3 });
   expect(GAME_ACHIEVEMENTS.some((x) => x.id === 'primeira_vagoneta')).toBe(false);
   expect(GAME_ACHIEVEMENTS.filter((x) => x.id.startsWith('cart_')).length).toBe(7);
   const cartFirst = GAME_ACHIEVEMENTS.find((x) => x.id === 'cart_first')!;
-  expect(cartFirst.reward.xp).toBe(10);
-  expect(cartFirst.reward.material).toBe(undefined);
-  expect(GAME_ACHIEVEMENTS.find((x) => x.id === 'cart_perfect')!.reward).toEqual({ xp: 15 });
+  expect(cartFirst.reward).toEqual({ xp: 30, material: 1 }); // bronze de jogo: XP do tier + material do nível da Ferraria
+  expect(GAME_ACHIEVEMENTS.find((x) => x.id === 'cart_perfect')!.reward).toEqual({ xp: 30, material: 1 });
   expect(evaluateAchievements({ redstoneDone: 1 }, {}).some((x) => x.id === 'cart_first')).toBe(true);
   expect(evaluateAchievements({ redstonePerfect: 1 }, {}).some((x) => x.id === 'cart_perfect')).toBe(true);
   expect(evaluateAchievements({ redstoneDone: 1 }, {}).some((x) => x.id === 'cart_perfect')).toBe(false);

@@ -1,11 +1,36 @@
 import type { GameAchievement, GameAchievementReward, AchievementTier } from '../types/village';
 
-const REWARD: Record<AchievementTier, GameAchievementReward> = {
-  bronze: { xp: 10, material: 1 },
-  prata: { xp: 25, material: 2 },
-  ouro: { xp: 50, rare: 'esmeralda' },
-  exclusiva: { xp: 100, rare: 'diamante' },
-};
+/**
+ * Recompensas (decisão 38, pai em 22/09): XP por tier 30/75/150/300 — uma conquista de semanas vale uma semana
+ * de missões, não uma missão. Gold SÓ nas categorias de vida real (3/6/12 por tier, dentro do teto semanal
+ * `achievementGoldCap`); as de jogo pagam material do nível da Ferraria (bronze 1, prata 2) e raro (ouro esmeralda,
+ * exclusiva diamante). Cosmético, quando existe, entra no lugar do raro.
+ */
+export const REAL_LIFE_CATEGORIES = ['rotina', 'agenda', 'bau', 'biblioteca'] as const;
+
+export function isRealLifeCategory(category: string): boolean {
+  return (REAL_LIFE_CATEGORIES as readonly string[]).includes(category);
+}
+
+export const ACH_XP: Record<AchievementTier, number> = { bronze: 30, prata: 75, ouro: 150, exclusiva: 300 };
+export const ACH_GOLD_REAL: Record<AchievementTier, number> = { bronze: 3, prata: 6, ouro: 12, exclusiva: 12 };
+
+/** Extras de uma conquista: `reward` parcial completa o padrão do tier (XP e gold de vida real ficam). */
+type AchExtra = Partial<Omit<GameAchievement, 'reward'>> & { reward?: Partial<GameAchievementReward> };
+
+function baseReward(category: string, tier: AchievementTier): GameAchievementReward {
+  const xp = ACH_XP[tier];
+  return isRealLifeCategory(category) ? { xp, gold: ACH_GOLD_REAL[tier] } : { xp };
+}
+
+export function rewardFor(category: string, tier: AchievementTier): GameAchievementReward {
+  const base = baseReward(category, tier);
+  if (isRealLifeCategory(category)) return base;
+  if (tier === 'bronze') return { ...base, material: 1 };
+  if (tier === 'prata') return { ...base, material: 2 };
+  if (tier === 'ouro') return { ...base, rare: 'esmeralda' };
+  return { ...base, rare: 'diamante' };
+}
 
 function a(
   id: string,
@@ -16,7 +41,7 @@ function a(
   icon: string,
   stat: string,
   target: number,
-  extra?: Partial<GameAchievement>
+  extra?: AchExtra
 ): GameAchievement {
   return {
     id,
@@ -27,7 +52,7 @@ function a(
     icon,
     stat,
     target,
-    reward: extra?.reward ?? REWARD[tier],
+    reward: extra?.reward ? { ...baseReward(category, tier), ...extra.reward } : rewardFor(category, tier),
     hidden: extra?.hidden,
     resetOnSeason: extra?.resetOnSeason,
   };
@@ -41,7 +66,7 @@ function trio(
   icon: string,
   stat: string,
   targets: [number, number, number],
-  extra?: Partial<GameAchievement>
+  extra?: AchExtra
 ): GameAchievement[] {
   const tiers: AchievementTier[] = ['bronze', 'prata', 'ouro'];
   return targets.map((target, i) =>
@@ -60,9 +85,9 @@ export const GAME_ACHIEVEMENTS: GameAchievement[] = [
   a('recuperacao', 'rotina', 'bronze', 'Recuperação', '5 missões recuperadas até meio-dia.', 'clock', 'recoveries', 5),
 
   a('primeira_obra', 'obras', 'bronze', 'Primeira obra', 'Fornalha no nível 1.', 'forge', 'building:fornalha', 1),
-  a('vila_verdade', 'obras', 'prata', 'Vila de verdade', 'Todas as sete no nível 1.', 'home', 'buildingsMin', 1),
+  a('vila_verdade', 'obras', 'prata', 'Vila de verdade', 'Todas as seis no nível 1.', 'home', 'buildingsMin', 1),
   a('mestre_obras', 'obras', 'ouro', 'Mestre de obras', 'Todas no nível 2.', 'home', 'buildingsMin', 2),
-  a('base_completa', 'obras', 'exclusiva', 'Base completa', 'Todas no nível 3.', 'home', 'buildingsMin', 3, { reward: { xp: 100, cosmetic: 'hat_mestre_obras' } }),
+  a('base_completa', 'obras', 'exclusiva', 'Base completa', 'Todas no nível 3.', 'home', 'buildingsMin', 3, { reward: { cosmetic: 'hat_mestre_obras' } }),
   ...trio('fundidor', 'obras', 'Fundidor', 'Fundições', 'forge', 'smelts', [10, 50, 200]),
   ...trio('queimador', 'obras', 'Queimador', 'Queimas de redstone', 'forge', 'burns', [10, 30, 100]),
 
@@ -81,13 +106,13 @@ export const GAME_ACHIEVEMENTS: GameAchievement[] = [
   a('ferraria_20', 'mina', 'bronze', 'Ferraria', '20 contratos de ferraria.', 'book', 'contractsForge', 20),
   a('comerciante_20', 'mina', 'bronze', 'Comerciante', '20 contratos de comerciante.', 'book', 'contractsMerchant', 20),
 
-  a('cart_first', 'mina', 'bronze', 'Primeira carga', 'Carregou a primeira vagoneta.', 'forge', 'redstoneDone', 1, { reward: { xp: 10 } }),
-  a('cart_perfect', 'mina', 'bronze', 'Três de três', 'Três vagonetas no mesmo dia.', 'forge', 'redstonePerfect', 1, { reward: { xp: 15 } }),
-  a('cart_5', 'mina', 'bronze', 'Vagoneteiro', 'Cinco dias com vagoneta.', 'forge', 'redstoneDone', 5, { reward: { xp: 20 } }),
-  a('cart_stages_30', 'mina', 'prata', 'Trilho longo', 'Trinta vagonetas carregadas.', 'forge', 'redstoneStages', 30, { reward: { xp: 25 } }),
-  a('cart_perfect_5', 'mina', 'prata', 'Carga exata', 'Cinco dias 3 de 3.', 'forge', 'redstonePerfect', 5, { reward: { xp: 30, rare: 'esmeralda' } }),
-  a('cart_20', 'mina', 'ouro', 'Mestre da vagoneta', 'Vinte dias com vagoneta.', 'forge', 'redstoneDone', 20, { reward: { xp: 40 } }),
-  a('cart_perfect_15', 'mina', 'exclusiva', 'Sem tombar', 'Quinze dias 3 de 3.', 'forge', 'redstonePerfect', 15, { reward: { xp: 50, rare: 'diamante' } }),
+  a('cart_first', 'mina', 'bronze', 'Primeira carga', 'Carregou a primeira vagoneta.', 'forge', 'redstoneDone', 1),
+  a('cart_perfect', 'mina', 'bronze', 'Três de três', 'Três vagonetas no mesmo dia.', 'forge', 'redstonePerfect', 1),
+  a('cart_5', 'mina', 'bronze', 'Vagoneteiro', 'Cinco dias com vagoneta.', 'forge', 'redstoneDone', 5),
+  a('cart_stages_30', 'mina', 'prata', 'Trilho longo', 'Trinta vagonetas carregadas.', 'forge', 'redstoneStages', 30),
+  a('cart_perfect_5', 'mina', 'prata', 'Carga exata', 'Cinco dias 3 de 3.', 'forge', 'redstonePerfect', 5, { reward: { rare: 'esmeralda' } }),
+  a('cart_20', 'mina', 'ouro', 'Mestre da vagoneta', 'Vinte dias com vagoneta.', 'forge', 'redstoneDone', 20),
+  a('cart_perfect_15', 'mina', 'exclusiva', 'Sem tombar', 'Quinze dias 3 de 3.', 'forge', 'redstonePerfect', 15),
 
   a('primeira_prova', 'biblioteca', 'bronze', 'Primeira prova', 'Fez a prova do dia.', 'book', 'quizzesDone', 1),
   ...trio('nota_maxima', 'biblioteca', 'Nota máxima', 'Provas 8 de 8', 'star', 'quizPerfect', [1, 10, 50]),
@@ -115,7 +140,7 @@ export const GAME_ACHIEVEMENTS: GameAchievement[] = [
   a('lenda_sabio', 'amizade', 'ouro', 'Lenda para o Sábio', 'Amizade nível 5.', 'heart', 'npcTier:sabio', 5),
   a('lenda_ferreiro', 'amizade', 'ouro', 'Lenda para o Ferreiro', 'Amizade nível 5.', 'heart', 'npcTier:ferreiro', 5),
   a('lenda_olheiro', 'amizade', 'ouro', 'Lenda para o Olheiro', 'Amizade nível 5.', 'heart', 'npcTier:olheiro', 5),
-  a('todo_mundo', 'amizade', 'exclusiva', 'Todo mundo gosta de você', 'Os quatro no nível 3.', 'heart', 'npcTiersMin', 3, { reward: { xp: 100, cosmetic: 'cape_vila' } }),
+  a('todo_mundo', 'amizade', 'exclusiva', 'Todo mundo gosta de você', 'Os quatro no nível 3.', 'heart', 'npcTiersMin', 3, { reward: { cosmetic: 'cape_vila' } }),
   a('bom_papo_100', 'amizade', 'bronze', 'Bom de papo', '100 conversas.', 'heart', 'npcTalks', 100),
   a('bom_papo_365', 'amizade', 'prata', 'Bom de papo', '365 conversas.', 'heart', 'npcTalks', 365),
 

@@ -67,7 +67,7 @@ import { weeklyStatement } from './village/bank';
 import { checkinXp } from './village/checkin';
 import { closeSeasonState, countWeekTorches, recordsAfterWeek, trophyOfWeek } from './village/season';
 import { addVillageStats } from './village/stats';
-import { currentOf, evaluateAchievements, seasonAchievementIds } from './village/achievements';
+import { achievementGoldRoom, currentOf, evaluateAchievements, materialForForgeLevel, seasonAchievementIds } from './village/achievements';
 import { friendTier, talkPointsToday } from './village/dialogue';
 import { tierGifts } from './village/friendship';
 import { levelGift } from './village/levels';
@@ -1258,6 +1258,9 @@ export async function applyVillageStats(
     const owned = [...village.owned];
     let xpGain = 0;
     const mats: Record<string, number> = {};
+    const matId = materialForForgeLevel(Number(buildings?.fornalha) || 0); // decisão 38: material do nível da Ferraria
+    let goldWanted = 0;
+    const goldTitles: string[] = [];
     for (const ach of fresh) {
       const ck = claimKey('ach', ach.id);
       if (claimed[ck]) continue;
@@ -1267,10 +1270,21 @@ export async function applyVillageStats(
       unlocked.push(ach.id);
       const def = GAME_ACHIEVEMENT_BY_ID[ach.id] ?? ach;
       xpGain += def.reward.xp || 0;
-      if (def.reward.material) mats.madeira = (mats.madeira || 0) + def.reward.material;
+      if (def.reward.material) mats[matId] = (mats[matId] || 0) + def.reward.material;
+      if (def.reward.gold) { goldWanted += def.reward.gold; goldTitles.push(def.title); }
       if (def.reward.rare === 'esmeralda') rare.esmeralda += 1;
       if (def.reward.rare === 'diamante') rare.diamante += 1;
       if (def.reward.cosmetic && !owned.includes(def.reward.cosmetic)) owned.push(def.reward.cosmetic);
+    }
+    // gold de vida real (decisão 38) dentro do teto semanal achievementGoldCap; o que passa do teto não fica devendo
+    let goldGain = 0;
+    if (goldWanted > 0) {
+      const eSnap = await tx.get(doc(db, 'settings', 'economy'));
+      const cap = Number(eSnap.data()?.achievementGoldCap);
+      const room = achievementGoldRoom(stats, weekStamp, Number.isFinite(cap) && cap >= 0 ? cap : DEFAULT_ECONOMY.achievementGoldCap);
+      goldGain = Math.min(goldWanted, room);
+      if ((Number(stats.achGoldWeekKey) || 0) !== weekStamp) { stats.achGoldWeek = 0; stats.achGoldWeekKey = weekStamp; }
+      stats.achGoldWeek = (Number(stats.achGoldWeek) || 0) + goldGain;
     }
     let npcs = village.npcs;
     const bag = { stats, level, buildings, gear: village.gear, npcTiers, owned };
@@ -1312,11 +1326,32 @@ export async function applyVillageStats(
     } else {
       tx.update(villageRef(uid), stripUndefined({ stats, achievementsUnlocked, newAchievements, claimed, rare, owned, npcs, updatedAt: nowIso() }));
     }
-    if (pSnap.exists() && xpGain > 0) {
-      tx.update(progressRef(uid), { totalXP: increment(xpGain), updatedAt: serverTimestamp() });
+    if (pSnap.exists() && (xpGain > 0 || goldGain > 0)) {
+      const goldBefore = Number(pSnap.data()?.availableGold) || 0;
+      tx.update(progressRef(uid), {
+        ...(xpGain > 0 ? { totalXP: increment(xpGain) } : {}),
+        ...(goldGain > 0 ? { availableGold: increment(goldGain), totalGoldEarned: increment(goldGain) } : {}),
+        updatedAt: serverTimestamp(),
+      });
+      if (goldGain > 0) {
+        tx.set(doc(collection(db, 'goldTransactions')), {
+          userId: uid,
+          amount: goldGain,
+          type: 'earned',
+          source: 'achievement',
+          description: `Conquista: ${goldTitles.join(', ')}`,
+          metadata: { achievements: unlocked, wanted: goldWanted, capped: goldWanted - goldGain },
+          balanceBefore: goldBefore,
+          balanceAfter: goldBefore + goldGain,
+          createdAt: serverTimestamp(),
+        });
+      }
     }
-    if (bSnap.exists() && mats.madeira) {
-      tx.update(baseRef(uid), { 'materials.madeira': increment(mats.madeira), updatedAt: nowIso() });
+    const matEntries = Object.entries(mats).filter(([, n]) => n > 0);
+    if (bSnap.exists() && matEntries.length) {
+      const upd: Record<string, unknown> = { updatedAt: nowIso() };
+      for (const [m, n] of matEntries) upd[`materials.${m}`] = increment(n);
+      tx.update(baseRef(uid), upd);
     }
   });
   return unlocked;

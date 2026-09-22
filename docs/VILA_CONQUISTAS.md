@@ -8,7 +8,7 @@ Documento de desenho (fonte de verdade a partir de 15/09/2026). Entra em código
 |---|---|---|
 | Quem cria | o jogo (catálogo em código, `src/data/achievements.ts`) | o pai, no painel (coleção `achievements`, como hoje) |
 | O que medem | progresso dentro do jogo: missões, tochas, obras, forja, Mina, prova, Banco, Agenda, amizade, nível | coisas de fora: "andou de bicicleta sem rodinha", "leu um livro inteiro", "nota boa na prova da escola" |
-| Recompensa | XP e material; nas de ouro, um raro; nas exclusivas, cosmético ou diamante; **nunca gold** | o que o pai definir (pode ser gold; é o pai pagando por algo real) |
+| Recompensa | **Decisão 38 (22/09)**: XP por tier 30 / 75 / 150 / 300. Gold **só** nas categorias de vida real (Rotina, Agenda, Baú, Biblioteca): 3 / 6 / 12, dentro do teto semanal `achievementGoldCap` (20). Jogo: material do nível da Ferraria (bronze 1, prata 2), esmeralda no ouro, diamante ou cosmético na exclusiva | o sistema antigo do Flash (coleção `achievements`) foi **aposentado** em 22/09: arquivado, fora da Torre e do painel. "Vida real" na Torre agora é a aba com Rotina, Biblioteca, Agenda e Baú do catálogo |
 | Como destrava | sozinha, por contadores gravados nas mesmas transações dos eventos | o pai marca como feita no painel (ou a criança pede e o pai confirma) |
 | Onde aparecem | Torre, aba Conquistas, por categoria, com barra de progresso | Torre, aba "Da vida real", com a foto ou ícone que o pai escolheu |
 
@@ -25,7 +25,7 @@ Regra: a lista do jogo tem que ser grande o bastante para sempre haver uma conqu
 
 ## Catálogo inicial (72 conquistas do jogo, mais 7 da Vagoneta desde 17/09)
 
-Alvos em (bronze / prata / ouro); recompensa padrão por camada: bronze 10 XP + 1 material; prata 25 XP + 2 materiais; ouro 50 XP + 1 esmeralda; exclusiva 100 XP + 1 diamante ou cosmético.
+Alvos em (bronze / prata / ouro); recompensa padrão por camada desde 22/09 (decisão 38): bronze 30 XP; prata 75 XP; ouro 150 XP; exclusiva 300 XP. Nas categorias de vida real (Rotina, Agenda, Baú, Biblioteca) soma gold 3 / 6 / 12; nas de jogo soma material do nível da Ferraria (1 / 2), esmeralda no ouro e diamante ou cosmético na exclusiva. As da Vagoneta seguem a mesma tabela (antes tinham XP próprio de 10 a 50). `base_completa` conta as seis obras da cena (sem Campinho).
 
 **Rotina (missões)**
 - Primeira picaretada: 1 missão feita (bronze).

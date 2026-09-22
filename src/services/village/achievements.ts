@@ -1,7 +1,44 @@
 import { GAME_ACHIEVEMENTS } from '../../data/achievements';
-import type { GameAchievement, VillageGear, VillageStats } from '../../types/village';
+import { COSMETIC_BY_ID } from '../../config/village';
+import { MATERIAL_LABELS } from '../../config/englishBase';
+import type { Material } from '../../types/english';
+import type { AchievementTier, GameAchievement, VillageGear, VillageStats } from '../../types/village';
 
-const SEVEN = ['fornalha', 'bau', 'cerca', 'torre', 'mesa', 'campinho', 'cofre'] as const;
+/** As obras que existem na cena (o Campinho saiu na decisão 8): `base_completa` conta só estas. */
+export const BASE_BUILDINGS = ['fornalha', 'bau', 'cerca', 'torre', 'mesa', 'cofre'] as const;
+const SEVEN = BASE_BUILDINGS;
+
+export const TIER_LABEL: Record<AchievementTier, string> = { bronze: 'Bronze', prata: 'Prata', ouro: 'Ouro', exclusiva: 'Exclusiva' };
+
+/** Material que a conquista de jogo paga: sobe com a Ferraria (fornalha) — 0-1 madeira, 2 pedra, 3 ferro. */
+export function materialForForgeLevel(level: number): Material {
+  if (level >= 3) return 'ferro';
+  if (level >= 2) return 'pedra';
+  return 'madeira';
+}
+
+/** Quanto gold de conquista ainda cabe na semana (`achievementGoldCap`); a chave da semana zera o contador. */
+export function achievementGoldRoom(stats: VillageStats, weekStamp: number, cap: number): number {
+  const sameWeek = (Number(stats.achGoldWeekKey) || 0) === weekStamp;
+  const used = sameWeek ? Number(stats.achGoldWeek) || 0 : 0;
+  return Math.max(0, cap - used);
+}
+
+/** O prêmio por extenso, como o cartão mostra: "+30 XP · 3 gold", "+75 XP · 2 pedra", "+150 XP · 1 esmeralda". */
+export function rewardLine(ach: GameAchievement, forgeLevel = 0): string {
+  const r = ach.reward;
+  const parts = [`+${r.xp} XP`];
+  if (r.gold) parts.push(`${r.gold} gold`);
+  if (r.material) parts.push(`${r.material} ${MATERIAL_LABELS[materialForForgeLevel(forgeLevel)].toLowerCase()}`);
+  if (r.rare) parts.push(`1 ${r.rare}`);
+  if (r.cosmetic) parts.push(COSMETIC_BY_ID[r.cosmetic]?.label ?? 'cosmético');
+  return parts.join(' · ');
+}
+
+/** Número do degrau para trios ("Mão na massa 10/50/100"): o alvo, quando o título termina com ele. */
+export function stepOf(ach: GameAchievement): number | null {
+  return ach.title.endsWith(` ${ach.target}`) ? ach.target : null;
+}
 
 export interface AchContext {
   stats: VillageStats;
@@ -77,6 +114,5 @@ export function seasonAchievementIds(): string[] {
 }
 
 export function rewardHasGold(ach: GameAchievement): boolean {
-  void ach;
-  return false;
+  return (ach.reward.gold || 0) > 0;
 }

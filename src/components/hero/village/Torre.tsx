@@ -5,14 +5,13 @@ import { useData } from '../../../contexts/DataContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { GAME_ACHIEVEMENTS } from '../../../data/achievements';
-import { almostThere, progressOf, visibleAchievements } from '../../../services/village/achievements';
+import { TIER_LABEL, currentOf, progressOf, rewardLine, stepOf, visibleAchievements } from '../../../services/village/achievements';
 import { claimTrophy, seeAchievements } from '../../../services/villageService';
 import { getLearning } from '../../../services/learningService';
 import type { GameAchievement, LearningDoc, NpcId } from '../../../types/village';
 import { FRIEND_TIER_NAME } from '../../../types/village';
 import { isoWeekOf, weekRangeLabel, weekdayOf } from '../../../utils/clock';
 import { useClock } from '../../../contexts/ClockContext';
-import AchievementsBadges from '../AchievementsBadges';
 import { NPC_QUESTS } from '../../../data/npcQuests';
 import { getLevelFromXP } from '../../../utils/levelSystem';
 import { liveBuildingLevel } from '../../../services/village/repair';
@@ -25,26 +24,28 @@ import ChildSheet from './ChildSheet';
 type Tab = 'conquistas' | 'vida' | 'recordes' | 'trofeus' | 'mapa' | 'historias';
 
 const TABS: Array<[Tab, string, number]> = [
+  ['vida', 'Vida real', 0],
   ['conquistas', 'Conquistas', 0],
-  ['vida', 'Vida real', 1],
   ['recordes', 'Recordes', 2],
   ['trofeus', 'Troféus', 2],
   ['mapa', 'Mapa', 3],
   ['historias', 'Histórias', 3],
 ];
 
-const CAT: Array<[string, string]> = [
+/** Decisão 38: "Vida real" = o que ele faz fora do jogo (rotina, prova e livros, agenda, Baú); "Conquistas" = o jogo. */
+const CATS_VIDA: Array<[string, string]> = [
   ['rotina', 'Rotina'],
-  ['obras', 'Obras'],
-  ['ferraria', 'Ferraria'],
-  ['mina', 'Mina'],
   ['biblioteca', 'Biblioteca'],
-  ['banco', 'Banco'],
   ['agenda', 'Agenda'],
-  ['amizade', 'Amizade'],
   ['bau', 'Baú'],
+];
+const CATS_JOGO: Array<[string, string]> = [
+  ['mina', 'Mina'],
+  ['ferraria', 'Ferraria'],
+  ['obras', 'Obras'],
+  ['banco', 'Banco'],
+  ['amizade', 'Amizade'],
   ['temporada', 'Temporada'],
-  ['segredos', 'Segredos'],
 ];
 
 const PIXEL: Record<string, string> = {
@@ -62,6 +63,10 @@ const PIXEL: Record<string, string> = {
   trophy: '/assets/english/ui/trophy.webp',
   gold: '/assets/english/ui/gold.webp',
   heart: '/assets/english/ui/star.webp',
+  emerald: '/assets/english/ui/emerald.webp',
+  diamond: '/assets/english/ui/diamond.webp',
+  moon: '/assets/english/ui/moon.webp',
+  crown: '/assets/english/ui/trophy.webp',
 };
 
 const TIER_FRAME: Record<GameAchievement['tier'], ItemRarity> = {
@@ -93,8 +98,9 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { childUid } = useAuth();
   const { playClick, playError } = useSound();
   const { today, hour } = useClock();
-  const [tab, setTab] = useState<Tab>('conquistas');
-  const [cat, setCat] = useState('rotina');
+  const [tab, setTab] = useState<Tab>('vida');
+  const [catVida, setCatVida] = useState('rotina');
+  const [catJogo, setCatJogo] = useState('mina');
   const [learning, setLearning] = useState<LearningDoc | null>(null);
   const week = isoWeekOf(today);
   const close = () => {
@@ -109,6 +115,7 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const minerLevel = getLevelFromXP(progress.totalXP || 0);
   const torreLevel = liveBuildingLevel(buildings, village.cracks, 'torre');
+  const forgeLevel = Number(buildings?.fornalha) || 0;
   const ctx = useMemo(() => ({
     buildings,
     gear: village.gear,
@@ -118,7 +125,26 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }), [buildings, village.gear, village.npcs, village.owned, minerLevel]);
 
   const visible = visibleAchievements(village.achievementsUnlocked);
-  const next = almostThere(village.stats, village.achievementsUnlocked, ctx);
+  const shownTab =
+    torreLevel < 2 && (tab === 'recordes' || tab === 'trofeus' || tab === 'mapa' || tab === 'historias') ? 'vida' :
+    torreLevel < 3 && (tab === 'mapa' || tab === 'historias') ? 'vida' :
+    tab;
+  const achTab = shownTab === 'vida' || shownTab === 'conquistas';
+  const secretsOpen = GAME_ACHIEVEMENTS.some((a) => a.category === 'segredos' && village.achievementsUnlocked[a.id]);
+  const cats: Array<[string, string]> = shownTab === 'vida'
+    ? CATS_VIDA
+    : (secretsOpen ? [...CATS_JOGO, ['segredos', 'Segredos'] as [string, string]] : CATS_JOGO);
+  const catIds = new Set(cats.map(([id]) => id));
+  const cat = shownTab === 'vida' ? catVida : catJogo;
+  const setCat = shownTab === 'vida' ? setCatVida : setCatJogo;
+  const bag = { stats: village.stats, ...ctx };
+  const next = visible
+    .filter((a) => catIds.has(a.category) && !village.achievementsUnlocked[a.id])
+    .map((a) => ({ a, cur: currentOf(a, bag) }))
+    .filter((x) => x.cur > 0 && x.cur < x.a.target)
+    .sort((x, y) => (y.cur / y.a.target) - (x.cur / x.a.target))
+    .slice(0, 3)
+    .map((x) => x.a);
   const inCat = visible
     .filter((a) => a.category === cat)
     .slice()
@@ -133,13 +159,11 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const pb = progressOf(village.stats, b, ctx);
       return (pb.current / pb.target) - (pa.current / pa.target);
     });
-  const shownTab =
-    torreLevel < 1 ? 'conquistas' :
-    torreLevel < 2 && (tab === 'recordes' || tab === 'trofeus' || tab === 'mapa' || tab === 'historias') ? 'conquistas' :
-    torreLevel < 3 && (tab === 'mapa' || tab === 'historias') ? 'conquistas' :
-    tab;
   const trophyNight = (weekdayOf(today) === 6 && hour >= 18) || weekdayOf(today) === 0;
   const look = VILLAGE_LINES.olheiro.find((l) => l.id === 'o3')?.text || buildLine('torre', Math.max(1, torreLevel));
+  const intro = shownTab === 'vida'
+    ? 'O que você faz de verdade: missões, prova, livros, agenda e o Baú. Estas pagam gold.'
+    : look;
 
   return (
     <ChildSheet
@@ -159,7 +183,7 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <button
                 key={id}
                 type="button"
-                className={`mc-slot rounded px-3 min-h-[44px] ${tab === id ? 'mc-slot-selected' : ''} ${locked ? 'is-lock' : ''}`}
+                className={`mc-slot rounded px-3 min-h-[44px] ${shownTab === id ? 'mc-slot-selected' : ''} ${locked ? 'is-lock' : ''}`}
                 title={locked ? lockLine(need) : undefined}
                 onClick={() => {
                   if (locked) {
@@ -179,54 +203,57 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       )}
     >
       <div className="p-3 space-y-2">
-        {shownTab === 'conquistas' && (
+        {achTab && (
           <>
-            <p className="text-sm">{look}</p>
+            <p className="text-sm">{intro}</p>
             {next.length > 0 && (
-              <div className="mc-inv p-1">
+              <div className="mc-inv p-1" data-testid="torre-quase-la">
                 <p className="mc-lbl px-1">Quase lá</p>
                 {next.map((a) => {
                   const p = progressOf(village.stats, a, ctx);
-                  const pct = Math.round((p.current / p.target) * 100);
+                  const pct = Math.min(100, Math.round((p.current / p.target) * 100));
                   return (
                     <div key={a.id} className="mc-row rounded px-2 py-1 flex items-center gap-2">
                       <img src={achIcon(a.icon)} alt="" className="w-6 h-6 mc-pixel shrink-0" draggable={false} />
                       <p className="text-sm font-bold truncate min-w-0 flex-1">{a.title}</p>
                       <div className="mc-bar w-28 shrink-0"><div className="mc-bar-fill" style={{ width: `${pct}%` }} /></div>
-                      <span className="mc-num shrink-0" style={{ fontSize: 11 }}>{p.current}/{p.target}</span>
+                      <span className="mc-num shrink-0" style={{ fontSize: 11 }}>{Math.min(p.current, p.target)}/{p.target}</span>
                     </div>
                   );
                 })}
               </div>
             )}
-            <div className="mc-hotbar">
-              {CAT.map(([id, label]) => {
+            <div className="mc-hotbar" data-testid="torre-categorias">
+              {cats.map(([id, label]) => {
                 const all = GAME_ACHIEVEMENTS.filter((a) => a.category === id && (!a.hidden || village.achievementsUnlocked[a.id]));
                 const n = all.filter((a) => village.achievementsUnlocked[a.id]).length;
                 return (
                   <button
                     key={id}
                     type="button"
-                    className={`mc-slot rounded px-2 text-[13px] min-h-[44px] ${cat === id ? 'mc-slot-selected' : ''}`}
+                    className={`mc-slot rounded px-2 text-[13px] min-h-[44px] flex-col gap-0 ${cat === id ? 'mc-slot-selected' : ''}`}
                     onClick={() => { playClick(); setCat(id); }}
                   >
-                    {label} {n}/{all.length}
+                    <span>{label}</span>
+                    {id !== 'segredos' && <span className="mc-num" style={{ fontSize: 10, opacity: 0.85 }}>{n}/{all.length}</span>}
                   </button>
                 );
               })}
             </div>
-            <div className="mc-inv space-y-1">
+            <div className="mc-inv space-y-1" data-testid="torre-lista">
               {inCat.map((a) => {
                 const p = progressOf(village.stats, a, ctx);
                 const unlocked = Boolean(village.achievementsUnlocked[a.id]);
                 const hidden = Boolean(a.hidden && !unlocked);
                 const isNew = village.newAchievements.includes(a.id);
                 const frame = itemFrame(TIER_FRAME[a.tier]);
-                const pct = Math.min(100, Math.round((p.current / p.target) * 100));
+                const cur = Math.min(p.current, p.target);
+                const pct = Math.min(100, Math.round((cur / p.target) * 100));
                 const when = unlocked ? shortDay(village.achievementsUnlocked[a.id]) : '';
+                const step = stepOf(a);
                 return (
-                  <div key={a.id} className={`mc-row rounded p-2 flex items-center gap-2 ${unlocked ? 'is-done' : 'is-locked'}`}>
-                    <span className="mc-slot w-11 h-11 p-1 shrink-0" style={{ boxShadow: `inset 0 0 0 2px ${frame.color}` }}>
+                  <div key={a.id} className={`mc-row rounded p-2 flex items-start gap-2 ${unlocked ? 'is-done' : 'is-locked'}`} data-testid={`ach-${a.id}`}>
+                    <span className="mc-slot w-12 h-12 p-1 shrink-0 relative" style={{ boxShadow: `inset 0 0 0 2px ${frame.color}` }}>
                       <img
                         src={achIcon(a.icon)}
                         alt=""
@@ -234,28 +261,37 @@ const Torre: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         draggable={false}
                         style={unlocked || hidden ? undefined : { filter: 'grayscale(1)', opacity: 0.7 }}
                       />
+                      {step != null && !hidden && (
+                        <span className="mc-num absolute right-0 bottom-0 px-1 rounded-tl" style={{ fontSize: 10, background: '#17130f', color: frame.color, lineHeight: '14px' }}>{step}</span>
+                      )}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold truncate">
-                        {hidden ? '?' : a.title}
-                        {isNew ? <span className="mc-warn"> Novo</span> : null}
-                      </p>
-                      <p className="text-sm mc-muted truncate">{hidden ? 'Segredo.' : a.description}</p>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <p className="text-sm font-bold truncate min-w-0">
+                          {hidden ? 'Segredo' : a.title}
+                          {isNew ? <span className="mc-warn"> Novo</span> : null}
+                        </p>
+                        <span className="mc-num shrink-0 px-1 rounded" style={{ fontSize: 10, border: `2px solid ${frame.color}`, color: frame.color, lineHeight: '16px' }}>{TIER_LABEL[a.tier]}</span>
+                      </div>
+                      <p className="text-sm mc-muted truncate">{hidden ? 'Ainda é segredo. Você descobre jogando.' : a.description}</p>
+                      <p className="text-xs mc-muted truncate">{hidden ? '' : `Prêmio: ${rewardLine(a, forgeLevel)}`}</p>
                       {!unlocked && !hidden && (
-                        <div className="mc-bar mt-1"><div className="mc-bar-fill" style={{ width: `${pct}%` }} /></div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="mc-bar flex-1"><div className="mc-bar-fill" style={{ width: `${pct}%` }} /></div>
+                          <span className="mc-num shrink-0" style={{ fontSize: 11 }}>{cur}/{p.target}</span>
+                        </div>
                       )}
-                    </div>
-                    <div className="shrink-0 text-right">
-                      {!hidden && <span className="mc-num" style={{ fontSize: 12 }}>{Math.min(p.current, p.target)}/{p.target}</span>}
-                      {when ? <p className="text-xs mc-muted">{when}</p> : null}
+                      {unlocked && (
+                        <p className="text-xs mc-good">Feita em {when}</p>
+                      )}
                     </div>
                   </div>
                 );
               })}
+              {inCat.length === 0 && <p className="text-sm mc-muted px-2 py-1">Nada aqui ainda.</p>}
             </div>
           </>
         )}
-        {shownTab === 'vida' && <AchievementsBadges embedded />}
         {shownTab === 'recordes' && (
           <div className="mc-inv space-y-2">
             <p className="text-sm">Numa semana você juntou <span className="mc-num" style={{ fontSize: 12 }}>{village.records.weekGold || 0}</span> gold.</p>

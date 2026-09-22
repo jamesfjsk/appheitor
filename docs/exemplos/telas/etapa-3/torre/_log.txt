@@ -1,0 +1,18 @@
+torre da conta de teste: nível 0 -> 2 (só para as fotos)
+foto C:\Users\Nobody\Downloads\Samsonite\appheitor\docs\exemplos\telas\etapa-3\torre\01-vida-real-rotina-1280.png
+categorias vida real (1280): Rotina 0/20 | Biblioteca 2/13 | Agenda 1/11 | Baú 0/9
+foto C:\Users\Nobody\Downloads\Samsonite\appheitor\docs\exemplos\telas\etapa-3\torre\02-vida-real-biblioteca-1280.png
+foto C:\Users\Nobody\Downloads\Samsonite\appheitor\docs\exemplos\telas\etapa-3\torre\03-conquistas-mina-1280.png
+categorias conquistas (1280): Mina 1/21 | Ferraria 0/5 | Obras 0/10 | Banco 0/8 | Amizade 0/11 | Temporada 0/8
+foto C:\Users\Nobody\Downloads\Samsonite\appheitor\docs\exemplos\telas\etapa-3\torre\04-conquistas-obras-1280.png
+primeiro cartão de Obras (1280): Primeira obra |  | Bronze |  | Fornalha no nível 1. |  | Prêmio: +30 XP · 1 madeira |  | 0/1
+erros 1280: nenhum
+foto C:\Users\Nobody\Downloads\Samsonite\appheitor\docs\exemplos\telas\etapa-3\torre\01-vida-real-rotina-1920.png
+categorias vida real (1920): Rotina 0/20 | Biblioteca 2/13 | Agenda 1/11 | Baú 0/9
+foto C:\Users\Nobody\Downloads\Samsonite\appheitor\docs\exemplos\telas\etapa-3\torre\02-vida-real-biblioteca-1920.png
+foto C:\Users\Nobody\Downloads\Samsonite\appheitor\docs\exemplos\telas\etapa-3\torre\03-conquistas-mina-1920.png
+categorias conquistas (1920): Mina 1/21 | Ferraria 0/5 | Obras 0/10 | Banco 0/8 | Amizade 0/11 | Temporada 0/8
+foto C:\Users\Nobody\Downloads\Samsonite\appheitor\docs\exemplos\telas\etapa-3\torre\04-conquistas-obras-1920.png
+primeiro cartão de Obras (1920): Primeira obra |  | Bronze |  | Fornalha no nível 1. |  | Prêmio: +30 XP · 1 madeira |  | 0/1
+erros 1920: nenhum
+torre da conta de teste devolvida ao nível 0

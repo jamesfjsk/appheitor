@@ -8,7 +8,7 @@ import type { BookJudge, BookSize, BookSuspect, BookVerdict } from '../../types'
 export const BOOK_XP = 40;
 export const BOOK_GOLD: Record<BookSize, number> = { curto: 8, medio: 15, longo: 25 };
 export const BOOK_MAX_WORDS = 600;
-export const BOOK_MIN_WORDS_START = 50;   // pai, 22/09: 80 era muito para começar
+export const BOOK_MIN_WORDS_START = 40;   // pai, 22/09: 80 era muito para começar (baixou para 50, depois 40)
 export const BOOK_MIN_WORDS_AFTER = 80;
 export const BOOK_EASY_BOOKS = 5;          // até este número de livros aceitos, o mínimo é o de começo e o molde aparece
 export const BOOK_ATTEMPTS_PER_DAY = 3;
