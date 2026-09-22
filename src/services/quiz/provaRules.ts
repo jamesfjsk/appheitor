@@ -5,7 +5,7 @@ export const LESSON_READ_MS = { min: 8000, max: 30000 };
 export const REFLECTION_MIN_WORDS = 10;
 export const DAILY_QUIZ_MODEL = 'gpt-4o';
 
-const KNOWLEDGE_AREAS = ['matemática', 'ciências', 'inglês', 'história ou geografia', 'futebol'] as const;
+const KNOWLEDGE_AREAS = ['matemática', 'ciências', 'inglês', 'história ou geografia', 'cenário de futebol'] as const;
 
 export function normalizeQuizText(s: string): string {
   return s

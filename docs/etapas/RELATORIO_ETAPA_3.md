@@ -699,6 +699,168 @@ Sem dilema nas oito. As duas de atitude caíram: uma por tamanho, outra por cari
 
 **Pare para o commit do pai.** Não começa o próximo pacote.
 
+## Pacote 6b — why em português, vaga por posição
+
+A oitava pergunta senta na vaga dela, e o why fala português.
+
+Itens 8 a 13 do pacote 6, como estão em `PROMPT_CURSOR_2026-09-22.md`. Sem tela nova. Sem gold novo. O papiro não foi reestilizado.
+
+### O que entrou
+
+8. `explicacao_em_ingles`. Why em português. Inglês só dentro de aspas. O teste real da Q4 em inglês cai; o exemplo "Depois de 'yesterday' o verbo vai para o passado" passa.
+9. `ingles_sem_marcador`. Três ou mais formas do mesmo verbo exigem marca de tempo na frase ou no áudio. "The knight ___ the castle bravely" cai. Com "yesterday" passa.
+10. `futebol_solto` e decisão 37. `FUT.REGRA` saiu da lista. A vaga é "cenário de futebol", com `scenario: "futebol"` e o subject da matéria ensinada. Regra 27 em `ETAPA_3_PROVA_V3.md`. A linha do §12 de `validateQuestion.ts` passou a "etapa-3 p6b | P0.2 / 31 RejectCodes".
+11. `duvida`. O revisor devolve o campo. Ausente vale false. A pergunta fica. `sanitize.duvidas` grava `{ n, question, motivo }` mesmo quando a lista está vazia. O painel do pai mostra a contagem na linha que já existia.
+12. Substituição por posição. Uma chamada só, pedindo a vaga que caiu (LIC.APLICA, LIC.DILEMA ou a área daquela posição). O texto não diz "as que faltam" nem "Faltam N". LIC.APLICA e LIC.DILEMA pedem quatro opções do mesmo tamanho (± 2 palavras), com exemplo, e o validador aplica esse ± 2 nessas duas skills.
+13. `definicao` também pega "qual é a função d", "qual é o papel d", "o que faz o/a", "para que serve". As três frases reais de 29/10 ("função do penalty kick / goal kick / midfielder") caem no teste.
+
+As posições 1–3 da prova de 8 são LIC.IDEIA, LIC.APLICA e LIC.DILEMA (`kind: dilemma`). O mesmo skill não entra três vezes.
+
+### Arquivos
+
+- `src/services/quiz/validateQuestion.ts` e o teste, mais `fixtures/era3.json` (o caso da posição de 15/09 agora espera `futebol_solto`)
+- `src/services/quiz/provaRules.ts`, `dailyPrompt.ts`, `reviewer.ts`
+- `src/services/aiDailyQuiz.ts`
+- `src/types/index.ts`, `src/services/dailyQuizService.ts`
+- `src/components/parent/DailyQuizManager.tsx` (só o fragmento da contagem)
+- `docs/etapas/ETAPA_3_PROVA_V3.md` (regra 27), `docs/etapas/ETAPA_2_LANCAMENTO.md` (linha do §12)
+- `docs/exemplos/telas/etapa-3/prova-v3/_gen_prova_v3.mjs` (espera 300 s; o pacote usa `SHOT_BUNDLE`, para não escrever por cima de `tres-provas.json`)
+
+### A prova que passou
+
+Uma geração real, conta `teste@flash.com`, `?quiz=regen`, Vite em `http://localhost:5175`.
+
+**2027-01-04 — Mistérios do Mar.** `source: ai`. 8 perguntas. `fromOffline: 0`. Posições 1–3: LIC.IDEIA / LIC.APLICA / LIC.DILEMA (`kind: dilemma`). Skills: cada uma uma vez, GEO.FATO duas (no teto). Zero "função do". Why em português. `sanitize.duvidas` gravado, com 1 item.
+
+Raw: `docs/exemplos/telas/etapa-3/prova-v3/2027-01-04.json`, campo `raw.first.questions` (8 objetos). Não houve chamada de substituição. O mesmo objeto está sozinho em `tres-provas-6b.json`. `tres-provas.json` do pacote 6 não foi reescrito.
+
+Códigos: `sanitize.dropped` é `{}`. `perQuestion` dos oito índices vem com `codes: []`. `review`: os oito `ok: true`. A dúvida gravada:
+
+- n 3, "Seu amigo acha que o fundo do mar é bem conhecido. Qual atitude é a mais justa?", motivo "Duas atitudes igualmente sábias."
+
+Fotos: `2027-01-04-1280.png`, `2027-01-04-1920.png`. Frame lido: em 1280 o título está no papiro, o Começar está livre, a vila continua em volta, nada cortado nem sobreposto. Em 1920 a primeira linha da ideia encosta no botão Começar. O papiro não foi mexido; é o mesmo encosto do pacote 6.
+
+### As oito, pela lei do professor
+
+1. "Por que o mar é salgado e os rios não?" — Evaporação deixa sais.
+   1. Aprende que a água vai embora e o sal fica.
+   2. Mar e rio. O why diz a evaporação. Não diz que o rio é quem traz o sal: é o meio da história, não a viagem inteira.
+   3. Claro. Quatro opções curtas.
+   4. Uma certa. "Rios têm mais peixes" é o erro de misturar bicho com sal. Fundo e comprimento são chute de tamanho. Consenso de 5º ano, simplificado.
+   5. O trap desmonta o peixe. Pode tentar de novo. O mesmo sal volta na pergunta 6.
+   6. Um degrau, da ideia para a maré. Não sobe dois.
+
+2. "O que acontece com a água do mar quando a Lua está cheia?" — Maré alta.
+   1. Aprende que a Lua puxa a água e, na lua cheia, a puxada fica mais forte.
+   2. O why diz "intensifica a força". O caso é a praia.
+   3. A frase é curta. Maré alta existe todo dia; a lua cheia faz a maré alta mais alta. A opção não diz "mais alta".
+   4. Das quatro, só "maré alta" conversa com a Lua. Evaporar e congelar são outra causa. Maré baixa é o contrário. O enunciado não entrega a palavra maré.
+   5. O trap desmonta "água evapora" (isso é o sol). Não nomeia a maré de sizígia. É a versão de sala.
+   6. Aplica a ideia do mar num caso. Um degrau.
+
+3. "Seu amigo acha que o fundo do mar é bem conhecido. Qual atitude é a mais justa?" — Explico que não é.
+   1. Aprende que, diante de um fato errado, a atitude justa é explicar.
+   2. O caso é o fundo do mar, o tema do dia.
+   3. Claro. A pergunta termina em "Qual atitude é a mais justa?"
+   4. Uma justa. Concordar, mudar de assunto e rir são omissão ou zombaria. "Rio da ideia dele" é dura, e não é a certa. O revisor chamou de duas atitudes sábias; o código manteve, com dúvida gravada, porque as outras três não são uma segunda ajuda.
+   5. O trap diz que concordar perde a chance de ensinar. Dilema não entra na nota.
+   6. É a decisão da posição 3. Não sobe a matéria.
+
+4. "O que aconteceria se a Lua desaparecesse?" — Marés sumiriam.
+   1. Aprende que sem a Lua as marés somem.
+   2. Causa e efeito. O why diz que a Lua puxa a água.
+   3. Claro.
+   4. Uma certa. "Dias mais longos" mistura a volta da Terra com a Lua. Sol quente e água doce são chute.
+   5. O trap desmonta "dias mais longos".
+   6. A mesma maré, pelo contrário. Um ângulo.
+
+5. "There ___ a turtle on the beach." — is. Áudio: "There is a turtle on the beach."
+   1. Aprende que "there is" vale para uma coisa só.
+   2. Tartaruga na praia. A regra tem nome em português no why.
+   3. Seis palavras. Nível 1.
+   4. Uma certa. "are" é o plural que o brasileiro marca. am e be não cabem.
+   5. O trap diz que "are" pensa em várias tartarugas.
+   6. Uma coisa nova: "there is" para uma coisa só. Sem tempo verbal junto.
+
+6. "Qual fato é verdadeiro sobre o oceano?" — Tem mais sal que os rios.
+   1. Aprende o sal de novo, e pelo erro aprende que a Lua é mais conhecida que o fundo do mar.
+   2. O trap é a aula: quem marca "mais explorado que a Lua" ignora que conhecemos mais a Lua.
+   3. Claro.
+   4. Uma certa. Mais raso que lago e mais quente que deserto são falsos. "Mais explorado que a Lua" é o erro famoso.
+   5. O trap desmonta a Lua. A certa repete o sal da pergunta 1. O fato novo está no erro.
+   6. Não é matéria nova. É a mesma ideia com um distrator que ensina.
+
+7. "Durante um jogo de futebol, a maré está alta. O que acontece com a praia próxima?" — Água avança. `scenario: futebol`, subject geografia, skill GEO.FATO.
+   1. Aprende que maré alta cobre mais a praia.
+   2. A partida é cenário. Não é regra de futebol, nem "função do".
+   3. Claro.
+   4. Uma certa. "Água recua" é maré baixa. Areia seca e areia some são chute.
+   5. O trap desmonta "água recua".
+   6. A maré das perguntas 2 e 4, agora num lugar. GEO.FATO aparece duas vezes, no teto.
+
+8. "Uma loja vende 80 conchas por dia. Em 5 dias, 40 conchas são devolvidas. Quantas conchas ficaram vendidas?" — 360.
+   1. Aprende a fazer duas contas: o total, depois o que voltou.
+   2. Conchas, no tema do mar. Why: 80 vezes 5 dá 400, menos 40 fecha 360.
+   3. Claro. Números até 1000.
+   4. Uma certa. 400 é parar na primeira conta. 320 e 340 ficam perto, sem fechar. Não é conta de um passo.
+   5. O trap diz que quem marca 400 esquece de subtrair. Tentar de novo não paga a primeira.
+   6. Um degrau de conta. Não empilha porcentagem em cima.
+
+### O que o código faz além da letra do prompt
+
+Está no código, com teste, e precisa ficar dito:
+
+- `explicacao_em_ingles` não é só "40% de palavras de função". Why curto em português, sem palavra inglesa, também passa. Why em inglês, com mais palavra inglesa do que portuguesa, cai. A Q4 real cai. O exemplo do "yesterday" passa. Why de fato em português que já estava no banco não foi derrubado.
+- O ± 2 palavras vale para LIC.APLICA e LIC.DILEMA. O resto continua na regra do pacote 6 (o dobro, ou diferença de até 3).
+- `tipos_mistos` não mudou.
+- `rescueDilemma` devolve para a prova, com `duvida: true`, três falsos do revisor: "não é sobre língua ou conta"; "única completa" em ideia, aplicação ou dilema; "conta não fecha" quando a conta de duas etapas fecha de verdade. "Duas atitudes sábias" só volta quando nenhuma opção errada é uma segunda ajuda (explicar, chamar, pedir). "Mais de uma alternativa", "falta de consenso" e conta que não fecha continuam caindo.
+- Opção "ignoro", "fingo" e "critico" entrou na caricatura, junto do infinitivo que já caía.
+- Se a IA escreve a skill com o nome da matéria ("ciências"), o código troca pelo código. Subject vazio é preenchido pela skill. Inglês com lacuna ganha `audioText` com a resposta no buraco.
+
+### Aceite
+
+O pedido era três gerações com 8 da IA. Entrou uma: 2027-01-04.
+
+Na geração de 2027-01-09 a chamada caiu com "Teto mensal de IA atingido" (`AI_MONTHLY_CALL_CAP` = 800). 2027-01-09 e 2027-01-10 saíram do banco offline e não contam. O teto não foi ampliado nem contornado.
+
+Perto, e ainda em 7: 2026-12-21 e 2026-12-31 (posições 1 e 2 certas, a oitava era a vaga de futebol ou o dilema). 2027-01-05 e 2027-01-06 têm as três primeiras posições e param em 7.
+
+### Barra
+
+1. Intenção. Continua sendo a prova do dia. Passa.
+2. Sistema. Sem tela nova. O pai só ganhou a contagem de dúvidas na linha que já existia. Passa.
+3. Fonte. Sem copy nova para o Heitor. Passa.
+4. Ícone. Sem ícone novo. Passa.
+5. Hierarquia. O convite continua com o título e o Começar. Passa.
+6. A cena continua. O papiro não tapa a vila. Passa.
+7. Arestas. 1280 limpo. 1920: a primeira linha da ideia encosta no Começar. Não reestilizei o papiro.
+8. Mundo. Prova na Biblioteca. Passa.
+9. Economia. Sem gold novo. Dilema fora da nota. Passa.
+10. Consequência. Pergunta ruim sai com código. Dúvida fica na lista, sem castigo na tela da criança. Passa.
+11. Estado honesto. `sanitize.duvidas`, `perQuestion`, `review`, `fromOffline`, `raw`. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. Why e trap em português. A frase do Heitor no convite é a ideia do dia, não boletim. Passa.
+15. Evidência. Uma prova de 8, fotos 1280 e 1920. Frame de 1280 limpo. Frame de 1920 com a linha no botão, como acima. As outras duas gerações do aceite não saíram: o teto de 800 chamadas fechou.
+16. Offline. Nesta prova, zero pergunta do banco. 2027-01-09 e 2027-01-10 são offline por causa do teto e não entram no aceite.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 27 arquivos, saída 0
+- `npm run test:village` — 10 arquivos, saída 0
+- Conta `teste@flash.com`, `?quiz=regen`, Vite em `http://localhost:5175`
+
+### Fora
+
+- As outras duas provas do aceite, até o teto mensal abrir ou ser ampliado
+- `pickTheme` (P1.5)
+- Pacote 7
+- O convite em 1920, a linha da ideia no botão
+
+**Pare para o commit do pai.** Não começa o próximo pacote.
+
 
 
 

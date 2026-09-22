@@ -1,0 +1,523 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-12-24",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-12-24",
+  "status": "ready",
+  "theme": {
+    "id": "ingles-perguntas",
+    "category": "ingles",
+    "title": "Perguntas em inglês: desvendando o mistério",
+    "lesson": "Imagine que você está em um jogo de futebol e quer saber o nome do jogador que fez o último gol. Em inglês, você perguntaria 'Who scored the last goal?'. Para fazer perguntas em inglês, usamos palavras como 'who', 'what', 'where', 'when', 'why' e 'how'. Às vezes, o 'do' aparece para ajudar, como em 'Do you like football?'. Hoje, você vai aprender a perguntar a idade, o nome e o time de alguém. Experimente perguntar a um amigo: 'What is your favorite team?'",
+    "whyItMatters": "Saber fazer perguntas em inglês ajuda você a se comunicar com pessoas de diferentes países.",
+    "curiosity": "Sabia que o inglês é a língua oficial em 67 países? E que 'soccer' é como os americanos chamam o futebol?"
+  },
+  "questions": [
+    {
+      "question": "Como você pergunta o nome de alguém em inglês?",
+      "options": [
+        "What is your name?",
+        "Where is your name?",
+        "When is your name?",
+        "Why is your name?"
+      ],
+      "answer": "What is your name?",
+      "explanation": "A resposta certa é 'What is your name?' porque 'what' é usado para perguntar sobre informações específicas.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'What is your name?' porque 'what' é usado para perguntar sobre informações específicas.",
+      "trap": "Quem marca 'Where is your name?' confunde 'where' com 'what', pois 'where' pergunta sobre localização.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Você quer saber o time favorito de alguém. Como pergunta em inglês?",
+      "options": [
+        "What is your favorite team?",
+        "Where is your favorite team?",
+        "When is your favorite team?",
+        "Why is your favorite team?"
+      ],
+      "answer": "What is your favorite team?",
+      "explanation": "A resposta certa é 'What is your favorite team?' porque 'what' é usado para perguntar sobre preferências.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'What is your favorite team?' porque 'what' é usado para perguntar sobre preferências.",
+      "trap": "Quem marca 'Where is your favorite team?' confunde 'where' com 'what', pois 'where' pergunta sobre localização.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma loja vende 40 brinquedos por dia. Em 3 dias, 15 brinquedos são devolvidos. Quantos ficaram vendidos?",
+      "options": [
+        "105",
+        "120",
+        "100",
+        "95"
+      ],
+      "answer": "105",
+      "explanation": "Primeiro, multiplicamos 40 por 3, depois subtraímos 15: 120 - 15 = 105.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 105 porque 40 vezes 3 dá 120, e depois tiramos os 15 devolvidos.",
+      "trap": "Quem marca 120 esquece de subtrair os 15 brinquedos devolvidos após a multiplicação.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se as plantas não realizassem fotossíntese?",
+      "options": [
+        "Faltaria oxigênio",
+        "Mais oxigênio",
+        "Nada mudaria",
+        "Menos água"
+      ],
+      "answer": "Faltaria oxigênio",
+      "explanation": "A fotossíntese é essencial para a produção de oxigênio.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Faltaria oxigênio' porque as plantas produzem oxigênio através da fotossíntese.",
+      "trap": "Quem marca 'Mais oxigênio' confunde o efeito da fotossíntese, que é produzir, não aumentar o oxigênio.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Grécia Antiga?",
+      "options": [
+        "Criaram a democracia",
+        "Inventaram o carro",
+        "Descobriram a América",
+        "Construíram pirâmides"
+      ],
+      "answer": "Criaram a democracia",
+      "explanation": "A Grécia Antiga é conhecida por desenvolver a democracia.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta certa é 'Criaram a democracia' porque a Grécia Antiga é famosa por esse sistema político.",
+      "trap": "Quem marca 'Construíram pirâmides' confunde com o Egito, que é conhecido por suas pirâmides.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    }
+  ],
+  "reflectionPrompt": "Qual pergunta em inglês você gostaria de aprender a fazer e por quê?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 5,
+    "dropped": {
+      "audio_mismatch": 1,
+      "trap_sem_distrator": 1,
+      "why_sem_resposta": 1,
+      "conta_um_passo": 2,
+      "duplicata": 1,
+      "opcao_caricata": 1,
+      "ingles_nivel": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": [
+          "audio_mismatch"
+        ]
+      },
+      {
+        "i": 1,
+        "codes": [
+          "trap_sem_distrator"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": [
+          "why_sem_resposta"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "ingles_nivel"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "A conta não fecha, resposta errada.",
+        "duvida": true
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "A pergunta pede opinião sobre preferências.",
+        "duvida": true
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "duvidas": [
+      {
+        "n": 1,
+        "question": "Uma loja vende 40 brinquedos por dia. Em 3 dias, 15 brinquedos são devolvidos. Quantos ficaram vendidos?",
+        "motivo": "A conta não fecha, resposta errada."
+      },
+      {
+        "n": 2,
+        "question": "Você quer saber o time favorito de alguém. Como pergunta em inglês?",
+        "motivo": "A pergunta pede opinião sobre preferências."
+      }
+    ]
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Perguntas em inglês: desvendando o mistério",
+        "lesson": "Imagine que você está em um jogo de futebol e quer saber o nome do jogador que fez o último gol. Em inglês, você perguntaria 'Who scored the last goal?'. Para fazer perguntas em inglês, usamos palavras como 'who', 'what', 'where', 'when', 'why' e 'how'. Às vezes, o 'do' aparece para ajudar, como em 'Do you like football?'. Hoje, você vai aprender a perguntar a idade, o nome e o time de alguém. Experimente perguntar a um amigo: 'What is your favorite team?'",
+        "whyItMatters": "Saber fazer perguntas em inglês ajuda você a se comunicar com pessoas de diferentes países.",
+        "curiosity": "Sabia que o inglês é a língua oficial em 67 países? E que 'soccer' é como os americanos chamam o futebol?"
+      },
+      "questions": [
+        {
+          "question": "Para perguntar a idade de alguém em inglês, qual palavra você usa?",
+          "options": [
+            "How",
+            "Who",
+            "What",
+            "Where"
+          ],
+          "answer": "How",
+          "explanation": "Usamos 'How' para perguntar sobre a idade: 'How old are you?'.",
+          "why": "A resposta certa é 'How' porque a pergunta sobre idade começa com 'How old are you?'.",
+          "trap": "Quem marca 'Who' confunde com 'Who are you?', que pergunta quem é a pessoa, não a idade.",
+          "kind": "lesson",
+          "subject": "ingles",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender",
+          "audioText": "How old are you?"
+        },
+        {
+          "question": "Você quer saber o time favorito de alguém. Como pergunta em inglês?",
+          "options": [
+            "What is your team?",
+            "Who is your team?",
+            "Where is your team?",
+            "How is your team?"
+          ],
+          "answer": "What is your team?",
+          "explanation": "Usamos 'What' para perguntar sobre preferências: 'What is your favorite team?'.",
+          "why": "A resposta certa é 'What is your team?' porque 'What' pergunta sobre preferências, como o time favorito.",
+          "trap": "Quem marca 'Who is your team?' confunde com 'Who plays in your team?', que pergunta sobre jogadores.",
+          "kind": "lesson",
+          "subject": "ingles",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar",
+          "audioText": "What is your team?"
+        },
+        {
+          "question": "Seu amigo não sabe perguntar o nome de alguém em inglês. Qual atitude é a mais justa?",
+          "options": [
+            "Ensino ele a perguntar",
+            "Fico quieto e observo",
+            "Digo que é difícil",
+            "Saio da conversa"
+          ],
+          "answer": "Ensino ele a perguntar",
+          "explanation": "Ensinar é a atitude mais justa, pois ajuda o amigo a aprender.",
+          "why": "Ensinar é a atitude mais justa porque ajuda o amigo a aprender e se comunicar melhor.",
+          "trap": "Quem marca 'Fico quieto e observo' não ajuda o amigo a aprender a perguntar em inglês.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Durante o jogo, o time marcou 2 gols no primeiro tempo e 3 no segundo. Quantos gols no total?",
+          "options": [
+            "5",
+            "4",
+            "6",
+            "3"
+          ],
+          "answer": "5",
+          "explanation": "Somamos os gols do primeiro e segundo tempos: 2 + 3 = 5.",
+          "why": "A resposta certa é 5 porque somamos os 2 gols do primeiro tempo com os 3 do segundo.",
+          "trap": "Quem marca 4 esquece de somar corretamente os gols dos dois tempos.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar",
+          "scenario": "futebol"
+        },
+        {
+          "question": "Uma loja vende 40 brinquedos por dia. Em 3 dias, 15 brinquedos são devolvidos. Quantos ficaram vendidos?",
+          "options": [
+            "105",
+            "120",
+            "100",
+            "95"
+          ],
+          "answer": "105",
+          "explanation": "Primeiro, multiplicamos 40 por 3, depois subtraímos 15: 120 - 15 = 105.",
+          "why": "A resposta certa é 105 porque 40 vezes 3 dá 120, e depois tiramos os 15 devolvidos.",
+          "trap": "Quem marca 120 esquece de subtrair os 15 brinquedos devolvidos após a multiplicação.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as plantas não realizassem fotossíntese?",
+          "options": [
+            "Faltaria oxigênio",
+            "Mais oxigênio",
+            "Nada mudaria",
+            "Menos água"
+          ],
+          "answer": "Faltaria oxigênio",
+          "explanation": "A fotossíntese é essencial para a produção de oxigênio.",
+          "why": "A resposta certa é 'Faltaria oxigênio' porque as plantas produzem oxigênio através da fotossíntese.",
+          "trap": "Quem marca 'Mais oxigênio' confunde o efeito da fotossíntese, que é produzir, não aumentar o oxigênio.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There ___ a rabbit in the garden.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a rabbit in the garden.",
+          "why": "A resposta certa é 'is' porque 'there is' vale para um coelho só, e 'are' fica para dois ou mais.",
+          "trap": "Quem marca 'are' pensa em várias coisas e esquece que a frase fala de um coelho só no jardim.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Grécia Antiga?",
+          "options": [
+            "Criaram a democracia",
+            "Inventaram o carro",
+            "Descobriram a América",
+            "Construíram pirâmides"
+          ],
+          "answer": "Criaram a democracia",
+          "explanation": "A Grécia Antiga é conhecida por desenvolver a democracia.",
+          "why": "A resposta certa é 'Criaram a democracia' porque a Grécia Antiga é famosa por esse sistema político.",
+          "trap": "Quem marca 'Construíram pirâmides' confunde com o Egito, que é conhecido por suas pirâmides.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Qual pergunta em inglês você gostaria de aprender a fazer e por quê?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Como você pergunta o nome de alguém em inglês?",
+          "options": [
+            "What is your name?",
+            "Where is your name?",
+            "When is your name?",
+            "Why is your name?"
+          ],
+          "answer": "What is your name?",
+          "why": "A resposta certa é 'What is your name?' porque 'what' é usado para perguntar sobre informações específicas.",
+          "trap": "Quem marca 'Where is your name?' confunde 'where' com 'what', pois 'where' pergunta sobre localização.",
+          "kind": "lesson",
+          "subject": "ideia",
+          "skill": "LIC.IDEIA",
+          "bloom": "compreender"
+        },
+        {
+          "question": "Você quer saber o time favorito de alguém. Como pergunta em inglês?",
+          "options": [
+            "What is your favorite team?",
+            "Where is your favorite team?",
+            "When is your favorite team?",
+            "Why is your favorite team?"
+          ],
+          "answer": "What is your favorite team?",
+          "why": "A resposta certa é 'What is your favorite team?' porque 'what' é usado para perguntar sobre preferências.",
+          "trap": "Quem marca 'Where is your favorite team?' confunde 'where' com 'what', pois 'where' pergunta sobre localização.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo não sabe perguntar a idade de alguém em inglês. Qual atitude é a mais justa?",
+          "options": [
+            "Ensino como perguntar",
+            "Ignoro a dúvida dele",
+            "Digo que não sei também",
+            "Mudo de assunto rapidamente"
+          ],
+          "answer": "Ensino como perguntar",
+          "why": "A resposta certa é Ensino como perguntar porque ajuda o amigo a aprender e as outras opções não ajudam.",
+          "trap": "Quem marca Ignoro a dúvida dele evita o problema, mas não ajuda o amigo a aprender a perguntar.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Um time marcou 3 gols no primeiro tempo e 2 no segundo. Quantos gols no total?",
+          "options": [
+            "5",
+            "4",
+            "3",
+            "2"
+          ],
+          "answer": "5",
+          "why": "A resposta certa é 5 porque somando 3 gols do primeiro tempo com 2 do segundo tempo resulta em 5.",
+          "trap": "Quem marca 4 esqueceu de somar corretamente os gols do primeiro e do segundo tempo.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "scenario": "futebol",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "There ___ a book on the table.",
+          "options": [
+            "is",
+            "are",
+            "was",
+            "were"
+          ],
+          "answer": "is",
+          "why": "A resposta certa é 'is' porque 'there is' indica a presença de algo singular no presente.",
+          "trap": "Quem marca 'are' confunde singular com plural, pois 'are' é usado para plural.",
+          "kind": "knowledge",
+          "subject": "inglês",
+          "skill": "ING.N1.BE",
+          "bloom": "lembrar"
+        }
+      ]
+    },
+    "slots": [
+      {
+        "index": 0,
+        "skill": "LIC.IDEIA",
+        "kind": "lesson",
+        "area": "ideia"
+      },
+      {
+        "index": 1,
+        "skill": "LIC.APLICA",
+        "kind": "lesson",
+        "area": "aplica"
+      },
+      {
+        "index": 2,
+        "skill": "LIC.DILEMA",
+        "kind": "dilemma",
+        "area": "dilema"
+      },
+      {
+        "index": 3,
+        "skill": "",
+        "kind": "knowledge",
+        "area": "cenário de futebol",
+        "scenario": "futebol"
+      },
+      {
+        "index": 4,
+        "skill": "MAT.OP2",
+        "kind": "knowledge",
+        "area": "matemática"
+      },
+      {
+        "index": 5,
+        "skill": "CIE.CAUSA",
+        "kind": "knowledge",
+        "area": "ciências"
+      },
+      {
+        "index": 6,
+        "skill": "ING.N1.BE",
+        "kind": "knowledge",
+        "area": "inglês"
+      },
+      {
+        "index": 7,
+        "skill": "HIS.FATO",
+        "kind": "knowledge",
+        "area": "história ou geografia"
+      }
+    ]
+  },
+  "generatedAt": {},
+  "completed": false
+}

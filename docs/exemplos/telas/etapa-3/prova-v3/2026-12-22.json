@@ -1,0 +1,489 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-12-22",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-12-22",
+  "status": "ready",
+  "theme": {
+    "id": "escrita-e-imprensa",
+    "category": "invencoes",
+    "title": "A Revolução do Conhecimento",
+    "lesson": "Imagine que você precisa copiar um livro inteiro à mão. Isso poderia levar um ano! Antes da invenção da prensa de Gutenberg, era assim que os livros eram feitos. Mas com a prensa, o conhecimento começou a se espalhar rapidamente. Hoje, a internet faz algo parecido: ela permite que informações sejam compartilhadas instantaneamente com pessoas do mundo todo. Assim como a prensa, a internet ajuda a espalhar ideias e conhecimentos. Hoje, você pode usar a internet para aprender sobre qualquer coisa, desde como fazer um gol perfeito até como funciona o sistema solar.",
+    "whyItMatters": "Entender como o conhecimento se espalha ajuda a aprender e compartilhar ideias.",
+    "curiosity": "Antes da prensa, um livro podia custar o mesmo que uma casa! A internet, por outro lado, permite acessar milhares de livros de graça."
+  },
+  "questions": [
+    {
+      "question": "Antes da prensa de Gutenberg, como os livros eram feitos?",
+      "options": [
+        "Copiados à mão",
+        "Impressos em massa",
+        "Digitados no computador",
+        "Gravados em áudio"
+      ],
+      "answer": "Copiados à mão",
+      "explanation": "Os livros eram copiados à mão, o que levava muito tempo.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Copiados à mão' porque antes da prensa, os livros eram escritos manualmente, o que era demorado.",
+      "trap": "Quem marca 'Impressos em massa' confunde com a invenção da prensa, que veio depois.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Seu amigo não entende por que a prensa de Gutenberg foi importante. Qual atitude é a mais justa?",
+      "options": [
+        "Explico como ela espalhou ideias",
+        "Fico quieto e não explico",
+        "Digo que não sei também",
+        "Mudo de assunto rapidamente"
+      ],
+      "answer": "Explico como ela espalhou ideias",
+      "explanation": "A resposta certa é Explico como ela espalhou ideias porque ajuda o amigo a entender a importância histórica da prensa.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é Explico como ela espalhou ideias porque ajuda o amigo a entender a importância histórica da prensa.",
+      "trap": "Quem marca Fico quieto e não explico evita a conversa, mas não ajuda o amigo a aprender sobre a prensa.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Seu amigo não entende por que a internet é importante. Qual atitude é a mais justa?",
+      "options": [
+        "Explico como ela ajuda",
+        "Ignoro o comentário dele",
+        "Digo que ele está errado",
+        "Saio da conversa"
+      ],
+      "answer": "Explico como ela ajuda",
+      "explanation": "Explicar ajuda seu amigo a entender a importância da internet.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é 'Explico como ela ajuda' porque compartilhar conhecimento é uma forma justa de ajudar.",
+      "trap": "Quem marca 'Ignoro o comentário dele' perde a chance de ensinar algo importante.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "There ___ a cat in the garden.",
+      "options": [
+        "is",
+        "are",
+        "am",
+        "be"
+      ],
+      "answer": "is",
+      "explanation": "A resposta certa é 'is' porque 'there is' é usado para um gato só.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "why": "A resposta certa é 'is' porque 'there is' é usado para um gato só.",
+      "trap": "Quem marca 'are' pensa em vários gatos, mas a frase fala de um só.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a cat in the garden."
+    },
+    {
+      "question": "Durante um jogo de futebol, o gramado está molhado. O que acontece com a bola?",
+      "options": [
+        "Desliza mais",
+        "Para no lugar",
+        "Sobe mais alto",
+        "Fica mais leve"
+      ],
+      "answer": "Desliza mais",
+      "explanation": "O gramado molhado faz a bola deslizar mais facilmente.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Desliza mais' porque a água reduz o atrito entre a bola e o gramado.",
+      "trap": "Quem marca 'Para no lugar' esquece que a água facilita o deslizamento.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar",
+      "scenario": "futebol"
+    },
+    {
+      "question": "Uma fábrica produz 50 brinquedos por hora. Em 4 horas, 20 brinquedos são defeituosos. Quantos brinquedos bons foram produzidos?",
+      "options": [
+        "180",
+        "200",
+        "150",
+        "100"
+      ],
+      "answer": "180",
+      "explanation": "Primeiro, 50 vezes 4 dá 200 brinquedos no total. Depois, 200 menos 20 defeituosos dá 180 bons.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 180 porque 200 menos 20 defeituosos resulta em 180 brinquedos bons.",
+      "trap": "Quem marca 200 esquece de subtrair os brinquedos defeituosos do total produzido.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como a internet mudou a forma como você aprende coisas novas?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 6,
+    "dropped": {
+      "tipos_mistos": 1,
+      "certa_mais_longa": 1,
+      "enunciado_vazou": 1,
+      "duplicata": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": [
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "duplicata"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": false,
+        "motivo": "Duas opções podem estar certas para um professor.",
+        "duvida": false
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "duvidas": []
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "A Revolução do Conhecimento",
+        "lesson": "Imagine que você precisa copiar um livro inteiro à mão. Isso poderia levar um ano! Antes da invenção da prensa de Gutenberg, era assim que os livros eram feitos. Mas com a prensa, o conhecimento começou a se espalhar rapidamente. Hoje, a internet faz algo parecido: ela permite que informações sejam compartilhadas instantaneamente com pessoas do mundo todo. Assim como a prensa, a internet ajuda a espalhar ideias e conhecimentos. Hoje, você pode usar a internet para aprender sobre qualquer coisa, desde como fazer um gol perfeito até como funciona o sistema solar.",
+        "whyItMatters": "Entender como o conhecimento se espalha ajuda a aprender e compartilhar ideias.",
+        "curiosity": "Antes da prensa, um livro podia custar o mesmo que uma casa! A internet, por outro lado, permite acessar milhares de livros de graça."
+      },
+      "questions": [
+        {
+          "question": "Antes da prensa de Gutenberg, como os livros eram feitos?",
+          "options": [
+            "Copiados à mão",
+            "Impressos em massa",
+            "Digitados no computador",
+            "Gravados em áudio"
+          ],
+          "answer": "Copiados à mão",
+          "explanation": "Os livros eram copiados à mão, o que levava muito tempo.",
+          "why": "A resposta certa é 'Copiados à mão' porque antes da prensa, os livros eram escritos manualmente, o que era demorado.",
+          "trap": "Quem marca 'Impressos em massa' confunde com a invenção da prensa, que veio depois.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Com a internet, como o conhecimento é compartilhado hoje?",
+          "options": [
+            "Instantaneamente",
+            "Por cartas",
+            "Em fitas cassete",
+            "Em livros manuscritos"
+          ],
+          "answer": "Instantaneamente",
+          "explanation": "A internet permite que o conhecimento seja compartilhado de forma rápida e global.",
+          "why": "A resposta certa é 'Instantaneamente' porque a internet permite o compartilhamento rápido de informações.",
+          "trap": "Quem marca 'Por cartas' pensa em métodos antigos de comunicação, não na rapidez da internet.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo não entende por que a internet é importante. Qual atitude é a mais justa?",
+          "options": [
+            "Explico como ela ajuda",
+            "Ignoro o comentário dele",
+            "Digo que ele está errado",
+            "Saio da conversa"
+          ],
+          "answer": "Explico como ela ajuda",
+          "explanation": "Explicar ajuda seu amigo a entender a importância da internet.",
+          "why": "A resposta certa é 'Explico como ela ajuda' porque compartilhar conhecimento é uma forma justa de ajudar.",
+          "trap": "Quem marca 'Ignoro o comentário dele' perde a chance de ensinar algo importante.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There ___ a cat in the garden.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a cat in the garden.",
+          "why": "A resposta certa é 'is' porque 'there is' é usado para um gato só.",
+          "trap": "Quem marca 'are' pensa em vários gatos, mas a frase fala de um só.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a invenção da prensa de Gutenberg?",
+          "options": [
+            "Acelerou a impressão de livros",
+            "Foi inventada no Egito",
+            "Usava tinta invisível",
+            "Era movida a vapor"
+          ],
+          "answer": "Acelerou a impressão de livros",
+          "explanation": "A prensa de Gutenberg permitiu a impressão rápida e em grande quantidade.",
+          "why": "A resposta certa é 'Acelerou a impressão de livros' porque a prensa tornou a produção de livros mais rápida.",
+          "trap": "Quem marca 'Foi inventada no Egito' confunde com a origem do papel, não da prensa.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo de futebol, o gramado está molhado. O que acontece com a bola?",
+          "options": [
+            "Desliza mais",
+            "Para no lugar",
+            "Sobe mais alto",
+            "Fica mais leve"
+          ],
+          "answer": "Desliza mais",
+          "explanation": "O gramado molhado faz a bola deslizar mais facilmente.",
+          "why": "A resposta certa é 'Desliza mais' porque a água reduz o atrito entre a bola e o gramado.",
+          "trap": "Quem marca 'Para no lugar' esquece que a água facilita o deslizamento.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar",
+          "scenario": "futebol"
+        },
+        {
+          "question": "Uma fábrica produz 50 brinquedos por hora. Em 4 horas, 20 brinquedos são defeituosos. Quantos brinquedos bons foram produzidos?",
+          "options": [
+            "180",
+            "200",
+            "150",
+            "100"
+          ],
+          "answer": "180",
+          "explanation": "Primeiro, 50 vezes 4 dá 200 brinquedos no total. Depois, 200 menos 20 defeituosos dá 180 bons.",
+          "why": "A resposta certa é 180 porque 200 menos 20 defeituosos resulta em 180 brinquedos bons.",
+          "trap": "Quem marca 200 esquece de subtrair os brinquedos defeituosos do total produzido.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse papel para imprimir livros?",
+          "options": [
+            "Livros seriam mais caros",
+            "Livros seriam mais baratos",
+            "Livros seriam mais leves",
+            "Livros seriam mais coloridos"
+          ],
+          "answer": "Livros seriam mais caros",
+          "explanation": "Sem papel, a produção de livros seria mais difícil e cara.",
+          "why": "A resposta certa é 'Livros seriam mais caros' porque a falta de papel encareceria a produção.",
+          "trap": "Quem marca 'Livros seriam mais baratos' não considera o custo de materiais alternativos.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        }
+      ],
+      "reflectionPrompt": "Como a internet mudou a forma como você aprende coisas novas?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Seu amigo não entende por que a prensa de Gutenberg foi importante. Qual atitude é a mais justa?",
+          "options": [
+            "Explico como ela espalhou ideias",
+            "Fico quieto e não explico",
+            "Digo que não sei também",
+            "Mudo de assunto rapidamente"
+          ],
+          "answer": "Explico como ela espalhou ideias",
+          "why": "A resposta certa é Explico como ela espalhou ideias porque ajuda o amigo a entender a importância histórica da prensa.",
+          "trap": "Quem marca Fico quieto e não explico evita a conversa, mas não ajuda o amigo a aprender sobre a prensa.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a invenção do papel pelos chineses?",
+          "options": [
+            "Foi inventado no século II",
+            "Foi inventado por Gutenberg",
+            "Foi inventado na Europa",
+            "Foi inventado no século XV"
+          ],
+          "answer": "Foi inventado no século II",
+          "why": "A resposta certa é Foi inventado no século II porque o papel foi realmente inventado pelos chineses nesse período.",
+          "trap": "Quem marca Foi inventado por Gutenberg confunde a invenção do papel com a prensa de Gutenberg.",
+          "kind": "knowledge",
+          "subject": "história",
+          "skill": "HIS.FATO",
+          "bloom": "lembrar"
+        },
+        {
+          "question": "Durante um jogo de futebol, o campo está seco. O que acontece com a bola?",
+          "options": [
+            "Ela rola mais rápido",
+            "Ela para no gramado",
+            "Ela fica presa na lama",
+            "Ela quica menos"
+          ],
+          "answer": "Ela rola mais rápido",
+          "why": "A resposta certa é Ela rola mais rápido porque em um campo seco, a bola encontra menos resistência.",
+          "trap": "Quem marca Ela para no gramado esquece que a bola rola mais facilmente em superfícies secas.",
+          "kind": "knowledge",
+          "subject": "ciências",
+          "skill": "CIE.CAUSA",
+          "bloom": "lembrar"
+        }
+      ]
+    },
+    "slots": [
+      {
+        "index": 0,
+        "skill": "LIC.IDEIA",
+        "kind": "lesson",
+        "area": "ideia"
+      },
+      {
+        "index": 1,
+        "skill": "LIC.APLICA",
+        "kind": "lesson",
+        "area": "aplica"
+      },
+      {
+        "index": 2,
+        "skill": "LIC.DILEMA",
+        "kind": "dilemma",
+        "area": "dilema"
+      },
+      {
+        "index": 3,
+        "skill": "ING.N1.BE",
+        "kind": "knowledge",
+        "area": "inglês"
+      },
+      {
+        "index": 4,
+        "skill": "HIS.FATO",
+        "kind": "knowledge",
+        "area": "história ou geografia"
+      },
+      {
+        "index": 5,
+        "skill": "",
+        "kind": "knowledge",
+        "area": "cenário de futebol",
+        "scenario": "futebol"
+      },
+      {
+        "index": 6,
+        "skill": "MAT.OP2",
+        "kind": "knowledge",
+        "area": "matemática"
+      },
+      {
+        "index": 7,
+        "skill": "CIE.CAUSA",
+        "kind": "knowledge",
+        "area": "ciências"
+      }
+    ]
+  },
+  "generatedAt": {},
+  "completed": false
+}

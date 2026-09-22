@@ -9,15 +9,18 @@ import { childAgeToday } from '../config/rules';
 import { QuizThemeSeed } from '../config/quizCurriculum';
 import { weekdayOf } from '../utils/clock';
 import { DAILY_QUIZ_MODEL, normalizeQuizText, reflectionLocalSay, touchesIdea, REFLECT_OFFTOPIC } from './quiz/provaRules';
-import { buildPrompt } from './quiz/dailyPrompt';
+import { buildPrompt, replacementBrief } from './quiz/dailyPrompt';
 import { QUIZ_SPARE, QUIZ_VALIDATOR_ENFORCE, quizMaxTokens } from './quiz/quizTokens';
-import { applyReview, parseReview, REVIEWER_MODEL, reviewBatch, reviewSystem, type ReviewItem } from './quiz/reviewer';
+import { applyReview, parseReview, rescueDilemma, REVIEWER_MODEL, reviewBatch, reviewSystem, type QuizDuvida, type ReviewItem } from './quiz/reviewer';
 import {
   canonSubject,
-  fillToCount,
+  fillSlotHoles,
   hashOf,
+  placeIntoSlots,
+  quizSlots,
   selectValidQuestions,
   SUBJECTS,
+  type QuizSlot,
   type RawQuestion,
 } from './quiz/validateQuestion';
 
@@ -35,11 +38,11 @@ export interface GeneratedDailyQuiz {
 
 const LESSON_QUESTIONS = 3;
 
-function toDaily(q: RawQuestion, i: number): DailyQuizQuestion {
+function toDaily(q: RawQuestion): DailyQuizQuestion {
   const kind =
     q.kind === 'dilemma' || q.skill === 'LIC.DILEMA'
       ? 'dilemma'
-      : q.kind === 'lesson' || i < LESSON_QUESTIONS
+      : q.skill === 'LIC.IDEIA' || q.skill === 'LIC.APLICA' || q.kind === 'lesson'
         ? 'lesson'
         : 'knowledge';
   const explanation =
@@ -60,6 +63,7 @@ function toDaily(q: RawQuestion, i: number): DailyQuizQuestion {
     ...(q.skill ? { skill: q.skill } : {}),
     ...(q.bloom ? { bloom: q.bloom } : {}),
     ...(q.audioText ? { audioText: q.audioText } : {}),
+    ...(q.scenario === 'futebol' ? { scenario: 'futebol' } : {}),
   };
 }
 
@@ -248,7 +252,18 @@ export async function generateDailyQuiz(opts: {
   const avoidText = recent.length
     ? `Perguntas já usadas (não repita nem parafraseie):\n- ${recent.join('\n- ')}`
     : 'Primeira prova: capriche.';
-  const userOrder = `${avoidText}\n\nO array questions tem exatamente ${asked} objetos. ${opts.count} não basta: faltam as ${QUIZ_SPARE} de folga. Conte os objetos antes de responder.`;
+  const userOrder = `${avoidText}
+
+O array questions tem exatamente ${asked} objetos, nesta ordem, nem mais nem menos:
+1) LIC.IDEIA — a causa ou o fato da ideia, uma só resposta certa. Não pergunte "ainda é o mesmo?" nem "depende".
+2) LIC.APLICA — a ideia num caso concreto. Não pergunte o que ele faria.
+3) LIC.DILEMA — kind "dilemma", subject "tema". A pergunta termina em "Qual atitude é a mais justa?".
+Cada opção tem de 3 a 5 palavras, e a certa não pode ser a única mais longa: se ela tem uma palavra a mais que as outras, a pergunta morre. Uma opção de 1 palavra mata a pergunta. Proibido ignorar, ignoro, fingir, finjo, criticar, critico, sair do jogo.
+Matemática copia a forma da abelha: duas contas, os números escritos na pergunta. 500 g e 2 kg não fecham.
+A vaga de futebol traz scenario "futebol" e ensina outra matéria. Proibido "qual é a função" e "o que acontece se".
+Inglês traz audioText com a frase certa, bicho e lugar novos.
+why e trap em português. O why e o trap precisam ter 16 palavras ou mais: um trap de 10 palavras mata a pergunta. O trap começa com "Quem marca", copia uma opção errada e continua até passar de 16. Modelo de trap: "Quem marca 75 parou na multiplicação dos cinco dias e esqueceu de tirar os livros que voltaram para a loja."
+Conte os objetos antes de responder.`;
 
   let first: Record<string, unknown> | null = null;
   try {
@@ -265,16 +280,19 @@ export async function generateDailyQuiz(opts: {
   const local = selectValidQuestions(first.questions, { ...ctx, lesson: theme.lesson }, QUIZ_VALIDATOR_ENFORCE);
   bumpDropped(dropped, local.dropped);
   perQuestion.push(...local.perQuestion);
-  const review = await reviewApproved(local.kept, englishLevel, opts.signal);
+  const review = rescueDilemma(local.kept, await reviewApproved(local.kept, englishLevel, opts.signal));
   const judged = applyReview(local.kept, review);
-  let pool = judged.kept;
+  const pool = judged.kept;
   const motivos = [...judged.motivos];
+  const duvidas: QuizDuvida[] = [...judged.duvidas];
   const reviewLog: ReviewItem[] = review ?? [];
   let reviewFellBack = review === null;
 
+  const slots = quizSlots(opts.count, weekday);
+  let seated = placeIntoSlots(pool, slots);
   let replacement: Record<string, unknown> | null = null;
-  if (pool.length < opts.count) {
-    const missing = opts.count - pool.length;
+  if (seated.missing.length > 0) {
+    const holes = seated.missing;
     const firstList = Array.isArray(first.questions) ? (first.questions as RawQuestion[]) : [];
     const reasons = discardLines(firstList, local.perQuestion, motivos);
     const fallen = local.perQuestion
@@ -282,8 +300,10 @@ export async function generateDailyQuiz(opts: {
       .map((row) => String(firstList[row.i]?.question ?? '').trim())
       .filter(Boolean);
     const approved = pool.map((q) => String(q.question ?? '')).filter(Boolean);
-    const user = `Faltam ${missing} perguntas NOVAS. Devolva JSON {"questions":[ exatamente ${missing} objetos ]} no mesmo formato da prova.
-Cada why e cada trap em português, com 16 palavras ou mais, no tamanho do modelo da abelha. A opção certa não pode ser a única mais longa. Matemática em duas etapas, nunca 90 dividido por 3. Inglês: why em português, frase de no máximo 7 palavras.
+    const user = `${replacementBrief(holes)}
+Ideia do dia, já escrita. LIC.IDEIA e LIC.APLICA precisam usar uma palavra dela:
+${theme.lesson}
+Cada objeto traz subject, skill, kind, bloom, answer igual a uma option, why com 16 palavras em português e trap com 16 palavras ou mais. Trap curto mata a pergunta. O trap começa com "Quem marca" seguido do texto exato de uma opção errada. A opção certa não pode ser a única mais longa. Matemática em duas etapas, com os dois números na pergunta (500 g e 2 kg não fecham: escreva 500 g e 2000 g). Inglês: why em português, frase de no máximo 7 palavras. A ideia não começa com "O que é". O dilema pergunta "Qual atitude é a mais justa?", com subject "tema". Só uma opção ajuda; as outras três são omissão ou desculpa, sem "peço ajuda ao adulto".
 Não devolva de novo uma pergunta que já caiu. Escreva outro enunciado.
 Caíram por isto:
 ${reasons.slice(0, 24).join('\n') || 'o validador recusou o lote'}
@@ -293,15 +313,16 @@ ${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${
       replacement = await callQuiz(
         buildPrompt({
           seed: opts.seed,
-          count: missing,
+          count: holes.length,
           spare: 0,
           age,
           weekday,
           englishLevel,
           avoidHashes,
+          slots: holes,
         }),
         user,
-        quizMaxTokens(missing, 0),
+        quizMaxTokens(holes.length, 0),
         opts.signal,
       );
     } catch (error) {
@@ -318,29 +339,35 @@ ${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${
       const offset = perQuestion.length;
       bumpDropped(dropped, extra.dropped);
       for (const row of extra.perQuestion) perQuestion.push({ i: row.i + offset, codes: row.codes });
-      const extraReview = await reviewApproved(extra.kept, englishLevel, opts.signal);
+      const extraReview = rescueDilemma(extra.kept, await reviewApproved(extra.kept, englishLevel, opts.signal));
       const extraJudged = applyReview(extra.kept, extraReview);
-      pool = [...pool, ...extraJudged.kept];
+      seated = fillSlotHoles(seated.placed, slots, extraJudged.kept);
       motivos.push(...extraJudged.motivos);
+      duvidas.push(...extraJudged.duvidas);
       if (extraReview) reviewLog.push(...extraReview);
       else reviewFellBack = true;
     }
   }
 
   let fromOffline = 0;
-  if (pool.length < opts.count) {
-    const candidates = await loadOfflineCandidates([...opts.avoidQuestions, ...pool.map((q) => String(q.question ?? ''))]);
+  if (seated.missing.some((slot) => slot.kind === 'knowledge')) {
+    const seatedNow = seated.placed.filter((q): q is RawQuestion => q != null);
+    const candidates = await loadOfflineCandidates([
+      ...opts.avoidQuestions,
+      ...seatedNow.map((q) => String(q.question ?? '')),
+    ]);
     const passed = selectValidQuestions(candidates, ctx, true);
-    const filled = fillToCount(pool, passed.kept, opts.count);
-    pool = filled.questions;
-    fromOffline = filled.fromOffline;
-  } else {
-    pool = pool.slice(0, opts.count);
+    const before = seatedNow.length;
+    seated = fillSlotHoles(seated.placed, slots, passed.kept);
+    fromOffline = seated.placed.filter((q) => q != null).length - before;
   }
 
-  if (pool.length === 0) return offlineQuiz({ kept: 0, dropped, perQuestion });
+  const ordered = seated.placed.filter((q): q is RawQuestion => q != null);
+  if (ordered.length === 0) return offlineQuiz({ kept: 0, dropped, perQuestion, duvidas: [] });
 
-  const questions = pool.map(toDaily);
+  const questions = ordered.map((q) => toDaily(q));
+  const published = new Set(questions.map((q) => q.question));
+  const duvidasOut = duvidas.filter((item) => published.has(item.question));
   const aiKept = questions.length - fromOffline;
   return {
     theme,
@@ -353,12 +380,20 @@ ${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${
       perQuestion,
       ...(reviewLog.length ? { review: reviewLog } : {}),
       ...(reviewFellBack ? { reviewFellBack: true } : {}),
-      batchLog: reviewBatch(pool, theme.lesson),
+      batchLog: reviewBatch(ordered, theme.lesson),
       fromOffline,
+      duvidas: duvidasOut,
     },
     raw: {
       first,
       ...(replacement ? { replacement } : {}),
+      slots: slots.map((slot: QuizSlot) => ({
+        index: slot.index,
+        skill: slot.skill,
+        kind: slot.kind,
+        area: slot.area,
+        ...(slot.scenario ? { scenario: slot.scenario } : {}),
+      })),
     },
   };
 }

@@ -632,7 +632,7 @@
     "id": "caso-15-09-q8-posicao",
     "date": "2026-09-15",
     "n": 8,
-    "expect": "ok",
+    "expect": "futebol_solto",
     "question": "Qual é a posição onde um jogador deve ficar para defender o gol no futebol?",
     "options": [
       "Fica no gol como goleiro",

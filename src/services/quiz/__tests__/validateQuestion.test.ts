@@ -8,6 +8,8 @@ import {
   numbersOf,
   reachable,
   fillToCount,
+  placeIntoSlots,
+  quizSlots,
   selectValidQuestions,
   validateQuestion,
   type RawQuestion,
@@ -26,8 +28,11 @@ interface FixtureRow extends RawQuestion {
 const rows = fixture as FixtureRow[];
 const byId = new Map(rows.map((r) => [r.id, r]));
 
-test('P0.2: 28 códigos nomeados', () => {
-  expect(REJECT_CODES).toHaveLength(28);
+test('P0.2: 31 códigos nomeados', () => {
+  expect(REJECT_CODES).toHaveLength(31);
+  expect(REJECT_CODES).toContain('explicacao_em_ingles');
+  expect(REJECT_CODES).toContain('ingles_sem_marcador');
+  expect(REJECT_CODES).toContain('futebol_solto');
   expect(REJECT_CODES).toContain('opiniao');
   expect(REJECT_CODES).toContain('opcao_caricata');
   expect(REJECT_CODES).toContain('tamanho_opcoes');
@@ -128,7 +133,7 @@ const CASOS = [
   ['caso-18-09-q1', 'reprova'],
   ['caso-19-09-q3', 'reprova'],
   ['2026-09-21-q4', 'aprova'],
-  ['caso-15-09-q8-posicao', 'aprova'],
+  ['caso-15-09-q8-posicao', 'reprova'],
 ] as const;
 
 test('§4.3: os 20 casos batem o veredito', () => {
@@ -148,7 +153,7 @@ test('§4.3: os 20 casos batem o veredito', () => {
   const knights = validateQuestion(byId.get('caso-22-09-q4')!, { englishLevel: 1 });
   expect(knights.includes('enunciado_vazou')).toBe(false);
   const posicao = validateQuestion(byId.get('caso-15-09-q8-posicao')!, { englishLevel: 1 });
-  expect(posicao).toEqual([]);
+  expect(posicao).toContain('futebol_solto');
   const onlyWhy = validateQuestion(byId.get('caso-19-09-q3')!, { englishLevel: 1 });
   expect(onlyWhy).toEqual(['why_sem_resposta']);
   const opinion = validateQuestion(byId.get('caso-21-09-q3')!, { englishLevel: 1 });
@@ -289,6 +294,134 @@ test('sonda: par mínimo de oxigênio e de a/an não é sinônimo; iguais ainda 
     { englishLevel: 1 },
   );
   expect(iguais).toContain('duas_certas');
+});
+
+function shell(over: Partial<RawQuestion>): RawQuestion {
+  return {
+    question: 'Pergunta de teste com bastante texto para não vazar.',
+    options: ['Uma frase curta aqui', 'Outra frase curta aqui', 'Mais uma frase curta', 'A última frase curta'],
+    answer: 'Uma frase curta aqui',
+    why: 'A resposta certa é Uma frase curta aqui porque o teste precisa de uma explicação longa em português do Brasil.',
+    trap: 'Quem marca Outra frase curta aqui escolhe o distrator e erra a regra que o teste quer ver.',
+    subject: 'tema',
+    skill: 'LIC.IDEIA',
+    bloom: 'entender',
+    kind: 'lesson',
+    ...over,
+  };
+}
+
+test('6b: why em inglês cai e o exemplo em português passa', () => {
+  const ruim = validateQuestion(
+    shell({ why: "The past tense 'defended' correctly fits the sentence context." }),
+    { englishLevel: 1 },
+  );
+  expect(ruim).toContain('explicacao_em_ingles');
+  const bom = validateQuestion(
+    shell({
+      why: "Depois de 'yesterday' o verbo vai para o passado: 'defended'. 'Defends' é o presente, de todo dia, e a frase pede o passado.",
+    }),
+    { englishLevel: 1 },
+  );
+  expect(bom.includes('explicacao_em_ingles')).toBe(false);
+});
+
+test('6b: formas do mesmo verbo sem marca de tempo caem', () => {
+  const base = {
+    options: ['defends', 'defended', 'defense', 'defending'],
+    answer: 'defended',
+    subject: 'ingles',
+    skill: 'ING.N1.BE',
+    why: 'A resposta certa é defended porque a frase pede o passado e defended é a forma que cabe aqui no castelo.',
+    trap: 'Quem marca defends escolhe o presente e esquece que a marca de tempo pede o passado do verbo.',
+  };
+  const sem = validateQuestion(
+    shell({ ...base, question: 'The knight ___ the castle bravely.', audioText: 'The knight defended the castle bravely.' }),
+    { englishLevel: 1 },
+  );
+  expect(sem).toContain('ingles_sem_marcador');
+  const com = validateQuestion(
+    shell({ ...base, question: 'The knight defended the castle yesterday.', audioText: 'The knight defended the castle yesterday.' }),
+    { englishLevel: 1 },
+  );
+  expect(com.includes('ingles_sem_marcador')).toBe(false);
+});
+
+test('6b: futebol como matéria cai e a conta da partida passa', () => {
+  const regra = validateQuestion(
+    shell({
+      question: 'Se um jogador está fora de campo durante o jogo, o que deve acontecer?',
+      subject: 'futebol',
+      skill: 'GEN.CONH',
+    }),
+    { englishLevel: 1 },
+  );
+  expect(regra).toContain('futebol_solto');
+  const conta = validateQuestion(
+    shell({
+      question: '2 gols no 1º tempo, sofreu 3, terminou 4 a 3. Quantos gols saíram no segundo tempo?',
+      subject: 'matematica',
+      skill: 'MAT.OP2',
+      scenario: 'futebol',
+      options: ['2', '3', '4', '5'],
+      answer: '2',
+    }),
+    { englishLevel: 1 },
+  );
+  expect(conta.includes('futebol_solto')).toBe(false);
+});
+
+test('6b: qual é a função do X no futebol é definição', () => {
+  const frases = [
+    "Qual é a função do 'penalty kick' no futebol?",
+    "Qual é a função do 'goal kick' no futebol?",
+    "Qual é a função do 'midfielder' em um time de futebol?",
+  ];
+  for (const question of frases) {
+    const codes = validateQuestion(shell({ question, subject: 'futebol', skill: 'GEN.CONH' }), { englishLevel: 1 });
+    expect(codes).toContain('definicao');
+  }
+});
+
+test('6b: skill escrito como matéria ganha o código e o subject', () => {
+  const codes = validateQuestion(
+    shell({
+      skill: 'ciências',
+      subject: '',
+      scenario: 'futebol',
+      question: 'No 1º tempo saíram 2 gols e no 2º saíram 3. Quantos gols o time fez no jogo?',
+      options: ['5', '6', '4', '1'],
+      answer: '5',
+      why: 'A resposta certa é 5 porque 2 gols do primeiro tempo mais 3 do segundo fecham 5 gols no jogo inteiro.',
+      trap: 'Quem marca 6 soma um gol que a pergunta não contou nos dois tempos do jogo.',
+    }),
+    { englishLevel: 1 },
+  );
+  expect(codes.includes('campo_invalido')).toBe(false);
+  expect(codes.includes('futebol_solto')).toBe(false);
+});
+
+test('6b: a posição 1-3 guarda ideia, aplica e dilema, e o skill não passa de dois', () => {
+  const slots = quizSlots(8, 1);
+  expect(slots[0].skill).toBe('LIC.IDEIA');
+  expect(slots[1].skill).toBe('LIC.APLICA');
+  expect(slots[2].skill).toBe('LIC.DILEMA');
+  expect(slots[2].kind).toBe('dilemma');
+  expect(slots.some((slot) => slot.scenario === 'futebol')).toBe(true);
+  const lote: RawQuestion[] = [
+    { question: 'ideia', skill: 'LIC.IDEIA', subject: 'tema' },
+    { question: 'aplica', skill: 'LIC.APLICA', subject: 'tema' },
+    { question: 'dilema', skill: 'LIC.DILEMA', kind: 'dilemma', subject: 'tema' },
+    { question: 'There is a dog.', skill: 'ING.N1.BE', subject: 'ingles' },
+    { question: 'The team scores now.', skill: 'ING.N1.BE', subject: 'ingles', scenario: 'futebol' },
+    { question: 'There is a cat.', skill: 'ING.N1.BE', subject: 'ingles', scenario: 'futebol' },
+  ];
+  const { placed } = placeIntoSlots(lote, slots);
+  expect(placed[0]?.skill).toBe('LIC.IDEIA');
+  expect(placed[1]?.skill).toBe('LIC.APLICA');
+  expect(placed[2]?.skill).toBe('LIC.DILEMA');
+  const be = placed.filter((q) => q?.skill === 'ING.N1.BE');
+  expect(be).toHaveLength(2);
 });
 
 test('sonda: Q8 compara o áudio com a resposta quando o enunciado não tem a frase', () => {

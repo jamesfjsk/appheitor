@@ -1,0 +1,462 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-12-26",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-12-26",
+  "status": "ready",
+  "theme": {
+    "id": "fogo-combustao",
+    "category": "quimica",
+    "title": "O Segredo do Fogo",
+    "lesson": "Imagine que você está em um acampamento e acende uma fogueira. De repente, começa a chover e o fogo apaga. Isso acontece porque o fogo precisa de três coisas para existir: combustível, oxigênio e calor. Quando a chuva cai, ela esfria o fogo, removendo o calor necessário. Da mesma forma, uma vela apaga quando colocamos um copo sobre ela, pois o oxigênio acaba. Saber como o fogo funciona pode ajudar a entender como apagá-lo em situações de emergência.",
+    "whyItMatters": "Entender o fogo ajuda a lidar com ele de forma segura.",
+    "curiosity": "Sabia que o fogo não tem sombra? Isso acontece porque ele mesmo é uma fonte de luz!"
+  },
+  "questions": [
+    {
+      "question": "Seu amigo está tentando apagar um fogo de óleo com água. Qual atitude é a mais justa?",
+      "options": [
+        "Aviso que é perigoso",
+        "Fico olhando de longe",
+        "Ajudo com mais água",
+        "Saio correndo"
+      ],
+      "answer": "Aviso que é perigoso",
+      "explanation": "Avisar é importante porque água no fogo de óleo pode causar explosões.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A atitude mais justa é avisar que é perigoso porque água no fogo de óleo espalha o fogo.",
+      "trap": "Quem marca ajudo com mais água não sabe que isso piora a situação, espalhando o fogo.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Uma loja vende 80 bolas por dia. Em 5 dias, 20 bolas são devolvidas. Quantas bolas ficaram vendidas?",
+      "options": [
+        "380",
+        "400",
+        "360",
+        "320"
+      ],
+      "answer": "380",
+      "explanation": "A resposta certa é 380 porque 80 vezes 5 dá 400, menos 20 devolvidas fecha 380.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 380 porque 80 vezes 5 dá 400, menos 20 devolvidas fecha 380.",
+      "trap": "Quem marca 400 esquece de subtrair as 20 bolas devolvidas após a multiplicação.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se não houvesse oxigênio no ar?",
+      "options": [
+        "Fogo apagaria",
+        "Fogo aumentaria",
+        "Fogo ficaria azul",
+        "Fogo sumiria"
+      ],
+      "answer": "Fogo apagaria",
+      "explanation": "A resposta certa é fogo apagaria porque o oxigênio é essencial para a combustão.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é fogo apagaria porque o oxigênio é essencial para a combustão.",
+      "trap": "Quem marca fogo aumentaria não entende que sem oxigênio o fogo não pode queimar.",
+      "skill": "CIE.CAUSA",
+      "bloom": "entender"
+    },
+    {
+      "question": "There ___ a frog in the pond.",
+      "options": [
+        "is",
+        "are",
+        "am",
+        "be"
+      ],
+      "answer": "is",
+      "explanation": "A resposta certa é is porque there is vale para um sapo só, e are fica para dois ou mais.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "why": "A resposta certa é is porque there is vale para um sapo só, e are fica para dois ou mais.",
+      "trap": "Quem marca are pensa em várias coisas e esquece que a frase fala de um sapo só no lago.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a frog in the pond."
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Idade do Bronze?",
+      "options": [
+        "Usavam bronze",
+        "Usavam ferro",
+        "Usavam ouro",
+        "Usavam prata"
+      ],
+      "answer": "Usavam bronze",
+      "explanation": "A resposta certa é usavam bronze porque a Idade do Bronze é conhecida pelo uso desse metal.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta certa é usavam bronze porque a Idade do Bronze é conhecida pelo uso desse metal.",
+      "trap": "Quem marca usavam ferro confunde com a Idade do Ferro, que veio depois.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Durante um jogo de futebol, o vento está forte. O que acontece com a bola?",
+      "options": [
+        "Muda de direção",
+        "Fica mais pesada",
+        "Fica menor",
+        "Fica invisível"
+      ],
+      "answer": "Muda de direção",
+      "explanation": "A resposta certa é muda de direção porque o vento forte pode alterar o trajeto da bola.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é muda de direção porque o vento forte pode alterar o trajeto da bola.",
+      "trap": "Quem marca fica mais pesada confunde o efeito do vento com o peso da bola.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar",
+      "scenario": "futebol"
+    }
+  ],
+  "reflectionPrompt": "Como você pode usar o que aprendeu sobre o fogo para ajudar em casa?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 6,
+    "dropped": {
+      "futebol_solto": 1,
+      "certa_mais_longa": 1,
+      "tamanho_opcoes": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": [
+          "futebol_solto"
+        ]
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": [
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": [
+          "tamanho_opcoes"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A pergunta não tem uma única resposta correta.",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "duvidas": []
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "O Segredo do Fogo",
+        "lesson": "Imagine que você está em um acampamento e acende uma fogueira. De repente, começa a chover e o fogo apaga. Isso acontece porque o fogo precisa de três coisas para existir: combustível, oxigênio e calor. Quando a chuva cai, ela esfria o fogo, removendo o calor necessário. Da mesma forma, uma vela apaga quando colocamos um copo sobre ela, pois o oxigênio acaba. Saber como o fogo funciona pode ajudar a entender como apagá-lo em situações de emergência.",
+        "whyItMatters": "Entender o fogo ajuda a lidar com ele de forma segura.",
+        "curiosity": "Sabia que o fogo não tem sombra? Isso acontece porque ele mesmo é uma fonte de luz!"
+      },
+      "questions": [
+        {
+          "question": "Por que uma vela apaga quando colocamos um copo sobre ela?",
+          "options": [
+            "Falta de oxigênio",
+            "Falta de calor",
+            "Falta de combustível",
+            "Falta de luz"
+          ],
+          "answer": "Falta de oxigênio",
+          "explanation": "A vela apaga porque o oxigênio dentro do copo se esgota.",
+          "why": "A resposta certa é falta de oxigênio porque o fogo precisa de oxigênio para continuar queimando.",
+          "trap": "Quem marca falta de calor esquece que o calor ainda está presente até o oxigênio acabar.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "O que acontece se você soprar uma brasa?",
+          "options": [
+            "Ela apaga",
+            "Ela acende mais",
+            "Ela fica fria",
+            "Ela some"
+          ],
+          "answer": "Ela acende mais",
+          "explanation": "Soprar uma brasa aumenta o oxigênio, fazendo-a acender mais.",
+          "why": "A resposta certa é ela acende mais porque o sopro fornece mais oxigênio, que alimenta a brasa.",
+          "trap": "Quem marca ela apaga confunde com apagar uma chama, mas a brasa precisa de oxigênio para reacender.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo está tentando apagar um fogo de óleo com água. Qual atitude é a mais justa?",
+          "options": [
+            "Aviso que é perigoso",
+            "Fico olhando de longe",
+            "Ajudo com mais água",
+            "Saio correndo"
+          ],
+          "answer": "Aviso que é perigoso",
+          "explanation": "Avisar é importante porque água no fogo de óleo pode causar explosões.",
+          "why": "A atitude mais justa é avisar que é perigoso porque água no fogo de óleo espalha o fogo.",
+          "trap": "Quem marca ajudo com mais água não sabe que isso piora a situação, espalhando o fogo.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Uma loja vende 80 bolas por dia. Em 5 dias, 20 bolas são devolvidas. Quantas bolas ficaram vendidas?",
+          "options": [
+            "380",
+            "400",
+            "360",
+            "320"
+          ],
+          "answer": "380",
+          "why": "A resposta certa é 380 porque 80 vezes 5 dá 400, menos 20 devolvidas fecha 380.",
+          "trap": "Quem marca 400 esquece de subtrair as 20 bolas devolvidas após a multiplicação.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse oxigênio no ar?",
+          "options": [
+            "Fogo apagaria",
+            "Fogo aumentaria",
+            "Fogo ficaria azul",
+            "Fogo sumiria"
+          ],
+          "answer": "Fogo apagaria",
+          "why": "A resposta certa é fogo apagaria porque o oxigênio é essencial para a combustão.",
+          "trap": "Quem marca fogo aumentaria não entende que sem oxigênio o fogo não pode queimar.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "entender"
+        },
+        {
+          "question": "There ___ a frog in the pond.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a frog in the pond.",
+          "why": "A resposta certa é is porque there is vale para um sapo só, e are fica para dois ou mais.",
+          "trap": "Quem marca are pensa em várias coisas e esquece que a frase fala de um sapo só no lago.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Idade do Bronze?",
+          "options": [
+            "Usavam bronze",
+            "Usavam ferro",
+            "Usavam ouro",
+            "Usavam prata"
+          ],
+          "answer": "Usavam bronze",
+          "why": "A resposta certa é usavam bronze porque a Idade do Bronze é conhecida pelo uso desse metal.",
+          "trap": "Quem marca usavam ferro confunde com a Idade do Ferro, que veio depois.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo de futebol, o vento está forte. O que acontece com a bola?",
+          "options": [
+            "Muda de direção",
+            "Fica mais pesada",
+            "Fica menor",
+            "Fica invisível"
+          ],
+          "answer": "Muda de direção",
+          "why": "A resposta certa é muda de direção porque o vento forte pode alterar o trajeto da bola.",
+          "trap": "Quem marca fica mais pesada confunde o efeito do vento com o peso da bola.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar",
+          "scenario": "futebol"
+        }
+      ],
+      "reflectionPrompt": "Como você pode usar o que aprendeu sobre o fogo para ajudar em casa?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Por que a chuva apaga uma fogueira?",
+          "options": [
+            "Remove o calor necessário",
+            "Aumenta o oxigênio",
+            "Adiciona mais combustível",
+            "Diminui o vento"
+          ],
+          "answer": "Remove o calor necessário",
+          "why": "A chuva esfria a fogueira, removendo o calor necessário para o fogo continuar.",
+          "trap": "Quem marca Aumenta o oxigênio esquece que a chuva esfria o fogo, não aumenta o oxigênio.",
+          "kind": "lesson",
+          "subject": "ideia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Seu amigo está tentando apagar uma fogueira com água. Qual atitude é a mais justa?",
+          "options": [
+            "Explico que a água esfria o fogo",
+            "Deixo ele tentar sozinho",
+            "Observo de longe",
+            "Digo que não sei o que fazer"
+          ],
+          "answer": "Explico que a água esfria o fogo",
+          "why": "A resposta certa é Explico que a água esfria o fogo porque ajuda a entender como apagar o fogo corretamente.",
+          "trap": "Quem marca Deixo ele tentar sozinho ignora a chance de ajudar o amigo a entender como o fogo apaga.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        }
+      ]
+    },
+    "slots": [
+      {
+        "index": 0,
+        "skill": "LIC.IDEIA",
+        "kind": "lesson",
+        "area": "ideia"
+      },
+      {
+        "index": 1,
+        "skill": "LIC.APLICA",
+        "kind": "lesson",
+        "area": "aplica"
+      },
+      {
+        "index": 2,
+        "skill": "LIC.DILEMA",
+        "kind": "dilemma",
+        "area": "dilema"
+      },
+      {
+        "index": 3,
+        "skill": "MAT.OP2",
+        "kind": "knowledge",
+        "area": "matemática"
+      },
+      {
+        "index": 4,
+        "skill": "CIE.CAUSA",
+        "kind": "knowledge",
+        "area": "ciências"
+      },
+      {
+        "index": 5,
+        "skill": "ING.N1.BE",
+        "kind": "knowledge",
+        "area": "inglês"
+      },
+      {
+        "index": 6,
+        "skill": "HIS.FATO",
+        "kind": "knowledge",
+        "area": "história ou geografia"
+      },
+      {
+        "index": 7,
+        "skill": "",
+        "kind": "knowledge",
+        "area": "cenário de futebol",
+        "scenario": "futebol"
+      }
+    ]
+  },
+  "generatedAt": {},
+  "completed": false
+}

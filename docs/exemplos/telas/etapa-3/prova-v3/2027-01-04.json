@@ -1,0 +1,457 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2027-01-04",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2027-01-04",
+  "status": "ready",
+  "theme": {
+    "id": "oceanos",
+    "category": "geografia",
+    "title": "Mistérios do Mar",
+    "lesson": "Imagine-se na praia, olhando para o vasto oceano. Já se perguntou por que o mar é salgado, enquanto os rios são doces? Isso acontece porque a água dos rios carrega minerais e sais das rochas, mas quando chega ao mar, a água evapora e os sais ficam. Além disso, as marés são influenciadas pela Lua, que com sua gravidade puxa a água, criando as marés altas e baixas. No fundo do mar, onde a luz não chega, vivem criaturas incríveis que ainda estamos descobrindo. Curiosamente, sabemos mais sobre a Lua do que sobre o fundo do mar. Que tal usar esse conhecimento para explorar mais sobre o mundo ao seu redor hoje?",
+    "whyItMatters": "Entender o mar nos ajuda a cuidar melhor do nosso planeta.",
+    "curiosity": "Sabia que existem peixes que brilham no fundo do mar? E que a Lua influencia as marés?"
+  },
+  "questions": [
+    {
+      "question": "Por que o mar é salgado e os rios não?",
+      "options": [
+        "Evaporação deixa sais",
+        "Rios têm mais peixes",
+        "Mar é mais fundo",
+        "Rios são mais curtos"
+      ],
+      "answer": "Evaporação deixa sais",
+      "explanation": "A água do mar evapora, mas os sais ficam.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Evaporação deixa sais' porque a água evapora e os sais permanecem no mar.",
+      "trap": "Quem marca 'Rios têm mais peixes' confunde a presença de peixes com a salinidade da água.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "O que acontece com a água do mar quando a Lua está cheia?",
+      "options": [
+        "Maré alta",
+        "Maré baixa",
+        "Água evapora",
+        "Água congela"
+      ],
+      "answer": "Maré alta",
+      "explanation": "A Lua cheia aumenta a força gravitacional, elevando as marés.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Maré alta' porque a Lua cheia intensifica a força que puxa a água para cima.",
+      "trap": "Quem marca 'Água evapora' confunde o efeito da luz solar com a influência da Lua.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Seu amigo acha que o fundo do mar é bem conhecido. Qual atitude é a mais justa?",
+      "options": [
+        "Explico que não é",
+        "Concordo com ele",
+        "Mudo de assunto",
+        "Rio da ideia dele"
+      ],
+      "answer": "Explico que não é",
+      "explanation": "Explicar ajuda a corrigir o engano e compartilhar conhecimento.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é 'Explico que não é' porque é importante esclarecer que o fundo do mar ainda é um mistério.",
+      "trap": "Quem marca 'Concordo com ele' perde a chance de ensinar algo novo e verdadeiro.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "O que aconteceria se a Lua desaparecesse?",
+      "options": [
+        "Marés sumiriam",
+        "Dias mais longos",
+        "Sol mais quente",
+        "Água doce no mar"
+      ],
+      "answer": "Marés sumiriam",
+      "explanation": "A Lua é responsável pelas marés devido à sua gravidade.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é 'Marés sumiriam' porque a Lua controla as marés com sua força gravitacional.",
+      "trap": "Quem marca 'Dias mais longos' confunde a rotação da Terra com a influência lunar.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "There ___ a turtle on the beach.",
+      "options": [
+        "is",
+        "are",
+        "am",
+        "be"
+      ],
+      "answer": "is",
+      "explanation": "A resposta certa é 'is' porque 'there is' é usado para uma única tartaruga.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "why": "A resposta certa é 'is' porque 'there is' é usado para uma única tartaruga.",
+      "trap": "Quem marca 'are' pensa em várias tartarugas, mas a frase fala de uma só.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a turtle on the beach."
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre o oceano?",
+      "options": [
+        "É mais explorado que a Lua",
+        "Tem mais sal que os rios",
+        "É mais raso que os lagos",
+        "É mais quente que o deserto"
+      ],
+      "answer": "Tem mais sal que os rios",
+      "explanation": "O oceano é salgado devido à evaporação que deixa os sais.",
+      "kind": "knowledge",
+      "subject": "geografia",
+      "why": "A resposta certa é 'Tem mais sal que os rios' porque a água do mar evapora e deixa os sais.",
+      "trap": "Quem marca 'É mais explorado que a Lua' ignora que conhecemos mais a Lua que o fundo do mar.",
+      "skill": "GEO.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Durante um jogo de futebol, a maré está alta. O que acontece com a praia próxima?",
+      "options": [
+        "Água avança",
+        "Água recua",
+        "Areia seca",
+        "Areia some"
+      ],
+      "answer": "Água avança",
+      "explanation": "A maré alta faz a água do mar avançar sobre a praia.",
+      "kind": "knowledge",
+      "subject": "geografia",
+      "why": "A resposta certa é 'Água avança' porque a maré alta leva a água a cobrir mais a praia.",
+      "trap": "Quem marca 'Água recua' confunde maré alta com maré baixa, que faz a água se afastar.",
+      "skill": "GEO.FATO",
+      "bloom": "aplicar",
+      "scenario": "futebol"
+    },
+    {
+      "question": "Uma loja vende 80 conchas por dia. Em 5 dias, 40 conchas são devolvidas. Quantas conchas ficaram vendidas?",
+      "options": [
+        "360",
+        "400",
+        "320",
+        "340"
+      ],
+      "answer": "360",
+      "explanation": "A resposta certa é 360 porque 80 vezes 5 dá 400, menos 40 devolvidas, fecha 360.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 360 porque 80 vezes 5 dá 400, menos 40 devolvidas, fecha 360.",
+      "trap": "Quem marca 400 esquece de subtrair as conchas devolvidas após a multiplicação.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que o conhecimento sobre o mar pode ajudar a proteger o meio ambiente?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {},
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": "Duas atitudes igualmente sábias.",
+        "duvida": true
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 8,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "duvidas": [
+      {
+        "n": 3,
+        "question": "Seu amigo acha que o fundo do mar é bem conhecido. Qual atitude é a mais justa?",
+        "motivo": "Duas atitudes igualmente sábias."
+      }
+    ]
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Mistérios do Mar",
+        "lesson": "Imagine-se na praia, olhando para o vasto oceano. Já se perguntou por que o mar é salgado, enquanto os rios são doces? Isso acontece porque a água dos rios carrega minerais e sais das rochas, mas quando chega ao mar, a água evapora e os sais ficam. Além disso, as marés são influenciadas pela Lua, que com sua gravidade puxa a água, criando as marés altas e baixas. No fundo do mar, onde a luz não chega, vivem criaturas incríveis que ainda estamos descobrindo. Curiosamente, sabemos mais sobre a Lua do que sobre o fundo do mar. Que tal usar esse conhecimento para explorar mais sobre o mundo ao seu redor hoje?",
+        "whyItMatters": "Entender o mar nos ajuda a cuidar melhor do nosso planeta.",
+        "curiosity": "Sabia que existem peixes que brilham no fundo do mar? E que a Lua influencia as marés?"
+      },
+      "questions": [
+        {
+          "question": "Por que o mar é salgado e os rios não?",
+          "options": [
+            "Evaporação deixa sais",
+            "Rios têm mais peixes",
+            "Mar é mais fundo",
+            "Rios são mais curtos"
+          ],
+          "answer": "Evaporação deixa sais",
+          "explanation": "A água do mar evapora, mas os sais ficam.",
+          "why": "A resposta certa é 'Evaporação deixa sais' porque a água evapora e os sais permanecem no mar.",
+          "trap": "Quem marca 'Rios têm mais peixes' confunde a presença de peixes com a salinidade da água.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "O que acontece com a água do mar quando a Lua está cheia?",
+          "options": [
+            "Maré alta",
+            "Maré baixa",
+            "Água evapora",
+            "Água congela"
+          ],
+          "answer": "Maré alta",
+          "explanation": "A Lua cheia aumenta a força gravitacional, elevando as marés.",
+          "why": "A resposta certa é 'Maré alta' porque a Lua cheia intensifica a força que puxa a água para cima.",
+          "trap": "Quem marca 'Água evapora' confunde o efeito da luz solar com a influência da Lua.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo acha que o fundo do mar é bem conhecido. Qual atitude é a mais justa?",
+          "options": [
+            "Explico que não é",
+            "Concordo com ele",
+            "Mudo de assunto",
+            "Rio da ideia dele"
+          ],
+          "answer": "Explico que não é",
+          "explanation": "Explicar ajuda a corrigir o engano e compartilhar conhecimento.",
+          "why": "A resposta certa é 'Explico que não é' porque é importante esclarecer que o fundo do mar ainda é um mistério.",
+          "trap": "Quem marca 'Concordo com ele' perde a chance de ensinar algo novo e verdadeiro.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "O que aconteceria se a Lua desaparecesse?",
+          "options": [
+            "Marés sumiriam",
+            "Dias mais longos",
+            "Sol mais quente",
+            "Água doce no mar"
+          ],
+          "answer": "Marés sumiriam",
+          "explanation": "A Lua é responsável pelas marés devido à sua gravidade.",
+          "why": "A resposta certa é 'Marés sumiriam' porque a Lua controla as marés com sua força gravitacional.",
+          "trap": "Quem marca 'Dias mais longos' confunde a rotação da Terra com a influência lunar.",
+          "kind": "knowledge",
+          "subject": "ciências",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There ___ a turtle on the beach.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a turtle on the beach.",
+          "why": "A resposta certa é 'is' porque 'there is' é usado para uma única tartaruga.",
+          "trap": "Quem marca 'are' pensa em várias tartarugas, mas a frase fala de uma só.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre o oceano?",
+          "options": [
+            "É mais explorado que a Lua",
+            "Tem mais sal que os rios",
+            "É mais raso que os lagos",
+            "É mais quente que o deserto"
+          ],
+          "answer": "Tem mais sal que os rios",
+          "explanation": "O oceano é salgado devido à evaporação que deixa os sais.",
+          "why": "A resposta certa é 'Tem mais sal que os rios' porque a água do mar evapora e deixa os sais.",
+          "trap": "Quem marca 'É mais explorado que a Lua' ignora que conhecemos mais a Lua que o fundo do mar.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo de futebol, a maré está alta. O que acontece com a praia próxima?",
+          "options": [
+            "Água avança",
+            "Água recua",
+            "Areia seca",
+            "Areia some"
+          ],
+          "answer": "Água avança",
+          "explanation": "A maré alta faz a água do mar avançar sobre a praia.",
+          "why": "A resposta certa é 'Água avança' porque a maré alta leva a água a cobrir mais a praia.",
+          "trap": "Quem marca 'Água recua' confunde maré alta com maré baixa, que faz a água se afastar.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "aplicar",
+          "scenario": "futebol"
+        },
+        {
+          "question": "Uma loja vende 80 conchas por dia. Em 5 dias, 40 conchas são devolvidas. Quantas conchas ficaram vendidas?",
+          "options": [
+            "360",
+            "400",
+            "320",
+            "340"
+          ],
+          "answer": "360",
+          "why": "A resposta certa é 360 porque 80 vezes 5 dá 400, menos 40 devolvidas, fecha 360.",
+          "trap": "Quem marca 400 esquece de subtrair as conchas devolvidas após a multiplicação.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que o conhecimento sobre o mar pode ajudar a proteger o meio ambiente?"
+    },
+    "slots": [
+      {
+        "index": 0,
+        "skill": "LIC.IDEIA",
+        "kind": "lesson",
+        "area": "ideia"
+      },
+      {
+        "index": 1,
+        "skill": "LIC.APLICA",
+        "kind": "lesson",
+        "area": "aplica"
+      },
+      {
+        "index": 2,
+        "skill": "LIC.DILEMA",
+        "kind": "dilemma",
+        "area": "dilema"
+      },
+      {
+        "index": 3,
+        "skill": "CIE.CAUSA",
+        "kind": "knowledge",
+        "area": "ciências"
+      },
+      {
+        "index": 4,
+        "skill": "ING.N1.BE",
+        "kind": "knowledge",
+        "area": "inglês"
+      },
+      {
+        "index": 5,
+        "skill": "HIS.FATO",
+        "kind": "knowledge",
+        "area": "história ou geografia"
+      },
+      {
+        "index": 6,
+        "skill": "",
+        "kind": "knowledge",
+        "area": "cenário de futebol",
+        "scenario": "futebol"
+      },
+      {
+        "index": 7,
+        "skill": "MAT.OP2",
+        "kind": "knowledge",
+        "area": "matemática"
+      }
+    ]
+  },
+  "generatedAt": {},
+  "completed": false
+}

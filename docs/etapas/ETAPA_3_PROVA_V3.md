@@ -63,6 +63,7 @@ Numeradas, medíveis, cada uma com o teste que a prova. Onde a regra muda um nú
 24. **`quizBank` obrigatório por pergunta.** Concluir a prova grava 8 docs no mesmo `writeBatch` do resultado. Sem isso não existe perfil, não existe revisita, não existe "Como ele vai" — e é a razão de o jogo não saber em que ele erra depois de 135 provas.
 25. **Anti-repetição por hash e por semelhança, não por texto.** Hash normalizado contra o `quizBank` dos últimos 180 dias, mais "quase igual" (mesmo `subject` e 70% das palavras de 4+ letras). Medida: os 8 pares de `valida.txt` reprovam; pares de assuntos diferentes passam.
 26. **Painel "Como ele vai".** Acerto por `kind`, por `subject` e por categoria em 7 dias, 30 dias e total; últimas 30 erradas com data; repetidas por hash com as datas; descartados do dia. Fonte: `learning/{uid}.profile` e `quizBank`.
+27. **Futebol é cenário, e a substituição pede a posição** (decisão 37, pacote 6b). A vaga de futebol ensina outra área: `scenario: "futebol"` e o `subject` da área (conta de gols, causa da bola, frase da partida). `futebol_solto` recusa `subject === 'futebol'` e o enunciado de regra ("o que acontece se", "quantos jogadores", "qual a posição", "quem é o", "regra do", "impedimento", "cartão" sem número). `definicao` também pega "qual é a função", "qual é o papel", "o que faz o/a", "para que serve". Quando uma vaga cai, a substituição pede aquela posição com o mesmo kind e skill, não um lote solto. LIC.APLICA e LIC.DILEMA pedem quatro opções do mesmo tamanho (± 2 palavras), sem caricatura.
 
 ---
 

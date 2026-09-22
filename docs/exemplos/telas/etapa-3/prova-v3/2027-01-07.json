@@ -1,0 +1,522 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2027-01-07",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2027-01-07",
+  "status": "ready",
+  "theme": {
+    "id": "porcentagem",
+    "category": "matematica",
+    "title": "Desvendando Descontos",
+    "lesson": "Imagine que você está em uma loja de brinquedos e vê um carrinho que custa R$100,00 com 30% de desconto. Isso significa que você pagará R$70,00, pois 30% de R$100,00 é R$30,00. Para calcular rapidamente, pense que 10% de R$100,00 é R$10,00, então 30% é três vezes isso. Agora, se houver um desconto adicional de 20% sobre o novo preço, não é simplesmente 50% de desconto total. Você aplica 20% sobre os R$70,00, resultando em R$56,00. Hoje, ao ver um desconto, tente calcular mentalmente quanto realmente pagará.",
+    "whyItMatters": "Saber calcular descontos ajuda a tomar decisões melhores ao comprar.",
+    "curiosity": "Descontos em sequência não se somam diretamente. Um desconto de 50% seguido de 50% não resulta em 100%."
+  },
+  "questions": [
+    {
+      "question": "Um tênis custa R$150,00 e tem 10% de desconto. Quanto você paga?",
+      "options": [
+        "R$135,00",
+        "R$140,00",
+        "R$145,00",
+        "R$150,00"
+      ],
+      "answer": "R$135,00",
+      "explanation": "10% de R$150,00 é R$15,00, então você paga R$135,00.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é R$135,00 porque 150 menos 15 dá 135, que é o preço com desconto.",
+      "trap": "Quem marca R$140,00 calculou errado, achando que 10% de 150 é 10, não 15.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Seu amigo acha que 30% de desconto seguido de 20% é 50%. Qual atitude é a mais justa?",
+      "options": [
+        "Explico como calcular",
+        "Concordo com ele",
+        "Fico em silêncio",
+        "Digo que está certo"
+      ],
+      "answer": "Explico como calcular",
+      "explanation": "Explicar ajuda seu amigo a entender que os descontos são aplicados sequencialmente.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é explicar porque isso ajuda seu amigo a entender como os descontos realmente funcionam.",
+      "trap": "Quem marca 'Concordo com ele' não percebe que os descontos são aplicados um após o outro, não somados.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Cada vitória vale 3 pontos e cada empate vale 1. O time venceu 4 e empatou 2. Quantos pontos fez?",
+      "options": [
+        "14",
+        "12",
+        "7",
+        "6"
+      ],
+      "answer": "14",
+      "explanation": "A resposta certa é 14 porque primeiro 3 vezes 4 dá 12 e depois 12 mais 2 fecha 14.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 14 porque primeiro 3 vezes 4 dá 12 e depois 12 mais 2 fecha 14.",
+      "trap": "Quem marca 12 contou só as vitórias e esqueceu os 2 pontos dos empates no fim da tabela.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar",
+      "scenario": "futebol"
+    },
+    {
+      "question": "O treino tem 10 minutos de alongamento. Depois são 4 blocos de 7 minutos. Quantos minutos no total?",
+      "options": [
+        "38",
+        "28",
+        "48",
+        "58"
+      ],
+      "answer": "38",
+      "explanation": "A resposta certa é 38 porque primeiro 4 vezes 7 dá 28 e depois 28 mais 10 fecha 38.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 38 porque primeiro 4 vezes 7 dá 28 e depois 28 mais 10 fecha 38.",
+      "trap": "Quem marca 28 parou nos blocos e esqueceu de somar os 10 minutos de alongamento no começo do treino.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se as plantas não recebessem luz solar?",
+      "options": [
+        "Não fariam fotossíntese",
+        "Cresceriam mais rápido",
+        "Ficariam azuis",
+        "Produziriam mais flores"
+      ],
+      "answer": "Não fariam fotossíntese",
+      "explanation": "Sem luz solar, as plantas não conseguem realizar a fotossíntese.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é não fariam fotossíntese porque a luz solar é essencial para esse processo vital das plantas.",
+      "trap": "Quem marca 'Cresceriam mais rápido' não entende que a luz é crucial para o crescimento, não um obstáculo.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    }
+  ],
+  "reflectionPrompt": "Como você pode usar o cálculo de porcentagem para economizar em suas compras?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 5,
+    "dropped": {
+      "conta_um_passo": 1,
+      "duas_certas": 1,
+      "duplicata": 2,
+      "why_curto": 1,
+      "trap_sem_distrator": 1,
+      "enunciado_vazou": 1,
+      "ingles_nivel": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "duas_certas"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "why_curto",
+          "trap_sem_distrator"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "enunciado_vazou"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": []
+      },
+      {
+        "i": 11,
+        "codes": [
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": [
+          "duplicata"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A conta não fecha corretamente.",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "A conta não fecha, resposta errada.",
+        "duvida": true
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "duvidas": [
+      {
+        "n": 1,
+        "question": "Cada vitória vale 3 pontos e cada empate vale 1. O time venceu 4 e empatou 2. Quantos pontos fez?",
+        "motivo": "A conta não fecha, resposta errada."
+      }
+    ]
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Desvendando Descontos",
+        "lesson": "Imagine que você está em uma loja de brinquedos e vê um carrinho que custa R$100,00 com 30% de desconto. Isso significa que você pagará R$70,00, pois 30% de R$100,00 é R$30,00. Para calcular rapidamente, pense que 10% de R$100,00 é R$10,00, então 30% é três vezes isso. Agora, se houver um desconto adicional de 20% sobre o novo preço, não é simplesmente 50% de desconto total. Você aplica 20% sobre os R$70,00, resultando em R$56,00. Hoje, ao ver um desconto, tente calcular mentalmente quanto realmente pagará.",
+        "whyItMatters": "Saber calcular descontos ajuda a tomar decisões melhores ao comprar.",
+        "curiosity": "Descontos em sequência não se somam diretamente. Um desconto de 50% seguido de 50% não resulta em 100%."
+      },
+      "questions": [
+        {
+          "question": "Se um produto custa R$200,00 e tem 30% de desconto, quanto você paga?",
+          "options": [
+            "R$140,00",
+            "R$160,00",
+            "R$180,00",
+            "R$60,00"
+          ],
+          "answer": "R$140,00",
+          "explanation": "30% de R$200,00 é R$60,00, então você paga R$140,00.",
+          "why": "A resposta certa é R$140,00 porque 200 menos 60 dá 140, que é o preço com desconto.",
+          "trap": "Quem marca R$160,00 subtraiu errado, pensando que 30% de 200 é 40, não 60.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Um tênis custa R$150,00 e tem 10% de desconto. Quanto você paga?",
+          "options": [
+            "R$135,00",
+            "R$140,00",
+            "R$145,00",
+            "R$150,00"
+          ],
+          "answer": "R$135,00",
+          "explanation": "10% de R$150,00 é R$15,00, então você paga R$135,00.",
+          "why": "A resposta certa é R$135,00 porque 150 menos 15 dá 135, que é o preço com desconto.",
+          "trap": "Quem marca R$140,00 calculou errado, achando que 10% de 150 é 10, não 15.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo acha que 30% de desconto seguido de 20% é 50%. Qual atitude é a mais justa?",
+          "options": [
+            "Explico como calcular",
+            "Concordo com ele",
+            "Fico em silêncio",
+            "Digo que está certo"
+          ],
+          "answer": "Explico como calcular",
+          "explanation": "Explicar ajuda seu amigo a entender que os descontos são aplicados sequencialmente.",
+          "why": "A resposta certa é explicar porque isso ajuda seu amigo a entender como os descontos realmente funcionam.",
+          "trap": "Quem marca 'Concordo com ele' não percebe que os descontos são aplicados um após o outro, não somados.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Durante um jogo de futebol, o time marcou 3 gols no primeiro tempo e 2 no segundo. Quantos gols no total?",
+          "options": [
+            "5",
+            "6",
+            "4",
+            "3"
+          ],
+          "answer": "5",
+          "explanation": "3 gols no primeiro tempo mais 2 no segundo totalizam 5 gols.",
+          "why": "A resposta certa é 5 porque somamos os gols dos dois tempos: 3 mais 2 dá 5.",
+          "trap": "Quem marca 6 pode ter somado um gol a mais por engano, sem verificar os tempos corretamente.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar",
+          "scenario": "futebol"
+        },
+        {
+          "question": "Uma loja vende 60 brinquedos por dia. Em 5 dias, 30 brinquedos são devolvidos. Quantos brinquedos ficaram vendidos?",
+          "options": [
+            "270",
+            "300",
+            "270",
+            "330"
+          ],
+          "answer": "270",
+          "explanation": "60 vezes 5 é 300, menos 30 devolvidos, restam 270 vendidos.",
+          "why": "A resposta certa é 270 porque 60 vezes 5 dá 300, e tirando 30 devolvidos, sobram 270.",
+          "trap": "Quem marca 300 esqueceu de subtrair os brinquedos devolvidos, pensando apenas na venda total.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as plantas não recebessem luz solar?",
+          "options": [
+            "Não fariam fotossíntese",
+            "Cresceriam mais rápido",
+            "Ficariam azuis",
+            "Produziriam mais flores"
+          ],
+          "answer": "Não fariam fotossíntese",
+          "explanation": "Sem luz solar, as plantas não conseguem realizar a fotossíntese.",
+          "why": "A resposta certa é não fariam fotossíntese porque a luz solar é essencial para esse processo vital das plantas.",
+          "trap": "Quem marca 'Cresceriam mais rápido' não entende que a luz é crucial para o crescimento, não um obstáculo.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There ___ a rabbit in the garden.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a rabbit in the garden.",
+          "why": "A resposta certa é is porque there is vale para um coelho só, e are fica para quando são dois ou mais.",
+          "trap": "Quem marca are pensa em vários coelhos e esquece que a frase fala de um coelho só no jardim.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a descoberta do Brasil?",
+          "options": [
+            "Foi em 1500",
+            "Foi em 1600",
+            "Foi em 1400",
+            "Foi em 1700"
+          ],
+          "answer": "Foi em 1500",
+          "explanation": "O Brasil foi descoberto em 1500 por Pedro Álvares Cabral.",
+          "why": "A resposta certa é foi em 1500 porque é o ano em que Pedro Álvares Cabral chegou ao Brasil.",
+          "trap": "Quem marca 1600 pode estar confundindo com outros eventos históricos posteriores.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Como você pode usar o cálculo de porcentagem para economizar em suas compras?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Ao ver um desconto, como calcular mentalmente o valor final?",
+          "options": [
+            "Calcule 10% e multiplique",
+            "Divida o preço por 2",
+            "Some 10% ao preço",
+            "Subtraia 10% do preço"
+          ],
+          "answer": "Calcule 10% e multiplique",
+          "why": "A resposta certa é Calcule 10% e multiplique porque facilita encontrar porcentagens como 30% rapidamente.",
+          "trap": "Quem marca Divida o preço por 2 confunde o cálculo de porcentagem com divisão simples, errando o desconto.",
+          "kind": "lesson",
+          "subject": "ideia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Cada vitória vale 3 pontos e cada empate vale 1. O time venceu 4 e empatou 2. Quantos pontos fez?",
+          "options": [
+            "14",
+            "12",
+            "7",
+            "6"
+          ],
+          "answer": "14",
+          "why": "A resposta certa é 14 porque primeiro 3 vezes 4 dá 12 e depois 12 mais 2 fecha 14.",
+          "trap": "Quem marca 12 contou só as vitórias e esqueceu os 2 pontos dos empates no fim da tabela.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "scenario": "futebol",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O treino tem 10 minutos de alongamento. Depois são 4 blocos de 7 minutos. Quantos minutos no total?",
+          "options": [
+            "38",
+            "28",
+            "48",
+            "58"
+          ],
+          "answer": "38",
+          "why": "A resposta certa é 38 porque primeiro 4 vezes 7 dá 28 e depois 28 mais 10 fecha 38.",
+          "trap": "Quem marca 28 parou nos blocos e esqueceu de somar os 10 minutos de alongamento no começo do treino.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "There ___ a cat under the table.",
+          "options": [
+            "is",
+            "are",
+            "was",
+            "were"
+          ],
+          "answer": "is",
+          "why": "A resposta certa é is porque 'there is' indica singular no presente.",
+          "trap": "Quem marca are confunde singular com plural, pois 'are' é usado para plural.",
+          "kind": "knowledge",
+          "subject": "inglês",
+          "skill": "ING.N1.BE",
+          "bloom": "lembrar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Revolução Industrial?",
+          "options": [
+            "Começou no século XVIII",
+            "Aconteceu no século XV",
+            "Foi liderada por Napoleão",
+            "Ocorreu na América do Sul"
+          ],
+          "answer": "Começou no século XVIII",
+          "why": "A resposta certa é Começou no século XVIII porque a Revolução Industrial iniciou na Inglaterra nesse período.",
+          "trap": "Quem marca Aconteceu no século XV confunde com o Renascimento, que ocorreu nesse século.",
+          "kind": "knowledge",
+          "subject": "história",
+          "skill": "HIS.FATO",
+          "bloom": "lembrar"
+        }
+      ]
+    },
+    "slots": [
+      {
+        "index": 0,
+        "skill": "LIC.IDEIA",
+        "kind": "lesson",
+        "area": "ideia"
+      },
+      {
+        "index": 1,
+        "skill": "LIC.APLICA",
+        "kind": "lesson",
+        "area": "aplica"
+      },
+      {
+        "index": 2,
+        "skill": "LIC.DILEMA",
+        "kind": "dilemma",
+        "area": "dilema"
+      },
+      {
+        "index": 3,
+        "skill": "",
+        "kind": "knowledge",
+        "area": "cenário de futebol",
+        "scenario": "futebol"
+      },
+      {
+        "index": 4,
+        "skill": "MAT.OP2",
+        "kind": "knowledge",
+        "area": "matemática"
+      },
+      {
+        "index": 5,
+        "skill": "CIE.CAUSA",
+        "kind": "knowledge",
+        "area": "ciências"
+      },
+      {
+        "index": 6,
+        "skill": "ING.N1.BE",
+        "kind": "knowledge",
+        "area": "inglês"
+      },
+      {
+        "index": 7,
+        "skill": "HIS.FATO",
+        "kind": "knowledge",
+        "area": "história ou geografia"
+      }
+    ]
+  },
+  "generatedAt": {},
+  "completed": false
+}

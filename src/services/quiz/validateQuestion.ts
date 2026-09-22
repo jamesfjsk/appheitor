@@ -1,7 +1,7 @@
 /** Validador da prova v3: uma pergunta, lista de códigos. Vazio = passa. */
 
 import { LEVELS, findForbiddenTokens } from '../../config/englishLevels';
-import { answerLeaksInPrompt, contentWords, normalizeQuizText, optionsCollide, wordCount } from './provaRules';
+import { answerLeaksInPrompt, contentWords, knowledgeAreasForWeekday, normalizeQuizText, optionsCollide, wordCount } from './provaRules';
 import { QUIZ_VALIDATOR_ENFORCE } from './quizTokens';
 
 export const REJECT_CODES = [
@@ -33,6 +33,9 @@ export const REJECT_CODES = [
   'tamanho_opcoes',
   'certa_mais_longa',
   'tipos_mistos',
+  'explicacao_em_ingles',
+  'ingles_sem_marcador',
+  'futebol_solto',
 ] as const;
 
 export type RejectCode = (typeof REJECT_CODES)[number];
@@ -51,7 +54,6 @@ export const SKILLS = new Set([
   'ING.N1.LIKE',
   'HIS.FATO',
   'GEO.FATO',
-  'FUT.REGRA',
   'GEN.CONH',
 ]);
 
@@ -80,6 +82,8 @@ export interface RawQuestion {
   bloom?: string;
   kind?: string;
   audioText?: string;
+  /** Cenário da pergunta quando o futebol é só o pano de fundo (decisão 37). */
+  scenario?: string;
 }
 
 export interface ValidateCtx {
@@ -90,16 +94,31 @@ export interface ValidateCtx {
   lesson?: string;
 }
 
-const DEFINICAO = /^(o que e |qual e o nome d|o que significa )/;
+const DEFINICAO = /^(o que e |qual e o nome d|o que significa |qual e a funcao d|qual e o papel d|o que faz o |o que faz a |para que serve)/;
+const FUTEBOL_SOLTO = /o que acontece se|quantos jogadores|qual a posicao|qual e a posicao|quem e o |regra do |impedimento/;
+/** Palavras de função do português. A razão é sobre o `why` depois de tirar o trecho entre aspas. */
+const PT_FUNCAO = new Set([
+  'e', 'de', 'que', 'nao', 'porque', 'para', 'com', 'um', 'uma', 'o', 'a', 'os', 'as',
+  'do', 'da', 'em', 'quando', 'depois', 'antes', 'verbo', 'frase', 'regra',
+]);
+/** Palavras inglesas que não estão na lista de função. "a" fica de fora: também é artigo em português. */
+const EN_PALAVRA = new Set([
+  'the', 'past', 'tense', 'correctly', 'fits', 'sentence', 'context', 'of', 'to', 'and',
+  'is', 'are', 'was', 'were', 'for', 'with', 'this', 'that', 'from', 'there', 'on', 'in',
+]);
+const MARCA_TEMPO = ['every day', 'right now', 'last week', 'next week', 'yesterday', 'tomorrow', 'always', 'now'];
+const ENSINA = new Set([
+  'MAT.OP2', 'CIE.CAUSA', 'ING.N1.PREP', 'ING.N1.BE', 'ING.N1.LIKE', 'HIS.FATO', 'GEO.FATO', 'GEN.CONH',
+]);
 const CAPITAL = /qual e a capital|capital d[aeo] /;
 const SUPERLATIVO = /\b(mais|maior|melhor|pior|principal|famos[oa]|avancad[oa])\b/;
 const FATO_SUBJ = /histor|geograf|futebol|arte/;
 const CARICATURA =
   /\b(azul|verde|roxo|rosa|amarelo|preto|branco)\b.{0,40}\b(celula|atomo|molecula|planeta)\b|\b(celula|atomo|molecula|planeta)\b.{0,40}\b(azul|verde|roxo|rosa|amarelo|preto|branco)\b/;
-const OPINIAO =
-  /\b(o que voce faria|como voce agiria|o que voce acha|voce prefere|o que seria mais sabio|como voce poderia usar|como voce pode aplicar|se voce tivesse que escolher)\b/;
+export const OPINIAO =
+  /\b(o que voce faria|como voce agiria|o que voce acha|voce prefere|o que seria mais sabio|como voce poderia usar|como voce pode aplicar|como voce pode usar|como voce demonstra|se voce tivesse que escolher|o que voce faz|o que fazer)\b/;
 const CARICATA =
-  /\b(ignorar|ignoraria|fingir|fingiria|burro|falar mal|nao fazer nada|nao comer nada|impor|nao se importar|nao se importaria|deixar para outra pessoa|sair do jogo|criticar)\b/;
+  /\b(ignorar|ignoraria|ignoro|fingir|fingiria|fingo|burro|falar mal|nao fazer nada|nao comer nada|impor|nao se importar|nao se importaria|deixar para outra pessoa|sair do jogo|criticar|critico)\b/;
 
 const VARIANT_PAIRS: Array<[string, string]> = [
   ['soccer', 'football'],
@@ -287,6 +306,30 @@ export function canonSubject(raw: string): string {
   return raw.trim();
 }
 
+function canonSkill(raw: string): string {
+  if (SKILLS.has(raw)) return raw;
+  const n = normalizeQuizText(raw).replace(/ /g, '');
+  if (n.includes('dilema')) return 'LIC.DILEMA';
+  if (n.includes('aplica')) return 'LIC.APLICA';
+  if (n.includes('ideia')) return 'LIC.IDEIA';
+  if (n.includes('matem')) return 'MAT.OP2';
+  if (n.includes('cien')) return 'CIE.CAUSA';
+  if (n.includes('ingl') || n === 'be' || n.includes('n1be')) return 'ING.N1.BE';
+  if (n.includes('hist')) return 'HIS.FATO';
+  if (n.includes('geog')) return 'GEO.FATO';
+  return raw;
+}
+
+function subjectForSkill(skill: string): string {
+  if (skill.startsWith('LIC.')) return 'tema';
+  if (skill === 'MAT.OP2') return 'matematica';
+  if (skill === 'CIE.CAUSA') return 'ciencias';
+  if (skill.startsWith('ING.')) return 'ingles';
+  if (skill === 'HIS.FATO') return 'historia';
+  if (skill === 'GEO.FATO') return 'geografia';
+  return '';
+}
+
 function inferSkill(subject: string, kind: string): string {
   if (kind === 'lesson') return 'LIC.IDEIA';
   if (subject === 'matematica') return 'MAT.OP2';
@@ -294,17 +337,69 @@ function inferSkill(subject: string, kind: string): string {
   if (subject === 'ingles') return 'ING.N1.PREP';
   if (subject === 'historia') return 'HIS.FATO';
   if (subject === 'geografia') return 'GEO.FATO';
-  if (subject === 'futebol') return 'FUT.REGRA';
+  if (subject === 'futebol') return 'GEN.CONH';
   return 'GEN.CONH';
 }
 
+function stripQuoted(text: string): string {
+  return text
+    .replace(/"[^"]*"/g, ' ')
+    .replace(/'[^']*'/g, ' ')
+    .replace(/[“”][^“”]*[“”]/g, ' ')
+    .replace(/[‘’][^‘’]*[‘’]/g, ' ');
+}
+
+/** 40% de palavra funcional aprova. Abaixo disso, só cai se o inglês empatar ou passar o português. */
+function explicacaoEmIngles(why: string): boolean {
+  const words = normalizeQuizText(stripQuoted(why)).split(' ').filter(Boolean);
+  if (words.length === 0) return false;
+  const pt = words.filter((w) => PT_FUNCAO.has(w)).length;
+  if (pt / words.length >= 0.4) return false;
+  const en = words.filter((w) => EN_PALAVRA.has(w) && !PT_FUNCAO.has(w)).length;
+  return en >= pt;
+}
+
+function sameVerbRoot(options: string[]): boolean {
+  const counts = new Map<string, number>();
+  for (const option of options) {
+    const token = normalizeQuizText(option).replace(/ /g, '');
+    if (token.length < 4) continue;
+    const root = token.slice(0, 4);
+    counts.set(root, (counts.get(root) ?? 0) + 1);
+  }
+  return [...counts.values()].some((n) => n >= 3);
+}
+
+function hasTimeMark(text: string): boolean {
+  const n = normalizeQuizText(text);
+  return MARCA_TEMPO.some((mark) => n.includes(mark));
+}
+
+function futebolSolto(question: string, subject: string): boolean {
+  if (subject === 'futebol') return true;
+  const nq = normalizeQuizText(question);
+  if (FUTEBOL_SOLTO.test(nq)) return true;
+  return nq.includes('cartao') && numbersOf(question).length === 0;
+}
+
 export function hydrateQuestion(raw: RawQuestion): RawQuestion {
-  const subject = canonSubject(typeof raw.subject === 'string' ? raw.subject : '');
-  const kind = raw.kind === 'dilemma' || raw.skill === 'LIC.DILEMA' ? 'dilemma' : raw.kind === 'lesson' ? 'lesson' : 'knowledge';
+  const named = canonSkill(typeof raw.skill === 'string' ? raw.skill : '');
+  const kind = raw.kind === 'dilemma' || named === 'LIC.DILEMA' ? 'dilemma' : raw.kind === 'lesson' ? 'lesson' : 'knowledge';
   const why = typeof raw.why === 'string' && raw.why.trim() ? raw.why : typeof raw.explanation === 'string' ? raw.explanation : '';
-  const skill = typeof raw.skill === 'string' && SKILLS.has(raw.skill) ? raw.skill : inferSkill(subject, kind === 'dilemma' ? 'lesson' : kind);
+  let subject = canonSubject(typeof raw.subject === 'string' ? raw.subject : '');
+  const skill = SKILLS.has(named) ? named : inferSkill(subject, kind === 'dilemma' ? 'lesson' : kind);
+  if (!SUBJECTS.has(subject)) {
+    const guessed = subjectForSkill(skill);
+    if (guessed) subject = guessed;
+  }
   const bloom = typeof raw.bloom === 'string' && BLOOM.has(raw.bloom) ? raw.bloom : kind === 'lesson' ? 'entender' : 'aplicar';
-  return { ...raw, subject, kind, why, skill, bloom };
+  let audioText = typeof raw.audioText === 'string' ? raw.audioText.trim() : '';
+  const question = typeof raw.question === 'string' ? raw.question : '';
+  const answer = typeof raw.answer === 'string' ? raw.answer.trim() : '';
+  if (subject === 'ingles' && !audioText && /___+/.test(question) && answer) {
+    audioText = question.replace(/___+/, answer);
+  }
+  return { ...raw, subject, kind, why, skill, bloom, ...(audioText ? { audioText } : {}) };
 }
 
 export function validateQuestion(raw: RawQuestion, ctx: ValidateCtx = {}): RejectCode[] {
@@ -331,6 +426,7 @@ export function validateQuestion(raw: RawQuestion, ctx: ValidateCtx = {}): Rejec
   if (stemLeak(question, answer)) r.push('enunciado_vazou');
   if (CAPITAL.test(nq)) r.push('capital');
   if (DEFINICAO.test(nq)) r.push('definicao');
+  if (futebolSolto(question, subject)) r.push('futebol_solto');
   if (FATO_SUBJ.test(subject) && SUPERLATIVO.test(nq)) r.push('fato_discutivel');
   if (CARICATURA.test(nq)) r.push('caricatura');
   if (optionsCollide(options)) r.push('duas_certas');
@@ -341,6 +437,7 @@ export function validateQuestion(raw: RawQuestion, ctx: ValidateCtx = {}): Rejec
   if (subject === 'ingles' && duasVariantesValidas(options)) r.push('ingles_duas_validas');
 
   if (wordCount(why) < 12 || wordCount(trap) < 12) r.push('why_curto');
+  if (why && explicacaoEmIngles(why)) r.push('explicacao_em_ingles');
   if (why && answer && !whyCitesAnswer(why, answer)) r.push('why_sem_resposta');
   if (trap && options.length === 4 && !trapHitsDistractor(trap, options, answer)) r.push('trap_sem_distrator');
 
@@ -348,7 +445,8 @@ export function validateQuestion(raw: RawQuestion, ctx: ValidateCtx = {}): Rejec
     const counts = options.map((o) => wordCount(o));
     const max = Math.max(...counts);
     const min = Math.min(...counts);
-    if (!(max <= 2 * min || max - min <= 3)) r.push('tamanho_opcoes');
+    const tightLesson = (skill === 'LIC.APLICA' || skill === 'LIC.DILEMA') && max - min > 2;
+    if (!(max <= 2 * min || max - min <= 3) || tightLesson) r.push('tamanho_opcoes');
     else if (wordCount(answer) === max && counts.filter((n) => n === max).length === 1 && max >= 4) r.push('certa_mais_longa');
     if (tiposMistos(options)) r.push('tipos_mistos');
   }
@@ -390,6 +488,7 @@ export function validateQuestion(raw: RawQuestion, ctx: ValidateCtx = {}): Rejec
     // O cartão vale para a frase que ele lê e ouve. why e trap são a explicação em português.
     const blob = [question, ...options, answer, audioText].join(' ');
     if (findForbiddenTokens(blob, lv).length > 0) r.push('ingles_nivel');
+    if (sameVerbRoot(options) && !hasTimeMark(question) && !hasTimeMark(audioText)) r.push('ingles_sem_marcador');
     const max = LEVELS[lv as 1 | 2 | 3].maxWords;
     const enWords = audioText ? wordCount(audioText) : wordCount(question);
     if (enWords > max) r.push('ingles_nivel');
@@ -443,4 +542,144 @@ export function fillToCount(
     fromOffline += 1;
   }
   return { questions, fromOffline };
+}
+
+export interface QuizSlot {
+  index: number;
+  skill: string;
+  kind: 'lesson' | 'dilemma' | 'knowledge';
+  area: string;
+  scenario?: 'futebol';
+}
+
+const AREA_SKILL: Record<string, string> = {
+  matemática: 'MAT.OP2',
+  ciências: 'CIE.CAUSA',
+  inglês: 'ING.N1.BE',
+  'história ou geografia': 'HIS.FATO',
+};
+
+export function quizSlots(count: number, weekday: number): QuizSlot[] {
+  const slots: QuizSlot[] = [];
+  const head: QuizSlot[] = [
+    { index: 0, skill: 'LIC.IDEIA', kind: 'lesson', area: 'ideia' },
+    { index: 1, skill: 'LIC.APLICA', kind: 'lesson', area: 'aplica' },
+    { index: 2, skill: 'LIC.DILEMA', kind: 'dilemma', area: 'dilema' },
+  ];
+  for (const slot of head) {
+    if (slots.length >= count) break;
+    slots.push(slot);
+  }
+  const areas = knowledgeAreasForWeekday(weekday);
+  let cursor = 0;
+  while (slots.length < count) {
+    const area = areas[cursor % areas.length];
+    cursor += 1;
+    const football = area === 'cenário de futebol';
+    slots.push({
+      index: slots.length,
+      skill: football ? '' : (AREA_SKILL[area] ?? 'GEN.CONH'),
+      kind: 'knowledge',
+      area,
+      ...(football ? { scenario: 'futebol' as const } : {}),
+    });
+  }
+  return slots;
+}
+
+function skillOf(q: RawQuestion): string {
+  return typeof q.skill === 'string' ? q.skill : '';
+}
+
+function skillRoom(skill: string, counts: Map<string, number>): boolean {
+  if (!skill) return true;
+  return (counts.get(skill) ?? 0) < 2;
+}
+
+function bumpSkill(counts: Map<string, number>, q: RawQuestion) {
+  const skill = skillOf(q);
+  if (skill) counts.set(skill, (counts.get(skill) ?? 0) + 1);
+}
+
+function mentionsFootball(q: RawQuestion): boolean {
+  return /\b(gol|gols|partida|campo|bola|jogador|gramado|tabela)\b/.test(normalizeQuizText(q.question ?? ''));
+}
+
+function matchesFixed(q: RawQuestion, slot: QuizSlot): boolean {
+  if (q.scenario === 'futebol') return false;
+  const skill = skillOf(q);
+  if (slot.skill === 'LIC.IDEIA' || slot.skill === 'LIC.APLICA' || slot.skill === 'LIC.DILEMA') return skill === slot.skill;
+  if (slot.area === 'inglês') return skill.startsWith('ING.');
+  if (slot.area === 'história ou geografia') return skill === 'HIS.FATO' || skill === 'GEO.FATO';
+  return skill === slot.skill;
+}
+
+function matchesFootball(q: RawQuestion): boolean {
+  if (q.subject === 'futebol') return false;
+  const skill = skillOf(q);
+  if (!ENSINA.has(skill) && !skill.startsWith('ING.')) return false;
+  return q.scenario === 'futebol' || mentionsFootball(q);
+}
+
+function takeQuestion(
+  questions: RawQuestion[],
+  used: Set<number>,
+  counts: Map<string, number>,
+  pred: (q: RawQuestion) => boolean,
+): number {
+  return questions.findIndex((q, i) => !used.has(i) && pred(q) && skillRoom(skillOf(q), counts));
+}
+
+/** A prova publicada segue a posição: ideia, aplica, dilema, depois as áreas do dia. */
+export function placeIntoSlots(
+  questions: RawQuestion[],
+  slots: QuizSlot[],
+): { placed: (RawQuestion | null)[]; missing: QuizSlot[] } {
+  const used = new Set<number>();
+  const counts = new Map<string, number>();
+  const placed: (RawQuestion | null)[] = slots.map(() => null);
+  const sit = (si: number, pred: (q: RawQuestion) => boolean) => {
+    const hit = takeQuestion(questions, used, counts, pred);
+    if (hit < 0) return;
+    used.add(hit);
+    placed[si] = questions[hit];
+    bumpSkill(counts, questions[hit]);
+  };
+  slots.forEach((slot, si) => {
+    if (slot.scenario === 'futebol') return;
+    sit(si, (q) => matchesFixed(q, slot));
+  });
+  slots.forEach((slot, si) => {
+    if (slot.scenario !== 'futebol') return;
+    sit(si, matchesFootball);
+  });
+  return { placed, missing: slots.filter((_, i) => placed[i] == null) };
+}
+
+/** Encaixa o lote novo só no buraco, sem tirar quem já sentou. */
+export function fillSlotHoles(
+  placed: (RawQuestion | null)[],
+  slots: QuizSlot[],
+  extra: RawQuestion[],
+): { placed: (RawQuestion | null)[]; missing: QuizSlot[] } {
+  const counts = new Map<string, number>();
+  for (const q of placed) if (q) bumpSkill(counts, q);
+  const used = new Set<number>();
+  const next = placed.slice();
+  const sit = (si: number, pred: (q: RawQuestion) => boolean) => {
+    const hit = takeQuestion(extra, used, counts, pred);
+    if (hit < 0) return;
+    used.add(hit);
+    next[si] = extra[hit];
+    bumpSkill(counts, extra[hit]);
+  };
+  slots.forEach((slot, si) => {
+    if (next[si] || slot.scenario === 'futebol') return;
+    sit(si, (q) => matchesFixed(q, slot));
+  });
+  slots.forEach((slot, si) => {
+    if (next[si] || slot.scenario !== 'futebol') return;
+    sit(si, matchesFootball);
+  });
+  return { placed: next, missing: slots.filter((_, i) => next[i] == null) };
 }

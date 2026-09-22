@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import { applyReview, parseReview, reviewBatch, reviewSystem } from '../reviewer';
+import { applyReview, parseReview, rescueDilemma, reviewBatch, reviewSystem } from '../reviewer';
 import type { RawQuestion } from '../validateQuestion';
 
 const mathTwo: RawQuestion = {
@@ -82,6 +82,154 @@ test('P0.6: duas reprovações saem e o motivo fica', () => {
   expect(out.kept).toEqual([mathTwo]);
   expect(out.motivos).toHaveLength(2);
   expect(out.motivos[0].motivo).toBe('duas alternativas defendem o gol');
+});
+
+test('6b: duvida ausente vale false e a do limite fica na lista', () => {
+  const ausente = parseReview({ itens: [{ n: 1, ok: true, motivo: '' }] });
+  expect(ausente).toBeTruthy();
+  expect(ausente![0].duvida).toBe(false);
+  const limite = parseReview({ itens: [{ n: 1, ok: true, motivo: 'no limite', duvida: true }] });
+  const out = applyReview([mathTwo], limite);
+  expect(out.kept).toHaveLength(1);
+  expect(out.duvidas).toHaveLength(1);
+  expect(out.duvidas[0].question).toBe(mathTwo.question);
+  expect(out.duvidas[0].motivo).toBe('no limite');
+  const caiu = parseReview({ itens: [{ n: 1, ok: false, motivo: 'duas certas', duvida: true }] });
+  const dropped = applyReview([mathTwo], caiu);
+  expect(dropped.kept).toHaveLength(0);
+  expect(dropped.duvidas).toHaveLength(0);
+});
+
+test('6b: dilema chamado de opinião fica na prova, com dúvida', () => {
+  const dilema: RawQuestion = {
+    question: 'O amigo ficou de fora. Qual atitude é a mais justa?',
+    skill: 'LIC.DILEMA',
+    kind: 'dilemma',
+    subject: 'tema',
+  };
+  const review = rescueDilemma(
+    [dilema],
+    [{ n: 1, ok: false, motivo: 'Pergunta pede o que ele faria, opinião.', duvida: false }],
+  );
+  const out = applyReview([dilema], review);
+  expect(out.kept).toHaveLength(1);
+  expect(out.duvidas).toHaveLength(1);
+  const conta = rescueDilemma(
+    [mathTwo],
+    [{ n: 1, ok: false, motivo: 'duas atitudes defendem', duvida: false }],
+  );
+  expect(applyReview([mathTwo], conta).kept).toHaveLength(0);
+});
+
+test('6b: ideia que não pede atitude não cai por opinião', () => {
+  const ideia: RawQuestion = {
+    question: 'Como os juros compostos ajudam a realizar sonhos futuros?',
+    skill: 'LIC.IDEIA',
+    kind: 'lesson',
+    subject: 'tema',
+  };
+  const review = rescueDilemma(
+    [ideia],
+    [{ n: 1, ok: false, motivo: 'A pergunta pede opinião e não é LIC.DILEMA.', duvida: false }],
+  );
+  const out = applyReview([ideia], review);
+  expect(out.kept).toHaveLength(1);
+  expect(out.duvidas).toHaveLength(1);
+  const atitude: RawQuestion = {
+    question: 'O que você faria com o dinheiro?',
+    skill: 'LIC.IDEIA',
+    kind: 'lesson',
+    subject: 'tema',
+  };
+  const cai = rescueDilemma([atitude], [{ n: 1, ok: false, motivo: 'opinião', duvida: false }]);
+  expect(applyReview([atitude], cai).kept).toHaveLength(0);
+});
+
+test('6b: conta que fecha em duas etapas não cai por conta não fecha', () => {
+  const pontos: RawQuestion = {
+    question: 'Cada vitória vale 3 pontos e cada empate vale 1. O time venceu 5 jogos e empatou 3. Quantos pontos o time acumulou?',
+    options: ['18', '15', '16', '20'],
+    answer: '18',
+    skill: 'MAT.OP2',
+    kind: 'knowledge',
+    subject: 'matematica',
+  };
+  const review = rescueDilemma(
+    [pontos],
+    [{ n: 1, ok: false, motivo: 'A conta não fecha, total é 18, mas opções erradas.', duvida: false }],
+  );
+  const out = applyReview([pontos], review);
+  expect(out.kept).toHaveLength(1);
+  expect(out.duvidas).toHaveLength(1);
+  const solta: RawQuestion = {
+    question: 'Cada caixa tem 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?',
+    options: ['6', '7', '8', '40'],
+    answer: '7',
+    skill: 'MAT.OP2',
+    kind: 'knowledge',
+    subject: 'matematica',
+  };
+  const cai = rescueDilemma(
+    [solta],
+    [{ n: 1, ok: false, motivo: 'A conta não fecha.', duvida: false }],
+  );
+  expect(applyReview([solta], cai).kept).toHaveLength(0);
+});
+
+test('6b: dilema com uma só ajuda não cai por duas atitudes', () => {
+  const um: RawQuestion = {
+    question: 'Seu amigo acha que redstone é real. Qual atitude é a mais justa?',
+    options: ['Explico sobre eletricidade', 'Deixo ele acreditar', 'Rio da ideia', 'Mudo de assunto'],
+    answer: 'Explico sobre eletricidade',
+    skill: 'LIC.DILEMA',
+    kind: 'dilemma',
+    subject: 'tema',
+  };
+  const review = rescueDilemma(
+    [um],
+    [{ n: 1, ok: false, motivo: 'Duas atitudes são igualmente sábias.', duvida: false }],
+  );
+  expect(applyReview([um], review).kept).toHaveLength(1);
+  const dois: RawQuestion = {
+    question: 'O amigo ficou de fora. Qual atitude é a mais justa?',
+    options: ['Chamo ele para entrar', 'Peço ajuda ao adulto', 'Fico quieto no banco', 'Sigo jogando sem ele'],
+    answer: 'Chamo ele para entrar',
+    skill: 'LIC.DILEMA',
+    kind: 'dilemma',
+    subject: 'tema',
+  };
+  const cai = rescueDilemma(
+    [dois],
+    [{ n: 1, ok: false, motivo: 'Duas atitudes são igualmente sábias.', duvida: false }],
+  );
+  expect(applyReview([dois], cai).kept).toHaveLength(0);
+});
+
+test('6b: ideia com opções curtas não cai por única completa', () => {
+  const ideia: RawQuestion = {
+    question: 'Por que o buraco mais fundo já cavado tem apenas 12 km?',
+    skill: 'LIC.IDEIA',
+    kind: 'lesson',
+    subject: 'tema',
+  };
+  const review = rescueDilemma(
+    [ideia],
+    [{ n: 1, ok: false, motivo: 'A certa é a única completa.', duvida: false }],
+  );
+  const out = applyReview([ideia], review);
+  expect(out.kept).toHaveLength(1);
+  expect(out.duvidas).toHaveLength(1);
+  const consenso: RawQuestion = {
+    question: 'Onde foram escritas as regras do jogo?',
+    skill: 'LIC.IDEIA',
+    kind: 'lesson',
+    subject: 'tema',
+  };
+  const cai = rescueDilemma(
+    [consenso],
+    [{ n: 1, ok: false, motivo: 'Falta de consenso sobre o fato.', duvida: false }],
+  );
+  expect(applyReview([consenso], cai).kept).toHaveLength(0);
 });
 
 test('P0.6: o prompt do revisor é o da prova e pede JSON', () => {

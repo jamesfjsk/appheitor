@@ -1,0 +1,127 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2027-01-10",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2027-01-10",
+  "status": "ready",
+  "theme": {
+    "id": "imposto",
+    "category": "dinheiro",
+    "title": "Para onde vai o dinheiro do imposto",
+    "lesson": "Uma parte de tudo o que se compra vai para o governo: o que é imposto, o que ele paga (escola, hospital, estrada) e como olhar a nota fiscal e achar quanto foi.",
+    "whyItMatters": "Pensar sobre isso hoje já é um passo."
+  },
+  "questions": [
+    {
+      "question": "O que é um orçamento?",
+      "options": [
+        "O nome de uma moeda antiga",
+        "Uma dívida com o banco",
+        "Um plano de quanto dinheiro vai entrar e quanto vai sair",
+        "Um tipo de loja"
+      ],
+      "answer": "Um plano de quanto dinheiro vai entrar e quanto vai sair",
+      "explanation": "Com um orçamento, você sabe antes se o dinheiro dá para tudo. Famílias, empresas e governos fazem isso.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Uma receita para 4 pessoas usa 2 ovos. Quantos ovos você precisa para 10 pessoas?",
+      "options": [
+        "4",
+        "8",
+        "5",
+        "6"
+      ],
+      "answer": "5",
+      "explanation": "Se 4 pessoas usam 2 ovos, cada 2 pessoas usam 1 ovo. Para 10 pessoas, 10 ÷ 2 = 5 ovos.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Na mitologia grega, Zeus é o rei dos deuses. Qual era a arma dele?",
+      "options": [
+        "O arco",
+        "O martelo",
+        "O raio",
+        "O tridente"
+      ],
+      "answer": "O raio",
+      "explanation": "Zeus governava o céu e lançava raios. O tridente era de Poseidon, deus do mar, e o martelo é de Thor, da mitologia nórdica.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Ache o erro: 'O Brasil foi colonizado por Portugal e ficou independente em 1500.'",
+      "options": [
+        "O Brasil nunca foi colônia",
+        "1500 é a chegada dos portugueses; a independência foi em 1822",
+        "Não há erro",
+        "O Brasil foi colonizado pela Espanha"
+      ],
+      "answer": "1500 é a chegada dos portugueses; a independência foi em 1822",
+      "explanation": "Entre 1500 e 1822 se passaram mais de 300 anos de colônia. A independência foi declarada por Dom Pedro I em 7 de setembro de 1822.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Alguém pergunta 'What time is it?'. Qual resposta faz sentido?",
+      "options": [
+        "It's three o'clock.",
+        "It's blue.",
+        "I'm fine, thanks.",
+        "My name is Heitor."
+      ],
+      "answer": "It's three o'clock.",
+      "explanation": "'What time is it?' é 'que horas são?'. 'I'm fine' responde a 'how are you?', e 'my name is' responde a 'what's your name?'.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Um número tem 3 algarismos: o das centenas é 4, o das dezenas é o dobro dele e o das unidades é zero. Que número é esse?",
+      "options": [
+        "480",
+        "408",
+        "840",
+        "440"
+      ],
+      "answer": "480",
+      "explanation": "Centenas 4, dezenas 8 (o dobro de 4) e unidades 0 formam 480. A posição de cada algarismo muda o valor dele.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Uma balança fica equilibrada com 3 maçãs de um lado e, do outro, 1 maçã mais um peso de 200 g. Quanto pesa cada maçã?",
+      "options": [
+        "200 g",
+        "300 g",
+        "50 g",
+        "100 g"
+      ],
+      "answer": "100 g",
+      "explanation": "Tire uma maçã de cada lado: sobram 2 maçãs contra 200 g. Então 2 maçãs pesam 200 g, e cada uma pesa 100 g.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Um artista quer que uma montanha pareça bem longe na pintura. O que ele deve fazer?",
+      "options": [
+        "Pintá-la menor e com cores mais claras",
+        "Pintá-la bem no centro da tela",
+        "Usar só a cor vermelha",
+        "Pintá-la maior e mais escura"
+      ],
+      "answer": "Pintá-la menor e com cores mais claras",
+      "explanation": "Coisas distantes parecem menores e mais desbotadas por causa do ar entre nós e elas. Isso se chama perspectiva.",
+      "kind": "knowledge",
+      "subject": "geral"
+    }
+  ],
+  "reflectionPrompt": "O que você aprendeu hoje que pode usar amanhã?",
+  "source": "offline",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {}
+  },
+  "generatedAt": {},
+  "completed": false
+}

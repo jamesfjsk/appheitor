@@ -1,0 +1,489 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-12-13",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-12-13",
+  "status": "ready",
+  "theme": {
+    "id": "cores-mistura",
+    "category": "arte",
+    "title": "A Magia das Cores",
+    "lesson": "Imagine que você está pintando um quadro e decide misturar azul e amarelo. O resultado é verde! Mas, se você estiver lidando com luzes, como as de um celular, misturar vermelho e verde resulta em amarelo. Isso acontece porque a mistura de tintas e a mistura de luzes funcionam de maneiras opostas. Na tela do seu celular, todas as cores que você vê são criadas a partir de apenas três cores de luz: vermelho, verde e azul. Hoje, observe as cores ao seu redor e pense em como elas podem ser criadas de maneiras diferentes.",
+    "whyItMatters": "Entender as cores ajuda a criar e apreciar arte e tecnologia.",
+    "curiosity": "Sabia que o arco-íris é um exemplo de como a luz branca se divide em várias cores?"
+  },
+  "questions": [
+    {
+      "question": "Misturando luzes, vermelho e verde resultam em qual cor?",
+      "options": [
+        "Amarelo",
+        "Azul",
+        "Roxo",
+        "Preto"
+      ],
+      "answer": "Amarelo",
+      "explanation": "Na mistura de luzes, vermelho e verde criam amarelo.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é amarelo porque na mistura de luzes, vermelho e verde se combinam para formar amarelo.",
+      "trap": "Quem marca azul confunde com a mistura de tintas, onde azul e amarelo formam verde.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "Na tela do celular, quais cores criam todas as outras?",
+      "options": [
+        "Vermelho, verde e azul",
+        "Amarelo, azul e preto",
+        "Roxo, laranja e verde",
+        "Preto, branco e cinza"
+      ],
+      "answer": "Vermelho, verde e azul",
+      "explanation": "As telas usam vermelho, verde e azul para criar todas as cores.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é vermelho, verde e azul porque essas são as cores primárias de luz usadas em telas.",
+      "trap": "Quem marca amarelo, azul e preto confunde com cores de tinta, não de luz.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Uma fábrica produz 20 brinquedos por hora. Em 4 horas, 10 brinquedos são defeituosos. Quantos brinquedos bons foram produzidos?",
+      "options": [
+        "70",
+        "80",
+        "90",
+        "60"
+      ],
+      "answer": "70",
+      "explanation": "A resposta certa é 70 porque primeiro 20 vezes 4 dá 80 e depois 80 menos 10 fecha 70.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 70 porque primeiro 20 vezes 4 dá 80 e depois 80 menos 10 fecha 70.",
+      "trap": "Quem marca 80 parou no total produzido e esqueceu de tirar os 10 brinquedos defeituosos.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O que aconteceria se as plantas não tivessem clorofila?",
+      "options": [
+        "Não fariam fotossíntese",
+        "Cresceriam mais rápido",
+        "Ficariam azuis",
+        "Produziriam mais oxigênio"
+      ],
+      "answer": "Não fariam fotossíntese",
+      "explanation": "Sem clorofila, as plantas não podem realizar fotossíntese.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é não fariam fotossíntese porque a clorofila é essencial para esse processo.",
+      "trap": "Quem marca ficariam azuis confunde a função da clorofila com a cor das plantas.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "There ___ a bird in the cage.",
+      "options": [
+        "is",
+        "are",
+        "am",
+        "be"
+      ],
+      "answer": "is",
+      "explanation": "A resposta certa é is porque there is vale para um pássaro só, e are fica para quando são dois ou mais.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "why": "A resposta certa é is porque there is vale para um pássaro só, e are fica para quando são dois ou mais.",
+      "trap": "Quem marca are pensa em várias coisas e esquece que a frase fala de um pássaro só na gaiola.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a bird in the cage."
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre a Segunda Guerra Mundial?",
+      "options": [
+        "Terminou em 1945",
+        "Começou em 1930",
+        "Durou 3 anos",
+        "Foi em 1950"
+      ],
+      "answer": "Terminou em 1945",
+      "explanation": "A Segunda Guerra Mundial terminou em 1945.",
+      "kind": "knowledge",
+      "subject": "historia",
+      "why": "A resposta certa é terminou em 1945 porque é um fato histórico amplamente reconhecido.",
+      "trap": "Quem marca começou em 1930 confunde com o período entre guerras, que foi antes de 1939.",
+      "skill": "HIS.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Durante um jogo de futebol, o vento está forte. O que acontece com a bola?",
+      "options": [
+        "Desvia do caminho",
+        "Fica mais pesada",
+        "Para no ar",
+        "Afunda no chão"
+      ],
+      "answer": "Desvia do caminho",
+      "explanation": "O vento forte pode desviar a bola do seu trajeto original.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é desvia do caminho porque o vento pode alterar a trajetória da bola.",
+      "trap": "Quem marca fica mais pesada confunde o efeito do vento com o peso da bola.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar",
+      "scenario": "futebol"
+    }
+  ],
+  "reflectionPrompt": "Como você acha que as cores influenciam o seu dia a dia?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 7,
+    "dropped": {
+      "conta_um_passo": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": []
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": []
+      },
+      {
+        "i": 9,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 3,
+        "ok": false,
+        "motivo": "Duas atitudes são igualmente sábias.",
+        "duvida": false
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "Duas atitudes são igualmente sábias.",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "duvidas": []
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "A Magia das Cores",
+        "lesson": "Imagine que você está pintando um quadro e decide misturar azul e amarelo. O resultado é verde! Mas, se você estiver lidando com luzes, como as de um celular, misturar vermelho e verde resulta em amarelo. Isso acontece porque a mistura de tintas e a mistura de luzes funcionam de maneiras opostas. Na tela do seu celular, todas as cores que você vê são criadas a partir de apenas três cores de luz: vermelho, verde e azul. Hoje, observe as cores ao seu redor e pense em como elas podem ser criadas de maneiras diferentes.",
+        "whyItMatters": "Entender as cores ajuda a criar e apreciar arte e tecnologia.",
+        "curiosity": "Sabia que o arco-íris é um exemplo de como a luz branca se divide em várias cores?"
+      },
+      "questions": [
+        {
+          "question": "Misturando luzes, vermelho e verde resultam em qual cor?",
+          "options": [
+            "Amarelo",
+            "Azul",
+            "Roxo",
+            "Preto"
+          ],
+          "answer": "Amarelo",
+          "explanation": "Na mistura de luzes, vermelho e verde criam amarelo.",
+          "why": "A resposta certa é amarelo porque na mistura de luzes, vermelho e verde se combinam para formar amarelo.",
+          "trap": "Quem marca azul confunde com a mistura de tintas, onde azul e amarelo formam verde.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Na tela do celular, quais cores criam todas as outras?",
+          "options": [
+            "Vermelho, verde e azul",
+            "Amarelo, azul e preto",
+            "Roxo, laranja e verde",
+            "Preto, branco e cinza"
+          ],
+          "answer": "Vermelho, verde e azul",
+          "explanation": "As telas usam vermelho, verde e azul para criar todas as cores.",
+          "why": "A resposta certa é vermelho, verde e azul porque essas são as cores primárias de luz usadas em telas.",
+          "trap": "Quem marca amarelo, azul e preto confunde com cores de tinta, não de luz.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo pintando com tintas. Ele quer misturar azul e amarelo. Qual atitude é a mais justa?",
+          "options": [
+            "Dizer que vira verde",
+            "Ficar em silêncio",
+            "Falar que vira roxo",
+            "Sugerir misturar com vermelho"
+          ],
+          "answer": "Dizer que vira verde",
+          "explanation": "Dizer que vira verde ajuda o amigo a entender a mistura de tintas.",
+          "why": "A resposta certa é dizer que vira verde porque isso ajuda o amigo a aprender sobre mistura de cores.",
+          "trap": "Quem marca falar que vira roxo confunde com outra combinação de cores.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Uma loja vende 15 camisetas por dia. Em 6 dias, quantas camisetas são vendidas?",
+          "options": [
+            "90",
+            "75",
+            "60",
+            "45"
+          ],
+          "answer": "90",
+          "explanation": "Multiplicando 15 por 6, temos 90 camisetas vendidas.",
+          "why": "A resposta certa é 90 porque 15 vezes 6 dá 90, o total de camisetas vendidas em 6 dias.",
+          "trap": "Quem marca 75 pode ter multiplicado errado, esquecendo de multiplicar corretamente 15 por 6.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se as plantas não tivessem clorofila?",
+          "options": [
+            "Não fariam fotossíntese",
+            "Cresceriam mais rápido",
+            "Ficariam azuis",
+            "Produziriam mais oxigênio"
+          ],
+          "answer": "Não fariam fotossíntese",
+          "explanation": "Sem clorofila, as plantas não podem realizar fotossíntese.",
+          "why": "A resposta certa é não fariam fotossíntese porque a clorofila é essencial para esse processo.",
+          "trap": "Quem marca ficariam azuis confunde a função da clorofila com a cor das plantas.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There ___ a bird in the cage.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a bird in the cage.",
+          "why": "A resposta certa é is porque there is vale para um pássaro só, e are fica para quando são dois ou mais.",
+          "trap": "Quem marca are pensa em várias coisas e esquece que a frase fala de um pássaro só na gaiola.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Segunda Guerra Mundial?",
+          "options": [
+            "Terminou em 1945",
+            "Começou em 1930",
+            "Durou 3 anos",
+            "Foi em 1950"
+          ],
+          "answer": "Terminou em 1945",
+          "explanation": "A Segunda Guerra Mundial terminou em 1945.",
+          "why": "A resposta certa é terminou em 1945 porque é um fato histórico amplamente reconhecido.",
+          "trap": "Quem marca começou em 1930 confunde com o período entre guerras, que foi antes de 1939.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo de futebol, o vento está forte. O que acontece com a bola?",
+          "options": [
+            "Desvia do caminho",
+            "Fica mais pesada",
+            "Para no ar",
+            "Afunda no chão"
+          ],
+          "answer": "Desvia do caminho",
+          "explanation": "O vento forte pode desviar a bola do seu trajeto original.",
+          "why": "A resposta certa é desvia do caminho porque o vento pode alterar a trajetória da bola.",
+          "trap": "Quem marca fica mais pesada confunde o efeito do vento com o peso da bola.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar",
+          "scenario": "futebol"
+        }
+      ],
+      "reflectionPrompt": "Como você acha que as cores influenciam o seu dia a dia?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Você vê um amigo misturando tintas e ele quer saber como criar uma nova cor. Qual atitude é a mais justa?",
+          "options": [
+            "Explico sobre misturar cores",
+            "Deixo ele descobrir sozinho",
+            "Chamo um adulto para ajudar",
+            "Sugiro usar outra cor"
+          ],
+          "answer": "Explico sobre misturar cores",
+          "why": "A resposta certa é Explico sobre misturar cores porque isso ajuda o amigo a entender o processo de mistura de cores.",
+          "trap": "Quem marca Deixo ele descobrir sozinho ignora a chance de ajudar o amigo a aprender sobre cores.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Uma fábrica produz 20 brinquedos por hora. Em 4 horas, 10 brinquedos são defeituosos. Quantos brinquedos bons foram produzidos?",
+          "options": [
+            "70",
+            "80",
+            "90",
+            "60"
+          ],
+          "answer": "70",
+          "why": "A resposta certa é 70 porque primeiro 20 vezes 4 dá 80 e depois 80 menos 10 fecha 70.",
+          "trap": "Quem marca 80 parou no total produzido e esqueceu de tirar os 10 brinquedos defeituosos.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ]
+    },
+    "slots": [
+      {
+        "index": 0,
+        "skill": "LIC.IDEIA",
+        "kind": "lesson",
+        "area": "ideia"
+      },
+      {
+        "index": 1,
+        "skill": "LIC.APLICA",
+        "kind": "lesson",
+        "area": "aplica"
+      },
+      {
+        "index": 2,
+        "skill": "LIC.DILEMA",
+        "kind": "dilemma",
+        "area": "dilema"
+      },
+      {
+        "index": 3,
+        "skill": "MAT.OP2",
+        "kind": "knowledge",
+        "area": "matemática"
+      },
+      {
+        "index": 4,
+        "skill": "CIE.CAUSA",
+        "kind": "knowledge",
+        "area": "ciências"
+      },
+      {
+        "index": 5,
+        "skill": "ING.N1.BE",
+        "kind": "knowledge",
+        "area": "inglês"
+      },
+      {
+        "index": 6,
+        "skill": "HIS.FATO",
+        "kind": "knowledge",
+        "area": "história ou geografia"
+      },
+      {
+        "index": 7,
+        "skill": "",
+        "kind": "knowledge",
+        "area": "cenário de futebol",
+        "scenario": "futebol"
+      }
+    ]
+  },
+  "generatedAt": {},
+  "completed": false
+}

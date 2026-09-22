@@ -51,7 +51,7 @@ try {
     await page.waitForFunction((expected) => {
       const q = window.__lastQuiz;
       return Boolean(window.__quizEpoch > 0 && q && q.date === expected && q.sanitize);
-    }, { timeout: 180000 }, date);
+    }, { timeout: 300000 }, date);
     const quiz = await page.evaluate(() => window.__lastQuiz);
     dumps.push(quiz);
     writeFileSync(path.join(root, `${date}.json`), JSON.stringify(quiz, null, 2));
@@ -77,7 +77,7 @@ try {
     await page.keyboard.press('Escape');
     await sleep(400);
   }
-  writeFileSync(path.join(root, 'tres-provas.json'), JSON.stringify(dumps, null, 2));
+  writeFileSync(path.join(root, process.env.SHOT_BUNDLE || 'tres-provas.json'), JSON.stringify(dumps, null, 2));
   console.log('ok', dumps.length);
 } catch (e) {
   console.error(e);

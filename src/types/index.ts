@@ -50,6 +50,8 @@ export interface DailyQuizSanitize {
   batchLog?: string[];
   /** Quantas das perguntas publicadas vieram do banco, depois do validador. */
   fromOffline?: number;
+  /** Aprovação no limite do revisor. A pergunta fica. */
+  duvidas?: { n: number; question: string; motivo: string }[];
 }
 
 export interface DailyQuizQuestion {
@@ -64,6 +66,8 @@ export interface DailyQuizQuestion {
   skill?: string;
   bloom?: string;
   audioText?: string;
+  /** Partida como cenário. A matéria continua em subject. */
+  scenario?: string;
 }
 
 export interface DailyQuizTheme {

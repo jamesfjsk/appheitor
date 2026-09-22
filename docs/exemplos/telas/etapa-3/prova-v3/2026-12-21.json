@@ -1,0 +1,463 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-12-21",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-12-21",
+  "status": "ready",
+  "theme": {
+    "id": "terra-gira",
+    "category": "astronomia",
+    "title": "Por que o Natal é quente aqui?",
+    "lesson": "Imagine que você está jogando futebol em um campo inclinado. A Terra é como esse campo, inclinada em relação ao Sol. Essa inclinação faz com que diferentes partes do planeta recebam mais ou menos luz solar ao longo do ano, criando as estações. No Brasil, o Natal é no verão porque estamos recebendo mais luz solar. Já no Canadá, é inverno e eles têm neve. Hoje, você pode usar essa ideia para entender por que o clima muda tanto durante o ano e como isso afeta as suas atividades, como jogar futebol ou ir à praia.",
+    "whyItMatters": "Entender as estações ajuda a planejar atividades e viagens.",
+    "curiosity": "Sabia que na Antártida o sol não se põe por meses durante o verão? E no inverno, ele nem aparece!"
+  },
+  "questions": [
+    {
+      "question": "Por que o Brasil tem verão no Natal?",
+      "options": [
+        "Inclinação da Terra",
+        "Distância do Sol",
+        "Rotação da Terra",
+        "Fases da Lua"
+      ],
+      "answer": "Inclinação da Terra",
+      "explanation": "A inclinação da Terra faz com que diferentes partes recebam mais ou menos luz solar.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é inclinação da Terra porque isso determina a quantidade de luz solar recebida em cada hemisfério.",
+      "trap": "Quem marca distância do Sol confunde a inclinação com a distância, mas a Terra está sempre a uma distância similar.",
+      "skill": "LIC.IDEIA",
+      "bloom": "entender"
+    },
+    {
+      "question": "No inverno, o que acontece com a luz solar no Canadá?",
+      "options": [
+        "Menos luz solar",
+        "Mais luz solar",
+        "Luz igual ao verão",
+        "Luz constante"
+      ],
+      "answer": "Menos luz solar",
+      "explanation": "No inverno, o hemisfério norte recebe menos luz solar devido à inclinação da Terra.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é menos luz solar porque a inclinação da Terra faz o hemisfério norte receber menos luz no inverno.",
+      "trap": "Quem marca mais luz solar confunde as estações, achando que o inverno tem mais luz como o verão.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "Seu amigo acha que o Natal é sempre frio. Qual atitude é a mais justa?",
+      "options": [
+        "Explico sobre as estações",
+        "Concordo com ele",
+        "Ignoro o assunto",
+        "Digo que está errado"
+      ],
+      "answer": "Explico sobre as estações",
+      "explanation": "Explicar ajuda seu amigo a entender por que o Natal é quente no Brasil.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é explicar sobre as estações porque isso ajuda seu amigo a entender a diferença entre os hemisférios.",
+      "trap": "Quem marca concordo com ele não ajuda a esclarecer a confusão sobre as estações do ano.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "O que aconteceria se a Terra não fosse inclinada?",
+      "options": [
+        "Sem estações",
+        "Mais estações",
+        "Estações iguais",
+        "Estações opostas"
+      ],
+      "answer": "Sem estações",
+      "explanation": "Sem inclinação, a luz solar seria distribuída igualmente, eliminando as estações.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é sem estações porque a inclinação da Terra é o que cria as estações do ano.",
+      "trap": "Quem marca mais estações confunde a inclinação com a rotação, achando que mais inclinação cria mais estações.",
+      "skill": "CIE.CAUSA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "There ___ a dog in the park.",
+      "options": [
+        "is",
+        "are",
+        "am",
+        "be"
+      ],
+      "answer": "is",
+      "explanation": "A resposta certa é is porque there is vale para um cachorro só, e are fica para quando são dois ou mais.",
+      "kind": "knowledge",
+      "subject": "ingles",
+      "why": "A resposta certa é is porque there is vale para um cachorro só, e are fica para quando são dois ou mais.",
+      "trap": "Quem marca are pensa em vários cachorros e esquece que a frase fala de um cachorro só no parque.",
+      "skill": "ING.N1.BE",
+      "bloom": "aplicar",
+      "audioText": "There is a dog in the park."
+    },
+    {
+      "question": "Qual fato é verdadeiro sobre as estações do ano?",
+      "options": [
+        "São causadas pela inclinação",
+        "São iguais em todo lugar",
+        "Mudam a cada mês",
+        "Dependem da distância do Sol"
+      ],
+      "answer": "São causadas pela inclinação",
+      "explanation": "As estações são causadas pela inclinação da Terra em relação ao Sol.",
+      "kind": "knowledge",
+      "subject": "geografia",
+      "why": "A resposta certa é são causadas pela inclinação porque isso determina a quantidade de luz solar recebida em cada hemisfério.",
+      "trap": "Quem marca dependem da distância do Sol confunde a inclinação com a distância, mas a Terra está sempre a uma distância similar.",
+      "skill": "GEO.FATO",
+      "bloom": "entender"
+    },
+    {
+      "question": "Uma loja vende 30 camisetas por dia. Em 4 dias, 10 camisetas são devolvidas. Quantas camisetas ficaram vendidas?",
+      "options": [
+        "110",
+        "120",
+        "100",
+        "90"
+      ],
+      "answer": "110",
+      "explanation": "Primeiro, multiplica 30 por 4 para saber o total vendido, depois subtrai as devoluções.",
+      "kind": "knowledge",
+      "subject": "matematica",
+      "why": "A resposta certa é 110 porque 30 vezes 4 dá 120, e 120 menos 10 devoluções fecha 110.",
+      "trap": "Quem marca 120 esquece de subtrair as 10 camisetas que foram devolvidas após a venda.",
+      "skill": "MAT.OP2",
+      "bloom": "aplicar"
+    }
+  ],
+  "reflectionPrompt": "Como as estações do ano afetam suas atividades favoritas ao longo do ano?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 7,
+    "dropped": {
+      "duplicata": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": []
+      },
+      {
+        "i": 3,
+        "codes": []
+      },
+      {
+        "i": 4,
+        "codes": []
+      },
+      {
+        "i": 5,
+        "codes": []
+      },
+      {
+        "i": 6,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": []
+      },
+      {
+        "i": 8,
+        "codes": []
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 3,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 4,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 5,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 6,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 7,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A conta não fecha, total é 18, mas opções erradas.",
+        "duvida": false
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "duvidas": []
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Por que o Natal é quente aqui?",
+        "lesson": "Imagine que você está jogando futebol em um campo inclinado. A Terra é como esse campo, inclinada em relação ao Sol. Essa inclinação faz com que diferentes partes do planeta recebam mais ou menos luz solar ao longo do ano, criando as estações. No Brasil, o Natal é no verão porque estamos recebendo mais luz solar. Já no Canadá, é inverno e eles têm neve. Hoje, você pode usar essa ideia para entender por que o clima muda tanto durante o ano e como isso afeta as suas atividades, como jogar futebol ou ir à praia.",
+        "whyItMatters": "Entender as estações ajuda a planejar atividades e viagens.",
+        "curiosity": "Sabia que na Antártida o sol não se põe por meses durante o verão? E no inverno, ele nem aparece!"
+      },
+      "questions": [
+        {
+          "question": "Por que o Brasil tem verão no Natal?",
+          "options": [
+            "Inclinação da Terra",
+            "Distância do Sol",
+            "Rotação da Terra",
+            "Fases da Lua"
+          ],
+          "answer": "Inclinação da Terra",
+          "explanation": "A inclinação da Terra faz com que diferentes partes recebam mais ou menos luz solar.",
+          "why": "A resposta certa é inclinação da Terra porque isso determina a quantidade de luz solar recebida em cada hemisfério.",
+          "trap": "Quem marca distância do Sol confunde a inclinação com a distância, mas a Terra está sempre a uma distância similar.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "No inverno, o que acontece com a luz solar no Canadá?",
+          "options": [
+            "Menos luz solar",
+            "Mais luz solar",
+            "Luz igual ao verão",
+            "Luz constante"
+          ],
+          "answer": "Menos luz solar",
+          "explanation": "No inverno, o hemisfério norte recebe menos luz solar devido à inclinação da Terra.",
+          "why": "A resposta certa é menos luz solar porque a inclinação da Terra faz o hemisfério norte receber menos luz no inverno.",
+          "trap": "Quem marca mais luz solar confunde as estações, achando que o inverno tem mais luz como o verão.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Seu amigo acha que o Natal é sempre frio. Qual atitude é a mais justa?",
+          "options": [
+            "Explico sobre as estações",
+            "Concordo com ele",
+            "Ignoro o assunto",
+            "Digo que está errado"
+          ],
+          "answer": "Explico sobre as estações",
+          "explanation": "Explicar ajuda seu amigo a entender por que o Natal é quente no Brasil.",
+          "why": "A resposta certa é explicar sobre as estações porque isso ajuda seu amigo a entender a diferença entre os hemisférios.",
+          "trap": "Quem marca concordo com ele não ajuda a esclarecer a confusão sobre as estações do ano.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "O que aconteceria se a Terra não fosse inclinada?",
+          "options": [
+            "Sem estações",
+            "Mais estações",
+            "Estações iguais",
+            "Estações opostas"
+          ],
+          "answer": "Sem estações",
+          "explanation": "Sem inclinação, a luz solar seria distribuída igualmente, eliminando as estações.",
+          "why": "A resposta certa é sem estações porque a inclinação da Terra é o que cria as estações do ano.",
+          "trap": "Quem marca mais estações confunde a inclinação com a rotação, achando que mais inclinação cria mais estações.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There ___ a dog in the park.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a dog in the park.",
+          "why": "A resposta certa é is porque there is vale para um cachorro só, e are fica para quando são dois ou mais.",
+          "trap": "Quem marca are pensa em vários cachorros e esquece que a frase fala de um cachorro só no parque.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre as estações do ano?",
+          "options": [
+            "São causadas pela inclinação",
+            "São iguais em todo lugar",
+            "Mudam a cada mês",
+            "Dependem da distância do Sol"
+          ],
+          "answer": "São causadas pela inclinação",
+          "explanation": "As estações são causadas pela inclinação da Terra em relação ao Sol.",
+          "why": "A resposta certa é são causadas pela inclinação porque isso determina a quantidade de luz solar recebida em cada hemisfério.",
+          "trap": "Quem marca dependem da distância do Sol confunde a inclinação com a distância, mas a Terra está sempre a uma distância similar.",
+          "kind": "knowledge",
+          "subject": "geografia",
+          "skill": "GEO.FATO",
+          "bloom": "entender"
+        },
+        {
+          "question": "Durante um jogo de futebol, o sol está forte. O que acontece com os jogadores?",
+          "options": [
+            "Cansam mais rápido",
+            "Correm mais rápido",
+            "Ficam mais fortes",
+            "Jogam melhor"
+          ],
+          "answer": "Cansam mais rápido",
+          "explanation": "O calor do sol forte faz os jogadores se cansarem mais rapidamente.",
+          "why": "A resposta certa é cansam mais rápido porque o calor aumenta o esforço físico e a perda de líquidos.",
+          "trap": "Quem marca correm mais rápido acha que o calor dá mais energia, mas na verdade ele cansa mais.",
+          "kind": "knowledge",
+          "subject": "ciencias",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar",
+          "scenario": "futebol"
+        },
+        {
+          "question": "Uma loja vende 30 camisetas por dia. Em 4 dias, 10 camisetas são devolvidas. Quantas camisetas ficaram vendidas?",
+          "options": [
+            "110",
+            "120",
+            "100",
+            "90"
+          ],
+          "answer": "110",
+          "explanation": "Primeiro, multiplica 30 por 4 para saber o total vendido, depois subtrai as devoluções.",
+          "why": "A resposta certa é 110 porque 30 vezes 4 dá 120, e 120 menos 10 devoluções fecha 110.",
+          "trap": "Quem marca 120 esquece de subtrair as 10 camisetas que foram devolvidas após a venda.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        }
+      ],
+      "reflectionPrompt": "Como as estações do ano afetam suas atividades favoritas ao longo do ano?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Durante um campeonato, cada vitória vale 3 pontos e cada empate vale 1. O time venceu 5 jogos e empatou 3. Quantos pontos o time acumulou?",
+          "options": [
+            "18",
+            "15",
+            "16",
+            "20"
+          ],
+          "answer": "18",
+          "why": "A resposta certa é 18 porque 5 vitórias dão 15 pontos e 3 empates somam mais 3 pontos, totalizando 18.",
+          "trap": "Quem marca 15 contou apenas as vitórias e esqueceu de adicionar os 3 pontos dos empates.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "scenario": "futebol",
+          "bloom": "aplicar"
+        }
+      ]
+    },
+    "slots": [
+      {
+        "index": 0,
+        "skill": "LIC.IDEIA",
+        "kind": "lesson",
+        "area": "ideia"
+      },
+      {
+        "index": 1,
+        "skill": "LIC.APLICA",
+        "kind": "lesson",
+        "area": "aplica"
+      },
+      {
+        "index": 2,
+        "skill": "LIC.DILEMA",
+        "kind": "dilemma",
+        "area": "dilema"
+      },
+      {
+        "index": 3,
+        "skill": "CIE.CAUSA",
+        "kind": "knowledge",
+        "area": "ciências"
+      },
+      {
+        "index": 4,
+        "skill": "ING.N1.BE",
+        "kind": "knowledge",
+        "area": "inglês"
+      },
+      {
+        "index": 5,
+        "skill": "HIS.FATO",
+        "kind": "knowledge",
+        "area": "história ou geografia"
+      },
+      {
+        "index": 6,
+        "skill": "",
+        "kind": "knowledge",
+        "area": "cenário de futebol",
+        "scenario": "futebol"
+      },
+      {
+        "index": 7,
+        "skill": "MAT.OP2",
+        "kind": "knowledge",
+        "area": "matemática"
+      }
+    ]
+  },
+  "generatedAt": {},
+  "completed": false
+}

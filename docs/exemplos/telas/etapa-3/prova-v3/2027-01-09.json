@@ -1,0 +1,127 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2027-01-09",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2027-01-09",
+  "status": "ready",
+  "theme": {
+    "id": "biomas-do-brasil",
+    "category": "brasil",
+    "title": "Seis Brasis diferentes",
+    "lesson": "Amazônia, Cerrado, Caatinga, Mata Atlântica, Pantanal e Pampa: por que cada um tem chuva, plantas e animais diferentes. O Cerrado é uma floresta de cabeça para baixo, com raízes gigantes.",
+    "whyItMatters": "Pensar sobre isso hoje já é um passo."
+  },
+  "questions": [
+    {
+      "question": "Qual animal usa o eco do próprio som para se guiar e caçar no escuro?",
+      "options": [
+        "A cobra",
+        "A coruja",
+        "O gato",
+        "O morcego"
+      ],
+      "answer": "O morcego",
+      "explanation": "O morcego emite sons agudos que batem nos objetos e voltam. Pelo eco, ele sabe onde está cada inseto, mesmo sem luz nenhuma.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Estime: quantos anos uma tartaruga gigante pode viver?",
+      "options": [
+        "Cerca de 2 anos",
+        "Cerca de 10 anos",
+        "Mais de 100 anos",
+        "Cerca de 30 anos"
+      ],
+      "answer": "Mais de 100 anos",
+      "explanation": "Tartarugas gigantes de Galápagos passam dos 150 anos. O metabolismo lento e o casco protetor ajudam nessa vida longa.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Por que não existem pinguins selvagens no Polo Norte?",
+      "options": [
+        "Porque no norte não há gelo",
+        "Porque as focas não deixam",
+        "Eles evoluíram no hemisfério sul e nunca cruzaram o Equador quente",
+        "Porque eles não sabem nadar em água fria"
+      ],
+      "answer": "Eles evoluíram no hemisfério sul e nunca cruzaram o Equador quente",
+      "explanation": "Pinguins vivem na Antártida, na África do Sul e até no Brasil. Ursos polares vivem só no norte, então os dois nunca se encontram na natureza.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Qual destas coisas é um dever de quem vive numa cidade?",
+      "options": [
+        "Respeitar as regras de trânsito",
+        "Torcer para o time da cidade",
+        "Morar em apartamento",
+        "Ter um carro"
+      ],
+      "answer": "Respeitar as regras de trânsito",
+      "explanation": "Regras de trânsito valem para motoristas, ciclistas e pedestres. Elas existem para que todos possam circular em segurança.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "O que aconteceria hoje se a roda nunca tivesse sido inventada?",
+      "options": [
+        "Não existiriam livros",
+        "Não existiriam casas",
+        "Transportar coisas pesadas seria muito mais difícil",
+        "Não existiria fogo"
+      ],
+      "answer": "Transportar coisas pesadas seria muito mais difícil",
+      "explanation": "Carros, bicicletas, carrinhos e até engrenagens usam a roda. Sem ela, tudo teria que ser arrastado ou carregado.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Estime: quantas pessoas vivem no Brasil?",
+      "options": [
+        "Cerca de 200 milhões",
+        "Cerca de 20 milhões",
+        "Cerca de 2 milhões",
+        "Cerca de 2 bilhões"
+      ],
+      "answer": "Cerca de 200 milhões",
+      "explanation": "O Brasil tem pouco mais de 200 milhões de habitantes e está entre os 7 países mais populosos do mundo.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Um quadrado tem área de 36 cm². Quanto mede cada lado?",
+      "options": [
+        "6 cm",
+        "18 cm",
+        "9 cm",
+        "4 cm"
+      ],
+      "answer": "6 cm",
+      "explanation": "A área do quadrado é lado × lado. Como 6 × 6 = 36, cada lado mede 6 cm.",
+      "kind": "knowledge",
+      "subject": "geral"
+    },
+    {
+      "question": "Qual destes animais é o parente vivo mais próximo dos dinossauros?",
+      "options": [
+        "O lagarto",
+        "O elefante",
+        "O tubarão",
+        "A galinha"
+      ],
+      "answer": "A galinha",
+      "explanation": "As aves descendem de dinossauros com penas. Ossos, ovos e até o jeito de andar da galinha lembram um pequeno dinossauro.",
+      "kind": "knowledge",
+      "subject": "geral"
+    }
+  ],
+  "reflectionPrompt": "O que você aprendeu hoje que pode usar amanhã?",
+  "source": "offline",
+  "sanitize": {
+    "kept": 8,
+    "dropped": {}
+  },
+  "generatedAt": {},
+  "completed": false
+}

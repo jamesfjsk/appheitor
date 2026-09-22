@@ -32,6 +32,7 @@ function readSanitize(raw: unknown): DailyQuizSanitize | undefined {
     batchLog?: unknown;
     fromOffline?: unknown;
     reviewFellBack?: unknown;
+    duvidas?: unknown;
   };
   const dropped =
     row.dropped && typeof row.dropped === 'object'
@@ -57,6 +58,16 @@ function readSanitize(raw: unknown): DailyQuizSanitize | undefined {
       })
     : undefined;
   const batchLog = Array.isArray(row.batchLog) ? row.batchLog.filter((x): x is string => typeof x === 'string') : undefined;
+  const duvidas = Array.isArray(row.duvidas)
+    ? row.duvidas.flatMap((item) => {
+        if (!item || typeof item !== 'object') return [];
+        const n = Number((item as { n?: unknown }).n);
+        const question = (item as { question?: unknown }).question;
+        if (!Number.isInteger(n) || typeof question !== 'string') return [];
+        const motivo = (item as { motivo?: unknown }).motivo;
+        return [{ n, question, motivo: typeof motivo === 'string' ? motivo : '' }];
+      })
+    : undefined;
   return {
     kept: Number(row.kept) || 0,
     dropped,
@@ -65,6 +76,7 @@ function readSanitize(raw: unknown): DailyQuizSanitize | undefined {
     ...(batchLog && batchLog.length ? { batchLog } : {}),
     ...(typeof row.fromOffline === 'number' ? { fromOffline: row.fromOffline } : {}),
     ...(row.reviewFellBack === true ? { reviewFellBack: true } : {}),
+    ...(duvidas ? { duvidas } : {}),
   };
 }
 

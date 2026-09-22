@@ -1,0 +1,519 @@
+{
+  "id": "DydxTQ0cGEbX46LLlQxxD123pQD3_2026-12-03",
+  "userId": "DydxTQ0cGEbX46LLlQxxD123pQD3",
+  "date": "2026-12-03",
+  "status": "ready",
+  "theme": {
+    "id": "ingles-jogos",
+    "category": "ingles",
+    "title": "Inglês dos Jogos: Além da Tela",
+    "lesson": "Você já reparou que algumas palavras aparecem em quase todos os jogos que você joga? Palavras como 'level', 'craft', 'inventory', 'quest', 'spawn' e 'settings' são comuns. Elas têm significados específicos nos jogos, mas também podem ser usadas fora deles. Por exemplo, 'level' pode ser o nível de um jogo ou o nível de dificuldade de uma tarefa na escola. 'Craft' significa criar algo, seja uma espada no jogo ou um projeto de ciências. Hoje, vamos explorar como essas palavras podem ser usadas no dia a dia, além de entender melhor o que elas significam nos jogos.",
+    "whyItMatters": "Entender essas palavras ajuda você a se comunicar melhor em inglês, dentro e fora dos jogos.",
+    "curiosity": "Sabia que 'spawn' vem do mundo da biologia, onde significa 'desovar'? Nos jogos, é quando algo aparece."
+  },
+  "questions": [
+    {
+      "question": "Se você está organizando seu 'inventory', o que está fazendo?",
+      "options": [
+        "Arrumando itens",
+        "Jogando fora",
+        "Comprando mais",
+        "Vendendo tudo"
+      ],
+      "answer": "Arrumando itens",
+      "explanation": "Organizar o 'inventory' significa arrumar os itens que você possui.",
+      "kind": "lesson",
+      "subject": "tema",
+      "why": "A resposta certa é 'Arrumando itens' porque 'inventory' é onde você guarda e organiza seus itens.",
+      "trap": "Quem marca 'Jogando fora' confunde organizar com descartar, mas 'inventory' é sobre manter.",
+      "skill": "LIC.APLICA",
+      "bloom": "aplicar"
+    },
+    {
+      "question": "O amigo está com dificuldade em 'craft'. Qual atitude é a mais justa?",
+      "options": [
+        "Ajudo ele a criar",
+        "Fico olhando de longe",
+        "Chamo outro amigo",
+        "Saio para brincar"
+      ],
+      "answer": "Ajudo ele a criar",
+      "explanation": "A resposta certa é Ajudo ele a criar porque isso ajuda o amigo a entender e participar melhor da atividade.",
+      "kind": "dilemma",
+      "subject": "tema",
+      "why": "A resposta certa é Ajudo ele a criar porque isso ajuda o amigo a entender e participar melhor da atividade.",
+      "trap": "Quem marca Fico olhando de longe não ajuda o amigo a superar a dificuldade.",
+      "skill": "LIC.DILEMA",
+      "bloom": "analisar"
+    },
+    {
+      "question": "Por que as plantas precisam de luz solar para crescer?",
+      "options": [
+        "Para fazer fotossíntese",
+        "Para se proteger do frio",
+        "Para evitar insetos",
+        "Para crescer mais rápido"
+      ],
+      "answer": "Para fazer fotossíntese",
+      "explanation": "A resposta certa é Para fazer fotossíntese porque a luz solar é essencial para esse processo nas plantas.",
+      "kind": "knowledge",
+      "subject": "ciencias",
+      "why": "A resposta certa é Para fazer fotossíntese porque a luz solar é essencial para esse processo nas plantas.",
+      "trap": "Quem marca Para crescer mais rápido não entende que a fotossíntese é o motivo principal.",
+      "skill": "CIE.CAUSA",
+      "bloom": "entender"
+    }
+  ],
+  "reflectionPrompt": "Qual palavra de jogo você acha mais interessante e por quê?",
+  "source": "ai",
+  "sanitize": {
+    "kept": 3,
+    "dropped": {
+      "opcao_caricata": 1,
+      "why_curto": 8,
+      "tipos_mistos": 1,
+      "conta_um_passo": 1,
+      "duplicata": 1,
+      "certa_mais_longa": 1,
+      "ingles_nivel": 1
+    },
+    "perQuestion": [
+      {
+        "i": 0,
+        "codes": []
+      },
+      {
+        "i": 1,
+        "codes": []
+      },
+      {
+        "i": 2,
+        "codes": [
+          "opcao_caricata"
+        ]
+      },
+      {
+        "i": 3,
+        "codes": [
+          "why_curto",
+          "tipos_mistos"
+        ]
+      },
+      {
+        "i": 4,
+        "codes": [
+          "conta_um_passo"
+        ]
+      },
+      {
+        "i": 5,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 6,
+        "codes": [
+          "duplicata"
+        ]
+      },
+      {
+        "i": 7,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 8,
+        "codes": [
+          "why_curto",
+          "certa_mais_longa"
+        ]
+      },
+      {
+        "i": 9,
+        "codes": []
+      },
+      {
+        "i": 10,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 11,
+        "codes": [
+          "why_curto"
+        ]
+      },
+      {
+        "i": 12,
+        "codes": []
+      },
+      {
+        "i": 13,
+        "codes": [
+          "why_curto",
+          "ingles_nivel"
+        ]
+      },
+      {
+        "i": 14,
+        "codes": [
+          "why_curto"
+        ]
+      }
+    ],
+    "review": [
+      {
+        "n": 1,
+        "ok": false,
+        "motivo": "A pergunta testa um fato sem consenso.",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 1,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      },
+      {
+        "n": 2,
+        "ok": true,
+        "motivo": "",
+        "duvida": false
+      }
+    ],
+    "batchLog": [
+      "falta_formato"
+    ],
+    "fromOffline": 0,
+    "duvidas": []
+  },
+  "raw": {
+    "first": {
+      "theme": {
+        "title": "Inglês dos Jogos: Além da Tela",
+        "lesson": "Você já reparou que algumas palavras aparecem em quase todos os jogos que você joga? Palavras como 'level', 'craft', 'inventory', 'quest', 'spawn' e 'settings' são comuns. Elas têm significados específicos nos jogos, mas também podem ser usadas fora deles. Por exemplo, 'level' pode ser o nível de um jogo ou o nível de dificuldade de uma tarefa na escola. 'Craft' significa criar algo, seja uma espada no jogo ou um projeto de ciências. Hoje, vamos explorar como essas palavras podem ser usadas no dia a dia, além de entender melhor o que elas significam nos jogos.",
+        "whyItMatters": "Entender essas palavras ajuda você a se comunicar melhor em inglês, dentro e fora dos jogos.",
+        "curiosity": "Sabia que 'spawn' vem do mundo da biologia, onde significa 'desovar'? Nos jogos, é quando algo aparece."
+      },
+      "questions": [
+        {
+          "question": "Quando você completa um 'level' no jogo, o que isso significa?",
+          "options": [
+            "Avançou de fase",
+            "Perdeu o jogo",
+            "Reiniciou o jogo",
+            "Fez uma pausa"
+          ],
+          "answer": "Avançou de fase",
+          "explanation": "Completar um 'level' significa que você passou para a próxima fase do jogo.",
+          "why": "A resposta certa é 'Avançou de fase' porque 'level' indica uma etapa ou fase que foi concluída.",
+          "trap": "Quem marca 'Perdeu o jogo' confunde 'level' com uma situação de derrota, o que não é o caso.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "Se você está organizando seu 'inventory', o que está fazendo?",
+          "options": [
+            "Arrumando itens",
+            "Jogando fora",
+            "Comprando mais",
+            "Vendendo tudo"
+          ],
+          "answer": "Arrumando itens",
+          "explanation": "Organizar o 'inventory' significa arrumar os itens que você possui.",
+          "why": "A resposta certa é 'Arrumando itens' porque 'inventory' é onde você guarda e organiza seus itens.",
+          "trap": "Quem marca 'Jogando fora' confunde organizar com descartar, mas 'inventory' é sobre manter.",
+          "kind": "lesson",
+          "subject": "tema",
+          "skill": "LIC.APLICA",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Você vê um amigo com dificuldade em uma 'quest' no jogo. Qual atitude é a mais justa?",
+          "options": [
+            "Oferecer ajuda",
+            "Ignorar a situação",
+            "Rir da dificuldade",
+            "Fingir que não viu"
+          ],
+          "answer": "Oferecer ajuda",
+          "explanation": "Oferecer ajuda é a atitude mais justa, pois mostra empatia e apoio ao amigo.",
+          "why": "A resposta certa é 'Oferecer ajuda' porque é importante ser solidário e ajudar quem precisa.",
+          "trap": "Quem marca 'Ignorar a situação' perde a chance de ser um bom amigo e ajudar.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Durante uma partida de futebol, você vê que a bola está 'spawning' rapidamente. O que isso significa?",
+          "options": [
+            "Aparecendo de novo",
+            "Desaparecendo",
+            "Parando no ar",
+            "Mudando de cor"
+          ],
+          "answer": "Aparecendo de novo",
+          "explanation": "'Spawning' significa que a bola está aparecendo novamente no campo.",
+          "why": "A resposta certa é 'Aparecendo de novo' porque 'spawn' é quando algo surge ou reaparece.",
+          "trap": "Quem marca 'Desaparecendo' confunde 'spawning' com sumir, mas é o oposto.",
+          "kind": "knowledge",
+          "subject": "ciências",
+          "skill": "CIE.CAUSA",
+          "bloom": "entender",
+          "scenario": "futebol"
+        },
+        {
+          "question": "Uma loja vende 3 jogos por R$ 50 cada. Quanto custa comprar 5 jogos?",
+          "options": [
+            "R$ 250",
+            "R$ 150",
+            "R$ 200",
+            "R$ 100"
+          ],
+          "answer": "R$ 250",
+          "explanation": "Primeiro, calcule 3 jogos por R$ 50 cada, depois multiplique por 5.",
+          "why": "A resposta certa é R$ 250 porque 3 vezes 50 é 150, e 150 vezes 5 é 250.",
+          "trap": "Quem marca R$ 150 só calcula o preço de 3 jogos, não de 5.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "O que aconteceria se não houvesse mais 'settings' nos jogos?",
+          "options": [
+            "Não ajustaria nada",
+            "Jogaria melhor",
+            "Ganhar pontos extras",
+            "Salvar automaticamente"
+          ],
+          "answer": "Não ajustaria nada",
+          "explanation": "Sem 'settings', não seria possível ajustar configurações do jogo.",
+          "why": "A resposta certa é 'Não ajustaria nada' porque 'settings' são as configurações que você pode mudar.",
+          "trap": "Quem marca 'Jogaria melhor' confunde ajustes com habilidades de jogo.",
+          "kind": "knowledge",
+          "subject": "ciências",
+          "skill": "CIE.CAUSA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "There ___ a rabbit in the garden.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "answer": "is",
+          "audioText": "There is a rabbit in the garden.",
+          "why": "A resposta certa é 'is' porque 'there is' vale para um coelho só, e 'are' fica para quando são dois ou mais.",
+          "trap": "Quem marca 'are' pensa em várias coisas e esquece que a frase fala de um coelho só no jardim.",
+          "kind": "knowledge",
+          "subject": "ingles",
+          "skill": "ING.N1.BE",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a chegada dos europeus na América?",
+          "options": [
+            "Chegaram em 1492",
+            "Vieram em 1600",
+            "Chegaram em 1800",
+            "Vieram em 1700"
+          ],
+          "answer": "Chegaram em 1492",
+          "explanation": "Os europeus chegaram à América em 1492, liderados por Cristóvão Colombo.",
+          "why": "A resposta certa é 'Chegaram em 1492' porque é um fato histórico amplamente aceito.",
+          "trap": "Quem marca 'Vieram em 1600' confunde com outros eventos históricos posteriores.",
+          "kind": "knowledge",
+          "subject": "historia",
+          "skill": "HIS.FATO",
+          "bloom": "entender"
+        }
+      ],
+      "reflectionPrompt": "Qual palavra de jogo você acha mais interessante e por quê?"
+    },
+    "replacement": {
+      "questions": [
+        {
+          "question": "Como a palavra 'craft' pode ser usada fora dos jogos?",
+          "options": [
+            "Criar um projeto de ciências",
+            "Jogar videogame",
+            "Assistir televisão",
+            "Ler um livro"
+          ],
+          "answer": "Criar um projeto de ciências",
+          "why": "A resposta certa é Criar um projeto de ciências porque 'craft' significa criar algo, seja no jogo ou na vida real.",
+          "trap": "Quem marca Jogar videogame não está usando a palavra 'craft' corretamente.",
+          "kind": "lesson",
+          "subject": "ideia",
+          "skill": "LIC.IDEIA",
+          "bloom": "entender"
+        },
+        {
+          "question": "O amigo está com dificuldade em 'craft'. Qual atitude é a mais justa?",
+          "options": [
+            "Ajudo ele a criar",
+            "Fico olhando de longe",
+            "Chamo outro amigo",
+            "Saio para brincar"
+          ],
+          "answer": "Ajudo ele a criar",
+          "why": "A resposta certa é Ajudo ele a criar porque isso ajuda o amigo a entender e participar melhor da atividade.",
+          "trap": "Quem marca Fico olhando de longe não ajuda o amigo a superar a dificuldade.",
+          "kind": "dilemma",
+          "subject": "tema",
+          "skill": "LIC.DILEMA",
+          "bloom": "analisar"
+        },
+        {
+          "question": "Em um jogo de futebol, cada gol vale 3 pontos. Se um time faz 4 gols em 2 partidas, quantos pontos ele ganha?",
+          "options": [
+            "24",
+            "12",
+            "18",
+            "6"
+          ],
+          "answer": "24",
+          "why": "A resposta certa é 24 porque 3 vezes 4 dá 12 e 12 vezes 2 dá 24.",
+          "trap": "Quem marca 12 esquece de multiplicar pelo número de partidas.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar",
+          "scenario": "futebol"
+        },
+        {
+          "question": "Cada pacote tem 7 balas. Em 3 dias, são vendidos 5 pacotes por dia. Quantas balas são vendidas?",
+          "options": [
+            "105",
+            "35",
+            "70",
+            "140"
+          ],
+          "answer": "105",
+          "why": "A resposta certa é 105 porque 7 vezes 5 dá 35 e 35 vezes 3 dá 105.",
+          "trap": "Quem marca 35 esquece de multiplicar pelo número de dias.",
+          "kind": "knowledge",
+          "subject": "matematica",
+          "skill": "MAT.OP2",
+          "bloom": "aplicar"
+        },
+        {
+          "question": "Por que as plantas precisam de luz solar para crescer?",
+          "options": [
+            "Para fazer fotossíntese",
+            "Para se proteger do frio",
+            "Para evitar insetos",
+            "Para crescer mais rápido"
+          ],
+          "answer": "Para fazer fotossíntese",
+          "why": "A resposta certa é Para fazer fotossíntese porque a luz solar é essencial para esse processo nas plantas.",
+          "trap": "Quem marca Para crescer mais rápido não entende que a fotossíntese é o motivo principal.",
+          "kind": "knowledge",
+          "subject": "ciências",
+          "skill": "CIE.CAUSA",
+          "bloom": "entender"
+        },
+        {
+          "question": "There ___ a book on the table.",
+          "options": [
+            "is",
+            "are",
+            "was",
+            "were"
+          ],
+          "answer": "is",
+          "why": "A resposta certa é 'is' porque 'a book' é singular e usamos 'is' para singular.",
+          "trap": "Quem marca are esquece que 'a book' é singular.",
+          "kind": "knowledge",
+          "subject": "inglês",
+          "skill": "ING.N1.BE",
+          "bloom": "lembrar"
+        },
+        {
+          "question": "Qual fato é verdadeiro sobre a Primeira Guerra Mundial?",
+          "options": [
+            "Começou em 1914",
+            "Terminou em 1925",
+            "Teve 3 fases principais",
+            "Foi na Ásia"
+          ],
+          "answer": "Começou em 1914",
+          "why": "A resposta certa é Começou em 1914 porque esse é o ano correto do início da guerra.",
+          "trap": "Quem marca Terminou em 1925 está errado, pois terminou em 1918.",
+          "kind": "knowledge",
+          "subject": "história",
+          "skill": "HIS.FATO",
+          "bloom": "lembrar"
+        }
+      ]
+    },
+    "slots": [
+      {
+        "index": 0,
+        "skill": "LIC.IDEIA",
+        "kind": "lesson",
+        "area": "ideia"
+      },
+      {
+        "index": 1,
+        "skill": "LIC.APLICA",
+        "kind": "lesson",
+        "area": "aplica"
+      },
+      {
+        "index": 2,
+        "skill": "LIC.DILEMA",
+        "kind": "dilemma",
+        "area": "dilema"
+      },
+      {
+        "index": 3,
+        "skill": "",
+        "kind": "knowledge",
+        "area": "cenário de futebol",
+        "scenario": "futebol"
+      },
+      {
+        "index": 4,
+        "skill": "MAT.OP2",
+        "kind": "knowledge",
+        "area": "matemática"
+      },
+      {
+        "index": 5,
+        "skill": "CIE.CAUSA",
+        "kind": "knowledge",
+        "area": "ciências"
+      },
+      {
+        "index": 6,
+        "skill": "ING.N1.BE",
+        "kind": "knowledge",
+        "area": "inglês"
+      },
+      {
+        "index": 7,
+        "skill": "HIS.FATO",
+        "kind": "knowledge",
+        "area": "história ou geografia"
+      }
+    ]
+  },
+  "generatedAt": {},
+  "completed": false
+}
