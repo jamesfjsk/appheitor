@@ -64,7 +64,7 @@ export function noteMaterial(score: number): MaterialCount {
   return 0;
 }
 
-/** Ferraria: >= 5 acertos (meio ponto na 2ª tentativa) = 3; 3-4 = 2; senão 0 */
+/** Ferraria: >= 5 acertos de primeira = 3; 3-4 = 2; senão 0 (a 2ª tentativa é treino, não conta) */
 export function forgeMaterial(hits: number): MaterialCount {
   if (hits >= FORGE_THRESHOLDS.three) return 3;
   if (hits >= FORGE_THRESHOLDS.two) return 2;

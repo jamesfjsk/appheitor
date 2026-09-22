@@ -1,5 +1,4 @@
-import type { EconomySettings, GoalDoc } from '../../types/village';
-import { DEFAULT_ECONOMY } from '../../config/village';
+import type { GoalDoc } from '../../types/village';
 import { addDays, isoWeekOf, weekdayOf } from '../../utils/clock';
 import type { GoldTransaction } from '../../types';
 
@@ -41,7 +40,6 @@ export function vaultInterestPct(level: number): number {
 export function weeklyInterest(
   goals: Array<Pick<GoalDoc, 'id' | 'status' | 'savedGold' | 'lastInterestWeek'>>,
   weekIso: string,
-  _settings: Pick<EconomySettings, 'interestRatePct' | 'interestCapGold'> = DEFAULT_ECONOMY,
   vaultLevel?: number,
   depositedThisWeek: Record<string, number> = {},
 ): InterestLine[] {

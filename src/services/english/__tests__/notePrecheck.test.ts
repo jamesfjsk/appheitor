@@ -1,5 +1,6 @@
 import { expect, run, test } from './harness';
 import { levenshtein, matchesInfo, missingInfos, normalize, singularize, tokenMatches, wordDistance } from '../notePrecheck';
+import { OFFLINE_NOTES } from '../../../data/englishOfflineContracts';
 
 test('normalize: minúsculas, sem acento/pontuação, número por extenso vira dígito, plural sai', () => {
   expect(normalize('Two Swords!')).toBe('2 sword');
@@ -67,6 +68,30 @@ test('wordDistance conta palavras trocadas, ignora maiúscula e pontuação', ()
   expect(wordDistance('i need two swords', 'I need two swords!')).toBe(0);
   expect(wordDistance('need two swords', 'I need two swords')).toBe(1);
   expect(wordDistance('I want the sword for dog', 'I want the sword for the dog')).toBe(1);
+});
+
+test('R1 (22/09): o prego não acende para o contrário do pedido', () => {
+  const n202 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-02');
+  if (!n202) throw new Error('n2-02 sumiu do banco');
+  const info = n202.content.mustInclude;
+  expect(missingInfos('I want the screen now. Dinner is first.', info).map((i) => i.pt)).toEqual(['não quero a tela']);
+  expect(missingInfos("I don't want the screen now. I wait because dinner is first.", info)).toEqual([]);
+  expect(missingInfos('I do not want the screen now. Dinner is first.', info)).toEqual([]);
+  expect(missingInfos('I do not want screen now. Dinner is first.', info)).toEqual([]);
+  expect(missingInfos('I dont want the screen now because dinner is first', info)).toEqual([]);
+  // sem "screen" o prego não pode acender, mesmo com "don't want"
+  expect(missingInfos("I don't want dinner. Dinner is first.", info).map((i) => i.pt)).toEqual(['não quero a tela']);
+  expect(missingInfos("I don't want to wait. Dinner is first.", info).map((i) => i.pt)).toEqual(['não quero a tela']);
+  const n104 = OFFLINE_NOTES[1].find((n) => n.id === 'n1-04');
+  if (!n104) throw new Error('n1-04 sumiu do banco');
+  expect(missingInfos('water please thirsty', n104.content.mustInclude).map((i) => i.pt)).toEqual(['quero água']);
+  expect(missingInfos('Please, I want water. I am thirsty.', n104.content.mustInclude)).toEqual([]);
+  expect(missingInfos('I want water please. I am thirsty', n104.content.mustInclude)).toEqual([]);
+  const n204 = OFFLINE_NOTES[2].find((n) => n.id === 'n2-04');
+  if (!n204) throw new Error('n2-04 sumiu do banco');
+  expect(missingInfos('I drink water after soccer because I am thirsty.', n204.content.mustInclude).map((i) => i.pt)).toEqual(['no jogo', 'porque estou com calor']);
+  expect(missingInfos('I drink water at the game because I am hot.', n204.content.mustInclude)).toEqual([]);
+  expect(missingInfos('I drink water in the game. I am hot.', n204.content.mustInclude).map((i) => i.pt)).toEqual(['porque estou com calor']);
 });
 
 void run();

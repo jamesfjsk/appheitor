@@ -243,7 +243,7 @@ export async function applyWeeklyInterest(uid: string): Promise<number> {
       depositedThisWeek[t.relatedId] = (depositedThisWeek[t.relatedId] || 0) + Math.abs(t.amount);
     }
   }
-  const lines = weeklyInterest(goals, week, economy, vaultLevel, depositedThisWeek);
+  const lines = weeklyInterest(goals, week, vaultLevel, depositedThisWeek);
   if (lines.length === 0) return 0;
   const room = await roomForGameGold(uid, economy);
   let remaining = room.room;

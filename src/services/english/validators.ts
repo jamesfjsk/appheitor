@@ -220,7 +220,8 @@ export function validateMerchant(content: MerchantContentInput, level: number, c
   const base: MerchantContent = { spots, items, steps, sentences: [], gapped: [], translation: [] };
   if (steps.length < 2 || steps.length > 4) problems.push(`passos: ${steps.length} (esperado 2-4)`);
   if (spots.length < 4 || spots.length > 6) problems.push(`lugares: ${spots.length} (esperado 4-6)`);
-  if (items.length !== steps.length + 1) problems.push('bandeja precisa ter um item a mais que os passos');
+  // a bandeja cresce com a prática (merchantRoom extraTray: até +2 depois da 3ª entrega); F1 da revisão de 22/09
+  if (items.length < steps.length + 1 || items.length > steps.length + 3) problems.push('bandeja precisa ter de 1 a 3 itens a mais que os passos');
   const seenItems = new Set<string>();
   steps.forEach((s, i) => {
     const def = catalogs.items.find((it) => it.id === s.item);

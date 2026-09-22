@@ -2,7 +2,6 @@ import { expect, run, test } from '../../english/__tests__/harness';
 import { addDays, isBeforeLaunch, nowBrazil, resetClockForTests } from '../../../utils/clock';
 import type { GoldTransaction } from '../../../types';
 import type { AgendaItem, ChallengeDoc, GoalDoc } from '../../../types/village';
-import { DEFAULT_ECONOMY } from '../../../config/village';
 import { validateDeposit, vaultGoalCap, weeklyInterest, weeklyStatement, savingsRate, patienceForecast, minGoldForBonus, vaultInterestPct, unlockOnAfter, canRedeemPile, redeemWaitLine, saqueLine } from '../bank';
 import { applyEvent, challengeState, extendForPunishment } from '../challenges';
 import { daysToAfford, priceForDays, referenceIncome, sinceLaunch } from '../income';
@@ -73,14 +72,13 @@ test('juros 10/20/30 sem teto e ignora semana já paga; virada de ano', () => {
   const week = '2026-W01';
   const a = goal({ id: 'a', savedGold: 200, lastInterestWeek: '2025-W52' });
   const b = goal({ id: 'b', savedGold: 200, lastInterestWeek: '2025-W52' });
-  const paid = weeklyInterest([a, b], week, DEFAULT_ECONOMY, 2);
+  const paid = weeklyInterest([a, b], week, 2);
   const sum = paid.reduce((s, p) => s + p.interest, 0);
   expect(sum).toBe(80);
   expect(paid[0].savedBefore).toBe(200);
   const again = weeklyInterest(
     paid.map((p) => ({ id: p.goalId, status: 'open' as const, savedGold: p.savedAfter, lastInterestWeek: week })),
     week,
-    DEFAULT_ECONOMY,
     2,
   );
   expect(again).toHaveLength(0);
@@ -96,11 +94,11 @@ test('juros do Cofre: n1 10%, n2 20%, n3 30%; n0 não paga', () => {
   expect(vaultInterestPct(3)).toBe(30);
   const week = '2026-W02';
   const g = goal({ savedGold: 100, lastInterestWeek: '2026-W01' });
-  expect(weeklyInterest([g], week, DEFAULT_ECONOMY, 0)).toHaveLength(0);
-  expect(weeklyInterest([g], week, DEFAULT_ECONOMY, 1)[0].interest).toBe(10);
-  expect(weeklyInterest([g], week, DEFAULT_ECONOMY, 2)[0].interest).toBe(20);
-  expect(weeklyInterest([g], week, DEFAULT_ECONOMY, 3)[0].interest).toBe(30);
-  const afterDeposit = weeklyInterest([g], week, DEFAULT_ECONOMY, 2, { g1: 80 });
+  expect(weeklyInterest([g], week, 0)).toHaveLength(0);
+  expect(weeklyInterest([g], week, 1)[0].interest).toBe(10);
+  expect(weeklyInterest([g], week, 2)[0].interest).toBe(20);
+  expect(weeklyInterest([g], week, 3)[0].interest).toBe(30);
+  const afterDeposit = weeklyInterest([g], week, 2, { g1: 80 });
   expect(afterDeposit[0].savedBefore).toBe(20);
   expect(afterDeposit[0].interest).toBe(4);
 });

@@ -124,7 +124,7 @@ Módulos novos continuam sem Firebase, React ou `import.meta.env`. `timezone.ts`
 ## `src/services/village/bank.ts`
 
 - `validateDeposit(goal, amount, availableGold)` — recusa amount, gold, closed, target.
-- `weeklyInterest(goals, weekIso, settings, vaultLevel)` — 10/20/30% do `savedGold` já guardado conforme o nível do Cofre, sem teto, ignora semana já paga. n0 não paga.
+- `weeklyInterest(goals, weekIso, vaultLevel, depositedThisWeek)` — 10/20/30% do `savedGold` já guardado conforme o nível do Cofre, sem teto, ignora semana já paga. n0 não paga.
 - `vaultInterestPct(level)` — 0 / 10 / 20 / 30.
 - `patienceForecast(saved, weeks, ratePct)` — bônus composto em gold inteiro, sem teto.
 - `unlockOnAfter` / `canRedeemPile` / `redeemWaitLine` / `saqueLine` — prazo das semanas, dia do saque e quando o Resgatar acende.

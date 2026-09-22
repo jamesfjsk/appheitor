@@ -1,6 +1,6 @@
 // ========================================
 // A Base: contrato da Ferraria. 6 peças: scramble (blocos clicáveis com desfazer),
-// gap (3 opções) e typed (campo). Erro -> regra + 1 tentativa (vale metade) -> revela.
+// gap (3 opções) e typed (campo). Erro -> regra + 1 tentativa (só treino, não paga) -> revela.
 // Peças erradas voltam uma vez no fim (repescagem, sem material).
 // ========================================
 
@@ -11,7 +11,7 @@ import { forgeMaterial } from '../../../../config/englishRewards';
 import { playText, prefetchAudio, stopAudio } from '../../../../services/englishTts';
 import type { ContractScreenProps } from './ContractShell';
 
-type Earned = 0 | 0.5 | 1;
+type Earned = 0 | 1;
 type Resolved = 'correct' | 'revealed' | null;
 type Phase = 'main' | 'redo' | 'summary';
 
@@ -162,8 +162,8 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
     return (
       <div className="text-center py-4" data-testid="forge-summary">
         <p className="mc-title text-xs sm:text-sm">Ferraria</p>
-        <p className="mc-font text-2xl text-white mt-3">{hits % 1 === 0 ? hits : hits.toFixed(1)}<span className="mc-muted text-base"> / {items.length}</span></p>
-        <p className="text-sm mc-muted mt-1">peças consertadas (2ª tentativa vale metade)</p>
+        <p className="mc-font text-2xl text-white mt-3">{hits}<span className="mc-muted text-base"> / {items.length}</span></p>
+        <p className="text-sm mc-muted mt-1">peças consertadas</p>
         {wrongIdx.length > 0 && (
           <p className="text-sm text-white/85 mt-3">Repescagem: {redoCorrect} de {wrongIdx.length} peças refeitas certas (só treino).</p>
         )}

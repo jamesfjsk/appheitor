@@ -205,7 +205,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const [paid, setPaid] = useState(false);
   const [saving, setSaving] = useState(false);
   const [voiceDone, setVoiceDone] = useState(true);
-  const prefetched = useRef(false);
+  const prefetched = useRef<string | null>(null);
   const stepLock = useRef(false);
   const voiceTick = useRef(0);
 
@@ -254,8 +254,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   }, [childUid, today, count]);
 
   useEffect(() => {
-    if (!loaded || !childUid || !enabled || prefetched.current) return;
-    prefetched.current = true;
+    // por dia, não por montagem: a aba que fica aberta na virada precisa preparar a prova nova e a de amanhã
+    if (!loaded || !childUid || !enabled || prefetched.current === today) return;
+    prefetched.current = today;
     if (!quiz || (quiz.questions.length === 0 && !quiz.completed)) void prepare();
     ensureDailyQuiz(childUid, addDays(today, 1), today, count).catch((e) => console.warn('DailyQuiz: prefetch de amanhã falhou', e));
   }, [loaded, childUid, enabled, quiz, prepare, today, count]);
@@ -380,6 +381,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
       const r = quizRewards(correct, total, economy);
       setScore(correct);
       setReward(r);
+      // paga primeiro: o pagamento é idempotente pelo claim quiz:<data>; se a aba cair entre as duas escritas,
+      // o dia não fica "concluído" sem o gold (A2 da revisão de 22/09)
+      await FirestoreService.payQuizRewards(childUid, today, r.xp, r.gold);
       await completeDailyQuiz(childUid, today, {
         score: correct,
         totalQuestions: total,
@@ -389,7 +393,6 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
         reflection,
         reflectionNote: verdict.say,
       });
-      await FirestoreService.payQuizRewards(childUid, today, r.xp, r.gold);
       if (correct / total >= 0.75) playLevelUp();
       else playTaskComplete();
       setPaid(true);

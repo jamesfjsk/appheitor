@@ -641,7 +641,7 @@ const NOTES_1: OfflineNote[] = [
       brief: 'Escreva um recado para a mamãe. Peça com educação uma água. Diga que você tem sede.',
       mustInclude: [
         { pt: 'por favor', en: ['Please, I want', 'please I want', 'Please'] },
-        { pt: 'quero água', en: ['I want water', 'want water', 'water'] },
+        { pt: 'quero água', en: ['I want water', 'want water', 'want a water', 'need water'] },
         { pt: 'tenho sede', en: ['I am thirsty', 'am thirsty', 'thirsty'] },
       ],
       wordBank: ['please', 'want', 'water', 'thirsty', 'need', 'help', 'juice', 'cup', 'now', 'first', 'dinner', 'play'],
@@ -707,7 +707,7 @@ const NOTES_2: OfflineNote[] = [
     content: {
       brief: 'Escreva um recado para a mamãe. Diga que você não liga a tela agora. Explique que é porque o jantar vem primeiro.',
       mustInclude: [
-        { pt: 'não quero a tela', en: ["don't want the screen", 'I don\'t want', 'the screen now'] },
+        { pt: 'não quero a tela', en: ["don't want the screen", 'do not want the screen', 'not want the screen', "don't want screen", 'not want screen'] },
         { pt: 'o jantar', en: ['dinner', 'because dinner'] },
         { pt: 'porque o jantar vem primeiro', en: ['because dinner is first', 'dinner is first'] },
       ],
@@ -740,8 +740,8 @@ const NOTES_2: OfflineNote[] = [
       brief: 'Escreva um recado para o time. Diga que você bebe água no jogo. Explique que é porque você está com calor.',
       mustInclude: [
         { pt: 'bebo água', en: ['drink water', 'I drink water', 'water'] },
-        { pt: 'no jogo', en: ['at the game', 'in the game', 'after soccer'] },
-        { pt: 'porque estou com calor', en: ['because I am hot', 'because I am thirsty'] },
+        { pt: 'no jogo', en: ['at the game', 'in the game', 'at soccer', 'at the soccer game'] },
+        { pt: 'porque estou com calor', en: ['because I am hot', 'because it is hot', 'because I feel hot'] },
       ],
       wordBank: ['drink', 'water', 'game', 'because', 'hot', 'play', 'soccer', 'want', 'help', 'now', 'first', 'team'],
       model: 'I drink water at the game. I do this because I am hot.',

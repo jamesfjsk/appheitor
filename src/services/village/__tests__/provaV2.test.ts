@@ -86,6 +86,11 @@ test('sanitize descarta resposta no enunciado e alternativas iguais depois de no
   expect(normalizeQuizText('São Paulo!')).toBe('sao paulo');
   expect(answerLeaksInPrompt('Qual o nome da técnica drible?', 'drible')).toBe(true);
   expect(answerLeaksInPrompt('Se o time marca 2 e depois 3, qual o placar?', '5')).toBe(false);
+  // A3 (22/09): só palavra inteira conta como vazamento
+  expect(answerLeaksInPrompt("Complete a frase em inglês: 'The knights were ... the castle.'", 'in')).toBe(false);
+  expect(answerLeaksInPrompt('Ponha o livro ... a mesa. Complete em inglês.', 'on')).toBe(false);
+  expect(answerLeaksInPrompt('Em 2026, quantos anos faltam para 2046?', '20')).toBe(false);
+  expect(answerLeaksInPrompt('A resposta é in ou on? Complete: The cat is ... the box', 'in')).toBe(true);
   expect(optionsCollide(['soccer', 'Football', 'Soccer', 'basket'])).toBe(true);
   expect(optionsCollide(['soccer', 'football', 'tennis', 'chess'])).toBe(false);
 });

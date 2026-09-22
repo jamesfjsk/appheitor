@@ -58,7 +58,8 @@ export function answerLeaksInPrompt(question: string, answer: string): boolean {
   const q = normalizeQuizText(question);
   const a = normalizeQuizText(answer);
   if (!a || a.length < 2) return false;
-  return ` ${q} `.includes(` ${a} `) || q.includes(a);
+  // só palavra inteira: `in` dentro de "inglês" ou `20` dentro de "2026" não é vazamento (A3, 22/09)
+  return ` ${q} `.includes(` ${a} `);
 }
 
 export function optionsCollide(options: string[]): boolean {

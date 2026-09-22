@@ -1,6 +1,6 @@
 import { expect, run, test } from './harness';
 import { MERCHANT_CATALOGS } from '../../../config/englishBase';
-import { buildMerchantContent, offlineSentences } from '../merchantRoom';
+import { buildMerchantContent, buildMerchantRoom, offlineSentences } from '../merchantRoom';
 import { checkMerchantSentence, merchantAllowlist, validateForge, validateLetter, validateMerchant, validateNote } from '../validators';
 
 // ---------- Comerciante ----------
@@ -270,6 +270,23 @@ test('validateForge rejeita 6 casos ruins', () => {
   expect(forbidden.ok).toBeFalsy();
   expect(forbidden.problems.join(' ')).toContain('went');
   expect(validateForge(replace(2, { kind: 'gap', sentence: 'There are two apples.', options: ['is', 'are', 'am'], answer: 1, rule }), 1).ok).toBeFalsy();
+});
+
+test('F1 (22/09): a bandeja com itens extras depois da 3ª entrega passa no validador', () => {
+  for (const level of [1, 2, 3]) {
+    for (const done of [3, 4, 6, 9]) {
+      const room = buildMerchantRoom(7, level, undefined, undefined, { done });
+      const { sentences, translations } = offlineSentences(room.steps, MERCHANT_CATALOGS, room.items);
+      const r = validateMerchant({ spots: room.spots, items: room.items, steps: room.steps, sentences, translation: translations }, level);
+      if (!r.ok) throw new Error(`nível ${level} done ${done}: ${r.problems.join('; ')}`);
+      expect(room.items.length).toBeGreaterThanOrEqual(room.steps.length + 2);
+      expect(r.content.sentences.length).toBe(room.steps.length);
+    }
+  }
+  const base = buildMerchantContent(7, 1);
+  const extra = (id: string) => ({ ...base.items[0], id });
+  const tooMany = validateMerchant({ ...base, items: [...base.items, extra('x1'), extra('x2'), extra('x3')] }, 1);
+  expect(tooMany.ok).toBe(false);
 });
 
 void run();
