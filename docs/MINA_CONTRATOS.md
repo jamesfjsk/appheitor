@@ -4,6 +4,13 @@ Documento de desenho (fonte de verdade a partir de 18/09/2026). Pedido do pai, n
 
 **A régua (pai, 18/09, depois da primeira versão deste documento)**: a Vagoneta é a referência do que já foi lapidado, **não o alvo**: ela ainda peca no visual (fundo parado, pouco movimento). O alvo é **jogo de verdade, prazeroso, divertido e que ensina**, independente de tempo, esforço e custo. Então cada contrato nasce como jogo pela porta "jogo" do `MUNDO.md` §5 (Phaser 2D em tela cheia, ou o kit do Mine Rush), não como cena parada com botões: personagens que se mexem e reagem, objetos com peso e som, câmera e partículas, ritmo de partida (começo, meio, fim), e o aprendizado dentro da mecânica, nunca em texto ao lado dela. A seção 2 e a 3 descrevem a mecânica e o que a criança faz; o acabamento de jogo (animação, som, física leve, festa) é obrigatório em cada uma, não opcional. O que for feito de arte e código para a Vagoneta é reaproveitado e melhorado junto (fundo com vida, vagões que balançam, Ferreiro que se levanta). Regras que não mudam: `englishPlans`/`englishSessions` continuam gravando conteúdo e resultado item a item; economia da Mina (material, XP, gold, teto) não muda; a IA continua gerando o conteúdo do dia (`englishAi.ts`); `MUNDO.md` §5: a Mina é lugar, o contrato é a porta "jogo" dentro dela.
 
+**Erro nos contratos, desde 23/09 (decisão 43; `docs/APRENDER_A_APRENDER.md` §4.5; entra no pacote AP2):** a resposta vem no último degrau, não no primeiro.
+- **Comerciante:** no primeiro erro, o item volta à bandeja e o pedido toca de novo, sem a frase corrigida. No segundo, a pista ("Presta atenção na palavra depois de *apple*"). Só então vem o `correctionFix`.
+- **Recado:** o Capataz primeiro circula onde está o erro, sem escrever a forma certa. Depois diz a regra com nome. Só no fim escreve a forma certa a giz.
+- **Ajuda sem custo:** a Dica do Recado deixa de custar ferro e só aparece depois da primeira tentativa.
+- **Ferraria:** fica como está.
+- **Pagamento:** continua só na primeira tentativa (decisão 23). Cada tentativa grava `supportLevel`.
+
 ## 1. O que a Vagoneta tem e os contratos não têm
 
 | Vagoneta (hoje) | Contratos (hoje) |

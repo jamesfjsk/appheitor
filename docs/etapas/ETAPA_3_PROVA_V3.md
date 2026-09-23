@@ -48,10 +48,10 @@ Numeradas, medíveis, cada uma com o teste que a prova. Onde a regra muda um nú
 **Ritmo e portões de tela**
 
 14. **"Próxima" libera só depois de `max(6 s, palavras/3 s)`.** Hoje o piso é 4 s (`src/services/quiz/provaRules.ts:3`, `EXPLAIN_READ_MS.min`). Com a mediana de 17 palavras, 51 dos 72 itens ficam presos no piso — é o piso que faz o trabalho, não a conta. Teste: `readingMs('texto de 9 palavras...', 6000, 12000) === 6000`.
-15. **Segunda tentativa depois de ler a explicação, sem pagar** (decisão 23b). Aparece um "Tentar de novo" quando o portão da regra 14 abre; a segunda escolha não muda `score`, `goldEarned`, `xpEarned` nem a esmeralda (`src/services/dailyQuizService.ts:176`), e é gravada como `attempts` e `retryOk` no `quizBank`. **Sem aviso explícito na tela** de que não paga — é a decisão 23b literal.
+15. **Segunda tentativa só em item de raciocínio, com aviso e sem revelar a certa** (decisões 23b e 43; reescrita em 23/09, `docs/APRENDER_A_APRENDER.md` §4.1 a §4.4). Em item com escada (`MAT.*`, `ING.*`, `LIC.APLICAR`, `CIE.CAUSA`, `FUT.TATICA`; revisita segue o `skill` original), o primeiro erro **não** acende a certa: aparece o aviso (o `trap`, quando ele nomeia a opção escolhida e não contém a resposta; senão uma pista da área de `docs/conteudo/FALAS_APRENDER.md` §1.1) e as opções reabrem para a segunda tentativa; só depois dela vêm a certa, o `why` e o `trap`. Em item de fato (demais `skill`), o erro mostra a certa com `why` e `trap`, **sem** segunda tentativa. A segunda escolha não muda `score`, `goldEarned`, `xpEarned` nem a esmeralda (`src/services/dailyQuizService.ts:176`) e é gravada como `attempts`, `secondChoice`, `retryOk` e `supportLevel` no `quizBank`. **Sem aviso explícito na tela** de que não paga (decisão 23b). A versão anterior ("reabre com a certa revelada", em toda pergunta) media cliques, não aprendizado.
 16. **Reflexão: 12 palavras ou mais E 2 ou mais palavras de conteúdo do tema do dia.** Hoje são 10 palavras sem checagem de tema no serviço (`src/services/quiz/provaRules.ts:5`; `completeDailyQuiz` chama `reflectionOk(reflection)` **sem** o `about`, `dailyQuizService.ts:154`, enquanto a tela chama com `about`, `DailyQuiz.tsx:433`). A v3 passa o `about` nos dois lugares.
 17. **Rampa de reflexão nos 7 primeiros dias: 8 palavras, depois 12.** A produção medida dele é de 2 e 4 palavras. Pular direto para 12 é triplicar a barra numa noite; a régua sem degrau vira parede. Medida: `REFLECTION_MIN_WORDS` vira função de `diasDesdeOLançamento`, com teste nos dois lados do degrau.
-18. **Molde e contador na tela da reflexão.** Abaixo da pergunta do Sábio, uma linha de molde ("Hoje eu ... porque ...") que ele pode tocar para começar a frase, e um contador vivo "7 / 12". Sem isso a regra 16 é uma parede sem porta.
+18. **Molde e contador na tela da reflexão.** Abaixo da pergunta do Sábio, uma linha de molde ("Hoje eu ... porque ...") que ele pode tocar para começar a frase, e um contador vivo "7 / 12". Sem isso a regra 16 é uma parede sem porta. **O molde some depois de 10 reflexões aceitas** (`village.stats.reflections >= 10`; decisão 43): ajuda que não some vira a forma de todas as reflexões. O contador continua.
 
 **Controle de qualidade**
 
@@ -379,8 +379,11 @@ interface QuizBankItem {
   hash: string;                 // normalizeQuestion(question), src/services/quiz/hash.ts
   chosen: string;               // a PRIMEIRA escolha
   correct: boolean;             // a primeira escolha estava certa (é a que paga)
-  attempts: 1 | 2;              // 2 quando ele usou a repescagem
-  retryOk?: boolean;            // acertou na segunda, depois de ler; não paga
+  attempts: 1 | 2;              // 2 quando ele usou a segunda tentativa (só item com escada)
+  secondChoice?: string;        // a segunda escolha, quando houve
+  retryOk?: boolean;            // acertou na segunda, depois do aviso; não paga
+  supportLevel?: 0 | 1 | 3;     // 0 de primeira; 1 acertou depois do aviso; 3 precisou da explicação (ausente no dilema). APRENDER_A_APRENDER §4.4
+  nudge?: 'trap' | 'strategy';  // qual aviso apareceu, quando houve
   msToAnswer: number;           // da pergunta na tela até a primeira escolha
   msReadingExplain: number;     // da primeira escolha até "Próxima" (portão de 6 s)
   audioPlayed?: boolean;        // inglês: o áudio tocou antes das opções
@@ -419,7 +422,7 @@ interface LearningProfile {
   weak: string[];     // 3 piores, mínimo 4 perguntas
   lastWrong: { date: string; id: string; category: string; subject: string; skill: string; question: string }[]; // 10
   englishLastSkill?: string;   // alimenta a regra 10 do prompt
-  retryRate: number;           // fração de erros em que ele usou a repescagem e acertou
+  retry: { d30: [number, number]; all: [number, number] };  // [acertou depois do aviso, errou de primeira] só em itens com escada; substitui o retryRate (23/09, decisão 43)
   medianMsToAnswer: number;
 }
 ```
@@ -436,9 +439,15 @@ Sem restilizar nada. Só os portões, os dois blocos de explicação, a repescag
 
 1. **Portão da "Próxima"**: `EXPLAIN_READ_MS.min` de 4000 para 6000 (`src/services/quiz/provaRules.ts:3`). O componente já usa `max(min, palavras/3)` via `readingMs` (`provaRules.ts:24-27`) e `ReadWaitButton` com `min={EXPLAIN_READ_MS.min}` (`DailyQuiz.tsx:613`). Uma linha.
 2. **Explicação em dois blocos**: onde hoje há `<p>{question.explanation}</p>` (`DailyQuiz.tsx:515-523, na linha 521`), passa a haver o bloco `why` e, abaixo, o bloco `trap` com o rótulo do papiro já existente (`mn-papiro-why` / texto normal). Sem classe nova.
-3. **Repescagem** (decisão 23b): quando o portão da "Próxima" abre e ele errou, aparece "Tentar de novo" ao lado. Reabre as opções mantendo a certa marcada como já revelada; a segunda escolha grava `attempts: 2` e `retryOk`, e **não** toca `score` nem `reward` (`DailyQuiz.tsx:337-355,357-405`). Sem frase explicando que não paga.
+3. **Segunda tentativa com aviso** (decisões 23b e 43; reescrita em 23/09 — a versão anterior reabria com a certa revelada e foi descartada). Tudo em `docs/APRENDER_A_APRENDER.md` §4.1 a §4.4; resumo para a tela:
+   - `retryable(question)` puro em `provaRules.ts`, pela lista fechada de `skill` (§4.1 de lá).
+   - **Item com escada, primeira escolha errada**: a certa **não** acende; a escolhida fica marcada e desabilitada; no lugar da explicação vem o aviso de `nudgeFor(question, chosen, seed)` (puro: o `trap` quando ele nomeia a opção escolhida — `trapNamesOption`, a regra de `trapHitsDistractor` em `validateQuestion.ts` aplicada a uma opção — e `answerLeaksInPrompt(trap, answer)` é falso; senão uma pista da área de `FALAS_APRENDER.md` §1.1, sem repetir em 14 dias). O aviso é falado com a voz da prova; em inglês, o `audioText` toca de novo. As opções reabrem depois de `readingMs(aviso, 3000, 8000)` e do fim do áudio.
+   - **Segunda escolha**: certa, linha "descobriu" (§1.2 do banco) + `why` e `trap`; errada, a certa acende + linha "errou a segunda" + `why` e `trap`. Depois, o portão da "Próxima" como sempre.
+   - **Item de fato, errado**: a certa acende + linha de fato (§1.2) + `why` e `trap`; sem segunda tentativa.
+   - **Sai "Não foi dessa vez."** (`DailyQuiz.tsx:661`); o acerto de primeira continua "Isso.".
+   - `answers[]`, `score`, `reward` e a esmeralda só olham a primeira escolha. Sem frase dizendo que a segunda não paga.
 4. **Inglês, áudio primeiro**: quando `question.subject === 'ingles'`, tocar `audioText` com `{ lang: 'en', speed: TTS_SPEED_SLOW }` e só liberar os cliques quando terminar, reusando o `voiceDone` que já existe (`DailyQuiz.tsx:207,329-334`). Um botão de repetir o áudio ao lado do enunciado (`mc-slot`, 44 px).
-5. **Reflexão**: abaixo do `reflectionPrompt` (`DailyQuiz.tsx:549-556`), uma linha de molde tocável ("Hoje eu ... porque ...") que preenche o começo do campo, e um contador "7 / 12" ao lado do botão "Entregar". `canDeliver` (`DailyQuiz.tsx:433`) passa a exigir as 12 palavras (8 nos 7 primeiros dias) e 2 palavras de conteúdo do tema.
+5. **Reflexão**: abaixo do `reflectionPrompt` (`DailyQuiz.tsx:549-556`), uma linha de molde tocável ("Hoje eu ... porque ...") que preenche o começo do campo, e um contador "7 / 12" ao lado do botão "Entregar". `canDeliver` (`DailyQuiz.tsx:433`) passa a exigir as 12 palavras (8 nos 7 primeiros dias) e 2 palavras de conteúdo do tema. O molde só aparece enquanto `village.stats.reflections < 10` (regra 18).
 6. **Tempo por pergunta**: um `useRef` com o `performance.now()` de quando a pergunta entra e de quando ele escolhe, entregue ao `completeDailyQuiz`. Não aparece na tela.
 7. **Prefetch de voz**: hoje o efeito de `prefetchLesson` e `prefetchVerdicts` roda assim que a prova chega pela assinatura, mesmo com a prova fechada (`DailyQuiz.tsx:283-289`), e a dependência `quiz` é o objeto inteiro, que muda de identidade a cada snapshot. Passa a rodar só quando `open && phase !== 'prompt'`, e a dependência vira `quiz?.id`. É o que faz o dia pulado não gastar 11 chamadas de voz.
 8. **Prefetch de amanhã**: `await prepare()` antes de `ensureDailyQuiz(amanhã)` (`DailyQuiz.tsx:256-262`). A alteração não commitada já trocou "uma vez por montagem" por "uma vez por dia" (`DailyQuiz.tsx:208,258-259`), mas o `await` continua faltando, e é ele que faz a prova de amanhã enxergar a de hoje.
@@ -450,6 +459,7 @@ Sem restilizar nada. Só os portões, os dois blocos de explicação, a repescag
 - Repetidas: mesmo `hash` com as duas datas.
 - Do doc do dia: "gerou 11, descartou 3" com os códigos de `sanitize.rejected` e os motivos do revisor.
 - Uma linha de reflexão: palavras e se tocou o tema.
+- Uma linha "Depois do aviso: acertou X de Y nos últimos 30 dias" (`profile.retry.d30`), com "pouco dado ainda" abaixo de 8.
 
 ---
 
@@ -476,7 +486,7 @@ Sem restilizar nada. Só os portões, os dois blocos de explicação, a repescag
 | P1.1 | `src/services/quiz/hash.ts`, `dedupe.ts` (novos) | hash normalizado e "quase igual" (70% das palavras de 4+ letras, mesmo `subject`) | fixture com os 8 pares de `valida.txt`: todos reprovam; pares de assuntos diferentes passam | log verde com os 8 pares nomeados por data | os 8 pares, e que nenhum par legítimo caia |
 | P1.2 | `src/services/dailyQuizService.ts:144-201` | escrever os 8 docs do `quizBank` no mesmo `writeBatch`, com `attempts`, `retryOk`, `msToAnswer`, `msReadingExplain` | teste: concluir a prova grava 8 docs com todos os campos da §5.1 | print do console do Firestore com os 8 docs de um dia | que os campos de tempo não estejam zerados |
 | P1.3 | `src/services/quiz/profile.ts` (novo) + `src/types/village.ts:310` | `buildProfile`; `LearningDoc.profile` | teste com o export real: `weak` traz `ingles` e `historia` | log verde | os `strong`/`weak` contra a tabela de acerto por assunto da análise |
-| P1.4 | `src/components/hero/DailyQuiz.tsx` + `provaRules.ts:3,5` | portão de 6 s; repescagem; áudio do inglês; molde e contador da reflexão; rampa de 8 para 12 palavras | `provaV2.test.ts`: `readingMs(texto, 6000, 12000) === 6000` para 9 palavras; reflexão de 11 palavras reprova depois do 7º dia e aprova antes | **fotos**: a tela da explicação com os dois blocos; o "Tentar de novo"; o contador "7 / 12"; o molde | as fotos contra a lei da fala (`lei-excelencia-aaa.mdc:110-120`) e a decisão 23b (sem aviso de que não paga) |
+| P1.4 | `src/components/hero/DailyQuiz.tsx` + `provaRules.ts:3,5` | portão de 6 s; segunda tentativa com aviso só em item com escada (§6.3, decisão 43); fim de "Não foi dessa vez"; áudio do inglês; molde (some depois de 10) e contador da reflexão; rampa de 8 para 12 palavras | `provaV2.test.ts`: `readingMs(texto, 6000, 12000) === 6000` para 9 palavras; reflexão de 11 palavras reprova depois do 7º dia e aprova antes; `retryable` por `skill`; `nudgeFor` (trap que nomeia a escolhida e não vaza; trap que vaza; escolhida que não é a do trap); `supportLevel` nos caminhos 0, 1 e 3 | **fotos**: conta errada com o aviso e a certa apagada; segunda tentativa certa com "descobriu"; item de fato errado sem segunda tentativa; a explicação com os dois blocos; o contador "7 / 12"; o molde | as fotos contra a lei da fala (`lei-excelencia-aaa.mdc:110-120`), a decisão 23b (sem aviso de que não paga) e o aceite do `APRENDER_A_APRENDER.md` §15 |
 | P1.5 | `src/services/quiz/rotation.ts:49-56` | implementar `pickTheme` (§8.2) e ligar em `dailyQuizService.ts:106`; gravar `theme.angle` e `theme.depth` | `rotation.test.ts`, que já existe e nunca rodou | log verde dos 365 dias simulados | que o ângulo e a profundidade cheguem ao prompt |
 | P1.6 | `src/components/parent/DailyQuizManager.tsx` | bloco "Como ele vai" (§6) | — | **foto** do painel com dados reais de 3 dias | que o pai consiga ler em 10 segundos em que ele vai mal |
 | P1.7 | `src/services/aiUsage.ts:35,106-111` | tabela de preço por modelo, somando por `byModel` | teste: 1.000 tokens de entrada em `gpt-4o` custam 6,25× mais que em `gpt-4.1-mini` | print do painel com o custo por modelo | a conta contra a tabela da OpenAI do dia |
@@ -521,10 +531,11 @@ O custo de voz em si: ~1.400 caracteres por dia, 42 mil por mês, a US$ 15 por m
 
 ## 9. O que fica para depois
 
-- **Estante de erros** (Etapa 3): a revisita da regra 11 é a semente. A Estante é a tela onde ele vê os erros ainda não corrigidos, escolhe um e o refaz por outro ângulo, com bônus no acerto (decisão 14, Biblioteca nível 3). Depende de o `quizBank` ter 30 dias de dados — ou seja, não antes de meados de outubro.
+- **Estante de erros** (Etapa 3): a revisita da regra 11 é a semente. A Estante é a tela onde ele vê os erros ainda não corrigidos, escolhe um e o refaz por outro ângulo. Depende de o `quizBank` ter 30 dias de dados — ou seja, não antes de meados de outubro. **Desde 23/09 (decisão 43)** ela é a **Estante única** de `docs/APRENDER_A_APRENDER.md` §6: uma fila para prova, Mina, Túnel e Expedição, entrada pelo `supportLevel`, revisita paga como item normal (o dobro da Biblioteca nível 3 sai).
+- **Prova v3 P2 da lente "aprender a aprender"** (pacote AP3 de `docs/APRENDER_A_APRENDER.md` §12): conta de duas etapas com resposta digitada (o `trap` reconhece o número da primeira etapa); campo `hint` no gerador (a pista em forma de ferramenta, com o código `hint_vaza_resposta` no validador), que vira o segundo degrau da escada; "Ache o erro" na posição 8 quando não há revisita; previsão semanal da nota (`predicted`); o Sábio resolvendo em voz alta, com um tropeço, uma vez por semana.
 - **Expedição mensal do Explorador** (Etapa 3): a prova longa de fim de mês, com `assessment` no `profile` (§8.4 já reservou o campo). Só faz sentido depois de `bySkill` ter volume; com 24 itens respondidos hoje, qualquer nota seria ruído.
 - **Três frases da mesma regra na mesma sessão** (lei do professor, `.cursor/rules/lei-excelencia-aaa.mdc:143`): a prova do dia cabe uma por dia; as outras duas são da Arena de Inglês. A ponte entre `englishBase` e o `skill` da prova fica para a Etapa 3.
-- **Formatos fora da múltipla escolha** (ordenar, completar, achar o erro com entrada de texto): precisam de tela nova. Etapa 3.
+- **Formatos fora da múltipla escolha** (ordenar, completar, achar o erro com entrada de texto): precisam de tela nova. Etapa 3. A conta digitada e o "Ache o erro" vêm primeiro (AP3, item acima).
 - **Ligar o `profile` ao `RotationProfile`** com peso de verdade: entra quando `weak` tiver base de 4 perguntas por categoria, não antes.
 
 ---

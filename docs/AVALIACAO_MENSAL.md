@@ -2,6 +2,16 @@
 
 Documento de desenho (fonte de verdade a partir de 17/09/2026). Pedido do pai: "o sistema precisa ter uma avaliação mensal, tipo uma prova, para termos um padrão de tudo dele e trazer os conteúdos de acordo com o que for analisado; bem completa; salvar os dados; perguntas coerentes que deem para analisar o grau de conhecimento, inteligência e raciocínio de uma criança de 10 anos; com algo científico para nos inspirar." Código na Etapa 3 (`docs/MINER_MISSIONS_ROADMAP.md`); a primeira expedição, a **Expedição de Boas-vindas**, roda entre 27/09 e 04/10/2026 como linha de base; depois, no último fim de semana de cada mês.
 
+**Ajustes de 23/09 (decisão 43, `docs/APRENDER_A_APRENDER.md` §10); valem sobre o texto abaixo e entram antes do código:**
+- O Heitor não vê estrelas de desempenho por região. O mapa mostra regiões exploradas e descobertas.
+- A confiança por item continua; "chute e acertou" vai para a Estante única, porque não é saber.
+- O Bloco 1 ganha formas paralelas antes do 4º mês, senão a "evolução" vira memória do item.
+- Entra um bloco curto de 3 problemas novos com a escada de ajuda, no lugar de parte do Bloco 1. Ele mede quanta ajuda ele precisa para aprender (avaliação dinâmica, Campione e Brown).
+- "Palavra dominada" no Bloco 6 passa a ser palavra acertada sem ajuda em dois dias diferentes, não `seen >= 3`.
+- O Bloco 6 muda de nome, porque "Túnel do Inglês" colide com O Túnel.
+
+Se a expedição não ficar pronta até 27/09, a linha de base pode começar em outubro sem perder valor.
+
 ## 1. O que é, em uma frase
 
 Uma vez por mês o Heitor faz uma expedição com seis blocos, em até três sessões curtas, e o jogo guarda cada resposta; o resultado vira o **padrão dele** (o que sabe, como raciocina, onde trava, quão bem se conhece), que passa a guiar a prova do dia, os contratos, as falas dos NPCs e a Estante de erros. Para ele é um mapa com estrelas; para o pai é um relatório; para o jogo é o perfil que decide o que ensinar.

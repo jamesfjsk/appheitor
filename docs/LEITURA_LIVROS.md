@@ -20,7 +20,7 @@ O Heitor termina um livro, vai até a Biblioteca e **conta o livro para o Sábio
 3. "Entregar" → cena "O Sábio lê" (pacote 7, reaproveitada) → veredito:
    - **Aceito**: "+15 gold" com o carimbo, o livro aparece na estante (lombada com o título) e o Sábio comenta uma coisa do texto dele.
    - **Falta parte**: balão com o que faltou (começo, meio, fim, personagem, opinião com motivo); texto mantido; "Tentar de novo".
-   - **Suspeito**: "Isso está muito arrumado. Me conta do seu jeito, como se fosse para um amigo." Texto mantido; marca `flag` para o pai.
+   - **Suspeito**: "Isso está muito arrumado. Me conta do seu jeito, como se fosse para um amigo." Texto mantido; marca `flag` para o pai. **Mudança de 23/09 (decisão 43; o Sábio é mentor, não fiscal):** a frase de suspeita sai da boca do Sábio; o pedido de reescrita vira um "Falta parte" que diz o que faltou (ex.: "Me conta com as suas palavras o que acontece no meio."), e a marca `flag` vai para o pai em silêncio. Entra num pacote pequeno, quando o pai pedir.
    - **Repetido**: "Esse você já me contou em 14/09." Sem pagamento, sem tentativa gasta.
 4. Painel do pai (aba Prova, bloco "Livros"): lista dos relatos com texto, veredito, o que faltou, sinal de suspeita; botões **Aprovar** (paga se o Sábio recusou) e **Anular** (estorna). Sem restilizar.
 

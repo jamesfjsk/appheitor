@@ -46,7 +46,7 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 - **Para que serve**: ver o que ele conquistou e para onde está indo.
 - **Nível 1**: abre a **Torre**: conquistas (pacote da nova fase) e a estrela de temporada.
 - **Nível 2**: **Recordes e Troféu da semana** (Etapa 2).
-- **Nível 3**: vê o **Mapa de habilidades** (acertos por matéria, da Memória da Prova) e as **Histórias** dos personagens (pedidos cumpridos). "Propor desafios" saiu da tela em 15/09 e sai do texto do nível em 17/09.
+- **Nível 3**: vê o **Mapa de habilidades** (da Memória da Prova; desde 23/09, decisão 43: o que ele já domina e o que está na pedra, sem porcentagem por matéria, que fica só no painel) e as **Histórias** dos personagens (pedidos cumpridos). "Propor desafios" saiu da tela em 15/09 e sai do texto do nível em 17/09.
 - **Ao tocar**: cartão com abas Conquistas, Recordes, Troféus, Habilidades (as que o nível liberou; as outras com cadeado e o nível necessário).
 - **Visual**: `buildings/torre-1..3.png` na cena (n1 tocha, n2 telhado, n3 bandeira); o fundo pintado fica só no lote vazio. Luz no topo à noite.
 
@@ -54,8 +54,8 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 
 - **Para que serve**: a prova do dia e o que ele vai aprender. É a casa do Sábio.
 - **Nível 1**: abre a **prova do dia** e o **tema da história de amanhã** na Mina. Sem este nível, a prova não aparece.
-- **Nível 2** (decisão do pai em 17/09, vale desde o lançamento): abre **"Como você vai"** na Biblioteca (o acerto dele por matéria e por assunto, da Memória da Prova) e a **revisita**: uma das 8 perguntas da prova volta a um erro de 3 a 10 dias atrás por outro ângulo. Na Etapa 3 o nível 2 ganha também a **Estante de erros** e o **Diário**.
-- **Nível 3** (idem): **1 dica grátis por dia** no Recado da Mina e a **revisita paga o dobro** (gold e XP da pergunta de revisita x2, dentro dos tetos). Na Etapa 3, o Sábio responde ao Diário no dia seguinte.
+- **Nível 2** (decisão do pai em 17/09, vale desde o lançamento): abre **"Como você vai"** na Biblioteca (da Memória da Prova; desde 23/09, decisão 43: o que ele já domina e o que está na pedra, sem porcentagem) e a **revisita**: uma das 8 perguntas da prova volta a um erro de 3 a 10 dias atrás por outro ângulo. Na Etapa 3 o nível 2 ganha também a **Estante de erros** e o **Diário**.
+- **Nível 3** (idem; **mudado em 23/09 pela decisão 43**, a entrar no pacote AP4 de `docs/APRENDER_A_APRENDER.md`): depois de uma revisita certa, a Estante mostra **o erro de origem ao lado do acerto de hoje**, com "O que mudou?". Saem a "1 dica grátis por dia no Recado" (toda dica passa a ser grátis, depois da primeira tentativa) e a "revisita paga o dobro" (a revisita paga como item normal: erro não pode render mais do que acerto). Até o AP4, o código atual continua valendo. Na Etapa 3, o Sábio responde ao Diário no dia seguinte.
 - **Ao tocar**: nível 0 abre o cartão Construir; nível 1+ abre a prova. O cartão também guarda o tema de amanhã.
 - **Visual**: `buildings/mesa-1..3.png` (roxa de propósito, é magia); partículas roxas no nível 3.
 
