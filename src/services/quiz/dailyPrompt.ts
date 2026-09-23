@@ -14,8 +14,25 @@ export interface BuildPromptInput {
   weekday: number;
   englishLevel: number;
   avoidHashes?: string[];
+  /** Ângulo do dia (§8.2). Entra no texto do prompt. */
+  angle?: string;
+  /** 1 primeiro contato, 2 aprofunda, 3 conecta com outra área. */
+  depth?: 1 | 2 | 3;
   /** Quando a substituição pede posições vazias, o prompt deixa de numerar a prova cheia. */
   slots?: QuizSlot[];
+}
+
+const DEPTH_LINE: Record<1 | 2 | 3, string> = {
+  1: 'primeiro contato',
+  2: 'aprofunde',
+  3: 'conecte com outra área',
+};
+
+function angleBlock(input: BuildPromptInput): string {
+  if (!input.angle || !input.depth) return '';
+  return `Ângulo de hoje: ${input.angle}
+Profundidade ${input.depth}: ${DEPTH_LINE[input.depth]}
+`;
 }
 
 export function buildPrompt(input: BuildPromptInput): string {
@@ -26,7 +43,7 @@ export function buildPrompt(input: BuildPromptInput): string {
   const areas = Array.from({ length: knowledge }, (_, i) => knowledgeAreasForWeekday(input.weekday)[i % 5]);
   const areaLines = areas.map((area, i) => `${i + 4}) ${areaRule(area)}`).join('\n');
   const lv = levelFor(input.englishLevel);
-  const avoid = (input.avoidHashes ?? []).slice(0, 40);
+  const avoid = (input.avoidHashes ?? []).slice(0, 60);
   const avoidBlock = avoid.length
     ? `Não repita nem parafraseie estas provas (hash):\n- ${avoid.join('\n- ')}`
     : 'Primeira leva: capriche.';
@@ -35,7 +52,7 @@ export function buildPrompt(input: BuildPromptInput): string {
 
 TEMA DO DIA: ${input.seed.title} (categoria: ${input.seed.category})
 Orientação: ${input.seed.seed}
-
+${angleBlock(input)}
 Monte um JSON com exatamente esta forma:
 {
   "theme": {
@@ -135,7 +152,7 @@ function buildReplacementPrompt(input: BuildPromptInput): string {
 
 TEMA DO DIA: ${input.seed.title} (categoria: ${input.seed.category})
 Orientação: ${input.seed.seed}
-
+${angleBlock(input)}
 Devolva JSON {"questions":[ exatamente ${slots.length} objetos ]}, na ordem das posições pedidas. Não numere uma prova nova.
 
 why, trap e explanation: em português do Brasil; inglês só nas palavras ou frase entre aspas; nomeie a regra em português com um exemplo. Ex.: Depois de 'yesterday' o verbo vai para o passado: 'defended'. 'Defends' é o presente, de todo dia.

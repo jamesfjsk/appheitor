@@ -1,6 +1,36 @@
+import type { QuizTiming } from './bankWrite';
 import { reflectionOk, wordCount } from './provaRules';
 
+export type { QuizTiming };
+
 export type QuizAbout = { prompt: string; title: string; lesson: string };
+
+export type QuizPhase = 'prompt' | 'lesson' | 'questions' | 'results';
+
+/** Estado da mesa no começo do dia. A virada não herda a prova de ontem. */
+export function freshQuizUi(): {
+  current: number;
+  selected: null;
+  answers: string[];
+  score: number;
+  reward: { xp: number; gold: number };
+  reflection: string;
+  judgeSay: null;
+  paid: false;
+  phase: QuizPhase;
+} {
+  return {
+    current: 0,
+    selected: null,
+    answers: [],
+    score: 0,
+    reward: { xp: 0, gold: 0 },
+    reflection: '',
+    judgeSay: null,
+    paid: false,
+    phase: 'prompt',
+  };
+}
 
 /** Paga primeiro; se o pagamento lançar, complete não roda (A2 + teste M1). */
 export async function payThenComplete(
@@ -11,14 +41,24 @@ export async function payThenComplete(
   await complete();
 }
 
-export function answersStash(answers: string[], score: number, totalQuestions: number): {
+export function answersStash(
+  answers: string[],
+  score: number,
+  totalQuestions: number,
+  timings?: QuizTiming[],
+): {
   answers: string[];
   score: number;
   totalQuestions: number;
   awaitingReflection: true;
   completed: false;
   status: 'ready';
+  timings?: QuizTiming[];
 } {
+  const timingsOut = timings?.map((t) => ({
+    msToAnswer: t && t.msToAnswer > 0 ? t.msToAnswer : 0,
+    msReadingExplain: t && t.msReadingExplain > 0 ? t.msReadingExplain : 0,
+  }));
   return {
     answers,
     score,
@@ -26,6 +66,7 @@ export function answersStash(answers: string[], score: number, totalQuestions: n
     awaitingReflection: true,
     completed: false,
     status: 'ready',
+    ...(timingsOut ? { timings: timingsOut } : {}),
   };
 }
 

@@ -520,3 +520,145 @@ O pai commitou o pacote junto com a Estante antes da revisão. Lido o relatório
 **Pendências do pai**: (1) publicar a função com o teto em dólares (`npx firebase-tools deploy --only functions --project app-heitor`): `aiUsage/2026-09` ainda não tem `tokensByModel`, sinal de que a função no ar é a antiga (teto de 800 chamadas; hoje 433); (2) limite rígido de US$ 60 e alerta em 40 na conta OpenAI; (3) `node scripts/archive-legacy-achievements.cjs --uid xZkTTR2tlIYXIpAelxEqXugNjqo2` e depois `--apply`; (4) decidir o retroativo das conquistas do Heitor pela tabela nova (18 gold + 200 XP em uma linha de ajuste) — sem resposta ainda; (5) o Heitor precisa de 1 redstone para a Biblioteca nível 1, que destrava os três livros cadastrados.
 
 **Líder amanhã**: ler a prova de 24/09 do Heitor (primeira v3 em produção) e a de 23/09 se ainda for v2; revisar o pacote 10 quando o Cursor parar; `MANUAL_DO_PAI.md` (aba Livros, Torre nova, Comerciante, decisão 41); começar o desenho dos comprovantes das missões de vida real (decisão 24).
+
+## Etapa 3, pacote 10 — Prova v3 P1, parte 1: dados e rotação (Cursor, 23/09) — APROVADO COM 4 CORREÇÕES ANTES DO COMMIT
+
+Lido o relatório (`RELATORIO_ETAPA_3.md`, "Pacote 10") e o diff inteiro (12 arquivos alterados, 8 novos). Barra rodada pelo líder na árvore do Cursor: `tsc` 0 erros; `eslint` 0 erros (os 8 avisos antigos); `test:english` 33 arquivos verdes (inclui `rotation.test.ts` com os 365 dias); `test:village` 13 verdes; `vite build` ok. Conferido no Firestore, só leitura: a prova de 23/09 da conta de teste tem `theme.angle` e `theme.depth`; a de 24/09 do Heitor (gerada ontem, antes deste pacote) tem 6 perguntas.
+
+### Entrou sem doc (todos aceitos)
+
+- `buildAndSave` apaga `answers`, `timings`, `score`, `totalQuestions`, `awaitingReflection`, `reflection*` ao gravar a prova. Só roda quando a prova não tem perguntas (`ensureDailyQuiz`) ou na regeneração forçada; evita respostas velhas com perguntas novas. Aceito.
+- O convite "oito perguntas" passou a usar o número da prova. Aceito (o problema de fundo está em "Fora do pacote").
+- `theme.angleIndex` gravado no doc da prova (a rotação precisa dele). Aceito.
+- Regra extra da categoria fraca em `pickTheme`. Aceita e registrada como regra 8 da §8.2 do `ETAPA_2_LANCAMENTO.md`.
+- `hashOf` do validador passa a usar `normalizeQuestion`: uma normalização só. Aceito.
+
+### O que está certo
+
+- `hash.ts` e `dedupe.ts` puros, com os 8 pares reais e os 4 de controle; `repetida` ligada nas três passagens (lote, substituição e reserva offline) e contando para a reserva.
+- `quizBank` no mesmo `writeBatch` do resultado, sem reescrever doc que já existe (a regra barraria o lote inteiro); campos da §5.1; `supportLevel` 0 ou 3 e ausente no dilema; nenhum `undefined`.
+- Rotação com as 7 regras e as strings de `reason` exatas. O histórico antigo do Heitor, com temas do currículo velho, não quebra a escolha.
+- "Não repita" com os 60 mais novos; `prepareTodayThenTomorrow` com teste.
+- Retroativo idempotente, só leitura sem `--apply`, só provas concluídas, rodado só na conta de teste.
+
+### Corrigir antes do commit (nesta ordem)
+
+**C1 (alta; defeito antigo que o pacote herdou) — a prova não zera na virada do dia.** `DailyQuiz.tsx` fica montado o tempo todo (`HeroPanel`, sem `key`), e a virada do dia (`dayChanged`) não recarrega a página. A assinatura troca para a prova nova, mas `current`, `selected`, `answers`, `score`, `reward`, `reflection`, `judgeSay`, `paid`, `phase` e agora `timingsRef` ficam os de ontem. A pergunta da tela é `quiz.questions[current]` e `current` nunca volta a 0. Com a aba aberta de um dia para o outro depois da prova (aconteceu em 21→22/09), a prova nova começa na última pergunta e as respostas de ontem entram na nota, no gold, no `quizBank` e nos tempos.
+- Função pura `freshQuizUi()` (em `src/services/quiz/closeQuiz.ts` ou arquivo novo em `src/services/quiz/`) que devolve o estado inicial: `current 0`, `selected null`, `answers []`, `score 0`, `reward { xp: 0, gold: 0 }`, `reflection ''`, `judgeSay null`, `paid false`, `phase 'prompt'`.
+- Um efeito com dependência `today` aplica esse estado e zera `timingsRef`, `askedAt`, `choseAt`, `stepLock` e `revealLock`. Tem de rodar antes do efeito que restaura a reflexão guardada, que continua valendo para a prova do dia.
+- Tempos gravados **por índice** (`next[current] = { ... }`), nunca empilhados. `answersStash` e `readTimings` deixam de filtrar a lista, porque filtrar desalinha os índices. Índice sem medida vira `{ msToAnswer: 0, msReadingExplain: 0 }`: nunca buraco nem `undefined` no array. O `quizBank` só grava tempo acima de 0, como já faz.
+- Teste: `freshQuizUi()`; `answersStash` com `[a, zero, c]` guardando os três na ordem.
+- Evidência: descrever no relatório como a virada foi simulada na conta de teste (relógio de desenvolvimento ou o efeito com `today` trocado) e que a prova seguinte abre na pergunta 1.
+
+**C2 (alta; economia; defeito antigo) — esmeralda e "Nota máxima" impossíveis desde 22/09.** O dilema saiu da nota (`quizScoreOf` não o conta), mas `completeDailyQuiz` ainda pede `score >= 8 && totalQuestions >= 8` para a esmeralda (`dailyQuizService.ts`, perto da linha 377) e `score >= 8` para `quizPerfect` (perto da 396; alimenta a conquista "Nota máxima" e a fala `s_first_quiz8`). Uma prova v3 cheia tem 7 perguntas que contam, mais o dilema: ninguém alcança.
+- Correção: volta a regra original, "acertou todas". Função pura `perfectQuiz(score, total)` = `total >= 5 && score === total` em `provaRules.ts`, usada nos dois lugares. O mínimo de 5 é o piso que o gerador já aceita: uma prova curta por erro do gerador não tira a esmeralda de quem acertou tudo.
+- Teste: 7 de 7 ganha; 6 de 7 não; 5 de 5 ganha; 4 de 4 não.
+
+**C3 (média; defeito antigo) — a tela conta o dilema no total.** O quadro final mostra `{score} de {quiz.questions.length}`: quem acerta tudo numa prova com dilema vê "7 de 8".
+- Correção: `{score} de {total que conta}`, com o `total` de `quizScoreOf`.
+- Foto do quadro final numa prova com dilema, na conta de teste.
+
+**C4 (média; dado) — `difficulty` do `quizBank` é a profundidade do tema.** `bankWrite.ts` e `scripts/backfill-quizbank.cjs` gravam `difficulty: theme.depth`. As perguntas geradas não trazem dificuldade própria (conferido nas provas de 23/09 da conta de teste e de 24/09 do Heitor), então o campo mentiria para a futura análise por dificuldade.
+- Correção: gravar `depth` (a profundidade do tema, com esse nome) e só gravar `difficulty` quando a pergunta trouxer 1, 2 ou 3.
+- Teste em `bankWrite.test.ts`.
+- Os 16 docs já criados na conta de teste ficam como estão. **O pai só roda o retroativo na conta do Heitor depois desta correção.**
+
+### Fora do pacote, mas pesa já amanhã
+
+**A prova do Heitor de 24/09 tem 6 perguntas** (5 que contam, mais o dilema). Descartes: 2 `conta_um_passo`, 2 `enunciado_vazou`, 2 `opiniao`, 1 `opcao_caricata`, 1 `conta_nao_fecha`; `fromOffline: 0`. A de 23/09 da conta de teste também saiu com 6.
+- A regra 22 da v3 ("nunca menos de 8; completa do banco offline pelo mesmo validador") não está sendo cumprida.
+- Causa: a reserva offline não passa no validador v3 (o P2.3 nunca foi feito), e as vagas da lição e do dilema não têm reserva compatível.
+- Não bloqueia o commit deste pacote. Vira o **pacote 10b**, logo depois destas correções. O Cursor faz uma segunda substituição só para as vagas vazias e deixa vaga de conhecimento ser completada por qualquer área válida. O líder passa o banco offline pelo validador e reescreve o que cair.
+- Até lá, com a C2, quem acerta as 5 ganha a esmeralda.
+
+**Falas `*_first_quiz8` dos quatro personagens** ("Oito de oito..."): trocadas pelo líder em 23/09 por "Acertou todas" / "Todas certas" (`sabio.ts`, `comerciante.ts`, `ferreiro.ts`, `olheiro.ts` e `docs/conteudo/FALAS_NPC.md`), porque a prova perfeita passou a ter 7 que contam.
+
+### Prompt para o Cursor (as correções)
+
+Leia esta seção inteira ("Etapa 3, pacote 10") e faça as correções C1 a C4, nesta ordem, cada uma com o teste pedido. Sem restilizar e sem mexer em nada fora delas. Barra de sempre (`tsc`, `eslint --max-warnings 8`, `test:english`, `test:village`); fotos só na conta de teste (a do quadro final da C3). Relatório no fim de `docs/etapas/RELATORIO_ETAPA_3.md`, com o título "Pacote 10 — correções da revisão". Pare antes do commit.
+
+## Pacote 10c — o tema de amanhã sai (decisão 44, pedido do pai em 23/09)
+
+O pai viu o campo "Tema de amanhã" no cartão da Biblioteca e pediu para tirar. Hoje, o que a criança digita ali (ou no mapa da Mina, "O que você quer na história de amanhã?") vai para `englishBase.themeRequest` e vira o tema principal dos contratos da Mina do dia seguinte (`englishAi.ts`, perto da linha 567). Salvar regenera o plano de amanhã. A prova do dia não lê esse campo. Depois deste pacote, o tema vem só da rotação do currículo.
+
+**Fazer, nesta ordem, sem restilizar nada:**
+
+1. `src/components/hero/village/BuildingCard.tsx` (cartão da `mesa`): sai o bloco "Tema de amanhã" (rótulo, campo, "Salvar"), o estado `theme`/`savingTheme`, `saveTheme`, o `THEME_MAX` se ficar sem uso e o import de `setThemeRequest`. O resto do cartão fica igual.
+2. `src/components/hero/english/base/BaseMap.tsx`: sai o bloco `theme-request` ("O que você quer na história de amanhã?"), com o estado, `saveTheme` e o que ficar sem uso (`mesaLive`, se só servia a ele).
+3. `src/services/englishAi.ts`: o tema principal do plano passa a ser sempre o sorteado (`pickOne(rng, pool)`), sem ler `base.themeRequest`. Os objetos do plano continuam com `themeRequest: null`, porque o tipo e os documentos antigos têm o campo. `src/services/englishBaseService.ts`: sai `setThemeRequest`, e sai a limpeza do `themeRequest` depois de gerar o plano (perto da linha 391), que fica morta.
+4. `src/services/village/statSources.ts`: sai `themesSet`. `src/data/npcQuests.ts`, pedidos do Sábio:
+   - capítulo 3: `{ chapter: 3, title: 'Todas', ask: 'Acerte todas as perguntas da prova', stat: 'quizPerfect', target: 1 }`;
+   - capítulo 4: `{ chapter: 4, title: 'Livro', ask: 'Conte um livro para o Sábio', stat: 'booksRead', target: 1 }`.
+5. `src/config/englishBase.ts`, `mesa`:
+   - `effects[0]` e `effect`: `'Você conta ao Sábio os livros que termina.'`;
+   - `effects[2]`: `'Você vê o erro antigo ao lado do acerto de hoje.'` (decisão 43; o nível 3 continua trancado);
+   - `effects[1]` fica.
+6. **Trancas sem nome de etapa** (aproveitando o mesmo cartão; o pai pode tirar este item). "Abre na Etapa 3" é jargão nosso na tela da criança. Onde a criança vê `Abre na ${opensIn}`, "Abre depois" ou "Em breve.":
+   - `BuildingCard.tsx`, perto das linhas 78, 83, 92 e 345;
+   - `BaseMap.tsx`, perto da 190;
+   - a mensagem de erro de `englishBaseService.ts`, perto da 755.
+
+   Nesses lugares passa a aparecer **"Ainda em obra."**; no botão desabilitado, **"Ainda em obra"**. Mensagens de requisito real ("Precisa de ...") ficam como estão. O `opensIn` continua no config e no painel do pai.
+
+**O que fica:** `themeRequest` no tipo e nos documentos antigos, `village.stats.themesSet` e `themeSetOn` nos dados, e as linhas "pedido da Mesa" do painel (histórico). Nada disso é mais escrito.
+
+**Aceite:**
+- `tsc`, `eslint --max-warnings 8`, `test:english` e `test:village` verdes, com `statSources.test.ts` passando com `booksRead` no capítulo 4.
+- Se a função que monta o plano da Mina for pura, um teste: com `base.themeRequest = 'dragões'`, o tema do plano de amanhã vem do sorteio. Se não for, dizer no relatório como verificou.
+- Fotos 1280×720 e 1920×1080, na conta de teste:
+  - cartão da Biblioteca nível 1 sem o campo e com o efeito novo;
+  - mapa da Mina sem o campo;
+  - pedidos do Sábio na Torre com os capítulos 3 e 4 novos;
+  - um nível trancado com "Ainda em obra".
+
+**Prompt para o Cursor:** Leia a seção "Pacote 10c" de `docs/etapas/REVISAO_ETAPA_2_LANCAMENTO.md` e faça os itens 1 a 6, nesta ordem, sem mexer em nada fora deles. Relatório no fim de `docs/etapas/RELATORIO_ETAPA_3.md`, com o título "Pacote 10c — tema de amanhã fora". Pare antes do commit.
+
+### Revisão do pacote 10c (23/09) — APROVADO
+
+Lido o relatório ("Pacote 10c — tema de amanhã fora") e o diff dos arquivos do pacote. Barra rodada pelo líder: `tsc` 0 erros; `eslint` 0 erros (8 avisos antigos); `test:english` 33 arquivos e `test:village` 13, todos verdes; `vite build` ok.
+
+O que foi conferido no diff:
+- `dayContextFor` sorteia o tema sem ler `base.themeRequest` e grava `themeRequest: null`.
+- `setThemeRequest` e a limpeza depois da geração saíram.
+- `themesSet` saiu das fontes de stat; os capítulos 3 e 4 do Sábio têm os textos pedidos; o teste confere os dois e a fonte de `booksRead`.
+- Os efeitos da Biblioteca estão como o item 5 pedia.
+- "Ainda em obra" aparece nos cadeados do cartão, do mapa e no erro de construir; "Precisa de ..." ficou.
+- O `BaseMap` perdeu a propriedade `onSaveTheme`. Ninguém monta esse componente hoje (código parado), então nada quebra.
+
+Fotos lidas pelo líder:
+- `01-biblioteca-1280`: sem o campo; "Você conta ao Sábio os livros que termina."; "Quando abre: Ainda em obra." e o botão desabilitado "Ainda em obra".
+- `03-sabio-1280`: "Feito: Todas" e "Conte um livro para o Sábio".
+
+Fica anotado:
+- As frases "Abre na Etapa 4" do Campinho e da Arena, fora das linhas pedidas, entram na próxima passada de texto.
+- Na mesma foto, o recado "Faltam 5 missões para o Baú do Dia" é o tipo de frase de sistema que a lei proíbe. Vai para a mesma passada.
+
+**As correções C1 a C4 do pacote 10 não foram feitas.** O relatório não tem a seção "Pacote 10 — correções da revisão", e o código continua com `score >= 8`, `{score} de {quiz.questions.length}` e `difficulty: depth`. Elas entram antes do commit. Sem a C2, o capítulo 3 novo do Sábio ("Acerte todas") continua impossível. Depois delas, um commit só: pacote 10, correções, 10c e os documentos do líder.
+
+### Revisão das correções C1 a C4 do pacote 10 (23/09) — APROVADO; pode commitar
+
+Lido o relatório ("Pacote 10 — correções da revisão") e o código de cada correção.
+
+- **C1:**
+  - `freshQuizUi()` em `closeQuiz.ts`.
+  - O efeito depende só de `today` (não reinicia a prova no meio quando o documento atualiza) e foi declarado antes da restauração da reflexão.
+  - Ele zera tempos, travas e a leitura pendente do Sábio.
+  - Tempos são gravados por índice, com zeros onde falta medida; `answersStash` e `readTimings` não filtram mais a lista.
+  - O Cursor simulou a virada sem recarregar, na conta de teste (`clock-override`): a prova nova abriu em "1 de 8", e a do dia anterior ficou sem respostas herdadas.
+- **C2:**
+  - `perfectQuiz` (`total >= 5 && score === total`) é usada na esmeralda e em `quizPerfect`.
+  - A tela manda ao serviço o total sem o dilema (`quizScoreOf(...).total`).
+  - Na conta de teste, 7 de 7 gravou a esmeralda (`quiz8:2026-10-25`) e `quizPerfect`.
+- **C3:** "{nota} de {total que conta}" no quadro pago e na prova já fechada. Foto `c3-nota-1280` lida: "7 de 7", "+42 XP", "+7 GOLD".
+- **C4:** `depth` no `quizBank` e no retroativo; `difficulty` só quando a pergunta traz 1, 2 ou 3.
+
+Barra rodada pelo líder: `tsc` 0 erros; `eslint` 0 erros (8 avisos antigos); `test:english` 33 arquivos e `test:village` 13, todos verdes; `vite build` ok.
+
+Fica anotado para um pacote de tela:
+- a esmeralda do acerto total é gravada, mas o papel mostra só XP e gold. Falta um terceiro chip "+1 esmeralda" quando `perfectQuiz`, para ele saber que ganhou.
+
+**Commit único:** pacote 10, correções, 10c e os documentos do líder. Depois:
+1. push;
+2. o pai roda o retroativo na conta do Heitor;
+3. pacote 10b (prova sempre com 8), que o líder escreve;
+4. pacote 11.

@@ -1,11 +1,6 @@
 import { expect, run, test } from '../../english/__tests__/harness';
-import {
-  answersStash,
-  completeQuizWrite,
-  payThenComplete,
-  shouldOpenReflection,
-} from '../closeQuiz';
-import { dilemmaOf, quizScoreOf, readRingDash, reflectionOk, wordCount } from '../provaRules';
+import { answersStash, completeQuizWrite, freshQuizUi, payThenComplete, shouldOpenReflection } from '../closeQuiz';
+import { dilemmaOf, perfectQuiz, quizScoreOf, readRingDash, reflectionOk, wordCount } from '../provaRules';
 
 const about = {
   prompt: 'O que você faria diferente no recreio depois desta ideia?',
@@ -74,6 +69,39 @@ test('B4: completeQuizWrite passa about e grava reflectionWords', () => {
   expect(plan.data.awaitingReflection).toBe(false);
   expect(plan.data.reflectionWords).toBe(wordCount(fairReflection));
   expect(plan.data.reflectionWords).toBeGreaterThanOrEqual(12);
+});
+
+test('C1: freshQuizUi começa a mesa vazia', () => {
+  const ui = freshQuizUi();
+  expect(ui.current).toBe(0);
+  expect(ui.selected).toBe(null);
+  expect(ui.answers).toEqual([]);
+  expect(ui.score).toBe(0);
+  expect(ui.reward).toEqual({ xp: 0, gold: 0 });
+  expect(ui.reflection).toBe('');
+  expect(ui.judgeSay).toBe(null);
+  expect(ui.paid).toBe(false);
+  expect(ui.phase).toBe('prompt');
+});
+
+test('C1: answersStash guarda o tempo zero no meio, na ordem', () => {
+  const stash = answersStash(['a', 'b', 'c'], 1, 3, [
+    { msToAnswer: 1200, msReadingExplain: 4000 },
+    { msToAnswer: 0, msReadingExplain: 0 },
+    { msToAnswer: 800, msReadingExplain: 5100 },
+  ]);
+  expect(stash.timings).toEqual([
+    { msToAnswer: 1200, msReadingExplain: 4000 },
+    { msToAnswer: 0, msReadingExplain: 0 },
+    { msToAnswer: 800, msReadingExplain: 5100 },
+  ]);
+});
+
+test('C2: esmeralda só quando acertou todas e a prova tem pelo menos 5', () => {
+  expect(perfectQuiz(7, 7)).toBe(true);
+  expect(perfectQuiz(6, 7)).toBe(false);
+  expect(perfectQuiz(5, 5)).toBe(true);
+  expect(perfectQuiz(4, 4)).toBe(false);
 });
 
 test('M2: answersStash não marca completed nem paga', () => {

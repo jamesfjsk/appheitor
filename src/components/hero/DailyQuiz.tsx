@@ -8,7 +8,9 @@ import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { getTodayBrazil } from '../../utils/clock';
 import { DailyQuiz as DailyQuizDoc } from '../../types';
-import { addDays, completeDailyQuiz, ensureDailyQuiz, payThenComplete, quizRewards, regenerateDailyQuiz, shouldOpenReflection, stashQuizAnswers, subscribeDailyQuiz } from '../../services/dailyQuizService';
+import { addDays, completeDailyQuiz, ensureDailyQuiz, payThenComplete, quizRewards, regenerateDailyQuiz, shouldOpenReflection, stashQuizAnswers, subscribeDailyQuiz, type QuizTiming } from '../../services/dailyQuizService';
+import { prepareTodayThenTomorrow } from '../../services/quiz/prefetch';
+import { freshQuizUi } from '../../services/quiz/closeQuiz';
 import { judgeReflection, type ReflectionJudge } from '../../services/aiDailyQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
@@ -214,6 +216,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const revealLock = useRef(false);
   const [voiceDone, setVoiceDone] = useState(true);
   const prefetched = useRef<string | null>(null);
+  const askedAt = useRef(0);
+  const choseAt = useRef(0);
+  const timingsRef = useRef<QuizTiming[]>([]);
   const stepLock = useRef(false);
   const voiceTick = useRef(0);
 
@@ -279,8 +284,12 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
         .catch((e) => console.warn('DailyQuiz: regen falhou', e));
       return;
     }
-    if (!quiz || (quiz.questions.length === 0 && !quiz.completed)) void prepare();
-    ensureDailyQuiz(childUid, addDays(today, 1), today, count).catch((e) => console.warn('DailyQuiz: prefetch de amanhã falhou', e));
+    const needsToday = !quiz || (quiz.questions.length === 0 && !quiz.completed);
+    void prepareTodayThenTomorrow({
+      needsToday,
+      prepare,
+      prefetchTomorrow: () => ensureDailyQuiz(childUid, addDays(today, 1), today, count),
+    }).catch((e) => console.warn('DailyQuiz: prefetch de amanhã falhou', e));
   }, [loaded, childUid, enabled, quiz, prepare, today, count]);
 
   useEffect(() => {
@@ -359,6 +368,28 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   };
 
   useEffect(() => {
+    const ui = freshQuizUi();
+    setCurrent(ui.current);
+    setSelected(ui.selected);
+    setAnswers(ui.answers);
+    setScore(ui.score);
+    setReward(ui.reward);
+    setReflection(ui.reflection);
+    setJudgeSay(ui.judgeSay);
+    setPaid(ui.paid);
+    setPhase(ui.phase);
+    timingsRef.current = [];
+    askedAt.current = 0;
+    choseAt.current = 0;
+    stepLock.current = false;
+    revealLock.current = false;
+    readGen.current += 1;
+    pendingRef.current = null;
+    setPendingVerdict(null);
+    setSaving(false);
+  }, [today]);
+
+  useEffect(() => {
     if (!quiz || !shouldOpenReflection(quiz)) return;
     const stored = quiz.answers ?? [];
     setAnswers(stored);
@@ -370,8 +401,21 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     if (open) setPhase('results');
   }, [quiz, open, economy]);
 
+  useEffect(() => {
+    if (phase !== 'questions' || selected) return;
+    askedAt.current = performance.now();
+  }, [phase, current, selected]);
+
+  useEffect(() => {
+    if (!quiz?.awaitingReflection) return;
+    const stored = quiz.timings;
+    if (!stored?.length || timingsRef.current.length >= stored.length) return;
+    timingsRef.current = stored;
+  }, [quiz]);
+
   const choose = (option: string) => {
     if (selected || !question) return;
+    choseAt.current = performance.now();
     setSelected(option);
     const ok = option === question.answer;
     if (question.kind === 'dilemma') playClick();
@@ -392,6 +436,12 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     stopProvaVoice();
     setVoiceDone(true);
     const nextAnswers = [...answers, selected];
+    const msToAnswer = Math.max(1, Math.round(choseAt.current - askedAt.current));
+    const msReadingExplain = Math.max(1, Math.round(performance.now() - choseAt.current));
+    const nextTimings = timingsRef.current.slice();
+    while (nextTimings.length < current) nextTimings.push({ msToAnswer: 0, msReadingExplain: 0 });
+    nextTimings[current] = { msToAnswer, msReadingExplain };
+    timingsRef.current = nextTimings;
     setAnswers(nextAnswers);
     if (!isLast) {
       setCurrent(current + 1);
@@ -404,7 +454,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     setReward(quizRewards(scored.correct, scored.total, economy));
     setPhase('results');
     if (childUid) {
-      void stashQuizAnswers(childUid, today, nextAnswers, scored.correct, scored.total).catch((e) => {
+      void stashQuizAnswers(childUid, today, nextAnswers, scored.correct, scored.total, timingsRef.current).catch((e) => {
         console.warn('DailyQuiz: não deu para guardar as respostas', e);
       });
     }
@@ -487,6 +537,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                 title: quiz.theme.title,
                 lesson: quiz.theme.lesson,
               },
+              timings: timingsRef.current,
             }),
           );
           if (readGen.current !== gen) return;
@@ -562,6 +613,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     title: quiz.theme.title,
     lesson: quiz.theme.lesson,
   };
+  const counted = quizScoreOf(quiz.questions, quiz.answers?.length ? quiz.answers : answers);
   const canDeliver = reflectionOk(reflection, aboutReflect);
 
   return (
@@ -577,7 +629,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                     {quiz.completed ? (
                       <>
                         <h3 className="mn-papiro-title">A prova de hoje fechou</h3>
-                        <p>{quiz.score ?? score} de {quiz.totalQuestions || quiz.questions.length || count}. O Sábio já leu.</p>
+                        <p>{quiz.score ?? score} de {counted.total}. O Sábio já leu.</p>
                       </>
                     ) : shouldOpenReflection(quiz) ? (
                       <>
@@ -591,7 +643,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                         </h3>
                         <p>
                           {ready
-                            ? 'Uma ideia na mesa e oito perguntas. A Mina abre depois.'
+                            ? `Uma ideia na mesa e ${quiz.questions.length} perguntas. A Mina abre depois.`
                             : generating
                               ? 'O Sábio ainda escreve. Um instante.'
                               : error ?? 'A mesa ainda está vazia.'}
@@ -671,7 +723,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                     {paid ? (
                       <>
                         <SageOnPaper kicker="Na mesa" />
-                        <p className="mn-papiro-title">{score} de {quiz.questions.length}</p>
+                        <p className="mn-papiro-title">{score} de {counted.total}</p>
                         <div className="flex gap-3 my-3 mc-pop">
                           <span className="mc-slot flex items-center gap-1.5 px-3 py-2">
                             <img src={STAR} alt="" className="w-6 h-6 mc-pixel" draggable={false} />

@@ -34,8 +34,6 @@ const WAIT_ATTEMPTS = 3;
 const RECENT_LOOKBACK_DAYS = 30;
 /** "Gerar próximos 7 dias": hoje..hoje+7 */
 const UPCOMING_MAX_DAYS = 7;
-const THEME_REQUEST_MAX = 30;
-
 export const planId = (uid: string, date: string): string => `${uid}_${date}`;
 
 export interface CompleteResult {
@@ -393,9 +391,6 @@ async function generateInto(
       return true;
     });
     if (!committed) return null;
-    if (built.themeRequest && base.themeRequest === built.themeRequest) {
-      await updateDoc(baseRef(uid), { themeRequest: null, updatedAt: nowIso() }).catch(() => undefined);
-    }
     const ready = (await getPlan(uid, date)) || {
       id: planId(uid, date),
       userId: uid,
@@ -752,7 +747,7 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
     const vSnap = await tx.get(doc(db, 'village', uid));
     if (isBroken(cracksOf(vSnap.data()?.cracks), buildingId)) throw ruinUseError(buildingId);
     const check = canBuild(base, buildingId, multiplier);
-    if (check.later) throw new Error(/^(Precisa|Em breve)/.test(check.later) ? `${check.later}.` : `Abre na ${check.later}.`);
+    if (check.later) throw new Error(/^Precisa/.test(check.later) ? `${check.later}.` : 'Ainda em obra.');
     if (!check.unlocked) {
       if (buildingId === 'cofre') throw new Error('Construa o Armazém primeiro.');
       if (buildingId === 'cerca') throw new Error('Construa a Fornalha primeiro.');
@@ -780,33 +775,6 @@ export async function buildUpgrade(uid: string, buildingId: BuildingId): Promise
   });
   if (!out) throw new Error('Falha ao construir.');
   return out;
-}
-
-/** Mesa n1: tema de amanhã (30 caracteres). Se o plano de amanhã já existe sem contrato concluído, regenera com o pedido. */
-export async function setThemeRequest(uid: string, text: string | null): Promise<void> {
-  const vSnap = await getDoc(doc(db, 'village', uid));
-  if (isBroken(cracksOf(vSnap.data()?.cracks), 'mesa')) throw ruinUseError('mesa');
-  const bPrev = await getDoc(baseRef(uid));
-  const prevTheme = String(bPrev.data()?.themeRequest || '') || null;
-  const value = (text ?? '').trim().slice(0, THEME_REQUEST_MAX);
-  const themeRequest = value || null;
-  const changed = themeRequest !== prevTheme;
-  await setDoc(baseRef(uid), { userId: uid, themeRequest, updatedAt: nowIso() }, { merge: true });
-  const tomorrow = addDays(getTodayBrazil(), 1);
-  const plan = await getPlan(uid, tomorrow);
-  if (plan && !hasDone(plan) && plan.themeRequest !== themeRequest) await regeneratePlan(uid, tomorrow);
-  if (themeRequest && changed) {
-    const day = Number(getTodayBrazil().replace(/-/g, ''));
-    const themeSetOn = Number((vSnap.data()?.stats as Record<string, number> | undefined)?.themeSetOn) || 0;
-    if (themeSetOn !== day) {
-      try {
-        const { bumpVillage } = await import('./village/statsBump');
-        await bumpVillage(uid, { themesSet: 1 }, { set: { themeSetOn: day } });
-      } catch (e) {
-        console.warn('stats tema', e);
-      }
-    }
-  }
 }
 
 // ---------- painel ----------

@@ -26,11 +26,7 @@ let filesRun = 0;
 try {
   for (const { name, dir } of targets) {
     if (!existsSync(dir)) continue;
-    const pending = new Set(['rotation.test.ts']);
-    const files = readdirSync(dir).filter((f) => f.endsWith('.test.ts') && !pending.has(f)).sort();
-    for (const skipped of readdirSync(dir).filter((f) => pending.has(f))) {
-      console.log(`\n== ${name}/${skipped}\n  pendente P1.5: pickTheme ainda é stub; fora do verde até a rotação`);
-    }
+    const files = readdirSync(dir).filter((f) => f.endsWith('.test.ts')).sort();
     for (const file of files) {
       filesRun++;
       const outfile = join(outDir, `${name}-${file.replace(/\.ts$/, '.cjs')}`);

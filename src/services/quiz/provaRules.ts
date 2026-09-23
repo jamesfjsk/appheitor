@@ -260,6 +260,11 @@ export function quizScoreOf(
   return { correct, total };
 }
 
+/** Acertou todas as que contam. Prova curta demais (menos de 5) não paga a esmeralda. */
+export function perfectQuiz(score: number, total: number): boolean {
+  return total >= 5 && score === total;
+}
+
 /** Falas enquanto o Sábio lê a frase. Cada uma fica SAGE_LINE_MS. A última segura. */
 export const SAGE_READ_LINES = [
   'Deixa eu ler com calma…',

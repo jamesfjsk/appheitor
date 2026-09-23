@@ -20,6 +20,19 @@ test('todo stat de conquista ou pedido tem fonte em STAT_SOURCES', () => {
   expect(missing).toEqual([]);
 });
 
+test('capítulo 4 do Sábio é o livro e tem fonte', () => {
+  const livro = NPC_QUESTS.sabio.find((c) => c.chapter === 4);
+  const todas = NPC_QUESTS.sabio.find((c) => c.chapter === 3);
+  expect(todas?.title).toBe('Todas');
+  expect(todas?.ask).toBe('Acerte todas as perguntas da prova');
+  expect(todas?.stat).toBe('quizPerfect');
+  expect(livro?.title).toBe('Livro');
+  expect(livro?.ask).toBe('Conte um livro para o Sábio');
+  expect(livro?.stat).toBe('booksRead');
+  expect(STAT_SOURCES.booksRead.where).toMatch(/bookService/);
+  expect(STAT_SOURCES.themesSet).toBe(undefined);
+});
+
 test('todo where cita arquivo ou função real', () => {
   const bad: string[] = [];
   for (const [stat, src] of Object.entries(STAT_SOURCES)) {

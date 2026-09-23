@@ -53,10 +53,10 @@ Materiais: madeira (missões da manhã), pedra (tarde), ferro (noite), redstone 
 ### 5. Biblioteca (Library): o saber (id `mesa`)
 
 - **Para que serve**: a prova do dia e o que ele vai aprender. É a casa do Sábio.
-- **Nível 1**: abre a **prova do dia** e o **tema da história de amanhã** na Mina. Sem este nível, a prova não aparece.
+- **Nível 1**: abre a **Estante do Sábio** (contar os livros que ele termina; decisão 40). A prova do dia continua alcançável em qualquer nível. Até 23/09 o nível 1 também deixava a criança escolher o **tema da história de amanhã** na Mina; saiu pela decisão 44 (o tema vem da rotação do currículo, não de um pedido digitado).
 - **Nível 2** (decisão do pai em 17/09, vale desde o lançamento): abre **"Como você vai"** na Biblioteca (da Memória da Prova; desde 23/09, decisão 43: o que ele já domina e o que está na pedra, sem porcentagem) e a **revisita**: uma das 8 perguntas da prova volta a um erro de 3 a 10 dias atrás por outro ângulo. Na Etapa 3 o nível 2 ganha também a **Estante de erros** e o **Diário**.
 - **Nível 3** (idem; **mudado em 23/09 pela decisão 43**, a entrar no pacote AP4 de `docs/APRENDER_A_APRENDER.md`): depois de uma revisita certa, a Estante mostra **o erro de origem ao lado do acerto de hoje**, com "O que mudou?". Saem a "1 dica grátis por dia no Recado" (toda dica passa a ser grátis, depois da primeira tentativa) e a "revisita paga o dobro" (a revisita paga como item normal: erro não pode render mais do que acerto). Até o AP4, o código atual continua valendo. Na Etapa 3, o Sábio responde ao Diário no dia seguinte.
-- **Ao tocar**: nível 0 abre o cartão Construir; nível 1+ abre a prova. O cartão também guarda o tema de amanhã.
+- **Ao tocar**: nível 0 abre o cartão Construir; nível 1+ abre a prova e a Estante do Sábio. (O campo "Tema de amanhã" saiu em 23/09, decisão 44.)
 - **Visual**: `buildings/mesa-1..3.png` (roxa de propósito, é magia); partículas roxas no nível 3.
 
 ### 6. Campinho (Football Field): o lazer

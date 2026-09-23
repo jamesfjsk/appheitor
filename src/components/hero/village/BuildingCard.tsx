@@ -23,15 +23,13 @@ import { useSound } from '../../../contexts/SoundContext';
 import { useData } from '../../../contexts/DataContext';
 import { useClock } from '../../../contexts/ClockContext';
 import { dueTasksOn } from '../../../services/village/schedule';
-import { buildUpgrade, canBuild, setThemeRequest } from '../../../services/englishBaseService';
+import { buildUpgrade, canBuild } from '../../../services/englishBaseService';
 import { repairBuilding, repairLot } from '../../../services/villageService';
 import { repairMaterialCost } from '../../../services/village/repair';
 import { addDays, getTodayBrazil } from '../../../utils/clock';
 import type { BuildingId } from '../../../types/english';
 import { getLevelFromXP } from '../../../utils/levelSystem';
 import type { ForgeTab } from '../../../services/village/furnace';
-
-const THEME_MAX = 30;
 
 interface Props {
   id: BuildingId;
@@ -59,8 +57,6 @@ const BuildingCard: React.FC<Props> = ({
   const { today } = useClock();
   const { playClick } = useSound();
   const [busy, setBusy] = useState(false);
-  const [theme, setTheme] = useState('');
-  const [savingTheme, setSavingTheme] = useState(false);
 
   const def = BUILDING_BY_ID[id];
   const level = buildings[id] || 0;
@@ -75,12 +71,12 @@ const BuildingCard: React.FC<Props> = ({
   const sealed = maxLive <= 0;
   const atCap = !sealed && level >= maxLive;
   const stageHold = atCap && maxLive < BUILDING_MAX_LEVEL;
-  const stageLine = def.opensIn ? `Abre na ${def.opensIn}.` : 'Isso abre numa etapa que ainda não chegou.';
+  const stageLine = 'Ainda em obra.';
   const cracked = visibleCracks(village.cracks).includes(id);
 
   const actionLabel = level === 0 ? 'Construir' : `Melhorar · nível ${info.nextLevel}`;
   const lockLabel = info.later
-    ? (info.later === 'Em breve' && atCap ? null : (/^(Precisa|Em breve)/.test(info.later) ? info.later : `Abre na ${info.later}`))
+    ? (info.later === 'Em breve' && atCap ? null : (/^Precisa/.test(info.later) ? info.later : 'Ainda em obra'))
     : !info.unlocked
       ? id === 'cerca'
         ? 'Precisa da Fornalha nível 1'
@@ -89,7 +85,7 @@ const BuildingCard: React.FC<Props> = ({
           : 'Precisa de Fornalha e Armazém nível 1'
       : null;
   const btnLabel = stageHold
-    ? (def.opensIn ? `Abre na ${def.opensIn}` : 'Abre depois')
+    ? 'Ainda em obra'
     : atCap
       ? 'Nível máximo'
       : lockLabel || actionLabel;
@@ -170,20 +166,6 @@ const BuildingCard: React.FC<Props> = ({
       toast.error(e instanceof Error ? e.message : 'Não deu para arrumar');
     } finally {
       setBusy(false);
-    }
-  };
-
-  const saveTheme = async () => {
-    if (!childUid || level < 1) return;
-    playClick();
-    setSavingTheme(true);
-    try {
-      await setThemeRequest(childUid, theme.trim() || null);
-      toast.success(theme.trim() ? 'Tema de amanhã guardado.' : 'Tema de amanhã apagado.');
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Não deu para guardar o tema');
-    } finally {
-      setSavingTheme(false);
     }
   };
 
@@ -297,7 +279,7 @@ const BuildingCard: React.FC<Props> = ({
             <div className="min-w-0">
               <h2 className="text-xl font-bold text-white leading-tight">{def.label}</h2>
               <p className="mn-obra-lv mt-1">
-                {sealed ? 'Em breve' : level <= 0 ? 'Ainda não construída' : atCap && maxLive <= 1 ? 'Pronta' : atCap ? `Nível ${level} · máxima` : `Nível ${level}`}
+                {sealed ? 'Ainda em obra' : level <= 0 ? 'Ainda não construída' : atCap && maxLive <= 1 ? 'Pronta' : atCap ? `Nível ${level} · máxima` : `Nível ${level}`}
               </p>
               {maxLive >= 2 && (
                   <div className="mn-obra-stages" aria-label={`Nível ${level} de ${maxLive}`}>
@@ -342,7 +324,7 @@ const BuildingCard: React.FC<Props> = ({
           <section>
             <p className="mc-lbl mb-1">{sealed || stageHold ? 'Quando abre' : level <= 0 ? 'Quando construir' : 'Próximo nível'}</p>
             {sealed ? (
-              <p className="text-sm">{lockLabel || (def.opensIn ? `Abre na ${def.opensIn}.` : 'Em breve.')}</p>
+              <p className="text-sm">{lockLabel?.startsWith('Precisa') ? lockLabel : 'Ainda em obra.'}</p>
             ) : stageHold ? (
               <div className="space-y-2">
                 <p className="text-sm">{stageLine}</p>
@@ -415,29 +397,7 @@ const BuildingCard: React.FC<Props> = ({
 
           {id === 'mesa' && (
             <>
-              {level >= 1 ? (
-                <div className="mc-card rounded p-3">
-                  <label className="mc-lbl block mb-1" htmlFor="building-theme">Tema de amanhã</label>
-                  <div className="flex gap-2">
-                    <input
-                      id="building-theme"
-                      value={theme}
-                      maxLength={THEME_MAX}
-                      onChange={(e) => setTheme(e.target.value.slice(0, THEME_MAX))}
-                      placeholder="ex.: dragões, futebol, mina"
-                      className="mc-slot flex-1 min-w-0 text-white text-sm px-3 py-2 outline-none placeholder:text-white/40"
-                    />
-                    <button
-                      type="button"
-                      className="mc-btn mc-btn-green min-h-[44px] px-3 font-bold"
-                      disabled={savingTheme}
-                      onClick={() => void saveTheme()}
-                    >
-                      {savingTheme ? '...' : 'Salvar'}
-                    </button>
-                  </div>
-                </div>
-              ) : (
+              {level < 1 && (
                 <p className="text-sm mc-muted">
                   {quizDone
                     ? 'A prova de hoje já foi feita.'

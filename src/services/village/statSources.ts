@@ -21,7 +21,6 @@ export const STAT_SOURCES: Record<string, { where: string }> = {
   contractsPerfect: { where: 'englishBaseService.completeContract' },
   contractsWeek: { where: 'englishBaseService.completeContract' },
   contractsDone: { where: 'englishBaseService.completeContract' },
-  themesSet: { where: 'englishBaseService.setThemeRequest' },
   wordsMastered: { where: 'englishBaseService.completeContract (vocab.seen >= 3)' },
   smelts: { where: 'villageService.tradeMaterials' },
   burns: { where: 'villageService.burnWood' },

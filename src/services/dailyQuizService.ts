@@ -3,11 +3,10 @@
 // O mesmo documento guarda a prova gerada e, depois, o resultado.
 // ========================================
 
-import { doc, getDoc, setDoc, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, deleteField, doc, getDoc, getDocs, onSnapshot, orderBy, query, serverTimestamp, setDoc, Timestamp, where, writeBatch } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { DailyQuiz, DailyQuizQuestion, DailyQuizSanitize, DailyQuizTheme } from '../types';
 import { generateDailyQuiz } from './aiDailyQuiz';
-import { pickThemeForDate } from '../config/quizCurriculum';
 import { DAILY_QUIZ_QUESTIONS } from '../config/rules';
 import { DEFAULT_ECONOMY, DEFAULT_MODULES } from '../config/village';
 import { getSettings } from './settingsService';
@@ -15,9 +14,13 @@ import type { EconomySettings, ModuleSettings } from '../types/village';
 import { addDays } from '../utils/clock';
 import { bumpChallenge } from './challengesService';
 import { nextQuizStreak } from './village/stats';
-import { answersStash, completeQuizWrite, type QuizAbout } from './quiz/closeQuiz';
+import { perfectQuiz } from './quiz/provaRules';
+import { answersStash, completeQuizWrite, type QuizAbout, type QuizTiming } from './quiz/closeQuiz';
+import { quizBankDocs } from './quiz/bankWrite';
+import { avoidQuestionsFromRecent, type DedupeNeedle } from './quiz/dedupe';
+import { pickTheme, rotationProfileFrom, type ThemeHistoryEntry } from './quiz/rotation';
 
-export type { QuizAbout };
+export type { QuizAbout, QuizTiming };
 export { payThenComplete, answersStash, shouldOpenReflection, completeQuizWrite } from './quiz/closeQuiz';
 
 export const dailyQuizId = (userId: string, date: string) => `${userId}_${date}`;
@@ -77,6 +80,40 @@ function readSanitize(raw: unknown): DailyQuizSanitize | undefined {
     ...(typeof row.fromOffline === 'number' ? { fromOffline: row.fromOffline } : {}),
     ...(row.reviewFellBack === true ? { reviewFellBack: true } : {}),
     ...(duvidas ? { duvidas } : {}),
+    ...(Array.isArray((raw as { rejected?: unknown }).rejected)
+      ? {
+          rejected: ((raw as { rejected: unknown[] }).rejected).flatMap((item) => {
+            if (!item || typeof item !== 'object') return [];
+            const n = Number((item as { n?: unknown }).n);
+            const reasons = (item as { reasons?: unknown }).reasons;
+            if (!Number.isInteger(n) || !Array.isArray(reasons)) return [];
+            return [{ n, reasons: reasons.filter((c): c is string => typeof c === 'string') }];
+          }),
+        }
+      : {}),
+  };
+}
+
+function readTimings(raw: unknown): QuizTiming[] | undefined {
+  if (!Array.isArray(raw) || raw.length === 0) return undefined;
+  return raw.map((item) => {
+    if (!item || typeof item !== 'object') return { msToAnswer: 0, msReadingExplain: 0 };
+    const msToAnswer = Number((item as { msToAnswer?: unknown }).msToAnswer);
+    const msReadingExplain = Number((item as { msReadingExplain?: unknown }).msReadingExplain);
+    return {
+      msToAnswer: Number.isFinite(msToAnswer) && msToAnswer > 0 ? msToAnswer : 0,
+      msReadingExplain: Number.isFinite(msReadingExplain) && msReadingExplain > 0 ? msReadingExplain : 0,
+    };
+  });
+}
+
+function readTheme(raw: DailyQuizTheme | undefined): DailyQuizTheme {
+  const theme = raw ?? { id: '', category: '', title: '', lesson: '', whyItMatters: '' };
+  const { angleIndex, depth, ...rest } = theme;
+  return {
+    ...rest,
+    ...(angleIndex === 0 || angleIndex === 1 || angleIndex === 2 ? { angleIndex } : {}),
+    ...(depth === 1 || depth === 2 || depth === 3 ? { depth } : {}),
   };
 }
 
@@ -91,7 +128,7 @@ function fromDoc(id: string, data: Record<string, unknown>): DailyQuiz | null {
     userId: String(data.userId ?? ''),
     date: String(data.date ?? ''),
     status: data.completed === true ? 'completed' : 'ready',
-    theme: theme ?? { id: '', category: '', title: '', lesson: '', whyItMatters: '' },
+    theme: readTheme(theme),
     questions,
     reflectionPrompt: typeof data.reflectionPrompt === 'string' ? data.reflectionPrompt : '',
     source: data.source === 'offline' ? 'offline' : 'ai',
@@ -106,6 +143,7 @@ function fromDoc(id: string, data: Record<string, unknown>): DailyQuiz | null {
     reflection: typeof data.reflection === 'string' ? data.reflection : undefined,
     reflectionWords: typeof data.reflectionWords === 'number' ? data.reflectionWords : undefined,
     reflectionNote: typeof data.reflectionNote === 'string' ? data.reflectionNote : undefined,
+    timings: readTimings(data.timings),
     completedAt: (data.completedAt as Timestamp | undefined)?.toDate?.(),
     sanitize: readSanitize(data.sanitize),
     ...(data.raw && typeof data.raw === 'object' ? { raw: data.raw } : {}),
@@ -163,20 +201,75 @@ export async function regenerateDailyQuiz(userId: string, date: string, today: s
   return buildAndSave(userId, date, today, count);
 }
 
+async function loadQuizBankNeedles(userId: string, today: string): Promise<DedupeNeedle[]> {
+  const since = addDays(today, -180);
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'quizBank'),
+      where('userId', '==', userId),
+      where('date', '>=', since),
+      orderBy('date', 'desc'),
+    ));
+    return snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        date: String(data.date ?? ''),
+        subject: String(data.subject ?? ''),
+        question: String(data.question ?? ''),
+        ...(typeof data.hash === 'string' ? { hash: data.hash } : {}),
+        ...(typeof data.n === 'number' ? { n: data.n } : {}),
+      };
+    });
+  } catch (e) {
+    console.warn('quizBank leitura', e);
+    return [];
+  }
+}
+
 async function buildAndSave(userId: string, date: string, today: string, count: number): Promise<DailyQuiz> {
-  // 90 dias de memória (18/09): a lista chega da mais recente para a mais antiga, e o prompt recebe as 80 mais recentes
   const recent = await getRecentDailyQuizzes(userId, today, 90);
-  const recentIds = recent.filter((q) => q.date !== date).map((q) => q.theme.id).filter(Boolean);
-  const avoid = recent.flatMap((q) => q.questions.map((x) => x.question));
-  const seed = pickThemeForDate(date, recentIds);
+  const history: ThemeHistoryEntry[] = recent
+    .filter((q) => q.date !== date && q.theme.id)
+    .map((q) => ({
+      date: q.date,
+      themeId: q.theme.id,
+      category: q.theme.category,
+      ...(q.theme.angleIndex === 0 || q.theme.angleIndex === 1 || q.theme.angleIndex === 2
+        ? { angle: q.theme.angleIndex }
+        : {}),
+    }));
+  let profile = rotationProfileFrom(undefined);
+  try {
+    const learning = await getDoc(doc(db, 'learning', userId));
+    profile = rotationProfileFrom(learning.data()?.profile);
+  } catch (e) {
+    console.warn('perfil da prova', e);
+  }
+  const pick = pickTheme(date, history, profile);
+  const avoid = avoidQuestionsFromRecent(
+    recent.map((q) => ({ date: q.date, questions: q.questions.map((x) => x.question) })),
+    60,
+  );
   const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
+  const bank = await loadQuizBankNeedles(userId, today);
   const generated = await generateDailyQuiz({
-    seed,
+    seed: pick.theme,
     count,
-    avoidQuestions: avoid.slice(0, 60),
+    avoidQuestions: avoid,
     date,
     forceOffline: modules.aiGeneration === false,
+    angle: pick.angle,
+    depth: pick.depth,
+    bank,
   });
+  const theme: DailyQuizTheme = {
+    ...generated.theme,
+    id: pick.theme.id,
+    category: pick.theme.category,
+    angle: pick.angle,
+    angleIndex: pick.angleIndex,
+    depth: pick.depth,
+  };
 
   const ref = doc(db, 'dailyQuizzes', dailyQuizId(userId, date));
   await setDoc(ref, {
@@ -184,12 +277,20 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     date,
     status: 'ready',
     completed: false,
-    theme: generated.theme,
+    theme,
     questions: generated.questions,
     reflectionPrompt: generated.reflectionPrompt,
     source: generated.source,
     ...(generated.sanitize ? { sanitize: generated.sanitize } : {}),
     ...(generated.raw ? { raw: generated.raw } : {}),
+    answers: deleteField(),
+    timings: deleteField(),
+    score: deleteField(),
+    totalQuestions: deleteField(),
+    awaitingReflection: deleteField(),
+    reflection: deleteField(),
+    reflectionWords: deleteField(),
+    reflectionNote: deleteField(),
     generatedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }, { merge: true });
@@ -199,7 +300,7 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     userId,
     date,
     status: 'ready',
-    theme: generated.theme,
+    theme,
     questions: generated.questions,
     reflectionPrompt: generated.reflectionPrompt,
     source: generated.source,
@@ -217,11 +318,12 @@ export async function stashQuizAnswers(
   answers: string[],
   score: number,
   totalQuestions: number,
+  timings?: QuizTiming[],
 ): Promise<void> {
   await setDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), {
     userId,
     date,
-    ...answersStash(answers, score, totalQuestions),
+    ...answersStash(answers, score, totalQuestions, timings),
     updatedAt: serverTimestamp(),
   }, { merge: true });
 }
@@ -235,25 +337,45 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
   reflection: string;
   reflectionNote?: string;
   about: QuizAbout;
+  timings?: QuizTiming[];
 }): Promise<void> {
   const ref = doc(db, 'dailyQuizzes', dailyQuizId(userId, date));
   const snap = await getDoc(ref);
-  const plan = completeQuizWrite(snap.exists() ? snap.data() : undefined, result);
+  const existing = snap.exists() ? snap.data() : undefined;
+  const plan = completeQuizWrite(existing, result);
   if (plan.kind === 'skip') return;
   if (plan.kind === 'reject') throw new Error(plan.reason);
-  await setDoc(ref, {
+  const questions = Array.isArray(existing?.questions) ? existing.questions as DailyQuizQuestion[] : [];
+  const theme = (existing?.theme ?? {}) as DailyQuizTheme;
+  const timings = result.timings?.length ? result.timings : readTimings(existing?.timings);
+  const bank = quizBankDocs({
+    userId,
+    date,
+    theme,
+    questions,
+    answers: result.answers,
+    timings,
+  });
+  const snaps = await Promise.all(bank.map((item) => getDoc(doc(db, 'quizBank', item.id))));
+  const fresh = bank.filter((_, i) => !snaps[i].exists());
+  const batch = writeBatch(db);
+  batch.set(ref, {
     userId,
     date,
     ...plan.data,
     completedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }, { merge: true });
+  for (const item of fresh) {
+    batch.set(doc(db, 'quizBank', item.id), { ...item.data, createdAt: serverTimestamp() });
+  }
+  await batch.commit();
   try {
     await bumpChallenge(userId, 'quiz_correct', result.score);
   } catch (e) {
     console.warn('desafio quiz_correct', e);
   }
-  if (result.score >= 8 && result.totalQuestions >= 8) {
+  if (perfectQuiz(result.score, result.totalQuestions)) {
     try {
       const { grantRare } = await import('./villageService');
       const { claimKey } = await import('./village/claims');
@@ -272,7 +394,7 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     const prevStreak = Number(vSnap.data()?.stats?.quizStreak) || 0;
     const deltas: Record<string, number> = { quizzesDone: 1 };
     if (result.score >= 6) deltas.quizScore = result.score;
-    if (result.score >= 8) deltas.quizPerfect = 1;
+    if (perfectQuiz(result.score, result.totalQuestions)) deltas.quizPerfect = 1;
     await bumpVillage(userId, { ...deltas, reflections: 1 }, { set: { quizStreak: nextQuizStreak(prevStreak, yesterday?.completed === true, skipped) } });
     await bumpFriend(userId, 'sabio', 2);
   } catch (e) {

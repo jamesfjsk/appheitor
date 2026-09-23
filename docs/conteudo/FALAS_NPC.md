@@ -12,7 +12,7 @@ Para vetar: marque o id e o motivo; a fala sai do arquivo.
 |---|---|---|
 | `s_first_build` | primeira vez | Sua primeira obra. Toda vila começou com uma pedra em cima da outra. |
 | `s_first_craft` | primeira vez | Você fez uma ferramenta. Os humanos fazem isso há dois milhões de anos. |
-| `s_first_quiz8` | primeira vez | Oito de oito. Não foi sorte, foi atenção. |
+| `s_first_quiz8` | primeira vez | Acertou todas. Não foi sorte, foi atenção. |
 | `s_first_chest` | primeira vez | O primeiro Baú abriu. Sabe o que ele guarda de verdade? |
 | `s_first_buy` | primeira vez | Sua primeira compra. Trocou gold por uma coisa que queria. |
 | `s_first_goal` | primeira vez | Uma meta no Cofrinho. Você mandou um recado para o seu futuro. |
@@ -88,7 +88,7 @@ Para vetar: marque o id e o motivo; a fala sai do arquivo.
 |---|---|---|
 | `c_first_build` | primeira vez | Construiu! Gastou material, mas gastou certo. |
 | `c_first_craft` | primeira vez | Uma ferramenta feita em casa. Sabe quanto eu cobraria por essa? Muito. |
-| `c_first_quiz8` | primeira vez | Oito de oito na prova. Isso não se compra, eu já tentei. |
+| `c_first_quiz8` | primeira vez | Todas certas na prova. Isso não se compra, eu já tentei. |
 | `c_first_chest` | primeira vez | Seu primeiro Baú do Dia. Abriu sozinho, sem chave e sem taxa. |
 | `c_first_buy` | primeira vez | Sua primeira compra! Fico feliz. O gold, nem tanto. |
 | `c_first_goal` | primeira vez | Uma meta no Cofrinho? Guardar em vez de gastar? Comigo aqui do lado? |
@@ -164,7 +164,7 @@ Para vetar: marque o id e o motivo; a fala sai do arquivo.
 |---|---|---|
 | `f_first_build` | primeira vez | Primeira obra. |
 | `f_first_craft` | primeira vez | Primeiro craft. |
-| `f_first_quiz8` | primeira vez | Oito de oito. |
+| `f_first_quiz8` | primeira vez | Todas certas. |
 | `f_first_chest` | primeira vez | Baú aberto. |
 | `f_first_buy` | primeira vez | Comprou. |
 | `f_first_goal` | primeira vez | Meta no Cofre. |
@@ -240,7 +240,7 @@ Para vetar: marque o id e o motivo; a fala sai do arquivo.
 |---|---|---|
 | `o_first_build` | primeira vez | Primeira obra. É como o primeiro treino: ninguém vê, mas o time sente. |
 | `o_first_craft` | primeira vez | Fez a própria ferramenta. Jogador que cuida da chuteira joga melhor. Regra antiga. |
-| `o_first_quiz8` | primeira vez | Oito de oito. Isso é pênalti no ângulo. Sem chance para o goleiro. |
+| `o_first_quiz8` | primeira vez | Todas certas. Isso é pênalti no ângulo. Sem chance para o goleiro. |
 | `o_first_chest` | primeira vez | Primeiro Baú. Fechou o dia inteiro, e o prêmio veio. |
 | `o_first_buy` | primeira vez | Primeira compra. Escolheu bem? Escolher é parte do jogo. |
 | `o_first_goal` | primeira vez | Uma meta no Cofrinho. Meta, no futebol e no banco, é onde você mira. |

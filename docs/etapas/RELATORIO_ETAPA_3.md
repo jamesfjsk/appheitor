@@ -972,6 +972,210 @@ A espera da reflexão deixa de ser o botão "O Sábio lê...". O Entregar some. 
 
 **Pare para o commit do pai.** Não começa o próximo pacote.
 
+## Pacote 10 — Prova v3 P1, parte 1: dados e rotação
+
+Sentimento alvo: a prova guarda cada pergunta de verdade, escolhe o tema do dia sem repetir a categoria de ontem, e o tempo de cada resposta fica no papel — sem aparecer na mesa.
+
+### O que mudou
+
+- **P1.1.** `normalizeQuestion` (minúsculas, sem acento, sem pontuação, espaços únicos) e `nearDuplicate` (mesmo assunto e 70% ou mais das palavras de 4+ letras). O `valida.txt` do prompt de 22/09 não está no repositório. Os 8 pares que reprovam saíram dos `dailyQuizzes` da conta de teste, nomeados por data: 23/09 Q7–24/09 Q6 (sol), 23/09 Q8–24/09 Q7 (soccer), 06/10 Q6–26/10 Q3 (bandeirinha), 10/10 Q1–24/10 Q6 (planeta), 16/11 Q7–20/11 Q4 (pontos do time), 08/11 Q4–Q5 (sequência), 23/10 Q3–02/11 Q4 (reais), 20/09 Q6–29/10 Q5 (Which sentence). Quatro pares de assuntos diferentes passam, mesmo com o texto igual ou parecido (Hércules geral/tema, idade do primo geral/matemática, rios/Sol, impedimento/bola molhada). No gerar, hash igual a um dos últimos 180 dias do `quizBank`, ou quase igual a um dos 60 mais recentes, sai com o código `repetida` em `sanitize.rejected` e abre buraco para a reserva.
+- **P1.2.** `completeDailyQuiz` grava os docs `quizBank/{uid}_{date}_{n}` no mesmo `writeBatch` do resultado. Campos da §5.1. Enquanto a segunda tentativa não existe: `attempts: 1`; `secondChoice`, `retryOk` e `nudge` ausentes; `supportLevel` 0 no acerto e 3 no erro; ausente no dilema. `createdAt` é o timestamp do servidor. Doc que já existe não é reescrito (a regra só deixa `reviewedOk` / `reviewedOn`).
+- **§6.6.** A mesa marca `performance.now()` quando a pergunta entra, quando ele escolhe e quando aperta Próxima. Isso vai para `completeDailyQuiz` como `timings[n]`. Nada disso aparece na tela. O stash da reflexão guarda os tempos, para o reload não zerar.
+- **P1.5.** `pickTheme` segue as 7 regras da §8.2. `rotation.test.ts` saiu da lista de pendente e passou, inclusive os 365 dias. `buildAndSave` usa os últimos 90 dias e `learning/{uid}.profile.weak/strong` se existir. O doc da prova grava `theme.angle`, `theme.angleIndex` e `theme.depth`. O prompt escreve o ângulo e a profundidade (`Profundidade 2: aprofunde`, e o mesmo para 1 e 3). Sem chamada de IA para provar o texto: o teste de `dailyPrompt` mostra os dois no prompt.
+- **§8.3 item 1.** A lista "não repita" manda os 60 enunciados mais novos (`slice(0, 60)` depois de ordenar da data mais recente para a mais antiga). Teste com 100 hashes datados: o prompt leva `hash-099` até `hash-040` e não leva os 40 mais antigos.
+- **P1.8.** `prepareTodayThenTomorrow` espera a prova de hoje gravar antes do `ensureDailyQuiz` de amanhã. Teste com o serviço dublado: o `avoid` da segunda chamada contém o enunciado da primeira.
+- **P2.4.** `scripts/backfill-quizbank.cjs --uid --apply`. Sem `--apply` só conta. Idempotente pelo id. Só prova com `completed === true`: a prova em aberto ainda cria o doc no fechar, e a regra não deixa editar depois.
+
+### Conta de teste
+
+Backfill (`DydxTQ0cGEbX46LLlQxxD123pQD3`), primeira vez com `--apply`:
+
+```
+provas lidas: 103
+criados: 16
+já existiam: 0
+sem questions+answers: 99
+em aberto (respostas sem fechar): 2
+```
+
+Segunda leitura, sem `--apply`: `criados: 0`, `já existiam: 16`.
+
+A prova de 23/09 foi gerada de novo na conta de teste e concluída. O doc traz `theme.angle` = "os rios voadores: como a Amazônia manda chuva para São Paulo", `theme.depth` = 1, `theme.id` = `biomas-do-brasil`. A geração publicou **6** perguntas, não 8: `sanitize.dropped` foi `conta_nao_fecha` 1, `opcao_caricata` 1, `certa_mais_longa` 2, `duplicata` 1. `repetida` não apareceu. O fechar gravou 6 docs no `quizBank` (ids `..._2026-09-23_1` a `_6`), todos com `msToAnswer` e `msReadingExplain` acima de zero (o primeiro: 1395 ms e 4023 ms), `attempts: 1`, `supportLevel: 0` (acertou de primeira), `createdAt` preenchido, sem `secondChoice` / `retryOk` / `nudge`. O teste puro `bankWrite.test.ts` grava 8 docs com os campos da §5.1, inclusive o dilema sem `supportLevel` e o erro com `supportLevel` 3.
+
+A mesa dizia "oito perguntas" com uma prova de 6. A frase passou a usar o número que a prova tem.
+
+### Arquivos
+
+- `src/services/quiz/hash.ts`, `dedupe.ts`, `bankWrite.ts`, `prefetch.ts`, `rotation.ts`
+- `src/services/quiz/__tests__/dedupe.test.ts`, `bankWrite.test.ts`, `rotation.test.ts` (já existia; agora roda), `dailyPrompt.test.ts`
+- `src/services/aiDailyQuiz.ts`, `dailyQuizService.ts`, `quiz/closeQuiz.ts`, `quiz/validateQuestion.ts` (`hashOf`), `quiz/dailyPrompt.ts`
+- `src/components/hero/DailyQuiz.tsx`, `src/types/index.ts`
+- `scripts/backfill-quizbank.cjs`, `scripts/run-english-tests.mjs` (tira o `rotation.test.ts` de pendente)
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` §12 (linha do pacote 10)
+- `docs/exemplos/telas/etapa-3/pacote-10/` (fotos e `_shot.mjs`)
+
+### Barra da lei
+
+1. Intenção. A mesa continua sendo a prova do dia. O tempo não aparece. Passa.
+2. Sistema. O papiro e os botões que já existiam. Sem classe nova. Passa.
+3. Fonte. Nada de título novo. Passa.
+4. Ícone. O Sábio no tamanho de sempre. Passa.
+5. Hierarquia. Pergunta, opções, Próxima. Passa.
+6. A cena continua. A Vila fica em volta do rolo. Passa.
+7. Arestas. 1280 e 1920: convite, pergunta e reflexão. Botões no alcance. Frame lido: nada sobreposto, cortado ou fora do clique. O convite fotografado ainda diz "oito"; a frase no código já usa o tamanho da prova.
+8. Mundo. Prova no React. Phaser não entrou. Passa.
+9. Economia. Sem fonte nova de gold. O fechar pagou o que a prova já pagava (6 acertos, +36 XP, +6 gold na conta de teste). Passa.
+10. Consequência. Sem humilhação nova. "Não foi dessa vez" continua até o pacote 11. Passa.
+11. Estado honesto. O doc guarda o que ele marcou e quanto tempo levou. A mesa não mostra o relógio. Passa.
+12. Mouse e teclado. Esc e os botões de sempre. Passa.
+13. Craft. O clique e o portão de leitura que já existiam. O tempo medido não tem animação própria. Passa.
+14. Copy. Nenhuma frase nova de sistema na mesa, fora o número de perguntas no lugar do "oito" fixo. Passa.
+15. Evidência. Conta `teste@flash.com`, `?d=2026-09-23&h=10`, Vite em `http://localhost:5174`. Fotos em `docs/exemplos/telas/etapa-3/pacote-10/`: `01-convite`, `02-pergunta`, `03-reflexao`, em 1280 e 1920. O quadro pago foi lido na hora ("6 de 6", "+36 XP", "+6 GOLD", "Li sua reflexão.", "Voltar à Vila") e não virou png: o script esperava "O Sábio leu" e a fala foi "Li sua reflexão." Som mudo no navegador sem tela, para a voz não travar o Próxima; o portão de leitura segurou (~4 s em `msReadingExplain`).
+16. Arestas. Prova já concluída não regenera. Backfill não mexe em prova em aberto. Hash antigo dentro de 180 dias e quase-igual fora dos 60 mais novos estão no teste. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes (o de `DailyQuiz.tsx` é o efeito da lição, que já pedia `quiz.theme`)
+- `npm run test:english` — 33 arquivos, saída 0 (inclui `rotation.test.ts` 10/10, com os 365 dias)
+- `npm run test:village` — 13 arquivos, saída 0
+
+### Fora
+
+- Pacote 11 (perfil, segunda tentativa, painel "Como ele vai")
+- A geração que publica menos de 8 quando o validador deixa buraco (dilema e folga). Nesta sessão uma saiu com 7 e a que fechou em 23/09 saiu com 6; `repetida` não foi o motivo
+- A categoria fraca, sem tema livre nos 90 dias e ainda com zero na semana, traz de volta o tema menos recente dela (depth sobe, reason continua "categoria fraca"). Sem isso o teste de 70 dias não fecha: matemática tem 6 temas e a janela pede a categoria em 7 semanas. O simulado sem perfil não repete tema dentro de 90 dias
+- Rodar o backfill na conta do Heitor — o pai
+
+**Pare para o commit do pai.** Não começa o pacote 11.
+
+## Pacote 10c — tema de amanhã fora
+
+Sentimento alvo: a Biblioteca conta livro e prova; o tema da Mina de amanhã não se pede num campo.
+
+### O que mudou
+
+1. O cartão da Biblioteca perdeu o bloco "Tema de amanhã" (rótulo, campo, Salvar) e o estado que só servia a ele.
+2. O mapa da Base perdeu "O que você quer na história de amanhã?", com o estado e o `mesaLive` que só existia para esse bloco. Esse mapa não está montado na Mina que o Heitor abre; a tela viva é o quadro de contratos, que nunca teve o campo.
+3. O tema principal do plano passou a ser sempre o sorteio (`pickOne`). O plano continua gravando `themeRequest: null`. Saiu `setThemeRequest` e a limpeza do pedido depois de gerar.
+4. Saiu `themesSet` das fontes de stat. Pedidos do Sábio: capítulo 3 "Todas" / "Acerte todas as perguntas da prova" (`quizPerfect`); capítulo 4 "Livro" / "Conte um livro para o Sábio" (`booksRead`).
+5. Efeito da Biblioteca no nível 1: "Você conta ao Sábio os livros que termina." O do nível 3: "Você vê o erro antigo ao lado do acerto de hoje." O do nível 2 ficou.
+6. Onde a criança lia "Abre na …", "Abre depois" ou "Em breve" no cartão, no mapa da Base e no erro de construir, agora lê "Ainda em obra." No botão, "Ainda em obra". "Precisa de …" ficou.
+
+`themeRequest` continua no tipo e nos documentos antigos. O painel ainda mostra o pedido antigo, se houver. Nada disso é mais escrito.
+
+`dayContextFor` não entra no harness: o arquivo puxa o Firebase e o `import.meta.env` fica vazio no teste em CJS. A escolha está no código (`mainTheme = pickOne(rng, pool)`, `themeRequest: null`, sem ler `base.themeRequest`). Na Mina da conta de teste o tema do contrato é "a caverna", do sorteio, não um texto digitado.
+
+### Arquivos
+
+- `src/components/hero/village/BuildingCard.tsx`
+- `src/components/hero/english/base/BaseMap.tsx`
+- `src/services/englishAi.ts`
+- `src/services/englishBaseService.ts`
+- `src/services/village/statSources.ts`
+- `src/data/npcQuests.ts`
+- `src/config/englishBase.ts`
+- `src/services/english/__tests__/levels.test.ts` (o efeito novo da Biblioteca)
+- `src/services/village/__tests__/statSources.test.ts`
+- `docs/exemplos/telas/etapa-3/pacote-10c/`
+
+### Barra da lei
+
+1. Intenção. Biblioteca = livros e prova. Mina = contratos do dia. Passa.
+2. Sistema. O cartão e o quadro que já existiam. Sem classe nova. Passa.
+3. Fonte. Fredoka no corpo, pixel no título curto. Passa.
+4. Ícone. A casa da Biblioteca no slot de sempre. Passa.
+5. Hierarquia. O efeito de agora e o cadeado do próximo nível. Passa.
+6. A cena continua. O cartão não apaga a Vila. Passa.
+7. Arestas. 1280 e 1920. Frame lido: nada sobreposto, cortado ou fora do clique.
+8. Mundo. Continua no React. Passa.
+9. Economia. Sem gold novo. Passa.
+10. Consequência. O pedido do Sábio agora é a prova inteira e o livro. Passa.
+11. Estado honesto. Nível trancado diz "Ainda em obra." Passa.
+12. Mouse. Esc fecha. Botões de 44 px. Passa.
+13. Craft. O clique que já existia. Passa.
+14. Copy. Sem "Etapa 3" nesses cadeados. Sem campo de tema. Passa.
+15. Evidência. Conta `teste@flash.com`, `?d=2026-09-23&h=10`, Vite em `http://localhost:5174`. Fotos em `docs/exemplos/telas/etapa-3/pacote-10c/`: `01-biblioteca` (efeito novo, sem o campo, "Ainda em obra"), `02-mina` (quadro sem o campo), `03-sabio` ("Feito: Todas" e "Conte um livro para o Sábio"), em 1280 e 1920. A Torre foi ao nível 3 e o Sábio ao capítulo 3 só nas fotos; os dois voltaram (torre 2, capítulo 2).
+16. Arestas. Prova já feita no botão da Biblioteca. Mina abre porque a prova de hoje está fechada. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `node scripts/run-english-tests.mjs english` — 11 arquivos, saída 0
+- `npm run test:village` — 13 arquivos, saída 0 (`statSources.test.ts` com `booksRead` no capítulo 4)
+
+### Fora
+
+- As frases soltas do Campinho ("abre na Etapa 4") e da Arena, que não estavam nas linhas do item 6
+- Pacote 11
+
+**Pare para o commit do pai.**
+
+## Pacote 10 — correções da revisão
+
+Sentimento alvo: a virada do dia começa a prova na primeira pergunta, e quem acerta todas as que contam vê isso na mesa.
+
+### O que mudou
+
+**C1.** `freshQuizUi()` em `closeQuiz.ts` devolve a mesa vazia (`current` 0, `selected` null, `answers` [], `score` 0, recompensa zerada, reflexão vazia, `judgeSay` null, `paid` false, `phase` prompt). O efeito que depende de `today` aplica isso e zera `timingsRef`, `askedAt`, `choseAt`, `stepLock` e `revealLock`. Ele está declarado antes do efeito que restaura a reflexão guardada. A leitura que já estava no ar também perde a vez (`readGen`, veredito pendente e `saving`), para o Sábio não fechar o dia novo com a frase de ontem. O tempo passa a ser gravado no índice (`next[current]`), com zero no meio quando falta medida. `answersStash` e `readTimings` não filtram mais a lista. O `quizBank` continua gravando só tempo acima de 0.
+
+**C2.** `perfectQuiz(score, total)` em `provaRules.ts`: `total >= 5 && score === total`. A esmeralda (`grantRare` esmeralda, chave `quiz8`) e `quizPerfect` usam essa função. 7 de 7 ganha; 6 de 7 não; 5 de 5 ganha; 4 de 4 não.
+
+**C3.** O quadro pago e a prova já fechada mostram `{nota} de {total que conta}`, o `total` de `quizScoreOf`. O dilema sai da conta.
+
+**C4.** `quizBankDocs` e o retroativo gravam `depth` (a profundidade do tema). `difficulty` só entra se a própria pergunta trouxer 1, 2 ou 3. Os 16 docs já criados na conta de teste não foram reescritos: `…_2026-09-23_1` continua com `difficulty` 1 e sem `depth`.
+
+### Arquivos
+
+- `src/services/quiz/closeQuiz.ts`
+- `src/components/hero/DailyQuiz.tsx`
+- `src/services/dailyQuizService.ts`
+- `src/services/quiz/provaRules.ts`
+- `src/services/quiz/bankWrite.ts`
+- `scripts/backfill-quizbank.cjs`
+- `src/services/quiz/__tests__/provaBleed.test.ts`
+- `src/services/quiz/__tests__/bankWrite.test.ts`
+- `docs/exemplos/telas/etapa-3/pacote-10/c3-nota-1280.png`
+- `docs/exemplos/telas/etapa-3/pacote-10/c3-nota-1920.png`
+
+### Barra da lei
+
+1. Intenção. A mesa diz quantas ele acertou entre as que contam. Passa.
+2. Sistema. O papiro que já existia. Sem classe nova. Passa.
+3. Fonte. O "7 de 7" no título do papiro. Passa.
+4. Ícone. Estrela e ouro nos slots de sempre, 24 px. Passa.
+5. Hierarquia. A nota é a âncora. Passa.
+6. A cena continua. A Vila fica atrás do papiro. Passa.
+7. Arestas. 1280 e 1920. Frame lido no papiro: nada sobreposto, cortado ou fora do clique.
+8. Mundo. Continua no React. Passa.
+9. Economia. Esmeralda e "Nota máxima" quando acertou todas, com piso de 5. Sem fonte nova de gold. Passa.
+10. Consequência. Errar uma das que contam não paga a esmeralda. Passa.
+11. Estado honesto. 8 perguntas, 1 dilema, nota 7 de 7. Passa.
+12. Mouse. O botão "Voltar à Vila" cabe no clique. Passa.
+13. Craft. O som e o papiro que já existiam. Passa.
+14. Copy. "7 de 7", "Li sua reflexão." Sem boletim. Passa.
+15. Evidência. Conta `teste@flash.com`, Vite em `http://localhost:5174`. Virada simulada sem recarregar a página: `?d=2026-10-24&h=10`, primeira pergunta respondida, a folha em "Sobre a ideia · 2 de 8"; `history.pushState` para `?d=2026-10-25` e o evento `clock-override`. A folha voltou ao convite ("A prova de hoje ainda espera", "Abrir a mesa"), sem o "2 de". "Começar" abriu "1 de 8". A prova de 24/10 ficou `completed` false e sem respostas. A de 25/10 tem dilema na pergunta 3; o quadro pago leu "7 de 7", "+42 XP", "+7 GOLD". Fotos `c3-nota-1280.png` e `c3-nota-1920.png`.
+16. Arestas. A de 24/10 não herdou a resposta. O dilema no `quizBank` ficou sem `supportLevel`. Oito tempos, nenhum buraco. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 33 arquivos, saída 0 (`freshQuizUi`, o zero no meio do `answersStash`, `perfectQuiz` 7/7, 6/7, 5/5 e 4/4, `depth` sem `difficulty` e `difficulty` 3 quando a pergunta traz)
+- `npm run test:village` — 13 arquivos, saída 0
+- Na conta de teste, a prova de 25/10 fechou com nota 7, total 7, 8 respostas e 8 tempos. Os 8 docs novos do `quizBank` têm `depth` 1 e não têm `difficulty`. A chave `quiz8:2026-10-25` gravou a esmeralda (`rare.esmeralda` 1, `quizPerfect` 1).
+
+### Fora
+
+- Os 16 docs antigos do `quizBank` na conta de teste. O retroativo na conta do Heitor fica para o pai, depois desta correção.
+- Pacote 10b (a prova sair com menos de 8)
+- Pacote 11
+
+**Pare para o commit do pai.**
+
+
+
 
 
 

@@ -45,11 +45,13 @@ Toda tela, conteúdo ou regra nova passa por ela. Três proibições vêm junto:
 
 A escada vale só em **problema de raciocínio**: o que se descobre pensando, ouvindo de novo ou testando (conta, regra de inglês, aplicar uma ideia, causa e efeito, circuito, lógica, ordem). **Fato** (data, nome, lugar, detalhe da lição) não se descobre pensando mais: erro de fato recebe a explicação na hora e vai para a Estante.
 
-Na prova, a divisão segue a lista fechada de `skill` do prompt v3, numa função pura `retryable(question)` em `src/services/quiz/provaRules.ts`:
+Na prova, a divisão segue a lista fechada `SKILLS` de `src/services/quiz/validateQuestion.ts` (a que o gerador usa de verdade; corrigido em 23/09, na revisão do pacote 10), numa função pura `retryable(question)` em `src/services/quiz/provaRules.ts`:
 
 | Com escada (raciocínio) | Sem escada (fato ou compreensão) | Fora da nota |
 |---|---|---|
-| `MAT.*`, `ING.*`, `LIC.APLICAR`, `CIE.CAUSA`, `FUT.TATICA` | `LIC.ENTENDER`, `CIE.MATERIA`, `CIE.VIDA`, `CIE.TERRA`, `CIE.CORPO`, `HUM.*`, `FUT.REGRA`, `FUT.HISTORIA`, `skill` ausente ou desconhecido | `LIC.DILEMA` (decisão 33) |
+| `MAT.*` (hoje `MAT.OP2`), `ING.*` (hoje `ING.N1.PREP`, `ING.N1.BE`, `ING.N1.LIKE`), `LIC.APLICA`, `CIE.CAUSA` | `LIC.IDEIA`, `HIS.FATO`, `GEO.FATO`, `GEN.CONH`, `skill` ausente ou desconhecido | `LIC.DILEMA` (decisão 33) |
+
+Código novo que entrar em `SKILLS` precisa ganhar coluna aqui no mesmo pacote.
 
 A revisita (`kind: 'review'`) segue o `skill` da pergunta original. **A lista se calibra pelos dados:** se, em 30 dias, a segunda tentativa de um `skill` acerta perto de 1 em 3 (o acaso com três opções restantes), aquele `skill` é de fato, não de raciocínio, e muda de coluna. O líder revê a lista uma vez por mês.
 

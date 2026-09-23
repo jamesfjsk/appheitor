@@ -31,7 +31,6 @@ import { validateForge, validateLetter, validateMerchant, validateNote, type Mer
 import { callOpenAI, isAIConfigured } from './aiQuiz';
 import { currentUsageMonth, getUsage, isOverCap } from './aiUsage';
 import { addDays } from './dailyQuizService';
-import { getTodayBrazil } from '../utils/timezone';
 
 const AI_MODEL = 'gpt-4.1-mini';
 const AI_TEMPERATURE = 0.8;
@@ -489,7 +488,7 @@ export interface DayContext {
   avoidOffline: string[];
   merchantDone: number;
   avoidMerchantSteps: string[];
-  /** Pedido da Mesa aplicado a este dia (só para datas depois de hoje) */
+  /** Sempre null. O pedido da Mesa saiu; o campo fica para os documentos antigos. */
   themeRequest: string | null;
 }
 
@@ -564,8 +563,7 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
   const recentThemes = unique(lastWeek.flatMap((p) => Object.values(p.contracts).map((c) => c.theme)));
   const themePool = lv.vocabThemes.filter((t) => !recentThemes.includes(t));
   const pool = themePool.length ? themePool : lv.vocabThemes;
-  const themeRequest = ctx.base.themeRequest && ctx.date > getTodayBrazil() ? ctx.base.themeRequest : null;
-  const mainTheme = themeRequest ?? pickOne(rng, pool);
+  const mainTheme = pickOne(rng, pool);
   const secondPool = pool.filter((t) => t !== mainTheme);
   const secondTheme = secondPool.length ? pickOne(rng, secondPool) : mainTheme;
 
@@ -619,7 +617,7 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
     avoidOffline,
     merchantDone: ctx.base.merchantDone,
     avoidMerchantSteps,
-    themeRequest,
+    themeRequest: null,
   };
 }
 

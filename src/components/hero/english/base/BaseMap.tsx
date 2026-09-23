@@ -20,8 +20,6 @@ import {
 } from '../../../../config/englishBase';
 import { buildXp } from '../../../../config/englishRewards';
 import { baseLevelOf, canBuild } from '../../../../services/englishBaseService';
-import { visibleCracks } from '../../../../config/village';
-import { useVillage } from '../../../../contexts/VillageContext';
 
 interface Props {
   base: BaseDoc;
@@ -30,24 +28,18 @@ interface Props {
   building: BuildingId | null;
   onBuild: (id: BuildingId) => void;
   onOpenBoard: () => void;
-  onSaveTheme: (text: string | null) => Promise<void>;
 }
 
 const TORCH_ICON = '/assets/english/ui/torch.webp';
 const MAX_TORCHES = 14;
-const THEME_MAX = 30;
 
 /** Subida em 3 quadros (steps) da construção recém-erguida; index.css não é tocado aqui */
 const RISE_CSS =
   '@keyframes mcb-rise{0%{transform:translateY(28px);opacity:.2}33%{transform:translateY(18px);opacity:.6}66%{transform:translateY(8px);opacity:.9}100%{transform:translateY(0);opacity:1}}.mcb-rising{animation:mcb-rise .6s steps(3,end) both}';
 
-const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, onSaveTheme }) => {
-  const { village } = useVillage();
-  const mesaLive = base.buildings.mesa >= 1 && !visibleCracks(village.cracks).includes('mesa');
+const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard }) => {
   const [selected, setSelected] = useState<BuildingId | null>('fornalha');
   const [rising, setRising] = useState<BuildingId | null>(null);
-  const [theme, setTheme] = useState(base.themeRequest ?? '');
-  const [savingTheme, setSavingTheme] = useState(false);
   const prevLevels = useRef(base.buildings);
 
   // Detecta a construção que subiu de nível para animar só aquele lote
@@ -74,15 +66,6 @@ const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, 
   const missingList = check
     ? MATERIALS.filter((m) => (check.missing[m] ?? 0) > 0).map((m) => `${check.missing[m]} ${MATERIAL_LABELS[m].toLowerCase()}`)
     : [];
-
-  const saveTheme = async () => {
-    setSavingTheme(true);
-    try {
-      await onSaveTheme(theme.trim() ? theme.trim() : null);
-    } finally {
-      setSavingTheme(false);
-    }
-  };
 
   return (
     <div data-testid="base-map">
@@ -187,32 +170,13 @@ const BaseMap: React.FC<Props> = ({ base, plan, building, onBuild, onOpenBoard, 
                 <button onClick={() => onBuild(def.id)} disabled={!check.ok || building !== null} className="mc-btn mc-btn-gold px-5 py-2.5 font-bold text-sm uppercase" data-testid="build-button">
                   {building === def.id ? 'Construindo...' : 'Construir'}
                 </button>
-                {!check.ok && check.later && <span className="text-xs mc-muted">Abre na {check.later}</span>}
+                {!check.ok && check.later && (
+                  <span className="text-xs mc-muted">{/^Precisa/.test(check.later) ? check.later : 'Ainda em obra.'}</span>
+                )}
                 {!check.ok && !check.later && missingList.length > 0 && <span className="text-xs mc-muted">Faltam: {missingList.join(', ')}</span>}
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Mesa nível 1: tema de amanhã */}
-      {mesaLive && (
-        <div className="mc-card p-3 mb-4" data-testid="theme-request">
-          <label className="mc-font text-[9px] mc-muted uppercase block mb-1" htmlFor="theme-request">O que você quer na história de amanhã?</label>
-          <div className="flex gap-2">
-            <input
-              id="theme-request"
-              value={theme}
-              maxLength={THEME_MAX}
-              onChange={(e) => setTheme(e.target.value.slice(0, THEME_MAX))}
-              placeholder="ex.: dragões, futebol, mina"
-              className="mc-slot flex-1 min-w-0 text-white text-sm px-3 py-2 outline-none placeholder:text-white/40"
-            />
-            <button onClick={() => void saveTheme()} disabled={savingTheme || theme.trim() === (base.themeRequest ?? '')} className="mc-btn mc-btn-green px-4 py-2 text-sm font-bold">
-              {savingTheme ? '...' : 'Salvar'}
-            </button>
-          </div>
-          <p className="text-[11px] mc-muted mt-1">{theme.length}/{THEME_MAX}{base.themeRequest ? ` · Amanhã: ${base.themeRequest}` : ''}</p>
         </div>
       )}
 

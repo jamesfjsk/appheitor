@@ -1,6 +1,7 @@
 /** Validador da prova v3: uma pergunta, lista de códigos. Vazio = passa. */
 
 import { LEVELS, findForbiddenTokens } from '../../config/englishLevels';
+import { normalizeQuestion } from './hash';
 import { answerLeaksInPrompt, contentWords, knowledgeAreasForWeekday, normalizeQuizText, optionsCollide, wordCount } from './provaRules';
 import { QUIZ_VALIDATOR_ENFORCE } from './quizTokens';
 
@@ -130,7 +131,7 @@ const VARIANT_PAIRS: Array<[string, string]> = [
 ];
 
 export function hashOf(question: string): string {
-  return normalizeQuizText(question);
+  return normalizeQuestion(question);
 }
 
 export function numbersOf(text: string): number[] {

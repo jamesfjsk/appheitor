@@ -45,6 +45,23 @@ test('6b: a substituição pede a posição, não um monte solto', () => {
   expect(p.includes("Depois de 'yesterday'")).toBe(true);
 });
 
+test('P1.5: o prompt escreve o ângulo e a profundidade', () => {
+  const angle = QUIZ_THEMES[0].angles[1];
+  const text = buildPrompt({
+    seed: QUIZ_THEMES[0],
+    count: 8,
+    spare: 3,
+    age: 10,
+    weekday: 1,
+    englishLevel: 1,
+    angle,
+    depth: 2,
+  });
+  expect(text.includes(angle)).toBe(true);
+  expect(text.includes('Profundidade 2: aprofunde')).toBe(true);
+  expect(text.includes('primeiro contato')).toBe(false);
+});
+
 test('P0.4: o giro do weekday muda a primeira área de conhecimento', () => {
   const mon = buildPrompt({
     seed: QUIZ_THEMES[0],

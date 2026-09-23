@@ -12,6 +12,7 @@ import { DAILY_QUIZ_MODEL, normalizeQuizText, reflectionLocalSay, touchesIdea, R
 import { buildPrompt, replacementBrief } from './quiz/dailyPrompt';
 import { QUIZ_SPARE, QUIZ_VALIDATOR_ENFORCE, quizMaxTokens } from './quiz/quizTokens';
 import { applyReview, parseReview, rescueDilemma, REVIEWER_MODEL, reviewBatch, reviewSystem, type QuizDuvida, type ReviewItem } from './quiz/reviewer';
+import { dropRepeated, type DedupeNeedle } from './quiz/dedupe';
 import {
   canonSubject,
   fillSlotHoles,
@@ -204,6 +205,11 @@ export async function generateDailyQuiz(opts: {
   signal?: AbortSignal;
   forceOffline?: boolean;
   englishLevel?: number;
+  /** Ângulo e profundidade do motor (§8.2). Entram no prompt. */
+  angle?: string;
+  depth?: 1 | 2 | 3;
+  /** quizBank dos últimos 180 dias. Hash igual ou quase igual vira `repetida`. */
+  bank?: DedupeNeedle[];
 }): Promise<GeneratedDailyQuiz> {
   const age = childAgeToday();
   const weekday = weekdayOf(opts.date);
@@ -246,6 +252,8 @@ export async function generateDailyQuiz(opts: {
     weekday,
     englishLevel,
     avoidHashes,
+    angle: opts.angle,
+    depth: opts.depth,
   });
   const asked = opts.count + QUIZ_SPARE;
   const recent = opts.avoidQuestions.slice(0, 60);
@@ -282,7 +290,11 @@ Conte os objetos antes de responder.`;
   perQuestion.push(...local.perQuestion);
   const review = rescueDilemma(local.kept, await reviewApproved(local.kept, englishLevel, opts.signal));
   const judged = applyReview(local.kept, review);
-  const pool = judged.kept;
+  const bank = opts.bank ?? [];
+  const cut = dropRepeated(judged.kept, bank, opts.date);
+  const pool = cut.kept;
+  const rejected: { n: number; reasons: string[] }[] = cut.rejected.map((row) => ({ ...row }));
+  if (cut.rejected.length) dropped.repetida = cut.rejected.length;
   const motivos = [...judged.motivos];
   const duvidas: QuizDuvida[] = [...judged.duvidas];
   const reviewLog: ReviewItem[] = review ?? [];
@@ -300,15 +312,18 @@ Conte os objetos antes de responder.`;
       .map((row) => String(firstList[row.i]?.question ?? '').trim())
       .filter(Boolean);
     const approved = pool.map((q) => String(q.question ?? '')).filter(Boolean);
+    const repeatedTexts = cut.rejected
+      .map((row) => String(judged.kept[row.n - 1]?.question ?? '').trim())
+      .filter(Boolean);
     const user = `${replacementBrief(holes)}
 Ideia do dia, já escrita. LIC.IDEIA e LIC.APLICA precisam usar uma palavra dela:
 ${theme.lesson}
 Cada objeto traz subject, skill, kind, bloom, answer igual a uma option, why com 16 palavras em português e trap com 16 palavras ou mais. Trap curto mata a pergunta. O trap começa com "Quem marca" seguido do texto exato de uma opção errada. A opção certa não pode ser a única mais longa. Matemática em duas etapas, com os dois números na pergunta (500 g e 2 kg não fecham: escreva 500 g e 2000 g). Inglês: why em português, frase de no máximo 7 palavras. A ideia não começa com "O que é". O dilema pergunta "Qual atitude é a mais justa?", com subject "tema". Só uma opção ajuda; as outras três são omissão ou desculpa, sem "peço ajuda ao adulto".
 Não devolva de novo uma pergunta que já caiu. Escreva outro enunciado.
 Caíram por isto:
-${reasons.slice(0, 24).join('\n') || 'o validador recusou o lote'}
+${[...reasons, ...repeatedTexts.map((q) => `repetida — ${q.slice(0, 140)}`)].slice(0, 24).join('\n') || 'o validador recusou o lote'}
 Proibido repetir:
-${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${q}`).join('\n')}`;
+${[...fallen, ...repeatedTexts, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${q}`).join('\n')}`;
     try {
       replacement = await callQuiz(
         buildPrompt({
@@ -319,6 +334,8 @@ ${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${
           weekday,
           englishLevel,
           avoidHashes,
+          angle: opts.angle,
+          depth: opts.depth,
           slots: holes,
         }),
         user,
@@ -341,7 +358,13 @@ ${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${
       for (const row of extra.perQuestion) perQuestion.push({ i: row.i + offset, codes: row.codes });
       const extraReview = rescueDilemma(extra.kept, await reviewApproved(extra.kept, englishLevel, opts.signal));
       const extraJudged = applyReview(extra.kept, extraReview);
-      seated = fillSlotHoles(seated.placed, slots, extraJudged.kept);
+      const extraCut = dropRepeated(extraJudged.kept, bank, opts.date);
+      if (extraCut.rejected.length) {
+        dropped.repetida = (dropped.repetida ?? 0) + extraCut.rejected.length;
+        const base = rejected.length;
+        for (const row of extraCut.rejected) rejected.push({ n: base + row.n, reasons: row.reasons });
+      }
+      seated = fillSlotHoles(seated.placed, slots, extraCut.kept);
       motivos.push(...extraJudged.motivos);
       duvidas.push(...extraJudged.duvidas);
       if (extraReview) reviewLog.push(...extraReview);
@@ -357,8 +380,14 @@ ${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${
       ...seatedNow.map((q) => String(q.question ?? '')),
     ]);
     const passed = selectValidQuestions(candidates, ctx, true);
+    const offlineCut = dropRepeated(passed.kept, bank, opts.date);
+    if (offlineCut.rejected.length) {
+      dropped.repetida = (dropped.repetida ?? 0) + offlineCut.rejected.length;
+      const base = rejected.length;
+      for (const row of offlineCut.rejected) rejected.push({ n: base + row.n, reasons: row.reasons });
+    }
     const before = seatedNow.length;
-    seated = fillSlotHoles(seated.placed, slots, passed.kept);
+    seated = fillSlotHoles(seated.placed, slots, offlineCut.kept);
     fromOffline = seated.placed.filter((q) => q != null).length - before;
   }
 
@@ -383,6 +412,7 @@ ${[...fallen, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${
       batchLog: reviewBatch(ordered, theme.lesson),
       fromOffline,
       duvidas: duvidasOut,
+      ...(rejected.length ? { rejected } : {}),
     },
     raw: {
       first,

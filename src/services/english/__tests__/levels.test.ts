@@ -176,9 +176,9 @@ test('Campinho não se constrói antes da Etapa 4; Agenda, Mercado e Biblioteca 
   expect(buildingEffectNow('fornalha', 0)).toBe('Ainda não construída.');
   expect(buildingEffectNow('torre', 1)).toMatch(/conquistas/i);
   expect(buildingEffectNow('torre', 3)).toMatch(/Mapa de habilidades/i);
-  expect(buildingEffectNow('mesa', 1)).toMatch(/tema/i);
+  expect(buildingEffectNow('mesa', 1)).toBe('Você conta ao Sábio os livros que termina.');
   expect(buildingEffectNow('mesa', 2)).toMatch(/matéria/i);
-  expect(buildingEffectNow('mesa', 3)).toMatch(/dica grátis/i);
+  expect(buildingEffectNow('mesa', 3)).toBe('Você vê o erro antigo ao lado do acerto de hoje.');
   expect(BUILDING_BY_ID.mesa.label).toBe('Biblioteca');
   expect(BUILDING_BY_ID.bau.effects[0]).toMatch(/Baú do Dia/i);
   expect(BUILDING_BY_ID.bau.effects[0].includes('Campinho')).toBeFalsy();

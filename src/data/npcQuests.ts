@@ -19,8 +19,8 @@ export const NPC_QUESTS: Record<NpcId, NpcQuestChapter[]> = {
   sabio: [
     { chapter: 1, title: 'Prova', ask: 'Tire 6 ou mais na prova', stat: 'quizScore', target: 6 },
     { chapter: 2, title: 'Reflexões', ask: 'Escreva 3 reflexões', stat: 'reflections', target: 3 },
-    { chapter: 3, title: 'Oito', ask: 'Tire 8 de 8', stat: 'quizPerfect', target: 1 },
-    { chapter: 4, title: 'Tema', ask: 'Escolha o tema de amanhã 5 vezes', stat: 'themesSet', target: 5 },
+    { chapter: 3, title: 'Todas', ask: 'Acerte todas as perguntas da prova', stat: 'quizPerfect', target: 1 },
+    { chapter: 4, title: 'Livro', ask: 'Conte um livro para o Sábio', stat: 'booksRead', target: 1 },
     { chapter: 5, title: 'Sequência', ask: 'Sete provas seguidas', stat: 'quizStreak', target: 7 },
   ],
   ferreiro: [

@@ -52,6 +52,8 @@ export interface DailyQuizSanitize {
   fromOffline?: number;
   /** Aprovação no limite do revisor. A pergunta fica. */
   duvidas?: { n: number; question: string; motivo: string }[];
+  /** Hash igual ou quase igual ao quizBank. Conta para a reserva. */
+  rejected?: { n: number; reasons: string[] }[];
 }
 
 export interface DailyQuizQuestion {
@@ -77,6 +79,11 @@ export interface DailyQuizTheme {
   lesson: string;      // a "ideia do dia": texto curto e concreto
   whyItMatters: string;
   curiosity?: string;  // 1 ou 2 frases, depois da ideia do dia
+  /** Ângulo escolhido pelo motor (§8.2). */
+  angle?: string;
+  angleIndex?: 0 | 1 | 2;
+  /** Profundidade do dia: 1 primeiro contato, 2 aprofunda, 3 conecta. */
+  depth?: 1 | 2 | 3;
 }
 
 export interface DailyQuiz {
@@ -105,6 +112,8 @@ export interface DailyQuiz {
   reflectionWords?: number;
   /** Frase do Sábio ao aceitar ou recusar a reflexão. */
   reflectionNote?: string;
+  /** Tempo por pergunta, na ordem. Não aparece na tela. */
+  timings?: { msToAnswer: number; msReadingExplain: number }[];
   completedAt?: Date;
 }
 

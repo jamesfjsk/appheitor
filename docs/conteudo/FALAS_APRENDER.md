@@ -18,14 +18,14 @@ Aparece depois do primeiro erro num item com escada, **quando o `trap` não serv
 | `av_ing_1` | `ING.*` | Ouve de novo, devagar. A palavra que falta está na frase. | ouvir de novo |
 | `av_ing_2` | `ING.*` | Ouve de novo e presta atenção no pedaço antes do espaço. | ouvir de novo |
 | `av_ing_3` | `ING.*` | Ouve de novo e repete a frase baixinho. Qual opção cabe nela? | testar e olhar |
-| `av_apl_1` | `LIC.APLICAR` | Volta na ideia do dia. O que ela diz que funciona? | começar pelo que sei |
-| `av_apl_2` | `LIC.APLICAR` | Imagina a cena acontecendo. O que vem logo depois de cada escolha? | testar e olhar |
-| `av_apl_3` | `LIC.APLICAR` | Qual destas a ideia do dia mostra que não dá certo? Risca essa primeiro. | riscar o que não pode |
+| `av_apl_1` | `LIC.APLICA` | Volta na ideia do dia. O que ela diz que funciona? | começar pelo que sei |
+| `av_apl_2` | `LIC.APLICA` | Imagina a cena acontecendo. O que vem logo depois de cada escolha? | testar e olhar |
+| `av_apl_3` | `LIC.APLICA` | Qual destas a ideia do dia mostra que não dá certo? Risca essa primeiro. | riscar o que não pode |
 | `av_cau_1` | `CIE.CAUSA` | Pensa no que muda primeiro. O resto vem depois dele. | fazer menor |
 | `av_cau_2` | `CIE.CAUSA` | Imagina em câmera lenta. O que acontece antes de quê? | de trás para frente |
 | `av_cau_3` | `CIE.CAUSA` | Testa cada opção na cabeça: se fosse assim, o que você veria? | testar e olhar |
-| `av_tat_1` | `FUT.TATICA` | Pensa no outro time. O que ele faz depois dessa jogada? | o que o outro vai fazer |
-| `av_tat_2` | `FUT.TATICA` | Olha o placar e o tempo que falta. O que isso muda? | entender o pedido |
+| `av_tat_1` | sem código hoje (fica para quando houver) | Pensa no outro time. O que ele faz depois dessa jogada? | o que o outro vai fazer |
+| `av_tat_2` | sem código hoje (fica para quando houver) | Olha o placar e o tempo que falta. O que isso muda? | entender o pedido |
 | `av_ger_1` | reserva | Relê a pergunta devagar. O que ela pede, exatamente? | entender o pedido |
 | `av_ger_2` | reserva | Risca a que você tem certeza que não é. O que sobra? | riscar o que não pode |
 
