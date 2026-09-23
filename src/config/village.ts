@@ -56,7 +56,7 @@ export const DEFAULT_ECONOMY: EconomySettings = {
   challengeGoldWeeklyCap: 30,
   achievementGoldCap: 20,
   buildCostMultiplier: 2,
-  merchantBuy: { materials: 10, gold: 2, dailyCap: 2 },
+  merchantBuy: { materials: 10, gold: 2, dailyCap: 2 }, // decisão 42 (22/09): a criança paga 2 gold por 10 de um material, 2x por dia; não vende material
   savingsTargetPct: 20,
   interestRatePct: 10, // legado no painel; a criança usa vaultInterestPct (10/20/30)
   interestCapGold: 0, // sem teto de paciência (decisão 27)

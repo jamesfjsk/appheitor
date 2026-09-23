@@ -895,15 +895,20 @@ export async function openStreakChest(uid: string): Promise<{ gold: number; diam
   return out;
 }
 
-export async function sellMaterials(uid: string, material: Material, lots: number): Promise<number> {
-  if (material === 'redstone') throw new Error('Redstone não se vende');
+/**
+ * Comerciante (decisão 42, pai em 22/09): a criança PAGA `merchantBuy.gold` e recebe `merchantBuy.materials`
+ * de UM material (madeira, pedra ou ferro; redstone só na Fornalha), até `dailyCap` compras por dia.
+ * Gold é o que vale: não existe mais vender material por gold.
+ */
+export async function buyMaterials(uid: string, material: Material, lots: number): Promise<{ gold: number; qty: number }> {
+  if (material === 'redstone') throw new Error('Redstone só na Fornalha');
   const n = Math.floor(lots);
-  if (n < 1) throw new Error('Escolha quantos lotes vender');
+  if (n < 1) throw new Error('Escolha quantos lotes comprar');
   const economy = await getSettings('economy', DEFAULT_ECONOMY as unknown as Record<string, unknown>) as unknown as EconomySettings;
   const buy = economy.merchantBuy;
   const today = getTodayBrazil();
-  const goldRoom = await roomForGameGold(uid, economy);
-  let paid = 0;
+  const cap = buy.dailyCap || 2;
+  let out = { gold: 0, qty: 0 };
   await runTransaction(db, async (tx) => {
     const vSnap = await tx.get(villageRef(uid));
     const pSnap = await tx.get(progressRef(uid));
@@ -911,50 +916,44 @@ export async function sellMaterials(uid: string, material: Material, lots: numbe
     const village = vSnap.exists() ? fromVillageDoc(uid, vSnap.data()) : initialVillageDoc(uid, nowIso());
     if (isBroken(village.cracks, 'mercado')) throw ruinUseError('mercado');
     let used = 0;
-    for (let i = 1; i <= (buy.dailyCap || 2); i += 1) {
+    for (let i = 1; i <= cap; i += 1) {
       if (hasClaim(village, claimKey('merchant', today, i))) used += 1;
     }
-    if (used + n > (buy.dailyCap || 2)) throw new Error('Só 2 vendas por dia');
+    if (used + n > cap) throw new Error(`Só ${cap} compras por dia`);
     const base = bSnap.exists() ? fromBaseDoc(uid, bSnap.data()) : initialBaseDoc(uid, nowIso());
-    const need = n * buy.materials;
-    if ((base.materials[material] ?? 0) < need) throw new Error('Falta material');
-    const want = n * buy.gold;
-    const cut = capGold(want, goldRoom.room);
-    if (cut.paid <= 0) throw new Error('Teto de hoje atingido; venda amanhã');
+    const price = n * buy.gold;
     const gold = Number(pSnap.data()?.availableGold) || 0;
-    const after = gold + cut.paid;
-    const materials = { ...base.materials, [material]: base.materials[material] - need };
+    if (gold < price) throw new Error('Gold insuficiente');
+    const qty = n * buy.materials;
+    const after = gold - price;
+    const materials = { ...base.materials, [material]: (base.materials[material] ?? 0) + qty };
     const claimed = { ...village.claimed };
     for (let i = 1; i <= n; i += 1) claimed[claimKey('merchant', today, used + i)] = nowIso();
-    const saleDeltas: Record<string, number> = {};
-    if (material === 'pedra') saleDeltas.merchantSales = need;
-    const stats = addVillageStats(village.stats, saleDeltas);
+    const stats = addVillageStats(village.stats, { merchantBuys: qty });
     if (!vSnap.exists()) tx.set(villageRef(uid), stripUndefined({ ...village, claimed, stats, updatedAt: nowIso() }));
     else tx.update(villageRef(uid), stripUndefined({ claimed, stats, updatedAt: nowIso() }));
     if (!bSnap.exists()) tx.set(baseRef(uid), stripUndefined({ ...base, materials, updatedAt: nowIso() }));
     else tx.update(baseRef(uid), stripUndefined({ materials, updatedAt: nowIso() }));
-    if (pSnap.exists() && cut.paid > 0) {
-      tx.update(progressRef(uid), {
-        availableGold: after,
-        totalGoldEarned: increment(cut.paid),
-        updatedAt: serverTimestamp(),
-      });
-      tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
-        userId: uid,
-        amount: cut.paid,
-        type: 'earned' as const,
-        source: 'merchant_sale' as const,
-        description: `Vendeu ${need} ${material}`,
-        metadata: { material, lots: n, capped: cut.capped },
-        balanceBefore: gold,
-        balanceAfter: after,
-        createdAt: serverTimestamp(),
-      }));
-    }
-    paid = cut.paid;
+    tx.update(progressRef(uid), {
+      availableGold: after,
+      totalGoldSpent: increment(price),
+      updatedAt: serverTimestamp(),
+    });
+    tx.set(doc(collection(db, 'goldTransactions')), omitUndefined({
+      userId: uid,
+      amount: -price,
+      type: 'spent' as const,
+      source: 'merchant_buy' as const,
+      description: `Comprou ${qty} ${material} do Comerciante`,
+      metadata: { material, lots: n, qty },
+      balanceBefore: gold,
+      balanceAfter: after,
+      createdAt: serverTimestamp(),
+    }));
+    out = { gold: price, qty };
   });
   await settleAfter(uid);
-  return paid;
+  return out;
 }
 
 export async function repairLot(uid: string, date: string): Promise<number> {

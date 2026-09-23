@@ -26,7 +26,7 @@ test('todo where cita arquivo ou função real', () => {
     if (!/[\w./-]+\.[A-Za-z_(]/.test(src.where)) bad.push(`${stat}:${src.where}`);
   }
   expect(bad).toEqual([]);
-  expect(STAT_SOURCES.merchantSales.where).toMatch(/need/);
+  expect(STAT_SOURCES.merchantBuys.where).toMatch(/qty/);
 });
 
 run();

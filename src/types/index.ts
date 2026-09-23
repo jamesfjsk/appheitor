@@ -388,6 +388,7 @@ export interface GoldTransaction {
     | 'challenge'
     | 'repair'
     | 'merchant_sale'
+    | 'merchant_buy'
     | 'streak_chest'
     | 'trophy'
     | 'late_task';

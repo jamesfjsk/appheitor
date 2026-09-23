@@ -10,7 +10,7 @@ export interface NpcQuestChapter {
 
 export const NPC_QUESTS: Record<NpcId, NpcQuestChapter[]> = {
   comerciante: [
-    { chapter: 1, title: 'Barraca', ask: 'Venda 10 pedra ao Comerciante', stat: 'merchantSales', target: 10 },
+    { chapter: 1, title: 'Barraca', ask: 'Compre 10 materiais do Comerciante', stat: 'merchantBuys', target: 10 },
     { chapter: 2, title: 'Contratos', ask: 'Faça 3 contratos numa semana', stat: 'contractsWeek', target: 3 },
     { chapter: 3, title: 'Compra', ask: 'Compre algo e não se arrependa', stat: 'shopBuys', target: 1 },
     { chapter: 4, title: 'Cofre', ask: 'Guarde 50 gold no Cofrinho', stat: 'savedGold', target: 50 },

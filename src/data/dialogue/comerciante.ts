@@ -28,7 +28,7 @@ const DAY: DialogueEntry[] = [
   e(N, 'c_day_full2', ['Dia completo. Cliente que fecha o dia é cliente que volta.', 'E cliente que volta paga a minha janta.'], dayComplete, { priority: 40 }),
   e(N, 'c_day_miss1', ['Ontem ficou uma missão para trás. Já fiz negócio pior e sobrevivi.', 'Hoje o balcão está limpo.'], (c) => c.yesterday.missed, { priority: 50 }),
   e(N, 'c_day_miss2', ['Uma missão escapou ontem. Eu já perdi uma carga inteira num rio.', 'A gente seca e segue.'], (c) => c.yesterday.missed, { priority: 50 }),
-  e(N, 'c_day_pause1', ['Folga! Barraca fechada, eu deitado na rede.', 'Nem pedra eu compro hoje. E olha que eu compro sempre.'], (c) => Boolean(c.pause), { priority: 45 }),
+  e(N, 'c_day_pause1', ['Folga! Barraca fechada, eu deitado na rede.', 'Nem pedra eu vendo hoje. E olha que eu vendo sempre.'], (c) => Boolean(c.pause), { priority: 45 }),
   e(N, 'c_day_wknd1', ['Fim de semana. Movimento fraco, preço firme.', 'Se aparecer pedra, eu topo.'], isWeekend, { priority: 15 }),
   e(N, 'c_day_quiz1', ['A prova do Sábio ainda está lá. É a única coisa de graça nessa Vila.', 'Aproveita antes que eu convença ele a cobrar.'], quizPending, { priority: 14 }),
   e(N, 'c_day_none1', ['Meio-dia e nada no quadro? O estoque não se enche sozinho.', 'Uma missãozinha e o dia destrava.'], nothingYet, { priority: 16 }),

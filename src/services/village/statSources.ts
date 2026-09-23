@@ -30,7 +30,7 @@ export const STAT_SOURCES: Record<string, { where: string }> = {
   diamondsEver: { where: 'villageService.grantRare / openStreakChest' },
   talksSameDay: { where: 'villageService.talkToNpc' },
   nightComplete: { where: 'villageService.completeNight' },
-  merchantSales: { where: 'villageService.sellMaterials (pedra, quantidade need)' },
+  merchantBuys: { where: 'villageService.buyMaterials (quantidade qty)' },
   goalsAchieved: { where: 'goalsService.finishGoal' },
   bigGoals: { where: 'goalsService.finishGoal (settings/economy incomeDayGold * 20)' },
   interestWeeks: { where: 'goalsService.applyWeeklyInterest' },

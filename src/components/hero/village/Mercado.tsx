@@ -11,7 +11,9 @@ import { useData } from '../../../contexts/DataContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useModules } from '../../../hooks/useModules';
 import { useAuth } from '../../../contexts/AuthContext';
-import { sellMaterials } from '../../../services/villageService';
+import { buyMaterials } from '../../../services/villageService';
+import { claimKey, hasClaim } from '../../../services/village/claims';
+import { getTodayBrazil } from '../../../utils/clock';
 import { MATERIAL_ICONS, MATERIAL_LABELS } from '../../../config/englishBase';
 import type { Material } from '../../../types/english';
 import { calculateLevelSystem } from '../../../utils/levelSystem';
@@ -71,12 +73,20 @@ const Mercado: React.FC<{
   const exclusive = ITEMS.filter((i) => i.source === 'marco' || i.source === 'patente' || i.source === 'npc');
   const selected = shopItems.find((c) => c.id === cardId);
 
-  const sell = async (m: Material) => {
+  // decisão 42: 2 gold viram 10 de um material; até N compras por dia; nada de vender material por gold
+  const buyPrice = economy.merchantBuy.gold;
+  const buyQty = economy.merchantBuy.materials;
+  const buyCap = economy.merchantBuy.dailyCap || 2;
+  const todayKey = getTodayBrazil();
+  let buysUsed = 0;
+  for (let i = 1; i <= buyCap; i += 1) if (hasClaim(village, claimKey('merchant', todayKey, i))) buysUsed += 1;
+  const buysLeft = Math.max(0, buyCap - buysUsed);
+  const buy = async (m: Material) => {
     if (!childUid) return;
     playClick();
     try {
-      const paid = await sellMaterials(childUid, m, 1);
-      toast.success(`+${paid} gold`);
+      const r = await buyMaterials(childUid, m, 1);
+      toast.success(`+${r.qty} ${MATERIAL_LABELS[m].toLowerCase()} · -${r.gold} gold`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Não deu certo');
     }
@@ -208,12 +218,19 @@ const Mercado: React.FC<{
         {tab === 'merchant' && (
           <div className="p-4 space-y-3">
             <img src={COMERCIANTE} alt="" className="w-16 h-16 mc-pixel" />
-            <p className="text-sm">10 materiais viram 3 gold. Até {economy.merchantBuy.dailyCap} vendas por dia.</p>
+            <p className="text-sm">{buyPrice} gold viram {buyQty} de um material. Até {buyCap} compras por dia{buysLeft < buyCap ? ` · hoje ainda ${buysLeft}` : ''}. Redstone só na Fornalha.</p>
             {(Object.keys(MATERIAL_LABELS) as Material[]).filter((m) => m !== 'redstone').map((m) => (
-              <div key={m} className="mc-row rounded p-3 flex items-center gap-3">
+              <div key={m} className="mc-row rounded p-3 flex items-center gap-3" data-testid={`merchant-${m}`}>
                 <img src={MATERIAL_ICONS[m]} alt="" className="w-8 h-8 mc-pixel" />
                 <span className="flex-1">{MATERIAL_LABELS[m]} · <span className="mc-num" style={{ fontSize: 12 }}>{materials[m] || 0}</span></span>
-                <button type="button" className="mc-btn mc-btn-gold min-h-[44px] px-3" disabled={(materials[m] || 0) < 10} onClick={() => void sell(m)}>Vender 10</button>
+                <button
+                  type="button"
+                  className={`mc-btn min-h-[44px] px-3 ${gold < buyPrice || buysLeft <= 0 ? 'mc-btn-stone' : 'mc-btn-gold'}`}
+                  disabled={gold < buyPrice || buysLeft <= 0}
+                  onClick={() => void buy(m)}
+                >
+                  {buysLeft <= 0 ? 'Amanhã' : gold < buyPrice ? `Faltam ${buyPrice - gold} gold` : `Comprar ${buyQty} · ${buyPrice} gold`}
+                </button>
               </div>
             ))}
           </div>
