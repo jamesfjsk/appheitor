@@ -191,7 +191,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onComplete, guidedMode = fals
             <span className="inline-flex items-center gap-1 mc-font text-[12px] text-amber-200" title={loot.qty > (economy.materialsPerTask || 1) ? 'Bônus da picareta' : undefined}>
               <img src={MATERIAL_ICONS[loot.material]} alt="" className="w-3.5 h-3.5 mc-pixel" draggable={false} />
               +{loot.qty} {MATERIAL_LABELS[loot.material]}
-              {loot.qty > (economy.materialsPerTask || 1) ? ' · picareta' : ''}
+              {loot.qty > (economy.materialsPerTask ?? 0) ? ' · picareta' : ''}
             </span>
           )}
         </div>

@@ -254,8 +254,14 @@ const BuildingCard: React.FC<Props> = ({
               </p>
             </section>
             {id === 'mesa' && (
-              <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
-                Prova do dia
+              <button
+                type="button"
+                disabled={quizDone}
+                className={`mc-btn w-full min-h-[48px] font-bold ${quizDone ? 'mc-btn-stone' : 'mc-btn-green'}`}
+                onClick={() => { if (quizDone) return; playClick(); onOpenQuiz(); }}
+                data-testid="building-quiz"
+              >
+                {quizDone ? 'Prova de hoje feita' : 'Prova do dia'}
               </button>
             )}
           </div>
@@ -440,8 +446,14 @@ const BuildingCard: React.FC<Props> = ({
                       : 'A prova do dia está pendente.'}
                 </p>
               )}
-              <button type="button" className="mc-btn mc-btn-green w-full min-h-[48px] font-bold" onClick={() => { playClick(); onOpenQuiz(); }}>
-                Prova do dia
+              <button
+                type="button"
+                disabled={quizDone}
+                className={`mc-btn w-full min-h-[48px] font-bold ${quizDone ? 'mc-btn-stone' : 'mc-btn-green'}`}
+                onClick={() => { if (quizDone) return; playClick(); onOpenQuiz(); }}
+                data-testid="building-quiz"
+              >
+                {quizDone ? 'Prova de hoje feita' : 'Prova do dia'}
               </button>
               <button
                 type="button"

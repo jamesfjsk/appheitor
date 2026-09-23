@@ -456,6 +456,8 @@ export interface BoardItem {
 export interface NoticeContext {
   due: number;
   done: number;
+  /** o Baú de hoje já foi aberto: some o "Faltam N missões para o Baú" (22/09) */
+  chestOpened?: boolean;
   minDueForChest: number;
   chestOpenHour: number;
   birthdayMmDd: string;

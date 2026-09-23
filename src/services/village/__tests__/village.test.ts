@@ -15,6 +15,7 @@ import type { NoticeContext, ScheduleTask, VillageGear } from '../../../types/vi
 
 const gear = (over: Partial<VillageGear> = {}): VillageGear => ({ ...EMPTY_GEAR, ...over });
 const none = { morning: 0, afternoon: 0, evening: 0 };
+const ONE_PER_TASK = { ...DEFAULT_ECONOMY, materialsPerTask: 1 }; // regra antiga (1 material por missão), para testar o bônus da picareta
 
 const task = (over: Partial<ScheduleTask> & Pick<ScheduleTask, 'id'>): ScheduleTask => ({
   active: true,
@@ -31,7 +32,7 @@ test('período manhã/tarde/noite vira madeira/pedra/ferro', () => {
     period: 'morning',
     gear: gear(),
     completionsTodayByPeriod: none,
-    settings: DEFAULT_ECONOMY,
+    settings: ONE_PER_TASK,
     effectsEnabled: true,
   });
   expect(morning).toEqual({ material: 'madeira', qty: 1 });
@@ -40,7 +41,7 @@ test('período manhã/tarde/noite vira madeira/pedra/ferro', () => {
       period: 'afternoon',
       gear: gear(),
       completionsTodayByPeriod: none,
-      settings: DEFAULT_ECONOMY,
+      settings: ONE_PER_TASK,
       effectsEnabled: true,
     }).material
   ).toBe('pedra');
@@ -49,7 +50,7 @@ test('período manhã/tarde/noite vira madeira/pedra/ferro', () => {
       period: 'evening',
       gear: gear(),
       completionsTodayByPeriod: none,
-      settings: DEFAULT_ECONOMY,
+      settings: ONE_PER_TASK,
       effectsEnabled: true,
     }).material
   ).toBe('ferro');
@@ -60,7 +61,7 @@ test('picaretas 1-4 em dias simulados', () => {
     period: 'morning',
     gear: gear({ pickaxe: 1 }),
     completionsTodayByPeriod: none,
-    settings: DEFAULT_ECONOMY,
+    settings: ONE_PER_TASK,
     effectsEnabled: true,
   });
   expect(stoneFirst.qty).toBe(2);
@@ -68,7 +69,7 @@ test('picaretas 1-4 em dias simulados', () => {
     period: 'afternoon',
     gear: gear({ pickaxe: 1 }),
     completionsTodayByPeriod: { morning: 1, afternoon: 0, evening: 0 },
-    settings: DEFAULT_ECONOMY,
+    settings: ONE_PER_TASK,
     effectsEnabled: true,
   });
   expect(stoneSecond.qty).toBe(1);
@@ -77,7 +78,7 @@ test('picaretas 1-4 em dias simulados', () => {
     period: 'afternoon',
     gear: gear({ pickaxe: 2 }),
     completionsTodayByPeriod: { morning: 2, afternoon: 0, evening: 0 },
-    settings: DEFAULT_ECONOMY,
+    settings: ONE_PER_TASK,
     effectsEnabled: true,
   });
   expect(ironFirstAfternoon.qty).toBe(2);
@@ -85,16 +86,20 @@ test('picaretas 1-4 em dias simulados', () => {
     period: 'afternoon',
     gear: gear({ pickaxe: 2 }),
     completionsTodayByPeriod: { morning: 2, afternoon: 1, evening: 0 },
-    settings: DEFAULT_ECONOMY,
+    settings: ONE_PER_TASK,
     effectsEnabled: true,
   });
   expect(ironSecondAfternoon.qty).toBe(1);
+  // decisão 41 (22/09): por padrão a missão não paga material; só o bônus da picareta entra
+  expect(DEFAULT_ECONOMY.materialsPerTask).toBe(0);
+  expect(computeTaskLoot({ period: 'morning', gear: gear(), completionsTodayByPeriod: none, effectsEnabled: true, settings: DEFAULT_ECONOMY }).qty).toBe(0);
+  expect(computeTaskLoot({ period: 'morning', gear: gear({ pickaxe: 1 }), completionsTodayByPeriod: none, effectsEnabled: true, settings: DEFAULT_ECONOMY }).qty).toBe(1);
 
   const goldFirst = computeTaskLoot({
     period: 'evening',
     gear: gear({ pickaxe: 3 }),
     completionsTodayByPeriod: { morning: 1, afternoon: 1, evening: 0 },
-    settings: DEFAULT_ECONOMY,
+    settings: ONE_PER_TASK,
     effectsEnabled: true,
   });
   expect(goldFirst.qty).toBe(2);
@@ -102,7 +107,7 @@ test('picaretas 1-4 em dias simulados', () => {
     period: 'evening',
     gear: gear({ pickaxe: 3 }),
     completionsTodayByPeriod: { morning: 1, afternoon: 1, evening: 1 },
-    settings: DEFAULT_ECONOMY,
+    settings: ONE_PER_TASK,
     effectsEnabled: true,
   });
   expect(goldAgain.qty).toBe(2);
@@ -111,7 +116,7 @@ test('picaretas 1-4 em dias simulados', () => {
     period: 'evening',
     gear: gear({ pickaxe: 4 }),
     completionsTodayByPeriod: { morning: 2, afternoon: 2, evening: 1 },
-    settings: DEFAULT_ECONOMY,
+    settings: ONE_PER_TASK,
     effectsEnabled: true,
   });
   expect(diamondEvery.qty).toBe(3);
@@ -353,6 +358,8 @@ test('noticesForNow e habitsForNow e pickLine sem repetir 14 dias', () => {
   const day = noticesForNow(ctx, '2026-09-15', 10);
   expect(day[0].kind).toBe('father');
   expect(day.some((i) => i.text.includes('Baú do Dia'))).toBe(true);
+  // Baú já aberto hoje: o recado some mesmo que a conta do dia tenha mudado depois (pai editou missões, 22/09)
+  expect(noticesForNow({ ...ctx, chestOpened: true }, '2026-09-15', 19).some((i) => i.text.includes('Baú do Dia'))).toBe(false);
   const night = noticesForNow(ctx, '2026-09-15', 22);
   expect(night.some((i) => i.text.startsWith('Amanhã:'))).toBe(true);
   expect(night.some((i) => i.text.includes('Baú'))).toBe(false);

@@ -44,7 +44,8 @@ export function noticesForNow(ctx: NoticeContext, date: string, hour: number): B
   }
 
   const missing = chestNeedLeft(ctx.due, ctx.done);
-  if (ctx.due >= ctx.minDueForChest && missing > 0 && hour < ctx.chestOpenHour + 6) {
+  // depois de aberto, a conta do dia pode mudar (pai edita missões) e o recado ficaria mentindo
+  if (!ctx.chestOpened && ctx.due >= ctx.minDueForChest && missing > 0 && hour < ctx.chestOpenHour + 6) {
     auto('chest', `${missing === 1 ? 'Falta 1 missão' : `Faltam ${missing} missões`} para o Baú do Dia`);
   }
 

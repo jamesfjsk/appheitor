@@ -305,6 +305,7 @@ const VillageHome: React.FC<Props> = ({
     done,
     minDueForChest: economy.minDueForChest,
     chestOpenHour: economy.chestOpenHour,
+    chestOpened: hasClaim(village, claimKey('daily', today)),
     birthdayMmDd: CHILD_BIRTHDAY_MMDD,
     gold: progress.availableGold || 0,
     nearestReward: null,

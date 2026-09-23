@@ -33,10 +33,11 @@ interface RewardsPanelProps {
   onClose: () => void;
   embedded?: boolean;
   browseOnly?: boolean;
+  /** sem uso desde 22/09 ("Criar meta no Banco" saiu da loja); a Vila ainda passa, para voltar sem mexer no chamador */
   onCreateGoal?: (title: string, gold: number, rewardId?: string) => void;
 }
 
-const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, browseOnly, onCreateGoal }) => {
+const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, browseOnly }) => {
   const { rewards, redemptions, progress, redeemReward, tasks } = useData();
   const { playClick } = useSound();
   const { economy } = useVillage();
@@ -281,13 +282,10 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, 
                       )}
                     </div>
                     {!isConfirming && !browseOnly && (
+                      // "Criar meta no Banco" saiu daqui (pai, 22/09: confuso); a meta continua no Cofrinho
                       reward.goalOnly || missingGold(reward) > 0 ? (
-                        <button
-                          type="button"
-                          className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto"
-                          onClick={() => { playClick(); onCreateGoal?.(reward.title, reward.costGold || 0, reward.id); }}
-                        >
-                          Criar meta no Banco
+                        <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
+                          {reward.goalOnly ? 'Só pelo Cofrinho' : `Faltam ${missingGold(reward)} gold`}
                         </button>
                       ) : !isUnlocked ? (
                         <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
@@ -316,12 +314,8 @@ const RewardsPanel: React.FC<RewardsPanelProps> = ({ isOpen, onClose, embedded, 
                       )
                     )}
                     {!isConfirming && browseOnly && (reward.goalOnly || missingGold(reward) > 0) && (
-                      <button
-                        type="button"
-                        className="mc-btn mc-btn-gold min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto"
-                        onClick={() => { playClick(); onCreateGoal?.(reward.title, reward.costGold || 0, reward.id); }}
-                      >
-                        Criar meta no Banco
+                      <button type="button" disabled className="mc-btn mc-btn-stone min-h-[44px] px-4 font-bold shrink-0 w-full sm:w-auto">
+                        {reward.goalOnly ? 'Só pelo Cofrinho' : `Faltam ${missingGold(reward)} gold`}
                       </button>
                     )}
                   </div>

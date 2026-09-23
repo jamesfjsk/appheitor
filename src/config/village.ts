@@ -38,7 +38,7 @@ export const DEFAULT_VILLAGE_SETTINGS: VillageSettings = {
 };
 
 export const DEFAULT_ECONOMY: EconomySettings = {
-  materialsPerTask: 1,
+  materialsPerTask: 0, // decisão 41 (pai, 22/09): missão diária paga só XP e gold; material vem do jogo (Baú, Mina, Comerciante, fundição). A picareta ainda soma o bônus dela.
   dailyChestGold: [5, 8], // metade (decisão do pai em 18/09: gold pela metade)
   rareEveryNDays: 3,
   gameGoldDailyCap: 18,
