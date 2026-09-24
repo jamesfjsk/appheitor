@@ -23,12 +23,27 @@ export function shouldReload(input: {
   return true;
 }
 
+let notifyTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Avisa depois do tique. As telas soltam a chave na limpeza do efeito e marcam de novo no efeito
+ * seguinte, no mesmo commit do React (troca de fase da prova, cada tecla na Estante). Avisar na hora
+ * deixava o app "livre" nesse intervalo e podia recarregar no meio da prova ou do texto.
+ */
+function notifyBusy(): void {
+  if (notifyTimer !== null) return;
+  notifyTimer = setTimeout(() => {
+    notifyTimer = null;
+    busyListeners.forEach((fn) => fn());
+  }, 0);
+}
+
 export function setAppBusy(key: string, on: boolean): void {
   const had = busyKeys.has(key);
   if (on) busyKeys.add(key);
   else busyKeys.delete(key);
   if (busyKeys.has(key) === had) return;
-  busyListeners.forEach((fn) => fn());
+  notifyBusy();
 }
 
 export function isAppBusy(): boolean {

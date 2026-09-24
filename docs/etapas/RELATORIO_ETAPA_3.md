@@ -1174,6 +1174,77 @@ Sentimento alvo: a virada do dia começa a prova na primeira pergunta, e quem ac
 
 **Pare para o commit do pai.**
 
+## Pacote 13 — o app se atualiza sozinho
+
+Sentimento alvo: a aba velha troca de versão sozinha, e não no meio da prova, do contrato ou do livro.
+
+### O que mudou
+
+1. O build chama `appVersion()` uma vez. A mesma string vai para `__APP_VERSION__` e para `dist/version.json` (`{ "version": "..." }`). Em DEV o plugin não emite o arquivo. No `vercel.json`, `/version.json` leva `Cache-Control: no-store`. O arquivo estático sai na raiz do build, então o rewrite para o `index.html` não o engole: o preview respondeu `Content-Type: application/json`.
+2. `shouldReload` só devolve true com versão nova, `running` diferente de `dev`, mesa livre, momento `visible` / `day` / `idle`, e pelo menos 10 minutos desde o último recarregamento.
+3. A prova marca `quiz` na lição, nas perguntas e na reflexão. A Mina marca `mine` com contrato ou Vagoneta abertos. A Estante marca `book` quando há texto no campo. Ao fechar, solta a chave.
+4. `useAppUpdate` sobe uma vez no `App`. Em DEV não faz nada. O teaser não monta o `App`. Busca `/version.json?t=` com `cache: 'no-store'` a cada 10 minutos, quando a aba volta e na virada do dia. Recarrega no primeiro momento livre. Falha de rede não faz nada. O horário do último recarregamento fica no `sessionStorage`.
+5. Ao abrir o jogo, `touchHealth(uid, 'appVersion', versão)`. No cartão Saúde, a linha "Versão no PC dele: … · no ar: …", com o chip vermelho que o cartão já usa quando as duas diferem.
+
+As duas strings, iguais:
+
+- `dist/version.json`: `2026-09-24-3d43e1f`
+- `__APP_VERSION__` no bundle `dist/assets/App-Cu4boAdh.js`: `2026-09-24-3d43e1f`
+
+### Arquivos
+
+- `vite.config.ts`
+- `vercel.json`
+- `src/services/appUpdate.ts`
+- `src/hooks/useAppUpdate.ts`
+- `src/utils/__tests__/appUpdate.test.ts`
+- `src/services/observability.ts`
+- `src/types/village.ts`
+- `src/App.tsx`
+- `src/components/hero/HeroPanel.tsx`
+- `src/components/hero/DailyQuiz.tsx`
+- `src/components/hero/english/base/EnglishBase.tsx`
+- `src/components/hero/village/EstanteDoSabio.tsx`
+- `src/components/parent/VillageManager.tsx`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (seção 12)
+- `docs/exemplos/telas/etapa-3/pacote-13/_shot.mjs`
+
+### Barra da lei
+
+1. Intenção. A aba nova chega sem o Heitor procurar o F5, e a prova aberta não some no meio. Passa.
+2. Sistema. O cartão Saúde que já existia, com o mesmo chip. Sem classe nova na criança. Passa.
+3. Fonte. A linha do pai é o texto do painel. Passa.
+4. Ícone. Nenhum ícone novo. Passa.
+5. Hierarquia. Uma linha no cartão. Passa.
+6. A cena continua. O recarregamento não é um modal. Passa.
+7. Arestas. Sem tela nova da criança. O cartão do pai não foi fotografado: o login do pai está ligado à conta do Heitor, e esta sessão não abre essa conta.
+8. Mundo. React. Passa.
+9. Economia. Sem gold. Passa.
+10. Consequência. Prova, contrato e livro seguram a troca. Passa.
+11. Estado honesto. A linha mostra a versão do PC dele e a do ar. Passa.
+12. Mouse. Nada de alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. "Versão no PC dele" / "no ar", no painel. Passa.
+15. Evidência. Conta `teste@flash.com` (uid `DydxTQ0cGEbX46LLlQxxD123pQD3`), `npx vite preview` em `http://localhost:4173`. Console: `app-update: recarregando 2026-09-24-nova` ao voltar para a aba na Vila. Com a prova na fase de perguntas, voltar para a aba não recarregou (a pergunta continuou na tela). `health.appVersion` da conta de teste: `2026-09-24-3d43e1f`.
+16. Arestas. Rede que falha não recarrega (o fetch engole o erro). A trava de 10 minutos segurou um segundo recarregamento na mesma sessão, depois que a mesa fechou: é a trava contra laço. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 34 arquivos, saída 0 (os seis casos de `shouldReload`)
+- `npm run test:village` — 13 arquivos, saída 0
+- `npx vite build` — `dist/version.json` com a mesma string do bundle
+- Preview: a Vila recarregou ao voltar a aba depois de trocar o `version.json` para `2026-09-24-nova`. A pergunta aberta não recarregou.
+
+### Fora
+
+- Foto do cartão Saúde. O painel do pai lê a criança ligada ao admin, que é a conta do Heitor. Não abri.
+- O fechar-a-mesa na mesma sessão do primeiro recarregamento não trocou de novo: os 10 minutos da trava ainda não tinham passado.
+- Pacotes 11 e 12
+
+**Pare para o commit do pai.**
+
 
 
 

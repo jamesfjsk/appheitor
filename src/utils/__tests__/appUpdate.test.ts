@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../services/english/__tests__/harness';
-import { isAppBusy, setAppBusy, shouldReload } from '../../services/appUpdate';
+import { isAppBusy, setAppBusy, shouldReload, subscribeAppBusy } from '../../services/appUpdate';
 
 const base = {
   running: '2026-09-22-2a0658f',
@@ -40,6 +40,24 @@ test('setAppBusy marca e solta a chave', () => {
   expect(isAppBusy()).toBe(true);
   setAppBusy('quiz', false);
   expect(isAppBusy()).toBe(false);
+});
+
+const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 5));
+
+test('soltar e marcar de novo no mesmo tique não avisa como livre (troca de fase, tecla na Estante)', async () => {
+  const seen: boolean[] = [];
+  const off = subscribeAppBusy(() => seen.push(isAppBusy()));
+  setAppBusy('book', true);
+  await tick();
+  seen.length = 0;
+  setAppBusy('book', false);
+  setAppBusy('book', true);
+  await tick();
+  expect(seen.every((busy) => busy)).toBe(true);
+  setAppBusy('book', false);
+  await tick();
+  expect(seen[seen.length - 1]).toBe(false);
+  off();
 });
 
 void run();

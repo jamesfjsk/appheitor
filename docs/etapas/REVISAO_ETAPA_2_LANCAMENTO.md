@@ -761,3 +761,31 @@ Leitura só de dados da conta do Heitor, sem gravar nada. Scripts e dump em `scr
   - reduzir as devidas por dia;
   - manter como está e deixar o Baú da metade fazer o papel de dia bom.
 - "Bom Comportamento" marcado pela criança é autoavaliação. No desenho dos comprovantes (decisão 24) vira "pai confirma".
+
+## Pacote 13 — o app se atualiza sozinho (Cursor, 24/09) — APROVADO, com 1 correção do líder
+
+O pai fez o commit (`1231af1`, 11h18) e o push antes da revisão; a revisão veio depois.
+
+**Conferido em produção:**
+- `https://www.flashmissons.com/version.json` responde `{"version":"2026-09-24-1231af1"}`, com `Content-Type: application/json` e `Cache-Control: no-store`.
+- O bundle publicado (`App-Bi9jNibl.js`) carrega a mesma string. Então não há risco de recarregar em laço.
+- **O PC do Heitor carregou `2026-09-24-1231af1` às 11h40** (`health.appVersion`). Daqui para frente as publicações chegam sozinhas.
+
+**Barra rodada pelo líder:** `tsc` 0 erros; `eslint` 0 erros; `test:english` com 34 arquivos (inclui `utils/appUpdate.test.ts`); `test:village` com 13; `vite build` ok; o `dist/version.json` local bate com o bundle.
+
+**O que está certo:**
+- `version.json` sai do mesmo `appVersion()` que alimenta o `define`.
+- `shouldReload` tem as cinco condições e a trava de 10 minutos.
+- O hook não faz nada em DEV nem no teaser, e falha de rede não faz nada.
+- A prova, a Mina/Vagoneta e a Estante marcam "ocupado".
+- `touchHealth('appVersion')` é gravado ao abrir, e a linha de versão aparece no cartão Saúde.
+- Evidência no preview: recarregou ao voltar para a aba; não recarregou com uma pergunta aberta.
+
+**Corrigido pelo líder: corrida no "ocupado".** As telas soltam a chave na limpeza do efeito e marcam de novo no efeito seguinte, no mesmo commit do React. Isso acontece a cada troca de fase da prova e, na Estante do Sábio, a cada tecla. Como `setAppBusy` avisava os ouvintes na hora, o hook via o app "livre" nesse intervalo. Com uma versão nova esperando, podia recarregar no meio da prova ou do texto do livro.
+- Agora o aviso sai depois do tique (`notifyBusy`, com `setTimeout(0)` único), quando a tela já marcou de novo.
+- Teste novo em `utils/appUpdate.test.ts`: soltar e marcar no mesmo tique só avisa "ocupado"; soltar de verdade avisa "livre". Com o código antigo, o teste falha.
+- `tsc` e `eslint` limpos; `utils` com 8 de 8.
+
+Vai no próximo commit, junto com o relatório e as fotos do pacote 13. A aba do Heitor, que roda `1231af1`, ainda tem a corrida uma vez: melhor publicar quando ele não estiver no meio da prova nem escrevendo um livro.
+
+**Fica anotado:** a foto do cartão Saúde não foi tirada, porque o login do pai está ligado à conta do Heitor. O pai confere a linha "Versão no PC dele" no painel.
