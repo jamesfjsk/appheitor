@@ -11,7 +11,8 @@ export type HealthField =
   | 'lastPlanGenerated'
   | 'lastChestDate'
   | 'lastInterestWeek'
-  | 'lastLearningWeek';
+  | 'lastLearningWeek'
+  | 'appVersion';
 
 function appVersion(): string {
   try {
@@ -77,6 +78,7 @@ export function subscribeHealth(uid: string, onChange: (doc: HealthDoc | null) =
       lastChestDate: typeof d.lastChestDate === 'string' ? d.lastChestDate : null,
       lastInterestWeek: typeof d.lastInterestWeek === 'string' ? d.lastInterestWeek : null,
       lastLearningWeek: typeof d.lastLearningWeek === 'string' ? d.lastLearningWeek : null,
+      appVersion: typeof d.appVersion === 'string' ? d.appVersion : null,
       clockDriftMs: typeof d.clockDriftMs === 'number' ? d.clockDriftMs : null,
       updatedAt: typeof d.updatedAt === 'string' ? d.updatedAt : '',
     });

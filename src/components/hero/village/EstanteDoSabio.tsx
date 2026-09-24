@@ -12,6 +12,7 @@ import { useClock } from '../../../contexts/ClockContext';
 import { useSound } from '../../../contexts/SoundContext';
 import { useVillage } from '../../../contexts/VillageContext';
 import { ISO_NPC } from '../../../config/village';
+import { setAppBusy } from '../../../services/appUpdate';
 import { childAgeToday } from '../../../config/rules';
 import type { BookDoc, BookJudge, BookReportDoc, BookVerify } from '../../../types';
 import {
@@ -138,6 +139,11 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
   const [propPages, setPropPages] = useState('');
   const typingStart = useRef<number | null>(null);
   const readingStart = useRef(0);
+
+  useEffect(() => {
+    setAppBusy('book', text.trim().length > 0);
+    return () => setAppBusy('book', false);
+  }, [text]);
 
   useEffect(() => {
     if (!childUid) return;

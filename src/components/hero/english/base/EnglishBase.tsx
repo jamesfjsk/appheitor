@@ -29,6 +29,7 @@ import { useVillage } from '../../../../contexts/VillageContext';
 import { claimKey, hasClaim } from '../../../../services/village/claims';
 import { noteDoneOf } from '../../../../services/village/redstone';
 import { pickaxeInfo } from '../../../../config/village';
+import { setAppBusy } from '../../../../services/appUpdate';
 
 const CartBench = lazy(() => import('./CartBench'));
 
@@ -131,6 +132,12 @@ const EnglishBase: React.FC<Props> = ({ onClose, onOpenLot }) => {
   useEffect(() => {
     if (view === 'loading' && base && ready) setView('board');
   }, [view, base, ready]);
+
+  useEffect(() => {
+    const open = view === 'contract' || view === 'merchant-v2' || view === 'note-v2' || view === 'redstone';
+    setAppBusy('mine', open);
+    return () => setAppBusy('mine', false);
+  }, [view]);
 
   const openContract = (id: string) => {
     const c = plan?.contracts[id];

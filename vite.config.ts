@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { execSync } from 'node:child_process';
 
@@ -14,6 +14,20 @@ function appVersion(): string {
   return `${day}-${hash}`;
 }
 
+function versionJsonPlugin(version: string): Plugin {
+  return {
+    name: 'app-version-json',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: `${JSON.stringify({ version })}\n`,
+      });
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Windows: se o terminal abre em c:\ (minúscula), o Vite serve tudo por /@fs/C:/... e duplica módulos
@@ -21,15 +35,16 @@ export default defineConfig(({ mode }) => {
   const root = fs.realpathSync.native(process.cwd());
   const env = loadEnv(mode, process.cwd(), '');
   const isDev = mode === 'development';
+  const version = appVersion();
   return {
     root,
-    plugins: [react()],
+    plugins: [react(), versionJsonPlugin(version)],
     optimizeDeps: {
       include: ['phaser'],
       exclude: ['lucide-react'],
     },
     define: {
-      __APP_VERSION__: JSON.stringify(appVersion()),
+      __APP_VERSION__: JSON.stringify(version),
       __TEST_CHILD_EMAIL__: JSON.stringify(isDev ? (env.TEST_CHILD_EMAIL || 'teste@flash.com') : ''),
       __TEST_CHILD_PASSWORD__: JSON.stringify(isDev ? (env.TEST_CHILD_PASSWORD || '') : ''),
     },

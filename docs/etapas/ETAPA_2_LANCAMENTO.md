@@ -326,6 +326,7 @@ Não fazer nesta etapa: restilizar o painel; mexer na Vagoneta fora de bug do E2
 |---|---|---|---|---|
 | `src/services/quiz/rotation.ts` (+ teste) | P5 | currículo, histórico da prova, perfil | `dailyQuizService` | prova do dia (Etapa 2, §22) |
 | `src/services/quiz/hash.ts`, `dedupe.ts`, `bankWrite.ts`, `prefetch.ts` (+ testes); `profile.ts` fica para o pacote 11 | etapa-3 p10 | `quizBank`, histórico da prova | prompt, `completeDailyQuiz`, prefetch de amanhã | prova do dia (não ensina; guarda o que ele respondeu) |
+| `src/services/appUpdate.ts` (+ `src/utils/__tests__/appUpdate.test.ts`), `src/hooks/useAppUpdate.ts`, `version.json` no build | etapa-3 p13 | `/version.json` | recarrega a aba fora da prova, do contrato e do livro; `health.appVersion` | não ensina |
 | `src/services/quizBankService.ts`, coleção `quizBank` | P5 | conclusão da prova | rotação, revisita, perfil, painel, Expedição (Etapa 3) | idem |
 | `src/services/village/statSources.ts` (+ teste) | P1 | eventos do jogo | conquistas, pedidos | não ensina |
 | `src/services/village/stats.ts` (puro: `addVillageStats`, `nextQuizStreak`, `skipDayPenalty`) e `quizGate.ts` (+ testes) | P1 | deltas dos eventos; `closeDay`; `quizRequired` | `village.stats` na transação de cada evento; portão da prova | não ensina |

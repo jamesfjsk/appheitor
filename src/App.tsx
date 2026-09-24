@@ -18,6 +18,7 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import ChatFlashGPT from './components/common/ChatFlashGPT';
 import { AI_CHAT_ENABLED } from './config/rules';
 import { installErrorLog } from './services/observability';
+import { useAppUpdate } from './hooks/useAppUpdate';
 import './index.css';
 
 installErrorLog();
@@ -41,6 +42,7 @@ const RoleBasedRedirect: React.FC = () => {
 };
 
 function App() {
+  useAppUpdate();
   const forceBoot = import.meta.env.DEV
     && typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).get('boot') === '1';

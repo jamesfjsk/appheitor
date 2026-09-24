@@ -14,6 +14,7 @@ import { freshQuizUi } from '../../services/quiz/closeQuiz';
 import { judgeReflection, type ReflectionJudge } from '../../services/aiDailyQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
+import { setAppBusy } from '../../services/appUpdate';
 import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionOk, SAGE_DOT_MS, SAGE_LINE_MS, sageReadFrame, sageReadSpeech } from '../../services/quiz/provaRules';
 import { prefetchLesson, prefetchVerdicts, speakProvaLesson, speakProvaVerdict, stopProvaVoice } from '../../services/quiz/provaSpeak';
 import { ISO_NPC } from '../../config/village';
@@ -234,6 +235,12 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     setMusicDuck('quiz', open);
     return () => setMusicDuck('quiz', false);
   }, [open, setMusicDuck]);
+
+  useEffect(() => {
+    const busy = open && (phase === 'lesson' || phase === 'questions' || (phase === 'results' && !paid));
+    setAppBusy('quiz', busy);
+    return () => setAppBusy('quiz', false);
+  }, [open, phase, paid]);
 
   useEffect(() => {
     if (!open) stopProvaVoice();

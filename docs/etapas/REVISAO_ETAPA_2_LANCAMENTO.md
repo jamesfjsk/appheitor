@@ -662,3 +662,102 @@ Fica anotado para um pacote de tela:
 2. o pai roda o retroativo na conta do Heitor;
 3. pacote 10b (prova sempre com 8), que o líder escreve;
 4. pacote 11.
+
+## 24/09 — Uso real do Heitor de 18 a 24/09: análise e próximos passos
+
+Leitura só de dados da conta do Heitor, sem gravar nada. Scripts e dump em `scratchpad/dados24/`. Janela: 18/09 (lançamento) a 24/09, 10h37.
+
+### Funcionamento
+
+- **O PC do Heitor está rodando a versão de 22/09 à noite (`2026-09-22-2a0658f`).** O site no ar já tem o pacote 10, as correções e o 10c: conferido no pacote publicado em `www.flashmissons.com`, que contém "Ainda em obra" e "Todas certas". Mas a aba dele nunca foi recarregada. Evidências:
+  - a prova de 25/09 foi gerada hoje às 10h02 sem `theme.angle` e sem `depth`, o que o código novo sempre grava;
+  - a de hoje fechou sem `timings` e sem nenhum doc no `quizBank`;
+  - os 2 erros do app desde 20/09 são "Cannot read properties of undefined (reading 'default')", com essa versão: o erro de aba velha tentando carregar um pedaço do app que o servidor já trocou.
+- **Consequência de hoje:** ele fez **5 de 5** na primeira prova v3 e **não ganhou a esmeralda**, porque no código velho a regra ainda era `score >= 8`. Não existe `quiz8:2026-09-24`.
+- **`quizBank` do Heitor: 0 docs.** O retroativo ainda não rodou, e o código velho não grava. O perfil, a rotação por matéria fraca e a revisita estão sem dados.
+- A função `openai` com teto em dólares está publicada (`aiUsage/2026-09` tem `tokensByModel`; 592 chamadas no mês).
+
+### Rotina (missões)
+
+- **Missões feitas por dia:** 2 de 10, 4 de 12, 6 de 12, 6 de 10, 2 de 8, 6 de 8 (18 a 23/09); hoje, 1 até as 10h37. **Nenhum dia completo** (`fullDays` 0; 0 tochas). Penalidade todo dia: −34 gold em 6 dias.
+- Horários: de manhã (10h a 11h30) e no fim da tarde (18h). Marca várias de uma vez (três às 10h38 de 22/09).
+- **Missões ativas que nunca foram feitas desde o lançamento:** "Lavar a Louça" (0 em 7 dias). "Bom Comportamento" foi marcada por ele mesmo uma vez. "Cuidar dos Pets" é a mais feita (5 em 7).
+- **O Baú do Dia abriu em 20, 21, 22 e 23/09** com metade das missões. É a regra documentada (`chestNeedDone`, metade para cima). Não é defeito.
+- **Nunca fechou o dia:** 0 check-ins em 7 dias. O "Fechar o dia" só abre às 20h ou depois do Baú, e ele joga às 10h e às 18h. O laço do plano (AP1) desenhado para o Fechar o dia nunca aconteceria: ajuste em `docs/APRENDER_A_APRENDER.md` §7.1.
+
+### Prova do dia
+
+- **Feita em 6 de 7 dias** (pulou 19/09). Notas: 4/8, 3/8, 4/8, 8/8 (22/09, a prova montada à mão pelo líder), 6/8 e **5/5 hoje**.
+- **Reflexões melhoraram muito** desde que ficaram obrigatórias:
+  - 20/09: 2 palavras;
+  - 21/09: 4 palavras;
+  - 22 a 24/09: 24 a 33 palavras, sempre ligadas ao tema e à vida dele.
+  - Hoje: "se eu quisese comprar um brinquedo eu ia pesar duas vezes antes de compra porque tauves eu poderia economizar mais para comprar uma coisa". É aplicação da ideia do dia à vida dele.
+  - Muitos erros de ortografia (quisese, tauves, disafiador, grasa, tanbem, ingrasadas, fasinado), esperados aos 10 anos.
+- **Prova de hoje (a primeira v3), qualidade:**
+  - a conta de duas etapas está certa (4 × 10 − 5), e o inglês ficou no nível;
+  - mas foram só 6 perguntas (vira o pacote 10b);
+  - ciências com distratores que se eliminam por bom senso ("Mais flores", "Árvores maiores");
+  - história com explicação circular ("porque é um fato histórico amplamente reconhecido") e sem ligação com o tema;
+  - o `why` do dilema diz "A resposta certa é...", o que a regra 6 proíbe.
+- **A de amanhã (25/09),** gerada pelo código velho, tem 7 perguntas, sem dilema. Tem de novo o molde "Qual fato é verdadeiro sobre a Revolução X?", distratores de bom senso ("Cor e tamanho") e uma lição com duas defensáveis ("Para evitar lesões").
+- O validador por lista de palavras não pega distrator absurdo nem explicação vazia: é trabalho para o revisor.
+
+### Mina (inglês): o módulo que mais precisa de conserto
+
+- **Contratos feitos por dia:** 4, 5, 4, 1, **0**, 5, **0** (hoje até as 10h37). Ele está evitando a Mina.
+- **Ferraria:** 4,5 de 6; depois 0 de 6; 1 de 6; 0 de 6; 0 de 6. O conteúdo está quebrado:
+  - regras erradas ("Use 'has' com 'my' para mostrar posse");
+  - regra que não tem a ver com a frase (fala de adjetivo numa frase sem adjetivo);
+  - contradição entre dias ("plural é com s" em 19/09, "three sheep" em 23/09);
+  - dois dias seguidos com seis frases de 6 ou 7 palavras para montar, no nível 1.
+
+  A conferência é justa (ignora maiúscula e pontuação). O problema é o conteúdo e a dificuldade. Seis erros seguidos, três vezes, é fracasso que não ensina, e explica a fuga.
+- **Carta:** respondida em **11 a 19 segundos**, sem tocar a evidência (`evidenceHits` 0) e sem glossário. É chute, não leitura.
+- **Comerciante:** 0 ou 1 de 2 (nenhuma entrega perfeita). **Recado:** 1 de 3 sempre, com esforço (3 a 5 minutos).
+- **Vagoneta:** uma sessão (0 de 3) em 23/09.
+- Nível 1; 41 palavras vistas; 4 "dominadas" pela regra antiga (`seen >= 3`).
+
+### Economia e mundo
+
+- 53 gold. XP 1.057 (nível 10). 2 esmeraldas, 1 diamante. Obras: Fornalha 1, Armazém 2, Torre 1, Biblioteca 1, Mercado 1.
+- Nenhum livro contado ainda (a Biblioteca nível 1 abriu; há três livros cadastrados).
+- Pedidos: Sábio no capítulo 3 ("Acerte todas", que ele fez hoje, mas no código velho não contou); Ferreiro no 2; Comerciante e Olheiro no 1.
+
+### Agir hoje (pai)
+
+1. **Recarregar a página no PC do Heitor (F5)** e, até o pacote 13 existir, fechar a aba à noite.
+2. **Esmeralda de hoje:** ele fez 5 de 5 e o código velho não pagou. Dá para conceder à mão (`rare.esmeralda` +1 e `claimed['quiz8:2026-09-24']`), pelo painel ou por um script do líder com o ok do pai.
+3. **Rodar o retroativo** (`backfill-quizbank.cjs`): agora inclui a prova de hoje.
+
+### Próximos pacotes, nesta ordem
+
+1. **Pacote 13 — o app se atualiza sozinho** (`PROMPT_CURSOR_2026-09-24.md`). Pequeno e urgente: sem ele, cada entrega chega ao Heitor dias depois, e abas velhas quebram.
+2. **Pacote 14a — a Ferraria sai do círculo** (mesmo prompt). Causa achada ao meio-dia de 24/09:
+   - a etiqueta de erro `other` do Recado vira o alvo "Frases completas";
+   - `forgeItemMixFor(level, 'order')` devolve 6 frases de montar em qualquer nível;
+   - o erro de ontem volta igual.
+
+   Resultado: 0 de 6 em 21, 23 e 24/09. A correção limita a frase de montar (2 por dia e até 5 palavras no nível 1), faz `other` cair no rodízio e desce um degrau depois de 0 ou 1 acerto.
+3. **Pacote 11** do prompt de 23/09 (já escrito): perfil, segunda tentativa com aviso, painel "Como ele vai". Depois, o **12**.
+4. **Pacote 10b — prova sempre com 8 e revisor mais exigente.** Barrar:
+   - distrator que se elimina por bom senso;
+   - `why` que não explica;
+   - "a resposta certa é" no dilema;
+   - o mesmo molde de enunciado em dias seguidos.
+
+   O líder escreve.
+5. **Pacote 14b — Carta e conteúdo dos contratos.**
+   - Portão de leitura da Carta: tempo mínimo pelo tamanho do texto e evidência antes da resposta, como em `MINA_CONTRATOS.md` §3.4.
+   - Revisor de conteúdo para Ferraria, Carta e Recado. Hoje a Carta perguntou "You want three apples. What do you take?" com resposta "five apples", e o Recado pediu "maçã azul".
+
+   O líder escreve.
+6. **AP1 com o ajuste de hoje:** o laço do plano acontece no fim da prova, depois da reflexão (`APRENDER_A_APRENDER.md` §7.1).
+
+### Para o pai decidir (rotina)
+
+- Ele faz perto de metade das missões e nunca fecha um dia: 0 tochas, e penalidade todo dia. Opções:
+  - rever a lista com ele (quais são realistas, e se "Lavar a Louça" de manhã faz sentido);
+  - reduzir as devidas por dia;
+  - manter como está e deixar o Baú da metade fazer o papel de dia bom.
+- "Bom Comportamento" marcado pela criança é autoavaliação. No desenho dos comprovantes (decisão 24) vira "pai confirma".

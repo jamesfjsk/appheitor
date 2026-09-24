@@ -61,6 +61,7 @@ const VillageManager: React.FC = () => {
   const [modules, setModules] = useState<ModuleSettings>(DEFAULT_MODULES);
   const [pauseDays, setPauseDays] = useState<PauseDaysSettings>({ dates: [] });
   const [health, setHealth] = useState<HealthDoc | null>(null);
+  const [publishedVersion, setPublishedVersion] = useState<string | null>(null);
   const [errors, setErrors] = useState<ClientErrorRow[]>([]);
   const [todayDone, setTodayDone] = useState<Array<{ taskId: string; taskTitle: string; date: string }>>([]);
   const [seasonStep, setSeasonStep] = useState(0);
@@ -83,6 +84,20 @@ const VillageManager: React.FC = () => {
     void listDayCompletions(childUid, today).then(setTodayDone);
     return () => unsubs.forEach((u) => u());
   }, [childUid]);
+
+  useEffect(() => {
+    let dead = false;
+    void fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() as Promise<{ version?: unknown }> : null))
+      .then((data) => {
+        if (dead) return;
+        setPublishedVersion(data && typeof data.version === 'string' && data.version ? data.version : null);
+      })
+      .catch(() => {
+        if (!dead) setPublishedVersion(null);
+      });
+    return () => { dead = true; };
+  }, []);
 
   const saveVillage = async (partial: Partial<VillageSettings>) => {
     await saveSettings('village', { ...settings, ...partial } as unknown as Record<string, unknown>);
@@ -352,6 +367,16 @@ const VillageManager: React.FC = () => {
             </span>
           ))}
         </div>
+        {(() => {
+          const onPc = health?.appVersion || '';
+          const onAir = publishedVersion || '';
+          const differ = Boolean(onPc && onAir && onPc !== onAir);
+          return (
+            <p className={`inline-block px-3 py-1 rounded-full text-sm mb-4 ${differ ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+              Versão no PC dele: {onPc || 'nunca'} · no ar: {onAir || '…'}
+            </p>
+          );
+        })()}
         <h3 className="font-semibold mb-2">Últimos erros do app</h3>
         {errors.length === 0 ? <p className="text-sm text-gray-500">Nenhum.</p> : (
           <ul className="text-xs space-y-2 max-h-48 overflow-y-auto">

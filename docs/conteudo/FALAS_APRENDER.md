@@ -59,17 +59,19 @@ A escrever com o pacote AP2 (Comerciante e Recado), na voz de cada personagem.
 
 ## 3. O laço do plano (pacote AP1)
 
-### 3.1 No Fechar o dia
+### 3.1 No fim da prova (ajuste de 24/09: o laço saiu do Fechar o dia)
 
 | elemento | texto |
 |---|---|
-| linha de cima | Ontem você escreveu: |
+| linha de cima | Ontem você disse que ia: |
 | a frase dele | em itálico, como ele escreveu |
 | pergunta | E aí? |
 | botões | Fiz · Em parte · Não fiz |
 | fichas (só em "Em parte" e "Não fiz"; opcional) | Esqueci · Não deu tempo · Ficou difícil · Mudei de ideia |
+| plano de hoje (sempre) | E hoje, o que você vai fazer? |
+| dica no campo | Hoje eu vou... |
 
-### 3.2 A fala do Sábio de manhã, na Placa
+### 3.2 A fala do Sábio sobre o plano (no papiro, na hora, e na Placa até o fim do dia)
 
 Uma por dia, sem repetir a mesma em 14 dias dentro do caso. Substitui o sorteio de `sageReplyFor` quando existe plano de ontem.
 

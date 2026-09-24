@@ -15,6 +15,7 @@ import Onboarding from './village/Onboarding';
 import LevelUpModal from './village/LevelUpModal';
 import { getTodayBrazil } from '../../utils/clock';
 import { quizLockedFor } from '../../services/village/quizGate';
+import { getAppVersion, touchHealth } from '../../services/observability';
 import { useClock } from '../../contexts/ClockContext';
 import { useSound } from '../../contexts/SoundContext';
 import { useModules } from '../../hooks/useModules';
@@ -80,6 +81,11 @@ const HeroPanel: React.FC = () => {
   useEffect(() => {
     setSelectedPeriod(clockPeriod);
   }, [clockPeriod]);
+
+  useEffect(() => {
+    if (!progress.userId) return;
+    void touchHealth(progress.userId, 'appVersion', getAppVersion());
+  }, [progress.userId]);
 
   useEffect(() => {
     if (!progress.userId) return;

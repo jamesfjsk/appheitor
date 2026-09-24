@@ -177,6 +177,7 @@ export interface HealthDoc {
   lastChestDate: string | null;
   lastInterestWeek: string | null;
   lastLearningWeek: string | null;
+  appVersion: string | null;
   clockDriftMs: number | null;
   updatedAt: string;
 }

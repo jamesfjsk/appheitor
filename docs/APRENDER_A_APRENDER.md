@@ -154,24 +154,27 @@ Hoje há quatro revisitas separadas: prova em 3 a 10 dias, Mina em 3 e 10, Túne
 
 ## 7. O laço do plano e a ponte da quinzena
 
-### 7.1 O laço do plano (Fechar o dia)
+### 7.1 O laço do plano (no fim da prova do dia)
 
-Hoje o "amanhã eu..." é escrito e ninguém olha para ele: de manhã, `sageReplyFor` sorteia uma frase do banco (`src/services/village/checkin.ts`). Passa a ser um laço:
+**Ajuste de 24/09, pelos dados reais:** em 7 dias ele nunca fechou o dia (0 check-ins). O "Fechar o dia" só abre às 20h ou depois do Baú, e ele joga às 10h e às 18h. Em compensação, faz a prova em 6 de 7 dias, por volta das 10h, e escreve a reflexão obrigatória. Por isso o laço sai do Fechar o dia e vai para **o fim da prova, logo depois da reflexão**, no mesmo papiro do Sábio: é o único momento diário em que ele já está escrevendo. O Fechar o dia continua como está (humor), opcional. O pai confirma este ajuste quando o AP1 entrar.
 
-- **No Fechar o dia**, antes do humor, aparece "Ontem você escreveu:" com a frase dele, e três botões: **Fiz**, **Em parte**, **Não fiz**. Em "Em parte" ou "Não fiz", aparece uma linha de fichas opcional, de um toque: *Esqueci · Não deu tempo · Ficou difícil · Mudei de ideia*. Grava `dailyProgress.checkin.planDone: 'sim' | 'parte' | 'nao'` e `planObstacle`.
-- **De manhã**, a fala do Sábio na Placa responde ao plano, e não a um sorteio (banco em `FALAS_APRENDER.md` §3):
+Hoje o "amanhã eu..." do Fechar o dia quase nunca é escrito, e quando é, ninguém olha para ele: de manhã, `sageReplyFor` sorteia uma frase do banco (`src/services/village/checkin.ts`). Passa a ser um laço, na prova:
+
+- **Depois da reflexão aceita**, se existe o plano do dia anterior, aparece "Ontem você disse que ia:" com a frase dele, e três botões: **Fiz**, **Em parte**, **Não fiz**. Em "Em parte" ou "Não fiz", aparece uma linha de fichas opcional, de um toque: *Esqueci · Não deu tempo · Ficou difícil · Mudei de ideia*. Grava `planDone: 'sim' | 'parte' | 'nao'` e `planObstacle` no doc da prova do dia.
+- **Logo em seguida, o plano de hoje:** "E hoje, o que você vai fazer?" (uma frase, mínimo de 3 palavras), gravada como `plan` no doc da prova. É ela que volta amanhã. Os dois passos juntos cabem em 20 segundos e nunca trancam a Mina por mais que isso.
+- **Na hora**, a fala do Sábio responde ao plano de ontem, e não a um sorteio (banco em `FALAS_APRENDER.md` §3). A mesma fala fica na Placa até o fim do dia:
   - plano feito: reconhece a ação;
   - em parte: pergunta o que ele faria diferente;
   - esquecido: sugere o lembrete da Agenda;
   - grande demais: sugere um plano menor.
 
   Sem sermão e sem pagamento.
-- Se não houve "amanhã eu" na véspera (primeiro dia, folga, férias, punição), a linha não aparece.
+- Se não houve plano na véspera (primeiro dia, dia sem prova, folga, férias, punição), a linha de ontem não aparece; o plano de hoje aparece sempre.
 - Cada plano cumprido acende uma **tocha de plano** na Torre (é contador, não moeda) e conta para a conquista "Plano cumprido".
 - Aos 12–13 anos, o plano ganha o formato "Quando ___, eu vou ___". Esses planos de implementação são uma das intervenções de autorregulação com mais evidência (Gollwitzer e Sheeran, 2006).
 - **Aceite:**
-  - fotos 1280×720 e 1920×1080 do Fechar o dia com o plano de ontem, os três botões e as fichas;
-  - a Placa da manhã seguinte com a fala do plano;
+  - fotos 1280×720 e 1920×1080 do fim da prova com o plano de ontem, os três botões, as fichas e o campo do plano de hoje;
+  - a fala do Sábio sobre o plano, no papiro e na Placa;
   - teste puro do seletor da fala nos casos do §3 do banco (feito, em parte, esqueci, sem tempo, difícil, mudei de ideia, sem ficha).
 
 ### 7.2 A ponte da quinzena (painel e dever de casa)
