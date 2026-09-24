@@ -19,6 +19,7 @@ import type {
 } from '../../types/english';
 import { MERCHANT_CATALOGS, RELATION_EN, type MerchantCatalogs } from '../../config/englishBase';
 import { LETTER_GENRES, NUMBER_WORDS, findForbiddenTokens, letterWordRange, levelFor, tokenize } from '../../config/englishLevels';
+import { scrambleWordCap } from './prompts';
 import { gapped, offlineSentences } from './merchantRoom';
 import { missingInfos, normalize, normalizedTokens, singularize } from './notePrecheck';
 import { mixSeed, seedFromString, seededShuffle, shuffleOptions } from './shuffle';
@@ -479,6 +480,10 @@ function parseForgeItem(raw: unknown, level: number, seed: number, index: number
     }
     const banned = answerWords.filter((w) => SCRAMBLE_BANNED.includes(w));
     if (banned.length) return { item: null, key: '', problems: [`${tag}: scramble com palavra proibida: ${banned.join(', ')}`] };
+    const cap = scrambleWordCap(level);
+    if (answerWords.length > cap) {
+      return { item: null, key: '', problems: [`${tag}: scramble_longo (${answerWords.length} palavras; no máximo ${cap} neste nível)`] };
+    }
     const forbidden = findForbiddenTokens(answer, level);
     if (forbidden.length) return { item: null, key: '', problems: [`${tag}: tokens proibidos: ${forbidden.join(', ')}`] };
     const bare = missingDeterminerAfterPreposition(answerWords, answer);

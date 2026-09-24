@@ -6,9 +6,9 @@
 // Módulo puro, roda em Node.
 // ========================================
 
-import type { ContractType, ForgeItem, ForgeTarget, LetterGenre, MerchantStep, NoteInfo } from '../../types/english';
+import type { ContractType, ForgeItem, ForgeTarget, LetterGenre, MerchantStep, NoteErrorTag, NoteInfo } from '../../types/english';
 import { MERCHANT_CATALOGS, RELATION_EN, type MerchantCatalogs } from '../../config/englishBase';
-import { NUMBER_WORDS, letterWordRange, levelFor, type EnglishLevel } from '../../config/englishLevels';
+import { FORGE_TAG_TARGETS, NUMBER_WORDS, letterWordRange, levelFor, type EnglishLevel } from '../../config/englishLevels';
 
 export interface BuiltPrompt {
   system: string;
@@ -74,13 +74,51 @@ export const PROMPT_MAX_TOKENS: Record<ContractType | 'judge' | 'explain', numbe
   explain: 280,
 };
 
-/** Quantos itens de cada tipo a Ferraria pede; alvo de ordem = só scramble */
+/** Quantos itens de cada tipo a Ferraria pede. Ordem não é mais seis frases para montar. */
 export function forgeItemMixFor(level: number, kind: ForgeTarget['kind']): { scramble: number; gap: number; typed: number } {
-  if (kind === 'order') return { scramble: 6, gap: 0, typed: 0 };
   const lv = levelFor(level).level;
+  if (kind === 'order') {
+    if (lv === 1) return { scramble: 2, gap: 4, typed: 0 };
+    if (lv === 2) return { scramble: 3, gap: 3, typed: 0 };
+    return { scramble: 4, gap: 1, typed: 1 };
+  }
   if (lv === 1) return { scramble: 0, gap: 4, typed: 2 };
   if (lv === 2) return { scramble: 0, gap: 3, typed: 3 };
   return { scramble: 0, gap: 2, typed: 4 };
+}
+
+/** Ontem 0 ou 1 acerto: hoje não é dia de montar frase. Sem prova ontem, não desce. */
+export function forgeStepDown(yesterdayScore: number, yesterdayMax: number): boolean {
+  return yesterdayMax > 0 && yesterdayScore <= 1;
+}
+
+/**
+ * Alvo do dia. `other` não escolhe: cai no rodízio.
+ * 0 ou 1 acerto ontem força um alvo `form` do rodízio do nível.
+ */
+export function forgeTargetFor(input: {
+  targets: ForgeTarget[];
+  dayIndex: number;
+  tag: NoteErrorTag | null;
+  yesterdayScore: number;
+  yesterdayMax: number;
+}): ForgeTarget {
+  const targets = input.targets.length ? input.targets : [{ id: 'to_be', label: 'am / is / are', kind: 'form' as const }];
+  const form = targets.filter((t) => t.kind === 'form');
+  const formPool = form.length ? form : targets;
+  if (forgeStepDown(input.yesterdayScore, input.yesterdayMax)) {
+    return formPool[((input.dayIndex % formPool.length) + formPool.length) % formPool.length];
+  }
+  if (input.tag && input.tag !== 'other') return FORGE_TAG_TARGETS[input.tag];
+  return targets[((input.dayIndex % targets.length) + targets.length) % targets.length];
+}
+
+/** Teto de palavras de um scramble: 5 no nível 1, 7 no 2, 8 no 3. */
+export function scrambleWordCap(level: number): number {
+  const lv = levelFor(level).level;
+  if (lv === 1) return 5;
+  if (lv === 2) return 7;
+  return 8;
 }
 
 export const LETTER_GENRE_HINTS: Record<LetterGenre, string> = {
@@ -278,7 +316,7 @@ function forgePrompt(input: ForgePromptInput): BuiltPrompt {
       : 'There are no mistakes from yesterday.',
     'Rules per kind:',
     bullet([
-      '"scramble": "answer" is a correct sentence of 4-8 words (count them; "next to" is two words) with its articles kept ("next to the goal", never "next to goal"); "words" is the same words in lowercase without punctuation (the game shuffles them); never use then, please, first, today or also',
+      `"scramble": "answer" is a correct sentence of 4-${scrambleWordCap(lv.level)} words (count them; "next to" is two words; longer sentences are rejected) with its articles kept ("next to the goal", never "next to goal"); "words" is the same words in lowercase without punctuation (the game shuffles them); never use then, please, first, today or also`,
       '"gap": "sentence" contains exactly one "___"; "options" has 3 different choices of the same kind (e.g. is/are/am); "answer" is the index of the correct one',
       '"typed": "prompt" is one line in Portuguese telling what to type (e.g. "Escreva o plural de torch"); "sentence" contains one "___"; "accepted" lists every correct spelling',
       '"rule": one line in Portuguese explaining the rule, shown when the learner misses',

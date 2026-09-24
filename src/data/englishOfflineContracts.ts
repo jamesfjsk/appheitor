@@ -883,8 +883,8 @@ const NOTES_3: OfflineNote[] = [
 
 // ========================================
 // Ferrarias: um contrato por alvo do cartão do nível (LEVELS[n].forgeTargets).
-// Alvo de ordem = 6 scrambles; alvo de forma = gap + typed na mistura de forgeItemMixFor
-// (n1 4+2, n2 3+3, n3 2+4).
+// Alvo de ordem: n1 = 2 scramble (até 5 palavras) + 4 gap; n2 = 3 + 3; n3 = 4 scramble + 1 gap + 1 typed.
+// Alvo de forma = gap + typed na mistura de forgeItemMixFor (n1 4+2, n2 3+3, n3 2+4).
 // ========================================
 
 const FORGES_1: OfflineForge[] = [
@@ -895,12 +895,12 @@ const FORGES_1: OfflineForge[] = [
     content: {
       target: 'Ordem do pedido (Put the X on the Y)',
       items: [
-        scramble('Put the torch on the table.', 'Comece com o verbo (Put), depois o objeto e por fim o lugar.'),
-        scramble('Give me two red apples.', 'Give + para quem (me) + o que.'),
-        scramble('Open the door of the base.', 'O verbo vem primeiro: Open the door.'),
-        scramble('Take the sword and the map.', 'Take + o que; junte os dois objetos com and.'),
-        scramble('Close the chest next to the bed.', 'Verbo, objeto e depois o lugar com next to.'),
-        scramble('Put five torches in the cave.', 'Put + quantidade e item + lugar.'),
+        scramble('Open the red door.', 'O pedido começa com o verbo: Open.'),
+        scramble('Give me two apples.', 'Give + para quem (me) + o que.'),
+        gap('___ the book on the bed.', ['Put', 'The', 'On'], 'O pedido começa com o verbo Put.'),
+        gap('Put the map ___ the table.', ['on', 'the', 'put'], 'O lugar vem no fim, com on.'),
+        gap('___ the blue box.', ['Open', 'The', 'Box'], 'O verbo vem primeiro.'),
+        gap('Take the key ___ the bag.', ['and', 'the', 'take'], 'And junta os dois objetos depois do verbo.'),
       ],
     },
   },
@@ -977,10 +977,10 @@ const FORGES_1: OfflineForge[] = [
       items: [
         scramble('Is the cave dark?', 'Na pergunta, is vem antes do sujeito: Is the cave...?'),
         scramble('Do you have a map?', 'Pergunta com do: Do you + verbo.'),
-        scramble('Are the dogs in the barn?', 'Com plural, are vem primeiro: Are the dogs...?'),
-        scramble('Is there a torch in the chest?', 'Is there...? pergunta se existe algo.'),
-        scramble('Do you want an apple?', 'Do you want...? = você quer...?'),
-        scramble('Where is my red ball?', 'A palavra de pergunta (where) vem primeiro, depois is.'),
+        gap('___ you want an apple?', ['Do', 'You', 'Want'], 'A pergunta com you começa com Do.'),
+        gap('___ the dogs in the barn?', ['Are', 'The', 'In'], 'Com plural, are vem primeiro.'),
+        gap('Where ___ my red ball?', ['is', 'are', 'do'], 'Depois de where vem is, e só então o objeto.'),
+        gap('___ there a torch here?', ['Is', 'Are', 'Do'], 'Is there pergunta se existe uma coisa.'),
       ],
     },
   },
@@ -1058,12 +1058,12 @@ const FORGES_2: OfflineForge[] = [
     content: {
       target: 'Ordem da pergunta (How many...? Does he...?)',
       items: [
-        scramble('How many emeralds do you have?', 'How many + substantivo + do you + verbo.'),
         scramble('Does he like spiders?', 'Com he/she/it a pergunta começa com Does.'),
         scramble('Can you open the chest?', 'Can vem antes de you na pergunta.'),
         scramble('Where does the wolf sleep?', 'Palavra de pergunta, depois does, depois o sujeito.'),
-        scramble('Do you want some soup?', 'Do you + verbo + o resto.'),
-        scramble('How many players can come?', 'How many + substantivo + can + verbo.'),
+        gap('How many emeralds ___ you have?', ['do', 'does', 'is'], 'Com you a pergunta usa do, não does.'),
+        gap('___ he like the mine?', ['Does', 'Do', 'Is'], 'Com he a pergunta começa com Does.'),
+        gap('How many players ___ come?', ['can', 'does', 'are'], 'Can fica depois do substantivo e antes do verbo.'),
       ],
     },
   },
@@ -1074,12 +1074,12 @@ const FORGES_2: OfflineForge[] = [
     content: {
       target: 'Ordem da frase com because',
       items: [
-        scramble('I need a torch because it is dark.', 'Primeiro o que você precisa, depois because e o motivo.'),
-        scramble("She doesn't play because she is sick.", 'A ação vem antes; because liga o motivo no fim.'),
-        scramble("We can't swim because the river is cold.", 'Frase principal primeiro, depois because + motivo.'),
-        scramble('He likes the mine because he finds gold.', 'Because vem no meio, ligando a frase ao motivo.'),
-        scramble('Take a rope because the wall is high.', 'Ordem: pedido, because, motivo.'),
         scramble('I want soup because I am hungry.', 'O motivo (I am hungry) vem depois de because.'),
+        scramble("She doesn't play because she is sick.", 'A ação vem antes; because liga o motivo no fim.'),
+        scramble('I stay home because I am sick.', 'Primeiro o que acontece, depois because e o motivo.'),
+        gap('I need a torch ___ it is dark.', ['because', 'but', 'and'], 'Because liga o motivo no fim da frase.'),
+        gap('Take a rope ___ the wall is high.', ['because', 'but', 'or'], 'O motivo vem depois de because.'),
+        gap('He likes the mine ___ he finds gold.', ['because', 'but', 'so'], 'Because fica no meio, entre a frase e o motivo.'),
       ],
     },
   },
@@ -1143,10 +1143,10 @@ const FORGES_3: OfflineForge[] = [
       items: [
         scramble('We never work at night.', 'O advérbio (never) vem antes do verbo principal.'),
         scramble('The owl always sleeps in the tree.', 'Always fica entre o sujeito e o verbo.'),
-        scramble('I sometimes play football on Sunday.', 'Sometimes vem antes do verbo play.'),
         scramble('She is always calm in the goal.', 'Com o verbo be, o advérbio vem depois: is always.'),
         scramble('They never lose at home.', 'Never antes do verbo: never lose.'),
-        scramble('He usually eats bread at midnight.', 'Usually entre o sujeito (he) e o verbo (eats).'),
+        gap('He ___ eats bread at midnight.', ['always', 'is', 'eat'], 'O advérbio fica entre o sujeito e o verbo.'),
+        typed('Escreva always ou never', 'I ___ play football on Sunday.', ['never', 'always'], 'O advérbio vem antes do verbo play.'),
       ],
     },
   },
@@ -1157,12 +1157,12 @@ const FORGES_3: OfflineForge[] = [
     content: {
       target: 'Ordem com to + verbo (finalidade)',
       items: [
-        scramble('I need a torch to light the cave.', 'Primeiro o que você precisa, depois to + verbo (para quê).'),
-        scramble('We use a boat to cross the river.', 'Objeto primeiro, finalidade (to cross) no fim.'),
-        scramble('Take a rope to climb the wall.', 'Pedido, depois to + verbo com a finalidade.'),
-        scramble('She wants a net to catch fish.', 'Wants + objeto + to + verbo.'),
-        scramble('Bring water to cook the soup.', 'Bring + o que + to + para quê.'),
-        scramble('He runs every day to get faster.', 'A finalidade (to get faster) fecha a frase.'),
+        scramble('I need a torch to see.', 'Primeiro o que você precisa, depois to + verbo (para quê).'),
+        scramble('We use a boat to cross.', 'Objeto primeiro, finalidade (to cross) no fim.'),
+        scramble('Take a rope to climb.', 'Pedido, depois to + verbo com a finalidade.'),
+        scramble('She wants a net to fish.', 'Wants + objeto + to + verbo.'),
+        gap('Bring water ___ cook the soup.', ['to', 'for', 'of'], 'A finalidade usa to + verbo.'),
+        typed('Escreva to e o verbo', 'He runs every day ___ faster.', ['to get'], 'A finalidade fecha a frase: to + verbo.'),
       ],
     },
   },

@@ -211,8 +211,8 @@ const rule = 'Verbo primeiro, depois o objeto e o lugar.';
 const goodForge = {
   target: 'Ordem do pedido',
   items: [
-    { kind: 'scramble', words: ['table', 'the', 'put', 'on', 'torch', 'the'], answer: 'Put the torch on the table.', rule },
-    { kind: 'scramble', words: [], answer: 'There are two swords in the chest.', rule },
+    { kind: 'scramble', words: ['door', 'the', 'open', 'red'], answer: 'Open the red door.', rule },
+    { kind: 'scramble', words: [], answer: 'Give me two apples.', rule },
     { kind: 'gap', sentence: 'There ___ two apples.', options: ['is', 'are', 'am'], answer: 1, rule: 'Com plural usamos are.' },
     { kind: 'gap', sentence: 'I have ___ apple.', options: ['a', 'an', 'the', 'an'], answer: 1, rule: 'Antes de vogal usamos an.' },
     { kind: 'typed', prompt: 'Escreva o plural de torch', sentence: 'I need two ___.', accepted: ['torches'], rule: 'Palavras em -ch ganham -es.' },
@@ -227,9 +227,9 @@ test('validateForge aceita o exemplo bom, embaralha scramble/opções e refaz wo
   const s0 = r.content.items[0];
   const s1 = r.content.items[1];
   if (s0.kind !== 'scramble' || s1.kind !== 'scramble') throw new Error('scramble esperado');
-  expect(s0.words.join(' ')).not.toBe('put the torch on the table');
-  expect([...s0.words].sort()).toEqual(['on', 'put', 'table', 'the', 'the', 'torch']);
-  expect([...s1.words].sort()).toEqual(['are', 'chest', 'in', 'swords', 'the', 'there', 'two']);
+  expect(s0.words.join(' ')).not.toBe('open the red door');
+  expect([...s0.words].sort()).toEqual(['door', 'open', 'red', 'the']);
+  expect([...s1.words].sort()).toEqual(['apples', 'give', 'me', 'two']);
   const g0 = r.content.items[2];
   const g1 = r.content.items[3];
   if (g0.kind !== 'gap' || g1.kind !== 'gap') throw new Error('gap esperado');

@@ -197,7 +197,7 @@ test('checkMerchantSentence: qty 1 exige the/a/an/one e concordância a/an', () 
 test('validateForge: scramble com words já na ordem da resposta ainda sai embaralhado', () => {
   const rule = 'Verbo primeiro.';
   const items = [
-    { kind: 'scramble', words: ['put', 'the', 'torch', 'on', 'the', 'table'], answer: 'Put the torch on the table.', rule },
+    { kind: 'scramble', words: ['open', 'the', 'big', 'red', 'door'], answer: 'Open the big red door.', rule },
     { kind: 'scramble', words: ['open', 'the', 'big', 'door'], answer: 'Open the big door.', rule },
     { kind: 'scramble', words: ['Give', 'me', 'two', 'keys.'], answer: 'Give me two keys.', rule },
     { kind: 'gap', sentence: 'There ___ two apples.', options: ['is', 'are', 'am'], answer: 1, rule },

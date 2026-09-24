@@ -1245,6 +1245,83 @@ As duas strings, iguais:
 
 **Pare para o commit do pai.**
 
+## Pacote 14a — a Ferraria sai do círculo
+
+Sentimento alvo: depois de zerar a montagem, o dia seguinte é uma frase curta de forma, não outras seis frases para ordenar.
+
+### O que mudou
+
+1. Alvo de ordem: nível 1 fica 2 frases para montar e 4 lacunas; nível 2 fica 3 e 3; nível 3 fica 4 para montar, 1 lacuna e 1 para escrever. Alvo de forma não mudou.
+2. Scramble com mais de 5 palavras no nível 1, ou mais de 7 no nível 2, cai com `scramble_longo` e a vaga segue para a substituição que já existia. O prompt da Ferraria diz o mesmo teto.
+3. A etiqueta `other` não escolhe mais "Frases completas". O alvo volta ao rodízio do nível. `word_order` continua ordem, já com a mistura nova.
+4. `forgeStepDown`: 0 ou 1 acerto ontem obriga um alvo `form` do rodízio. 2 de 6 não desce.
+
+O banco offline dos alvos de ordem foi encurtado para a mistura nova, senão a reserva repetia as seis frases longas quando a IA falha.
+
+### O que a geração ensina
+
+Ontem 0 de 6, nível 1, etiqueta `other`: o alvo saiu `there_is_are` (`form`), "There is / There are". Ele aprende que uma coisa pede *is* e várias pedem *are*. Os distratores são o erro típico (is/are/am e have no lugar de are). A frase para montar que a IA encaixou tem 5 palavras e a mesma regra. Não gravei isso no plano da conta de teste.
+
+```json
+{
+  "target": "There is / There are",
+  "items": [
+    { "kind": "gap", "sentence": "There ___ a ball on the table.", "options": ["are", "am", "is"], "answer": 2, "rule": "Use 'is' para falar de uma coisa só." },
+    { "kind": "gap", "sentence": "There ___ three books in my bag.", "options": ["are", "have", "is"], "answer": 0, "rule": "Use 'are' para falar de várias coisas." },
+    { "kind": "typed", "prompt": "Escreva a palavra para 'há' quando tem uma coisa só", "sentence": "___ a friend next to me.", "accepted": ["there is"], "rule": "Use 'there is' para falar de uma coisa." },
+    { "kind": "typed", "prompt": "Escreva a palavra para 'há' quando tem mais de uma coisa", "sentence": "___ two balls under the chair.", "accepted": ["there are"], "rule": "Use 'there are' para falar de mais de uma coisa." },
+    { "kind": "scramble", "words": ["is", "there", "blue", "book", "a"], "answer": "There is a blue book.", "rule": "Use 'there is' para falar de uma coisa só." },
+    { "kind": "gap", "sentence": "There ___ four balls in the box.", "options": ["are", "have", "is"], "answer": 0, "rule": "Use 'are' com números maiores que um." }
+  ]
+}
+```
+
+Fonte: `ai`. A mistura pedida para forma no nível 1 é 4 lacunas e 2 escritas, sem montar. A IA mandou uma montagem de 5 palavras no lugar de uma lacuna; o validador aceitou porque a frase cabe no teto. O alvo continua forma.
+
+### Arquivos
+
+- `src/services/english/prompts.ts`
+- `src/services/english/validators.ts`
+- `src/services/englishAi.ts`
+- `src/data/englishOfflineContracts.ts`
+- `src/services/english/__tests__/forgeMix.test.ts`
+- `src/services/english/__tests__/validators.test.ts`
+- `src/services/english/__tests__/adversarial.test.ts`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (seção 12)
+
+### Barra da lei
+
+1. Intenção. Dia ruim de montar vira um dia de forma. Passa.
+2. Sistema. O contrato da Ferraria que já existia. Passa.
+3. Fonte. Sem tela nova. Passa.
+4. Ícone. Sem ícone novo. Passa.
+5. Hierarquia. Sem tela nova. Passa.
+6. A cena continua. Nada de overlay. Passa.
+7. Arestas. Sem tela nova. Passa.
+8. Mundo. A Mina continua no React. Passa.
+9. Economia. Sem gold novo. Passa.
+10. Consequência. Errar quase tudo desce o degrau, sem castigo na frase. Passa.
+11. Estado honesto. O alvo do dia é o que a nota de ontem pede. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. A regra da peça continua em português, na boca da Ferraria. Passa.
+15. Evidência. Uma chamada de IA, conta de teste, sem gravar o plano. JSON acima.
+16. Arestas. Sem ontem, não desce. `other` não escolhe "Frases completas". Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 35 arquivos, saída 0
+- `npm run test:village` — 13 arquivos, saída 0
+
+### Fora
+
+- Recado, Carta, Comerciante e economia
+- Pacotes 11, 12 e 14b
+
+**Pare para o commit do pai.**
+
 
 
 
