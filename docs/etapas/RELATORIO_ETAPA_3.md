@@ -1322,6 +1322,53 @@ Fonte: `ai`. A mistura pedida para forma no nível 1 é 4 lacunas e 2 escritas, 
 
 **Pare para o commit do pai.**
 
+## Pacote 14a-2 — a Ferraria olha a última concluída
+
+Sentimento alvo: o plano de amanhã, gerado de manhã, ainda enxerga a última Ferraria que ele de fato terminou.
+
+### O que mudou
+
+`yesterdayForgeScore` olhava só o dia anterior ao plano. De manhã esse dia ainda está aberto, sem nota, e o degrau para baixo não disparava. Agora `lastForgeScore` pega a Ferraria concluída mais recente, em qualquer plano anterior à data. Ferraria aberta não conta. Sem nenhuma concluída, o placar é 0 de 0 e não desce. `forgeTargetFor` ficou igual.
+
+### Arquivos
+
+- `src/services/english/prompts.ts`
+- `src/services/englishAi.ts`
+- `src/services/english/__tests__/forgeMix.test.ts`
+
+### Barra da lei
+
+1. Intenção. O dia seguinte reage à última Ferraria feita, não a uma prova ainda em branco. Passa.
+2. Sistema. A escolha de alvo que já existia. Passa.
+3. Fonte. Sem tela nova. Passa.
+4. Ícone. Sem ícone novo. Passa.
+5. Hierarquia. Sem tela nova. Passa.
+6. A cena continua. Passa.
+7. Arestas. Sem tela nova. Passa.
+8. Mundo. A Mina continua no React. Passa.
+9. Economia. Sem gold novo. Passa.
+10. Consequência. 0 ou 1 na última concluída ainda desce o degrau. 4 de 6 não. Passa.
+11. Estado honesto. A nota usada é a que já está gravada. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. Sem frase nova. Passa.
+15. Evidência. Teste puro, sem geração de IA e sem gravar plano.
+16. Arestas. Plano de 24/09 aberto não esconde o 0 de 6 de 23/09. Sem concluída, não desce. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 35 arquivos, saída 0 (`lastForgeScore`: 0/6 com o dia seguinte aberto desce; 4/6 não; nenhuma concluída não desce)
+- `npm run test:village` — 13 arquivos, saída 0
+
+### Fora
+
+- Pacote 10b
+- Pacotes 11, 12 e 14b
+
+**Pare para o commit do pai.**
+
 
 
 

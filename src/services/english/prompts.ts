@@ -87,9 +87,31 @@ export function forgeItemMixFor(level: number, kind: ForgeTarget['kind']): { scr
   return { scramble: 0, gap: 2, typed: 4 };
 }
 
-/** Ontem 0 ou 1 acerto: hoje não é dia de montar frase. Sem prova ontem, não desce. */
+/** 0 ou 1 acerto na última Ferraria concluída: hoje não é dia de montar frase. Sem nota, não desce. */
 export function forgeStepDown(yesterdayScore: number, yesterdayMax: number): boolean {
   return yesterdayMax > 0 && yesterdayScore <= 1;
+}
+
+export interface ForgeScorePlan {
+  date: string;
+  contracts: Record<string, { type?: string; result?: { score?: number; max?: number } | null } | undefined>;
+}
+
+/** A Ferraria concluída mais recente, em qualquer plano anterior a `date`. Aberta não conta. */
+export function lastForgeScore(plans: ForgeScorePlan[], date: string): { score: number; max: number } {
+  const done = plans
+    .filter((p) => p.date < date)
+    .sort((a, b) => b.date.localeCompare(a.date));
+  for (const plan of done) {
+    for (const contract of Object.values(plan.contracts)) {
+      if (!contract || contract.type !== 'forge' || !contract.result) continue;
+      return {
+        score: Number(contract.result.score) || 0,
+        max: Number(contract.result.max) || 0,
+      };
+    }
+  }
+  return { score: 0, max: 0 };
 }
 
 /**

@@ -1,6 +1,6 @@
 import { expect, run, test } from './harness';
 import { LEVELS } from '../../../config/englishLevels';
-import { forgeItemMixFor, forgeStepDown, forgeTargetFor } from '../prompts';
+import { forgeItemMixFor, forgeStepDown, forgeTargetFor, lastForgeScore } from '../prompts';
 import { validateForge } from '../validators';
 
 test('forgeItemMixFor: ordem respeita o nível', () => {
@@ -34,6 +34,25 @@ test('forgeStepDown: 0 de 6 e 1 de 6 descem; 2 de 6 não', () => {
   expect(down.kind).toBe('form');
   const stay = forgeTargetFor({ targets, dayIndex: 0, tag: 'word_order', yesterdayScore: 2, yesterdayMax: 6 });
   expect(stay.kind).toBe('order');
+});
+
+const forgePlan = (date: string, score: number | null, max = 6) => ({
+  date,
+  contracts: {
+    c4: score === null ? { type: 'forge', result: null } : { type: 'forge', result: { score, max } },
+  },
+});
+
+test('lastForgeScore: a aberta de ontem não esconde a concluída de anteontem', () => {
+  const down = lastForgeScore([forgePlan('2026-09-23', 0), forgePlan('2026-09-24', null)], '2026-09-25');
+  expect(down).toEqual({ score: 0, max: 6 });
+  expect(forgeStepDown(down.score, down.max)).toBe(true);
+  const stay = lastForgeScore([forgePlan('2026-09-23', 4), forgePlan('2026-09-24', null)], '2026-09-25');
+  expect(stay).toEqual({ score: 4, max: 6 });
+  expect(forgeStepDown(stay.score, stay.max)).toBe(false);
+  const none = lastForgeScore([forgePlan('2026-09-24', null)], '2026-09-25');
+  expect(none).toEqual({ score: 0, max: 0 });
+  expect(forgeStepDown(none.score, none.max)).toBe(false);
 });
 
 test('validador: scramble de 6 peças no nível 1 cai; o de 5 fica', () => {

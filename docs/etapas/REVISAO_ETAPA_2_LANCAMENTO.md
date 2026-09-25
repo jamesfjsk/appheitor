@@ -789,3 +789,64 @@ O pai fez o commit (`1231af1`, 11h18) e o push antes da revisão; a revisão vei
 Vai no próximo commit, junto com o relatório e as fotos do pacote 13. A aba do Heitor, que roda `1231af1`, ainda tem a corrida uma vez: melhor publicar quando ele não estiver no meio da prova nem escrevendo um livro.
 
 **Fica anotado:** a foto do cartão Saúde não foi tirada, porque o login do pai está ligado à conta do Heitor. O pai confere a linha "Versão no PC dele" no painel.
+
+## Pacote 14a — a Ferraria sai do círculo (Cursor, 24/09) — APROVADO depois do commit, com 1 ajuste (14a-2)
+
+Commit e push feitos pelo pai (`ab96f2a`, 24/09 20h52, com a mensagem "Pacote 13: revisao e correcao da corrida do ocupado"), antes da revisão.
+
+**Conferido:**
+- `forgeItemMixFor` por nível (2, 3 ou 4 frases de montar);
+- `forgeStepDown`, `forgeTargetFor` (`other` cai no rodízio);
+- `scrambleWordCap` (5, 7, 8) no prompt e no validador, com o código `scramble_longo`;
+- o banco offline da Ferraria ajustado ao limite;
+- `forgeMix.test.ts`.
+
+Barra rodada pelo líder: `tsc` 0 erros; `eslint` 0 erros; `test:english` com 35 arquivos; `test:village` com 13; `vite build` ok.
+
+**Em produção funciona:** o plano da Mina de 26/09, gerado em 25/09 às 9h40 pelo código novo, tem alvo "am / is / are". São 4 lacunas e 2 digitadas, e as regras estão certas ("Use 'is' com singular: The dog is.").
+
+**Ajuste (14a-2):** o plano de amanhã é gerado de manhã, antes da Ferraria do dia. `yesterdayForgeScore` procura a Ferraria de ontem em relação à data do plano e acha uma ainda sem resultado. Assim o degrau para baixo quase nunca dispara: o `form` de 26/09 veio do rodízio, não do degrau. Passa a olhar a última Ferraria **concluída** (`PROMPT_CURSOR_2026-09-25.md`).
+
+## 25/09 — ontem e hoje (dados do Heitor até 10h)
+
+**As melhorias no PC dele:**
+- O PC está em `2026-09-24-ab96f2a`, a versão no ar: a atualização automática funcionou.
+- A prova de hoje gravou 7 docs no `quizBank`, com `supportLevel` 0 e `msToAnswer` de 2 a 33 s, e gravou `timings`.
+- 7 de 7 pagou a esmeralda (`quiz8:2026-09-25`), e o capítulo 3 do Sábio ("Acerte todas") foi concluído hoje. As duas coisas vêm da regra nova (C2).
+- A prova de amanhã (26/09) saiu do código novo, com ângulo e `depth` 3 ("A lógica por trás dos computadores"), mas com **6 perguntas**.
+- Nenhum erro no app desde 24/09 às 11h.
+
+**Ainda pendente:**
+- O retroativo não foi rodado (o `quizBank` tem só as 7 de hoje).
+- A esmeralda do 5 de 5 de 24/09 não foi concedida.
+
+**24/09, resto do dia:** nada depois das 11h07. Fechou com **2 de 8 missões** (Matific e Pets). Sem check-in, sem tocha.
+
+**25/09 até 10h:**
+- **Prova:** às 9h37, 7 perguntas, sem dilema, **7 de 7**.
+  - Várias respostas em 2 a 4 s, e distratores de bom senso ("Correria mais rápido", "Cor e tamanho").
+  - Reflexão com 23 palavras e aplicada à vida dele: "se eu treinase eu poderia ficar mais forte e mais rapido e se eu comese frutas veguetais e massa ima me ajudar bastante".
+  - O Sábio respondeu "Li sua reflexão.": perdeu o momento.
+- **Mina:** os 5 contratos em cerca de 5 minutos (9h40 às 9h45).
+  - Recado: 1 de 3 em 128 s.
+  - Cartas: **2 de 3 em 10 s** e **0 de 3 em 6 s**, ou seja, sem ler.
+  - Comerciante: 1 de 2.
+  - Ferraria: 0 de 6 em 71 s. É do plano velho, gerado em 24/09 às 10h58, antes do 14a: seis frases de 7 ou 8 palavras.
+  - Vagoneta: 0 de 3.
+- **Missões:** 1 (Matific às 9h28).
+
+**Leitura:**
+- A prova ficou fácil demais e curta. O 10b é o próximo.
+- A Carta virou clicar e passar. O 14b dá um portão de leitura.
+- A rotina da vida real segue em metade ou menos, sem dia completo. Decisão do pai sobre a lista de missões, registrada em 24/09.
+
+## Pacote 14a-2 — a Ferraria olha a última concluída (Cursor, 25/09) — APROVADO; pode commitar
+
+Revisado antes do commit.
+
+- `lastForgeScore(plans, date)` em `prompts.ts` devolve a Ferraria **concluída** mais recente de qualquer plano anterior à data; Ferraria aberta não conta.
+- `dayContextFor` passa a usar essa função, e `yesterdayForgeScore` saiu.
+- Teste em `forgeMix.test.ts` com os três casos (23/09 com 0/6 e 24/09 aberta → desce; 4/6 → não desce; nenhuma concluída → não desce).
+- Barra: `tsc` 0 erros; `eslint` 0 erros; `english` com 12 arquivos verdes.
+
+**Fica anotado:** `yesterdayMistakes`, os 2 itens errados que voltam na Ferraria de amanhã, tem o mesmo desencontro. Ele olha o plano de exatamente um dia antes, que ainda está aberto quando o plano é gerado, então hoje não traz nada. Não mexer agora: trazer de volta as frases longas que ele errou brigaria com o degrau para baixo. Entra no 14b, com o revisor de conteúdo, trazendo só itens do alvo do dia.

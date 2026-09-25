@@ -23,7 +23,7 @@ import type {
 } from '../types/english';
 import { CONTRACT_MATERIAL, MERCHANT_CATALOGS } from '../config/englishBase';
 import { FORGE_TAG_TARGETS, LETTER_GENRES, levelFor } from '../config/englishLevels';
-import { forgeTargetFor } from './english/prompts';
+import { forgeTargetFor, lastForgeScore } from './english/prompts';
 import { buildMerchantRoom, merchantKey, merchantLevelFromSkill, merchantStepKey, offlineSentences } from './english/merchantRoom';
 import { normalize } from './english/notePrecheck';
 import { buildPrompt, type BuiltPrompt } from './english/prompts';
@@ -518,14 +518,6 @@ function frequentTag(plans: DailyPlan[]): NoteErrorTag | null {
 
 const isForgeItem = (v: unknown): v is ForgeItem => isRecord(v) && (v.kind === 'scramble' || v.kind === 'gap' || v.kind === 'typed');
 
-function yesterdayForgeScore(plans: DailyPlan[], date: string): { score: number; max: number } {
-  const yesterday = plans.find((p) => p.date === addDays(date, -1));
-  if (!yesterday) return { score: 0, max: 0 };
-  const forge = contractsOf([yesterday], 'forge')[0];
-  if (!forge || forge.type !== 'forge' || !forge.result) return { score: 0, max: 0 };
-  return { score: Number(forge.result.score) || 0, max: Number(forge.result.max) || 0 };
-}
-
 /** Itens errados na Ferraria de ontem: details.wrongItems como índices ou como os próprios itens */
 function yesterdayMistakes(plans: DailyPlan[], date: string): ForgeItem[] {
   const yesterday = plans.find((p) => p.date === addDays(date, -1));
@@ -587,7 +579,7 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
 
   const dayIndex = dayIndexOf(ctx.date);
   const tag = frequentTag(recent);
-  const yesterday = yesterdayForgeScore(recent, ctx.date);
+  const yesterday = lastForgeScore(recent, ctx.date);
   const forgeTarget = forgeTargetFor({
     targets: lv.forgeTargets,
     dayIndex,
