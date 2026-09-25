@@ -18,6 +18,7 @@ import { perfectQuiz } from './quiz/provaRules';
 import { answersStash, completeQuizWrite, type QuizAbout, type QuizTiming } from './quiz/closeQuiz';
 import { quizBankDocs } from './quiz/bankWrite';
 import { avoidQuestionsFromRecent, type DedupeNeedle } from './quiz/dedupe';
+import { challengeLine, type ChallengeItem } from './quiz/challengeLine';
 import { pickTheme, rotationProfileFrom, type ThemeHistoryEntry } from './quiz/rotation';
 
 export type { QuizAbout, QuizTiming };
@@ -226,6 +227,31 @@ async function loadQuizBankNeedles(userId: string, today: string): Promise<Dedup
   }
 }
 
+async function loadChallengeItems(userId: string, today: string): Promise<ChallengeItem[]> {
+  const since = addDays(today, -14);
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'quizBank'),
+      where('userId', '==', userId),
+      where('date', '>=', since),
+      orderBy('date', 'desc'),
+    ));
+    return snap.docs.map((d) => {
+      const data = d.data();
+      const ms = Number(data.msToAnswer);
+      return {
+        date: String(data.date ?? ''),
+        correct: data.correct === true,
+        ...(typeof data.kind === 'string' ? { kind: data.kind } : {}),
+        ...(Number.isFinite(ms) && ms > 0 ? { msToAnswer: ms } : {}),
+      };
+    });
+  } catch (e) {
+    console.warn('quizBank desafio', e);
+    return [];
+  }
+}
+
 async function buildAndSave(userId: string, date: string, today: string, count: number): Promise<DailyQuiz> {
   const recent = await getRecentDailyQuizzes(userId, today, 90);
   const history: ThemeHistoryEntry[] = recent
@@ -252,6 +278,7 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
   );
   const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
   const bank = await loadQuizBankNeedles(userId, today);
+  const challenge = challengeLine(await loadChallengeItems(userId, today), today) ?? undefined;
   const generated = await generateDailyQuiz({
     seed: pick.theme,
     count,
@@ -261,6 +288,7 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     angle: pick.angle,
     depth: pick.depth,
     bank,
+    ...(challenge ? { challenge } : {}),
   });
   const theme: DailyQuizTheme = {
     ...generated.theme,

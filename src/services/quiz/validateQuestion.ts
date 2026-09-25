@@ -37,6 +37,9 @@ export const REJECT_CODES = [
   'explicacao_em_ingles',
   'ingles_sem_marcador',
   'futebol_solto',
+  'why_circular',
+  'dilema_com_certa',
+  'fato_solto',
 ] as const;
 
 export type RejectCode = (typeof REJECT_CODES)[number];
@@ -85,6 +88,8 @@ export interface RawQuestion {
   audioText?: string;
   /** Cenário da pergunta quando o futebol é só o pano de fundo (decisão 37). */
   scenario?: string;
+  /** Id do banco de reserva, quando a pergunta veio de lá. */
+  id?: string;
 }
 
 export interface ValidateCtx {
@@ -193,13 +198,26 @@ function duasVariantesValidas(options: string[]): boolean {
   return VARIANT_PAIRS.some(([a, b]) => blob.includes(` ${a} `) && blob.includes(` ${b} `));
 }
 
+/** Palavra da certa com 5 letras ou mais, inteira no enunciado e em nenhuma errada. */
+export function answerWordInStem(question: string, answer: string, options: string[]): boolean {
+  const q = normalizeQuizText(question);
+  const wrong = options.filter((o) => normalizeQuizText(o) !== normalizeQuizText(answer)).map((o) => normalizeQuizText(o));
+  const words = normalizeQuizText(answer).split(' ').filter((w) => w.length >= 5);
+  return words.some((w) => {
+    const hit = new RegExp(`(?:^| )${w}(?: |$)`);
+    if (!hit.test(q)) return false;
+    return wrong.every((o) => !hit.test(o));
+  });
+}
+
 function stemLeak(question: string, answer: string): boolean {
   if (answerLeaksInPrompt(question, answer)) return true;
   const a = normalizeQuizText(answer);
   const q = normalizeQuizText(question);
   if (a.length < 4) return false;
   const stem = a.replace(/e$/, '').slice(0, 6);
-  return stem.length >= 4 && q.includes(stem);
+  if (stem.length < 4) return false;
+  return q.split(' ').some((word) => word.startsWith(stem));
 }
 
 function trapHitsDistractor(trap: string, options: string[], answer: string): boolean {
@@ -385,8 +403,10 @@ function futebolSolto(question: string, subject: string): boolean {
 
 export function hydrateQuestion(raw: RawQuestion): RawQuestion {
   const named = canonSkill(typeof raw.skill === 'string' ? raw.skill : '');
-  const kind = raw.kind === 'dilemma' || named === 'LIC.DILEMA' ? 'dilemma' : raw.kind === 'lesson' ? 'lesson' : 'knowledge';
-  const why = typeof raw.why === 'string' && raw.why.trim() ? raw.why : typeof raw.explanation === 'string' ? raw.explanation : '';
+  const dilemma = raw.kind === 'dilemma' || named === 'LIC.DILEMA';
+  const rawWhy = typeof raw.why === 'string' && raw.why.trim() ? raw.why : typeof raw.explanation === 'string' ? raw.explanation : '';
+  const why = dilemma ? stripCertaPrefix(rawWhy) : rawWhy;
+  const kind = dilemma ? 'dilemma' : raw.kind === 'lesson' ? 'lesson' : 'knowledge';
   let subject = canonSubject(typeof raw.subject === 'string' ? raw.subject : '');
   const skill = SKILLS.has(named) ? named : inferSkill(subject, kind === 'dilemma' ? 'lesson' : kind);
   if (!SUBJECTS.has(subject)) {
@@ -424,7 +444,8 @@ export function validateQuestion(raw: RawQuestion, ctx: ValidateCtx = {}): Rejec
   if (!SKILLS.has(skill) || !SUBJECTS.has(subject) || !BLOOM.has(bloom)) r.push('campo_invalido');
   if (!why.trim() || !trap.trim()) r.push('formato_invalido');
 
-  if (stemLeak(question, answer)) r.push('enunciado_vazou');
+  const dilema = skill === 'LIC.DILEMA' || q.kind === 'dilemma';
+  if (stemLeak(question, answer) || (!dilema && answerWordInStem(question, answer, options))) r.push('enunciado_vazou');
   if (CAPITAL.test(nq)) r.push('capital');
   if (DEFINICAO.test(nq)) r.push('definicao');
   if (futebolSolto(question, subject)) r.push('futebol_solto');
@@ -437,7 +458,11 @@ export function validateQuestion(raw: RawQuestion, ctx: ValidateCtx = {}): Rejec
 
   if (subject === 'ingles' && duasVariantesValidas(options)) r.push('ingles_duas_validas');
 
-  if (wordCount(why) < 12 || wordCount(trap) < 12) r.push('why_curto');
+  const whyMin = skill === 'LIC.DILEMA' || q.kind === 'dilemma' ? 8 : 12;
+  if (wordCount(why) < whyMin || wordCount(trap) < 12) r.push('why_curto');
+  if (whyCircular(why)) r.push('why_circular');
+  if ((skill === 'LIC.DILEMA' || q.kind === 'dilemma') && dilemaComCerta(why)) r.push('dilema_com_certa');
+  if (!skill.startsWith('LIC.') && FATO_SOLTO.test(normalizeQuizText(question))) r.push('fato_solto');
   if (why && explicacaoEmIngles(why)) r.push('explicacao_em_ingles');
   if (why && answer && !whyCitesAnswer(why, answer)) r.push('why_sem_resposta');
   if (trap && options.length === 4 && !trapHitsDistractor(trap, options, answer)) r.push('trap_sem_distrator');
@@ -683,4 +708,65 @@ export function fillSlotHoles(
     sit(si, matchesFootball);
   });
   return { placed: next, missing: slots.filter((_, i) => next[i] == null) };
+}
+
+/** Vaga que sobrou, inclusive ideia e dilema, aceita pergunta de conhecimento. Cada área no máximo duas vezes. */
+export function fillAnyArea(
+  placed: (RawQuestion | null)[],
+  extra: RawQuestion[],
+): { placed: (RawQuestion | null)[]; used: number } {
+  const areaOf = (q: RawQuestion) => (typeof q.subject === 'string' && q.subject ? q.subject : 'geral');
+  const counts = new Map<string, number>();
+  for (const q of placed) {
+    if (!q) continue;
+    counts.set(areaOf(q), (counts.get(areaOf(q)) ?? 0) + 1);
+  }
+  const usedIdx = new Set<number>();
+  const next = placed.slice();
+  let used = 0;
+  for (let i = 0; i < next.length; i++) {
+    if (next[i]) continue;
+    const hit = extra.findIndex((q, j) => !usedIdx.has(j) && (counts.get(areaOf(q)) ?? 0) < 2);
+    if (hit < 0) continue;
+    usedIdx.add(hit);
+    const q = extra[hit];
+    next[i] = q.kind === 'dilemma' ? { ...q, kind: 'knowledge' } : q;
+    counts.set(areaOf(q), (counts.get(areaOf(q)) ?? 0) + 1);
+    used += 1;
+  }
+  return { placed: next, used };
+}
+
+const CIRCULAR_WHY = /amplamente reconhecid|bem documentad|consensual|e um fato historico|e verdade porque e/;
+
+function whyCircular(why: string): boolean {
+  const n = normalizeQuizText(why);
+  if (!CIRCULAR_WHY.test(n)) return false;
+  const rest = n
+    .replace(/amplamente reconhecid\w*/g, ' ')
+    .replace(/bem documentad\w*/g, ' ')
+    .replace(/\bconsensual\b/g, ' ')
+    .replace(/e um fato historico/g, ' ')
+    .replace(/e verdade porque e/g, ' ');
+  if (/\d/.test(why)) return false;
+  if (/\b(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|seculo)\b/.test(rest)) return false;
+  if (/\b(brasil|rio|sao paulo|amazonia|minas|bahia|paris|europa|africa|oceano|floresta|cidade)\b/.test(rest)) return false;
+  const stop = new Set(['porque', 'pois', 'fato', 'historico', 'verdade', 'amplamente', 'reconhecido', 'reconhecida', 'documentado', 'documentada', 'consensual', 'isso', 'essa', 'esse', 'muito', 'sobre', 'entre', 'quando', 'sempre']);
+  const cause = rest.split(' ').filter((w) => w.length >= 5 && !stop.has(w));
+  return cause.length < 2;
+}
+
+const FATO_SOLTO = /^(qual fato e verdadeiro|qual frase e verdadeira|qual das frases e verdadeira|qual das alternativas e verdadeira)\b/;
+
+/** Tira do começo "A resposta certa é '…' porque/pois/,". O resto começa com maiúscula. */
+export function stripCertaPrefix(why: string): string {
+  const match = why.match(/^\s*a resposta certa é\s+(?:['"“«][^'"”»]+['"”»]\s*)?(?:porque|pois|,)\s*/i);
+  if (!match) return why;
+  const rest = why.slice(match[0].length).trim();
+  if (!rest) return why;
+  return rest.charAt(0).toUpperCase() + rest.slice(1);
+}
+
+function dilemaComCerta(why: string): boolean {
+  return /a resposta certa|a certa e/.test(normalizeQuizText(why));
 }

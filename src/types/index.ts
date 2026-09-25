@@ -42,7 +42,7 @@ export interface DailyQuizSanitize {
   dropped: Record<string, number>;
   /** Códigos do validador, na ordem da IA. Vazio = a pergunta passou. */
   perQuestion?: { i: number; codes: string[] }[];
-  /** Revisor (gpt-4o-mini): o lote inteiro. ok false sai da prova. */
+  /** Revisor (gpt-4o): o lote inteiro. ok false sai da prova. */
   review?: { n: number; ok: boolean; motivo: string }[];
   /** A resposta do revisor veio quebrada: vale o validador local. */
   reviewFellBack?: boolean;
@@ -50,6 +50,10 @@ export interface DailyQuizSanitize {
   batchLog?: string[];
   /** Quantas das perguntas publicadas vieram do banco, depois do validador. */
   fromOffline?: number;
+  /** Vagas preenchidas na segunda chamada de substituição. */
+  secondReplacement?: number;
+  /** Vagas preenchidas por pergunta válida de qualquer área do banco. */
+  offlineAnyArea?: number;
   /** Aprovação no limite do revisor. A pergunta fica. */
   duvidas?: { n: number; question: string; motivo: string }[];
   /** Hash igual ou quase igual ao quizBank. Conta para a reserva. */
@@ -70,6 +74,8 @@ export interface DailyQuizQuestion {
   audioText?: string;
   /** Partida como cenário. A matéria continua em subject. */
   scenario?: string;
+  /** Id no banco de reserva, quando a pergunta veio de lá. */
+  id?: string;
 }
 
 export interface DailyQuizTheme {

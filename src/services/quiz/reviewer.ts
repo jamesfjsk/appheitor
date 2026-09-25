@@ -4,7 +4,7 @@
 import { contentWords, normalizeQuizText } from './provaRules';
 import { numbersOf, OPINIAO, reachable, type RawQuestion } from './validateQuestion';
 
-export const REVIEWER_MODEL = 'gpt-4o-mini';
+export const REVIEWER_MODEL = 'gpt-4o';
 
 export function reviewSystem(level: number): string {
   return `Você é professor de 5º ano corrigindo a prova de outro professor. Para cada pergunta, diga se ela pode ir para um menino de 10 anos.
@@ -12,10 +12,15 @@ Reprove (ok: false) se: houver mais de uma alternativa defensável; a pergunta p
 A skill LIC.DILEMA é um dilema de propósito. Aprove. Não reprove por opinião, por "o que você faz" nem por "a certa é a única completa": as quatro atitudes são curtas de propósito. Reprove o dilema só se duas atitudes forem igualmente sábias.
 Antes de reprovar a conta, calcule. Se o número da resposta é o resultado das duas etapas, ok true.
 "O que aconteceria se" é causa e efeito, não opinião. Não reprove por esse formato.
-Não reprove um fato só porque o tema é grande. Reprove fato sem consenso só quando duas opções podem estar certas para um professor de 5º ano. Se uma opção é claramente a certa, ok true. Na dúvida, aprove e marque "duvida": true.
+Não reprove um fato só porque o tema é grande. Reprove fato sem consenso só quando duas opções podem estar certas para um professor de 5º ano. Na dúvida, aprove e marque "duvida": true.
+O why que só repete que é verdade ou que é conhecido ("amplamente reconhecido", "bem documentado", "é um fato histórico") e não explica o porquê continua reprovado.
+Em toda pergunta, antes do ok, preencha três campos:
+- "no_enunciado": true se a resposta, ou a palavra que a decide, já está no enunciado ("locomotiva a vapor" → "Com vapor");
+- "descartaveis": a lista das erradas que uma criança de 10 anos descarta sem saber a matéria ("Explodiria", "Flutuaria", "Fica invisível"). No inglês e no dilema, lista vazia;
+- "sem_saber": true se dá para acertar sem ler a ideia do dia e sem saber a matéria ("sem bateria, o carro para").
 Não reescreva. Não elogie. O motivo tem no máximo 12 palavras e diz o que está errado, não o que fazer.
 Quando a aprovação for no limite, ok true e "duvida": true. Se o campo faltar, vale false. "duvida" só importa quando ok é true.
-Responda SOMENTE em JSON: {"itens":[{"n":1,"ok":true,"motivo":"","duvida":false}]}`;
+Responda SOMENTE em JSON: {"itens":[{"n":1,"no_enunciado":false,"descartaveis":[],"sem_saber":false,"ok":true,"motivo":"","duvida":false}]}`;
 }
 
 export interface ReviewItem {
@@ -24,6 +29,12 @@ export interface ReviewItem {
   motivo: string;
   /** Aprovação no limite. Ausente no JSON vale false. */
   duvida: boolean;
+  /** A resposta, ou a palavra que a decide, já está no enunciado. Ausente vale false. */
+  no_enunciado?: boolean;
+  /** Erradas que se descartam sem saber a matéria. Ausente vale lista vazia. */
+  descartaveis?: string[];
+  /** Dá para acertar sem a ideia do dia e sem a matéria. Ausente vale false. */
+  sem_saber?: boolean;
 }
 
 export interface QuizDuvida {
@@ -38,7 +49,15 @@ export function parseReview(raw: unknown): ReviewItem[] | null {
   const itens: ReviewItem[] = [];
   for (const item of (raw as { itens: unknown[] }).itens) {
     if (!item || typeof item !== 'object') return null;
-    const row = item as { n?: unknown; ok?: unknown; motivo?: unknown; duvida?: unknown };
+    const row = item as {
+      n?: unknown;
+      ok?: unknown;
+      motivo?: unknown;
+      duvida?: unknown;
+      no_enunciado?: unknown;
+      descartaveis?: unknown;
+      sem_saber?: unknown;
+    };
     const n = Number(row.n);
     if (!Number.isInteger(n) || n < 1 || typeof row.ok !== 'boolean') return null;
     itens.push({
@@ -46,6 +65,9 @@ export function parseReview(raw: unknown): ReviewItem[] | null {
       ok: row.ok,
       motivo: typeof row.motivo === 'string' ? row.motivo : '',
       duvida: row.duvida === true,
+      no_enunciado: row.no_enunciado === true,
+      descartaveis: Array.isArray(row.descartaveis) ? row.descartaveis.filter((x): x is string => typeof x === 'string') : [],
+      sem_saber: row.sem_saber === true,
     });
   }
   return itens;
@@ -56,21 +78,32 @@ export function applyReview(
   review: ReviewItem[] | null,
 ): { kept: RawQuestion[]; motivos: { n: number; motivo: string; question: string }[]; duvidas: QuizDuvida[] } {
   if (!review) return { kept: questions, motivos: [], duvidas: [] };
-  const bad = new Map(review.filter((item) => !item.ok).map((item) => [item.n, item.motivo]));
   const motivos: { n: number; motivo: string; question: string }[] = [];
   const duvidas: QuizDuvida[] = [];
+  const drop = new Map<number, string>();
   for (const item of review) {
-    if (!item.ok || !item.duvida) continue;
     const q = questions[item.n - 1];
     if (!q) continue;
-    duvidas.push({ n: item.n, question: String(q.question ?? ''), motivo: item.motivo });
+    const reason = reviewDropReason(q, item);
+    if (reason) drop.set(item.n, reason);
+    else if (item.ok && item.duvida) duvidas.push({ n: item.n, question: String(q.question ?? ''), motivo: item.motivo });
   }
   const kept = questions.filter((q, i) => {
-    if (!bad.has(i + 1)) return true;
-    motivos.push({ n: i + 1, motivo: bad.get(i + 1) ?? '', question: String(q.question ?? '') });
+    if (!drop.has(i + 1)) return true;
+    motivos.push({ n: i + 1, motivo: drop.get(i + 1) ?? '', question: String(q.question ?? '') });
     return false;
   });
   return { kept, motivos, duvidas };
+}
+
+function reviewDropReason(q: RawQuestion, item: ReviewItem): string | null {
+  const dilema = q.skill === 'LIC.DILEMA' || q.kind === 'dilemma';
+  if (!dilema) {
+    if (item.no_enunciado) return 'no_enunciado';
+    if (item.sem_saber) return 'sem_saber';
+  }
+  if (!item.ok) return item.motivo || 'reprovada';
+  return null;
 }
 
 /** O revisor chama o dilema de opinião ou de "única completa". O formato é esse: a pergunta fica, com dúvida. */
@@ -115,7 +148,7 @@ export function reviewBatch(questions: RawQuestion[], lesson = ''): string[] {
   if (math.length > 0 && twoStep.length < 1) issues.push('falta_duas_etapas');
 
   const altFormat = questions.filter((q) =>
-    /o que aconteceria se|ache o erro|qual frase e verdadeira|estime /i.test(q.question ?? ''),
+    /o que aconteceria se|ache o erro|estime /i.test(q.question ?? ''),
   );
   if (altFormat.length < 2) issues.push('falta_formato');
 

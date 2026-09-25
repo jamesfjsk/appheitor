@@ -1,0 +1,225 @@
+# Banco offline reprovado pelo validador v3
+
+Rodado em 25/09/2026 sobre as 200 perguntas de `public/data/quizData.json`. O líder reescreve. Este arquivo não corrige o conteúdo.
+
+## Quantas passam, por área
+
+- animais: 0 passam, 10 caem
+- arte: 3 passam, 7 caem
+- astronomia: 2 passam, 8 caem
+- brasil: 4 passam, 6 caem
+- cidadania: 0 passam, 10 caem
+- corpo: 1 passam, 9 caem
+- cotidiano: 1 passam, 9 caem
+- dinheiro: 1 passam, 9 caem
+- filosofia: 0 passam, 10 caem
+- futebol: 0 passam, 10 caem
+- geografia: 1 passam, 9 caem
+- historia: 0 passam, 10 caem
+- ingles: 0 passam, 10 caem
+- invencoes: 0 passam, 10 caem
+- logica: 5 passam, 10 caem
+- matematica: 0 passam, 15 caem
+- minecraft: 3 passam, 7 caem
+- mitologia: 2 passam, 8 caem
+- quimica: 1 passam, 9 caem
+
+## Códigos mais comuns
+
+- trap_sem_distrator: 98
+- tamanho_opcoes: 67
+- why_sem_resposta: 34
+- certa_mais_longa: 31
+- enunciado_vazou: 28
+- sinonimas: 11
+- conta_nao_fecha: 10
+- futebol_solto: 10
+- audio_vazio: 9
+- ingles_nivel: 9
+- tipos_mistos: 6
+- conta_um_passo: 5
+- definicao: 5
+- fato_discutivel: 3
+- explicacao_em_ingles: 2
+- why_curto: 2
+- duas_certas: 1
+- opcao_caricata: 1
+
+## Reprovadas
+
+- geografia — trap_sem_distrator, certa_mais_longa — Qual frase é verdadeira sobre os rios?
+- geografia — enunciado_vazou — O Rio Amazonas atravessa o Brasil de oeste para leste. Em qual oceano ele deságua?
+- geografia — trap_sem_distrator — Num mapa, 1 cm representa 10 km. Duas cidades estão a 5 cm uma da outra no mapa. Qual é a distância real?
+- geografia — certa_mais_longa — O que aconteceria se o eixo da Terra não fosse inclinado?
+- geografia — enunciado_vazou, why_sem_resposta, trap_sem_distrator — Ache o erro: 'O deserto do Saara fica na África, é coberto de areia e neva quase todo dia.'
+- geografia — enunciado_vazou, trap_sem_distrator — Estime: um avião voa a 850 km/h. Quanto tempo leva para cruzar o Brasil de norte a sul, cerca de 4.300 km?
+- geografia — tamanho_opcoes — No verão, o Polo Norte tem Sol por meses seguidos. Por que mesmo assim faz tanto frio lá?
+- geografia — certa_mais_longa — O que acontece com as estações nos hemisférios norte e sul?
+- geografia — fato_discutivel, certa_mais_longa — Duas cidades estão na mesma latitude: uma no alto de uma montanha e outra na praia. Qual costuma ser mais fria?
+- quimica — trap_sem_distrator, tamanho_opcoes — Você mexe uma colher de açúcar num copo de água e o açúcar some de vista. O que aconteceu?
+- quimica — certa_mais_longa — Qual frase é verdadeira sobre o gelo?
+- quimica — trap_sem_distrator, certa_mais_longa — Você deixa um copo de água na janela e, dias depois, tem bem menos água. Para onde ela foi?
+- quimica — enunciado_vazou, tamanho_opcoes — Ache o erro: 'O ferro enferruja em contato com ar e água, e a ferrugem deixa o ferro mais forte.'
+- quimica — sinonimas, trap_sem_distrator, certa_mais_longa — O que aconteceria se você misturasse óleo e água num pote e deixasse parado?
+- quimica — tamanho_opcoes — Por que a massa do bolo cresce dentro do forno?
+- quimica — tamanho_opcoes — Uma vela acesa é coberta por um pote de vidro fechado. Depois de um tempo ela apaga. Por quê?
+- quimica — trap_sem_distrator — Qual destas mudanças NÃO tem volta fácil?
+- quimica — certa_mais_longa — Um cubo de gelo flutua num copo cheio até a borda. Quando ele derreter, a água vai transbordar?
+- matematica — trap_sem_distrator, conta_um_passo — Uma pizza foi cortada em 8 fatias iguais. Heitor comeu 3 e o pai comeu 2. Que fração da pizza sobrou?
+- matematica — trap_sem_distrator, conta_nao_fecha — Um ônibus sai às 7h40 e a viagem dura 1 hora e 35 minutos. A que horas ele chega?
+- matematica — trap_sem_distrator, conta_um_passo — Qual número vem depois na sequência 2, 6, 12, 20, 30, ...?
+- matematica — conta_nao_fecha — Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?
+- matematica — trap_sem_distrator, conta_um_passo — Ache o erro no cálculo: 25 × 4 = 90.
+- matematica — trap_sem_distrator, conta_nao_fecha — Estime sem fazer a conta exata: 398 + 203 fica mais perto de qual número?
+- matematica — conta_nao_fecha — Numa turma de 30 alunos, 2/5 são meninas. Quantos meninos há na turma?
+- matematica — conta_um_passo — Qual é o menor número que pode ser dividido por 2, por 3 e por 4 sem deixar resto?
+- matematica — trap_sem_distrator, conta_nao_fecha — Um número tem 3 algarismos: o das centenas é 4, o das dezenas é o dobro dele e o das unidades é zero. Que número é esse?
+- matematica — conta_nao_fecha — Cada caixa guarda 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?
+- matematica — sinonimas, trap_sem_distrator, conta_nao_fecha — Qual frase sobre números é verdadeira?
+- matematica — enunciado_vazou, trap_sem_distrator, conta_nao_fecha — Um quadrado tem área de 36 cm². Quanto mede cada lado?
+- matematica — conta_nao_fecha — Heitor tem o triplo da idade do primo. Juntos, eles têm 16 anos. Qual é a idade do primo?
+- matematica — duas_certas, trap_sem_distrator, conta_um_passo — De manhã o termômetro marcava −3 °C. Até a tarde, a temperatura subiu 8 graus. Quanto marca agora?
+- matematica — conta_nao_fecha — Quantos minutos há em 2 horas e meia?
+- astronomia — tamanho_opcoes — Se a Lua deixasse de existir, o que mudaria mais nos oceanos?
+- astronomia — enunciado_vazou, tamanho_opcoes — Em Vênus, um dia dura mais que um ano. O que isso quer dizer?
+- astronomia — why_sem_resposta — Por que a Lua brilha à noite?
+- astronomia — trap_sem_distrator, certa_mais_longa — A luz do Sol leva cerca de 8 minutos para chegar à Terra. Se o Sol se apagasse agora, quando você perceberia?
+- astronomia — sinonimas — Estime: quantas Terras enfileiradas cabem no diâmetro do Sol?
+- astronomia — enunciado_vazou, tamanho_opcoes — Ache o erro: 'Marte é chamado de planeta vermelho, tem duas luas e é o maior planeta do sistema solar.'
+- astronomia — why_sem_resposta, tamanho_opcoes — Um astronauta na Lua solta um martelo e uma pena ao mesmo tempo. O que acontece?
+- astronomia — sinonimas, trap_sem_distrator, tamanho_opcoes — A gravidade da Lua é cerca de 6 vezes menor que a da Terra. O que acontece com uma pessoa de 60 kg lá?
+- corpo — trap_sem_distrator, tamanho_opcoes — O que acontece com o batimento do coração quando você corre?
+- corpo — enunciado_vazou, certa_mais_longa — Qual frase é verdadeira sobre os ossos?
+- corpo — trap_sem_distrator, tamanho_opcoes — Por que sentimos sede?
+- corpo — enunciado_vazou, tamanho_opcoes — Ache o erro: 'O ar entra pelo nariz, vai para os pulmões, e o coração transforma o ar em oxigênio.'
+- corpo — sinonimas — Você come um pedaço de pão. Qual é a ordem certa do caminho que ele faz?
+- corpo — trap_sem_distrator — O que aconteceria se uma pessoa não tivesse o sentido do tato?
+- corpo — sinonimas, why_sem_resposta, trap_sem_distrator — Estime: quantas vezes o coração de uma criança bate em 1 minuto quando ela está descansando?
+- corpo — tamanho_opcoes — Por que os músculos ficam doloridos no dia seguinte a um treino puxado?
+- corpo — trap_sem_distrator, certa_mais_longa — Você espirra. O que o corpo está tentando fazer?
+- arte — enunciado_vazou, why_sem_resposta, trap_sem_distrator, tamanho_opcoes — Qual frase é verdadeira sobre uma escultura?
+- arte — trap_sem_distrator, certa_mais_longa — Um artista quer que uma montanha pareça bem longe na pintura. O que ele deve fazer?
+- arte — enunciado_vazou, tamanho_opcoes — Ache o erro: 'Numa orquestra, o violino é um instrumento de sopro.'
+- arte — trap_sem_distrator — Que técnica usa pequenos pedaços de pedra ou vidro colorido para formar uma imagem?
+- arte — trap_sem_distrator — O que acontece com uma pintura se o artista usar apenas tons de uma única cor?
+- arte — why_sem_resposta, trap_sem_distrator — Numa história em quadrinhos, o balão ligado ao personagem por bolhinhas serve para quê?
+- arte — trap_sem_distrator — Uma canção diz 'sobe, sobe, balão'. Se a melodia imita a letra, o que as notas fazem?
+- invencoes — why_sem_resposta, trap_sem_distrator, tamanho_opcoes — O que aconteceria hoje se a roda nunca tivesse sido inventada?
+- invencoes — certa_mais_longa — Qual destas invenções apareceu primeiro?
+- invencoes — enunciado_vazou, trap_sem_distrator, tamanho_opcoes — Ache o erro: 'Santos Dumont, brasileiro, voou com o 14-Bis em Paris, em 1906, usando um motor a vapor.'
+- invencoes — tamanho_opcoes — Por que a geladeira mudou tanto a vida das pessoas?
+- invencoes — trap_sem_distrator, tamanho_opcoes — Qual frase é verdadeira sobre a internet?
+- invencoes — sinonimas, why_sem_resposta, trap_sem_distrator — Estime: há quanto tempo foi criada a primeira lâmpada elétrica que funcionava bem?
+- invencoes — why_sem_resposta, trap_sem_distrator, tamanho_opcoes — O que a bússola permitiu aos navegadores fazer?
+- invencoes — trap_sem_distrator — Qual destes objetos funciona pelo mesmo princípio de uma alavanca?
+- invencoes — trap_sem_distrator — Um inventor quer subir caixas pesadas até o segundo andar fazendo pouco esforço. O que ele deveria usar?
+- invencoes — enunciado_vazou, certa_mais_longa, tipos_mistos — O que vem depois nesta sequência de jeitos de ouvir música: disco de vinil, fita cassete, CD, ...?
+- mitologia — tamanho_opcoes — Antes da ciência, como as pessoas explicavam trovões e tempestades?
+- mitologia — why_sem_resposta — Na mitologia nórdica, Thor carrega um martelo. O que ele controla com ele?
+- mitologia — trap_sem_distrator, tamanho_opcoes — O Curupira, do folclore brasileiro, tem os pés virados para trás. Por que isso ajuda ele?
+- mitologia — tamanho_opcoes — No mito grego, Ícaro voou com asas de penas e cera. O que ele fez de errado?
+- mitologia — trap_sem_distrator, tamanho_opcoes — Como os deuses do Egito antigo costumavam ser representados?
+- mitologia — trap_sem_distrator, tipos_mistos — O Cavalo de Troia era um presente com truque. O que estava escondido dentro dele?
+- mitologia — trap_sem_distrator, tamanho_opcoes — Medusa transformava em pedra quem olhasse para ela. Como Perseu conseguiu vencê-la?
+- mitologia — why_sem_resposta, trap_sem_distrator, certa_mais_longa — Na lenda da Amazônia, o que o Boto cor-de-rosa faz nas noites de festa?
+- dinheiro — explicacao_em_ingles — Você tem R$ 50 e quer um jogo de R$ 80. Se guardar R$ 10 por semana, em quantas semanas consegue comprar?
+- dinheiro — trap_sem_distrator — Um brinquedo custa R$ 40 e está com 25% de desconto. Quanto você paga?
+- dinheiro — tamanho_opcoes — Qual frase é verdadeira sobre juros?
+- dinheiro — why_sem_resposta, trap_sem_distrator, certa_mais_longa — O que aconteceria se uma pessoa gastasse sempre tudo o que ganha?
+- dinheiro — trap_sem_distrator, tamanho_opcoes — Ache o erro: 'Uma loja comprou uma bola por R$ 20, vendeu por R$ 30 e teve um prejuízo de R$ 10.'
+- dinheiro — enunciado_vazou, trap_sem_distrator — Você compra 3 canetas de R$ 2,50 cada e paga com uma nota de R$ 10. Quanto recebe de troco?
+- dinheiro — trap_sem_distrator, certa_mais_longa — Por que o mesmo produto pode custar preços diferentes em duas lojas?
+- dinheiro — definicao, trap_sem_distrator, tamanho_opcoes — O que é um orçamento?
+- dinheiro — sinonimas, trap_sem_distrator — Estime: se você guardar R$ 5 por semana, quanto terá depois de um ano?
+- cidadania — why_sem_resposta, trap_sem_distrator, tamanho_opcoes — Qual frase é verdadeira sobre as leis?
+- cidadania — trap_sem_distrator, tamanho_opcoes — O que aconteceria numa cidade se ninguém pagasse impostos?
+- cidadania — definicao, trap_sem_distrator, tamanho_opcoes — Para que serve o voto?
+- cidadania — enunciado_vazou, tamanho_opcoes — Ache o erro: 'No Brasil, o voto é obrigatório a partir dos 12 anos.'
+- cidadania — why_sem_resposta, tamanho_opcoes, opcao_caricata — Um amigo joga lixo no chão do parque. Qual é a atitude de um bom cidadão?
+- cidadania — definicao, trap_sem_distrator, tamanho_opcoes — O que significa ter um direito?
+- cidadania — trap_sem_distrator — Qual destas coisas é um dever de quem vive numa cidade?
+- cidadania — trap_sem_distrator, certa_mais_longa — Por que existem faixas de pedestres nas ruas?
+- cidadania — certa_mais_longa — Quem faz as leis no Brasil?
+- cidadania — trap_sem_distrator, tamanho_opcoes — Numa votação da turma, 14 alunos escolheram o zoológico e 11 o museu. O que acontece com quem votou no museu?
+- animais — trap_sem_distrator, tamanho_opcoes — O que aconteceria com uma floresta se todas as abelhas sumissem?
+- animais — trap_sem_distrator, certa_mais_longa — Um golfinho precisa subir à superfície de tempos em tempos. Por quê?
+- animais — enunciado_vazou, tamanho_opcoes — Ache o erro: 'A aranha é um inseto de oito patas.'
+- animais — trap_sem_distrator, tamanho_opcoes — Por que o camaleão muda de cor?
+- animais — trap_sem_distrator — Estime: quantos anos uma tartaruga gigante pode viver?
+- animais — trap_sem_distrator — Qual destes animais é o parente vivo mais próximo dos dinossauros?
+- animais — tamanho_opcoes — Um sapo começa a vida como girino. O que muda até ele virar adulto?
+- animais — tamanho_opcoes — Por que não existem pinguins selvagens no Polo Norte?
+- animais — trap_sem_distrator — Qual animal usa o eco do próprio som para se guiar e caçar no escuro?
+- animais — tamanho_opcoes — A onça caça veados, e os veados comem capim. Se o capim sumir, o que acontece com a onça?
+- cotidiano — trap_sem_distrator — Você precisa estar na escola às 7h30, leva 20 minutos para se arrumar e 15 para chegar. Qual é o horário máximo para acordar?
+- cotidiano — certa_mais_longa — Por que lavar as mãos com sabão funciona melhor do que só com água?
+- cotidiano — tamanho_opcoes — Por que a roupa no varal seca mais rápido num dia de vento?
+- cotidiano — trap_sem_distrator, tamanho_opcoes — Você quer que o sorvete demore a derreter no caminho de casa. O que ajuda?
+- cotidiano — enunciado_vazou, trap_sem_distrator, tamanho_opcoes — Ache o erro: 'Para economizar água, deixo a torneira aberta enquanto escovo os dentes.'
+- cotidiano — tamanho_opcoes — Por que o leite aberto deve ficar na geladeira?
+- cotidiano — tamanho_opcoes, tipos_mistos — O que vem depois nesta rotina: tirar a roupa suja, colocar na máquina, lavar, ...?
+- cotidiano — sinonimas — Estime: quantos litros de água um banho de 10 minutos gasta num chuveiro comum?
+- cotidiano — certa_mais_longa — Você vai atravessar uma rua sem semáforo. Qual é a ordem certa?
+- brasil — tamanho_opcoes — Ache o erro: 'O Brasil foi colonizado por Portugal e ficou independente em 1500.'
+- brasil — trap_sem_distrator — Qual bioma brasileiro é a maior floresta tropical do mundo?
+- brasil — why_sem_resposta, tamanho_opcoes — O que aconteceria se a Floresta Amazônica fosse toda derrubada?
+- brasil — trap_sem_distrator — Qual bioma do Nordeste é seco e tem plantas que aguentam meses sem chuva?
+- brasil — trap_sem_distrator, tamanho_opcoes — Brasília foi construída de propósito para ser a capital. Por que ela fica no meio do país?
+- brasil — trap_sem_distrator, tamanho_opcoes — O que representam as estrelas da bandeira do Brasil?
+- minecraft — certa_mais_longa — No Minecraft, o que pode acontecer se você cavar direto para baixo, bem embaixo dos seus pés?
+- minecraft — trap_sem_distrator, certa_mais_longa — Qual frase é verdadeira sobre a lava no Minecraft?
+- minecraft — why_sem_resposta — Ache o erro: 'Para fazer uma picareta de madeira, uso 3 tábuas e 2 gravetos na mesa de trabalho.'
+- minecraft — trap_sem_distrator — Um creeper explode perto da sua casa. Qual destes blocos NÃO quebra com a explosão?
+- minecraft — enunciado_vazou — Qual é a picareta mais simples que consegue soltar o minério de ferro no Minecraft?
+- minecraft — trap_sem_distrator, certa_mais_longa — Por que os zumbis pegam fogo de dia no Minecraft?
+- minecraft — tamanho_opcoes — Você planta trigo no Minecraft. O que ele precisa para crescer?
+- futebol — futebol_solto — Um time fez 2 gols no primeiro tempo e sofreu 3 no segundo. Se o jogo terminou 4 a 3 para ele, quantos gols fez no segundo tempo?
+- futebol — enunciado_vazou, futebol_solto, trap_sem_distrator, tamanho_opcoes — Quando o impedimento é marcado?
+- futebol — enunciado_vazou, futebol_solto, tamanho_opcoes — Ache o erro: 'Uma partida tem dois tempos de 45 minutos, e o goleiro pode pegar a bola com a mão em qualquer lugar do campo.'
+- futebol — futebol_solto — No campeonato, vitória vale 3 pontos e empate vale 1. Um time com 5 vitórias, 4 empates e 3 derrotas tem quantos pontos?
+- futebol — futebol_solto, trap_sem_distrator — De quantos em quantos anos acontece a Copa do Mundo de futebol?
+- futebol — futebol_solto, trap_sem_distrator, certa_mais_longa — O que acontece com um jogador que recebe o segundo cartão amarelo na mesma partida?
+- futebol — futebol_solto, why_sem_resposta, certa_mais_longa — Por que o Brasil é chamado de 'país do futebol', se o esporte não foi inventado aqui?
+- futebol — futebol_solto — Estime: com dois tempos de 45 minutos e um intervalo de 15, quanto dura uma partida, sem acréscimos?
+- futebol — futebol_solto, tamanho_opcoes — Um atacante avança sozinho e o goleiro sai do gol em direção a ele. Por que isso ajuda o goleiro?
+- futebol — futebol_solto, trap_sem_distrator — Um time começa com 11 jogadores e tem 2 expulsos. Com quantos fica, e o jogo continua?
+- filosofia — trap_sem_distrator, certa_mais_longa — Se ninguém estiver olhando, ainda vale a pena fazer a coisa certa?
+- filosofia — why_sem_resposta, tamanho_opcoes — Qual frase é verdadeira sobre a filosofia?
+- filosofia — why_sem_resposta, trap_sem_distrator, tamanho_opcoes — Sócrates dizia 'só sei que nada sei'. O que ele queria ensinar com isso?
+- filosofia — trap_sem_distrator, tamanho_opcoes — Você e um amigo discordam sobre qual jogo é melhor. O que é pensar bem nessa hora?
+- filosofia — tamanho_opcoes — Ache o erro no raciocínio: 'Todo cachorro tem quatro patas. Meu gato tem quatro patas. Logo, meu gato é um cachorro.'
+- filosofia — definicao, why_sem_resposta, trap_sem_distrator, tamanho_opcoes — O que significa ser justo?
+- filosofia — why_sem_resposta, tamanho_opcoes — Se um robô fizesse todas as suas tarefas de escola, você teria aprendido algo?
+- filosofia — why_sem_resposta, trap_sem_distrator, tamanho_opcoes — O que aconteceria se todo mundo mentisse o tempo todo?
+- filosofia — why_sem_resposta, trap_sem_distrator, certa_mais_longa — Qual destas perguntas é uma pergunta de filosofia?
+- filosofia — tamanho_opcoes — Você ganhou um prêmio por um trabalho que um colega fez. O que a honestidade pede?
+- historia — enunciado_vazou, tipos_mistos — O que vem depois nesta ordem: Pré-História, Idade Antiga, Idade Média, ...?
+- historia — why_sem_resposta, trap_sem_distrator — O que marca o fim da Pré-História?
+- historia — fato_discutivel, trap_sem_distrator, tamanho_opcoes — Ache o erro: 'As pirâmides do Egito foram construídas com guindastes elétricos há mais de 4 mil anos.'
+- historia — why_sem_resposta, trap_sem_distrator, tamanho_opcoes — Por que dominar o fogo foi tão importante para os primeiros humanos?
+- historia — sinonimas, trap_sem_distrator — Estime: há quantos anos os humanos começaram a plantar em vez de só caçar e coletar?
+- historia — why_sem_resposta, trap_sem_distrator, tamanho_opcoes — O que aconteceria se a escrita nunca tivesse sido inventada?
+- historia — fato_discutivel, why_sem_resposta, trap_sem_distrator, certa_mais_longa — Os romanos construíram estradas de pedra ligando cidades muito distantes. Qual era a principal vantagem?
+- historia — why_sem_resposta, trap_sem_distrator — Em 1500, Pedro Álvares Cabral chegou ao Brasil. De onde ele tinha saído?
+- historia — why_sem_resposta, trap_sem_distrator, certa_mais_longa — Na Idade Média, os castelos tinham muros altos e fossos com água em volta. Para quê?
+- historia — enunciado_vazou — Um objeto foi feito no ano de 1750. Em que século ele foi feito?
+- logica — enunciado_vazou, tipos_mistos — Ana é mais alta que Bia. Bia é mais alta que Carla. Quem é a mais baixa das três?
+- logica — enunciado_vazou — Qual figura NÃO combina com as outras: quadrado, retângulo, triângulo, losango?
+- logica — enunciado_vazou, why_sem_resposta, trap_sem_distrator — Todos os gatos da vila são pretos. Tom é um gato da vila. O que podemos afirmar?
+- logica — why_sem_resposta — Numa gaveta há meias azuis e vermelhas misturadas, e está escuro. Quantas meias você precisa pegar para garantir um par da mesma cor?
+- logica — enunciado_vazou, tamanho_opcoes — Ache o erro: 'Se chove, a rua fica molhada. A rua está molhada. Logo, choveu.'
+- logica — enunciado_vazou — Qual número está fora do padrão: 3, 6, 9, 11, 15?
+- logica — enunciado_vazou, tipos_mistos — Na fila, Pedro está atrás de Lucas e na frente de Júlia. Quem está no meio dos três?
+- logica — trap_sem_distrator — O que vem depois: 1, 1, 2, 3, 5, 8, ...?
+- logica — sinonimas — Qual frase sobre figuras é verdadeira?
+- logica — why_sem_resposta, trap_sem_distrator — Três amigos apertam as mãos, cada um com cada um, só uma vez. Quantos apertos de mão acontecem?
+- ingles — trap_sem_distrator, audio_vazio — Qual frase em inglês está correta?
+- ingles — trap_sem_distrator, audio_vazio, ingles_nivel, ingles_nivel — Ache o erro: 'She go to school every day.'
+- ingles — definicao, why_curto, audio_vazio, ingles_nivel — O que significa a placa 'EXIT' num shopping?
+- ingles — audio_vazio, ingles_nivel — 'Dog' vira 'dogs' no plural. Como fica o plural de 'box' (caixa)?
+- ingles — audio_vazio — Qual palavra é o oposto de 'big'?
+- ingles — why_curto, trap_sem_distrator, ingles_nivel — 'It's raining, so take your ___.' Qual palavra completa a frase?
+- ingles — trap_sem_distrator, audio_vazio, ingles_nivel — O que vem depois: Monday, Tuesday, Wednesday, ...?
+- ingles — explicacao_em_ingles, why_sem_resposta, trap_sem_distrator, audio_vazio, ingles_nivel — Alguém pergunta 'What time is it?'. Qual resposta faz sentido?
+- ingles — why_sem_resposta, audio_vazio, ingles_nivel — No futebol em inglês, o 'goalkeeper' é qual jogador?
+- ingles — audio_vazio, ingles_nivel — Como se escreve o número quinze em inglês?

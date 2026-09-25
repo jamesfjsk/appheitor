@@ -1,6 +1,6 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import { QUIZ_THEMES } from '../../../config/quizCurriculum';
-import { buildPrompt, replacementBrief } from '../dailyPrompt';
+import { buildPrompt, moldOfDay, replacementBrief } from '../dailyPrompt';
 import { quizSlots } from '../validateQuestion';
 
 const p = buildPrompt({
@@ -80,6 +80,21 @@ test('P0.4: o giro do weekday muda a primeira área de conhecimento', () => {
     englishLevel: 1,
   });
   expect(mon === tue).toBe(false);
+});
+
+test('10b-2: dois dias seguidos não repetem o molde na mesma área', () => {
+  const areas = ['matemática', 'ciências', 'história ou geografia', 'inglês'];
+  for (const area of areas) {
+    expect(moldOfDay(area, '2026-12-07') === moldOfDay(area, '2026-12-08')).toBe(false);
+    expect(moldOfDay(area, '2026-12-08', 2) === moldOfDay(area, '2026-12-09', 2)).toBe(false);
+  }
+  const a = buildPrompt({ seed: QUIZ_THEMES[0], count: 8, spare: 3, age: 10, weekday: 1, englishLevel: 1, date: '2026-12-07' });
+  const b = buildPrompt({ seed: QUIZ_THEMES[0], count: 8, spare: 3, age: 10, weekday: 1, englishLevel: 1, date: '2026-12-08' });
+  expect(a.includes('A conta de hoje segue este molde, com outra história e outros números')).toBe(true);
+  expect(a.includes('abelha')).toBe(false);
+  expect(a.includes('There ___ a cat on the mat')).toBe(false);
+  expect(a.includes('Qual fato é verdadeiro')).toBe(true);
+  expect(a === b).toBe(false);
 });
 
 void run();

@@ -232,6 +232,28 @@ test('6b: ideia com opções curtas não cai por única completa', () => {
   expect(applyReview([consenso], cai).kept).toHaveLength(0);
 });
 
+test('10b-2: o código decide pelos campos novos', () => {
+  const dilema: RawQuestion = { question: 'Qual atitude é a mais justa?', skill: 'LIC.DILEMA', kind: 'dilemma', subject: 'tema', options: ['A', 'B', 'C', 'D'], answer: 'A' };
+  const ingles: RawQuestion = { question: 'There ___ a ball.', skill: 'ING.N1.BE', kind: 'knowledge', subject: 'ingles', options: ['is', 'are', 'am', 'be'], answer: 'is' };
+  const ciencia: RawQuestion = { question: 'Por que a água evapora?', skill: 'CIE.CAUSA', kind: 'knowledge', subject: 'ciencias', options: ['Calor', 'Explodiria', 'Flutuaria', 'Pedra'], answer: 'Calor' };
+  const fica = applyReview([dilema], [{ n: 1, ok: true, motivo: '', duvida: false, sem_saber: true }]);
+  expect(fica.kept).toHaveLength(1);
+  const en = applyReview([ingles], [{ n: 1, ok: true, motivo: '', duvida: false, descartaveis: ['are', 'am', 'be'] }]);
+  expect(en.kept).toHaveLength(1);
+  const ficaCiencia = applyReview([ciencia], [{ n: 1, ok: true, motivo: '', duvida: false, descartaveis: ['Explodiria', 'Flutuaria', 'Pedra'], sem_saber: false }]);
+  expect(ficaCiencia.kept).toHaveLength(1);
+  const sai = applyReview([ciencia], [{ n: 1, ok: true, motivo: '', duvida: false, sem_saber: true }]);
+  expect(sai.kept).toHaveLength(0);
+  expect(sai.motivos[0].motivo).toBe('sem_saber');
+  const semMotivo = applyReview([ciencia], [{ n: 1, ok: false, motivo: '', duvida: false }]);
+  expect(semMotivo.kept).toHaveLength(0);
+  expect(semMotivo.motivos[0].motivo).toBe('reprovada');
+  const semCampo = parseReview({ itens: [{ n: 1, ok: true, motivo: '' }] });
+  expect(semCampo?.[0].no_enunciado).toBe(false);
+  expect(semCampo?.[0].sem_saber).toBe(false);
+  expect(semCampo?.[0].descartaveis).toEqual([]);
+});
+
 test('P0.6: o prompt do revisor é o da prova e pede JSON', () => {
   const text = reviewSystem(1);
   expect(text.includes('professor de 5º ano')).toBe(true);

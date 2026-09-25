@@ -4,26 +4,29 @@
 // ========================================
 
 import { DailyQuizQuestion, DailyQuizSanitize, DailyQuizTheme } from '../types';
-import { callOpenAI, isAIConfigured, loadOfflineQuestions, sanitizeQuestions } from './aiQuiz';
+import { callOpenAI, isAIConfigured } from './aiQuiz';
 import { childAgeToday } from '../config/rules';
 import { QuizThemeSeed } from '../config/quizCurriculum';
 import { weekdayOf } from '../utils/clock';
 import { DAILY_QUIZ_MODEL, normalizeQuizText, reflectionLocalSay, touchesIdea, REFLECT_OFFTOPIC } from './quiz/provaRules';
-import { buildPrompt, replacementBrief } from './quiz/dailyPrompt';
+import { buildPrompt, DILEMMA_RULE, replacementBrief } from './quiz/dailyPrompt';
+import { parseSageSay, SAGE_LOCAL_OK } from './quiz/sageSay';
 import { QUIZ_SPARE, QUIZ_VALIDATOR_ENFORCE, quizMaxTokens } from './quiz/quizTokens';
 import { applyReview, parseReview, rescueDilemma, REVIEWER_MODEL, reviewBatch, reviewSystem, type QuizDuvida, type ReviewItem } from './quiz/reviewer';
 import { dropRepeated, type DedupeNeedle } from './quiz/dedupe';
 import {
-  canonSubject,
   fillSlotHoles,
+  fillAnyArea,
   hashOf,
   placeIntoSlots,
   quizSlots,
   selectValidQuestions,
-  SUBJECTS,
   type QuizSlot,
   type RawQuestion,
 } from './quiz/validateQuestion';
+import { pickReserveQuiz, reserveFromRow, topUpReserve } from './quiz/reserveFromRow';
+
+export { pickReserveQuiz, reserveFromRow };
 
 export { buildPrompt } from './quiz/dailyPrompt';
 
@@ -36,8 +39,6 @@ export interface GeneratedDailyQuiz {
   /** Saída crua da IA, para calibrar o validador. */
   raw?: unknown;
 }
-
-const LESSON_QUESTIONS = 3;
 
 function toDaily(q: RawQuestion): DailyQuizQuestion {
   const kind =
@@ -65,18 +66,8 @@ function toDaily(q: RawQuestion): DailyQuizQuestion {
     ...(q.bloom ? { bloom: q.bloom } : {}),
     ...(q.audioText ? { audioText: q.audioText } : {}),
     ...(q.scenario === 'futebol' ? { scenario: 'futebol' } : {}),
+    ...(q.id ? { id: q.id } : {}),
   };
-}
-
-function coerceQuestions(raw: unknown, count: number, avoid: string[]): DailyQuizQuestion[] {
-  const base = sanitizeQuestions(raw, avoid);
-  const rawArr = Array.isArray(raw) ? (raw as Record<string, unknown>[]) : [];
-  return base.slice(0, count).map((q, i) => {
-    const match = rawArr.find((r) => typeof r.question === 'string' && r.question.trim() === q.question);
-    const kind = match?.kind === 'lesson' || (!match && i < LESSON_QUESTIONS) ? 'lesson' : 'knowledge';
-    const subject = typeof match?.subject === 'string' ? match.subject : kind === 'lesson' ? 'tema do dia' : 'geral';
-    return { ...q, kind, subject };
-  });
 }
 
 function themeFrom(parsed: Record<string, unknown>, seed: QuizThemeSeed): DailyQuizTheme | null {
@@ -102,7 +93,7 @@ function reflectionOf(parsed: Record<string, unknown>): string {
     : REFLECTION_FALLBACK;
 }
 
-async function reviewApproved(questions: RawQuestion[], level: number, signal?: AbortSignal): Promise<ReviewItem[] | null> {
+export async function reviewApproved(questions: RawQuestion[], level: number, signal?: AbortSignal): Promise<ReviewItem[] | null> {
   if (questions.length === 0) return [];
   const user = questions
     .map((q, i) =>
@@ -147,34 +138,31 @@ function discardLines(
   return lines;
 }
 
+async function readQuizFile(name: string): Promise<unknown[] | null> {
+  const urls = typeof window === 'undefined' ? [`http://localhost:5174/data/${name}`, `/data/${name}`] : [`/data/${name}`];
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) continue;
+      const data = (await response.json()) as unknown;
+      if (Array.isArray(data)) return data;
+    } catch {
+      /* tenta o próximo arquivo */
+    }
+  }
+  return null;
+}
+
 async function loadOfflineCandidates(avoid: string[]): Promise<RawQuestion[]> {
   try {
-    const response = await fetch('/data/quizData.json');
-    if (!response.ok) return [];
-    const data = (await response.json()) as unknown;
-    if (!Array.isArray(data)) return [];
+    const data = (await readQuizFile('provaReserva.json')) ?? (await readQuizFile('quizData.json')) ?? [];
     const skip = new Set(avoid.map((q) => normalizeQuizText(q)));
     const out: RawQuestion[] = [];
     for (const item of data) {
       if (!item || typeof item !== 'object') continue;
-      const row = item as Record<string, unknown>;
-      const question = typeof row.question === 'string' ? row.question.trim() : '';
-      const answer = typeof row.answer === 'string' ? row.answer.trim() : '';
-      const explanation = typeof row.explanation === 'string' ? row.explanation.trim() : '';
-      const options = Array.isArray(row.options) ? row.options.filter((o): o is string => typeof o === 'string') : [];
-      if (!question || !answer || options.length !== 4 || skip.has(normalizeQuizText(question))) continue;
-      const mapped = canonSubject(typeof row.category === 'string' ? row.category : '');
-      const subject = SUBJECTS.has(mapped) ? mapped : 'tema';
-      out.push({
-        question,
-        options,
-        answer,
-        explanation,
-        why: explanation,
-        trap: explanation,
-        subject,
-        kind: 'knowledge',
-      });
+      const mapped = reserveFromRow(item as Record<string, unknown>);
+      if (!mapped || skip.has(normalizeQuizText(String(mapped.question ?? '')))) continue;
+      out.push(mapped);
     }
     return out;
   } catch {
@@ -210,6 +198,8 @@ export async function generateDailyQuiz(opts: {
   depth?: 1 | 2 | 3;
   /** quizBank dos últimos 180 dias. Hash igual ou quase igual vira `repetida`. */
   bank?: DedupeNeedle[];
+  /** Linha extra quando ele acerta quase tudo e responde rápido. */
+  challenge?: string;
 }): Promise<GeneratedDailyQuiz> {
   const age = childAgeToday();
   const weekday = weekdayOf(opts.date);
@@ -221,12 +211,12 @@ export async function generateDailyQuiz(opts: {
   };
 
   const offlineQuiz = async (sanitize?: DailyQuizSanitize): Promise<GeneratedDailyQuiz> => {
-    const offline = await loadOfflineQuestions(opts.count, opts.avoidQuestions);
-    const questions = coerceQuestions(
-      offline.map((q) => ({ ...q, kind: 'knowledge', subject: 'geral' })),
-      opts.count,
-      opts.avoidQuestions,
-    );
+    const fresh = await loadOfflineCandidates(opts.avoidQuestions);
+    const enough = pickReserveQuiz(fresh, opts.count);
+    const offline = enough.length >= opts.count ? enough : topUpReserve(fresh, await loadOfflineCandidates([]), opts.count);
+    // Sem banco nenhum, erro como antes do 10d: prova vazia não é gravada.
+    if (offline.length === 0) throw new Error('Banco de reserva indisponível');
+    const questions = offline.map(toDaily);
     return {
       theme: {
         id: opts.seed.id,
@@ -254,6 +244,8 @@ export async function generateDailyQuiz(opts: {
     avoidHashes,
     angle: opts.angle,
     depth: opts.depth,
+    challenge: opts.challenge,
+    date: opts.date,
   });
   const asked = opts.count + QUIZ_SPARE;
   const recent = opts.avoidQuestions.slice(0, 60);
@@ -303,6 +295,7 @@ Conte os objetos antes de responder.`;
   const slots = quizSlots(opts.count, weekday);
   let seated = placeIntoSlots(pool, slots);
   let replacement: Record<string, unknown> | null = null;
+  const bannedTexts: string[] = [];
   if (seated.missing.length > 0) {
     const holes = seated.missing;
     const firstList = Array.isArray(first.questions) ? (first.questions as RawQuestion[]) : [];
@@ -315,15 +308,16 @@ Conte os objetos antes de responder.`;
     const repeatedTexts = cut.rejected
       .map((row) => String(judged.kept[row.n - 1]?.question ?? '').trim())
       .filter(Boolean);
-    const user = `${replacementBrief(holes)}
+    const user = `${replacementBrief(holes, opts.date, englishLevel)}
 Ideia do dia, já escrita. LIC.IDEIA e LIC.APLICA precisam usar uma palavra dela:
 ${theme.lesson}
-Cada objeto traz subject, skill, kind, bloom, answer igual a uma option, why com 16 palavras em português e trap com 16 palavras ou mais. Trap curto mata a pergunta. O trap começa com "Quem marca" seguido do texto exato de uma opção errada. A opção certa não pode ser a única mais longa. Matemática em duas etapas, com os dois números na pergunta (500 g e 2 kg não fecham: escreva 500 g e 2000 g). Inglês: why em português, frase de no máximo 7 palavras. A ideia não começa com "O que é". O dilema pergunta "Qual atitude é a mais justa?", com subject "tema". Só uma opção ajuda; as outras três são omissão ou desculpa, sem "peço ajuda ao adulto".
+Cada objeto traz subject, skill, kind, bloom, answer igual a uma option, why com 16 palavras em português e trap com 16 palavras ou mais. Trap curto mata a pergunta. O trap começa com "Quem marca" seguido do texto exato de uma opção errada. A opção certa não pode ser a única mais longa. Matemática em duas etapas, com os dois números na pergunta (500 g e 2 kg não fecham: escreva 500 g e 2000 g). Inglês: why em português, frase de no máximo 7 palavras. A ideia não começa com "O que é". O dilema pergunta "Qual atitude é a mais justa?", com subject "tema". ${DILEMMA_RULE}
 Não devolva de novo uma pergunta que já caiu. Escreva outro enunciado.
 Caíram por isto:
 ${[...reasons, ...repeatedTexts.map((q) => `repetida — ${q.slice(0, 140)}`)].slice(0, 24).join('\n') || 'o validador recusou o lote'}
 Proibido repetir:
 ${[...fallen, ...repeatedTexts, ...approved, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${q}`).join('\n')}`;
+    bannedTexts.push(...fallen, ...repeatedTexts, ...approved);
     try {
       replacement = await callQuiz(
         buildPrompt({
@@ -337,6 +331,8 @@ ${[...fallen, ...repeatedTexts, ...approved, ...opts.avoidQuestions.slice(0, 30)
           angle: opts.angle,
           depth: opts.depth,
           slots: holes,
+          challenge: opts.challenge,
+          date: opts.date,
         }),
         user,
         quizMaxTokens(holes.length, 0),
@@ -391,6 +387,84 @@ ${[...fallen, ...repeatedTexts, ...approved, ...opts.avoidQuestions.slice(0, 30)
     fromOffline = seated.placed.filter((q) => q != null).length - before;
   }
 
+  let secondReplacement = 0;
+  if (seated.missing.length > 0) {
+    const beforeSecond = seated.placed.filter((q) => q != null).length;
+    const holes = seated.missing;
+    const seatedTexts = seated.placed
+      .filter((q): q is RawQuestion => q != null)
+      .map((q) => String(q.question ?? '').trim())
+      .filter(Boolean);
+    const user = `${replacementBrief(holes, opts.date, englishLevel)}
+Ideia do dia, já escrita. LIC.IDEIA e LIC.APLICA precisam usar uma palavra dela:
+${theme.lesson}
+Cada objeto traz subject, skill, kind, bloom, answer igual a uma option, why com 16 palavras em português e trap com 16 palavras ou mais. Trap curto mata a pergunta. O trap começa com "Quem marca" seguido do texto exato de uma opção errada. A opção certa não pode ser a única mais longa. Matemática em duas etapas, com os dois números na pergunta (500 g e 2 kg não fecham: escreva 500 g e 2000 g). Inglês: why em português, frase de no máximo 7 palavras. A ideia não começa com "O que é". O dilema pergunta "Qual atitude é a mais justa?", com subject "tema". ${DILEMMA_RULE}
+Não devolva de novo uma pergunta que já caiu. Escreva outro enunciado.
+Proibido repetir:
+${[...bannedTexts, ...seatedTexts, ...opts.avoidQuestions.slice(0, 30)].map((q) => `- ${q}`).join('\n')}`;
+    let second: Record<string, unknown> | null = null;
+    try {
+      second = await callQuiz(
+        buildPrompt({
+          seed: opts.seed,
+          count: holes.length,
+          spare: 0,
+          age,
+          weekday,
+          englishLevel,
+          avoidHashes,
+          angle: opts.angle,
+          depth: opts.depth,
+          slots: holes,
+          challenge: opts.challenge,
+          date: opts.date,
+        }),
+        user,
+        quizMaxTokens(holes.length, 0),
+        opts.signal,
+      );
+    } catch (error) {
+      console.warn('aiDailyQuiz: segunda substituição falhou', error);
+    }
+    if (second) {
+      const avoid = new Set(ctx.avoidHashes);
+      for (const q of seated.placed) if (q) avoid.add(hashOf(String(q.question ?? '')));
+      const extra = selectValidQuestions(
+        second.questions,
+        { ...ctx, avoidHashes: avoid, lesson: theme.lesson },
+        QUIZ_VALIDATOR_ENFORCE,
+      );
+      bumpDropped(dropped, extra.dropped);
+      const extraReview = rescueDilemma(extra.kept, await reviewApproved(extra.kept, englishLevel, opts.signal));
+      const extraJudged = applyReview(extra.kept, extraReview);
+      const extraCut = dropRepeated(extraJudged.kept, bank, opts.date);
+      if (extraCut.rejected.length) dropped.repetida = (dropped.repetida ?? 0) + extraCut.rejected.length;
+      seated = fillSlotHoles(seated.placed, slots, extraCut.kept);
+      motivos.push(...extraJudged.motivos);
+      duvidas.push(...extraJudged.duvidas);
+      if (extraReview) reviewLog.push(...extraReview);
+      else reviewFellBack = true;
+      secondReplacement = seated.placed.filter((q) => q != null).length - beforeSecond;
+    }
+  }
+
+  let offlineAnyArea = 0;
+  if (seated.missing.length > 0) {
+    const seatedNow = seated.placed.filter((q): q is RawQuestion => q != null);
+    const candidates = await loadOfflineCandidates([
+      ...opts.avoidQuestions,
+      ...seatedNow.map((q) => String(q.question ?? '')),
+    ]);
+    const passed = selectValidQuestions(candidates, ctx, true);
+    const anyCut = dropRepeated(passed.kept, bank, opts.date);
+    const topped = fillAnyArea(seated.placed, anyCut.kept);
+    offlineAnyArea = topped.used;
+    seated = {
+      placed: topped.placed,
+      missing: slots.filter((_, i) => topped.placed[i] == null),
+    };
+  }
+
   const ordered = seated.placed.filter((q): q is RawQuestion => q != null);
   if (ordered.length === 0) return offlineQuiz({ kept: 0, dropped, perQuestion, duvidas: [] });
 
@@ -411,6 +485,8 @@ ${[...fallen, ...repeatedTexts, ...approved, ...opts.avoidQuestions.slice(0, 30)
       ...(reviewFellBack ? { reviewFellBack: true } : {}),
       batchLog: reviewBatch(ordered, theme.lesson),
       fromOffline,
+      secondReplacement,
+      offlineAnyArea,
       duvidas: duvidasOut,
       ...(rejected.length ? { rejected } : {}),
     },
@@ -461,7 +537,7 @@ export async function judgeReflection(input: {
   if (localSay) return { ok: false, say: localSay, source: 'local' };
   const localOk = (): ReflectionJudge => {
     if (!touchesIdea(input.text, about)) return { ok: false, say: REFLECT_OFFTOPIC, source: 'local' };
-    return { ok: true, say: 'O Sábio leu. A Mina abre.', source: 'local' };
+    return { ok: true, say: SAGE_LOCAL_OK, source: 'local' };
   };
   if (input.forceOffline || !isAIConfigured()) return localOk();
 
@@ -472,7 +548,7 @@ Aceita (ok=true) se ele responde a pergunta com as próprias palavras e fala da 
 
 Recusa (ok=false) se for teclado, palavras soltas, recado vazio ("foi legal", "não sei"), cópia da pergunta ou da ideia, ou se não tem a ver com o tema.
 
-Voz: uma frase de jogo, sem ouro, sem pontos, sem o nome dele, sem "Salvar". Se recusou, diz o que falta. Se aceitou, diz só que leu.
+Voz: uma frase de jogo, sem ouro, sem pontos, sem o nome dele, sem "Salvar". Se recusou, diz o que falta. Se aceitou, uma frase sobre algo específico que ele escreveu: retome a ideia dele com as palavras dele e, se couber, termine com uma pergunta curta que leve a ideia adiante. Sem elogiar a pessoa, sem nota, sem "muito bem". Exemplo: ele escreveu que ia pensar duas vezes e economizar mais — "Esperar para juntar mais: foi isso mesmo. Que brinquedo você esperaria uma semana?"
 
 Responda SOMENTE JSON: {"ok": true ou false, "say": "frase curta"}`;
   const user = `Ideia: ${input.title}\n${lesson}\n\nPergunta: ${input.prompt}\n\nEle escreveu: ${input.text.trim()}`;
@@ -485,9 +561,10 @@ Responda SOMENTE JSON: {"ok": true ou false, "say": "frase curta"}`;
       temperature: 0.2,
     });
     const rec = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : null;
-    if (!rec || typeof rec.ok !== 'boolean') return localOk();
-    const say = clipSage(typeof rec.say === 'string' ? rec.say : rec.ok ? 'O Sábio leu. A Mina abre.' : REFLECT_WAIT);
-    return { ok: rec.ok, say, source: 'ai' };
+    const parsed = parseSageSay(rec);
+    if (!parsed) return localOk();
+    const say = clipSage(parsed.say || (parsed.ok ? SAGE_LOCAL_OK : REFLECT_WAIT));
+    return { ok: parsed.ok, say, source: 'ai' };
   } catch (e) {
     console.warn('judgeReflection: IA falhou, filtro local vale', e);
     return localOk();

@@ -850,3 +850,199 @@ Revisado antes do commit.
 - Barra: `tsc` 0 erros; `eslint` 0 erros; `english` com 12 arquivos verdes.
 
 **Fica anotado:** `yesterdayMistakes`, os 2 itens errados que voltam na Ferraria de amanhã, tem o mesmo desencontro. Ele olha o plano de exatamente um dia antes, que ainda está aberto quando o plano é gerado, então hoje não traz nada. Não mexer agora: trazer de volta as frases longas que ele errou brigaria com o degrau para baixo. Entra no 14b, com o revisor de conteúdo, trazendo só itens do alvo do dia.
+
+## Pacote 10b — prova com 8, revisor mais exigente, Sábio na frase (Cursor, 25/09) — APROVADO COM 4 CORREÇÕES ANTES DO COMMIT
+
+Revisado antes do commit.
+
+**Barra rodada pelo líder:** `tsc` 0 erros; `eslint` 0 erros; `test:english` com 37 arquivos (inclui `challengeLine`, `sageSay`, `validateQuestion`).
+
+**O que está certo:**
+- Segunda substituição só para as vagas que faltam, e depois o banco de qualquer área (`fillAnyArea`, com teto de 2 por área). As origens ficam em `sanitize.secondReplacement` e `sanitize.offlineAnyArea`.
+- Revisor com os três casos novos; `why_circular` com saída para número, data, lugar e causa.
+- `challengeLine` pura, com os limites testados.
+- A fala do Sábio sobre a frase dele: prompt novo, `parseSageSay`, e a fala local "Li sua reflexão.".
+- O relatório do banco offline (`docs/conteudo/BANCO_OFFLINE_REPROVADAS.md`) e três gerações reais, lidas uma a uma pelo próprio Cursor. Honesto.
+
+**O que os três testes mostraram:**
+- 8, 7 e 8 perguntas. A de 7 saiu assim porque só **24 das 200** do banco offline passam no validador v3.
+- **O dilema caiu nas três**, por `dilema_com_certa`.
+- Ainda passam pergunta óbvia ("sem dormir, fica cansado"), conta ambígua ("5 a mais": por dia ou no total?) e o molde "Qual fato é verdadeiro / Qual frase é verdadeira".
+
+**Causas achadas no próprio texto do gerador:**
+- Os dois textos de substituição (`aiDailyQuiz.ts`, perto das linhas 327 e 413) dizem "Só uma opção ajuda; as outras três são omissão ou desculpa". Isso contraria a decisão 33 e a regra 6 da v3 (custo dos dois lados, nenhuma caricata) e empurra a IA para "A resposta certa é...", que a trava nova agora derruba.
+- O prompt principal (`dailyPrompt.ts`, perto da linha 84) **sugere** o formato "qual frase é verdadeira".
+
+### Correções (nesta ordem)
+
+**C1 (alta) — o dilema fica.**
+1. Nos dois textos de substituição e no bloco do dilema do prompt principal, troque a instrução por:
+
+   > "As 4 opções são atitudes que um menino de 10 anos toma de verdade. A melhor resolve sem custo escondido; as outras três resolvem em parte e cobram um preço depois. O why do dilema começa pela consequência da melhor ('Quem conversa sobre prioridades...') e nunca diz 'a resposta certa'; o trap diz o preço de uma das outras."
+2. Antes de validar uma `LIC.DILEMA`, uma função pura `stripCertaPrefix(why)` tira do começo a fórmula "A resposta certa é '…' porque" (ou "pois", ou vírgula) e põe a primeira letra em maiúscula.
+3. `dilema_com_certa` só reprova se a expressão continuar no texto depois disso. No dilema, que não vale nota, `why_curto` passa a exigir 8 palavras.
+
+Teste:
+- o `why` real de 24/09, "A resposta certa é 'Conversar sobre prioridades' porque ajuda o amigo a refletir sobre suas escolhas e necessidades.", vira "Ajuda o amigo a refletir sobre suas escolhas e necessidades.", e o dilema passa;
+- um `why` com "a resposta certa" no meio continua reprovado.
+
+**C2 (média) — revisor com o modelo maior.** `REVIEWER_MODEL` passa de `gpt-4o-mini` para `gpt-4o`. É o revisor que deixou passar a pergunta óbvia e a conta ambígua. Custa perto de US$ 0,01 por dia a mais e cabe no teto de US$ 50. Confira que `aiCost.ts` já tem o preço do `gpt-4o`.
+
+**C3 (média) — sai o molde da trivia.**
+- Tire "qual frase é verdadeira" da lista de formatos do prompt principal.
+- Código novo `fato_solto` no validador: reprova enunciado que começa com "Qual fato é verdadeiro", "Qual frase é verdadeira", "Qual das frases é verdadeira" ou "Qual das alternativas é verdadeira", em pergunta que não é `LIC.*`.
+- Teste com as reais de 24/09 ("Qual fato é verdadeiro sobre a Revolução Industrial?") e de 25/09 ("… sobre a Revolução Francesa?").
+
+**C4 (baixa) — o desafio ignora o dilema.** `ChallengeItem` ganha `kind`; item `dilemma` não conta no acerto nem no tempo. Teste.
+
+**Aceite:**
+- Testes verdes.
+- **Três provas geradas de verdade na conta de teste** (três chamadas; só essas), com o JSON de `sanitize` de cada uma. O dilema tem de ficar na maioria delas; se cair, o motivo não pode ser `dilema_com_certa`.
+- Nenhum "Qual fato/frase é verdadeiro(a)" nas 24 perguntas.
+
+**Com o líder:** o banco offline (176 de 200 reprovadas) não será reescrito à mão. O líder gera um banco novo com o próprio gerador v3 (validador e revisor), por área, e o pai lê a amostra de 20%. Até lá, a segunda substituição de IA é a rede de segurança.
+
+**Prompt para o Cursor:** Leia a seção "Pacote 10b" de `docs/etapas/REVISAO_ETAPA_2_LANCAMENTO.md` e faça as correções C1 a C4, na ordem, cada uma com o teste pedido. Relatório no fim de `docs/etapas/RELATORIO_ETAPA_3.md`, com o título "Pacote 10b — correções da revisão". Pare antes do commit.
+
+## Pacote 10b — correções C1 a C4 (Cursor, 25/09) — APROVADO PARA O COMMIT; o 10b-2 vem logo depois
+
+**Barra rodada pelo líder:** `tsc` 0 erros; `eslint` 0 erros e os 8 avisos de antes; `test:english` 37 arquivos; `test:village` 13; `vite build` ok.
+
+**Conferido no código:**
+- C1: `stripCertaPrefix` antes de validar o dilema; `dilema_com_certa` só com a expressão que sobra; `why_curto` do dilema com 8. O texto novo está nos três lugares que o C1 pediu.
+- C2: `REVIEWER_MODEL = 'gpt-4o'`.
+- C3: o formato "qual frase é verdadeira" saiu do prompt; `fato_solto` fora de `LIC.*`.
+- C4: `ChallengeItem.kind`; o dilema fica fora do acerto e do tempo.
+
+**As três provas, lidas no Firestore (conta de teste, só leitura):** conferem com o relatório. O dilema ficou nas três, e nenhuma publicada começa com "Qual fato/frase é verdadeiro(a)". O aceite do C1 e do C3 está cumprido.
+
+**O que as três provas mostram (vai para o 10b-2):**
+1. **7, 8 e 6 perguntas.** O aceite do item 1 do 10b ("as três com 8") não fechou.
+   - A vaga de história ou geografia caiu nos três dias: a vaga, a folga e a substituição vieram no molde "Qual fato é verdadeiro", e `fato_solto` derrubou as três.
+   - **Nenhuma das três provas tem história ou geografia.**
+   - O banco offline válido (24 perguntas) não cobriu.
+2. **A conta é a mesma nos três dias:** "Uma loja vende 25 livros por dia. Em 4 dias, quantos 3 lojas vendem juntas?". É o MODELO da abelha do prompt com outra roupa, até na frase torta ("quantas 4 abelhas constroem juntas") e no why e no trap copiados.
+3. **O inglês é o mesmo nos três dias:** "There ___ a bird / a rabbit / a lion". O prompt manda "troque o bicho e o lugar", e ela troca só isso.
+4. **O revisor `gpt-4o` aprovou tudo**, inclusive:
+   - "Como a primeira locomotiva a vapor se movia?", com a certa "Com vapor";
+   - "carro elétrico sem bateria", com as opções "Pararia / Explodiria / Aceleraria / Flutuaria";
+   - "vento forte", com as opções "Muda de direção / Fica parada / Afunda no gramado / Sobe sozinha".
+
+   Há duas causas no texto do revisor:
+   - a linha "Se uma opção é claramente a certa, ok true", escrita para o fato sem consenso, manda aprovar justamente a pergunta fácil;
+   - o veredito é um sim ou não geral, e o modelo não confere critério por critério.
+5. **O dilema:**
+   - A frase de exemplo que o líder pôs no C1 virou opção: "Conversa sobre prioridades" (05/12) e "Conversa com o grupo sobre inclusão" (06/12).
+   - O texto de substituição do `dailyPrompt.ts` (`OPTION_SIZE` e o "MODELO de dilema") ainda diz "Só a primeira ajuda; as outras três são omissão ou desculpa", com um why que começa por "A resposta certa é". Esse quarto lugar faltou no C1 do líder; o Cursor fez o que foi pedido. Por isso as erradas ainda são omissão.
+   - Nenhum dos três dilemas usa a ideia do dia. Troia virou "amigo excluído do grupo".
+6. **Ciências passa com o efeito óbvio:** bateria, vento, campo encharcado. A exigência do mecanismo está só na linha de desafio.
+7. **A linha de desafio não entra para o Heitor.**
+   - O `quizBank` dele só tem 25/09: 7 perguntas, porque o backfill não rodou.
+   - A mediana dele é 8,7 s, com 100% de acerto. Pela regra dos 6 s, a linha não entraria nem com 12 perguntas.
+   - Para ele, o acerto já é o sinal.
+8. As duas perguntas que vieram do banco offline (perímetro e ovos) têm o `trap` igual ao `why`: o carregador copia `explanation` nos dois. O banco novo resolve.
+
+**Por que o commit sai agora:** nada disso é regressão.
+- O prompt em produção tem os mesmos moldes (abelha e gato) e o revisor menor.
+- O 10b tira a trivia, segura o dilema, tenta chegar a 8 por dois caminhos novos, troca o revisor pelo `gpt-4o` e traz a fala do Sábio.
+- História e geografia sumiram: é o preço de tirar a trivia, e o 10b-2 devolve a área com uma forma que ensina.
+
+**Commit:** um só, com o 10b e as correções.
+
+**Próximo do Cursor:** o Pacote 10b-2, em `docs/etapas/PROMPT_CURSOR_2026-09-25.md`, antes do 11. Os exemplos novos do prompt estão em `docs/conteudo/MOLDES_PROVA.md` e passam pela amostra do pai antes.
+
+**Com o líder, mudança de plano:** o banco offline novo não sai do gerador, porque ele clona o modelo e o revisor aprova pergunta fácil. O líder escreve 60 perguntas (12 por área: matemática, ciências, inglês, história, geografia), com `why` e `trap` diferentes, passa no validador local e manda 12 ao pai.
+
+## Pacote 10b-2 — prova sem molde e revisor que confere (Cursor, 25/09) — NÃO COMMITAR AINDA: 4 correções
+
+O 10b não foi commitado antes do 10b-2. O commit sai um só, com o 10b, as correções C1 a C4, o 10b-2 e as correções abaixo.
+
+**Barra rodada pelo líder:** `tsc` 0 erros; `eslint` 0 erros e os 8 avisos de antes; `test:english` 37 arquivos; `test:village` 13; `vite build` ok.
+
+**O que está certo:**
+- Os moldes giram pelo dia, com o texto de `MOLDES_PROVA.md`.
+- A abelha e o gato saíram.
+- A regra do dilema está nos quatro lugares, e o D1 é o modelo da substituição.
+- O desafio olha só o acerto.
+- O Cursor seguiu a ordem de não ajustar o revisor e colou tudo.
+
+**O problema: as provas caíram para 4, 3 e 5 perguntas.** Lidas no Firestore (conta de teste, só leitura), a causa principal é o campo `descartaveis`:
+- O `gpt-4o` chama de descartável **toda** opção errada: a etapa pela metade do perímetro ("17 cm", "60 cm"), os outros nomes da mandioca, "Existência de anéis".
+- Em 09/12, 14 perguntas passaram no validador e foram ao revisor. Todas vieram com `ok` true e nenhuma com `sem_saber` ou `no_enunciado`. 11 caíram só por ter 2 ou mais descartáveis.
+- Em 07/12 caíram 4 assim; em 08/12, 6.
+- Entre elas estava uma pergunta de história ou geografia no molde novo, com as erradas "Proteção contra invasores", "Clima agradável" e "Terreno plano". A de geografia que entrou em 09/12 (o relógio no Japão) veio do banco, não da IA: o `why` é igual ao `trap`.
+
+Os outros dois campos funcionaram. Nas 21 de 04 a 06/12, `no_enunciado` e `sem_saber` marcaram só a locomotiva, a bateria e o vento, que era o esperado.
+
+**Outras quedas:**
+- Em 09/12, o dia do M7 (perímetro), as duas contas que caíram tinham `enunciado_vazou`. O `stemLeak` antigo compara o começo da certa como pedaço de texto: "20 met", de "20 metros", casa dentro de "120 metros". É um erro dele, anterior ao 10b-2.
+- O inglês da IA não entrou em nenhum dos três dias. Em 07 e 08/12, dias do I5 e do I6 (has/have), caíram 2 e 3 por `ingles_nivel`. O mais provável é "had" como distrator, que o nível 1 proíbe.
+- `certa_mais_longa` subiu para 5 e 4 (antes 2, 1, 1). Resposta que é uma explicação (mecanismo, causa, dilema) sai mais longa que as erradas.
+
+### Correções (nesta ordem)
+
+**C1 (alta) — `descartaveis` sai da decisão.**
+- Em `applyReview`, tire a regra dos 2 ou mais descartáveis.
+- O campo continua no pedido ao revisor e em `sanitize.review`, só como registro.
+- Sai da prova quando `ok` é false; ou, fora do dilema, quando há `no_enunciado` ou `sem_saber`.
+
+Teste:
+- ciências com 3 descartáveis e `sem_saber` false fica;
+- com `sem_saber` true sai.
+
+**C2 (alta) — `stemLeak` com fronteira de palavra.** O pedaço de 6 letras da certa só conta se começar uma palavra do enunciado.
+
+Teste:
+- enunciado com "120 metros de perímetro" e a certa "20 metros" passa;
+- "qual o nome da técnica de driblar" com a certa "Drible" continua reprovando.
+
+**C3 (média) — o inglês usa as quatro opções do molde.** Na linha de inglês do prompt e da substituição, acrescente: "Use as quatro opções do molde. Nada de passado (had, was, were, did)."
+
+**C4 (baixa) — a certa do mesmo tamanho.** Junto da regra "a opção certa ser a única com mais palavras", acrescente: "Nas de explicação (ideia, ciências, história, dilema), escreva a certa primeiro e as três erradas com o mesmo número de palavras dela. Conte."
+
+**Aceite:**
+- Barra verde, com os testes do C1 e do C2.
+- **Três provas na conta de teste, em 10, 11 e 12/12** (três chamadas; só essas), com o `sanitize` e a leitura da lei do professor. O líder confere:
+  - 8 perguntas em pelo menos duas, e nenhuma abaixo de 7;
+  - história ou geografia e inglês **da IA** (com `why` diferente do `trap`) em pelo menos duas;
+  - nenhum "Qual fato é verdadeiro" e nenhum distrator absurdo.
+- Se o log do navegador tiver o texto, cole as perguntas que caíram por `enunciado_vazou` e `ingles_nivel`.
+- Se o Pacote 10d entrar antes das três provas, marque no relatório quais perguntas vieram do banco novo (pelo `id`), porque ali o `why` também é diferente do `trap`.
+
+**Fora:** o dilema do lote principal ainda sai fraco (07/12: "Faço sozinho", "Deixo ele tentar"; 08/12: "Guardo" e "Escondo"). Ele não vale nota; volta nos pacotes AP. O banco offline novo continua com o líder.
+
+**Prompt para o Cursor:** Leia a seção "Pacote 10b-2" do fim de `docs/etapas/REVISAO_ETAPA_2_LANCAMENTO.md` e faça as correções C1 a C4, na ordem. Relatório no fim de `docs/etapas/RELATORIO_ETAPA_3.md`, com o título "Pacote 10b-2 — correções da revisão". Pare antes do commit.
+
+## Pacotes 10b-2 (correções) e 10d — banco de reserva (Cursor, 25/09) — APROVADOS; commit único com o 10b, com 3 ajustes do líder
+
+**Barra rodada pelo líder, depois dos ajustes:** `tsc` 0 erros; `eslint` 0 erros e os 8 avisos de antes; `test:english` 38 arquivos; `test:village` 13; `vite build` ok.
+
+**Conferido:**
+- C1: `descartaveis` só no registro. Sai com `ok` false; ou, fora do dilema, com `no_enunciado` ou `sem_saber`.
+- C2: o pedaço da certa só vale no começo de uma palavra. "20 metros" não cai mais dentro de "120 metros".
+- C3 e C4: as duas frases novas estão no prompt.
+- 10d:
+  - `reserveFromRow` lê `why` e `trap` próprios, e a linha antiga continua como era;
+  - `provaReserva.json` é o texto aprovado, sem mudança;
+  - a Missão Surpresa continua no `quizData.json`;
+  - um teste passa as 60 no validador.
+
+**As provas, lidas no Firestore (conta de teste, só leitura):**
+- 10/12, 11/12 e 12/12 com 8 perguntas cada. A prova offline de 13/12 também tem 8.
+- Nenhuma pergunta com `why` igual ao `trap`, nenhuma trivia e nenhum distrator absurdo.
+- História da IA em 10 e 11/12; inglês da IA em 10 e 12/12.
+- O aceite está cumprido.
+
+**Ajustes do líder (pequenos, com teste):**
+- **A1.** `reviewDropReason` devolvia o `motivo` quando `ok` era false. Com o motivo vazio, a pergunta reprovada ficava na prova. Agora sai com o motivo "reprovada". Teste em `reviewer.test.ts`.
+- **A2.** A prova toda offline podia sair curta, ou vazia e gravada, quando ele já tivesse visto o banco inteiro. O leitor antigo liberava a repetição nesse caso. Agora é assim:
+  - `topUpReserve`, em `reserveFromRow.ts` junto com `pickReserveQuiz`, completa com as já vistas, 2 por área;
+  - sem arquivo nenhum, dá erro como antes do 10d, e a prova vazia não é gravada.
+  - Teste em `reserveFromRow.test.ts`.
+- **A3.** O exemplo fixo de história ("Por que muitas cidades antigas nasceram perto de rios?") saiu da `HISTORY_LINE`. A IA copiou o texto igual em 10/12 e uma variação ("perto de portos") em 11/12. `MOLDES_PROVA.md` foi atualizado.
+
+**Para vigiar:**
+- **Consumo do banco.** Nas três provas de teste entraram 1, 5 e 3 perguntas do banco. Cada uma só volta depois de 180 dias (`dropRepeated`). No ritmo de 3 por dia, as 60 duram umas três semanas. O líder conta o consumo na leitura diária; quando passar de 30, escreve mais 60.
+- **Lição e dilema faltando.** Em 11/12 faltaram a aplicação e o dilema; em 12/12, as duas perguntas da ideia. O banco tapou, como a regra 22 manda. O dilema fraco volta nos pacotes AP.
+
+**Commit:** um só, com o 10b, as correções C1 a C4, o 10b-2, as correções dele, o 10d e estes ajustes.

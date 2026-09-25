@@ -167,7 +167,7 @@ test('prompt da prova fixa 5º ano, proibições, auto-revisão e giro das área
   expect(p.includes('AUTO-REVISÃO')).toBe(true);
   expect(p.includes('qual a capital de')).toBe(true);
   expect(p.includes('nunca uma conta de um passo') || p.includes('Nunca uma conta de um passo')).toBe(true);
-  expect(p.includes('ciências — causa e efeito')).toBe(true);
+  expect(p.includes('ciências — o mecanismo, não o efeito óbvio')).toBe(true);
   expect(p.includes('gpt-4o')).toBe(false);
 });
 

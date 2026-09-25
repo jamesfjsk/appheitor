@@ -1369,6 +1369,524 @@ Sentimento alvo: o plano de amanhã, gerado de manhã, ainda enxerga a última F
 
 **Pare para o commit do pai.**
 
+## Pacote 10b — prova com 8, revisor mais exigente, Sábio na frase
+
+Sentimento alvo: a prova não sai pela metade, e o Sábio responde o que o Heitor escreveu.
+
+### O que mudou
+
+1. Depois da reserva offline, se ainda falta vaga: uma segunda substituição de IA só para os buracos, com as quedas no "Proibido repetir". Se ainda falta, entra pergunta válida de qualquer área do banco (ideia e dilema aceitam conhecimento). Cada área no máximo duas vezes. `sanitize.secondReplacement` e `sanitize.offlineAnyArea` contam as vagas.
+2. O banco de 200 passou pelo validador. Lista em `docs/conteudo/BANCO_OFFLINE_REPROVADAS.md`. Não reescrevi o conteúdo.
+3. O revisor também recusa distrator que se descarta sem saber a matéria, `why` que só diz que é conhecido, e pergunta fácil demais para o 5º ano.
+4. Códigos novos: `why_circular` e `dilema_com_certa`.
+5. `challengeLine`: 12 perguntas nos últimos 14 dias, 90% ou mais, mediana de tempo abaixo de 6 s. Senão, sem linha.
+6. Se a IA aceita a reflexão, a fala retoma a frase dele. Sem `say`, cai em "Li sua reflexão." Sem IA, a mesma fala local.
+
+### Banco offline
+
+200 perguntas. 24 passam, 176 caem. Códigos mais comuns: `trap_sem_distrator` 98, `tamanho_opcoes` 67, `why_sem_resposta` 34, `certa_mais_longa` 31, `enunciado_vazou` 28. Por área, o arquivo lista cada uma. Matemática 0 de 15, inglês 0 de 10, história 0 de 10, futebol 0 de 10. Lógica 5 de 15. Arte 3 de 10.
+
+### Três provas na conta de teste
+
+Datas futuras, não concluídas, regeneradas no Vite de desenvolvimento. O dilema caiu nas três (`dilema_com_certa`); a vaga virou conhecimento.
+
+**2026-12-01, 8 perguntas.** "Plantas comem luz?" `secondReplacement` 1, `offlineAnyArea` 2, `fromOffline` 0.
+
+```json
+{"kept":8,"dropped":{"tipos_mistos":1,"dilema_com_certa":3,"opcao_caricata":2,"conta_um_passo":1,"duplicata":1,"certa_mais_longa":1,"repetida":3},"fromOffline":0,"secondReplacement":1,"offlineAnyArea":2}
+```
+
+1. Como as plantas crescem sem perder peso do solo? Aprende que a planta junta luz e água, não come terra. O distrator "comem terra" é o erro típico. Clara. Uma certa. O erro ensina. Degrau: primeiro contato da ideia. Passa a barra.
+2. Planta no quarto escuro. Aprende que sem luz ela murcha. Clara. Uma certa. "Fica verde" é tentação. Ensina. Passa.
+3. Azul com amarelo dá verde. Aprende mistura de tinta. Clara. Uma certa. Não usa a ideia do dia (veio do banco). Fato de consenso. Passa, fora do tema.
+4. There ___ a fish. Aprende is com um só. Distrator are é o erro do brasileiro. Clara. Uma certa. Ensina. Passa.
+5. 12 palmas em compassos de 4. Aprende dividir. Duas etapas (12 e 4). Clara. Uma certa. Ensina. Passa.
+6. Sol forte no jogo, ficam cansados. Fácil demais: não pede o mecanismo. Não passa a barra do professor. O revisor novo já marca "fácil demais"; esta passou no lote.
+7. 20 por dia, 4 dias, 5 a mais. O enunciado não diz se os 5 são por dia ou no total. Conta ambígua. Não passa.
+8. Por que a planta precisa de luz? A resposta "fotossíntese" é o nome, e a ideia já disse. Quase decorar. Fraca.
+
+**2026-12-02, 7 perguntas.** "A Profundidade do Oceano." `offlineAnyArea` 3. Faltou 1: o banco válido acabou (176 de 200 caem no validador, e a área não repete a terceira).
+
+```json
+{"kept":7,"dropped":{"certa_mais_longa":3,"dilema_com_certa":3,"opcao_caricata":4,"duplicata":2,"why_curto":1,"repetida":1,"trap_sem_distrator":1,"tamanho_opcoes":1},"fromOffline":0,"secondReplacement":0,"offlineAnyArea":3}
+```
+
+1. Água ferve abaixo de 100 °C no alto. Aprende pressão. Clara. Uma certa. Ensina. Passa.
+2. O Sol é uma estrela. Fácil demais, "qual frase é verdadeira". Não passa.
+3. Cores primárias da tinta. Fato. Clara. Uma certa. Fora do tema do oceano. Passa como fato.
+4. Maré alta, o que acontece com a bola? "Nada muda" é chute de bom senso. Não ensina o oceano. Não passa.
+5. 10 amostras por dia, 4 dias, 5 extras = 45. Duas contas. Clara se "extras" for no total. Uma certa. Passa.
+6. Sem luz no fundo, nada cresceria. Efeito óbvio, não o mecanismo. Não passa.
+7. There ___ a turtle. Mesma regra do is. Passa.
+
+**2026-12-03, 8 perguntas.** "O Cérebro se Lava à Noite." O revisor tirou duas por "fácil demais". `offlineAnyArea` 3.
+
+```json
+{"kept":8,"dropped":{"dilema_com_certa":2,"opcao_caricata":3,"trap_sem_distrator":1,"certa_mais_longa":3,"opiniao":1,"sem_licao":1},"fromOffline":0,"secondReplacement":0,"offlineAnyArea":3}
+```
+
+1. Fervura na montanha. Igual à de 02/12 (o dia 03 é depois, então não entrou no avoid). Passa a barra, repete o banco.
+2. O Sol é uma estrela. Não passa (fácil, molde "qual frase é verdadeira").
+3. Cores primárias. Passa como fato, fora do tema.
+4. 5 gols × 3 e 3 assistências = 18. Duas contas. O revisor marcou dúvida ("a conta não fecha") e a pergunta ficou. A conta fecha. Passa.
+5. 15 camisetas, 3 dias, 5 lojas = 225. Duas contas. Passa.
+6. Sem dormir, fica cansado. Efeito óbvio. Não passa.
+7. There ___ a horse. Passa (is).
+8. Revolução Industrial no século XVIII. "Qual fato é verdadeiro", molde já visto. Fraca.
+
+A foto da fala nova do Sábio não foi tirada nesta sessão.
+
+### Arquivos
+
+- `src/services/aiDailyQuiz.ts`
+- `src/services/dailyQuizService.ts`
+- `src/services/quiz/validateQuestion.ts`
+- `src/services/quiz/reviewer.ts`
+- `src/services/quiz/dailyPrompt.ts`
+- `src/services/quiz/challengeLine.ts`
+- `src/services/quiz/sageSay.ts`
+- `src/types/index.ts`
+- `src/services/quiz/__tests__/validateQuestion.test.ts`
+- `src/services/quiz/__tests__/challengeLine.test.ts`
+- `src/services/quiz/__tests__/sageSay.test.ts`
+- `docs/conteudo/BANCO_OFFLINE_REPROVADAS.md`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (seção 12)
+
+### Barra da lei
+
+1. Intenção. A prova tenta chegar a 8 e o Sábio fala da frase dele. Passa no código. A de 02/12 ficou em 7.
+2. Sistema. O papiro e o prompt que já existiam. Passa.
+3. Fonte. Sem tela nova. Passa.
+4. Ícone. Sem ícone novo. Passa.
+5. Hierarquia. Sem tela nova. Passa.
+6. A cena continua. Passa.
+7. Arestas. Sem tela nova fotografada. A fala do Sábio não foi vista no frame.
+8. Mundo. React. Passa.
+9. Economia. Sem gold novo. Passa.
+10. Consequência. Dilema ruim sai; a vaga vira outra pergunta. Passa.
+11. Estado honesto. O sanitize mostra de onde veio cada vaga. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. A fala nova está no prompt do Sábio. A local continua "Li sua reflexão." Passa.
+15. Evidência. Três gerações na conta de teste, acima. Banco no arquivo. Testes puros dos itens 1, 4, 5 e 6.
+16. Arestas. Sem 12 perguntas, sem 90% ou com mediana de 6 s, a linha de desafio não entra. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 37 arquivos, saída 0
+- `npm run test:village` — 13 arquivos, saída 0
+
+### Fora
+
+- Reescrever as 176 perguntas do banco. Fica para o líder.
+- Foto 1280×720 da fala nova do Sábio.
+- Pacotes 11, 12 e 14b
+
+**Pare para o commit do pai.**
+
+## Pacote 10b — correções da revisão
+
+Sentimento alvo: o dilema fica na prova, e a pergunta de conhecimento não começa como trivia.
+
+### O que mudou
+
+**C1.** Nos dois textos de substituição (`aiDailyQuiz.ts`) e no bloco do dilema do prompt principal (`dailyPrompt.ts`), a instrução "só uma opção ajuda" virou: as quatro opções são atitudes reais; a melhor resolve sem custo escondido; as outras três resolvem em parte e cobram um preço; o why começa pela consequência e não diz "a resposta certa". Antes de validar `LIC.DILEMA`, `stripCertaPrefix` tira o prefixo "A resposta certa é '…' porque/pois/," e põe maiúscula no resto. `dilema_com_certa` só recusa se a frase ainda estiver no texto. No dilema, `why_curto` pede 8 palavras (o trap continua em 12).
+
+**C2.** `REVIEWER_MODEL` passou de `gpt-4o-mini` para `gpt-4o`. O gerador da prova e a voz (`gpt-4o-mini-tts`) ficaram no modelo de antes. `aiCost.ts` já tinha o preço do `gpt-4o`.
+
+**C3.** "qual frase é verdadeira" saiu da lista de formatos do prompt. Código novo `fato_solto`: recusa enunciado que começa com "Qual fato é verdadeiro", "Qual frase é verdadeira", "Qual das frases é verdadeira" ou "Qual das alternativas é verdadeira", fora de `LIC.*`.
+
+**C4.** `ChallengeItem` ganhou `kind`. `kind === 'dilemma'` não entra no acerto nem na mediana de tempo. `loadChallengeItems` lê o `kind` do `quizBank`.
+
+### Três provas na conta de teste
+
+Datas futuras, não concluídas, uma geração cada no Vite de desenvolvimento. O dilema ficou nas três. Nenhuma queda foi `dilema_com_certa`. Nenhum enunciado que ficou começa com "Qual fato/frase é verdadeiro(a)". O molde apareceu e caiu: `fato_solto` 3 em cada dia.
+
+**2026-12-04, 7 perguntas.** "A Primeira Locomotiva e o Medo da Velocidade." `secondReplacement` 0, `offlineAnyArea` 1.
+
+```json
+{"kept":7,"dropped":{"futebol_solto":1,"opcao_caricata":1,"fato_solto":3,"sem_licao":2,"certa_mais_longa":2,"repetida":1,"duplicata":1},"fromOffline":0,"secondReplacement":0,"offlineAnyArea":1}
+```
+
+1. Como a locomotiva a vapor se movia? A resposta "Com vapor" já está no enunciado. Não ensina. Não passa.
+2. Perímetro 12 + 5 + 12 + 5 = 34. Aprende a não confundir com a área (60). Duas somas. Clara. Uma certa. Ensina. Passa.
+3. Dilema do carrinho. O why começa em "Quem pesquisa como fazer…" e não diz "a resposta certa". As outras três (deixar para outro dia, esperar, desistir) são omissão, não um jeito que cobra preço. O prefixo saiu; o custo escondido não chegou. Fraca.
+4. 25 livros × 4 dias × 3 lojas = 300. Duas contas. Clara. Uma certa. O enunciado sai sem o "as" ("quantos 3 lojas"). Passa a conta, a frase é torta.
+5. Carro elétrico sem bateria para. Óbvio, e as outras opções são caricatura. Não passa.
+6. There ___ a bird. Aprende is com um só. Distrator are é o erro do brasileiro. Passa.
+7. Vento forte muda a bola. Efeito óbvio. Não passa.
+
+**2026-12-05, 8 perguntas.** "Mandioca, Aipim ou Macaxeira?" `secondReplacement` 1, `offlineAnyArea` 1. O revisor marcou dúvida na 2, sem motivo escrito.
+
+```json
+{"kept":8,"dropped":{"why_sem_resposta":1,"opcao_caricata":2,"fato_solto":3,"repetida":1,"enunciado_vazou":1},"fromOffline":0,"secondReplacement":1,"offlineAnyArea":1}
+```
+
+1. Por que a mesma raiz tem três nomes. Aprende que o nome muda de região, não a planta. Distratores tipo/cor/tamanho são o erro típico. Clara. Uma certa. Ensina. Passa.
+2. Na feira do Rio, o nome é aipim. Decoraria o mapa da lição se a ideia já tivesse dito. Uma certa. Fraca.
+3. Dilema da festa. O why começa em "Quem conversa sobre prioridades…" e não diz "a resposta certa". "Faço tudo sozinho" cobra um preço; "fico quieto" e "deixo de lado" ainda são omissão. Melhor que o de 04/12. Passa no C1, mistura omissão.
+4. 30 pacotes × 5 dias × 4 lojas = 600. Mesmo molde da 4 de 04/12. Duas contas. Passa a conta, repete o molde.
+5. Mandioca crua pode ser tóxica. Aprende que o cozimento tira o veneno. "Nada acontece" é o erro típico. Clara. Uma certa. Ensina. Passa.
+6. There ___ a rabbit. Mesma regra do is. Passa, terceira vez do molde na semana de teste.
+7. 40 ovos em caixas de 6: 6 cheias e sobram 4, então 7. Duas etapas. O 6 é o erro de ignorar a sobra. Ensina. Passa.
+8. Campo encharcado deixa a bola mais pesada. Simplifica demais, e "invisível" é caricatura. Não passa.
+
+**2026-12-06, 6 perguntas.** "A Guerra de Troia: Mito ou Realidade?" `secondReplacement` 1, `offlineAnyArea` 0. Faltaram 2: o banco válido não cobriu o buraco. O revisor marcou a 2 como opinião e ela ficou, com dúvida.
+
+```json
+{"kept":6,"dropped":{"tamanho_opcoes":1,"opcao_caricata":1,"enunciado_vazou":2,"fato_solto":3,"trap_sem_distrator":1,"why_sem_resposta":1,"repetida":1,"conta_um_passo":1},"fromOffline":0,"secondReplacement":1,"offlineAnyArea":0}
+```
+
+1. O cavalo de madeira era para enganar. Aprende a estratégia (soldados dentro), não o nome do objeto. "Presente" é a desculpa da história. Clara. Uma certa. Ensina. Passa.
+2. Ao abrir os portões, veria soldados escondidos. Aplica a ideia. O revisor chamou de opinião. A resposta não está no enunciado. Passa, com a dúvida gravada.
+3. Dilema do amigo excluído. O why começa em "Quem conversa sobre inclusão…" e não diz "a resposta certa". "Procurar outro grupo" cobra um preço; ignorar e "não posso fazer nada" são omissão. Passa no C1, mistura omissão.
+4. 40 maçãs × 3 dias × 5 lojas = 600. Terceiro dia do mesmo molde. Duas contas. Passa a conta, repete.
+5. Plantas precisam de luz para fazer fotossíntese. A resposta é o nome do processo. Não passa.
+6. There ___ a lion. Mesma regra do is. Passa.
+
+### Arquivos
+
+- `src/services/aiDailyQuiz.ts`
+- `src/services/quiz/dailyPrompt.ts`
+- `src/services/quiz/validateQuestion.ts`
+- `src/services/quiz/reviewer.ts`
+- `src/services/quiz/challengeLine.ts`
+- `src/services/dailyQuizService.ts`
+- `src/types/index.ts`
+- `src/services/quiz/__tests__/validateQuestion.test.ts`
+- `src/services/quiz/__tests__/challengeLine.test.ts`
+
+### Barra da lei
+
+1. Intenção. O dilema permanece e a trivia de "qual fato é verdadeiro" não entra. Passa nas três.
+2. Sistema. O prompt e o validador que já existiam. Código novo só `fato_solto` e `stripCertaPrefix`. Passa.
+3. Fonte. Sem tela nova. Passa.
+4. Ícone. Sem ícone novo. Passa.
+5. Hierarquia. Sem tela nova. Passa.
+6. A cena continua. Passa.
+7. Arestas. Sem tela nova. Passa.
+8. Mundo. React. Passa.
+9. Economia. Sem gold novo. O dilema continua fora da nota. Passa.
+10. Consequência. O prefixo "a resposta certa" sai antes do veredito; no meio da frase, o dilema ainda cai. Passa.
+11. Estado honesto. 7, 8 e 6. O sanitize mostra a queda. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. O why dos três dilemas começa pela consequência. As outras opções ainda misturam omissão. A frase do prompt mudou; o modelo não cumpriu as quatro de cada vez.
+15. Evidência. Três gerações na conta de teste, acima. Teste puro do prefixo de 24/09 e do `fato_solto` da Revolução Industrial e da Francesa.
+16. Arestas. Dilema errado e lento não completa os 12 nem puxa a mediana. Passa no teste.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 37 arquivos, saída 0
+- `npm run test:village` — 13 arquivos, saída 0
+
+### Fora
+
+- Reescrever as 176 perguntas do banco. Continua com o líder.
+- Pacotes 11, 12 e 14b
+
+**Pare para o commit do pai.**
+
+## Pacote 10b-2
+
+Sentimento alvo: cada dia pede um jeito diferente de pensar, e nenhuma pergunta se acerta só pelo bom senso.
+
+### O que mudou
+
+Os textos saíram de `docs/conteudo/MOLDES_PROVA.md`.
+
+1. `moldOfDay(area, date)` usa o número do dia. Matemática gira M1–M7, ciências C1–C5, história ou geografia H1–H5, inglês do nível 1 I1–I7. Do nível 2 em diante gira `promptAllowed`. O prompt principal perdeu a abelha e o gato. A conta do dia é o M em JSON. Cada linha de área leva o molde. História e geografia levam a regra do bloco H. Na substituição, MAT.OP2 usa o M do dia, e HIS.FATO / GEO.FATO usam a mesma linha.
+2. A linha dos distratores e o exemplo do gelo que boia entraram nas exigências. Ciências pede o mecanismo. `CHALLENGE_LINE` ficou só com o degrau.
+3. A regra do dilema, sem o exemplo "Quem conversa sobre prioridades", está no bloco 3, nas duas substituições e na vaga LIC.DILEMA. `OPTION_SIZE` ficou só com o tamanho. O modelo da substituição é o D1.
+4. O revisor preenche `no_enunciado`, `descartaveis` e `sem_saber` antes do `ok`. O código tira a pergunta se `ok` é false ou, fora do dilema, se `no_enunciado`, `sem_saber` ou 2+ descartáveis (inglês isento). O motivo gravado é o nome do campo.
+5. `enunciado_vazou` também quando uma palavra da certa com 5 letras ou mais está inteira no enunciado e em nenhuma errada. Não vale para o dilema.
+6. A linha de desafio não olha mais o tempo. Ficam 12 perguntas nos 14 dias, fora o dilema, com 90% ou mais.
+7. `reviewBatch` não conta mais "qual frase é verdadeira" como formato.
+
+### Banco offline
+
+Das 24 que passavam, 2 caem só pela palavra nova: "Hércules… dez trabalhos" (a certa repete "trabalhos") e o suco de 1 litro por R$ 8 contra 2 litros por R$ 14 (a certa repete "litros"). 21 continuam passando. "Qual frase é verdadeira sobre o Sol" já caía por `fato_solto` e não entra nesta conta.
+
+### Revisor nas 21 de 04, 05 e 06/12
+
+Saíram, como esperado: a locomotiva (`no_enunciado`), a bateria (`sem_saber`) e o vento (`sem_saber`). Ficaram as três de inglês. Saíram, e o texto não foi ajustado: perímetro, ovos, mandioca crua, cavalo de Troia e soldados escondidos. O modelo listou a etapa pela metade como descartável, e o código tirou.
+
+```json
+{"n":1,"q":"Como a primeira locomotiva a vapor se movia?","ok":false,"no_enunciado":true,"descartaveis":["Com eletricidade","Com gasolina","Com vento"],"sem_saber":true,"sai":"no_enunciado"}
+{"n":2,"q":"Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?","ok":true,"no_enunciado":false,"descartaveis":["17 cm","60 cm","24 cm"],"sem_saber":false,"sai":"descartaveis: 17 cm, 60 cm, 24 cm"}
+{"n":3,"q":"Você e seus amigos querem construir um carrinho de brinquedo. Qual atitude é a mais justa?","ok":true,"no_enunciado":false,"descartaveis":[],"sem_saber":false,"sai":null}
+{"n":4,"q":"Uma loja vende 25 livros por dia. Em 4 dias, quantos 3 lojas vendem juntas?","ok":true,"no_enunciado":false,"descartaveis":["100","75","200"],"sem_saber":false,"sai":"descartaveis: 100, 75, 200"}
+{"n":5,"q":"O que aconteceria se um carro elétrico ficasse sem bateria?","ok":true,"no_enunciado":false,"descartaveis":["Explodiria","Aceleraria","Flutuaria"],"sem_saber":true,"sai":"sem_saber"}
+{"n":6,"q":"There ___ a bird in the sky.","ok":true,"no_enunciado":false,"descartaveis":[],"sem_saber":false,"sai":null}
+{"n":7,"q":"Durante uma partida de futebol, o vento está forte. O que acontece com a bola?","ok":true,"no_enunciado":false,"descartaveis":["Fica parada","Afunda no gramado","Sobe sozinha"],"sem_saber":true,"sai":"sem_saber"}
+{"n":1,"q":"Por que a mesma raiz é chamada de mandioca, aipim e macaxeira?","ok":true,"no_enunciado":false,"descartaveis":["Cores variadas","Tamanhos distintos"],"sem_saber":false,"sai":"descartaveis: Cores variadas, Tamanhos distintos"}
+{"n":2,"q":"Em uma feira no Rio de Janeiro, como a raiz é chamada?","ok":true,"no_enunciado":false,"descartaveis":["Mandioca","Macaxeira","Batata"],"sem_saber":false,"sai":"descartaveis: Mandioca, Macaxeira, Batata"}
+{"n":3,"q":"Você e seus amigos querem fazer uma festa surpresa. Qual atitude é a mais justa?","ok":true,"no_enunciado":false,"descartaveis":[],"sem_saber":false,"sai":null}
+{"n":4,"q":"Uma loja vende 30 pacotes de mandioca por dia. Em 5 dias, quantos 4 lojas vendem juntas?","ok":true,"no_enunciado":false,"descartaveis":["150","120","100"],"sem_saber":false,"sai":"descartaveis: 150, 120, 100"}
+{"n":5,"q":"O que aconteceria se a mandioca não fosse cozida antes de comer?","ok":true,"no_enunciado":false,"descartaveis":["Nada acontece","Fica mais saborosa","Perde nutrientes"],"sem_saber":false,"sai":"descartaveis: Nada acontece, Fica mais saborosa, Perde nutrientes"}
+{"n":6,"q":"There ___ a rabbit in the garden.","ok":true,"no_enunciado":false,"descartaveis":[],"sem_saber":false,"sai":null}
+{"n":7,"q":"Cada caixa guarda 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?","ok":true,"no_enunciado":false,"descartaveis":["6","8","5"],"sem_saber":false,"sai":"descartaveis: 6, 8, 5"}
+{"n":8,"q":"Durante uma partida de futebol, o campo está encharcado. O que acontece com a bola?","ok":true,"no_enunciado":false,"descartaveis":["Quica mais alto","Rola mais rápido","Fica invisível"],"sem_saber":false,"sai":"descartaveis: Quica mais alto, Rola mais rápido, Fica invisível"}
+{"n":1,"q":"Por que os gregos usaram um cavalo de madeira na história de Troia?","ok":true,"no_enunciado":false,"descartaveis":["Para construir uma estátua","Para transportar comida"],"sem_saber":false,"sai":"descartaveis: Para construir uma estátua, Para transportar comida"}
+{"n":2,"q":"Se você estivesse em Troia, o que veria ao abrir os portões para o cavalo?","ok":true,"no_enunciado":false,"descartaveis":["Um cavalo vazio","Um presente dos deuses","Comida para a cidade"],"sem_saber":false,"sai":"descartaveis: Um cavalo vazio, Um presente dos deuses, Comida para a cidade"}
+{"n":3,"q":"Você descobre que um amigo está sendo excluído do grupo. Qual atitude é a mais justa?","ok":true,"no_enunciado":false,"descartaveis":[],"sem_saber":false,"sai":null}
+{"n":4,"q":"Uma loja vende 40 maçãs por dia. Em 3 dias, quantas 5 lojas vendem juntas?","ok":true,"no_enunciado":false,"descartaveis":["200","120","60"],"sem_saber":false,"sai":"descartaveis: 200, 120, 60"}
+{"n":5,"q":"Por que as plantas precisam de luz solar para crescer?","ok":true,"no_enunciado":false,"descartaveis":["Para se proteger do frio","Para absorver água","Para evitar predadores"],"sem_saber":false,"sai":"descartaveis: Para se proteger do frio, Para absorver água, Para evitar predadores"}
+{"n":6,"q":"There ___ a lion in the zoo.","ok":true,"no_enunciado":false,"descartaveis":[],"sem_saber":false,"sai":null}
+```
+
+### Três provas na conta de teste
+
+História ou geografia ficou em uma das três (09/12), sem "Qual fato é verdadeiro". A conta muda de molde. O inglês do dia quase não sobreviveu: o que entrou em 09/12 veio do banco ("There ___ a cat"). Nenhum distrator publicado é explode, flutua ou invisível. Os três dilemas estão em primeira pessoa. O de 09/12 copia o D1 com o tema trocado.
+
+**2026-12-07, 4 perguntas.** "Redstone no Mundo Real." `fromOffline` 1, `offlineAnyArea` 2, `secondReplacement` 0.
+
+```json
+{"kept":4,"dropped":{"certa_mais_longa":5,"enunciado_vazou":1,"why_curto":2,"fato_discutivel":2,"conta_nao_fecha":2,"duplicata":1,"ingles_nivel":2,"futebol_solto":1,"repetida":1,"conta_um_passo":1},"fromOffline":1,"secondReplacement":0,"offlineAnyArea":2}
+```
+
+1. 2 horas e meia são 150 minutos. Aprende hora e meia hora. Duas somas. O 120 é a etapa pela metade. Clara. Uma certa. Ensina. Passa. Veio do banco, não do molde do dia.
+2. Qual planeta fica entre a Terra e Júpiter. Decora a ordem. A resposta é um nome. Não passa.
+3. Dilema do circuito. Primeira pessoa, curto. "Faço sozinho" e "Deixo ele tentar" são omissão, não um preço. O why não usa a situação. Não passa a regra nova.
+4. Primo com 4 anos se juntos têm 16 e um tem o triplo. Duas etapas. O 12 é a idade do outro. Clara. Uma certa. Ensina. Passa.
+
+**2026-12-08, 3 perguntas.** "Mary Anning: A Caçadora de Fósseis." `secondReplacement` 1, `offlineAnyArea` 1.
+
+```json
+{"kept":3,"dropped":{"trap_sem_distrator":2,"why_curto":3,"certa_mais_longa":4,"tamanho_opcoes":1,"opcao_caricata":1,"ingles_nivel":3,"conta_um_passo":2,"enunciado_vazou":1,"repetida":1},"fromOffline":0,"secondReplacement":1,"offlineAnyArea":1}
+```
+
+1. O cérebro não bombeia o sangue. Aprende a função. "Bombear" é o trabalho do coração. Clara. Uma certa. Ensina. Fora do tema do fóssil. Passa.
+2. Dilema do fóssil. Primeira pessoa e ligado à ideia. "Guardo" e "Escondo" são as duas omissão. A regra pede no máximo uma de ficar parado. Não passa inteira.
+3. 4 abacaxis por 20 e 6 por 24: economiza 1 real cada. É o M6 com outra fruta. Duas divisões e a diferença. O 4 reais compara os totais. Ensina. Passa.
+
+**2026-12-09, 5 perguntas.** "Planetas além do nosso sistema solar." `fromOffline` 1, `offlineAnyArea` 1.
+
+```json
+{"kept":5,"dropped":{"opcao_caricata":1,"trap_sem_distrator":1,"enunciado_vazou":3,"conta_nao_fecha":3,"repetida":1},"fromOffline":1,"secondReplacement":0,"offlineAnyArea":1}
+```
+
+1. A arma de Zeus é o raio. A resposta é o nome do objeto. Não ensina o planeta de fora. Não passa.
+2. Dilema estudo às 15h contra o jogo. Primeira pessoa. Copia o D1 (aviso, jogo agora, faço rápido, peço para outro). O preço de cada errada está na forma. A frase é a do modelo. O líder confere.
+3. Relógio do Brasil ao Japão adianta. Aprende que a leste o Sol nasce antes. "Atrasar" é o erro típico. Clara. Uma certa. Geografia, sem o molde de trivia. Passa.
+4. 5 vitórias e 3 empates dão 18. Duas contas. O 15 é só as vitórias. Ensina. O molde é o da partida, não o M do dia. Passa a conta.
+5. There ___ a cat on the roof. A regra do is. Veio do banco, a frase que saiu do prompt. Passa a regra, não o giro do dia.
+
+### Arquivos
+
+- `src/services/quiz/dailyPrompt.ts`
+- `src/services/aiDailyQuiz.ts`
+- `src/services/quiz/reviewer.ts`
+- `src/services/quiz/validateQuestion.ts`
+- `src/services/quiz/challengeLine.ts`
+- `src/services/quiz/__tests__/dailyPrompt.test.ts`
+- `src/services/quiz/__tests__/reviewer.test.ts`
+- `src/services/quiz/__tests__/validateQuestion.test.ts`
+- `src/services/quiz/__tests__/challengeLine.test.ts`
+- `src/services/village/__tests__/provaV2.test.ts`
+
+### Barra da lei
+
+1. Intenção. O molde do dia troca a conta. O revisor marca o que se acerta sem saber. Passa no código. As provas ficaram em 4, 3 e 5 porque o código tirou o que o modelo chamou de descartável.
+2. Sistema. O prompt e o validador que já existiam. Passa.
+3. Fonte. Sem tela nova. Passa.
+4. Ícone. Sem ícone novo. Passa.
+5. Hierarquia. Sem tela nova. Passa.
+6. A cena continua. Passa.
+7. Arestas. Sem tela nova. Passa.
+8. Mundo. React. Passa.
+9. Economia. Sem gold novo. O dilema continua fora da nota. Passa.
+10. Consequência. Palavra da certa no enunciado cai. Dilema com `sem_saber` fica. Passa.
+11. Estado honesto. O sanitize mostra a queda. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. A regra do dilema é a do arquivo. O de 09/12 ainda copia o D1.
+15. Evidência. Testes dos itens 1, 4, 5 e 6. Revisor nas 21. Três gerações, acima.
+16. Arestas. 100% com mediana de 8,7 s agora ganha a linha. Sem 12 ou sem 90%, não. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 37 arquivos, saída 0
+- `npm run test:village` — a suíte de village entra na de english; a linha de ciências do `provaV2` foi atualizada para o mecanismo
+
+### Fora
+
+- Banco offline novo. Continua com o líder.
+- Ajustar o texto do revisor para o perímetro, os ovos, a mandioca crua, o cavalo e os soldados voltarem. O modelo listou a etapa pela metade como descartável. O líder decide.
+- Pacotes 11, 12 e 14b
+
+**Pare para o commit do pai.**
+
+## Pacote 10b-2 — correções da revisão
+
+Sentimento alvo: a prova volta a ter tamanho de prova, e "20 metros" não cai dentro de "120 metros".
+
+### O que mudou
+
+**C1.** `descartaveis` continua no pedido ao revisor e no `sanitize.review`. Sai da prova só com `ok` false ou, fora do dilema, com `no_enunciado` ou `sem_saber`. Ciências com 3 descartáveis e `sem_saber` false fica.
+
+**C2.** O pedaço de 6 letras da certa só conta se começa uma palavra do enunciado. "20 met" não casa dentro de "120 metros". "dribl" continua casando no começo de "driblar".
+
+**C3.** A linha de inglês do prompt e da substituição ganhou: "Use as quatro opções do molde. Nada de passado (had, was, were, did)."
+
+**C4.** Junto da regra da certa mais longa: nas de explicação, a certa sai primeiro e as três erradas com o mesmo número de palavras. Conte.
+
+As três provas desta correção foram geradas depois do 10d, em 10, 11 e 12/12. Estão na seção seguinte, com o id do banco quando a pergunta veio de lá.
+
+### Arquivos
+
+- `src/services/quiz/reviewer.ts`
+- `src/services/quiz/validateQuestion.ts`
+- `src/services/quiz/dailyPrompt.ts`
+- `src/services/quiz/__tests__/reviewer.test.ts`
+- `src/services/quiz/__tests__/validateQuestion.test.ts`
+
+### Barra da lei
+
+1. Intenção. A etapa pela metade não derruba mais a pergunta. Passa.
+2. Sistema. O revisor e o validador que já existiam. Passa.
+3. Fonte. Sem tela nova. Passa.
+4. Ícone. Sem ícone novo. Passa.
+5. Hierarquia. Sem tela nova. Passa.
+6. A cena continua. Passa.
+7. Arestas. Sem tela nova. Passa.
+8. Mundo. React. Passa.
+9. Economia. Sem gold novo. Passa.
+10. Consequência. "120 metros" com a certa "20 metros" passa. "driblar" com a certa "Drible" cai. Passa.
+11. Estado honesto. O campo descartáveis continua no registro. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. A frase nova do inglês e a da certa do mesmo tamanho saíram do pedido. Passa.
+15. Evidência. Testes do C1 e do C2. As três provas estão no 10d.
+16. Arestas. `sem_saber` ainda tira, fora do dilema. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 38 arquivos, saída 0
+- `npm run test:village` — 13 arquivos, saída 0
+
+Nenhuma das três provas caiu por `enunciado_vazou`. O log do navegador não trouxe o texto das que caíram por `ingles_nivel` (uma em 11/12, uma em 12/12, junto de outros códigos).
+
+### Fora
+
+- O dilema fraco. Volta nos pacotes AP.
+- Pacotes 11, 12 e 14b
+
+## Pacote 10d
+
+Sentimento alvo: a pergunta que tapa uma vaga ensina tanto quanto a da IA.
+
+### O que mudou
+
+`docs/conteudo/banco-reserva-v3.json` foi copiado para `public/data/provaReserva.json`, sem mudar o texto. `reserveFromRow` lê a linha nova com `why`, `trap`, `subject`, `skill`, `audioText`, `scenario` e `id`, e `explanation` igual ao `why`. Linha sem `why` continua copiando a explanation nos dois. `loadOfflineCandidates` lê `provaReserva.json` e, se não carregar, `quizData.json`. A prova com a IA desligada monta 8 do banco novo, no máximo 2 por área. A Missão Surpresa continua no `quizData.json`.
+
+### Prova offline na conta de teste
+
+2026-12-13, `forceOffline`, 8 perguntas, `source` offline. Duas de cada: M01, M02, C01, C02, E01, E02, H01, H02. Em todas o `why` é diferente do `trap`.
+
+```json
+{"kept":8,"dropped":{}}
+```
+
+### Três provas depois do 10d
+
+As três têm 8. Nenhuma começa com "Qual fato é verdadeiro". Nenhum distrator publicado é explode, flutua ou invisível. História da IA (why diferente do trap, sem id) entrou em 10 e 11/12. Inglês da IA entrou em 10 e 12/12. Os dois juntos, no mesmo dia, só em 10/12. Em 11/12 o inglês é do banco; em 12/12 a história é do banco.
+
+**2026-12-10, 8.** "Como um computador pensa com 0 e 1." `fromOffline` 1. Banco: C01.
+
+```json
+{"kept":8,"dropped":{"certa_mais_longa":1},"fromOffline":1,"secondReplacement":0,"offlineAnyArea":0}
+```
+
+1. Sistema binário. Aprende que o computador usa 0 e 1, não o 0 a 9. Clara. Uma certa. "Decimal" é o erro típico. Ensina. Passa.
+2. Ada escreveu o primeiro programa. Aprende a diferença para quem projetou a máquina. Clara. Uma certa. Ensina. Passa.
+3. Dilema do computador travado. A certa é "Esperar um pouco", que é ficar parado. As outras não cobram um preço claro. Não passa a regra do dilema.
+4. 3 vitórias e 3 empates dão 12. Duas contas. O 9 é só as vitórias. Ensina. Passa. O molde é o da partida.
+5. 5 livros de 18, pago com 100, troco 10. Duas contas. O trap fala em "soma" e a opção 20 não é essa soma. Fraca no trap. A conta ensina.
+6. C01, banco. O navio boia porque o casco guarda ar. O "ferro mais leve" é o erro típico. Ensina. Passa.
+7. There ___ a dog. Inglês da IA, is com um só. Why curto e o trap repete a regra. Passa a regra, a explicação é fina.
+8. Cidades perto de rios por causa do transporte. É o exemplo do prompt, quase copiado. A causa é de consenso, mas a pergunta não saiu da cabeça do dia. Fraca.
+
+**2026-12-11, 8.** "A Lógica das Máquinas." Sem dilema: a vaga virou conhecimento. `fromOffline` 3, `offlineAnyArea` 2. Banco: C03, E02, M01, C02, E01.
+
+```json
+{"kept":8,"dropped":{"opcao_caricata":1,"conta_nao_fecha":1,"trap_sem_distrator":2,"why_curto":4,"sinonimas":1,"certa_mais_longa":1,"conta_um_passo":1,"ingles_nivel":1,"why_sem_resposta":1},"fromOffline":3,"secondReplacement":0,"offlineAnyArea":2}
+```
+
+1. Portas E, OU e NÃO. Aprende que a decisão da máquina é lógica, não desenho. Clara. Uma certa. Ensina. Passa.
+2. C03, banco. Teste justo muda só a luz. Ensina. Passa.
+3. E02, banco. are com brothers. Ensina. Passa.
+4. M01, banco. Troco dos lanches e do suco. Duas contas e mais uma. Ensina. Passa.
+5. C02, banco. Sem garça, mais peixe, menos alga. A cadeia ensina. Passa.
+6. E01, banco. am com I. Ensina. Passa.
+7. Cidades perto de portos por causa do comércio. História da IA. Causa de consenso. "Mais bonitas" é opinião. Ensina. Passa.
+8. 3 gols valem 2 e 4 assistências valem 1, total 10. Duas contas. O 7 soma sem multiplicar. Ensina. Passa.
+
+**2026-12-12, 8.** "Frases de Sobrevivência em Inglês." `fromOffline` 1, `offlineAnyArea` 2. Banco: C04, E03, H01.
+
+```json
+{"kept":8,"dropped":{"certa_mais_longa":3,"audio_mismatch":1,"ingles_sem_marcador":2,"opcao_caricata":1,"conta_nao_fecha":1,"fato_discutivel":2,"tipos_mistos":1,"why_curto":1,"audio_vazio":1,"ingles_nivel":1,"why_sem_resposta":1,"trap_sem_distrator":1},"fromOffline":1,"secondReplacement":0,"offlineAnyArea":2}
+```
+
+1. C04, banco. O erro é achar que o Sol se apaga. A Terra gira. Ensina. Passa.
+2. E03, banco. there are com três. Ensina. Passa.
+3. Dilema da lição às 18h contra o jogo. Copia o D1. Primeira pessoa, cada errada tem um preço. A frase é a do modelo. O líder confere.
+4. Ônibus às 13h50 mais 2h15 chega às 16h05. É o M3 com outra hora. O 15h65 esquece que 60 minutos viram hora. Ensina. Passa.
+5. A primeira etapa é a semente germinar. A ordem ensina, e "floresce" é a etapa seguinte. Passa, fora do tema do inglês.
+6. There ___ two cats. Inglês da IA, are com dois. Why curto. Passa a regra.
+7. H01, banco. Plantar prendeu o povo na roça. A caça que some é o erro típico. Ensina. Passa.
+8. 6 vitórias e 1 empate dão 19. O 18 esquece o empate. Ensina. O mesmo molde da partida de 10/12.
+
+### Arquivos
+
+- `public/data/provaReserva.json`
+- `src/services/quiz/reserveFromRow.ts`
+- `src/services/aiDailyQuiz.ts`
+- `src/services/quiz/validateQuestion.ts`
+- `src/types/index.ts`
+- `src/services/quiz/__tests__/reserveFromRow.test.ts`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (seção 12)
+
+### Barra da lei
+
+1. Intenção. A vaga que falta traz pergunta com why e trap de verdade. Passa.
+2. Sistema. A leitura do banco que já existia, agora no arquivo novo. Passa.
+3. Fonte. Sem tela nova. Passa.
+4. Ícone. Sem ícone novo. Passa.
+5. Hierarquia. Sem tela nova. Passa.
+6. A cena continua. Passa.
+7. Arestas. Sem tela nova. Passa.
+8. Mundo. React. Passa.
+9. Economia. Sem gold novo. Passa.
+10. Consequência. Linha antiga ainda copia a explanation. A nova não. Passa.
+11. Estado honesto. O id marca o que veio do banco. Passa.
+12. Mouse. Sem alvo novo. Passa.
+13. Craft. Sem animação nova. Passa.
+14. Copy. O texto do banco não foi reescrito. Passa.
+15. Evidência. As 60 passam no teste. A prova offline de 13/12 tem 8. As três de 10 a 12/12 estão acima.
+16. Arestas. Se `provaReserva.json` não carrega, volta o `quizData.json`. A Missão Surpresa não mudou de arquivo. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 38 arquivos, saída 0
+- `npm run test:village` — 13 arquivos, saída 0
+
+### Fora
+
+- Pacotes 11, 12 e 14b
+
+**Pare para o commit do pai.**
+
 
 
 

@@ -9,8 +9,10 @@ import {
   reachable,
   fillToCount,
   placeIntoSlots,
+  fillAnyArea,
   quizSlots,
   selectValidQuestions,
+  stripCertaPrefix,
   validateQuestion,
   type RawQuestion,
 } from '../validateQuestion';
@@ -28,8 +30,8 @@ interface FixtureRow extends RawQuestion {
 const rows = fixture as FixtureRow[];
 const byId = new Map(rows.map((r) => [r.id, r]));
 
-test('P0.2: 31 códigos nomeados', () => {
-  expect(REJECT_CODES).toHaveLength(31);
+test('P0.2: 34 códigos nomeados', () => {
+  expect(REJECT_CODES).toHaveLength(34);
   expect(REJECT_CODES).toContain('explicacao_em_ingles');
   expect(REJECT_CODES).toContain('ingles_sem_marcador');
   expect(REJECT_CODES).toContain('futebol_solto');
@@ -38,6 +40,9 @@ test('P0.2: 31 códigos nomeados', () => {
   expect(REJECT_CODES).toContain('tamanho_opcoes');
   expect(REJECT_CODES).toContain('certa_mais_longa');
   expect(REJECT_CODES).toContain('tipos_mistos');
+  expect(REJECT_CODES).toContain('why_circular');
+  expect(REJECT_CODES).toContain('dilema_com_certa');
+  expect(REJECT_CODES).toContain('fato_solto');
 });
 
 test('P0.2: numbersOf lê inteiros e vírgula', () => {
@@ -427,6 +432,211 @@ test('6b: a posição 1-3 guarda ideia, aplica e dilema, e o skill não passa de
 test('sonda: Q8 compara o áudio com a resposta quando o enunciado não tem a frase', () => {
   const codes = validateQuestion(probe.questions[7], { englishLevel: 1 });
   expect(codes.includes('audio_mismatch')).toBe(false);
+});
+
+test('why_circular: fato reconhecido sem causa cai; com ano e lugar fica', () => {
+  const base = {
+    question: 'O que aconteceu com o gelo no sol?',
+    options: ['derrete', 'cresce', 'some', 'quebra'],
+    answer: 'derrete',
+    trap: 'Quem marca some acha que o gelo desaparece no ar e esquece que ele vira água no copo.',
+    skill: 'CIE.CAUSA',
+    subject: 'ciencias',
+    bloom: 'entender',
+    kind: 'knowledge',
+  };
+  const circular = validateQuestion({
+    ...base,
+    why: 'Porque é um fato histórico amplamente reconhecido e bem documentado nos livros de sempre sem mais nada.',
+  });
+  expect(circular.includes('why_circular')).toBe(true);
+  const caused = validateQuestion({
+    ...base,
+    why: 'Em 1822 no Rio o gelo derrete porque o sol esquenta a água e ela muda de estado no copo da mesa.',
+  });
+  expect(caused.includes('why_circular')).toBe(false);
+});
+
+test('dilema_com_certa: o why do dilema não diz qual é a certa', () => {
+  const base = {
+    question: 'O amigo ficou de fora. Qual atitude é a mais justa?',
+    options: ['Chamo ele', 'Fico quieto', 'Sigo jogando', 'Digo fechou'],
+    answer: 'Chamo ele',
+    trap: 'Quem marca Fico quieto deixa o amigo sozinho e chama isso de respeito ao jogo dos outros.',
+    skill: 'LIC.DILEMA',
+    subject: 'tema',
+    bloom: 'analisar',
+    kind: 'dilemma',
+  };
+  const bad = validateQuestion({
+    ...base,
+    why: 'A resposta certa é chamar o amigo porque ficar quieto abandona quem quer jogar junto no recreio.',
+  });
+  expect(bad.includes('dilema_com_certa')).toBe(true);
+  const ok = validateQuestion({
+    ...base,
+    why: 'Chamar o amigo muda o jogo para os dois. Ficar quieto abandona quem quer entrar no recreio.',
+  });
+  expect(ok.includes('dilema_com_certa')).toBe(false);
+});
+
+test('lote curto chega a 8: substituição de 1 e banco de qualquer área; dilema vazio vira conhecimento', () => {
+  const q = (n: number, subject: string): RawQuestion => ({
+    question: `pergunta ${n} sobre ${subject}`,
+    subject,
+    kind: 'knowledge',
+    skill: 'GEN.CONH',
+  });
+  const kept = [q(1, 'tema'), q(2, 'tema'), q(3, 'matematica'), q(4, 'ciencias'), q(5, 'historia')];
+  const replacement = [q(6, 'geografia')];
+  const seated: (RawQuestion | null)[] = [...kept, ...replacement, null, null];
+  const second = fillAnyArea(seated, [q(7, 'ingles')]);
+  expect(second.used).toBe(1);
+  const offline = fillAnyArea(second.placed, [q(8, 'matematica'), q(9, 'ciencias')]);
+  const final = offline.placed.filter((item): item is RawQuestion => item != null);
+  expect(final).toHaveLength(8);
+  expect(second.used + offline.used).toBe(2);
+
+  const dilemmaHole: (RawQuestion | null)[] = [q(1, 'tema'), q(2, 'tema'), null, q(4, 'matematica'), q(5, 'ciencias'), q(6, 'historia'), q(7, 'geografia'), q(8, 'ingles')];
+  const filled = fillAnyArea(dilemmaHole, [{ ...q(3, 'futebol'), kind: 'knowledge' }]);
+  const quiz = filled.placed.filter((item): item is RawQuestion => item != null);
+  expect(quiz).toHaveLength(8);
+  expect(quiz.some((item) => item.kind === 'dilemma')).toBe(false);
+});
+
+test('C1: o prefixo da certa sai e o dilema passa; no meio continua reprovado', () => {
+  const original = "A resposta certa é 'Conversar sobre prioridades' porque ajuda o amigo a refletir sobre suas escolhas e necessidades.";
+  expect(stripCertaPrefix(original)).toBe('Ajuda o amigo a refletir sobre suas escolhas e necessidades.');
+  const base = {
+    question: 'O amigo quer o brinquedo agora. Qual atitude é a mais justa?',
+    options: ['Converso sobre prioridades', 'Compro na hora', 'Escondo o dinheiro', 'Digo que não tem'],
+    answer: 'Converso sobre prioridades',
+    trap: 'Quem marca Compro na hora paga o preço de gastar o que era para outra coisa.',
+    skill: 'LIC.DILEMA',
+    subject: 'tema',
+    bloom: 'analisar',
+    kind: 'dilemma' as const,
+  };
+  const kept = selectValidQuestions([{ ...base, why: original }], {});
+  expect(kept.kept).toHaveLength(1);
+  expect(kept.kept[0].why).toBe('Ajuda o amigo a refletir sobre suas escolhas e necessidades.');
+  expect(kept.dropped.dilema_com_certa).toBe(undefined);
+  const middle = validateQuestion({
+    ...base,
+    why: 'Conversar ajuda, mas a resposta certa no meio da frase ainda entrega o gabarito para a criança.',
+  });
+  expect(middle.includes('dilema_com_certa')).toBe(true);
+});
+
+test('fato_solto: o molde da trivia cai fora da ideia', () => {
+  const base = {
+    options: ['Começou no século XVIII', 'Foi no século XX', 'Iniciou no Brasil', 'Durou 10 anos'],
+    answer: 'Começou no século XVIII',
+    why: 'A Revolução Industrial começou na Inglaterra no século XVIII porque as máquinas a vapor mudaram as fábricas.',
+    trap: 'Quem marca Foi no século XX confunde com as guerras do século passado e erra o começo das fábricas.',
+    skill: 'HIS.FATO',
+    subject: 'historia',
+    bloom: 'entender',
+    kind: 'knowledge' as const,
+  };
+  const industrial = validateQuestion({
+    ...base,
+    question: 'Qual fato é verdadeiro sobre a Revolução Industrial?',
+  });
+  expect(industrial.includes('fato_solto')).toBe(true);
+  const francesa = validateQuestion({
+    ...base,
+    question: 'Qual fato é verdadeiro sobre a Revolução Francesa?',
+    options: ['Começou em 1789', 'Foi em 1500', 'Iniciou no Brasil', 'Durou 10 anos'],
+    answer: 'Começou em 1789',
+  });
+  expect(francesa.includes('fato_solto')).toBe(true);
+  const lesson = validateQuestion({
+    ...base,
+    question: 'Qual fato é verdadeiro sobre a Revolução Industrial?',
+    skill: 'LIC.IDEIA',
+    subject: 'tema',
+    kind: 'lesson',
+  });
+  expect(lesson.includes('fato_solto')).toBe(false);
+});
+
+test('C2: o pedaço da certa só vale no começo da palavra', () => {
+  const pack = (question: string, answer: string): RawQuestion => ({
+    question,
+    options: [answer, 'outra medida longa', 'mais uma medida', 'a última medida'],
+    answer,
+    why: 'A explicação nomeia a resposta e diz por que a etapa pela metade engana quem para cedo demais.',
+    trap: 'Quem marca a primeira errada parou na etapa pela metade e não fechou a conta do enunciado.',
+    skill: 'MAT.OP2',
+    subject: 'matematica',
+    bloom: 'aplicar',
+    kind: 'knowledge',
+  });
+  const perimetro = validateQuestion({
+    ...pack('Um campinho tem 120 metros de perímetro. Quanto mede o outro lado?', '20 metros'),
+    options: ['20 metros', '40 metros', '70 metros', '50 metros'],
+  });
+  expect(perimetro.includes('enunciado_vazou')).toBe(false);
+  const drible = validateQuestion({
+    ...pack('qual o nome da técnica de driblar', 'Drible'),
+    options: ['Drible', 'Passe', 'Chute', 'Cruzamento'],
+    skill: 'LIC.IDEIA',
+    subject: 'tema',
+    kind: 'lesson',
+  });
+  expect(drible.includes('enunciado_vazou')).toBe(true);
+});
+
+test('10b-2: palavra da certa no enunciado', () => {
+  const pack = (question: string, answer: string, options: string[], skill = 'CIE.CAUSA'): RawQuestion => ({
+    question,
+    options,
+    answer,
+    why: 'A explicação nomeia a resposta e diz por que a etapa pela metade engana quem para cedo.',
+    trap: 'Quem marca a primeira errada parou na etapa pela metade e não fechou a conta do enunciado.',
+    skill,
+    subject: skill.startsWith('LIC') ? 'tema' : skill.startsWith('MAT') ? 'matematica' : skill.startsWith('ING') ? 'ingles' : 'ciencias',
+    bloom: 'aplicar',
+    kind: skill === 'LIC.DILEMA' ? 'dilemma' : skill.startsWith('LIC') ? 'lesson' : 'knowledge',
+  });
+  const loco = validateQuestion(pack(
+    'Como a primeira locomotiva a vapor se movia?',
+    'Com vapor',
+    ['Com vapor', 'Com eletricidade', 'Com gasolina', 'Com vento'],
+  ));
+  expect(loco.includes('enunciado_vazou')).toBe(true);
+  const troia = validateQuestion(pack(
+    'Por que os gregos usaram um cavalo de madeira na história de Troia?',
+    'Para enganar os troianos',
+    ['Para enganar os troianos', 'Para presentear os deuses', 'Para construir uma estátua', 'Para transportar comida'],
+    'LIC.IDEIA',
+  ));
+  expect(troia.includes('enunciado_vazou')).toBe(false);
+  const published: RawQuestion[] = [
+    pack('Um retângulo tem 12 cm de comprimento e 5 cm de largura. Qual é o perímetro dele?', '34 cm', ['34 cm', '17 cm', '60 cm', '24 cm'], 'MAT.OP2'),
+    pack('Você e seus amigos querem construir um carrinho de brinquedo. Qual atitude é a mais justa?', 'Pesquiso como fazer', ['Pesquiso como fazer', 'Deixo para outro dia', 'Espero alguém ajudar', 'Desisto da ideia'], 'LIC.DILEMA'),
+    pack('Uma loja vende 25 livros por dia. Em 4 dias, quantos 3 lojas vendem juntas?', '300', ['300', '100', '75', '200'], 'MAT.OP2'),
+    pack('O que aconteceria se um carro elétrico ficasse sem bateria?', 'Pararia', ['Pararia', 'Explodiria', 'Aceleraria', 'Flutuaria']),
+    pack('There ___ a bird in the sky.', 'is', ['is', 'are', 'am', 'be'], 'ING.N1.BE'),
+    pack('Durante uma partida de futebol, o vento está forte. O que acontece com a bola?', 'Muda de direção', ['Muda de direção', 'Fica parada', 'Afunda no gramado', 'Sobe sozinha']),
+    pack('Por que a mesma raiz é chamada de mandioca, aipim e macaxeira?', 'Diferenças regionais', ['Diferenças regionais', 'Tipos diferentes', 'Cores variadas', 'Tamanhos distintos'], 'LIC.IDEIA'),
+    pack('Em uma feira no Rio de Janeiro, como a raiz é chamada?', 'Aipim', ['Mandioca', 'Aipim', 'Macaxeira', 'Batata'], 'LIC.APLICA'),
+    pack('Você e seus amigos querem fazer uma festa surpresa. Qual atitude é a mais justa?', 'Conversa sobre prioridades', ['Conversa sobre prioridades', 'Fico quieto sobre a festa', 'Deixo a ideia de lado', 'Faço tudo sozinho'], 'LIC.DILEMA'),
+    pack('Uma loja vende 30 pacotes de mandioca por dia. Em 5 dias, quantos 4 lojas vendem juntas?', '600', ['600', '150', '120', '100'], 'MAT.OP2'),
+    pack('O que aconteceria se a mandioca não fosse cozida antes de comer?', 'Pode ser tóxica', ['Nada acontece', 'Pode ser tóxica', 'Fica mais saborosa', 'Perde nutrientes']),
+    pack('There ___ a rabbit in the garden.', 'is', ['is', 'are', 'am', 'be'], 'ING.N1.BE'),
+    pack('Cada caixa guarda 6 ovos. Quantas caixas são necessárias para guardar 40 ovos?', '7', ['7', '6', '8', '5'], 'MAT.OP2'),
+    pack('Durante uma partida de futebol, o campo está encharcado. O que acontece com a bola?', 'Fica mais pesada', ['Fica mais pesada', 'Quica mais alto', 'Rola mais rápido', 'Fica invisível']),
+    pack('Se você estivesse em Troia, o que veria ao abrir os portões para o cavalo?', 'Soldados escondidos', ['Um cavalo vazio', 'Soldados escondidos', 'Um presente dos deuses', 'Comida para a cidade'], 'LIC.APLICA'),
+    pack('Você descobre que um amigo está sendo excluído do grupo. Qual atitude é a mais justa?', 'Conversa com o grupo sobre inclusão', ['Conversa com o grupo sobre inclusão', 'Ignora e continua com seus amigos', 'Fala para o amigo procurar outro grupo', 'Diz que não pode fazer nada'], 'LIC.DILEMA'),
+    pack('Uma loja vende 40 maçãs por dia. Em 3 dias, quantas 5 lojas vendem juntas?', '600', ['600', '200', '120', '60'], 'MAT.OP2'),
+    pack('Por que as plantas precisam de luz solar para crescer?', 'Para fazer fotossíntese', ['Para fazer fotossíntese', 'Para se proteger do frio', 'Para absorver água', 'Para evitar predadores']),
+    pack('There ___ a lion in the zoo.', 'is', ['is', 'are', 'am', 'be'], 'ING.N1.BE'),
+    pack('Por que os gregos usaram um cavalo de madeira na história de Troia?', 'Para enganar os troianos', ['Para enganar os troianos', 'Para presentear os deuses', 'Para construir uma estátua', 'Para transportar comida'], 'LIC.IDEIA'),
+  ];
+  expect(published).toHaveLength(20);
+  for (const q of published) expect(validateQuestion(q).includes('enunciado_vazou')).toBe(false);
 });
 
 void run();
