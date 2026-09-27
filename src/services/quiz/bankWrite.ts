@@ -28,6 +28,12 @@ const KINDS = new Set(['lesson', 'knowledge', 'review', 'dilemma']);
  * supportLevel é 0 no acerto e 3 no erro; no dilema o campo não vai.
  * createdAt entra no serviço (serverTimestamp), não aqui.
  */
+export interface BankAttempt {
+  second?: string;
+  nudge?: 'trap' | 'strategy';
+  audioPlayed?: boolean;
+}
+
 export function quizBankDocs(input: {
   userId: string;
   date: string;
@@ -35,6 +41,7 @@ export function quizBankDocs(input: {
   questions: BankSourceQuestion[];
   answers: string[];
   timings?: QuizTiming[];
+  attempts?: BankAttempt[];
 }): { id: string; data: Record<string, unknown> }[] {
   const count = Math.min(input.questions.length, input.answers.length);
   const depth = input.theme.depth === 2 || input.theme.depth === 3 ? input.theme.depth : 1;
@@ -68,8 +75,20 @@ export function quizBankDocs(input: {
       correct,
       attempts: 1,
     };
+    const attempt = input.attempts?.[i];
+    if (attempt?.second) {
+      data.attempts = 2;
+      data.secondChoice = attempt.second;
+      data.retryOk = attempt.second === answer;
+      if (attempt.nudge) data.nudge = attempt.nudge;
+    }
     if (q.difficulty === 1 || q.difficulty === 2 || q.difficulty === 3) data.difficulty = q.difficulty;
-    if (kind !== 'dilemma') data.supportLevel = correct ? 0 : 3;
+    if (kind !== 'dilemma') {
+      if (correct) data.supportLevel = 0;
+      else if (attempt?.second && attempt.second === answer) data.supportLevel = 1;
+      else data.supportLevel = 3;
+    }
+    if (attempt?.audioPlayed) data.audioPlayed = true;
     const timing = input.timings?.[i];
     if (timing && timing.msToAnswer > 0) data.msToAnswer = Math.round(timing.msToAnswer);
     if (timing && timing.msReadingExplain > 0) data.msReadingExplain = Math.round(timing.msReadingExplain);

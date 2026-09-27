@@ -366,11 +366,14 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
   reflectionNote?: string;
   about: QuizAbout;
   timings?: QuizTiming[];
+  attempts?: { second?: string; nudge?: 'trap' | 'strategy'; audioPlayed?: boolean }[];
+  launchedOn?: string | null;
+  reflectionMs?: number;
 }): Promise<void> {
   const ref = doc(db, 'dailyQuizzes', dailyQuizId(userId, date));
   const snap = await getDoc(ref);
   const existing = snap.exists() ? snap.data() : undefined;
-  const plan = completeQuizWrite(existing, result);
+  const plan = completeQuizWrite(existing, { ...result, today: date });
   if (plan.kind === 'skip') return;
   if (plan.kind === 'reject') throw new Error(plan.reason);
   const questions = Array.isArray(existing?.questions) ? existing.questions as DailyQuizQuestion[] : [];
@@ -383,6 +386,7 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     questions,
     answers: result.answers,
     timings,
+    attempts: result.attempts,
   });
   const snaps = await Promise.all(bank.map((item) => getDoc(doc(db, 'quizBank', item.id))));
   const fresh = bank.filter((_, i) => !snaps[i].exists());
@@ -398,6 +402,12 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     batch.set(doc(db, 'quizBank', item.id), { ...item.data, createdAt: serverTimestamp() });
   }
   await batch.commit();
+  try {
+    const { saveQuizProfile } = await import('./learningService');
+    await saveQuizProfile(userId, date);
+  } catch (e) {
+    console.warn('perfil da prova', e);
+  }
   try {
     await bumpChallenge(userId, 'quiz_correct', result.score);
   } catch (e) {

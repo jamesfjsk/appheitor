@@ -9,6 +9,8 @@ import { DailyQuiz } from '../../types';
 import { addDays, ensureDailyQuiz, getRecentDailyQuizzes, regenerateDailyQuiz } from '../../services/dailyQuizService';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { isAIConfigured } from '../../services/aiQuiz';
+import { getLearning, loadQuizBankRows } from '../../services/learningService';
+import type { LearningProfile } from '../../services/quiz/profile';
 
 const DailyQuizManager: React.FC = () => {
   const { childUid } = useAuth();
@@ -24,6 +26,8 @@ const DailyQuizManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [profile, setProfile] = useState<LearningProfile | null>(null);
+  const [bankRows, setBankRows] = useState<Awaited<ReturnType<typeof loadQuizBankRows>>>([]);
 
   const load = useCallback(async () => {
     if (!childUid) return;
@@ -31,6 +35,9 @@ const DailyQuizManager: React.FC = () => {
     try {
       const recent = await getRecentDailyQuizzes(childUid, tomorrow, 16);
       setHistory(recent);
+      const learning = await getLearning(childUid);
+      setProfile(learning?.profile ?? null);
+      setBankRows(await loadQuizBankRows(childUid));
     } catch (e) {
       console.error('DailyQuizManager: erro ao carregar', e);
       toast.error('Não foi possível carregar o quiz diário');
@@ -222,6 +229,87 @@ const DailyQuizManager: React.FC = () => {
             ))}
           </ul>
         )}
+      </div>
+
+      <HowHeIsGoing profile={profile} rows={bankRows} today={todayQuiz} />
+    </div>
+  );
+};
+
+function pairText(pair?: [number, number]): string {
+  if (!pair || pair[1] === 0) return '—';
+  return `${pair[0]}/${pair[1]}`;
+}
+
+const HowHeIsGoing = ({
+  profile,
+  rows,
+  today,
+}: {
+  profile: LearningProfile | null;
+  rows: { id?: string; date: string; subject?: string; kind?: string; question?: string; chosen?: string; hash?: string; correct?: boolean }[];
+  today: DailyQuiz | null;
+}) => {
+  const wrong = rows.filter((row) => row.correct === false).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 30);
+  const byHash = new Map<string, string[]>();
+  for (const row of rows) {
+    if (!row.hash) continue;
+    const list = byHash.get(row.hash) ?? [];
+    if (!list.includes(row.date)) list.push(row.date);
+    byHash.set(row.hash, list);
+  }
+  const repeats = [...byHash.entries()].filter(([, dates]) => dates.length > 1);
+  const retry = profile?.retry.d30 ?? [0, 0];
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4" data-testid="como-ele-vai">
+      <h3 className="text-lg font-bold text-gray-900">Como ele vai</h3>
+      {!profile ? <p className="text-sm text-gray-500">O perfil aparece depois da próxima prova.</p> : (
+        <>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-xl border border-gray-200 p-4">
+              <p className="text-xs font-semibold uppercase text-gray-400 mb-2">Por tipo</p>
+              {Object.entries(profile.byKind).map(([kind, row]) => (
+                <p key={kind} className="text-sm text-gray-800">{kind}: 7 dias {pairText(row.d7)} · 30 dias {pairText(row.d30)} · total {pairText(row.all)}</p>
+              ))}
+            </div>
+            <div className="rounded-xl border border-gray-200 p-4">
+              <p className="text-xs font-semibold uppercase text-gray-400 mb-2">Por assunto</p>
+              {Object.entries(profile.bySubject).map(([subject, row]) => (
+                <p key={subject} className="text-sm text-gray-800">{subject}: 7 dias {pairText(row.d7)} · 30 dias {pairText(row.d30)} · total {pairText(row.all)}</p>
+              ))}
+              <p className="text-sm text-gray-600 mt-2">Forte: {profile.strong.join(', ') || '—'} · Fraco: {profile.weak.join(', ') || '—'}</p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-800">
+            Depois do aviso: acertou {retry[0]} de {retry[1]} nos últimos 30 dias.
+            {retry[1] < 8 && <span className="text-gray-500"> Pouco dado ainda.</span>}
+          </p>
+        </>
+      )}
+      {today && (
+        <p className="text-sm text-gray-700">
+          Reflexão: {today.reflectionWords ?? '—'} palavras
+          {typeof today.reflectionThemeHits === 'number' ? ` · tema ${today.reflectionThemeHits > 0 ? 'sim' : 'não'}` : ''}.
+          {today.sanitize ? ` Gerou ${today.sanitize.kept + Object.values(today.sanitize.dropped || {}).reduce((a, b) => a + b, 0)}, descartou ${Object.values(today.sanitize.dropped || {}).reduce((a, b) => a + b, 0)} (${Object.keys(today.sanitize.dropped || {}).join(', ') || 'nenhum'}).` : ''}
+          {today.sanitize?.rejected?.length ? ` Repetidas na geração: ${today.sanitize.rejected.map((r) => r.reasons.join(', ')).filter(Boolean).join('; ') || 'sem código'}.` : ''}
+          {today.sanitize?.review?.length ? ` Revisor: ${today.sanitize.review.map((r) => r.motivo).filter(Boolean).join('; ') || 'sem motivo'}.` : ''}
+        </p>
+      )}
+      <div>
+        <p className="text-xs font-semibold uppercase text-gray-400 mb-1">Últimas erradas</p>
+        {wrong.length === 0 ? <p className="text-sm text-gray-500">Nenhuma.</p> : (
+          <ul className="text-sm text-gray-800 space-y-1">
+            {wrong.map((row) => (
+              <li key={row.id}>{row.date} · {row.subject} · marcou {row.chosen || '—'} · {row.question}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div>
+        <p className="text-xs font-semibold uppercase text-gray-400 mb-1">Repetidas</p>
+        {repeats.length === 0 ? <p className="text-sm text-gray-500">Nenhuma.</p> : repeats.map(([hash, dates]) => (
+          <p key={hash} className="text-sm text-gray-800">{dates.sort().join(' e ')}</p>
+        ))}
       </div>
     </div>
   );

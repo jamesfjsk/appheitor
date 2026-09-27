@@ -8,6 +8,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Square, Volume2 } from 'lucide-react';
 import type { LetterQuestion } from '../../../../types/english';
 import { letterMaterial } from '../../../../config/englishRewards';
+import { letterAskEmpty, letterGateMs, letterQuestionStep, type LetterAsk } from '../../../../services/english/letterGate';
 import { playText, prefetchAudio, stopAudio } from '../../../../services/englishTts';
 import type { ContractScreenProps } from './ContractShell';
 
@@ -34,6 +35,9 @@ interface QState {
   evidenceStage: 'none' | 'ask' | 'done';
   evidenceOk: boolean | null;
   clicked: number | null;
+  /** Compreensão: as opções esperam a frase. Decisão já nasce aberta. */
+  ask: LetterAsk;
+  optionsOpen: boolean;
 }
 
 const WORD_RE = /^[A-Za-z'’-]/;
@@ -158,12 +162,24 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
   const { content } = contract;
   const questions: LetterQuestion[] = content.questions;
   const [qi, setQi] = useState(0);
-  const [qs, setQs] = useState<QState[]>(() => questions.map(() => ({ picked: null, correct: null, evidenceStage: 'none', evidenceOk: null, clicked: null })));
+  const [qs, setQs] = useState<QState[]>(() => questions.map((item) => ({
+    picked: null,
+    correct: null,
+    evidenceStage: 'none',
+    evidenceOk: null,
+    clicked: null,
+    ask: letterAskEmpty(),
+    optionsOpen: item.kind !== 'comprehension',
+  })));
   const [glossaryHovers, setGlossaryHovers] = useState(0);
   const [reading, setReading] = useState(false);
   const [readingId, setReadingId] = useState<number | null>(null);
   const [finished, setFinished] = useState(false);
+  const [questionsOpen, setQuestionsOpen] = useState(false);
+  const [gateKind, setGateKind] = useState<'audio' | 'timer'>('audio');
+  const [listenedMs, setListenedMs] = useState(0);
   const readToken = useRef(0);
+  const openedAt = useRef(0);
 
   const sentences = useMemo<Sentence[]>(() => {
     const map = new Map<string, string>();
@@ -186,19 +202,58 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
   const st = qs[qi];
   const updateQ = (patch: Partial<QState>) => setQs((prev) => prev.map((s, i) => (i === qi ? { ...s, ...patch } : s)));
 
-  const readAll = async () => {
+  const readAll = async (): Promise<'done' | 'stopped' | 'failed'> => {
     const token = ++readToken.current;
     setReading(true);
     for (const s of sentences) {
-      if (readToken.current !== token) break;
+      if (readToken.current !== token) return 'stopped';
       setReadingId(s.id);
-      await playText(s.text.trim());
+      const heard = await playText(s.text.trim());
+      if (readToken.current !== token) return 'stopped';
+      if (!heard) {
+        setReadingId(null);
+        setReading(false);
+        return 'failed';
+      }
     }
-    if (readToken.current === token) {
-      setReadingId(null);
-      setReading(false);
-    }
+    if (readToken.current !== token) return 'stopped';
+    setReadingId(null);
+    setReading(false);
+    return 'done';
   };
+
+  useEffect(() => {
+    let cancel = false;
+    openedAt.current = Date.now();
+    const words = content.text.trim().split(/\s+/).filter(Boolean).length;
+    const wait = letterGateMs(words);
+    let timer = 0;
+    const open = (kind: 'audio' | 'timer') => {
+      if (cancel) return;
+      window.clearTimeout(timer);
+      setQuestionsOpen(true);
+      setGateKind(kind);
+      setListenedMs(Date.now() - openedAt.current);
+    };
+    const armTimer = () => {
+      const left = wait - (Date.now() - openedAt.current);
+      if (left <= 0) open('timer');
+      else timer = window.setTimeout(() => open('timer'), left);
+    };
+    void readAll().then((result) => {
+      if (cancel) return;
+      if (result === 'done') open('audio');
+      else armTimer();
+    });
+    return () => {
+      cancel = true;
+      window.clearTimeout(timer);
+      readToken.current += 1;
+      stopAudio();
+    };
+    // A carta toca uma vez ao abrir. Ouvir de novo não reabre o portão.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content.text]);
 
   const stopReading = () => {
     readToken.current++;
@@ -216,7 +271,19 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
   };
 
   const clickSentence = (s: Sentence) => {
-    if (!q || !st || st.evidenceStage !== 'ask') return;
+    if (!q || !st || !questionsOpen) return;
+    if (q.kind === 'comprehension' && !st.optionsOpen) {
+      const correctId = sentences.find((row) => hasEvidence(row.text, q.evidence))?.id ?? -1;
+      const nextAsk = letterQuestionStep(st.ask, s.id, hasEvidence(s.text, q.evidence), correctId);
+      if (nextAsk.mark === 'found') sfx.hit(1);
+      else sfx.miss();
+      updateQ({
+        ask: nextAsk,
+        optionsOpen: nextAsk.open,
+      });
+      return;
+    }
+    if (st.evidenceStage !== 'ask') return;
     const ok = hasEvidence(s.text, q.evidence);
     if (ok) sfx.hit(2);
     else sfx.miss();
@@ -235,19 +302,30 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
     const decision = decisionIdx >= 0 ? qs[decisionIdx] : null;
     // evidenceOk=false só quando a decisão foi acertada sem mostrar a frase certa
     const evidenceOk = !(decision && decision.correct && decision.evidenceOk === false);
-    const evidenceHits = qs.filter((s) => s.evidenceOk === true).length;
+    const evidenceHits = qs.filter((s) => s.ask.mark === 'found').length;
     onFinish({
       score: hits,
       max: questions.length,
       materialEarned: letterMaterial(hits, evidenceOk, questions.length),
       answer: qs.map((s) => (s.picked === null ? '-' : String(s.picked))).join(','),
-      details: { glossaryHovers, evidenceHits, evidenceOk, answers: qs.map((s) => s.picked), kinds: questions.map((x) => x.kind), genre: content.genre },
+      details: {
+        glossaryHovers,
+        evidenceHits,
+        evidenceOk,
+        answers: qs.map((s) => s.picked),
+        kinds: questions.map((x) => x.kind),
+        genre: content.genre,
+        listenedMs,
+        gate: gateKind,
+        evidenceFirst: qs.map((s) => s.ask.mark),
+      },
     });
   };
 
   const showEvidence = Boolean(st && (st.correct === false || st.evidenceStage === 'done'));
   const evidenceIds = useMemo(() => (q ? sentences.filter((s) => hasEvidence(s.text, q.evidence)).map((s) => s.id) : []), [q, sentences]);
   const askingEvidence = st?.evidenceStage === 'ask';
+  const askingSentence = Boolean(q && q.kind === 'comprehension' && questionsOpen && st && !st.optionsOpen);
   const canNext = Boolean(st && st.picked !== null && st.evidenceStage !== 'ask');
 
   return (
@@ -265,12 +343,13 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
             <button onClick={() => void readAll()} className="mc-btn mc-btn-stone px-3 py-1.5 text-sm font-bold"><Volume2 className="w-4 h-4" /> Ouvir o texto</button>
           )}
         </div>
-        <div className={`mc-paper rounded p-3 text-gray-900 text-[15px] leading-relaxed ${askingEvidence ? 'ring-2 ring-yellow-400' : ''}`} data-testid="letter-text">
+        <div className={`mc-paper rounded p-3 text-gray-900 text-[15px] leading-relaxed ${askingEvidence || askingSentence ? 'ring-2 ring-yellow-400' : ''}`} data-testid="letter-text">
           {sentences.map((s) => {
-            const isEvidence = showEvidence && evidenceIds.includes(s.id);
-            const isWrongClick = st?.evidenceStage === 'done' && st.evidenceOk === false && st.clicked === s.id;
+            const isEvidence = (showEvidence || st?.ask.mark === 'shown') && evidenceIds.includes(s.id);
+            const isWrongClick = (st?.evidenceStage === 'done' && st.evidenceOk === false && st.clicked === s.id) || Boolean(st?.ask.struck.includes(s.id));
+            const clickable = askingEvidence || askingSentence;
             const cls = [
-              askingEvidence ? 'cursor-pointer hover:bg-sky-100' : '',
+              clickable ? 'cursor-pointer hover:bg-sky-100' : '',
               isEvidence ? 'bg-yellow-200' : '',
               isWrongClick ? 'bg-red-200 line-through decoration-red-500' : '',
               readingId === s.id ? 'bg-sky-100' : '',
@@ -278,7 +357,7 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
             return (
               <React.Fragment key={s.id}>
                 <span
-                  role={askingEvidence ? 'button' : undefined}
+                  role={clickable ? 'button' : undefined}
                   className={`rounded px-0.5 ${cls}`}
                   onClick={() => clickSentence(s)}
                   data-testid={`sentence-${s.id}`}
@@ -301,14 +380,26 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
 
       {/* Perguntas ou tradução */}
       <div>
-        {!finished && q && st && (
+        {!finished && !questionsOpen && (
+          <div className="mc-card p-4" data-testid="letter-gate">
+            <p className="text-base font-bold text-white leading-snug">Ouça a carta. As perguntas abrem quando ela terminar.</p>
+          </div>
+        )}
+
+        {!finished && questionsOpen && q && st && (
           <div className="mc-card p-3" data-testid={`question-${qi}`}>
             <div className="flex items-center justify-between mb-2">
               <span className="mc-font text-[9px] mc-muted uppercase">Pergunta {qi + 1} de {questions.length}</span>
               <button onClick={() => void playText(q.question)} aria-label="Ouvir a pergunta" className="mc-btn mc-btn-dark w-8 h-8 p-0"><Volume2 className="w-4 h-4" /></button>
             </div>
             <p className="text-base font-bold text-white leading-snug mb-3">{q.question}</p>
-            <div className="grid gap-2">
+            {askingSentence && (
+              <p className="text-sm font-bold text-white mb-2" data-testid="ask-sentence">Onde está a resposta? Clique na frase.</p>
+            )}
+            {askingSentence && st.ask.misses > 0 && (
+              <p className="text-sm mc-bad font-bold mb-2" data-testid="sentence-miss">Não é essa. Leia de novo.</p>
+            )}
+            {st.optionsOpen && <div className="grid gap-2">
               {q.options.map((opt, idx) => {
                 const picked = st.picked === idx;
                 const reveal = st.picked !== null;
@@ -325,9 +416,9 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
                   </button>
                 );
               })}
-            </div>
+            </div>}
 
-            {st.picked !== null && (
+            {st.optionsOpen && st.picked !== null && (
               <div className="mt-3 text-sm">
                 {st.correct ? (
                   <p className="mc-good font-bold">Certo.</p>

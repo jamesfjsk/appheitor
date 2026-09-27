@@ -1,6 +1,6 @@
 import { expect, run, test } from './harness';
 import { LEVELS } from '../../../config/englishLevels';
-import { forgeItemMixFor, forgeStepDown, forgeTargetFor, lastForgeScore } from '../prompts';
+import { forgeItemMixFor, forgeStepDown, forgeTargetFor, lastForgeScore, yesterdayMistakes } from '../prompts';
 import { validateForge } from '../validators';
 
 test('forgeItemMixFor: ordem respeita o nível', () => {
@@ -53,6 +53,31 @@ test('lastForgeScore: a aberta de ontem não esconde a concluída de anteontem',
   const none = lastForgeScore([forgePlan('2026-09-24', null)], '2026-09-25');
   expect(none).toEqual({ score: 0, max: 0 });
   expect(forgeStepDown(none.score, none.max)).toBe(false);
+});
+
+const scramble = (n: number) => ({ kind: 'scramble' as const, words: ['a', 'b', 'c', 'd', 'e', 'f'].slice(0, n), answer: 'a b', rule: 'Ordem.' });
+const gap = (sentence: string) => ({ kind: 'gap' as const, sentence, options: ['is', 'are', 'am'], answer: 0, rule: 'is para um.' });
+
+test('yesterdayMistakes: a última concluída, só no tipo do dia', () => {
+  const long = [0, 1, 2, 3, 4, 5].map(() => scramble(6));
+  const formMix = forgeItemMixFor(1, 'form');
+  const none = yesterdayMistakes([
+    {
+      date: '2026-09-25',
+      contracts: { c4: { type: 'forge', content: { items: long }, result: { details: { wrongItems: [0, 1, 2, 3, 4, 5] } } } },
+    },
+    { date: '2026-09-26', contracts: { c4: { type: 'forge', result: null } } },
+  ], '2026-09-27', formMix);
+  expect(none).toEqual([]);
+  const gaps = [gap('There ___ a ball.'), gap('There ___ two cats.')];
+  const back = yesterdayMistakes([
+    {
+      date: '2026-09-25',
+      contracts: { c4: { type: 'forge', content: { items: gaps }, result: { details: { wrongItems: [0, 1] } } } },
+    },
+  ], '2026-09-27', formMix);
+  expect(back).toEqual(gaps);
+  expect(yesterdayMistakes([], '2026-09-27', formMix)).toEqual([]);
 });
 
 test('validador: scramble de 6 peças no nível 1 cai; o de 5 fica', () => {

@@ -1,6 +1,6 @@
 /** Regras da prova do dia v2 (decisão 26): tempo de leitura, reflexão e limpeza de pergunta. */
 
-export const EXPLAIN_READ_MS = { min: 4000, max: 12000 };
+export const EXPLAIN_READ_MS = { min: 6000, max: 12000 };
 export const LESSON_READ_MS = { min: 8000, max: 30000 };
 export const REFLECTION_MIN_WORDS = 10;
 export const DAILY_QUIZ_MODEL = 'gpt-4o';
@@ -161,6 +161,86 @@ export function reflectionOk(text: string, about?: { prompt: string; title: stri
   if (uniqueWordCount(trimmed) < 6) return false;
   if (contentWords(trimmed).length < 3) return false;
   return true;
+}
+
+/** 8 palavras nos 7 primeiros dias desde o lançamento; depois, 12. */
+export function reflectionMinWords(launchedOn?: string | null, today?: string): number {
+  if (!launchedOn || !today || launchedOn > today) return 12;
+  const start = Date.parse(`${launchedOn}T00:00:00Z`);
+  const end = Date.parse(`${today}T00:00:00Z`);
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return 12;
+  const days = Math.floor((end - start) / 86400000);
+  return days < 7 ? 8 : 12;
+}
+
+function oneLetterOff(a: string, b: string): boolean {
+  if (a === b) return true;
+  const d = a.length - b.length;
+  if (Math.abs(d) > 1) return false;
+  if (d === 0) {
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diff += 1;
+    return diff <= 1;
+  }
+  const [long, short] = d > 0 ? [a, b] : [b, a];
+  let i = 0;
+  let j = 0;
+  let skips = 0;
+  while (i < long.length && j < short.length) {
+    if (long[i] === short[j]) {
+      i += 1;
+      j += 1;
+    } else {
+      skips += 1;
+      i += 1;
+      if (skips > 1) return false;
+    }
+  }
+  return true;
+}
+
+/** Palavras do tema que aparecem na reflexão. 5+ letras aceitam 1 letra diferente. */
+export function reflectionThemeHits(text: string, about: { prompt: string; title: string; lesson: string }): number {
+  const theme = [
+    ...contentWords(about.title),
+    ...contentWords(about.lesson),
+    ...contentWords(about.prompt),
+  ];
+  const said = normalizeQuizText(text).split(' ').filter((w) => w.length >= 4);
+  const used = new Set<string>();
+  let hits = 0;
+  for (const word of said) {
+    for (const themeWord of theme) {
+      if (used.has(themeWord)) continue;
+      const close = word === themeWord || (themeWord.length >= 5 && oneLetterOff(word, themeWord));
+      if (!close) continue;
+      used.add(themeWord);
+      hits += 1;
+      break;
+    }
+  }
+  return hits;
+}
+
+export function reflectionReady(
+  text: string,
+  about: { prompt: string; title: string; lesson: string },
+  launchedOn?: string | null,
+  today?: string,
+): boolean {
+  if (!reflectionOk(text, about)) return false;
+  if (wordCount(text) < reflectionMinWords(launchedOn, today)) return false;
+  const theme = [...contentWords(about.title), ...contentWords(about.lesson), ...contentWords(about.prompt)];
+  if (theme.length === 0) return true;
+  return reflectionThemeHits(text, about) >= 1;
+}
+
+/** Conta, inglês, aplicar e causa têm segunda tentativa. Fato e dilema não. */
+export function retryable(question: { skill?: string; kind?: string }): boolean {
+  if (question.kind === 'dilemma' || question.skill === 'LIC.DILEMA') return false;
+  const skill = question.skill || '';
+  if (skill.startsWith('MAT.') || skill.startsWith('ING.')) return true;
+  return skill === 'LIC.APLICA' || skill === 'CIE.CAUSA';
 }
 
 export function knowledgeAreasForWeekday(weekday: number): string[] {

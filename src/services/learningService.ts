@@ -7,6 +7,7 @@ import { weeklyStatement } from './village/bank';
 import { countWeekTorches } from './village/season';
 import { getVillage } from './villageService';
 import { touchHealth } from './observability';
+import { buildProfile, type ProfileItem } from './quiz/profile';
 
 function asDate(value: unknown): Date {
   if (value instanceof Date) return value;
@@ -78,6 +79,24 @@ export async function computeWeeklyLearning(uid: string, week: string): Promise<
   }).length;
   const wordsMastered = wordsFromVocab(baseSnap.data()?.vocab) || Number(village.stats.wordsMastered || 0);
 
+  const profile = buildProfile(bankSnap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      date: String(data.date || ''),
+      category: String(data.category || ''),
+      subject: String(data.subject || ''),
+      skill: String(data.skill || ''),
+      kind: String(data.kind || ''),
+      question: String(data.question || ''),
+      correct: data.correct === true,
+      msToAnswer: Number(data.msToAnswer) || 0,
+      attempts: Number(data.attempts) || 1,
+      supportLevel: typeof data.supportLevel === 'number' ? data.supportLevel : undefined,
+      retryOk: data.retryOk === true,
+    } satisfies ProfileItem;
+  }), getTodayBrazil());
+
   const docData: LearningDoc = {
     week,
     quizAccuracyByCategory,
@@ -110,8 +129,9 @@ export async function computeWeeklyLearning(uid: string, week: string): Promise<
       fullDays: docData.fullDays,
       challengesDone: docData.challengesDone,
       updatedAt: docData.updatedAt,
+      profile,
       quizAccuracyByCategory: deleteField(),
-    } : { updatedAt: docData.updatedAt }),
+    } : { updatedAt: docData.updatedAt, profile }),
   }, { merge: true });
   if (writeTop) {
     await setDoc(ref, { quizAccuracyByCategory }, { merge: true });
@@ -136,5 +156,48 @@ export async function getLearning(uid: string): Promise<LearningDoc | null> {
     fullDays: Number(d.fullDays) || 0,
     challengesDone: Number(d.challengesDone) || 0,
     updatedAt: String(d.updatedAt || ''),
+    ...(d.profile ? { profile: d.profile as LearningDoc['profile'] } : {}),
   };
+}
+
+export async function saveQuizProfile(uid: string, today: string): Promise<void> {
+  const snap = await getDocs(query(collection(db, 'quizBank'), where('userId', '==', uid)));
+  const profile = buildProfile(snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      date: String(data.date || ''),
+      category: String(data.category || ''),
+      subject: String(data.subject || ''),
+      skill: String(data.skill || ''),
+      kind: String(data.kind || ''),
+      question: String(data.question || ''),
+      correct: data.correct === true,
+      msToAnswer: Number(data.msToAnswer) || 0,
+      attempts: Number(data.attempts) || 1,
+      supportLevel: typeof data.supportLevel === 'number' ? data.supportLevel : undefined,
+      retryOk: data.retryOk === true,
+    } satisfies ProfileItem;
+  }), today);
+  await setDoc(doc(db, 'learning', uid), { profile, updatedAt: today }, { merge: true });
+}
+
+export async function loadQuizBankRows(uid: string) {
+  const snap = await getDocs(query(collection(db, 'quizBank'), where('userId', '==', uid)));
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      date: String(data.date || ''),
+      category: String(data.category || ''),
+      subject: String(data.subject || ''),
+      skill: String(data.skill || ''),
+      kind: String(data.kind || ''),
+      question: String(data.question || ''),
+      correct: data.correct === true,
+      chosen: String(data.chosen || ''),
+      hash: String(data.hash || ''),
+      msToAnswer: Number(data.msToAnswer) || 0,
+    };
+  });
 }

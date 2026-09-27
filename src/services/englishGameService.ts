@@ -157,14 +157,14 @@ export function playWord(word: EnglishWord): void {
 
 /** Sempre a voz nova. */
 export function speakAsync(text: string): Promise<void> {
-  return playText(text);
+  return playText(text).then(() => undefined);
 }
 
 /**
  * Toca o mp3 da palavra e resolve no 'ended'. Sem mp3, voz nova.
  */
 export function playWordAsync(word: EnglishWord): Promise<void> {
-  if (!word.audio) return playText(word.word);
+  if (!word.audio) return playText(word.word).then(() => undefined);
   const el = audioFor(word.audio);
   return new Promise<void>((resolve) => {
     let settled = false;

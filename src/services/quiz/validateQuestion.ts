@@ -220,17 +220,20 @@ function stemLeak(question: string, answer: string): boolean {
   return q.split(' ').some((word) => word.startsWith(stem));
 }
 
-function trapHitsDistractor(trap: string, options: string[], answer: string): boolean {
+/** O trap nomeia esta opção: uma palavra de 5+ letras dela, ou o texto inteiro se for curto. */
+export function trapNamesOption(trap: string, option: string): boolean {
   const nt = normalizeQuizText(trap);
+  const n = normalizeQuizText(option);
+  if (!n || !nt) return false;
+  const words = n.split(' ').filter((w) => w.length >= 5);
+  if (words.some((w) => nt.includes(w))) return true;
+  return n.length <= 12 && nt.includes(n);
+}
+
+function trapHitsDistractor(trap: string, options: string[], answer: string): boolean {
   return options
     .filter((o) => normalizeQuizText(o) !== normalizeQuizText(answer))
-    .some((o) => {
-      const n = normalizeQuizText(o);
-      if (!n) return false;
-      const words = n.split(' ').filter((w) => w.length >= 5);
-      if (words.some((w) => nt.includes(w))) return true;
-      return n.length <= 12 && nt.includes(n);
-    });
+    .some((o) => trapNamesOption(trap, o));
 }
 
 function overlapRatio(a: string, b: string): number {

@@ -1887,6 +1887,201 @@ As três têm 8. Nenhuma começa com "Qual fato é verdadeiro". Nenhum distrator
 
 **Pare para o commit do pai.**
 
+## Pacote 14b — a Mina lê antes de responder
+
+Sentimento alvo: a Carta se ouve e se lê antes das perguntas, e a resposta sai do texto, não do chute.
+
+### O que mudou
+
+1. Ao abrir, a Carta toca sozinha, frase por frase, com a frase marcada. Enquanto toca, o lado das perguntas só diz: "Ouça a carta. As perguntas abrem quando ela terminar." Se ele aperta Parar ou a voz não sai, as perguntas esperam `letterGateMs` (600 ms por palavra, entre 12 s e 45 s), contado desde a abertura. "Ouvir o texto" continua para ouvir de novo. O portão vale no refazer. Grava `details.listenedMs` e `details.gate` (`audio` ou `timer`).
+2. Na compreensão, antes das opções: "Onde está a resposta? Clique na frase." A frase certa abre as opções (`found`). A primeira errada fica riscada, com "Não é essa. Leia de novo." A segunda errada marca a certa em amarelo e abre as opções (`shown`). A decisão continua como estava: responde e depois mostra a frase. `evidenceHits` soma os `found`. O material da Carta não mudou.
+3. Na Ferraria, a frase aparece primeiro. As opções e o campo de digitar abrem depois de `readingMs` da frase (entre 1,5 s e 3 s). Grava `details.msPerItem`. Erro, dica, refazer e pagamento ficaram iguais.
+4. `yesterdayMistakes` usa a Ferraria concluída mais recente antes da data, como o placar do 14a-2. Só entram itens cujo tipo o mix do dia ainda pede. Um dia de lacuna e digitação não recebe frase embaralhada.
+
+### Carta na conta de teste
+
+Data 20/12, contrato c3, "Scout Report: Mina Verde". 3 de 3. Tempo do contrato 40 s. A leitura abriu as perguntas pelo áudio.
+
+```json
+{"listenedMs":35937,"gate":"audio","evidenceFirst":[null,"found","found"],"evidenceHits":2,"durationSec":40}
+```
+
+A decisão não pede a frase antes. As duas de compreensão acharam a frase (`found`).
+
+### Fotos
+
+- `docs/exemplos/telas/etapa-3/pacote-14b/carta-portao-1280.png` e `carta-portao-1920.png`
+- `docs/exemplos/telas/etapa-3/pacote-14b/carta-frase-1280.png` e `carta-frase-1920.png`
+- `docs/exemplos/telas/etapa-3/pacote-14b/carta-errada-1280.png` e `carta-errada-1920.png`
+- `docs/exemplos/telas/etapa-3/pacote-14b/ferraria-fechada-1280.png` e `ferraria-fechada-1920.png`
+
+Frame lido no contrato, nas duas resoluções: a carta e o recado do portão cabem no quadro, a Vila continua atrás, o botão Parar e o Sair ficam no clique. A frase errada sai riscada em vermelho. Na Ferraria, "I ___ a miner." aparece sem as opções.
+
+### Arquivos
+
+- `src/services/english/letterGate.ts`
+- `src/components/hero/english/base/LetterContract.tsx`
+- `src/components/hero/english/base/ForgeContract.tsx`
+- `src/services/englishTts.ts`
+- `src/services/english/prompts.ts`
+- `src/services/englishAi.ts`
+- `src/services/english/__tests__/letterGate.test.ts`
+- `src/services/english/__tests__/forgeMix.test.ts`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (seção 12)
+
+### Barra da lei
+
+1. Intenção. A Carta pede ouvido antes da pergunta, e a compreensão pede a frase antes da opção. A Ferraria mostra a frase antes do clique. Passa.
+2. Sistema. O papel da Carta, o cartão e os botões que já existiam. Passa.
+3. Fonte. Título curto na pixel. O recado e a pergunta em Fredoka. Passa.
+4. Ícone. O envelope e o ferreiro que já estavam, no tamanho do quadro. Passa.
+5. Hierarquia. Enquanto lê, o recado é a âncora. Depois, a pergunta. Passa.
+6. A cena continua. A Vila fica atrás do quadro da Mina. Passa.
+7. Arestas. 1280 e 1920. Frame lido: nada sobreposto, cortado ou fora do clique no contrato.
+8. Mundo. A Mina continua no React. Passa.
+9. Economia. Sem gold, material ou nível novos. O material da Carta segue a conta de antes. Passa.
+10. Consequência. Errar a frase uma vez risca e pede para ler de novo. A segunda mostra a certa. Passa.
+11. Estado honesto. `listenedMs`, `gate` e `evidenceFirst` estão no resultado. Passa.
+12. Mouse. Parar, Sair, a frase e as opções cabem no clique. Passa.
+13. Craft. A frase da Carta acende enquanto a voz toca. A Ferraria espera o tempo de leitura. Passa.
+14. Copy. As frases do portão, da frase e do erro são as do pacote. Passa.
+15. Evidência. Fotos acima. Carta feita do começo ao fim, JSON acima.
+16. Arestas. Parar ou voz muda o portão para o relógio. Dia de forma não herda embaralhada. Sem Ferraria concluída, nenhum item. Passa.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 39 arquivos, saída 0 (a pasta village entrou nessa suíte)
+- `letterGateMs(10)` 12 s, `letterGateMs(60)` 36 s, `letterGateMs(100)` 45 s
+- Ferraria de 25/09 com 6 embaralhadas, plano de 26/09 aberto, data 27/09 e alvo de forma: nenhum item. Duas lacunas erradas no alvo com lacuna: as duas. Nenhuma concluída: nenhum item.
+
+### Fora
+
+- O revisor de conteúdo da Mina
+- O Recado
+- Gold, material e nível
+- Pacotes 11 e 12
+
+**Pare para o commit do pai.**
+
+## Pacote 11
+
+Sentimento alvo: errar uma conta não entrega a resposta; o Sábio dá um aviso, e a certa só acende quando a segunda escolha já foi feita. No fato, a certa acende na hora.
+
+### O que mudou
+
+1. `buildProfile` calcula o perfil da §5.3 a partir do `quizBank`. Entra em `learning/{uid}.profile` ao fechar a prova e em `computeWeeklyLearning`.
+2. O portão da explicação espera no mínimo 6 s. A explicação mostra o porquê e, abaixo, a armadilha. Sem armadilha, fica só o porquê.
+3. Item com escada (`MAT.*`, `ING.*`, `LIC.APLICA`, `CIE.CAUSA`) e primeira escolha errada: a certa fica apagada, a escolhida fica marcada, e entra o aviso. O aviso é a armadilha quando ela nomeia a opção e não entrega a resposta; senão é uma pista da área, sem repetir a mesma em 14 dias. A segunda certa traz uma linha `desc_*`. A segunda errada acende a certa e traz uma linha `seg_*`. Fato errado acende a certa, traz uma linha `fato_*` e não abre segunda tentativa. "Não foi dessa vez." saiu. O acerto de primeira continua "Isso." Nota, gold e esmeralda olham só a primeira escolha.
+4. Inglês: o `audioText` toca devagar antes do clique, e "Ouvir" fica ao lado do enunciado.
+5. Reflexão: o molde "Hoje eu … porque …" aparece enquanto `village.stats.reflections < 10`. O contador "N / mínimo" fica ao lado de Entregar. Entregar pede 12 palavras (8 nos 7 primeiros dias desde `village.launchedOn`) e 1 palavra do tema, com a tolerância de 26/09 (sem acento, até 1 letra diferente em palavra de 5 letras ou mais). Grava `reflectionWords`, `reflectionThemeHits` e `reflectionMs`.
+6. No fim de `DailyQuizManager`, o cartão "Como ele vai": acerto por tipo e por assunto em 7 dias, 30 dias e total; últimas 30 erradas; repetidas pelo hash; gerou/descartou do dia, com os códigos de `sanitize.dropped`, as razões de `sanitize.rejected` e os motivos do revisor; a reflexão; "Depois do aviso: acertou X de Y", com "Pouco dado ainda." quando Y é menor que 8.
+
+### Tabela à mão (conta de teste, total, mínimo 4)
+
+| categoria | acertos |
+|---|---|
+| animais | 0/8 |
+| matematica | 2/8 |
+| brasil | 6/6 |
+| corpo | 8/8 |
+
+`strong`: brasil, corpo, matematica. `weak`: animais, matematica, brasil. As duas listas se cruzam porque só quatro categorias passam de 4 perguntas, e o perfil guarda as três de cima e as três de baixo.
+
+### `learning/DydxTQ0cGEbX46LLlQxxD123pQD3.profile` (gravado em 26/09)
+
+```json
+{
+  "strong": ["brasil", "corpo", "matematica"],
+  "weak": ["animais", "matematica", "brasil"],
+  "retry": { "d30": [0, 0], "all": [0, 0] },
+  "lastWrong": [
+    "2026-09-21 futebol",
+    "2026-09-21 história",
+    "2026-09-21 inglês",
+    "2026-09-21 ciências",
+    "2026-09-21 matematica",
+    "2026-09-21 matematica",
+    "2026-09-20 futebol",
+    "2026-09-20 história",
+    "2026-09-20 inglês",
+    "2026-09-20 ciências"
+  ]
+}
+```
+
+`retry` está 0 de 0: o banco antigo não tem segunda tentativa. O painel diz "Pouco dado ainda."
+
+### Fotos
+
+Conta `teste@flash.com`, `?d=2026-12-10&h=10`, Vite em `http://localhost:5174`. A prova não foi entregue.
+
+- `docs/exemplos/telas/etapa-3/pacote-11/aviso-1280.png` e `aviso-1920.png` — conta errada (marcou 10; a certa é 12). A certa apagada. Aviso: "Confere os números do enunciado. Todos entraram na sua conta?" A armadilha dessa pergunta nomeia o 9, então a pista foi da área.
+- `docs/exemplos/telas/etapa-3/pacote-11/segunda-1280.png` e `segunda-1920.png` — segunda escolha certa. "Descobriu." O porquê e a armadilha no mesmo quadro.
+- `docs/exemplos/telas/etapa-3/pacote-11/fato-1280.png` e `fato-1920.png` — história, 8 de 8, fato errado. A certa acesa, a escolhida marcada, "A certa é outra. Guarda o porquê: ela volta.", porquê e armadilha. Sem segunda tentativa.
+- `docs/exemplos/telas/etapa-3/pacote-11/reflexao-1280.png` e `reflexao-1920.png` — molde "Hoje eu … porque …" e contador "7 / 12".
+
+Frame lido, 1280×720 e 1920×1080: nada sobreposto, cortado ou fora do clique no papiro. A Vila continua atrás. O aviso do Baú no canto é o que a Vila já mostra.
+
+A foto do cartão "Como ele vai" não saiu. O cartão está no fim do painel do pai. A conta de teste é criança e não abre esse painel. `admin@flash.com` aponta para a conta do Heitor, e eu não entrei nela.
+
+### Arquivos
+
+- `src/services/quiz/profile.ts`
+- `src/services/quiz/nudge.ts`
+- `src/data/helpLines.ts`
+- `src/services/quiz/provaRules.ts`
+- `src/services/quiz/validateQuestion.ts`
+- `src/services/quiz/bankWrite.ts`
+- `src/services/quiz/closeQuiz.ts`
+- `src/services/dailyQuizService.ts`
+- `src/services/learningService.ts`
+- `src/types/village.ts`
+- `src/types/index.ts`
+- `src/components/hero/DailyQuiz.tsx`
+- `src/components/parent/DailyQuizManager.tsx`
+- `src/services/quiz/__tests__/profile.test.ts`
+- `src/services/quiz/__tests__/fixtures/quizbank-teste.json`
+- `src/services/village/__tests__/provaV2.test.ts`
+- `docs/etapas/ETAPA_2_LANCAMENTO.md` (seção 12, linha do p11)
+
+### Barra da lei
+
+1. Intenção. Errar uma conta traz um aviso, com a certa apagada. Errar um fato acende a certa. A reflexão mostra o molde e o quanto falta escrever. Passa.
+2. Sistema. O papiro, `mc-slot` e os botões que já existiam. O painel do pai continua no cartão branco. Passa.
+3. Fonte. O passo e o contador na pixel. O enunciado, o aviso e a explicação em Fredoka. Passa.
+4. Ícone. O Sábio que já estava, no tamanho do quadro. "Ouvir" é texto no `mc-slot` de 44 px. Passa.
+5. Hierarquia. No erro, o aviso é a âncora. No fato, a certa acesa e o porquê. Na reflexão, a pergunta e o contador. Passa.
+6. A cena continua. A Vila fica atrás do papiro. Passa.
+7. Arestas. 1280 e 1920. Frame lido: a armadilha cabe no papiro; o contador "7 / 12" cabe ao lado de Entregar. Passa.
+8. Mundo. A prova continua no React. Passa.
+9. Economia. A segunda escolha não paga. Gold, XP e esmeralda seguem a primeira. Passa.
+10. Consequência. O erro de escada pede outra olhada. O erro de fato mostra a certa e o porquê. Passa.
+11. Estado honesto. `supportLevel` 0, 1 ou 3. O perfil gravado bate com a tabela. Passa.
+12. Mouse. Opções, Ouvir, molde e Entregar no clique de 44 px. Passa.
+13. Craft. O aviso é falado. A "Próxima" espera a leitura. O papiro rola até a armadilha. Passa.
+14. Copy. As linhas saíram de `FALAS_APRENDER.md` §1. Sem frase dizendo que a segunda não paga. Passa.
+15. Evidência. Fotos acima, nas duas resoluções. O perfil está no Firestore da conta de teste. A foto do painel do pai ficou de fora, pelo motivo acima.
+16. Arestas. Fato sem segunda tentativa. Reflexão de 11 palavras reprova no 8º dia e passa no dia do lançamento. "lojica" conta como "lógica". Passa.
+
+Nenhuma questão nova. As seis perguntas da lei do professor não se aplicam a item gerado nesta sessão.
+
+### Como verificou
+
+- `npx tsc --noEmit -p tsconfig.app.json` — 0 erros
+- `npx eslint src --max-warnings 8` — 0 erros, 8 avisos de antes
+- `npm run test:english` — 40 arquivos, saída 0
+- `profile.test.ts` e o teste novo em `provaV2.test.ts`: `readingMs` de 9 palavras com piso 6000 devolve 6000; 11 palavras reprovam em 03/10 e passam em 26/09; a frase real de 26/09 aprova
+
+### Fora
+
+- A foto do cartão "Como ele vai"
+- Pacote 12
+- Pacotes AP
+
+**Pare para o commit do pai.**
+
 
 
 

@@ -323,6 +323,7 @@ export interface LearningDoc {
   fullDays: number;
   challengesDone: number;
   updatedAt: string;
+  profile?: import('../services/quiz/profile').LearningProfile;
 }
 
 export type VillageSceneEventKind =

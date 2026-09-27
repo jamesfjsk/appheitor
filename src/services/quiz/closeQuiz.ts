@@ -1,5 +1,5 @@
 import type { QuizTiming } from './bankWrite';
-import { reflectionOk, wordCount } from './provaRules';
+import { reflectionReady, reflectionThemeHits, wordCount } from './provaRules';
 
 export type { QuizTiming };
 
@@ -94,6 +94,9 @@ export function completeQuizWrite(
     reflection: string;
     reflectionNote?: string;
     about: QuizAbout;
+    launchedOn?: string | null;
+    today?: string;
+    reflectionMs?: number;
   },
 ): { kind: 'skip' } | { kind: 'reject'; reason: string } | {
   kind: 'write';
@@ -108,12 +111,14 @@ export function completeQuizWrite(
     answers: string[];
     reflection: string;
     reflectionWords: number;
+    reflectionThemeHits: number;
+    reflectionMs?: number;
     reflectionNote?: string;
   };
 } {
   if (existing?.completed === true) return { kind: 'skip' };
   const reflection = result.reflection.trim();
-  if (!reflectionOk(reflection, result.about)) {
+  if (!reflectionReady(reflection, result.about, result.launchedOn, result.today)) {
     return { kind: 'reject', reason: 'A reflexão ainda não está pronta.' };
   }
   const note = result.reflectionNote?.trim();
@@ -130,6 +135,8 @@ export function completeQuizWrite(
       answers: result.answers,
       reflection,
       reflectionWords: wordCount(reflection),
+      reflectionThemeHits: reflectionThemeHits(reflection, result.about),
+      ...(typeof result.reflectionMs === 'number' ? { reflectionMs: result.reflectionMs } : {}),
       ...(note ? { reflectionNote: note } : {}),
     },
   };

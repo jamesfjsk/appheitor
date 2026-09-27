@@ -137,42 +137,42 @@ export function stopAudio(): void {
   if (hasSpeech()) window.speechSynthesis.cancel();
 }
 
-function playUrl(url: string): Promise<void> {
+function playUrl(url: string): Promise<boolean> {
   const el = audioFor(url);
-  return new Promise<void>((resolve) => {
+  return new Promise<boolean>((resolve) => {
     let settled = false;
     let guard = 0;
     const detach = () => {
-      el.removeEventListener('ended', settle);
-      el.removeEventListener('error', fallback);
+      el.removeEventListener('ended', onEnded);
+      el.removeEventListener('error', onError);
     };
-    const settle = () => {
+    const finish = (ok: boolean) => {
       if (settled) return;
       settled = true;
       clearTimeout(guard);
       detach();
       if (current === el) current = null;
-      if (currentSettle === settle) currentSettle = null;
-      resolve();
+      if (currentSettle === finishTrue) currentSettle = null;
+      resolve(ok);
     };
-    const fallback = () => {
-      settle();
-    };
-    guard = window.setTimeout(settle, PLAY_GUARD_MS);
-    el.addEventListener('ended', settle);
-    el.addEventListener('error', fallback);
-    currentSettle = settle;
+    const finishTrue = () => finish(true);
+    const onEnded = () => finish(true);
+    const onError = () => finish(false);
+    guard = window.setTimeout(onEnded, PLAY_GUARD_MS);
+    el.addEventListener('ended', onEnded);
+    el.addEventListener('error', onError);
+    currentSettle = finishTrue;
     current = el;
     el.currentTime = 0;
-    el.play().catch(fallback);
+    el.play().catch(onError);
   });
 }
 
-/** Toca o mp3 da voz nova. Sem URL, silêncio. Nunca rejeita. */
-export async function playText(text: string, opts?: PlayTextOpts): Promise<void> {
+/** Toca o mp3 da voz nova. Sem URL, silêncio. Nunca rejeita. false = a voz não saiu. */
+export async function playText(text: string, opts?: PlayTextOpts): Promise<boolean> {
   stopAudio();
   const normalized = normalizeText(text);
-  if (!normalized) return;
+  if (!normalized) return true;
   const speed = clampSpeed(opts?.speed);
   const voice = clampVoice(opts?.voice);
   const lang = clampLang(opts?.lang);
@@ -181,7 +181,7 @@ export async function playText(text: string, opts?: PlayTextOpts): Promise<void>
     urlCache.delete(memKey(normalized, speed, voice, lang));
     url = await audioUrlFor(normalized, opts);
   }
-  if (!url) return;
+  if (!url) return false;
   return playUrl(url);
 }
 

@@ -1046,3 +1046,89 @@ Teste:
 - **Lição e dilema faltando.** Em 11/12 faltaram a aplicação e o dilema; em 12/12, as duas perguntas da ideia. O banco tapou, como a regra 22 manda. O dilema fraco volta nos pacotes AP.
 
 **Commit:** um só, com o 10b, as correções C1 a C4, o 10b-2, as correções dele, o 10d e estes ajustes.
+
+## 26/09 — ontem e hoje (dados do Heitor até 11h)
+
+**Estado:**
+- O PC dele roda `2026-09-25-170543d`, a versão nova, sem erros desde ontem.
+- O backfill rodou: o `quizBank` tem 59 itens, de 18 a 26/09.
+
+**Prova de 26/09** (gerada em 25/09 às 9h28, antes do deploy, com o código antigo). Ele fez 5 de 5, com o dilema fora da nota.
+- Quatro respostas em até 2,5 s: o dilema, o perímetro (pergunta nova para ele, certa em 2,0 s), "abelhas" e "There ___ a bird", o terceiro dia seguido do mesmo molde.
+- As duas que pediram conta ou leitura levaram tempo: a trivia da lâmpada, 37 s; gols e assistências, 26 s.
+- Reflexão de 13 palavras: "a lojica dele tanbem pode fucionar em celular , tv , tablet etc".
+- A fala nova do Sábio (10b, item 6) funcionou: "A lógica de Boole ajudando em celulares e TVs: você já pensou como isso pode melhorar os jogos que você joga nelas?". Ela também devolve "lógica" escrito certo.
+
+**Prova de 27/09: gerada à meia-noite por código velho.**
+- `generatedAt` 03h00 UTC, 00h00 em Brasília.
+- O `sanitize` tem `secondReplacement`, mas o lote passou sem `fato_solto` ("Qual fato é verdadeiro sobre a Lua?", com a opção "É feita de queijo"). Isso só existiu no código do 10b antes das correções. Nenhuma versão publicada tem essa combinação.
+- O mais provável: uma aba de desenvolvimento (localhost) com a conta do Heitor, ou a do pai vendo o Heitor, ficou aberta. Na virada do dia, ela pré-gerou a prova com o código antigo que tinha na memória.
+- **Ação do pai:** no site publicado, no painel da prova, "Gerar outra" na prova de amanhã, e fechar as abas de localhost com a conta dele.
+- **Prevenção:** item (4) do Pacote 12. Em desenvolvimento, só a conta de teste gera prova e plano da Mina.
+
+**Missões:**
+- 25/09: 5 de 8. As quatro da noite foram marcadas: Leitura às 18h18, Quarto às 18h19, Bom Comportamento e Dever às 20h30. Faltaram as três da manhã (Louça, Pets, Armário): −3 gold. O Baú do Dia abriu.
+- 26/09: 5 feitas até 10h54.
+
+**Mina, o ponto fraco do dia:**
+- **Ferraria.**
+  - 25/09: 0 de 6 em frases embaralhadas de 7 e 8 palavras. O plano era de 24/09, antes do 14a-2.
+  - 26/09: o degrau desceu para am/is/are (lacuna e digitação) e deu 2 de 6, com 2 de 4 no refazer. "Escreva 'are' para completar" saiu errado: ele não leu a instrução.
+- **Cartas.** 0 de 3 em 6 s, 2 de 3 em 10 s e 2 de 3 em 7 s, para textos de 52 a 63 palavras. Nenhuma consulta ao glossário e nenhuma evidência: ele não lê.
+- **Recado.** 1 de 3 nos dois dias, em 128 e 148 s. Ele tenta. Em 25/09, a segunda versão saiu certa: "I do my homework first. Then I want an apple."
+- Conclusão: o 14b (ler antes de responder) vira a prioridade da Mina.
+
+**Linha de desafio:** 74% em 14 dias. De 18 a 21/09 foi perto de 45%; desde 22/09, 31 de 33. A linha entra sozinha quando os primeiros dias saírem da janela, se ele seguir acertando. Nada a mudar.
+
+**Ajustes nos prompts do Cursor:**
+- Pacote 11: a reflexão pede 1 palavra do tema, com tolerância de ortografia. Com a regra de 2 palavras exatas, a reflexão real dele de 26/09 seria reprovada por "lojica".
+- Pacote 12: a trava de desenvolvimento acima.
+
+## Pacote 14b — a Mina lê antes de responder (Cursor, 26/09) — APROVADO; pode commitar
+
+Feito antes dos Pacotes 11 e 12, por escolha do pai. Sem problema: os três não se tocam.
+
+**Barra rodada pelo líder:** `tsc` 0 erros; `eslint` 0 erros e os 8 avisos de antes; `test:english` 39 arquivos; `test:village` 13; `vite build` ok.
+
+**Conferido no código:**
+- **Carta.**
+  - Toca sozinha ao abrir (`readAll`). Termina: abre pelo áudio. Parada ou voz falha: abre pelo relógio, contado desde a abertura (`letterGateMs`: 12 s, 36 s e 45 s para 10, 60 e 100 palavras).
+  - A limpeza do efeito para o áudio e o relógio.
+  - `playText` passou a devolver `true` ou `false` (`englishTts.ts`) para saber quando a voz não saiu. `englishGameService.ts` só se ajustou ao tipo novo; ele não estava na lista do relatório, mas a mudança é só essa.
+- **Compreensão.** `letterQuestionStep` é puro e testado: a frase certa abre; uma errada risca; duas erradas marcam a certa e abrem. A decisão ficou como era.
+- **Ferraria.**
+  - Cada item espera `readingMs(frase, 1500, 3000)` antes de abrir as peças, e grava `msPerItem`.
+  - Entrou uma linha que não estava no pacote: "A frase está na mesa. As peças abrem quando você terminar de ler." Ela combina com a Ferraria. Aceita.
+- **Erros de ontem.** `yesterdayMistakes` foi para `prompts.ts`: usa a última Ferraria concluída e só pega tipos do mix do dia. Testado.
+
+**Fotos (1280):** portão, pedido da frase, frase errada riscada e Ferraria fechada. Tudo cabe no quadro, e a Vila continua atrás.
+
+**Carta de teste:** 3 de 3 em 40 s, `listenedMs` 36 s pelo áudio, as duas de compreensão com a frase achada. Antes, o Heitor levava de 6 a 10 s.
+
+**Para a leitura diária:**
+- `evidenceHits` agora conta só as frases achadas na compreensão. A da decisão continua em `evidenceOk`.
+- O que medir amanhã: `listenedMs`, `gate`, `evidenceFirst` e `msPerItem`.
+
+**Pendente do pai:** a prova de 27/09 ainda é a gerada à meia-noite pelo código velho. É preciso "Gerar outra" no painel do site publicado.
+
+**Commit:** "Pacote 14b: a Mina le antes de responder".
+
+## 27/09 — as provas de 27 e 28/09 saíram de código velho
+
+- **Prova de 27/09 (hoje):** ainda é a gerada à meia-noite de 26/09 pelo 10b anterior às correções. Não foi regenerada nem feita até a leitura das 7h.
+- **Prova de 28/09:** gerada à meia-noite de 27/09 por código de antes do 10b. Não tem `secondReplacement` e vem com os moldes antigos: "There ___ a computer", a tabela de vitórias e o relógio do Japão do banco antigo. O PC dele roda `170543d` desde 26/09.
+- **Causa:** a virada do dia dispara o pré-gerar numa aba com código velho na memória antes de ela recarregar. Pode ser um segundo aparelho ou uma aba de localhost.
+- **Correção:** item (5) do Pacote 12. Não gera com versão desatualizada, e o doc grava `generatedVersion`.
+- **Ação do pai agora:**
+  1. No site publicado, recarregar com Ctrl+F5.
+  2. Conferir a linha de versão do painel (`170543d` ou mais nova).
+  3. "Gerar outra" na prova de hoje e na de amanhã, antes de o Heitor abrir a prova.
+
+**27/09, 7h48 — prova de hoje refeita pelo líder, a pedido do pai.**
+- Gerada com o código publicado (`170543d`) rodando aqui, com o mesmo pedido que a Cloud Function faz à OpenAI. Tema "Como o fogo mudou a humanidade", 8 perguntas.
+- Três ajustes à mão, e as 8 passam no validador publicado:
+  - o dilema tinha duas certas: "Chamo um adulto" também servia para fogueira na escola;
+  - a pergunta do óleo tinha uma segunda opção verdadeira ("Água evapora rápido");
+  - a do vento era óbvia e foi trocada pela C09 do banco aprovado.
+- A anterior foi copiada (`scratchpad/regen27/backup-antes-2026-09-27.json`). O doc traz `generatedBy` e `sanitize.liderAjustes`.
+- Nota: esta prova ainda tem "cidades perto de rios", porque o exemplo que o líder tirou só sai no próximo commit. Tem também o "Do you like pizza?" do molde I4.

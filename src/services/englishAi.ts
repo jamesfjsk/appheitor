@@ -23,7 +23,7 @@ import type {
 } from '../types/english';
 import { CONTRACT_MATERIAL, MERCHANT_CATALOGS } from '../config/englishBase';
 import { FORGE_TAG_TARGETS, LETTER_GENRES, levelFor } from '../config/englishLevels';
-import { forgeTargetFor, lastForgeScore } from './english/prompts';
+import { forgeItemMixFor, forgeTargetFor, lastForgeScore, yesterdayMistakes } from './english/prompts';
 import { buildMerchantRoom, merchantKey, merchantLevelFromSkill, merchantStepKey, offlineSentences } from './english/merchantRoom';
 import { normalize } from './english/notePrecheck';
 import { buildPrompt, type BuiltPrompt } from './english/prompts';
@@ -516,25 +516,6 @@ function frequentTag(plans: DailyPlan[]): NoteErrorTag | null {
   return bestCount >= TAG_MIN_COUNT ? best : null;
 }
 
-const isForgeItem = (v: unknown): v is ForgeItem => isRecord(v) && (v.kind === 'scramble' || v.kind === 'gap' || v.kind === 'typed');
-
-/** Itens errados na Ferraria de ontem: details.wrongItems como índices ou como os próprios itens */
-function yesterdayMistakes(plans: DailyPlan[], date: string): ForgeItem[] {
-  const yesterday = plans.find((p) => p.date === addDays(date, -1));
-  if (!yesterday) return [];
-  const forge = contractsOf([yesterday], 'forge')[0];
-  if (!forge || forge.type !== 'forge' || !forge.result) return [];
-  const details = forge.result.details ?? {};
-  const raw = details.wrongItems ?? details.missed ?? details.wrong;
-  if (!Array.isArray(raw)) return [];
-  const items: ForgeItem[] = [];
-  for (const entry of raw) {
-    if (typeof entry === 'number' && forge.content.items[entry]) items.push(forge.content.items[entry]);
-    else if (isForgeItem(entry)) items.push(entry);
-  }
-  return items.slice(0, YESTERDAY_MISTAKES);
-}
-
 /** Nomes próprios da Carta (remetente, falantes do diálogo, maiúsculas fora do início da frase) */
 function letterContextOf(contract: Contract | null): { names: string[]; items: string[] } {
   if (!contract || contract.type !== 'letter') return { names: [], items: [] };
@@ -621,7 +602,7 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
     vocabKnown,
     avoidNames,
     forgeTarget,
-    retryItems: yesterdayMistakes(recent, ctx.date),
+    retryItems: yesterdayMistakes(recent, ctx.date, forgeItemMixFor(lv.level, forgeTarget.kind)),
     avoidOffline,
     merchantDone: ctx.base.merchantDone,
     avoidMerchantSteps,

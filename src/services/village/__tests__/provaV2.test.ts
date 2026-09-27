@@ -16,6 +16,8 @@ import {
   REFLECT_SHORT,
   reflectionLocalSay,
   reflectionOk,
+  reflectionReady,
+  reflectionThemeHits,
   revealParts,
   speakChunks,
   speakVerdict,
@@ -214,6 +216,21 @@ test('7: reticências andam e param com reduced-motion', () => {
   expect(sageReadSpeech(line, SAGE_DOT_MS * 3, false)).toBe('Deixa eu ler com calma.');
   expect(sageReadSpeech(line, SAGE_DOT_MS, true)).toBe(line);
   expect(sageReadSpeech('Quase lá.', 800, false)).toBe('Quase lá.');
+});
+
+test('reflexão do pacote 11: 12 palavras, 8 nos 7 primeiros dias, e lojica conta', () => {
+  expect(readingMs('um dois três quatro cinco seis sete oito nove', 6000, 12000)).toBe(6000);
+  const about = {
+    prompt: 'O que a lógica muda no seu dia?',
+    title: 'A lógica por trás dos computadores',
+    lesson: 'A lógica liga uma causa a um efeito, como um interruptor.',
+  };
+  const eleven = 'hoje a logica do jogo me ajudou a pensar bem melhor';
+  expect(reflectionReady(eleven, about, '2026-09-26', '2026-10-03')).toBe(false);
+  expect(reflectionReady(eleven, about, '2026-09-26', '2026-09-26')).toBe(true);
+  const real = 'a lojica dele tanbem pode fucionar em celular , tv , tablet etc';
+  expect(reflectionThemeHits(real, about)).toBeGreaterThanOrEqual(1);
+  expect(reflectionReady(real, about)).toBe(true);
 });
 
 void run();

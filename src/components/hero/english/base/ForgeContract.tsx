@@ -4,10 +4,11 @@
 // Peças erradas voltam uma vez no fim (repescagem, sem material).
 // ========================================
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Undo2, Volume2 } from 'lucide-react';
 import type { ForgeItem } from '../../../../types/english';
 import { forgeMaterial } from '../../../../config/englishRewards';
+import { readingMs } from '../../../../services/quiz/provaRules';
 import { playText, prefetchAudio, stopAudio } from '../../../../services/englishTts';
 import type { ContractScreenProps } from './ContractShell';
 
@@ -53,6 +54,9 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
   const [typed, setTyped] = useState('');
   const [gapWrong, setGapWrong] = useState<number[]>([]);
   const [speaking, setSpeaking] = useState(false);
+  const [itemReady, setItemReady] = useState(false);
+  const itemStart = useRef(0);
+  const msPerItem = useRef<number[]>(items.map(() => 0));
 
   useEffect(() => {
     prefetchAudio(items.map(fullSentence));
@@ -63,6 +67,16 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
   const item: ForgeItem | undefined = items[cur];
   const maxTries = phase === 'redo' ? REDO_TRIES : MAIN_TRIES;
   const wrongIdx = items.map((_, i) => i).filter((i) => earned[i] < 1);
+
+  useEffect(() => {
+    if (!item) return;
+    itemStart.current = Date.now();
+    setItemReady(false);
+    const phrase = item.kind === 'scramble' ? item.words.join(' ') : item.sentence;
+    const wait = readingMs(phrase, 1500, 3000);
+    const timer = window.setTimeout(() => setItemReady(true), wait);
+    return () => window.clearTimeout(timer);
+  }, [cur, phase, item]);
 
   const record = (ok: boolean, triesUsed: number) => {
     if (phase === 'main') {
@@ -75,7 +89,8 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
   };
 
   const check = (ok: boolean) => {
-    if (!item || resolved) return;
+    if (!item || resolved || !itemReady) return;
+    if (phase === 'main' && msPerItem.current[cur] === 0) msPerItem.current[cur] = Date.now() - itemStart.current;
     const t = tries + 1;
     setTries(t);
     if (ok) {
@@ -125,7 +140,7 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
       max: items.length,
       materialEarned: forgeMaterial(hits),
       // wrongItems: índices lidos por englishAi.yesterdayMistakes (2 deles voltam na Ferraria de amanhã)
-      details: { perItem: earned, wrongItems: wrongIdx, redo: wrongIdx, redoCorrect, target: contract.content.target },
+      details: { perItem: earned, wrongItems: wrongIdx, redo: wrongIdx, redoCorrect, target: contract.content.target, msPerItem: msPerItem.current },
     });
   };
 
@@ -190,23 +205,28 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
       <div className="mc-card p-3" data-testid={`forge-item-${cur}`}>
         <p className="mc-font text-[9px] mc-warn uppercase mb-2">{KIND_LABEL[item.kind]}</p>
 
+        {!itemReady && (
+          <p className="text-sm text-white/85 mb-3" data-testid="forge-item-closed">A frase está na mesa. As peças abrem quando você terminar de ler.</p>
+        )}
+
         {item.kind === 'scramble' && (
           <div>
+            {!itemReady && <p className="text-base font-bold text-white mb-3">{item.words.join(' ')}</p>}
             {/* Linha de resposta: clicar num bloco devolve ao monte */}
-            <div className="mc-slot min-h-[3.25rem] p-2 flex flex-wrap gap-1.5 items-center" data-testid="scramble-line">
+            {itemReady && <div className="mc-slot min-h-[3.25rem] p-2 flex flex-wrap gap-1.5 items-center" data-testid="scramble-line">
               {built.length === 0 && <span className="text-xs mc-muted">Clique nos blocos na ordem certa</span>}
               {built.map((wi, k) => (
                 <button key={`${wi}-${k}`} onClick={() => popWord(k)} disabled={done} className="mc-btn mc-btn-gold px-2.5 py-1.5 text-sm font-bold">{item.words[wi]}</button>
               ))}
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-3 min-h-[2.5rem]">
+            </div>}
+            {itemReady && <div className="flex flex-wrap gap-1.5 mt-3 min-h-[2.5rem]">
               {item.words.map((w, wi) =>
                 built.includes(wi) ? null : (
                   <button key={wi} onClick={() => pushWord(wi)} disabled={done} className="mc-btn mc-btn-stone px-2.5 py-1.5 text-sm font-bold" data-testid={`block-${wi}`}>{w}</button>
                 )
               )}
-            </div>
-            {!done && (
+            </div>}
+            {itemReady && !done && (
               <div className="flex gap-2 mt-3 justify-end">
                 <button onClick={() => setBuilt((b) => b.slice(0, -1))} disabled={built.length === 0} className="mc-btn mc-btn-dark px-3 py-2 text-sm font-bold"><Undo2 className="w-4 h-4" /> Desfazer</button>
                 <button onClick={checkScramble} disabled={built.length !== item.words.length} className="mc-btn mc-btn-green px-5 py-2 text-sm font-bold" data-testid="forge-check">Conferir</button>
@@ -218,7 +238,7 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
         {item.kind === 'gap' && (
           <div>
             <p className="text-base font-bold text-white mb-3 font-mono tracking-wide">{done ? fullSentence(item) : item.sentence}</p>
-            <div className="grid gap-2 sm:grid-cols-3">
+            {itemReady && <div className="grid gap-2 sm:grid-cols-3">
               {item.options.map((opt, idx) => {
                 const wrong = gapWrong.includes(idx);
                 const right = done && idx === item.answer;
@@ -228,7 +248,7 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
                   </button>
                 );
               })}
-            </div>
+            </div>}
           </div>
         )}
 
@@ -236,7 +256,7 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
           <div>
             <p className="text-sm text-white/85 mb-1">{item.prompt}</p>
             <p className="text-base font-bold text-white mb-3 font-mono tracking-wide">{done ? fullSentence(item) : item.sentence}</p>
-            {!done && (
+            {itemReady && !done && (
               <div className="flex gap-2">
                 <input
                   value={typed}

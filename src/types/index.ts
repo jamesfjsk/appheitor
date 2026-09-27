@@ -116,6 +116,8 @@ export interface DailyQuiz {
   reflection?: string;
   /** Contagem gravada, não recalculada (B4). */
   reflectionWords?: number;
+  reflectionThemeHits?: number;
+  reflectionMs?: number;
   /** Frase do Sábio ao aceitar ou recusar a reflexão. */
   reflectionNote?: string;
   /** Tempo por pergunta, na ordem. Não aparece na tela. */

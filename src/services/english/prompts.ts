@@ -114,6 +114,52 @@ export function lastForgeScore(plans: ForgeScorePlan[], date: string): { score: 
   return { score: 0, max: 0 };
 }
 
+export interface ForgeMistakePlan {
+  date: string;
+  contracts: Record<string, {
+    type?: string;
+    content?: unknown;
+    result?: { details?: Record<string, unknown> } | null;
+  } | undefined>;
+}
+
+const isForgeItem = (v: unknown): v is ForgeItem => {
+  if (!v || typeof v !== 'object') return false;
+  const kind = (v as { kind?: unknown }).kind;
+  return kind === 'scramble' || kind === 'gap' || kind === 'typed';
+};
+
+/**
+ * Erros da Ferraria concluída mais recente, antes de `date`.
+ * Só entram tipos que o mix do dia ainda pede. Aberta não conta. No máximo 2.
+ */
+export function yesterdayMistakes(
+  plans: ForgeMistakePlan[],
+  date: string,
+  mix: { scramble: number; gap: number; typed: number },
+): ForgeItem[] {
+  const done = plans.filter((p) => p.date < date).sort((a, b) => b.date.localeCompare(a.date));
+  for (const plan of done) {
+    for (const contract of Object.values(plan.contracts)) {
+      if (!contract || contract.type !== 'forge' || !contract.result) continue;
+      const content = contract.content as { items?: unknown[] } | undefined;
+      const items = content?.items ?? [];
+      const details = contract.result.details ?? {};
+      const raw = details.wrongItems ?? details.missed ?? details.wrong;
+      if (!Array.isArray(raw)) return [];
+      const out: ForgeItem[] = [];
+      for (const entry of raw) {
+        const item = typeof entry === 'number' ? items[entry] : entry;
+        if (!isForgeItem(item)) continue;
+        if ((mix[item.kind] ?? 0) <= 0) continue;
+        out.push(item);
+      }
+      return out.slice(0, 2);
+    }
+  }
+  return [];
+}
+
 /**
  * Alvo do dia. `other` não escolhe: cai no rodízio.
  * 0 ou 1 acerto ontem força um alvo `form` do rodízio do nível.

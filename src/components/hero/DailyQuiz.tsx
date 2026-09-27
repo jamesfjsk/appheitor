@@ -15,8 +15,11 @@ import { judgeReflection, type ReflectionJudge } from '../../services/aiDailyQui
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
 import { setAppBusy } from '../../services/appUpdate';
-import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionOk, SAGE_DOT_MS, SAGE_LINE_MS, sageReadFrame, sageReadSpeech } from '../../services/quiz/provaRules';
+import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionMinWords, reflectionReady, SAGE_DOT_MS, SAGE_LINE_MS, sageReadFrame, sageReadSpeech, wordCount, retryable } from '../../services/quiz/provaRules';
+import { nudgeFor, resultLine } from '../../services/quiz/nudge';
+import type { BankAttempt } from '../../services/quiz/bankWrite';
 import { prefetchLesson, prefetchVerdicts, speakProvaLesson, speakProvaVerdict, stopProvaVoice } from '../../services/quiz/provaSpeak';
+import { playText, TTS_SPEED_SLOW } from '../../services/englishTts';
 import { ISO_NPC } from '../../config/village';
 
 const STAR = '/assets/english/ui/star.webp';
@@ -184,7 +187,7 @@ const ReadWaitButton: React.FC<{
 const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openRequested }) => {
   const { childUid } = useAuth();
   const { progress } = useData();
-  const { economy, modules } = useVillage();
+  const { economy, modules, village } = useVillage();
   const { playTaskComplete, playLevelUp, playClick, playProvaHit, playProvaMiss, playQuill, setMusicDuck, isSoundEnabled } = useSound();
   const reducedMotion = useReducedMotion();
 
@@ -201,6 +204,12 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const [error, setError] = useState<string | null>(null);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
+  const [tryPhase, setTryPhase] = useState<'open' | 'nudge' | 'retry' | 'done'>('open');
+  const [secondPick, setSecondPick] = useState<string | null>(null);
+  const [nudgeText, setNudgeText] = useState('');
+  const [optionsLocked, setOptionsLocked] = useState(false);
+  const attemptsRef = useRef<BankAttempt[]>([]);
+  const reflectStarted = useRef(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [score, setScore] = useState(0);
   const [reward, setReward] = useState({ xp: 0, gold: 0 });
@@ -414,6 +423,11 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   }, [phase, current, selected]);
 
   useEffect(() => {
+    if (tryPhase !== 'done') return;
+    document.querySelector('[data-testid="quiz-explain"]')?.lastElementChild?.scrollIntoView({ block: 'end' });
+  }, [tryPhase, current]);
+
+  useEffect(() => {
     if (!quiz?.awaitingReflection) return;
     const stored = quiz.timings;
     if (!stored?.length || timingsRef.current.length >= stored.length) return;
@@ -421,23 +435,67 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   }, [quiz]);
 
   const choose = (option: string) => {
-    if (selected || !question) return;
+    if (!question || optionsLocked || tryPhase === 'nudge' || tryPhase === 'done') return;
+    if (tryPhase === 'retry' && option === selected) return;
+    if (tryPhase === 'open' && selected) return;
+    const ok = option === question.answer;
+    const speak = (line: string) => {
+      if (!isSoundEnabled) {
+        setVoiceDone(true);
+        return;
+      }
+      setVoiceDone(false);
+      void speakProvaVerdict(line, true).finally(() => setVoiceDone(true));
+    };
+    if (tryPhase === 'retry') {
+      setSecondPick(option);
+      setTryPhase('done');
+      const hit = option === question.answer;
+      if (hit) playProvaHit();
+      else playProvaMiss();
+      const slot = attemptsRef.current[current] ?? {};
+      attemptsRef.current[current] = { ...slot, second: option, nudge: slot.nudge };
+      speak([question.why, question.trap].filter(Boolean).join(' ') || question.explanation);
+      return;
+    }
     choseAt.current = performance.now();
     setSelected(option);
-    const ok = option === question.answer;
     if (question.kind === 'dilemma') playClick();
     else if (ok) playProvaHit();
     else playProvaMiss();
-    if (!isSoundEnabled) {
-      setVoiceDone(true);
+    if (ok || question.kind === 'dilemma' || !retryable(question)) {
+      setTryPhase('done');
+      speak(question.explanation);
       return;
     }
+    const seed = question.question.length + current;
+    let recent: string[] = [];
+    try {
+      const raw = JSON.parse(localStorage.getItem('mm_nudge_used') || '[]') as { id: string; date: string }[];
+      recent = raw.filter((row) => row.date >= addDays(today, -14)).map((row) => row.id);
+    } catch { /* lista vazia */ }
+    const nudge = nudgeFor(question, option, seed, recent);
+    setNudgeText(nudge.text);
+    setTryPhase('nudge');
+    attemptsRef.current[current] = { nudge: nudge.nudge, ...(attemptsRef.current[current]?.audioPlayed ? { audioPlayed: true } : {}) };
+    if (nudge.lineId) {
+      const next = [...recent.map((id) => ({ id, date: today })), { id: nudge.lineId, date: today }];
+      localStorage.setItem('mm_nudge_used', JSON.stringify(next.slice(-40)));
+    }
+    const wait = readingMs(nudge.text, 3000, 8000);
     setVoiceDone(false);
-    void speakProvaVerdict(question.explanation, true).finally(() => setVoiceDone(true));
+    const voice = isSoundEnabled ? speakProvaVerdict(nudge.text, true) : Promise.resolve();
+    const again = question.subject === 'ingles' && question.audioText
+      ? playText(question.audioText, { lang: 'en', speed: TTS_SPEED_SLOW })
+      : Promise.resolve(true);
+    void Promise.all([voice, again, new Promise((r) => window.setTimeout(r, wait))]).finally(() => {
+      setVoiceDone(true);
+      setTryPhase('retry');
+    });
   };
 
   const goNext = () => {
-    if (!quiz || !question || !selected || stepLock.current) return;
+    if (!quiz || !question || !selected || tryPhase !== 'done' || stepLock.current) return;
     stepLock.current = true;
     playClick();
     stopProvaVoice();
@@ -453,6 +511,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     if (!isLast) {
       setCurrent(current + 1);
       setSelected(null);
+      setSecondPick(null);
+      setNudgeText('');
+      setTryPhase('open');
       stepLock.current = false;
       return;
     }
@@ -467,12 +528,35 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     }
   };
 
+  useEffect(() => {
+    if (phase !== 'questions' || !question || question.subject !== 'ingles' || !question.audioText) {
+      setOptionsLocked(false);
+      return;
+    }
+    let stop = false;
+    setOptionsLocked(true);
+    void playText(question.audioText, { lang: 'en', speed: TTS_SPEED_SLOW }).finally(() => {
+      if (stop) return;
+      setOptionsLocked(false);
+      const prev = attemptsRef.current[current] ?? {};
+      attemptsRef.current[current] = { ...prev, audioPlayed: true };
+    });
+    return () => {
+      stop = true;
+      stopProvaVoice();
+    };
+  }, [phase, current, question]);
+
+  useEffect(() => {
+    if (phase === 'results' && reflectStarted.current === 0) reflectStarted.current = performance.now();
+  }, [phase]);
+
   const conclude = async () => {
-    if (!quiz || !childUid || paid || saving || !reflectionOk(reflection, {
+    if (!quiz || !childUid || paid || saving || !reflectionReady(reflection, {
       prompt: quiz.reflectionPrompt,
       title: quiz.theme.title,
       lesson: quiz.theme.lesson,
-    })) return;
+    }, village.launchedOn, today)) return;
     const gen = ++readGen.current;
     revealLock.current = false;
     verdictAt.current = null;
@@ -545,6 +629,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                 lesson: quiz.theme.lesson,
               },
               timings: timingsRef.current,
+              attempts: attemptsRef.current,
+              launchedOn: village.launchedOn,
+              reflectionMs: Math.max(0, Math.round(performance.now() - reflectStarted.current)),
             }),
           );
           if (readGen.current !== gen) return;
@@ -621,7 +708,8 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     lesson: quiz.theme.lesson,
   };
   const counted = quizScoreOf(quiz.questions, quiz.answers?.length ? quiz.answers : answers);
-  const canDeliver = reflectionOk(reflection, aboutReflect);
+  const canDeliver = reflectionReady(reflection, aboutReflect, village.launchedOn, today);
+  const reflectMin = reflectionMinWords(village.launchedOn, today);
 
   return (
     <AnimatePresence>
@@ -683,26 +771,41 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                       kicker={question.kind === 'dilemma' ? 'E você?' : question.kind === 'lesson' ? 'Sobre a ideia' : question.subject}
                       step={`${current + 1} de ${quiz.questions.length}`}
                     />
-                    <h3 className="mn-papiro-title">{question.question}</h3>
+                    <div className="flex items-start gap-2">
+                      <h3 className="mn-papiro-title flex-1">{question.question}</h3>
+                      {question.subject === 'ingles' && question.audioText && (
+                        <button
+                          type="button"
+                          aria-label="Ouvir de novo"
+                          className="mc-slot w-11 h-11 shrink-0"
+                          onClick={() => void playText(question.audioText || '', { lang: 'en', speed: TTS_SPEED_SLOW })}
+                        >
+                          Ouvir
+                        </button>
+                      )}
+                    </div>
                     <div className="mn-prova-opts">
                       {question.options.map((option, i) => {
                         const isCorrect = option === question.answer;
-                        const isChosen = option === selected;
+                        const isFirst = option === selected;
+                        const isSecond = option === secondPick;
+                        const ladder = retryable(question);
+                        const showRight = tryPhase === 'done' && question.kind !== 'dilemma' && (
+                          selected === question.answer || !ladder || Boolean(secondPick)
+                        );
                         let rowClass = 'mn-prova-opt';
-                        if (selected && question.kind !== 'dilemma') {
-                          if (isCorrect) rowClass += ' is-right';
-                          else if (isChosen) rowClass += ' is-wrong';
-                          else rowClass += ' is-dim';
-                        } else if (selected && question.kind === 'dilemma') {
-                          if (isChosen) rowClass += ' is-right';
-                          else rowClass += ' is-dim';
-                        }
+                        if (showRight && isCorrect) rowClass += ' is-right';
+                        else if (isFirst && selected !== question.answer) rowClass += ' is-wrong';
+                        else if (isSecond && secondPick !== question.answer) rowClass += ' is-wrong';
+                        else if (tryPhase === 'done' && question.kind === 'dilemma' && isFirst) rowClass += ' is-right';
+                        else if (tryPhase === 'done' && !isFirst && !isSecond) rowClass += ' is-dim';
+                        const locked = optionsLocked || tryPhase === 'nudge' || tryPhase === 'done' || (tryPhase === 'retry' ? option === selected : Boolean(selected));
                         return (
                           <button
                             key={option}
                             type="button"
                             onClick={() => choose(option)}
-                            aria-disabled={Boolean(selected)}
+                            disabled={locked}
                             className={rowClass}
                           >
                             <span className="mn-prova-opt-letter">{String.fromCharCode(65 + i)}</span>
@@ -711,15 +814,26 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                         );
                       })}
                     </div>
-                    {selected && (
-                      <div
-                        className="mn-papiro-explain"
-                        ref={(el) => { el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }}
-                      >
+                    {tryPhase === 'nudge' && (
+                      <div className="mn-papiro-explain" data-testid="quiz-nudge">
+                        <p className="mn-papiro-why">{nudgeText}</p>
+                      </div>
+                    )}
+                    {tryPhase === 'done' && selected && (
+                      <div className="mn-papiro-explain" data-testid="quiz-explain">
                         {question.kind !== 'dilemma' && (
-                          <p className="mn-papiro-why">{selected === question.answer ? 'Isso.' : 'Não foi dessa vez.'}</p>
+                          <p className="mn-papiro-why" data-testid="quiz-result-line">
+                            {selected === question.answer
+                              ? 'Isso.'
+                              : secondPick === question.answer
+                                ? resultLine('desc', current)
+                                : secondPick
+                                  ? resultLine('seg', current)
+                                  : resultLine('fato', current)}
+                          </p>
                         )}
-                        <p>{question.explanation}</p>
+                        <p>{question.why || question.explanation}</p>
+                        {question.trap && <p className="mn-papiro-why">{question.trap}</p>}
                       </div>
                     )}
                   </>
@@ -766,6 +880,16 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                           </p>
                         )}
                         {!saving && <p className="mn-papiro-why">{quiz.reflectionPrompt}</p>}
+                        {!saving && (village.stats.reflections || 0) < 10 && (
+                          <button
+                            type="button"
+                            className="mc-btn mc-btn-stone min-h-[44px] px-3 mb-2 text-sm"
+                            data-testid="reflect-mold"
+                            onClick={() => setReflection((prev) => prev.trim() ? prev : 'Hoje eu … porque …')}
+                          >
+                            Hoje eu … porque …
+                          </button>
+                        )}
                         <textarea
                           value={reflection}
                           readOnly={saving}
@@ -832,8 +956,8 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                 text={explainText || question?.question || ''}
                 min={EXPLAIN_READ_MS.min}
                 max={EXPLAIN_READ_MS.max}
-                active={Boolean(selected)}
-                disabled={!selected || saving || !voiceDone}
+                active={tryPhase === 'done'}
+                disabled={tryPhase !== 'done' || saving || !voiceDone}
                 className="mc-btn-green"
                 onFire={goNext}
               >
@@ -854,9 +978,11 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                   type="button"
                   onClick={() => { void conclude(); }}
                   disabled={!canDeliver}
+                  data-testid="reflect-deliver"
                   className={`mc-btn min-h-[44px] px-6 ${canDeliver ? 'mc-btn-green' : 'mc-btn-stone'}`}
                 >
                   Entregar
+                  <span className="mc-num ml-2" data-testid="reflect-count">{wordCount(reflection)} / {reflectMin}</span>
                 </button>
                 <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
                   Voltar à Vila
