@@ -1132,3 +1132,80 @@ Feito antes dos Pacotes 11 e 12, por escolha do pai. Sem problema: os três não
   - a do vento era óbvia e foi trocada pela C09 do banco aprovado.
 - A anterior foi copiada (`scratchpad/regen27/backup-antes-2026-09-27.json`). O doc traz `generatedBy` e `sanitize.liderAjustes`.
 - Nota: esta prova ainda tem "cidades perto de rios", porque o exemplo que o líder tirou só sai no próximo commit. Tem também o "Do you like pizza?" do molde I4.
+
+## 29/09 — como estamos (dados do Heitor de 27 a 29/09, até 11h48)
+
+**Estado:**
+- O PC dele roda `2026-09-27-438418d`: pacote 11 e 14b, commitados sem a revisão do líder, que está em andamento.
+- Nenhum erro desde 27/09. Saldo: 13 gold.
+
+**Prova:**
+
+| Dia | Gerada por | Nota | Tempos |
+|---|---|---|---|
+| 27/09 | refeita pelo líder | 7/7 | de 37 a 70 s nas de raciocínio |
+| 28/09 | código velho, gerada à meia-noite de 27/09 e não regenerada | 5/5 | de 7 a 50 s |
+| 29/09 | código novo, gerada à meia-noite de 28/09 | 7/7 | ver abaixo |
+
+- **29/09:** as três da ideia do dia ("Errar para aprender") saíram em 5 a 6 s. A ideia e a aplicação são fáceis demais: "Por que errar é importante? Porque faz o cérebro crescer"; "o aluno que erra muito... está aprendendo". As de raciocínio levaram de 27 a 78 s, e duas eram do banco de reserva (H01 e M01).
+- **A segunda tentativa do pacote 11 ainda não entrou em jogo:** ele não errou nenhum item com escada desde 27/09 (`supportLevel` 0 em tudo).
+- **Reflexões:**
+  - 27/09: 21 palavras, sobre o fogo e a química;
+  - 28/09: 12 palavras em caixa alta;
+  - 29/09: 41 palavras em 12 minutos, uma história dele de verdade: o xarope de maracujá demais que o deixou tonto, e o que aprendeu com isso. É a melhor até agora.
+- **A regra da palavra do tema** foi ajustada hoje pelo pai com o Cursor: família de palavras e sinônimos ("aprendi" conta como "aprender", "errei" como "erro"). Testada. Vai no commit de base.
+- **Prova de 30/09:** código novo, 8 perguntas, **sem dilema**. Entrou a M02 do banco. A ideia é boa: por que as pessoas concordam com o grupo mesmo sabendo que está errado.
+
+**Missões:**
+- 27/09: **10 de 10**, dia completo, até a louça.
+- 28/09: 5 de 8 (−3).
+
+**Mina** (14b no ar desde 27/09, 10h15):
+- **Carta de 28/09:** 1/3 em 46 s, contra 6 a 10 s antes.
+  - As perguntas abriram pelo relógio (`gate=timer`) depois de 23 s: ele parou o áudio, ou a voz falhou.
+  - Nas duas de compreensão, ele não achou a frase em duas tentativas (`shown`, `shown`).
+  - Agora gasta tempo, mas ainda não encontra a informação no texto. Olhar mais dois dias antes de mexer no nível das Cartas.
+- **Ferraria de 28/09** (a/an/the): 1/6, com 3 a 6 s por peça, e 3 certas no refazer.
+- **Recado:** 1/3, com esforço (4 a 5 min).
+- **Mercador:** 3/3 e 2/3.
+
+**Livros:** a Matilda segue sem aprovação. A correção do líder (`bookPayBlock`) ainda não foi publicada; vai no commit de base.
+
+**Próximos passos: três frentes em paralelo** (`docs/etapas/PROMPT_CURSOR_2026-09-29_TRES_FRENTES.md`):
+- **P12:** ruído, dev e código velho não geram prova.
+- **P16:** a conversa do Sábio.
+- **P15a:** Encomendas.
+
+As regras de Firestore e Storage das três frentes foram escritas pelo líder no `main` e compiladas pela API de regras. O líder publica.
+
+## Pacote 11 — perfil, segunda tentativa e reflexão (Cursor, 27/09) — REVISADO DEPOIS DE PUBLICADO: manter, com correções
+
+Foi commitado e publicado em 27/09, junto com o 14b, sem a revisão do líder. A revisão foi feita em 29/09, no código do commit `438418d`.
+
+**Pagamento íntegro:**
+- `answers[]` guarda só a primeira escolha, e a segunda fica em `secondPick`. É a primeira que decide nota, gold, XP, esmeralda e `quizBank.correct`.
+- O pagamento usa a chave `quiz:<data>` numa transação.
+- `tryPhase`, `stepLock` e `saving` barram o clique duplo.
+- As regras aceitam os campos novos.
+- A falha do perfil não impede fechar a prova.
+
+**Corrigido pelo líder em 29/09, na base:**
+1. **(alta)** A aba que atravessava a meia-noite abria a prova nova com `tryPhase` `'done'`: todas as opções travadas, e só o F5 resolvia. Agora o efeito de `[today]` zera `tryPhase`, `secondPick`, `nudgeText`, `attemptsRef` e `reflectStarted`.
+2. **(média)** A atitude escolhida no dilema ficava vermelha quando não era a "melhor" do gerador, contra a decisão 33. Agora o dilema tem ramo próprio: a escolha acende e as outras apagam.
+3. **(baixa)** O `localStorage.setItem` do aviso estava fora de try/catch e podia deixar a prova parada no aviso.
+
+**Vai para a frente P12** (`PROMPT_CURSOR_2026-09-29_TRES_FRENTES.md`):
+- as tentativas perdidas num recarregamento antes da reflexão;
+- o aviso que some na segunda escolha;
+- o inglês que toca a frase certa junto com o aviso, e por isso entrega a resposta;
+- a reflexão bloqueada sem explicação com 0 palavra do tema: o botão passa a depender só do contador;
+- pontuação contando como palavra;
+- a memória de 14 dias das falas;
+- o dilema contando como erro no perfil;
+- `retry`, `d7` e `d30`;
+- `reflectionThemeHits` no painel;
+- `audioPlayed`;
+- a ordem do perfil no fechamento;
+- a foto do painel.
+
+**Nota de desenho:** no inglês, o `audioText` é a frase certa, então "Ouvir de novo" no aviso entregava a resposta. O `retryOk` de inglês ficaria perto de 100%. A correção 3 da P12 resolve isso.

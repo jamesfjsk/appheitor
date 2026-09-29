@@ -1,6 +1,7 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import {
   BOOK_MAX_WORDS,
+  bookPayBlock,
   buildBookJudgePrompt,
   buildVerifyPrompt,
   claimKeyForBook,
@@ -142,6 +143,16 @@ test('prompt do juiz leva título, páginas e o texto, sem os dias; dias entre d
   expect(readingLineAt(0)).toBe('Deixa eu ler com calma…');
   expect(readingLineAt(1700)).toBe('Hum. Lendo de novo a sua frase…');
   expect(readingLineAt(9000)).toBe('Quase lá.');
+});
+
+test('bookPayBlock: livro paga uma vez; o dia barra o Sábio, não o pai (Matilda, 28/09)', () => {
+  const kb = claimKeyForBook('matilda');
+  const kd = claimKeyForBookDay('2026-09-28');
+  expect(bookPayBlock({}, kb, kd, false)).toBe(null);
+  expect(bookPayBlock({ [kd]: 'x' }, kb, kd, false)).toBe('day');
+  expect(bookPayBlock({ [kd]: 'x' }, kb, kd, true)).toBe(null);
+  expect(bookPayBlock({ [kb]: 'x' }, kb, kd, true)).toBe('book');
+  expect(bookPayBlock({ [kb]: 'x', [kd]: 'x' }, kb, kd, false)).toBe('book');
 });
 
 void run();

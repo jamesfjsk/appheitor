@@ -233,4 +233,18 @@ test('reflexão do pacote 11: 12 palavras, 8 nos 7 primeiros dias, e lojica cont
   expect(reflectionReady(real, about)).toBe(true);
 });
 
+test('reflexão: aprendi, errei e sinônimo contam como a palavra da ideia', () => {
+  const about = {
+    prompt: 'Pense em um erro que você cometeu recentemente. Como ele ajudou você a aprender algo novo?',
+    title: 'Errar para Aprender',
+    lesson: 'Errar faz parte do aprendizado. Quando erramos, a gente aprende.',
+  };
+  const frase = 'ontem eu errei na bebida e aprendi que xarope demais estraga o gosto';
+  expect(reflectionThemeHits(frase, about)).toBeGreaterThanOrEqual(1);
+  expect(reflectionReady(frase, about, '2026-09-18', '2026-09-29')).toBe(true);
+  expect(touchesIdea('eu me enganei na bebida e entendi o gosto no final de tudo', about)).toBe(true);
+  expect(touchesIdea('banana casa bola sol mesa cadeira livro porta janela rua', about)).toBe(false);
+  expect(reflectionThemeHits('eu aprendeu a lição ontem no recreio com o time', about)).toBeGreaterThanOrEqual(1);
+});
+
 void run();

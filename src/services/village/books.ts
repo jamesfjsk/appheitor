@@ -39,6 +39,17 @@ export function claimKeyForBookDay(date: string): string {
   return `bookday:${date}`;
 }
 
+/**
+ * O que impede o pagamento. O livro paga uma vez só, sempre.
+ * O limite de um livro por dia vale para o Sábio; a aprovação do pai não gasta nem respeita o dia
+ * (caso de 28/09: a Matilda recusada três vezes não podia ser aprovada porque a Fábrica já tinha pago o dia).
+ */
+export function bookPayBlock(claimed: Record<string, unknown>, keyBook: string, keyDay: string, byParent: boolean): 'book' | 'day' | null {
+  if (claimed[keyBook]) return 'book';
+  if (!byParent && claimed[keyDay]) return 'day';
+  return null;
+}
+
 export function sizeForPages(pages: number): BookSize {
   if (pages <= 60) return 'curto';
   if (pages <= 150) return 'medio';

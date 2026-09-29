@@ -403,6 +403,12 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     pendingRef.current = null;
     setPendingVerdict(null);
     setSaving(false);
+    // Pacote 11: sem isto, a aba que atravessa a meia-noite abre a prova nova com tryPhase 'done' e tudo travado.
+    setTryPhase('open');
+    setSecondPick(null);
+    setNudgeText('');
+    attemptsRef.current = [];
+    reflectStarted.current = 0;
   }, [today]);
 
   useEffect(() => {
@@ -480,7 +486,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     attemptsRef.current[current] = { nudge: nudge.nudge, ...(attemptsRef.current[current]?.audioPlayed ? { audioPlayed: true } : {}) };
     if (nudge.lineId) {
       const next = [...recent.map((id) => ({ id, date: today })), { id: nudge.lineId, date: today }];
-      localStorage.setItem('mm_nudge_used', JSON.stringify(next.slice(-40)));
+      try {
+        localStorage.setItem('mm_nudge_used', JSON.stringify(next.slice(-40)));
+      } catch { /* sem armazenamento: o aviso segue */ }
     }
     const wait = readingMs(nudge.text, 3000, 8000);
     setVoiceDone(false);
@@ -794,10 +802,14 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                           selected === question.answer || !ladder || Boolean(secondPick)
                         );
                         let rowClass = 'mn-prova-opt';
-                        if (showRight && isCorrect) rowClass += ' is-right';
+                        if (question.kind === 'dilemma') {
+                          // dilema não tem errada (decisão 33): a escolha dele acende, as outras apagam
+                          if (tryPhase === 'done' && isFirst) rowClass += ' is-right';
+                          else if (tryPhase === 'done') rowClass += ' is-dim';
+                        }
+                        else if (showRight && isCorrect) rowClass += ' is-right';
                         else if (isFirst && selected !== question.answer) rowClass += ' is-wrong';
                         else if (isSecond && secondPick !== question.answer) rowClass += ' is-wrong';
-                        else if (tryPhase === 'done' && question.kind === 'dilemma' && isFirst) rowClass += ' is-right';
                         else if (tryPhase === 'done' && !isFirst && !isSecond) rowClass += ' is-dim';
                         const locked = optionsLocked || tryPhase === 'nudge' || tryPhase === 'done' || (tryPhase === 'retry' ? option === selected : Boolean(selected));
                         return (

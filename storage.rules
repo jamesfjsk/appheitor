@@ -10,6 +10,14 @@ service firebase.storage {
         && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('audio/.*'));
     }
 
+    // Foto da entrega de uma encomenda, tirada pelo pai no celular (CONTRATOS_E_CARREIRAS.md §7, 29/09).
+    match /proofs/{uid}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

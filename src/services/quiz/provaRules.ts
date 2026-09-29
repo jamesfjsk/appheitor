@@ -123,15 +123,95 @@ export function copiesSource(text: string, source: string): boolean {
   return false;
 }
 
+/**
+ * Mesma família de palavra: a forma da lição, a conjugação e o derivado.
+ * "aprendi" / "aprendeu" / "aprendizado" contam como "aprender";
+ * "errei" / "errou" / "errado" contam como "erro" (pai, 29/09).
+ */
+const PT_SUFFIXES = [
+  'izacoes', 'izacao', 'izagem', 'izamento', 'izado', 'izada',
+  'amentos', 'imento', 'amento',
+  'acoes', 'adoras', 'adores', 'adora', 'ador', 'acao',
+  'ando', 'endo', 'indo',
+  'aram', 'eram', 'iram',
+  'amos', 'emos', 'imos',
+  'avam',
+  'ado', 'ido', 'ada', 'ida',
+  'ara', 'era', 'ira',
+  'ava',
+  'ar', 'er', 'ir',
+  'ou', 'ei', 'eu',
+  'am', 'em',
+  'es', 's',
+  'i',
+];
+
+function stripOnce(word: string): string {
+  for (const suf of PT_SUFFIXES) {
+    if (!word.endsWith(suf) || word.length === suf.length) continue;
+    const rest = word.length - suf.length;
+    const min = suf === 'i' ? 4 : 3;
+    if (rest < min) continue;
+    return word.slice(0, rest);
+  }
+  return word;
+}
+
+function stemForms(word: string): string[] {
+  const out = [word];
+  let cur = word;
+  for (let n = 0; n < 3; n++) {
+    const next = stripOnce(cur);
+    if (next === cur) break;
+    out.push(next);
+    cur = next;
+  }
+  return out;
+}
+
+function sameFamily(said: string, theme: string): boolean {
+  if (said === theme) return true;
+  if (theme.length >= 5 && oneLetterOff(said, theme)) return true;
+  const fa = stemForms(said);
+  const fb = stemForms(theme);
+  for (const x of fa) {
+    for (const y of fb) {
+      if (x.length >= 3 && x === y) return true;
+      const [short, tall] = x.length <= y.length ? [x, y] : [y, x];
+      if (short.length >= 3 && (tall === `${short}a` || tall === `${short}e` || tall === `${short}o`)) return true;
+    }
+  }
+  return false;
+}
+
+/** Raízes diferentes que uma criança de 10 anos troca na reflexão. */
+const IDEA_SYNONYMS: string[][] = [
+  ['erro', 'engano', 'falha', 'besteira', 'mancada', 'vacilo', 'equivoco'],
+  ['aprender', 'descobrir', 'entender', 'estudo', 'licao'],
+];
+
+function shareSynonym(said: string, theme: string): boolean {
+  for (const group of IDEA_SYNONYMS) {
+    const hitSaid = group.some((w) => sameFamily(said, w));
+    const hitTheme = group.some((w) => sameFamily(theme, w));
+    if (hitSaid && hitTheme) return true;
+  }
+  return false;
+}
+
+function wordsClose(said: string, theme: string): boolean {
+  return sameFamily(said, theme) || shareSynonym(said, theme);
+}
+
 /** Pelo menos uma palavra de verdade em comum com a ideia ou a pergunta. */
 export function touchesIdea(text: string, about: { prompt: string; title: string; lesson: string }): boolean {
-  const aboutSet = new Set([
+  const theme = [
     ...contentWords(about.prompt),
     ...contentWords(about.title),
     ...contentWords(about.lesson),
-  ]);
-  if (aboutSet.size === 0) return true;
-  return contentWords(text).some((w) => aboutSet.has(w));
+  ];
+  if (theme.length === 0) return true;
+  return contentWords(text).some((w) => theme.some((t) => wordsClose(w, t)));
 }
 
 export const REFLECT_SHORT = 'Ainda está curto. Conta o que ficou na cabeça, com as suas palavras.';
@@ -212,7 +292,7 @@ export function reflectionThemeHits(text: string, about: { prompt: string; title
   for (const word of said) {
     for (const themeWord of theme) {
       if (used.has(themeWord)) continue;
-      const close = word === themeWord || (themeWord.length >= 5 && oneLetterOff(word, themeWord));
+      const close = wordsClose(word, themeWord);
       if (!close) continue;
       used.add(themeWord);
       hits += 1;

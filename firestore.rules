@@ -352,13 +352,89 @@ service cloud.firestore {
           && !request.resource.data.keys().hasAny(['parentDecision'])
         )
       );
-      // a criança só recebe o pagamento pela transação; parentDecision é do pai
+      // a criança só recebe o pagamento pela transação; parentDecision é do pai.
+      // Conversa do Sábio (LEITURA_LIVROS.md, 28/09): depois de aceito, a criança grava só `talk`.
       allow update: if isAdmin() || (
         signedIn()
         && resource.data.userId == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paidGold', 'paidXp', 'accepted', 'updatedAt'])
+        && (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['paidGold', 'paidXp', 'accepted', 'updatedAt'])
+          || (
+            resource.data.accepted == true
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['talk', 'updatedAt'])
+          )
+        )
       );
       allow delete: if isAdmin();
+    }
+
+    // ---------- ENCOMENDAS, TREINOS E CARREIRAS (docs/CONTRATOS_E_CARREIRAS.md §10, 29/09) ----------
+    // Gold nunca sai da criança: a aprovação (e o pagamento) é do pai. A criança só aceita, entrega e desiste.
+    function boardAfter(uid) {
+      return getAfter(/databases/$(database)/documents/assignmentBoards/$(uid)).data;
+    }
+
+    match /assignments/{id} {
+      allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && (
+          // aceitar: só encomenda paga, antes do prazo, com o quadro de ativas atualizado na mesma escrita
+          (
+            resource.data.kind == 'paid'
+            && resource.data.status == 'available'
+            && request.resource.data.status == 'accepted'
+            && (!('dueAt' in resource.data) || request.time < resource.data.dueAt)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'acceptedAt', 'plan', 'updatedAt'])
+            && boardAfter(request.auth.uid).active.hasAny([id])
+            && boardAfter(request.auth.uid).active.size() <= 5
+          )
+          // entregar: encomenda aceita ou com ajuste pedido; treino direto do disponível
+          || (
+            (resource.data.status in ['accepted', 'needs_changes'] || (resource.data.kind == 'training' && resource.data.status == 'available'))
+            && request.resource.data.status == 'submitted'
+            && (!('dueAt' in resource.data) || request.time < resource.data.dueAt)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'submissions', 'updatedAt'])
+            && request.resource.data.submissions.size() == resource.data.submissions.size() + 1
+          )
+          // desistir: volta para o quadro, sem castigo; o pai vê as desistências
+          || (
+            resource.data.kind == 'paid'
+            && resource.data.status in ['accepted', 'needs_changes']
+            && request.resource.data.status == 'available'
+            && request.resource.data.drops == resource.data.drops + 1
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'acceptedAt', 'drops', 'updatedAt'])
+            && !boardAfter(request.auth.uid).active.hasAny([id])
+          )
+        )
+      );
+    }
+
+    // encomendas aceitas agora (limite do settings no cliente; a regra segura um teto de 5)
+    match /assignmentBoards/{uid} {
+      allow get: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow create, update: if isAdmin() || (
+        signedIn()
+        && uid == request.auth.uid
+        && request.resource.data.userId == uid
+        && request.resource.data.active is list
+        && request.resource.data.active.size() <= 5
+        && request.resource.data.keys().hasOnly(['userId', 'active', 'updatedAt'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /assignmentRecurrences/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // carreira: a criança lê; título e competências só mudam pela aprovação do pai
+    match /careers/{uid} {
+      allow get: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow write: if isAdmin();
     }
 
     match /quizBank/{id} {

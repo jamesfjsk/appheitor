@@ -30,6 +30,7 @@ import {
   BOOK_VERIFY_MODEL,
   BOOK_XP,
   buildBookJudgePrompt,
+  bookPayBlock,
   claimKeyForBook,
   claimKeyForBookDay,
   buildVerifyPrompt,
@@ -216,7 +217,7 @@ export async function saveBookReport(uid: string, input: ReportInput): Promise<s
  * gold do livro (valor do pai ou pelo tamanho) + XP, linha no extrato, livro marcado como lido, stat booksRead.
  * Idempotente: se qualquer um dos dois claims já existe, não paga.
  */
-export async function payBookReport(uid: string, reportId: string, book: Pick<BookDoc, 'id' | 'titleKey' | 'size' | 'title' | 'gold'>, date: string): Promise<{ paid: boolean; gold: number; xp: number; reason?: 'book' | 'day' }> {
+export async function payBookReport(uid: string, reportId: string, book: Pick<BookDoc, 'id' | 'titleKey' | 'size' | 'title' | 'gold'>, date: string, byParent = false): Promise<{ paid: boolean; gold: number; xp: number; reason?: 'book' | 'day' }> {
   const gold = goldForBook(book);
   const xp = BOOK_XP;
   const keyBook = claimKeyForBook(book.titleKey);
@@ -230,15 +231,15 @@ export async function payBookReport(uid: string, reportId: string, book: Pick<Bo
     const vSnap = await tx.get(vRef);
     const pSnap = await tx.get(pRef);
     const claimed = (vSnap.data()?.claimed || {}) as Record<string, string>;
-    if (claimed[keyBook]) { outcome = { paid: false, gold, xp, reason: 'book' }; return; }
-    if (claimed[keyDay]) { outcome = { paid: false, gold, xp, reason: 'day' }; return; }
+    const block = bookPayBlock(claimed, keyBook, keyDay, byParent);
+    if (block) { outcome = { paid: false, gold, xp, reason: block }; return; }
     if (!vSnap.exists() || !pSnap.exists()) throw new Error('O bolso do minerador não apareceu.');
     const goldBefore = Number(pSnap.data()?.availableGold) || 0;
     const goldAfter = goldBefore + gold;
     const now = new Date().toISOString();
     tx.update(vRef, {
       [`claimed.${keyBook}`]: now,
-      [`claimed.${keyDay}`]: now,
+      ...(byParent ? {} : { [`claimed.${keyDay}`]: now }),
       'stats.booksRead': increment(1),
       updatedAt: serverTimestamp(),
     });
@@ -260,7 +261,7 @@ export async function payBookReport(uid: string, reportId: string, book: Pick<Bo
       createdAt: serverTimestamp(),
     });
     tx.update(bRef, { status: 'done', doneOn: date, updatedAt: serverTimestamp() });
-    tx.update(rRef, { paidGold: gold, paidXp: xp, accepted: true, updatedAt: serverTimestamp() });
+    tx.update(rRef, { paidGold: gold, paidXp: xp, accepted: true, ...(byParent ? { paidByParent: true } : {}), updatedAt: serverTimestamp() });
     outcome = { paid: true, gold, xp };
   });
   return outcome;
@@ -274,7 +275,7 @@ export async function parentApproveReport(uid: string, reportId: string): Promis
   const bSnap = await getDoc(doc(db, 'books', report.bookId));
   if (!bSnap.exists()) throw new Error('Livro não encontrado');
   const book = fromBook(bSnap.id, bSnap.data());
-  const out = await payBookReport(uid, reportId, book, report.date);
+  const out = await payBookReport(uid, reportId, book, report.date, true);
   await updateDoc(doc(db, 'bookReports', reportId), { parentDecision: 'approved', needsParent: false, updatedAt: serverTimestamp() });
   return out;
 }
@@ -284,6 +285,7 @@ export async function parentVoidReport(uid: string, reportId: string): Promise<v
   const rSnap = await getDoc(doc(db, 'bookReports', reportId));
   if (!rSnap.exists()) throw new Error('Relato não encontrado');
   const report = fromReport(rSnap.id, rSnap.data());
+  const paidByParent = rSnap.data()?.paidByParent === true;
   await runTransaction(db, async (tx) => {
     const vRef = doc(db, 'village', uid);
     const pRef = doc(db, 'progress', uid);
@@ -306,7 +308,7 @@ export async function parentVoidReport(uid: string, reportId: string): Promise<v
     }
     tx.update(vRef, {
       [`claimed.${claimKeyForBook(report.titleKey)}`]: null,
-      [`claimed.${claimKeyForBookDay(report.date)}`]: null,
+      ...(paidByParent ? {} : { [`claimed.${claimKeyForBookDay(report.date)}`]: null }),
       updatedAt: serverTimestamp(),
     });
     if (report.bookId) tx.update(doc(db, 'books', report.bookId), { status: 'to_read', doneOn: null, updatedAt: serverTimestamp() });
