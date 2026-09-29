@@ -64,4 +64,10 @@ export const STAT_SOURCES: Record<string, { where: string }> = {
   npcTiersMin: { where: 'village.npcs (evaluateAchievements)' },
   milestonesOwned: { where: 'village.owned (evaluateAchievements)' },
   seasonsDone: { where: 'villageService.closeSeason' },
+  assignmentsApproved: { where: 'assignmentsService.approveAssignment' },
+  assignmentsFixed: { where: 'assignmentsService.approveAssignment' },
+  trainingsDone: { where: 'assignmentsService.approveAssignment' },
+  bugsFixed: { where: 'assignmentsService.approveAssignment' },
+  projectsDone: { where: 'assignmentsService.approveAssignment' },
+  careerRank: { where: 'assignmentsService.approveAssignment' },
 };

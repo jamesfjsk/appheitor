@@ -52,6 +52,7 @@ const SOURCE_LABEL: Record<string, string> = {
   admin_adjustment: 'Ajuste',
   task_reversal: 'Missão desfeita',
   level_gift: 'Presente de nível',
+  assignment: 'Encomendas',
 };
 
 export function sourceLabel(source: string): string {

@@ -66,6 +66,16 @@ export const DEFAULT_ECONOMY: EconomySettings = {
   repairRefundPct: 50,
   seasonWeeks: 13,
   levelCap: 40,
+  assignmentBands: {
+    pequena: { minDays: 0.1, maxDays: 0.2, xp: 10 },
+    normal: { minDays: 0.2, maxDays: 0.3, xp: 15 },
+    sabado: { minDays: 0.4, maxDays: 0.65, xp: 25 },
+    projeto: { minDays: 1, maxDays: 2, xp: 50 },
+    grande: { minDays: 2, maxDays: 3, xp: 80 },
+  },
+  assignmentWeeklyCapDays: 2,
+  assignmentActiveMax: 3,
+  assignmentProjectMax: 1,
 };
 
 export const PRICE_BANDS: PriceBand[] = [

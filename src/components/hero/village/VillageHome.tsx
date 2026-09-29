@@ -85,6 +85,7 @@ function MailNote({
 }
 
 function noticeLook(key: string, kind: string): { icon: string; kicker: string } {
+  if (key.startsWith('father:asg')) return { icon: '/assets/english/ui/gold.webp', kicker: 'Encomenda' };
   if (kind === 'father') return { icon: LETTER, kicker: 'Papai' };
   if (key.includes(':chest:')) return { icon: CHEST, kicker: 'Baú do Dia' };
   if (key.includes(':quiz:')) return { icon: BOOK, kicker: 'Prova' };
@@ -140,6 +141,7 @@ const VillageHome: React.FC<Props> = ({
   const [sageLine, setSageLine] = useState<string | null>(null);
   const [yesterdayCtx, setYesterdayCtx] = useState<{ missed: boolean; complete: boolean }>({ missed: false, complete: false });
   const [placaOpen, setPlacaOpen] = useState(false);
+  const [casaTab, setCasaTab] = useState<'missoes' | 'encomendas' | 'fechar'>('missoes');
   const [compactHud, setCompactHud] = useState(
     typeof window !== 'undefined' ? window.innerHeight < 800 : false,
   );
@@ -416,7 +418,7 @@ const VillageHome: React.FC<Props> = ({
     }
     const lv = (bid: BuildingId) => buildings[bid] || 0;
     if (id === 'character') { setPackTab('ficha'); setPackSlot('shirt'); setDistrict('pack'); return; }
-    if (id === 'house') { setDistrict('house'); return; }
+    if (id === 'house') { setCasaTab('missoes'); setDistrict('house'); return; }
     if (id === 'mine') { setDistrict('mine'); return; }
     if (id === 'pack') { setPackTab('ficha'); setPackSlot('shirt'); setDistrict('pack'); return; }
     if (id === 'market') {
@@ -547,7 +549,7 @@ const VillageHome: React.FC<Props> = ({
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const k = e.key.toLowerCase();
       if (k === '1') { setDistrict(null); setLot(null); setDockTab('vila'); }
-      if (k === '2' || k === 'm') { setDistrict('house'); setLot(null); setDockTab('missoes'); }
+      if (k === '2' || k === 'm') { setCasaTab('missoes'); setDistrict('house'); setLot(null); setDockTab('missoes'); }
       if (k === '3' || k === 'e') openDistrict('mine');
       if (k === '4' || k === 'l') openDistrict('market');
       if (k === '5' || k === 'i') openDistrict('pack');
@@ -637,7 +639,12 @@ const VillageHome: React.FC<Props> = ({
                   icon={look.icon}
                   kicker={look.kicker}
                   body={item.text}
-                  action={item.kind === 'father' ? (
+                  action={item.key.startsWith('father:asg') ? (
+                    <span className="flex gap-1 shrink-0">
+                      <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-2" onClick={() => { playClick(); setCasaTab('encomendas'); setDistrict('house'); setLot(null); setPlacaOpen(false); }}>Ver na Casa</button>
+                      <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-2" onClick={() => { playClick(); void ackNotice(item.key.replace('father:', '')); }}>Combinado</button>
+                    </span>
+                  ) : item.kind === 'father' ? (
                     <button type="button" className="mc-btn mc-btn-green min-h-[36px] px-2 shrink-0" onClick={() => { playClick(); void ackNotice(item.key.replace('father:', '')); }}>Combinado</button>
                   ) : undefined}
                 />
@@ -732,7 +739,7 @@ const VillageHome: React.FC<Props> = ({
                       <button
                         type="button"
                         className="mc-btn mc-btn-wood min-h-[44px] px-3"
-                        onClick={() => { playClick(); setDistrict('house'); setLot(null); setDockTab('missoes'); }}
+                        onClick={() => { playClick(); setCasaTab('missoes'); setDistrict('house'); setLot(null); setDockTab('missoes'); }}
                       >
                         Casa
                       </button>
@@ -750,7 +757,7 @@ const VillageHome: React.FC<Props> = ({
           <nav className="mc-hotbar mn-dock-nav">
             {([
               ['Vila', 'vila', () => { setDistrict(null); setLot(null); setDockTab('vila'); }],
-              ['Missões', 'missoes', () => { setDistrict('house'); setLot(null); setDockTab('missoes'); }],
+              ['Missões', 'missoes', () => { setCasaTab('missoes'); setDistrict('house'); setLot(null); setDockTab('missoes'); }],
               ['Mina', 'mine', () => openDistrict('mine')],
               ['Mercado', 'market', () => openDistrict('market')],
               ['Mochila', 'pack', () => openDistrict('pack')],
@@ -876,6 +883,7 @@ const VillageHome: React.FC<Props> = ({
       {district === 'agenda' && <Agenda onClose={() => setDistrict(null)} />}
       {district === 'house' && (
         <Casa
+          initialTab={casaTab}
           onClose={() => setDistrict(null)}
           selectedPeriod={selectedPeriod}
           onPeriodChange={onPeriodChange}
