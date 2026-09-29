@@ -247,10 +247,13 @@ const HowHeIsGoing = ({
   today,
 }: {
   profile: LearningProfile | null;
-  rows: { id?: string; date: string; subject?: string; kind?: string; question?: string; chosen?: string; hash?: string; correct?: boolean }[];
+  rows: { id?: string; date: string; subject?: string; kind?: string; skill?: string; question?: string; chosen?: string; hash?: string; correct?: boolean }[];
   today: DailyQuiz | null;
 }) => {
-  const wrong = rows.filter((row) => row.correct === false).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 30);
+  const wrong = rows
+    .filter((row) => row.correct === false && row.kind !== 'dilemma' && row.skill !== 'LIC.DILEMA')
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 30);
   const byHash = new Map<string, string[]>();
   for (const row of rows) {
     if (!row.hash) continue;

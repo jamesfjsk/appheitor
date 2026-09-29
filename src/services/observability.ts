@@ -22,15 +22,32 @@ function appVersion(): string {
   }
 }
 
+/** localhost e 127.0.0.1 são o hot reload do Vite, não o app publicado. */
+export function shouldReportClientError(input: { hostname: string; message: string }): boolean {
+  const host = (input.hostname || '').trim().toLowerCase();
+  if (host === 'localhost' || host === '127.0.0.1') return false;
+  return typeof input.message === 'string';
+}
+
 export async function logClientError(err: unknown, route = typeof location !== 'undefined' ? location.pathname : ''): Promise<void> {
+  const e = err instanceof Error ? err : new Error(String(err));
+  const message = String(e.message || err).slice(0, 500);
+  const hostname = typeof location !== 'undefined' ? location.hostname : '';
+  if (!shouldReportClientError({ hostname, message })) {
+    console.warn('clientError', message);
+    return;
+  }
   try {
-    const e = err instanceof Error ? err : new Error(String(err));
     const uid = auth.currentUser?.uid ?? '';
+    const href = typeof location !== 'undefined' ? location.href.slice(0, 300) : '';
+    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 180) : '';
     await addDoc(collection(db, 'clientErrors'), {
-      message: String(e.message || err).slice(0, 500),
+      message,
       stack: String(e.stack || '').slice(0, STACK_MAX),
       uid,
       route,
+      href,
+      userAgent,
       appVersion: appVersion(),
       createdAt: new Date().toISOString(),
     });
@@ -91,6 +108,8 @@ export interface ClientErrorRow {
   stack: string;
   uid: string;
   route: string;
+  href: string;
+  userAgent: string;
   appVersion: string;
   createdAt: string;
 }
@@ -109,6 +128,8 @@ export function subscribeClientErrors(uid: string, onChange: (rows: ClientErrorR
             stack: String(data.stack || ''),
             uid: String(data.uid || ''),
             route: String(data.route || ''),
+            href: String(data.href || '').slice(0, 300),
+            userAgent: String(data.userAgent || '').slice(0, 180),
             appVersion: String(data.appVersion || ''),
             createdAt: typeof data.createdAt === 'string'
               ? data.createdAt

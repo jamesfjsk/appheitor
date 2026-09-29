@@ -32,6 +32,9 @@ import { validateForge, validateLetter, validateMerchant, validateNote, type Mer
 import { callOpenAI, isAIConfigured } from './aiQuiz';
 import { currentUsageMonth, getUsage, isOverCap } from './aiUsage';
 import { addDays } from './dailyQuizService';
+import { mayGenerateNow } from './generationGuard';
+import { readPublishedVersion } from './appUpdate';
+import { getAppVersion } from './observability';
 
 const AI_MODEL = 'gpt-4.1-mini';
 const AI_TEMPERATURE = 0.8;
@@ -676,6 +679,12 @@ const planSource = (sources: GeneratedSource[]): DailyPlan['source'] => {
  * Cada contrato pronto dispara onProgress/onContract. Lança só pelo teto mensal.
  */
 export async function buildDailyContracts(ctx: BuildContext): Promise<BuiltPlan> {
+  const running = getAppVersion();
+  const latest = await readPublishedVersion();
+  if (!mayGenerateNow({ running, latest, dev: Boolean(import.meta.env.DEV), uid: ctx.uid })) {
+    console.warn('plano: esta aba não gera', { running, latest, dev: Boolean(import.meta.env.DEV), uid: ctx.uid });
+    throw new Error('O plano espera a versão nova.');
+  }
   await assertAiBudget();
   const day = dayContextFor(ctx);
   const total = day.specs.length;

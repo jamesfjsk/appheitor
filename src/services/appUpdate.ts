@@ -7,6 +7,18 @@ const MOMENTS = new Set(['visible', 'day', 'idle']);
 const busyKeys = new Set<string>();
 const busyListeners = new Set<() => void>();
 
+/** Versão publicada em /version.json. Vazio se a rede falhar ou o arquivo não existir. */
+export async function readPublishedVersion(): Promise<string> {
+  try {
+    const res = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return '';
+    const data = await res.json() as { version?: unknown };
+    return typeof data.version === 'string' ? data.version : '';
+  } catch {
+    return '';
+  }
+}
+
 export function shouldReload(input: {
   running: string;
   latest: string;

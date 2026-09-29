@@ -17,8 +17,13 @@ export function normalizeQuizText(s: string): string {
     .replace(/\s+/g, ' ');
 }
 
+/** Palavra de verdade. Vírgula solta, ponto e o "…" do molde não contam. */
 export function wordCount(s: string): number {
-  return s.trim().split(/\s+/).filter(Boolean).length;
+  return s
+    .trim()
+    .split(/\s+/)
+    .filter((token) => /[0-9A-Za-zÀ-ÖØ-öø-ÿ]/.test(token))
+    .length;
 }
 
 export function readingMs(text: string, minMs: number, maxMs: number): number {
@@ -220,9 +225,16 @@ export const REFLECT_COPY = 'Isso é a pergunta, não a sua resposta. Escreve co
 export const REFLECT_THIN = 'Tá repetindo a mesma palavra. Diz o que ficou, com palavras diferentes.';
 export const REFLECT_OFFTOPIC = 'Isso não fala da ideia de hoje. Lê a pergunta de novo e responde com a sua boca.';
 
+export function reflectOfftopicSay(title: string): string {
+  const theme = title.replace(/\s+/g, ' ').trim();
+  if (!theme) return REFLECT_OFFTOPIC;
+  return `Isso não fala de ${theme}. Liga a sua frase com a ideia de hoje.`;
+}
+
 export function reflectionLocalSay(text: string, about: { prompt: string; title: string; lesson: string }): string | null {
   const trimmed = text.trim();
-  if (wordCount(trimmed) < REFLECTION_MIN_WORDS) return REFLECT_SHORT;
+  // Piso da primeira semana. O de 12 palavras fica em reflectionGate.
+  if (wordCount(trimmed) < 8) return REFLECT_SHORT;
   if (hasKeyMash(trimmed)) return REFLECT_MASH;
   if (hasRepeatedWord(trimmed, 4) || uniqueWordCount(trimmed) < 6) return REFLECT_THIN;
   if (contentWords(trimmed).length < 3) return REFLECT_SHORT;
@@ -302,17 +314,44 @@ export function reflectionThemeHits(text: string, about: { prompt: string; title
   return hits;
 }
 
+export type ReflectionGate =
+  | { ok: true }
+  | { ok: false; code: 'short' | 'mash' | 'thin' | 'copy' | 'offtopic'; say: string };
+
+/**
+ * O botão Entregar olha só o contador. Aqui, na entrega: lixo cai na hora;
+ * com 0 palavra do tema o Sábio pede uma vez; a segunda entrega passa.
+ */
+export function reflectionGate(
+  text: string,
+  about: { prompt: string; title: string; lesson: string },
+  launchedOn: string | null | undefined,
+  today: string | undefined,
+  offtopicAsked: boolean,
+): ReflectionGate {
+  const trimmed = text.trim();
+  if (wordCount(trimmed) < reflectionMinWords(launchedOn, today)) return { ok: false, code: 'short', say: REFLECT_SHORT };
+  if (hasKeyMash(trimmed)) return { ok: false, code: 'mash', say: REFLECT_MASH };
+  if (hasRepeatedWord(trimmed, 4) || uniqueWordCount(trimmed) < 6) return { ok: false, code: 'thin', say: REFLECT_THIN };
+  if (contentWords(trimmed).length < 3) return { ok: false, code: 'short', say: REFLECT_SHORT };
+  if (copiesSource(trimmed, about.prompt) || copiesSource(trimmed, about.title) || copiesSource(trimmed, about.lesson)) {
+    return { ok: false, code: 'copy', say: REFLECT_COPY };
+  }
+  const theme = [...contentWords(about.title), ...contentWords(about.lesson), ...contentWords(about.prompt)];
+  if (theme.length > 0 && reflectionThemeHits(trimmed, about) < 1 && !offtopicAsked) {
+    return { ok: false, code: 'offtopic', say: reflectOfftopicSay(about.title) };
+  }
+  return { ok: true };
+}
+
 export function reflectionReady(
   text: string,
   about: { prompt: string; title: string; lesson: string },
   launchedOn?: string | null,
   today?: string,
+  offtopicAsked = false,
 ): boolean {
-  if (!reflectionOk(text, about)) return false;
-  if (wordCount(text) < reflectionMinWords(launchedOn, today)) return false;
-  const theme = [...contentWords(about.title), ...contentWords(about.lesson), ...contentWords(about.prompt)];
-  if (theme.length === 0) return true;
-  return reflectionThemeHits(text, about) >= 1;
+  return reflectionGate(text, about, launchedOn, today, offtopicAsked).ok;
 }
 
 /** Conta, inglês, aplicar e causa têm segunda tentativa. Fato e dilema não. */
