@@ -19,6 +19,34 @@ export async function readPublishedVersion(): Promise<string> {
   }
 }
 
+/**
+ * A versão publicada já é outra. Recarrega na hora se a tela não está ocupada.
+ * O intervalo de 10 minutos de `shouldReload` não vale aqui.
+ */
+export function versionReloadPlan(input: { running: string; latest: string; busy: boolean }): 'now' | 'wait' | 'skip' {
+  if (!input.latest || input.latest === input.running || input.running === 'dev') return 'skip';
+  return input.busy ? 'wait' : 'now';
+}
+
+let pendingLatest = '';
+
+function flushVersionReload(): void {
+  if (!pendingLatest || isAppBusy()) return;
+  if (typeof window === 'undefined') return;
+  const latest = pendingLatest;
+  pendingLatest = '';
+  console.info('app-update: recarregando', latest);
+  window.location.reload();
+}
+
+/** Pede o recarregamento assim que a versão diverge. Se a prova ou a Estante estão abertas, espera soltar. */
+export function requestVersionReload(latest: string, running: string): void {
+  const plan = versionReloadPlan({ running, latest, busy: isAppBusy() });
+  if (plan === 'skip') return;
+  pendingLatest = latest;
+  if (plan === 'now') flushVersionReload();
+}
+
 export function shouldReload(input: {
   running: string;
   latest: string;
@@ -47,6 +75,7 @@ function notifyBusy(): void {
   notifyTimer = setTimeout(() => {
     notifyTimer = null;
     busyListeners.forEach((fn) => fn());
+    flushVersionReload();
   }, 0);
 }
 

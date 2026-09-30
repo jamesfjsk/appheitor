@@ -17,8 +17,8 @@ import { nextQuizStreak } from './village/stats';
 import { perfectQuiz } from './quiz/provaRules';
 import { answersStash, attemptsForBank, completeQuizWrite, readAttempts, type QuizAbout, type QuizTiming } from './quiz/closeQuiz';
 import type { BankAttempt } from './quiz/bankWrite';
-import { mayGenerateNow } from './generationGuard';
-import { readPublishedVersion } from './appUpdate';
+import { generationBlock, guardHost, refuseMessage } from './generationGuard';
+import { readPublishedVersion, requestVersionReload } from './appUpdate';
 import { getAppVersion } from './observability';
 import { quizBankDocs } from './quiz/bankWrite';
 import { avoidQuestionsFromRecent, type DedupeNeedle } from './quiz/dedupe';
@@ -129,13 +129,15 @@ export type StoredDailyQuiz = DailyQuiz & {
   generatedVersion?: string;
 };
 
-async function generationVersion(userId: string): Promise<string | null> {
+async function generationVersion(userId: string): Promise<string> {
   const running = getAppVersion();
   const latest = await readPublishedVersion();
   const dev = Boolean(import.meta.env.DEV);
-  if (!mayGenerateNow({ running, latest, dev, uid: userId })) {
-    console.warn('prova: esta aba não gera', { running, latest, dev, uid: userId });
-    return null;
+  const block = generationBlock({ running, latest, dev, uid: userId, hostname: guardHost() });
+  if (block) {
+    console.warn('prova: esta aba não gera', { running, latest, dev, uid: userId, block });
+    if (block === 'version') requestVersionReload(latest, running);
+    throw new Error(refuseMessage(block));
   }
   return running;
 }
@@ -213,11 +215,10 @@ export async function ensureDailyQuiz(userId: string, date: string, today: strin
   const task = (async () => {
     try {
       const version = await generationVersion(userId);
-      if (!version) {
-        if (existing) return existing;
-        throw new Error('A prova espera a versão nova.');
-      }
       return await buildAndSave(userId, date, today, count, version);
+    } catch (e) {
+      if (existing) return existing;
+      throw e;
     } finally {
       inFlight.delete(key);
     }
@@ -231,7 +232,6 @@ export async function regenerateDailyQuiz(userId: string, date: string, today: s
   const existing = await getDailyQuiz(userId, date);
   if (existing?.completed) throw new Error('Prova já concluída, não dá para regenerar.');
   const version = await generationVersion(userId);
-  if (!version) throw new Error('A prova espera a versão nova.');
   return buildAndSave(userId, date, today, count, version);
 }
 
@@ -286,7 +286,7 @@ async function loadChallengeItems(userId: string, today: string): Promise<Challe
 }
 
 async function buildAndSave(userId: string, date: string, today: string, count: number, version: string): Promise<StoredDailyQuiz> {
-  if (!version) throw new Error('A prova espera a versão nova.');
+  if (!version) throw new Error('A prova espera a versão nova. Recarregue a página.');
   const recent = await getRecentDailyQuizzes(userId, today, 90);
   const history: ThemeHistoryEntry[] = recent
     .filter((q) => q.date !== date && q.theme.id)

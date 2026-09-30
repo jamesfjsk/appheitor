@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { DAY_CHANGED_EVENT } from '../contexts/ClockContext';
 import { getAppVersion } from '../services/observability';
-import { isAppBusy, shouldReload, subscribeAppBusy } from '../services/appUpdate';
+import { isAppBusy, requestVersionReload, shouldReload, subscribeAppBusy } from '../services/appUpdate';
 
 const POLL_MS = 10 * 60 * 1000;
 const IDLE_MS = 5 * 60 * 1000;
@@ -65,6 +65,7 @@ export function useAppUpdate(): void {
       const next = await fetchLatest();
       if (dead || !next) return;
       latest = next;
+      requestVersionReload(next, running);
     };
 
     const armIdle = () => {

@@ -32,8 +32,8 @@ import { validateForge, validateLetter, validateMerchant, validateNote, type Mer
 import { callOpenAI, isAIConfigured } from './aiQuiz';
 import { currentUsageMonth, getUsage, isOverCap } from './aiUsage';
 import { addDays } from './dailyQuizService';
-import { mayGenerateNow } from './generationGuard';
-import { readPublishedVersion } from './appUpdate';
+import { generationBlock, guardHost, refuseMessage } from './generationGuard';
+import { readPublishedVersion, requestVersionReload } from './appUpdate';
 import { getAppVersion } from './observability';
 
 const AI_MODEL = 'gpt-4.1-mini';
@@ -681,9 +681,12 @@ const planSource = (sources: GeneratedSource[]): DailyPlan['source'] => {
 export async function buildDailyContracts(ctx: BuildContext): Promise<BuiltPlan> {
   const running = getAppVersion();
   const latest = await readPublishedVersion();
-  if (!mayGenerateNow({ running, latest, dev: Boolean(import.meta.env.DEV), uid: ctx.uid })) {
-    console.warn('plano: esta aba não gera', { running, latest, dev: Boolean(import.meta.env.DEV), uid: ctx.uid });
-    throw new Error('O plano espera a versão nova.');
+  const dev = Boolean(import.meta.env.DEV);
+  const block = generationBlock({ running, latest, dev, uid: ctx.uid, hostname: guardHost() });
+  if (block) {
+    console.warn('plano: esta aba não gera', { running, latest, dev, uid: ctx.uid, block });
+    if (block === 'version') requestVersionReload(latest, running);
+    throw new Error(refuseMessage(block));
   }
   await assertAiBudget();
   const day = dayContextFor(ctx);

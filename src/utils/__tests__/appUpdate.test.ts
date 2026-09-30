@@ -1,5 +1,5 @@
 import { expect, run, test } from '../../services/english/__tests__/harness';
-import { isAppBusy, setAppBusy, shouldReload, subscribeAppBusy } from '../../services/appUpdate';
+import { isAppBusy, setAppBusy, shouldReload, subscribeAppBusy, versionReloadPlan } from '../../services/appUpdate';
 
 const base = {
   running: '2026-09-22-2a0658f',
@@ -58,6 +58,13 @@ test('soltar e marcar de novo no mesmo tique não avisa como livre (troca de fas
   await tick();
   expect(seen[seen.length - 1]).toBe(false);
   off();
+});
+
+test('versão nova pede recarregar na hora, e espera se a tela está ocupada', () => {
+  expect(versionReloadPlan({ running: base.running, latest: base.latest, busy: false })).toBe('now');
+  expect(versionReloadPlan({ running: base.running, latest: base.latest, busy: true })).toBe('wait');
+  expect(versionReloadPlan({ running: base.running, latest: base.running, busy: false })).toBe('skip');
+  expect(versionReloadPlan({ running: 'dev', latest: base.latest, busy: false })).toBe('skip');
 });
 
 void run();

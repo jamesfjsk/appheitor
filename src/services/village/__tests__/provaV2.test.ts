@@ -18,6 +18,7 @@ import {
   reflectionOk,
   reflectionReady,
   reflectionThemeHits,
+  reflectionWordCount,
   revealParts,
   speakChunks,
   speakVerdict,
@@ -229,7 +230,7 @@ test('reflexão do pacote 11: 12 palavras, 8 nos 7 primeiros dias, e lojica cont
   expect(reflectionReady(eleven, about, '2026-09-26', '2026-10-03')).toBe(false);
   expect(reflectionReady(eleven, about, '2026-09-26', '2026-09-26')).toBe(true);
   const real = 'a lojica dele tanbem pode fucionar em celular , tv , tablet etc';
-  expect(wordCount(real)).toBe(11);
+  expect(reflectionWordCount(real)).toBe(11);
   expect(reflectionThemeHits(real, about)).toBeGreaterThanOrEqual(1);
   expect(reflectionReady(real, about, '2026-09-26', '2026-09-26')).toBe(true);
   expect(reflectionReady(real, about)).toBe(false);

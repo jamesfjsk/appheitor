@@ -58,8 +58,8 @@ function rank(rows: { key: string; ok: number; n: number }[], dir: 'best' | 'wor
 
 /** Perfil da prova. strong e weak usam o total, com pelo menos 4 perguntas. */
 export function buildProfile(items: ProfileItem[], today: string): LearningProfile {
-  const d7 = addDays(today, -7);
-  const d30 = addDays(today, -30);
+  const d7 = addDays(today, -6);
+  const d30 = addDays(today, -29);
   const byCategory: LearningProfile['byCategory'] = {};
   const bySubject: LearningProfile['bySubject'] = {};
   const bySkill: LearningProfile['bySkill'] = {};

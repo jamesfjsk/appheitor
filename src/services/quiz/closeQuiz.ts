@@ -1,5 +1,5 @@
 import type { BankAttempt, QuizTiming } from './bankWrite';
-import { reflectionReady, reflectionThemeHits, wordCount } from './provaRules';
+import { reflectionReady, reflectionThemeHits, reflectionWordCount } from './provaRules';
 
 export type { QuizTiming };
 
@@ -174,7 +174,7 @@ export function completeQuizWrite(
       goldEarned: result.goldEarned,
       answers: result.answers,
       reflection,
-      reflectionWords: wordCount(reflection),
+      reflectionWords: reflectionWordCount(reflection),
       reflectionThemeHits: reflectionThemeHits(reflection, result.about),
       ...(typeof result.reflectionMs === 'number' ? { reflectionMs: result.reflectionMs } : {}),
       ...(note ? { reflectionNote: note } : {}),
