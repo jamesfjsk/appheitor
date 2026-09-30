@@ -15,7 +15,11 @@ import { addDays } from '../utils/clock';
 import { bumpChallenge } from './challengesService';
 import { nextQuizStreak } from './village/stats';
 import { perfectQuiz } from './quiz/provaRules';
-import { answersStash, completeQuizWrite, type QuizAbout, type QuizTiming } from './quiz/closeQuiz';
+import { answersStash, attemptsForBank, completeQuizWrite, readAttempts, type QuizAbout, type QuizTiming } from './quiz/closeQuiz';
+import type { BankAttempt } from './quiz/bankWrite';
+import { mayGenerateNow } from './generationGuard';
+import { readPublishedVersion } from './appUpdate';
+import { getAppVersion } from './observability';
 import { quizBankDocs } from './quiz/bankWrite';
 import { avoidQuestionsFromRecent, type DedupeNeedle } from './quiz/dedupe';
 import { challengeLine, type ChallengeItem } from './quiz/challengeLine';
@@ -120,9 +124,26 @@ function readTheme(raw: DailyQuizTheme | undefined): DailyQuizTheme {
 
 export { addDays };
 
-function fromDoc(id: string, data: Record<string, unknown>): DailyQuiz | null {
+export type StoredDailyQuiz = DailyQuiz & {
+  attempts?: BankAttempt[];
+  generatedVersion?: string;
+};
+
+async function generationVersion(userId: string): Promise<string | null> {
+  const running = getAppVersion();
+  const latest = await readPublishedVersion();
+  const dev = Boolean(import.meta.env.DEV);
+  if (!mayGenerateNow({ running, latest, dev, uid: userId })) {
+    console.warn('prova: esta aba não gera', { running, latest, dev, uid: userId });
+    return null;
+  }
+  return running;
+}
+
+function fromDoc(id: string, data: Record<string, unknown>): StoredDailyQuiz | null {
   const questions = Array.isArray(data.questions) ? (data.questions as DailyQuizQuestion[]) : [];
   const theme = data.theme as DailyQuizTheme | undefined;
+  const attempts = readAttempts(data.attempts);
   // documentos antigos (só resultado, sem prova) também são aceitos
   return {
     id,
@@ -143,20 +164,23 @@ function fromDoc(id: string, data: Record<string, unknown>): DailyQuiz | null {
     answers: Array.isArray(data.answers) ? (data.answers as string[]) : undefined,
     reflection: typeof data.reflection === 'string' ? data.reflection : undefined,
     reflectionWords: typeof data.reflectionWords === 'number' ? data.reflectionWords : undefined,
+    reflectionThemeHits: typeof data.reflectionThemeHits === 'number' ? data.reflectionThemeHits : undefined,
     reflectionNote: typeof data.reflectionNote === 'string' ? data.reflectionNote : undefined,
     timings: readTimings(data.timings),
+    ...(attempts ? { attempts } : {}),
+    ...(typeof data.generatedVersion === 'string' ? { generatedVersion: data.generatedVersion } : {}),
     completedAt: (data.completedAt as Timestamp | undefined)?.toDate?.(),
     sanitize: readSanitize(data.sanitize),
     ...(data.raw && typeof data.raw === 'object' ? { raw: data.raw } : {}),
   };
 }
 
-export async function getDailyQuiz(userId: string, date: string): Promise<DailyQuiz | null> {
+export async function getDailyQuiz(userId: string, date: string): Promise<StoredDailyQuiz | null> {
   const snap = await getDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)));
   return snap.exists() ? fromDoc(snap.id, snap.data()) : null;
 }
 
-export function subscribeDailyQuiz(userId: string, date: string, onChange: (quiz: DailyQuiz | null) => void, onError?: (e: Error) => void): () => void {
+export function subscribeDailyQuiz(userId: string, date: string, onChange: (quiz: StoredDailyQuiz | null) => void, onError?: (e: Error) => void): () => void {
   return onSnapshot(
     doc(db, 'dailyQuizzes', dailyQuizId(userId, date)),
     (snap) => onChange(snap.exists() ? fromDoc(snap.id, snap.data()) : null),
@@ -165,19 +189,19 @@ export function subscribeDailyQuiz(userId: string, date: string, onChange: (quiz
 }
 
 /** Últimos N dias (inclui hoje), do mais recente para o mais antigo. Sem índice: busca por id. */
-export async function getRecentDailyQuizzes(userId: string, today: string, days = 30): Promise<DailyQuiz[]> {
+export async function getRecentDailyQuizzes(userId: string, today: string, days = 30): Promise<StoredDailyQuiz[]> {
   const dates = Array.from({ length: days }, (_, i) => addDays(today, -i));
   const snaps = await Promise.all(dates.map((d) => getDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, d)))));
   return snaps.filter((s) => s.exists()).map((s) => fromDoc(s.id, s.data() as Record<string, unknown>)!);
 }
 
-const inFlight = new Map<string, Promise<DailyQuiz>>();
+const inFlight = new Map<string, Promise<StoredDailyQuiz>>();
 
 /**
  * Garante que a prova do dia exista: se já foi gerada, devolve; senão gera e grava.
  * Chamadas simultâneas na mesma aba compartilham a mesma geração.
  */
-export async function ensureDailyQuiz(userId: string, date: string, today: string, count = DAILY_QUIZ_QUESTIONS): Promise<DailyQuiz> {
+export async function ensureDailyQuiz(userId: string, date: string, today: string, count = DAILY_QUIZ_QUESTIONS): Promise<StoredDailyQuiz> {
   const key = dailyQuizId(userId, date);
   const existing = await getDailyQuiz(userId, date);
   if (existing && existing.questions.length > 0) return existing;
@@ -187,19 +211,28 @@ export async function ensureDailyQuiz(userId: string, date: string, today: strin
   if (running) return running;
 
   const task = (async () => {
-    const quiz = await buildAndSave(userId, date, today, count);
-    inFlight.delete(key);
-    return quiz;
+    try {
+      const version = await generationVersion(userId);
+      if (!version) {
+        if (existing) return existing;
+        throw new Error('A prova espera a versão nova.');
+      }
+      return await buildAndSave(userId, date, today, count, version);
+    } finally {
+      inFlight.delete(key);
+    }
   })();
   inFlight.set(key, task);
   return task;
 }
 
 /** Descarta a prova (não concluída) e gera outra. */
-export async function regenerateDailyQuiz(userId: string, date: string, today: string, count = DAILY_QUIZ_QUESTIONS): Promise<DailyQuiz> {
+export async function regenerateDailyQuiz(userId: string, date: string, today: string, count = DAILY_QUIZ_QUESTIONS): Promise<StoredDailyQuiz> {
   const existing = await getDailyQuiz(userId, date);
   if (existing?.completed) throw new Error('Prova já concluída, não dá para regenerar.');
-  return buildAndSave(userId, date, today, count);
+  const version = await generationVersion(userId);
+  if (!version) throw new Error('A prova espera a versão nova.');
+  return buildAndSave(userId, date, today, count, version);
 }
 
 async function loadQuizBankNeedles(userId: string, today: string): Promise<DedupeNeedle[]> {
@@ -252,7 +285,8 @@ async function loadChallengeItems(userId: string, today: string): Promise<Challe
   }
 }
 
-async function buildAndSave(userId: string, date: string, today: string, count: number): Promise<DailyQuiz> {
+async function buildAndSave(userId: string, date: string, today: string, count: number, version: string): Promise<StoredDailyQuiz> {
+  if (!version) throw new Error('A prova espera a versão nova.');
   const recent = await getRecentDailyQuizzes(userId, today, 90);
   const history: ThemeHistoryEntry[] = recent
     .filter((q) => q.date !== date && q.theme.id)
@@ -319,9 +353,16 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     reflection: deleteField(),
     reflectionWords: deleteField(),
     reflectionNote: deleteField(),
+    generatedVersion: version,
     generatedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }, { merge: true });
+
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    const w = window as unknown as { __generatedVersions?: Record<string, string> };
+    w.__generatedVersions = { ...(w.__generatedVersions ?? {}), [date]: version };
+    console.info('prova generatedVersion', date, version);
+  }
 
   return {
     id: ref.id,
@@ -334,6 +375,7 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     source: generated.source,
     sanitize: generated.sanitize,
     ...(generated.raw ? { raw: generated.raw } : {}),
+    generatedVersion: version,
     generatedAt: new Date(),
     completed: false,
   };
@@ -347,11 +389,12 @@ export async function stashQuizAnswers(
   score: number,
   totalQuestions: number,
   timings?: QuizTiming[],
+  attempts?: BankAttempt[],
 ): Promise<void> {
   await setDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), {
     userId,
     date,
-    ...answersStash(answers, score, totalQuestions, timings),
+    ...answersStash(answers, score, totalQuestions, timings, attempts),
     updatedAt: serverTimestamp(),
   }, { merge: true });
 }
@@ -369,6 +412,7 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
   attempts?: { second?: string; nudge?: 'trap' | 'strategy'; audioPlayed?: boolean }[];
   launchedOn?: string | null;
   reflectionMs?: number;
+  waiveTheme?: boolean;
 }): Promise<void> {
   const ref = doc(db, 'dailyQuizzes', dailyQuizId(userId, date));
   const snap = await getDoc(ref);
@@ -379,6 +423,7 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
   const questions = Array.isArray(existing?.questions) ? existing.questions as DailyQuizQuestion[] : [];
   const theme = (existing?.theme ?? {}) as DailyQuizTheme;
   const timings = result.timings?.length ? result.timings : readTimings(existing?.timings);
+  const attempts = attemptsForBank(result.attempts, readAttempts(existing?.attempts));
   const bank = quizBankDocs({
     userId,
     date,
@@ -386,7 +431,7 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     questions,
     answers: result.answers,
     timings,
-    attempts: result.attempts,
+    attempts,
   });
   const snaps = await Promise.all(bank.map((item) => getDoc(doc(db, 'quizBank', item.id))));
   const fresh = bank.filter((_, i) => !snaps[i].exists());
@@ -402,12 +447,6 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     batch.set(doc(db, 'quizBank', item.id), { ...item.data, createdAt: serverTimestamp() });
   }
   await batch.commit();
-  try {
-    const { saveQuizProfile } = await import('./learningService');
-    await saveQuizProfile(userId, date);
-  } catch (e) {
-    console.warn('perfil da prova', e);
-  }
   try {
     await bumpChallenge(userId, 'quiz_correct', result.score);
   } catch (e) {
@@ -437,6 +476,12 @@ export async function completeDailyQuiz(userId: string, date: string, result: {
     await bumpFriend(userId, 'sabio', 2);
   } catch (e) {
     console.warn('stats prova', e);
+  }
+  try {
+    const { saveQuizProfile } = await import('./learningService');
+    await saveQuizProfile(userId, date);
+  } catch (e) {
+    console.warn('perfil da prova', e);
   }
 }
 

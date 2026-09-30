@@ -72,8 +72,10 @@ export function buildProfile(items: ProfileItem[], today: string): LearningProfi
 
   for (const item of ordered) {
     const correct = item.correct === true;
-    const in7 = item.date >= d7 && item.date < today;
-    const in30 = item.date >= d30 && item.date < today;
+    const dilemma = item.kind === 'dilemma' || item.skill === 'LIC.DILEMA';
+    if (dilemma) continue;
+    const in7 = item.date >= d7 && item.date <= today;
+    const in30 = item.date >= d30 && item.date <= today;
     const cat = item.category || 'tema';
     const subject = item.subject || 'geral';
     const skill = item.skill || '';
@@ -115,7 +117,8 @@ export function buildProfile(items: ProfileItem[], today: string): LearningProfi
       });
     }
     if (skill.startsWith('ING.')) englishLastSkill = skill;
-    if (retryable({ skill, kind }) && !correct) {
+    const hadSecond = (item.attempts ?? 0) >= 2 || typeof item.retryOk === 'boolean' || item.supportLevel === 1;
+    if (retryable({ skill, kind }) && hadSecond) {
       const later = item.retryOk === true || item.supportLevel === 1;
       retry.all = [retry.all[0] + (later ? 1 : 0), retry.all[1] + 1];
       if (in30) retry.d30 = [retry.d30[0] + (later ? 1 : 0), retry.d30[1] + 1];

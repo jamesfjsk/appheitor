@@ -22,6 +22,9 @@ import { normalizedTokens } from './english/notePrecheck';
 import { assertAiBudget, buildDailyContracts, regenerateSingle } from './englishAi';
 import { prefetchAudio } from './englishTts';
 import { addDays } from './dailyQuizService';
+import { mayGenerateNow } from './generationGuard';
+import { readPublishedVersion } from './appUpdate';
+import { getAppVersion } from './observability';
 import { getTodayBrazil } from '../utils/timezone';
 import { addVillageStats } from './village/stats';
 
@@ -35,6 +38,17 @@ const RECENT_LOOKBACK_DAYS = 30;
 /** "Gerar próximos 7 dias": hoje..hoje+7 */
 const UPCOMING_MAX_DAYS = 7;
 export const planId = (uid: string, date: string): string => `${uid}_${date}`;
+
+async function planGenerationVersion(uid: string): Promise<string | null> {
+  const running = getAppVersion();
+  const latest = await readPublishedVersion();
+  const dev = Boolean(import.meta.env.DEV);
+  if (!mayGenerateNow({ running, latest, dev, uid })) {
+    console.warn('plano: esta aba não gera', { running, latest, dev, uid });
+    return null;
+  }
+  return running;
+}
 
 export interface CompleteResult {
   xp: number;
@@ -330,7 +344,8 @@ async function generateInto(
   previous: Record<string, number>,
   base: BaseDoc,
   onProgress?: (ready: number, total: number) => void,
-  force = false
+  force = false,
+  generatedVersion = '',
 ): Promise<DailyPlan | null> {
   const ref = planRef(uid, date);
   const withVersion = (c: Contract): Contract => ({ ...c, version: (previous[c.id] ?? 0) + 1 });
@@ -341,7 +356,12 @@ async function generateInto(
       const committed = await runTransaction(db, async (tx) => {
         const snap = await tx.get(ref);
         if (!snap.exists() || snap.data().generatingAt !== token) return false;
-        tx.update(ref, { status: 'ready', generatingAt: null, generatedAt });
+        tx.update(ref, {
+          status: 'ready',
+          generatingAt: null,
+          generatedAt,
+          ...(generatedVersion ? { generatedVersion } : {}),
+        });
         return true;
       });
       if (committed) {
@@ -387,6 +407,7 @@ async function generateInto(
         rewardedIds: hasDone(snapPlan) ? snapPlan.rewardedIds : [],
         source: built.source,
         themeRequest: built.themeRequest,
+        ...(generatedVersion ? { generatedVersion } : {}),
       });
       return true;
     });
@@ -419,6 +440,8 @@ const inFlight = new Map<string, Promise<DailyPlan>>();
 async function ensurePlanInner(uid: string, date: string, onProgress?: (ready: number, total: number) => void): Promise<DailyPlan> {
   const existing = await getPlan(uid, date);
   if (existing?.status === 'ready') return existing;
+  const version = await planGenerationVersion(uid);
+  if (!version) throw new Error('O plano espera a versão nova.');
   for (let attempt = 0; attempt < WAIT_ATTEMPTS; attempt++) {
     const base = await ensureBase(uid);
     const lease = await acquireLease(uid, date, base.level, false);
@@ -428,7 +451,7 @@ async function ensurePlanInner(uid: string, date: string, onProgress?: (ready: n
       if (waited) return waited;
       continue;
     }
-    const plan = await generateInto(uid, date, lease.token, lease.previous, base, onProgress, false);
+    const plan = await generateInto(uid, date, lease.token, lease.previous, base, onProgress, false, version);
     if (plan) return plan;
     // Outra aba assumiu no meio: fica com o resultado dela
     const waited = await waitForPlan(uid, date, onProgress);
@@ -457,10 +480,12 @@ async function regeneratePlan(uid: string, date: string): Promise<DailyPlan> {
   const running = inFlight.get(key);
   if (running) await running.catch(() => undefined);
   const task = (async () => {
+    const version = await planGenerationVersion(uid);
+    if (!version) throw new Error('O plano espera a versão nova.');
     const base = await ensureBase(uid);
     const lease = await acquireLease(uid, date, base.level, true);
     if (lease.kind !== 'acquired') throw new Error('Não foi possível assumir a regeneração do plano.');
-    const plan = await generateInto(uid, date, lease.token, lease.previous, base, undefined, true);
+    const plan = await generateInto(uid, date, lease.token, lease.previous, base, undefined, true, version);
     if (!plan) throw new Error('Outra aba assumiu a geração deste plano.');
     return plan;
   })().finally(() => inFlight.delete(key));
@@ -794,6 +819,8 @@ export async function setBaseLevel(uid: string, level: number): Promise<void> {
 
 /** Regenera um contrato aberto (version + 1); o plano passa a 'mixed' quando as fontes divergem */
 export async function regenerateContract(uid: string, date: string, contractId: string): Promise<void> {
+  const generatedVersion = await planGenerationVersion(uid);
+  if (!generatedVersion) throw new Error('O plano espera a versão nova.');
   const ref = planRef(uid, date);
   const plan = await getPlan(uid, date);
   if (!plan) throw new Error('Plano não encontrado.');
@@ -812,13 +839,15 @@ export async function regenerateContract(uid: string, date: string, contractId: 
     const c = fresh.contracts[contractId];
     if (!c || c.status !== 'open') throw new Error('O contrato foi concluído enquanto era regenerado.');
     const source: PlanSource = fresh.source !== 'mixed' && fresh.source !== generated.source ? 'mixed' : fresh.source;
-    tx.update(ref, { [`contracts.${contractId}`]: stripUndefined(generated.contract), source });
+    tx.update(ref, { [`contracts.${contractId}`]: stripUndefined(generated.contract), source, generatedVersion });
   });
   prefetchPlanAudio({ date, contracts: { [contractId]: generated.contract } });
 }
 
 /** Garante hoje..hoje+days em sequência (máximo 7); planos prontos ficam como estão */
 export async function generateUpcomingDays(uid: string, days: number, onProgress?: (done: number, total: number) => void): Promise<void> {
+  const version = await planGenerationVersion(uid);
+  if (!version) throw new Error('O plano espera a versão nova.');
   const count = Math.min(UPCOMING_MAX_DAYS, Math.max(0, Math.floor(num(days))));
   const today = getTodayBrazil();
   const total = count + 1;

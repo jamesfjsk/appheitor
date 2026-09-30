@@ -1,4 +1,4 @@
-import type { QuizTiming } from './bankWrite';
+import type { BankAttempt, QuizTiming } from './bankWrite';
 import { reflectionReady, reflectionThemeHits, wordCount } from './provaRules';
 
 export type { QuizTiming };
@@ -41,11 +41,47 @@ export async function payThenComplete(
   await complete();
 }
 
+export function cleanAttempt(raw: unknown): BankAttempt {
+  if (!raw || typeof raw !== 'object') return {};
+  const row = raw as { second?: unknown; nudge?: unknown; audioPlayed?: unknown };
+  const out: BankAttempt = {};
+  if (typeof row.second === 'string' && row.second) out.second = row.second;
+  if (row.nudge === 'trap' || row.nudge === 'strategy') out.nudge = row.nudge;
+  if (row.audioPlayed === true) out.audioPlayed = true;
+  return out;
+}
+
+export function readAttempts(raw: unknown): BankAttempt[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  return raw.map((item) => cleanAttempt(item));
+}
+
+/** Recarregar antes da reflexão não pode apagar a segunda tentativa que já estava na mesa. */
+export function attemptsForBank(incoming?: BankAttempt[], stored?: BankAttempt[]): BankAttempt[] | undefined {
+  const n = Math.max(incoming?.length ?? 0, stored?.length ?? 0);
+  if (n === 0) return undefined;
+  const out: BankAttempt[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = incoming?.[i];
+    const b = stored?.[i];
+    const second = a?.second || b?.second;
+    const nudge = a?.nudge || b?.nudge;
+    const audioPlayed = a?.audioPlayed === true || b?.audioPlayed === true;
+    const row: BankAttempt = {};
+    if (second) row.second = second;
+    if (nudge === 'trap' || nudge === 'strategy') row.nudge = nudge;
+    if (audioPlayed) row.audioPlayed = true;
+    out.push(row);
+  }
+  return out;
+}
+
 export function answersStash(
   answers: string[],
   score: number,
   totalQuestions: number,
   timings?: QuizTiming[],
+  attempts?: BankAttempt[],
 ): {
   answers: string[];
   score: number;
@@ -54,11 +90,13 @@ export function answersStash(
   completed: false;
   status: 'ready';
   timings?: QuizTiming[];
+  attempts?: BankAttempt[];
 } {
   const timingsOut = timings?.map((t) => ({
     msToAnswer: t && t.msToAnswer > 0 ? t.msToAnswer : 0,
     msReadingExplain: t && t.msReadingExplain > 0 ? t.msReadingExplain : 0,
   }));
+  const attemptsOut = attempts ? answers.map((_, i) => cleanAttempt(attempts[i])) : undefined;
   return {
     answers,
     score,
@@ -67,6 +105,7 @@ export function answersStash(
     completed: false,
     status: 'ready',
     ...(timingsOut ? { timings: timingsOut } : {}),
+    ...(attemptsOut ? { attempts: attemptsOut } : {}),
   };
 }
 
@@ -97,6 +136,7 @@ export function completeQuizWrite(
     launchedOn?: string | null;
     today?: string;
     reflectionMs?: number;
+    waiveTheme?: boolean;
   },
 ): { kind: 'skip' } | { kind: 'reject'; reason: string } | {
   kind: 'write';
@@ -118,7 +158,7 @@ export function completeQuizWrite(
 } {
   if (existing?.completed === true) return { kind: 'skip' };
   const reflection = result.reflection.trim();
-  if (!reflectionReady(reflection, result.about, result.launchedOn, result.today)) {
+  if (!reflectionReady(reflection, result.about, result.launchedOn, result.today, result.waiveTheme === true)) {
     return { kind: 'reject', reason: 'A reflexão ainda não está pronta.' };
   }
   const note = result.reflectionNote?.trim();

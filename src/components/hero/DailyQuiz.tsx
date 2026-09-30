@@ -8,15 +8,16 @@ import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { getTodayBrazil } from '../../utils/clock';
 import { DailyQuiz as DailyQuizDoc } from '../../types';
-import { addDays, completeDailyQuiz, ensureDailyQuiz, payThenComplete, quizRewards, regenerateDailyQuiz, shouldOpenReflection, stashQuizAnswers, subscribeDailyQuiz, type QuizTiming } from '../../services/dailyQuizService';
+import { addDays, completeDailyQuiz, ensureDailyQuiz, payThenComplete, quizRewards, regenerateDailyQuiz, shouldOpenReflection, stashQuizAnswers, subscribeDailyQuiz, type QuizTiming, type StoredDailyQuiz } from '../../services/dailyQuizService';
 import { prepareTodayThenTomorrow } from '../../services/quiz/prefetch';
 import { freshQuizUi } from '../../services/quiz/closeQuiz';
 import { judgeReflection, type ReflectionJudge } from '../../services/aiDailyQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
 import { setAppBusy } from '../../services/appUpdate';
-import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionMinWords, reflectionReady, SAGE_DOT_MS, SAGE_LINE_MS, sageReadFrame, sageReadSpeech, wordCount, retryable } from '../../services/quiz/provaRules';
-import { nudgeFor, resultLine } from '../../services/quiz/nudge';
+import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionGate, reflectionMinWords, reflectionThemeHits, SAGE_DOT_MS, SAGE_LINE_MS, sageReadFrame, sageReadSpeech, wordCount, retryable } from '../../services/quiz/provaRules';
+import { nudgeFor, nudgeIdsInWindow, rememberNudge, resultLine } from '../../services/quiz/nudge';
+import { SAGE_LOCAL_OK } from '../../services/quiz/sageSay';
 import type { BankAttempt } from '../../services/quiz/bankWrite';
 import { prefetchLesson, prefetchVerdicts, speakProvaLesson, speakProvaVerdict, stopProvaVoice } from '../../services/quiz/provaSpeak';
 import { playText, TTS_SPEED_SLOW } from '../../services/englishTts';
@@ -196,7 +197,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const required = Boolean(progress.quizRequired);
   const count = progress.quizQuestionCount || DAILY_QUIZ_QUESTIONS;
 
-  const [quiz, setQuiz] = useState<DailyQuizDoc | null>(null);
+  const [quiz, setQuiz] = useState<StoredDailyQuiz | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('prompt');
@@ -209,6 +210,8 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const [nudgeText, setNudgeText] = useState('');
   const [optionsLocked, setOptionsLocked] = useState(false);
   const attemptsRef = useRef<BankAttempt[]>([]);
+  const offtopicAsked = useRef(false);
+  const waiveThemeRef = useRef(false);
   const reflectStarted = useRef(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [score, setScore] = useState(0);
@@ -408,6 +411,8 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     setSecondPick(null);
     setNudgeText('');
     attemptsRef.current = [];
+    offtopicAsked.current = false;
+    waiveThemeRef.current = false;
     reflectStarted.current = 0;
   }, [today]);
 
@@ -429,15 +434,27 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   }, [phase, current, selected]);
 
   useEffect(() => {
+    if (tryPhase === 'nudge' || tryPhase === 'retry') {
+      document.querySelector('[data-testid="quiz-nudge"]')?.scrollIntoView({ block: 'nearest' });
+      return;
+    }
     if (tryPhase !== 'done') return;
     document.querySelector('[data-testid="quiz-explain"]')?.lastElementChild?.scrollIntoView({ block: 'end' });
-  }, [tryPhase, current]);
+  }, [tryPhase, current, nudgeText]);
 
   useEffect(() => {
     if (!quiz?.awaitingReflection) return;
     const stored = quiz.timings;
     if (!stored?.length || timingsRef.current.length >= stored.length) return;
     timingsRef.current = stored;
+  }, [quiz]);
+
+  useEffect(() => {
+    if (!quiz?.awaitingReflection) return;
+    const stored = quiz.attempts;
+    if (!stored?.some((row) => row?.second)) return;
+    if (attemptsRef.current.some((row) => row?.second)) return;
+    attemptsRef.current = stored;
   }, [quiz]);
 
   const choose = (option: string) => {
@@ -475,28 +492,24 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
       return;
     }
     const seed = question.question.length + current;
-    let recent: string[] = [];
+    let rows: { id?: string; date?: string }[] = [];
     try {
-      const raw = JSON.parse(localStorage.getItem('mm_nudge_used') || '[]') as { id: string; date: string }[];
-      recent = raw.filter((row) => row.date >= addDays(today, -14)).map((row) => row.id);
+      const raw = JSON.parse(localStorage.getItem('mm_nudge_used') || '[]') as unknown;
+      if (Array.isArray(raw)) rows = raw as { id?: string; date?: string }[];
     } catch { /* lista vazia */ }
-    const nudge = nudgeFor(question, option, seed, recent);
+    const nudge = nudgeFor(question, option, seed, nudgeIdsInWindow(rows, today));
     setNudgeText(nudge.text);
     setTryPhase('nudge');
     attemptsRef.current[current] = { nudge: nudge.nudge, ...(attemptsRef.current[current]?.audioPlayed ? { audioPlayed: true } : {}) };
     if (nudge.lineId) {
-      const next = [...recent.map((id) => ({ id, date: today })), { id: nudge.lineId, date: today }];
       try {
-        localStorage.setItem('mm_nudge_used', JSON.stringify(next.slice(-40)));
+        localStorage.setItem('mm_nudge_used', JSON.stringify(rememberNudge(rows, nudge.lineId, today)));
       } catch { /* sem armazenamento: o aviso segue */ }
     }
     const wait = readingMs(nudge.text, 3000, 8000);
     setVoiceDone(false);
     const voice = isSoundEnabled ? speakProvaVerdict(nudge.text, true) : Promise.resolve();
-    const again = question.subject === 'ingles' && question.audioText
-      ? playText(question.audioText, { lang: 'en', speed: TTS_SPEED_SLOW })
-      : Promise.resolve(true);
-    void Promise.all([voice, again, new Promise((r) => window.setTimeout(r, wait))]).finally(() => {
+    void Promise.all([voice, new Promise((r) => window.setTimeout(r, wait))]).finally(() => {
       setVoiceDone(true);
       setTryPhase('retry');
     });
@@ -530,7 +543,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     setReward(quizRewards(scored.correct, scored.total, economy));
     setPhase('results');
     if (childUid) {
-      void stashQuizAnswers(childUid, today, nextAnswers, scored.correct, scored.total, timingsRef.current).catch((e) => {
+      void stashQuizAnswers(childUid, today, nextAnswers, scored.correct, scored.total, timingsRef.current, attemptsRef.current).catch((e) => {
         console.warn('DailyQuiz: não deu para guardar as respostas', e);
       });
     }
@@ -543,11 +556,12 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     }
     let stop = false;
     setOptionsLocked(true);
-    void playText(question.audioText, { lang: 'en', speed: TTS_SPEED_SLOW }).finally(() => {
-      if (stop) return;
-      setOptionsLocked(false);
+    void playText(question.audioText, { lang: 'en', speed: TTS_SPEED_SLOW }).then((played) => {
+      if (stop || !played) return;
       const prev = attemptsRef.current[current] ?? {};
       attemptsRef.current[current] = { ...prev, audioPlayed: true };
+    }).finally(() => {
+      if (!stop) setOptionsLocked(false);
     });
     return () => {
       stop = true;
@@ -559,12 +573,28 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     if (phase === 'results' && reflectStarted.current === 0) reflectStarted.current = performance.now();
   }, [phase]);
 
+  useEffect(() => {
+    if (!judgeSay || saving) return;
+    document.querySelector('[data-testid="reflect-say"]')?.scrollIntoView({ block: 'nearest' });
+  }, [judgeSay, saving]);
+
   const conclude = async () => {
-    if (!quiz || !childUid || paid || saving || !reflectionReady(reflection, {
+    if (!quiz || !childUid || paid || saving) return;
+    const about = {
       prompt: quiz.reflectionPrompt,
       title: quiz.theme.title,
       lesson: quiz.theme.lesson,
-    }, village.launchedOn, today)) return;
+    };
+    if (wordCount(reflection) < reflectionMinWords(village.launchedOn, today)) return;
+    const gate = reflectionGate(reflection, about, village.launchedOn, today, offtopicAsked.current);
+    if (!gate.ok) {
+      if (gate.code === 'offtopic') offtopicAsked.current = true;
+      setJudgeSay(gate.say);
+      playProvaMiss();
+      return;
+    }
+    const waiveTheme = reflectionThemeHits(reflection, about) < 1;
+    waiveThemeRef.current = waiveTheme;
     const gen = ++readGen.current;
     revealLock.current = false;
     verdictAt.current = null;
@@ -576,13 +606,15 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     setSaving(true);
     playQuill();
     try {
-      const verdict = await judgeReflection({
-        text: reflection,
-        prompt: quiz.reflectionPrompt,
-        title: quiz.theme.title,
-        lesson: quiz.theme.lesson,
-        forceOffline: modules.aiGeneration === false,
-      });
+      const verdict = waiveTheme
+        ? { ok: true, say: SAGE_LOCAL_OK, source: 'local' as const }
+        : await judgeReflection({
+          text: reflection,
+          prompt: quiz.reflectionPrompt,
+          title: quiz.theme.title,
+          lesson: quiz.theme.lesson,
+          forceOffline: modules.aiGeneration === false,
+        });
       if (gen !== readGen.current) return;
       pendingRef.current = verdict;
       verdictAt.current = performance.now() - readStarted.current;
@@ -640,6 +672,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
               attempts: attemptsRef.current,
               launchedOn: village.launchedOn,
               reflectionMs: Math.max(0, Math.round(performance.now() - reflectStarted.current)),
+              waiveTheme: waiveThemeRef.current,
             }),
           );
           if (readGen.current !== gen) return;
@@ -710,14 +743,9 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   if (!enabled || !open || !quiz) return null;
 
   const explainText = selected && question ? question.explanation : '';
-  const aboutReflect = {
-    prompt: quiz.reflectionPrompt,
-    title: quiz.theme.title,
-    lesson: quiz.theme.lesson,
-  };
   const counted = quizScoreOf(quiz.questions, quiz.answers?.length ? quiz.answers : answers);
-  const canDeliver = reflectionReady(reflection, aboutReflect, village.launchedOn, today);
   const reflectMin = reflectionMinWords(village.launchedOn, today);
+  const canDeliver = wordCount(reflection) >= reflectMin;
 
   return (
     <AnimatePresence>
@@ -781,12 +809,19 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                     />
                     <div className="flex items-start gap-2">
                       <h3 className="mn-papiro-title flex-1">{question.question}</h3>
-                      {question.subject === 'ingles' && question.audioText && (
+                      {question.subject === 'ingles' && question.audioText && tryPhase !== 'nudge' && tryPhase !== 'retry' && (
                         <button
                           type="button"
                           aria-label="Ouvir de novo"
                           className="mc-slot w-11 h-11 shrink-0"
-                          onClick={() => void playText(question.audioText || '', { lang: 'en', speed: TTS_SPEED_SLOW })}
+                          onClick={() => {
+                            playClick();
+                            void playText(question.audioText || '', { lang: 'en', speed: TTS_SPEED_SLOW }).then((played) => {
+                              if (!played) return;
+                              const prev = attemptsRef.current[current] ?? {};
+                              attemptsRef.current[current] = { ...prev, audioPlayed: true };
+                            });
+                          }}
                         >
                           Ouvir
                         </button>
@@ -826,7 +861,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                         );
                       })}
                     </div>
-                    {tryPhase === 'nudge' && (
+                    {(tryPhase === 'nudge' || tryPhase === 'retry') && nudgeText && (
                       <div className="mn-papiro-explain" data-testid="quiz-nudge">
                         <p className="mn-papiro-why">{nudgeText}</p>
                       </div>
@@ -914,7 +949,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                           className={`mn-papiro-write${saving ? ' is-held' : ''}`}
                         />
                         {!saving && judgeSay && (
-                          <div className="mn-papiro-explain mn-sabio-line">
+                          <div className="mn-papiro-explain mn-sabio-line" data-testid="reflect-say">
                             <p className="mn-papiro-why">{judgeSay}</p>
                           </div>
                         )}

@@ -1,7 +1,7 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import { buildProfile } from '../profile';
 import { nudgeFor } from '../nudge';
-import { readingMs, reflectionMinWords, reflectionReady, reflectionThemeHits, retryable } from '../provaRules';
+import { readingMs, reflectionMinWords, reflectionReady, reflectionThemeHits, retryable, wordCount } from '../provaRules';
 import { quizBankDocs } from '../bankWrite';
 import items from './fixtures/quizbank-teste.json';
 
@@ -82,8 +82,10 @@ test('reflexão: 11 palavras, a de 26/09 e o piso de leitura', () => {
   expect(reflectionReady(eleven, about, '2026-09-26', '2026-09-26')).toBe(true);
   expect(reflectionMinWords('2026-09-26', '2026-09-26')).toBe(8);
   const real = 'a lojica dele tanbem pode fucionar em celular , tv , tablet etc';
+  expect(wordCount(real)).toBe(11);
   expect(reflectionThemeHits(real, about)).toBeGreaterThanOrEqual(1);
-  expect(reflectionReady(real, about)).toBe(true);
+  expect(reflectionReady(real, about, '2026-09-26', '2026-09-26')).toBe(true);
+  expect(reflectionReady(real, about)).toBe(false);
 });
 
 void run();
