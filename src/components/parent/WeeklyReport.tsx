@@ -2,13 +2,18 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { computeWeeklyLearning } from '../../services/learningService';
+import { listGoldTransactions } from '../../services/goldTx';
+import { gamesOutearnedMissions, weekIncome } from '../../services/assignments/buckets';
+import { gamesBeatMissions } from '../../services/assignments/voice';
 import type { LearningDoc } from '../../types/village';
-import { isoWeekOf, getTodayBrazil, weekRangeLabel } from '../../utils/clock';
+import type { GoldTransaction } from '../../types';
+import { isoWeekOf, getTodayBrazil, nowBrazil, weekRangeLabel } from '../../utils/clock';
 
 const WeeklyReport: React.FC = () => {
   const { childUid } = useAuth();
   const week = isoWeekOf(getTodayBrazil());
   const [doc, setDoc] = useState<LearningDoc | null>(null);
+  const [gainsTx, setGainsTx] = useState<GoldTransaction[]>([]);
   const [busy, setBusy] = useState(false);
   const [boot, setBoot] = useState<'loading' | 'ok' | 'fail'>('loading');
 
@@ -34,6 +39,19 @@ const WeeklyReport: React.FC = () => {
       });
     return () => { cancelled = true; };
   }, [childUid, week]);
+
+  useEffect(() => {
+    if (!childUid) return;
+    void listGoldTransactions(childUid, 400).then(setGainsTx).catch(() => setGainsTx([]));
+  }, [childUid]);
+
+  const weekRows = gainsTx.filter((t) => {
+    const raw = t.createdAt;
+    const ms = raw instanceof Date ? raw.getTime() : Date.parse(String(raw));
+    if (!Number.isFinite(ms)) return false;
+    return isoWeekOf(nowBrazil(ms).date) === week;
+  });
+  const gains = weekIncome(weekRows.map((t) => ({ source: t.source, amount: t.amount })));
 
   const load = async () => {
     if (!childUid) return;
@@ -67,6 +85,16 @@ const WeeklyReport: React.FC = () => {
         </button>
       </div>
       <p className="text-sm text-gray-600 mb-3">{weekRangeLabel(week)}</p>
+      <div className="border border-gray-200 rounded p-3 mb-3" data-testid="ganhos-semana">
+        <p className="font-semibold text-gray-900">Ganhos da semana</p>
+        <p className="text-sm text-gray-800">
+          Missões da vida real: {gains.life} · Encomendas: {gains.assignment} · Jogos e aprendizado: {gains.play}
+        </p>
+        {(gains.penalty !== 0 || gains.interest !== 0) && (
+          <p className="text-sm text-gray-600">Penalidade: {gains.penalty} · Juros: {gains.interest}</p>
+        )}
+        {gamesOutearnedMissions(gains) && <p className="text-sm text-amber-700">{gamesBeatMissions()}</p>}
+      </div>
       {boot === 'loading' && !doc && <p className="text-sm text-gray-500">Calculando o relatório desta semana…</p>}
       {boot === 'fail' && !doc && <p className="text-sm text-gray-500">Não deu para calcular</p>}
       {doc && (

@@ -10,6 +10,7 @@ import type { AgendaItem, DailyCheckinAnswers, DayMood, Period } from '../../../
 import DailyChecklist from '../DailyChecklist';
 import CharacterPreview from './CharacterPreview';
 import ChildSheet from './ChildSheet';
+import EncomendasQuadro from './EncomendasQuadro';
 import { dayTimeline, occurrencesBetween } from '../../../services/village/agenda';
 import { markAgendaDone } from '../../../services/agendaService';
 import { addDays, getTodayBrazil, isNightHour, nowBrazil } from '../../../utils/clock';
@@ -21,6 +22,7 @@ import { getDailyQuiz } from '../../../services/dailyQuizService';
 import { hasClaim, claimKey } from '../../../services/village/claims';
 
 const MOON = '/assets/english/ui/moon.webp';
+const PAPER = '/assets/english/ui/map.webp';
 const LANTERN = '/assets/village/items/lantern.png';
 const CHEST = '/assets/village/items/chest_daily.png';
 const TORCH = '/assets/english/ui/torch.webp';
@@ -32,7 +34,7 @@ const MOOD = {
   dificil: '/assets/village/ui/mood-dificil.png',
 } as const;
 
-type Tab = 'missoes' | 'fechar';
+type Tab = 'missoes' | 'encomendas' | 'fechar';
 
 const Casa: React.FC<{
   onClose: () => void;
@@ -46,15 +48,16 @@ const Casa: React.FC<{
   chestReady?: boolean;
   onOpenChest?: () => void;
   agendaItems?: AgendaItem[];
+  initialTab?: Tab;
 }> = ({
   onClose, selectedPeriod, onPeriodChange, guidedMode, onToggleGuidedMode,
-  hour, done, due, chestReady, onOpenChest, agendaItems = [],
+  hour, done, due, chestReady, onOpenChest, agendaItems = [], initialTab = 'missoes',
 }) => {
   const { village } = useVillage();
   const { tasks } = useData();
   const { childUid } = useAuth();
   const { playClick } = useSound();
-  const [tab, setTab] = useState<Tab>('missoes');
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [lineOpen, setLineOpen] = useState(false);
   const [check, setCheck] = useState<DailyCheckinAnswers>({ tomorrow: '' });
   const [closed, setClosed] = useState(false);
@@ -79,6 +82,8 @@ const Casa: React.FC<{
         : check.tomorrow.trim().split(/\s+/).filter(Boolean).length < 3
           ? 'Escreva o amanhã em 3 palavras'
           : 'Fechar o dia';
+
+  useEffect(() => { setTab(initialTab); }, [initialTab]);
 
   useEffect(() => {
     if (!childUid) return;
@@ -158,12 +163,14 @@ const Casa: React.FC<{
     <div className="mc-hotbar px-4 pt-3">
       {([
         ['missoes', 'Missões', src],
+        ['encomendas', 'Encomendas', PAPER],
         ['fechar', 'Fechar o dia', MOON],
       ] as const).map(([id, label, icon]) => (
         <button
           key={id}
           type="button"
           className={`mc-slot rounded px-3 min-h-[44px] ${tab === id ? 'mc-slot-selected' : ''}`}
+          data-testid={`casa-tab-${id}`}
           onClick={() => { playClick(); setTab(id); }}
         >
           <img src={icon} alt="" className="w-6 h-6 mc-pixel" draggable={false} />
@@ -231,6 +238,7 @@ const Casa: React.FC<{
             )}
           </>
         )}
+        {tab === 'encomendas' && <EncomendasQuadro />}
         {tab === 'fechar' && (
           <div className="mn-casa-sheet p-4 space-y-3">
             <h3 className="mc-h">

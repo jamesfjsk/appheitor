@@ -5,11 +5,14 @@ import { useData } from '../../contexts/DataContext';
 import { listGoldTransactions } from '../../services/goldTx';
 import { txsLastDays, balancaTotals } from '../../services/village/balance';
 import { sinceLaunch } from '../../services/village/income';
+import { weekIncome, gamesOutearnedMissions } from '../../services/assignments/buckets';
+import { gamesBeatMissions } from '../../services/assignments/voice';
 import { subscribeVillage } from '../../services/villageService';
 import { DEFAULT_ECONOMY } from '../../config/village';
 import type { GoldTransaction } from '../../types';
 import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { getTodayBrazil, isoWeekOf, nowBrazil, weekRangeLabel } from '../../utils/clock';
 
 const Balanca: React.FC = () => {
   const { childUid } = useAuth();
@@ -33,6 +36,16 @@ const Balanca: React.FC = () => {
     () => balancaTotals(cut, DEFAULT_ECONOMY.incomeDayGold, { launchedOn }),
     [cut, launchedOn]
   );
+  const weekId = isoWeekOf(getTodayBrazil());
+  const gains = useMemo(() => {
+    const rows = txs.filter((t) => {
+      const raw = t.createdAt;
+      const ms = raw instanceof Date ? raw.getTime() : Date.parse(String(raw));
+      if (!Number.isFinite(ms)) return false;
+      return isoWeekOf(nowBrazil(ms).date) === weekId;
+    });
+    return weekIncome(rows.map((t) => ({ source: t.source, amount: t.amount })));
+  }, [txs, weekId]);
   const gold = progress.availableGold || 0;
   const days = r7 > 0 ? gold / r7 : 0;
   const lastSpend = cut.filter((t) => t.amount < 0 && t.type !== 'saved').sort((a, b) => {
@@ -74,6 +87,19 @@ const Balanca: React.FC = () => {
       {days > 14 && <p className="text-sm text-amber-700">Saldo parado &gt; 14 D</p>}
       {daysSinceSpend > 21 && <p className="text-sm text-amber-700">Nada comprado há 21 dias</p>}
       {gamePct > 30 && <p className="text-sm text-amber-700">Gold de jogo &gt; 30% ({gamePct}%)</p>}
+      <div className="border border-gray-200 rounded p-3" data-testid="ganhos-semana">
+        <p className="font-semibold text-gray-900">Ganhos da semana</p>
+        <p className="text-xs text-gray-500">{weekRangeLabel(weekId)}</p>
+        <p className="text-sm text-gray-800 mt-1">
+          Missões da vida real: {gains.life} · Encomendas: {gains.assignment} · Jogos e aprendizado: {gains.play}
+        </p>
+        {(gains.penalty !== 0 || gains.interest !== 0) && (
+          <p className="text-sm text-gray-600">Penalidade: {gains.penalty} · Juros: {gains.interest}</p>
+        )}
+        {gamesOutearnedMissions(gains) && (
+          <p className="text-sm text-amber-700" data-testid="jogos-mais">{gamesBeatMissions()}</p>
+        )}
+      </div>
       <div className="flex gap-2">
         <button type="button" className="px-3 py-2 text-sm border rounded" onClick={() => void rescale(1.1)}>Reajustar x1,1</button>
         <button type="button" className="px-3 py-2 text-sm border rounded" onClick={() => void rescale(0.9)}>Reajustar x0,9</button>

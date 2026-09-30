@@ -140,6 +140,7 @@ const GoldHistory: React.FC = () => {
       trophy: <Trophy className="w-5 h-5" />,
       late_task: <Target className="w-5 h-5" />,
       book_report: <Star className="w-5 h-5" />,
+      assignment: <Star className="w-5 h-5" />,
     };
 
     return iconMap[transaction.source] || <DollarSign className="w-5 h-5" />;
@@ -192,6 +193,7 @@ const GoldHistory: React.FC = () => {
       trophy: 'Troféu da semana',
       late_task: 'Missão recuperada',
       book_report: 'Livro contado ao Sábio',
+      assignment: 'Encomendas',
     };
 
     return labels[source] || source;
@@ -330,6 +332,7 @@ const GoldHistory: React.FC = () => {
               <option value="task_reversal">Missão revertida</option>
               <option value="level_gift">Presente de nível</option>
               <option value="admin_adjustment">Ajustes Manuais</option>
+              <option value="assignment">Encomendas</option>
             </select>
           </div>
         </div>

@@ -408,7 +408,8 @@ export interface GoldTransaction {
     | 'merchant_buy'
     | 'streak_chest'
     | 'trophy'
-    | 'late_task';
+    | 'late_task'
+    | 'assignment';
   description: string; // Human-readable description
   relatedId?: string; // Task ID, Reward ID, Achievement ID, etc.
   relatedTitle?: string; // Title of related item for quick reference

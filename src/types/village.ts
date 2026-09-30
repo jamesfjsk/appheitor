@@ -29,7 +29,8 @@ export type ClaimKind =
   | 'fence'
   | 'ach'
   | 'friend'
-  | 'redstone';
+  | 'redstone'
+  | 'assignment';
 export type NoticeType = 'compromisso' | 'regra' | 'viagem' | 'visita' | 'recado';
 export type HabitId = 'agua' | 'postura' | 'alongar' | 'tela' | 'arrumar' | 'sono' | 'gentileza';
 
@@ -112,6 +113,12 @@ export interface MerchantBuySettings {
   dailyCap: number;
 }
 
+export interface AssignmentBandSetting {
+  minDays: number;
+  maxDays: number;
+  xp: number;
+}
+
 export interface EconomySettings {
   materialsPerTask: number;
   dailyChestGold: [number, number];
@@ -141,6 +148,11 @@ export interface EconomySettings {
   repairRefundPct: number;
   seasonWeeks: number;
   levelCap: number;
+  /** Faixas de encomenda em dias de renda (CONTRATOS_E_CARREIRAS.md §4.2). */
+  assignmentBands: Record<'pequena' | 'normal' | 'sabado' | 'projeto' | 'grande', AssignmentBandSetting>;
+  assignmentWeeklyCapDays: number;
+  assignmentActiveMax: number;
+  assignmentProjectMax: number;
 }
 
 export interface ModuleSettings {

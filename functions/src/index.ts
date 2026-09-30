@@ -285,3 +285,121 @@ export const agendaReminders = onSchedule({ region: REGION, schedule: 'every 5 m
     });
   }
 });
+
+function ymdAdd(date: string, n: number): string {
+  const [y, m, d] = date.split('-').map(Number);
+  const utc = new Date(Date.UTC(y, m - 1, d + n));
+  const p = (x: number) => String(x).padStart(2, '0');
+  return `${utc.getUTCFullYear()}-${p(utc.getUTCMonth() + 1)}-${p(utc.getUTCDate())}`;
+}
+
+function ymdWeekday(date: string): number {
+  const [y, m, d] = date.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 15, 0, 0)).getUTCDay();
+}
+
+function cleanRec(data: { [key: string]: unknown }): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined) out[key] = value;
+  }
+  return out;
+}
+
+/** Uma instância por recorrência e dia: `{id}_{AAAA-MM-DD}`. Igual a instanceId no cliente. */
+async function runAssignmentDay(date: string): Promise<{ created: string[]; expired: string[] }> {
+  const created: string[] = [];
+  const expired: string[] = [];
+  const weekday = ymdWeekday(date);
+  const recs = await db.collection('assignmentRecurrences').where('active', '==', true).get();
+  for (const rec of recs.docs) {
+    const data = rec.data();
+    const weekdays = Array.isArray(data.weekdays) ? data.weekdays.map((n: unknown) => Number(n)) : [];
+    if (!weekdays.includes(weekday)) continue;
+    const userId = String(data.userId || '');
+    const title = String(data.title || '').trim();
+    if (!userId || !title) continue;
+    const id = `${rec.id}_${date}`;
+    const ref = db.collection('assignments').doc(id);
+    const existing = await ref.get();
+    if (existing.exists) continue;
+    const dueAfter = Math.max(0, Math.floor(Number(data.dueAfterDays) || 0));
+    const dueOn = ymdAdd(date, dueAfter);
+    const body = cleanRec({
+      userId,
+      kind: 'paid',
+      templateId: data.templateId,
+      specialty: data.specialty,
+      title,
+      story: data.story,
+      deliverable: data.deliverable,
+      criteria: data.criteria,
+      proof: data.proof,
+      size: data.size,
+      reward: data.reward,
+      competencies: Array.isArray(data.competencies) ? data.competencies : [],
+      adult: data.adult === true ? true : undefined,
+      status: 'available',
+      availableOn: date,
+      dueOn,
+      dueAt: new Date(`${ymdAdd(dueOn, 1)}T00:00:00.000-03:00`),
+      recurrenceId: rec.id,
+      periodKey: date,
+      createdBy: 'system',
+      submissions: [],
+      reviews: [],
+      drops: 0,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    await ref.set(body);
+    const text = `Encomenda nova na Casa: ${title}`.slice(0, 90);
+    await db.collection('notices').doc(`asg_${id}_new`).set({
+      userId,
+      type: 'recado',
+      text,
+      when: date,
+      until: null,
+      ackAt: null,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+    created.push(id);
+  }
+
+  const open = await db.collection('assignments').where('status', 'in', ['available', 'accepted', 'needs_changes']).get();
+  for (const item of open.docs) {
+    const dueOn = item.data().dueOn;
+    if (typeof dueOn !== 'string' || dueOn >= date) continue;
+    const userId = String(item.data().userId || '');
+    await item.ref.update({ status: 'expired', updatedAt: FieldValue.serverTimestamp() });
+    if (userId) {
+      const board = db.collection('assignmentBoards').doc(userId);
+      const snap = await board.get();
+      if (snap.exists) {
+        await board.update({
+          active: FieldValue.arrayRemove(item.id),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
+    }
+    expired.push(item.id);
+  }
+  return { created, expired };
+}
+
+export const assignmentRecurrences = onSchedule(
+  { region: REGION, schedule: '5 0 * * *', timeZone: 'America/Sao_Paulo' },
+  async () => {
+    await runAssignmentDay(nowBrazil().date);
+  },
+);
+
+export const generateAssignmentsNow = onCall({ region: REGION }, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Entre como o pai.');
+  const user = await db.doc(`users/${request.auth.uid}`).get();
+  if (user.data()?.role !== 'admin') throw new HttpsError('permission-denied', 'Só o pai gera encomendas.');
+  const raw = request.data as { date?: string } | undefined;
+  const date = raw?.date && /^\d{4}-\d{2}-\d{2}$/.test(raw.date) ? raw.date : nowBrazil().date;
+  return runAssignmentDay(date);
+});

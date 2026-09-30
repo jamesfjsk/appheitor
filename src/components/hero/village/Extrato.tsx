@@ -34,6 +34,7 @@ const TX_ICON: Record<string, string> = {
   admin_adjustment: '/assets/english/ui/gold.webp',
   task_reversal: '/assets/english/ui/map.webp',
   level_gift: '/assets/english/ui/star.webp',
+  assignment: '/assets/english/ui/map.webp',
 };
 
 function groupWeek(lines: GoldTransaction[]): GoldTransaction[] {

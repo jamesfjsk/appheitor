@@ -30,11 +30,12 @@ import AgendaManager from './AgendaManager';
 import HojeCard from './HojeCard';
 import WeeklyReport from './WeeklyReport';
 import CharactersPanel from './CharactersPanel';
+import EncomendasPanel from './EncomendasPanel';
 
 type TabType =
   | 'dashboard' | 'village' | 'tasks' | 'rewards' | 'reminders' | 'surprise' | 'quiz'
   | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system'
-  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books';
+  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books' | 'encomendas';
 
 const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; label: string; icon: string }> }> = [
   {
@@ -53,6 +54,7 @@ const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; labe
       { id: 'challenges', label: 'Desafios', icon: 'trophy' },
       { id: 'rewards', label: 'Prêmios', icon: 'gift' },
       { id: 'tasks', label: 'Missões', icon: 'notes' },
+      { id: 'encomendas', label: 'Encomendas', icon: 'notes' },
       { id: 'surprise', label: 'Missão surpresa', icon: 'target' },
       { id: 'agenda', label: 'Agenda', icon: 'notes' },
     ],
@@ -134,6 +136,7 @@ const ParentPanel: React.FC = () => {
           {activeTab === 'balanca' && <Balanca />}
           {activeTab === 'agenda' && <AgendaManager />}
           {activeTab === 'tasks' && <TaskManager tasks={tasks} />}
+          {activeTab === 'encomendas' && <EncomendasPanel />}
           {activeTab === 'rewards' && <RewardManager />}
           {activeTab === 'reminders' && <PlacaManager />}
           {activeTab === 'surprise' && <SurpriseMissionConfigComponent />}
