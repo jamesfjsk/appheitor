@@ -518,6 +518,32 @@ export interface BookVerify {
 
 export type BookVerdict = 'aceito' | 'falta' | 'suspeito' | 'fora' | 'colado' | 'repetido';
 
+/** Movimento da segunda pergunta (SABIO_CONVERSA_LIVROS.md §3). */
+export type SageMove = 'por_que' | 'exemplo' | 'e_se' | 'outro_lado' | 'sua_vida' | 'duas_saidas';
+
+export interface BookTalkTurn {
+  by: 'sabio' | 'heitor';
+  text: string;
+  move?: SageMove;
+}
+
+export interface BookTalkClosing {
+  restate: string;
+  concept: string;
+  takeHome: string;
+}
+
+/** Conversa depois do relato aceito (`bookReports.talk`). */
+export interface BookTalk {
+  theme: string;
+  question: string;
+  turns: BookTalkTurn[];
+  closing?: BookTalkClosing;
+  doneAt?: string;
+  skipped?: boolean;
+  flagged?: boolean;
+}
+
 export interface BookReportDoc {
   id: string;
   userId: string;
@@ -538,10 +564,12 @@ export interface BookReportDoc {
   verify?: BookVerify;
   verdict: BookVerdict;
   accepted: boolean;
-  needsParent: boolean;       // livro proposto pela criança ou texto suspeito aceito com marca
+  needsParent: boolean;       // livro proposto, terceira entrega recusada, ou marca para o pai
   flagged: boolean;
   paidGold: number;
   paidXp: number;
   parentDecision?: 'approved' | 'voided';
+  talk?: BookTalk;
   createdAt: Date;
+  updatedAt?: Date;
 }

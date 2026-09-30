@@ -212,12 +212,13 @@ Regras:
 1. "leu" de 0 a 3: 3 = traz detalhes que só quem leu sabe (nomes, o que acontece, onde, como termina) e eles batem com o livro, se você o conhece; 2 = conta a história com começo, meio e fim, coerente, ainda que simples; 1 = resumo genérico, que caberia em qualquer livro ou saiu da sinopse da capa; 0 = não fala do livro.
 2. Se você não conhece o livro, julgue pela coerência interna e pelos detalhes concretos; não reprove por não conhecer.
 3. Escrita de criança de ${input.age} anos: erros de ortografia, frases curtas e repetições são ESPERADOS e não tiram ponto. Texto sem erro nenhum, com vocabulário, pontuação e estrutura de resenha adulta marca "suspeito": "ia"; texto que é a sinopse da capa ou de site marca "copiado"; texto que não fala desse livro marca "fora_do_tema". Caso contrário "nenhum".
-4. "faltou": lista com o que não apareceu, entre: "comeco", "meio", "fim", "personagem", "opiniao" (opinião com motivo). Vazia se está tudo lá.
-5. "comentario": UMA frase do Sábio sobre algo específico que ele escreveu, sem elogio vazio e sem correção de português.
-6. "pergunta": uma pergunta curta sobre um fato da HISTÓRIA que NÃO está no texto dele (o que acontece, onde, com quem, o que alguém faz) e que uma criança que leu responde em uma frase; "respostaEsperada": a resposta certa em poucas palavras. Só pergunte se você tem CERTEZA da resposta pelo próprio livro. Nunca pergunte o nome do autor, nem nome de personagem que o livro não dá, nem número de páginas ou capítulos. Se não conhece o livro, pergunte para ele completar um detalhe do que ele mesmo escreveu. Sem certeza: "pergunta" e "respostaEsperada" vazias.
-7. "motivo": até 20 palavras, dizendo por que o "leu" é esse.
+4. "faltou": o que não apareceu no texto, entre "comeco", "meio", "fim", "personagem". Não marque opinião: a ficha já pergunta se gostou. Vazia se começo, meio, fim e personagem estão no texto.
+5. "gancho": se "leu" for 0 ou 1 e faltar uma parte, UMA frase pedindo essa parte, com um lugar ou momento DESTE livro, sem contar o que acontece. Forma: Me conta uma coisa que acontece no meio, em [lugar deste livro]. Se "leu" for 2 ou 3, string vazia.
+6. "comentario": UMA frase do Sábio sobre algo específico que ele escreveu, sem elogio vazio e sem correção de português.
+7. "pergunta": uma pergunta curta sobre um fato da HISTÓRIA que NÃO está no texto dele (o que acontece, onde, com quem, o que alguém faz) e que uma criança que leu responde em uma frase; "respostaEsperada": a resposta certa em poucas palavras. Só pergunte se você tem CERTEZA da resposta pelo próprio livro. Nunca pergunte o nome do autor, nem nome de personagem que o livro não dá, nem número de páginas ou capítulos. Se não conhece o livro, pergunte para ele completar um detalhe do que ele mesmo escreveu. Sem certeza: "pergunta" e "respostaEsperada" vazias. Esta pergunta é só um sinal para o pai: ela não decide se o relato passa.
+8. "motivo": até 20 palavras, dizendo por que o "leu" é esse.
 
-Responda SOMENTE com JSON: {"leu":0,"motivo":"","faltou":[],"suspeito":"nenhum","comentario":"","pergunta":"","respostaEsperada":""}`;
+Responda SOMENTE com JSON: {"leu":0,"motivo":"","faltou":[],"suspeito":"nenhum","comentario":"","gancho":"","pergunta":"","respostaEsperada":""}`;
   const user = `Título: ${input.title}\n\nTexto dele:\n${input.text.trim()}`;
   return { system, user };
 }
@@ -242,7 +243,8 @@ ${input.text.trim()}` : ''}`;
 }
 
 const SUSPECTS: BookSuspect[] = ['nenhum', 'copiado', 'ia', 'fora_do_tema'];
-const FALTOU = new Set(['comeco', 'meio', 'fim', 'personagem', 'opiniao']);
+/** Opinião saiu: a ficha já pergunta se gostou (Pacote 16). */
+const FALTOU = new Set(['comeco', 'meio', 'fim', 'personagem']);
 
 export function parseBookJudge(raw: unknown, model = BOOK_JUDGE_MODEL): BookJudge | null {
   if (!raw || typeof raw !== 'object') return null;
@@ -254,7 +256,8 @@ export function parseBookJudge(raw: unknown, model = BOOK_JUDGE_MODEL): BookJudg
   const str = (k: string) => (typeof r[k] === 'string' ? (r[k] as string).trim() : '');
   const pergunta = str('pergunta');
   const respostaEsperada = str('respostaEsperada');
-  return {
+  const gancho = str('gancho').slice(0, 220);
+  const out: BookJudge & { gancho?: string } = {
     leu: leuN as 0 | 1 | 2 | 3,
     motivo: str('motivo').slice(0, 200),
     faltou,
@@ -263,6 +266,8 @@ export function parseBookJudge(raw: unknown, model = BOOK_JUDGE_MODEL): BookJudg
     ...(pergunta && respostaEsperada ? { pergunta, respostaEsperada } : {}),
     model,
   };
+  if (gancho) out.gancho = gancho;
+  return out;
 }
 
 export function parseVerify(raw: unknown): { ok: boolean; motivo: string } | null {
@@ -277,8 +282,53 @@ const FALTOU_LINE: Record<string, string> = {
   meio: 'o que acontece no meio',
   fim: 'como termina',
   personagem: 'quem é o personagem principal',
-  opiniao: 'o que você achou, e por quê',
 };
+
+const FALTOU_PARENT: Record<string, string> = {
+  comeco: 'o começo',
+  meio: 'o meio',
+  fim: 'o fim',
+  personagem: 'o personagem',
+};
+
+/** Linha para o pai. A opinião não entra. Não é recusa. */
+export function faltouParentLine(faltou: string[]): string {
+  const parts = faltou.filter((f) => f !== 'opiniao').map((f) => FALTOU_PARENT[f]).filter(Boolean);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return `não contou ${parts[0]}`;
+  return `não contou ${parts.slice(0, -1).join(', ')} e ${parts[parts.length - 1]}`;
+}
+
+export function ganchoOf(judge: BookJudge): string {
+  const gancho = (judge as BookJudge & { gancho?: string }).gancho;
+  return typeof gancho === 'string' ? gancho.replace(/\s+/g, ' ').trim().slice(0, 220) : '';
+}
+
+/** O que o Sábio pede quando recusa: um ponto do livro, sem entregar a resposta. */
+export function faltouPull(faltou: string[], title: string, gancho?: string): string {
+  const hook = (gancho || '').replace(/\s+/g, ' ').trim();
+  if (hook) return hook;
+  const code = ['comeco', 'meio', 'fim', 'personagem'].find((c) => faltou.includes(c));
+  if (code === 'comeco') return `Me conta uma coisa que acontece no começo de "${title}".`;
+  if (code === 'meio') return `Me conta uma coisa que acontece no meio de "${title}".`;
+  if (code === 'fim') return `Me conta como "${title}" termina, uma coisa só.`;
+  if (code === 'personagem') return `Me conta quem anda em "${title}" e o que essa pessoa faz.`;
+  return 'Ficou genérico: isso caberia em qualquer livro. Me conta uma coisa que só acontece nesse.';
+}
+
+/** Recusas já gravadas deste livro (falta, suspeito ou fora). A terceira entrega vai para o pai. */
+export function priorRefusalsOf(
+  reports: Array<{ bookId: string; titleKey: string; accepted: boolean; verdict: string }>,
+  book: { id: string; titleKey: string },
+): number {
+  return reports.filter((r) =>
+    (r.bookId === book.id || r.titleKey === book.titleKey)
+    && !r.accepted
+    && (r.verdict === 'falta' || r.verdict === 'suspeito' || r.verdict === 'fora'),
+  ).length;
+}
+
+export const PARENT_HOLD_SAY = 'Vou guardar o seu relato para o seu pai ler. Ele te responde.';
 
 export function faltouLine(faltou: string[]): string {
   const parts = faltou.map((f) => FALTOU_LINE[f]).filter(Boolean);
@@ -289,41 +339,78 @@ export function faltouLine(faltou: string[]): string {
 
 export interface VerdictInput {
   judge: BookJudge;
-  verifyOk: boolean | null;   // null = não houve pergunta
+  verifyOk: boolean | null;   // null = não houve pergunta; false não recusa mais (Pacote 16)
   title: string;
   gold: number;
+  /** Recusas já gravadas deste livro. Com 2, a próxima recusa vai para o pai. */
+  priorRefusals?: number;
 }
 
 export interface Verdict {
   verdict: BookVerdict;
   accepted: boolean;
   flagged: boolean;
+  needsParent: boolean;
   say: string;
 }
 
 /**
- * Aceito: leu >= 2, sem suspeita forte e (se houve) a pergunta respondida.
- * Suspeita com leu >= 2 aceita e MARCA para o pai (o texto bonito não é castigado; ajuste 3 do pai).
- * Suspeita com leu <= 1 pede reescrita. Fora do tema recusa sem gastar tentativa de "falta".
+ * Pacote 16: leu >= 2 aceita sempre (faltou vira linha do pai, opinião não recusa).
+ * A pergunta de fato não decide: se veio errada, marca em silêncio.
+ * Recusa só com leu <= 1. A terceira entrega (depois de duas recusas) vai para o pai.
+ * Suspeita com leu >= 2 aceita e marca. Fora do tema recusa, salvo o teto de duas.
  */
 export function verdictOf(input: VerdictInput): Verdict {
   const { judge } = input;
+  const faltou = judge.faltou.filter((f) => f !== 'opiniao');
+  const hold = (input.priorRefusals ?? 0) >= 2;
+  const factFlag = input.verifyOk === false;
+  const toParent = (flagged: boolean): Verdict => ({
+    verdict: 'falta',
+    accepted: false,
+    flagged,
+    needsParent: true,
+    say: PARENT_HOLD_SAY,
+  });
+
   if (judge.suspeito === 'fora_do_tema' || judge.leu === 0) {
-    return { verdict: 'fora', accepted: false, flagged: false, say: `Isso não parece ser sobre "${input.title}". Me conta desse livro mesmo.` };
-  }
-  if (input.verifyOk === false) {
-    return { verdict: 'falta', accepted: false, flagged: false, say: 'Hum. Isso eu não achei no livro. Me conta de novo essa parte, com o que você lembra.' };
+    if (hold) return toParent(factFlag);
+    return {
+      verdict: 'fora',
+      accepted: false,
+      flagged: factFlag,
+      needsParent: false,
+      say: `Isso não parece ser sobre "${input.title}". Me conta desse livro mesmo.`,
+    };
   }
   if (judge.suspeito !== 'nenhum' && judge.leu <= 1) {
-    return { verdict: 'suspeito', accepted: false, flagged: true, say: 'Isso está arrumado demais. Me conta do seu jeito, como se fosse para um amigo.' };
+    if (hold) return toParent(true);
+    return {
+      verdict: 'suspeito',
+      accepted: false,
+      flagged: true,
+      needsParent: false,
+      say: 'Isso está arrumado demais. Me conta do seu jeito, como se fosse para um amigo.',
+    };
   }
-  if (judge.leu <= 1 || judge.faltou.length > 0) {
-    const line = judge.faltou.length > 0 ? faltouLine(judge.faltou) : 'Ficou genérico: isso caberia em qualquer livro.';
-    return { verdict: 'falta', accepted: false, flagged: false, say: `${line} Completa aí e me entrega de novo.` };
+  if (judge.leu >= 2) {
+    const comment = judge.comentario ? ` ${judge.comentario}` : '';
+    return {
+      verdict: 'aceito',
+      accepted: true,
+      flagged: judge.suspeito !== 'nenhum' || factFlag,
+      needsParent: false,
+      say: `Acreditei.${comment} +${input.gold} gold.`,
+    };
   }
-  const flagged = judge.suspeito !== 'nenhum';
-  const comment = judge.comentario ? ` ${judge.comentario}` : '';
-  return { verdict: 'aceito', accepted: true, flagged, say: `Acreditei.${comment} +${input.gold} gold.` };
+  if (hold) return toParent(factFlag);
+  return {
+    verdict: 'falta',
+    accepted: false,
+    flagged: factFlag,
+    needsParent: false,
+    say: faltouPull(faltou, input.title, ganchoOf(judge)),
+  };
 }
 
 // ---------- o Sábio lendo ----------

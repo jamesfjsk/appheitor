@@ -21,7 +21,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { FAMILY_ID } from '../config/rules';
-import type { BookDoc, BookJudge, BookReportDoc, BookSize, BookVerdict, BookVerify } from '../types';
+import type { BookDoc, BookJudge, BookReportDoc, BookSize, BookTalk, BookTalkClosing, BookVerdict, BookVerify, SageMove } from '../types';
 import { getTodayBrazil } from '../utils/clock';
 import { callOpenAI } from './aiQuiz';
 import {
@@ -41,6 +41,27 @@ import {
   sizeForPages,
   titleKeyOf,
 } from './village/books';
+import {
+  BOOK_TALK_MODEL,
+  BOOK_TALK_XP,
+  LOCAL_CLOSING,
+  SAGE_CLOSING_TEMP,
+  SAGE_FOLLOW_TEMP,
+  SAGE_QUESTION_TEMP,
+  answerMissesStory,
+  buildSageClosingPrompt,
+  buildSageFollowPrompt,
+  buildSageQuestionPrompt,
+  checkSageQuestion,
+  localFollow,
+  localQuestion,
+  parseSageClosing,
+  parseSageFollow,
+  parseSageQuestion,
+  parseStoredTalk,
+  pickMove,
+  rejectionHint,
+} from './village/bookTalk';
 
 const omitUndefined = <T extends Record<string, unknown>>(data: T): T =>
   Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined)) as T;
@@ -94,7 +115,9 @@ function fromReport(id: string, d: Record<string, unknown>): BookReportDoc {
     paidGold: Number(d.paidGold) || 0,
     paidXp: Number(d.paidXp) || 0,
     parentDecision: d.parentDecision === 'approved' || d.parentDecision === 'voided' ? d.parentDecision : undefined,
+    talk: parseStoredTalk(d.talk),
     createdAt: toDate(d.createdAt),
+    updatedAt: d.updatedAt ? toDate(d.updatedAt) : undefined,
   };
 }
 
@@ -314,4 +337,131 @@ export async function parentVoidReport(uid: string, reportId: string): Promise<v
     if (report.bookId) tx.update(doc(db, 'books', report.bookId), { status: 'to_read', doneOn: null, updatedAt: serverTimestamp() });
     tx.update(doc(db, 'bookReports', reportId), { parentDecision: 'voided', accepted: false, paidGold: 0, needsParent: false, updatedAt: serverTimestamp() });
   });
+}
+
+// ---------- conversa do Sábio (Pacote 16): três chamadas gpt-4o; a criança grava só talk ----------
+
+function talkPayload(talk: BookTalk): Record<string, unknown> {
+  const turns = talk.turns.map((t) => {
+    const row: Record<string, unknown> = { by: t.by, text: t.text };
+    if (t.move) row.move = t.move;
+    return row;
+  });
+  const out: Record<string, unknown> = {
+    theme: talk.theme || '',
+    question: talk.question || '',
+    turns,
+  };
+  if (talk.closing) {
+    out.closing = {
+      restate: talk.closing.restate,
+      concept: talk.closing.concept,
+      takeHome: talk.closing.takeHome,
+    };
+  }
+  if (talk.doneAt) out.doneAt = talk.doneAt;
+  if (talk.skipped) out.skipped = true;
+  if (talk.flagged) out.flagged = true;
+  return out;
+}
+
+/** Só `talk` e `updatedAt`, e só em relato aceito (a regra do Firestore já exige isso). */
+export async function saveBookTalk(reportId: string, talk: BookTalk): Promise<void> {
+  await updateDoc(doc(db, 'bookReports', reportId), {
+    talk: talkPayload(talk),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function fetchSageQuestion(input: { title: string; text: string; signal?: AbortSignal }): Promise<{ theme: string; question: string }> {
+  const built = buildSageQuestionPrompt(input);
+  const ask = async (extra?: string) => {
+    const raw = await callOpenAI(built.system, extra ? `${built.user}\n\n${extra}` : built.user, 280, {
+      model: BOOK_TALK_MODEL,
+      temperature: SAGE_QUESTION_TEMP,
+      signal: input.signal,
+      timeoutMs: 45_000,
+    });
+    return parseSageQuestion(raw);
+  };
+  try {
+    const first = await ask();
+    if (first && checkSageQuestion(first.question).ok) return first;
+    const second = await ask(rejectionHint(first ? checkSageQuestion(first.question).reason : 'tamanho'));
+    if (second && checkSageQuestion(second.question).ok) return second;
+    return localQuestion(input.title, second?.theme || first?.theme);
+  } catch (e) {
+    console.warn('fetchSageQuestion', e);
+    return localQuestion(input.title);
+  }
+}
+
+export async function fetchSageFollow(input: { title: string; theme: string; question: string; answer: string; signal?: AbortSignal }): Promise<{ move: SageMove; question: string; flagged: boolean }> {
+  const local = () => {
+    const picked = localFollow(input.title, input.theme, pickMove(input.answer));
+    return { ...picked, flagged: answerMissesStory(input.answer) };
+  };
+  try {
+    const built = buildSageFollowPrompt(input);
+    const raw = await callOpenAI(built.system, built.user, 220, {
+      model: BOOK_TALK_MODEL,
+      temperature: SAGE_FOLLOW_TEMP,
+      signal: input.signal,
+      timeoutMs: 45_000,
+    });
+    const parsed = parseSageFollow(raw);
+    if (!parsed) return local();
+    return { ...parsed, flagged: parsed.flagged || answerMissesStory(input.answer) };
+  } catch (e) {
+    console.warn('fetchSageFollow', e);
+    return local();
+  }
+}
+
+export async function fetchSageClosing(input: { title: string; question: string; answers: string[]; signal?: AbortSignal }): Promise<BookTalkClosing> {
+  try {
+    const built = buildSageClosingPrompt(input);
+    const raw = await callOpenAI(built.system, built.user, 260, {
+      model: BOOK_TALK_MODEL,
+      temperature: SAGE_CLOSING_TEMP,
+      signal: input.signal,
+      timeoutMs: 45_000,
+    });
+    return parseSageClosing(raw) ?? LOCAL_CLOSING;
+  } catch (e) {
+    console.warn('fetchSageClosing', e);
+    return LOCAL_CLOSING;
+  }
+}
+
+/** 10 XP e `stats.bookTalks`, uma vez por relato. O claim evita pagar de novo. */
+export async function grantBookTalkXp(uid: string, reportId: string): Promise<number> {
+  const key = `booktalk:${reportId}`;
+  let granted = 0;
+  await runTransaction(db, async (tx) => {
+    const vRef = doc(db, 'village', uid);
+    const pRef = doc(db, 'progress', uid);
+    const vSnap = await tx.get(vRef);
+    const pSnap = await tx.get(pRef);
+    const claimed = (vSnap.data()?.claimed ?? {}) as Record<string, unknown>;
+    if (claimed[key]) return;
+    if (!pSnap.exists() && !vSnap.exists()) return;
+    if (pSnap.exists()) tx.update(pRef, { totalXP: increment(BOOK_TALK_XP), updatedAt: serverTimestamp() });
+    if (vSnap.exists()) {
+      tx.update(vRef, {
+        [`claimed.${key}`]: new Date().toISOString(),
+        'stats.bookTalks': increment(1),
+        updatedAt: serverTimestamp(),
+      });
+    }
+    granted = BOOK_TALK_XP;
+  });
+  return granted;
+}
+
+export async function finishBookTalk(uid: string, reportId: string, talk: BookTalk): Promise<{ xp: number; doneAt: string }> {
+  const doneAt = talk.doneAt || new Date().toISOString();
+  await saveBookTalk(reportId, { ...talk, doneAt, skipped: false });
+  const xp = await grantBookTalkXp(uid, reportId);
+  return { xp, doneAt };
 }

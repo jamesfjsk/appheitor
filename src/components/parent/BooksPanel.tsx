@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import type { BookDoc, BookReportDoc } from '../../types';
-import { BOOK_GOLD_MAX, LIKED_LABELS, goldForBook, goldForSize, sizeForPages } from '../../services/village/books';
+import { BOOK_GOLD_MAX, LIKED_LABELS, faltouParentLine, goldForBook, goldForSize, sizeForPages } from '../../services/village/books';
 import { addBook, parentApproveReport, parentVoidReport, setBookGold, setParentReply, subscribeBookReports, subscribeBooks } from '../../services/bookService';
 
 const VERDICT_LABEL: Record<string, string> = {
@@ -94,6 +94,15 @@ const BooksPanel: React.FC = () => {
       toast.error(e instanceof Error ? e.message : 'Não deu para aprovar');
     } finally {
       setBusy(null);
+    }
+  };
+
+  const copyDinner = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Pergunta copiada');
+    } catch {
+      toast.error('Não deu para copiar');
     }
   };
 
@@ -219,10 +228,55 @@ const BooksPanel: React.FC = () => {
               <p className="text-xs text-gray-600">
                 {LIKED_LABELS[r.liked]}{r.rating != null ? ` · nota ${r.rating}` : ''} · {r.words} palavras · na estante há {r.readingDays} dia(s){r.pasted ? ' · texto colado' : ''}
                 {j?.motivo ? ` · ${j.motivo}` : ''}
-                {j?.faltou?.length ? ` · faltou: ${j.faltou.join(', ')}` : ''}
+                {j?.faltou && faltouParentLine(j.faltou) ? ` · ${faltouParentLine(j.faltou)}` : ''}
               </p>
+              {r.needsParent && !r.accepted && r.attempt >= 3 && r.parentDecision !== 'approved' && (
+                <p className="text-xs text-gray-700">Terceira entrega. O Sábio guardou para você ler.</p>
+              )}
+              {j?.pergunta && !r.verify && (
+                <p className="text-xs text-gray-600">Pergunta de fato, só sinal: {j.pergunta}</p>
+              )}
               {r.verify && (
                 <p className="text-xs text-gray-600">Pergunta: {r.verify.question} · ele: "{r.verify.answer}" · {r.verify.ok ? 'bateu' : 'não bateu'}</p>
+              )}
+              {r.talk?.flagged && (
+                <p className="text-sm text-amber-900">A resposta da conversa não mostra que ele conhece a história.</p>
+              )}
+              {r.talk && (r.talk.question || r.talk.turns.length > 0 || r.talk.closing) && (
+                <div className="text-sm space-y-1 bg-white border border-gray-200 rounded p-2" data-testid={`relato-conversa-${r.id}`}>
+                  <p className="font-medium text-gray-900">Conversa</p>
+                  {r.talk.turns.length > 0
+                    ? r.talk.turns.map((t, i) => (
+                      <p key={`${t.by}-${i}`} className="text-gray-800">
+                        <span className="text-gray-500">{t.by === 'sabio' ? 'Sábio' : 'Ele'}: </span>
+                        {t.text}
+                      </p>
+                    ))
+                    : <p className="text-gray-800"><span className="text-gray-500">Sábio: </span>{r.talk.question}</p>}
+                  {r.talk.closing && (
+                    <>
+                      <p className="text-gray-800">{r.talk.closing.restate}</p>
+                      <p className="text-gray-800">{r.talk.closing.concept}</p>
+                      {r.talk.closing.takeHome && (
+                        <p className="text-gray-900">
+                          Pergunta para o jantar: {r.talk.closing.takeHome}
+                          <button
+                            type="button"
+                            className="ml-2 px-2 py-1 rounded border border-gray-300 text-xs"
+                            data-testid={`jantar-copiar-${r.id}`}
+                            onClick={() => void copyDinner(r.talk?.closing?.takeHome || '')}
+                          >
+                            Copiar
+                          </button>
+                        </p>
+                      )}
+                    </>
+                  )}
+                  {r.talk.skipped && !r.talk.doneAt && <p className="text-xs text-gray-500">Deixou para conversar depois.</p>}
+                </div>
+              )}
+              {r.talk?.skipped && !r.talk.question && !r.talk.closing && (
+                <p className="text-xs text-gray-600">Deixou para conversar depois.</p>
               )}
               <button type="button" className="text-xs text-blue-700 underline" onClick={() => setOpen(open === r.id ? null : r.id)}>
                 {open === r.id ? 'esconder o texto' : 'ver o texto'}

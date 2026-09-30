@@ -8,12 +8,16 @@ import {
   claimKeyForBookDay,
   daysBetween,
   faltouLine,
+  faltouParentLine,
+  faltouPull,
   goldForBook,
   goldForSize,
   localCheck,
   minWordsFor,
   parseBookJudge,
   parseVerify,
+  PARENT_HOLD_SAY,
+  priorRefusalsOf,
   readingLineAt,
   sameBook,
   sizeForPages,
@@ -86,12 +90,13 @@ test('textSimilarity: igual dá 1, textos diferentes ficam baixos', () => {
   expect(textSimilarity('a menina achou um gato preto na chuva e levou para casa', 'o time ganhou o jogo de futebol no ultimo minuto')).toBeLessThanOrEqual(0.2);
 });
 
-test('parseBookJudge: aceita o JSON do Sábio, recusa lixo, corta faltou inválido', () => {
-  const j = parseBookJudge({ leu: 3, motivo: 'detalhes do fim', faltou: ['fim', 'banana'], suspeito: 'nenhum', comentario: 'Você lembrou do cachorro.', pergunta: 'Quem achou a chave?', respostaEsperada: 'O irmão' });
+test('parseBookJudge: aceita o JSON do Sábio, recusa lixo, corta faltou inválido e a opinião', () => {
+  const j = parseBookJudge({ leu: 3, motivo: 'detalhes do fim', faltou: ['fim', 'banana', 'opiniao'], suspeito: 'nenhum', comentario: 'Você lembrou do cachorro.', pergunta: 'Quem achou a chave?', respostaEsperada: 'O irmão', gancho: 'Me conta o meio, na ponte.' });
   expect(j?.leu).toBe(3);
   expect(j?.faltou).toEqual(['fim']);
   expect(j?.pergunta).toBe('Quem achou a chave?');
   expect(j?.model).toBe('gpt-4o');
+  expect((j as { gancho?: string } | null)?.gancho).toBe('Me conta o meio, na ponte.');
   expect(parseBookJudge({ leu: 'muito' })).toBe(null);
   expect(parseBookJudge(null)).toBe(null);
   expect(parseBookJudge({ leu: 2, suspeito: 'sei la' })?.suspeito).toBe('nenhum');
@@ -100,17 +105,14 @@ test('parseBookJudge: aceita o JSON do Sábio, recusa lixo, corta faltou inváli
   expect(parseVerify({ ok: 'sim' })).toBe(null);
 });
 
-test('verdictOf: aceito, falta, suspeito, fora, pergunta errada; suspeita com leu 2 aceita e marca', () => {
+test('verdictOf: aceito, falta, suspeito, fora; suspeita com leu 2 aceita e marca', () => {
   const judge = { leu: 3 as const, motivo: '', faltou: [], suspeito: 'nenhum' as const, comentario: 'Gostei da parte do dragão.', model: 'gpt-4o' };
   const ok = verdictOf({ judge, verifyOk: true, title: 'A Ilha', gold: 15 });
   expect(ok.verdict).toBe('aceito');
   expect(ok.accepted).toBe(true);
+  expect(ok.needsParent).toBe(false);
   expect(ok.say).toContain('+15 gold');
   expect(ok.say).toContain('dragão');
-  const falta = verdictOf({ judge: { ...judge, leu: 2, faltou: ['fim', 'opiniao'] }, verifyOk: null, title: 'A Ilha', gold: 15 });
-  expect(falta.verdict).toBe('falta');
-  expect(falta.say).toContain('como termina');
-  expect(falta.say).toContain('o que você achou');
   expect(verdictOf({ judge: { ...judge, leu: 1 }, verifyOk: null, title: 'A Ilha', gold: 15 }).verdict).toBe('falta');
   const susp = verdictOf({ judge: { ...judge, leu: 1, suspeito: 'ia' }, verifyOk: null, title: 'A Ilha', gold: 15 });
   expect(susp.verdict).toBe('suspeito');
@@ -120,9 +122,47 @@ test('verdictOf: aceito, falta, suspeito, fora, pergunta errada; suspeita com le
   expect(suspOk.flagged).toBe(true);
   expect(verdictOf({ judge: { ...judge, suspeito: 'fora_do_tema' }, verifyOk: null, title: 'A Ilha', gold: 15 }).verdict).toBe('fora');
   expect(verdictOf({ judge: { ...judge, leu: 0 }, verifyOk: null, title: 'A Ilha', gold: 15 }).verdict).toBe('fora');
-  expect(verdictOf({ judge, verifyOk: false, title: 'A Ilha', gold: 15 }).verdict).toBe('falta');
   expect(faltouLine([])).toBe('Faltou uma parte da história.');
   expect(faltouLine(['fim'])).toBe('Faltou como termina.');
+});
+
+test('verdictOf: leu 2 com faltou aceita, opinião não recusa, fato não decide, terceira entrega vai para o pai', () => {
+  const base = { leu: 2 as const, motivo: '', faltou: ['meio', 'opiniao'] as string[], suspeito: 'nenhum' as const, comentario: 'Você lembrou da escola.', model: 'gpt-4o' };
+  const aceito = verdictOf({ judge: base, verifyOk: null, title: 'Matilda', gold: 15 });
+  expect(aceito.verdict).toBe('aceito');
+  expect(aceito.accepted).toBe(true);
+  expect(aceito.needsParent).toBe(false);
+  expect(aceito.say).not.toContain('meio');
+  expect(aceito.say).not.toContain('opini');
+  expect(faltouParentLine(['meio', 'opiniao'])).toBe('não contou o meio');
+  expect(faltouParentLine(['opiniao'])).toBe('');
+
+  const soOpiniao = verdictOf({ judge: { ...base, leu: 3, faltou: ['opiniao'] }, verifyOk: null, title: 'Matilda', gold: 15 });
+  expect(soOpiniao.accepted).toBe(true);
+
+  const fato = verdictOf({ judge: { ...base, leu: 3, faltou: [] }, verifyOk: false, title: 'Matilda', gold: 15 });
+  expect(fato.accepted).toBe(true);
+  expect(fato.flagged).toBe(true);
+  expect(fato.say).not.toContain('não achei');
+
+  const curto = { ...base, leu: 1 as const, faltou: ['meio'], gancho: 'Me conta uma coisa que acontece no meio, na escola da Matilda.' };
+  const uma = verdictOf({ judge: curto, verifyOk: null, title: 'Matilda', gold: 15, priorRefusals: 0 });
+  expect(uma.verdict).toBe('falta');
+  expect(uma.needsParent).toBe(false);
+  expect(uma.say).toContain('escola da Matilda');
+  expect(verdictOf({ judge: curto, verifyOk: null, title: 'Matilda', gold: 15, priorRefusals: 1 }).needsParent).toBe(false);
+  const terceira = verdictOf({ judge: curto, verifyOk: null, title: 'Matilda', gold: 15, priorRefusals: 2 });
+  expect(terceira.needsParent).toBe(true);
+  expect(terceira.accepted).toBe(false);
+  expect(terceira.say).toBe(PARENT_HOLD_SAY);
+  const terceiraBoa = verdictOf({ judge: { ...base, faltou: ['fim'] }, verifyOk: null, title: 'Matilda', gold: 15, priorRefusals: 2 });
+  expect(terceiraBoa.accepted).toBe(true);
+  expect(faltouPull(['meio'], 'Matilda')).toContain('meio');
+  expect(priorRefusalsOf([
+    { bookId: 'm', titleKey: 'matilda', accepted: false, verdict: 'falta' },
+    { bookId: 'm', titleKey: 'matilda', accepted: false, verdict: 'suspeito' },
+    { bookId: 'm', titleKey: 'matilda', accepted: true, verdict: 'aceito' },
+  ], { id: 'm', titleKey: 'matilda' })).toBe(2);
 });
 
 test('prompt do juiz leva título, páginas e o texto, sem os dias; dias entre datas; falas do Sábio lendo', () => {
@@ -133,6 +173,8 @@ test('prompt do juiz leva título, páginas e o texto, sem os dias; dias entre d
   expect(p.system).toContain('ESPERADOS');
   expect(p.user).toContain('era uma vez');
   expect(p.system).toContain('Nunca pergunte o nome do autor'); // caso Menino Maluquinho (22/09): o juiz esperou "Ziraldo"
+  expect(p.system).toContain('gancho');
+  expect(p.system).not.toContain('"opiniao"');
   const v = buildVerifyPrompt({ title: 'A Ilha', question: 'Quem achou a chave?', expected: 'O irmão', answer: 'o irmao dele', text: 'era uma vez' });
   expect(v.system).toContain('PODE ESTAR ERRADA');
   expect(v.system).toContain('Na dúvida, true');

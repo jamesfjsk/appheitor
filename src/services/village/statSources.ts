@@ -14,6 +14,7 @@ export const STAT_SOURCES: Record<string, { where: string }> = {
   quizScore: { where: 'dailyQuizService.completeDailyQuiz' },
   quizPerfect: { where: 'dailyQuizService.completeDailyQuiz' },
   booksRead: { where: 'bookService.payBookReport' },
+  bookTalks: { where: 'bookService.finishBookTalk' },
   contractsLetter: { where: 'englishBaseService.completeContract' },
   contractsNote: { where: 'englishBaseService.completeContract' },
   contractsForge: { where: 'englishBaseService.completeContract' },
