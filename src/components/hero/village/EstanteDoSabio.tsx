@@ -1,8 +1,7 @@
 // ========================================
-// Estante do Sábio (decisão 40): contar um livro e ganhar gold de vida real.
-// Estante com os livros lidos, lista dos "para ler" (cadastrados pelo pai ou propostos pela criança),
-// papiro para contar o livro, o Sábio lendo, uma pergunta de verificação e o veredito.
-// Regras puras em services/village/books.ts; Firestore em services/bookService.ts.
+// Estante do Sábio: contar um livro e, se o Sábio acreditar, conversar.
+// A pergunta de fato não trava mais o relato. A conversa vem depois do pagamento.
+// Regras puras em services/village/books.ts e bookTalk.ts; Firestore em bookService.ts.
 // ========================================
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -14,9 +13,8 @@ import { useVillage } from '../../../contexts/VillageContext';
 import { ISO_NPC } from '../../../config/village';
 import { setAppBusy } from '../../../services/appUpdate';
 import { childAgeToday } from '../../../config/rules';
-import type { BookDoc, BookJudge, BookReportDoc, BookVerify } from '../../../types';
+import type { BookDoc, BookJudge, BookReportDoc, BookTalk } from '../../../types';
 import {
-  BOOK_ATTEMPTS_PER_DAY,
   BOOK_EASY_BOOKS,
   BOOK_MOLDE,
   LIKED_LABELS,
@@ -27,18 +25,31 @@ import {
   goldForBook,
   localCheck,
   minWordsFor,
+  priorRefusalsOf,
   readingLineAt,
   verdictOf,
 } from '../../../services/village/books';
 import {
+  SAGE_NUDGE,
+  answerMissesStory,
+  closingSpeech,
+  needsNudge,
+  talkStep,
+} from '../../../services/village/bookTalk';
+import {
   addBook,
+  fetchSageClosing,
+  fetchSageFollow,
+  fetchSageQuestion,
+  finishBookTalk,
   judgeBook,
   payBookReport,
   saveBookReport,
+  saveBookTalk,
   subscribeBookReports,
   subscribeBooks,
-  verifyBookAnswer,
 } from '../../../services/bookService';
+import { speakProvaVerdict, stopProvaVoice } from '../../../services/quiz/provaSpeak';
 import ChildSheet from './ChildSheet';
 
 const GOLD = '/assets/english/ui/gold.webp';
@@ -50,7 +61,50 @@ const FACES: Array<{ label: (typeof LIKED_LABELS)[number]; glyph: string }> = [
   { label: 'Amei', glyph: '🤩' },
 ];
 
-type Phase = 'shelf' | 'propose' | 'form' | 'reading' | 'verify' | 'result';
+type Phase = 'shelf' | 'propose' | 'form' | 'reading' | 'result' | 'talk' | 'talk-wait' | 'talk-done';
+
+interface ResultState {
+  say: string;
+  accepted: boolean;
+  gold: number;
+  needsParent: boolean;
+  reportId: string;
+  canTalk: boolean;
+}
+
+interface RecAlt {
+  transcript: string;
+}
+interface RecEvent {
+  results: ArrayLike<ArrayLike<RecAlt>>;
+}
+interface BrowserRec {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((ev: RecEvent) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+type RecCtor = new () => BrowserRec;
+
+function speechCtor(): RecCtor | null {
+  if (typeof window === 'undefined') return null;
+  const w = window as unknown as { SpeechRecognition?: RecCtor; webkitSpeechRecognition?: RecCtor };
+  return w.SpeechRecognition || w.webkitSpeechRecognition || null;
+}
+
+async function micAvailable(): Promise<boolean> {
+  if (!speechCtor() || !navigator.mediaDevices?.enumerateDevices) return false;
+  try {
+    const list = await navigator.mediaDevices.enumerateDevices();
+    return list.some((d) => d.kind === 'audioinput');
+  } catch {
+    return false;
+  }
+}
 
 interface Props {
   onClose: () => void;
@@ -77,7 +131,7 @@ const Papiro: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </div>
 );
 
-function Shelf({ books }: { books: BookDoc[] }) {
+function Shelf({ books, pending, onTalk }: { books: BookDoc[]; pending: Set<string>; onTalk: (b: BookDoc) => void }) {
   if (books.length === 0) {
     return <p className="text-sm mc-muted">A estante está vazia. Quando terminar um livro, vem me contar.</p>;
   }
@@ -86,28 +140,52 @@ function Shelf({ books }: { books: BookDoc[] }) {
   return (
     <div className="mc-inv p-2">
       <div className="flex items-end gap-1 overflow-x-auto pb-1" data-testid="estante-lombadas">
-        {shown.map((b, i) => (
-          <div
-            key={b.id}
-            title={`${b.title}${b.doneOn ? ` · contado em ${b.doneOn.slice(8, 10)}/${b.doneOn.slice(5, 7)}` : ''}`}
-            className="mc-pixel shrink-0 flex items-end justify-center"
-            style={{
-              width: 26,
-              height: 84 + (i % 3) * 8,
-              background: SPINE_COLORS[i % SPINE_COLORS.length],
-              border: '2px solid #1a1008',
-              borderRadius: 3,
-              boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.08)',
-            }}
-          >
+        {shown.map((b, i) => {
+          const wait = pending.has(b.id);
+          const spine = (
             <span
-              className="text-white font-bold"
-              style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontSize: 10, lineHeight: 1, padding: '6px 0', maxHeight: 76, overflow: 'hidden', whiteSpace: 'nowrap' }}
+              className="mc-pixel shrink-0 flex items-end justify-center"
+              style={{
+                width: wait ? 44 : 26,
+                height: 84 + (i % 3) * 8,
+                background: SPINE_COLORS[i % SPINE_COLORS.length],
+                border: '2px solid #1a1008',
+                borderRadius: 3,
+                boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.08)',
+              }}
             >
-              {b.title}
+              <span
+                className="text-white font-bold"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontSize: 10, lineHeight: 1, padding: '6px 0', maxHeight: 76, overflow: 'hidden', whiteSpace: 'nowrap' }}
+              >
+                {b.title}
+              </span>
             </span>
-          </div>
-        ))}
+          );
+          if (!wait) {
+            return (
+              <div key={b.id} title={b.title} className="shrink-0">
+                {spine}
+              </div>
+            );
+          }
+          return (
+            <button
+              key={b.id}
+              type="button"
+              className="shrink-0 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer"
+              style={{ width: 96 }}
+              onClick={() => onTalk(b)}
+              data-testid={`lombada-conversa-${b.id}`}
+              aria-label={`${b.title}. O Sábio quer conversar`}
+            >
+              {spine}
+              <span className="mc-warn text-center font-semibold" style={{ fontSize: 11, lineHeight: 1.25 }}>
+                O Sábio quer conversar
+              </span>
+            </button>
+          );
+        })}
         {more > 0 && <span className="mc-num self-center" style={{ fontSize: 11 }}>+{more}</span>}
       </div>
       <p className="text-xs mc-muted mt-1">{books.length === 1 ? '1 livro lido' : `${books.length} livros lidos`}</p>
@@ -119,7 +197,7 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
   const { childUid } = useAuth();
   const { today } = useClock();
   const { village } = useVillage();
-  const { playClick, playTaskComplete, playProvaMiss } = useSound();
+  const { playClick, playTaskComplete, playProvaMiss, isSoundEnabled } = useSound();
 
   const [books, setBooks] = useState<BookDoc[]>([]);
   const [reports, setReports] = useState<BookReportDoc[]>([]);
@@ -131,14 +209,35 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
   const [pasted, setPasted] = useState(false);
   const [say, setSay] = useState<string | null>(null);
   const [readingMs, setReadingMs] = useState(0);
-  const [judge, setJudge] = useState<BookJudge | null>(null);
-  const [answer, setAnswer] = useState('');
-  const [result, setResult] = useState<{ say: string; accepted: boolean; gold: number; needsParent: boolean } | null>(null);
+  const [result, setResult] = useState<ResultState | null>(null);
   const [busy, setBusy] = useState(false);
   const [propTitle, setPropTitle] = useState('');
   const [propPages, setPropPages] = useState('');
+  const [reportId, setReportId] = useState<string | null>(null);
+  const [sourceText, setSourceText] = useState('');
+  const [talk, setTalk] = useState<BookTalk | null>(null);
+  const [draft, setDraft] = useState('');
+  const [nudgeUsed, setNudgeUsed] = useState(false);
+  const [nudgeLine, setNudgeLine] = useState<string | null>(null);
+  const [xpJust, setXpJust] = useState(0);
+  const [canMic, setCanMic] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [micNote, setMicNote] = useState<string | null>(null);
   const typingStart = useRef<number | null>(null);
   const readingStart = useRef(0);
+  const skipRef = useRef(false);
+  const recRef = useRef<BrowserRec | null>(null);
+
+  const stopRec = () => {
+    const rec = recRef.current;
+    recRef.current = null;
+    if (!rec) return;
+    rec.onresult = null;
+    rec.onerror = null;
+    rec.onend = null;
+    try { rec.stop(); } catch { /* já parado */ }
+    setListening(false);
+  };
 
   useEffect(() => {
     setAppBusy('book', text.trim().length > 0);
@@ -153,25 +252,70 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
   }, [childUid]);
 
   useEffect(() => {
-    if (phase !== 'reading') return;
+    if (phase !== 'reading' && phase !== 'talk-wait') return;
     readingStart.current = performance.now();
     setReadingMs(0);
     const id = window.setInterval(() => setReadingMs(performance.now() - readingStart.current), 400);
     return () => window.clearInterval(id);
   }, [phase]);
 
+  useEffect(() => () => {
+    stopProvaVoice();
+    const rec = recRef.current;
+    if (!rec) return;
+    try { rec.stop(); } catch { /* já parado */ }
+  }, []);
+
   const done = useMemo(() => books.filter((b) => b.status === 'done').sort((a, b) => (b.doneOn || '').localeCompare(a.doneOn || '')), [books]);
   const toRead = useMemo(() => books.filter((b) => b.status === 'to_read'), [books]);
   const dayUsed = Boolean(village.claimed?.[claimKeyForBookDay(today)]);
   const minWords = minWordsFor(done.length);
   const words = bookWordCount(text);
-  const attemptsToday = (b: BookDoc) => reports.filter((r) => r.bookId === b.id && r.date === today).length;
+  const acceptedOf = (b: BookDoc) => reports.find((r) => r.accepted && (r.bookId === b.id || r.titleKey === b.titleKey));
+  const pendingIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const b of done) {
+      const r = reports.find((x) => x.accepted && (x.bookId === b.id || x.titleKey === b.titleKey));
+      if (r && !r.talk?.doneAt) ids.add(b.id);
+    }
+    return ids;
+  }, [done, reports]);
   const lastReply = done.find((b) => b.parentReply);
+  const replyAfterTalk = Boolean(lastReply && reports.some((r) => r.accepted && (r.bookId === lastReply.id || r.titleKey === lastReply.titleKey) && r.talk?.doneAt));
+
+  const sageNow = talk ? ([...talk.turns].reverse().find((t) => t.by === 'sabio')?.text || talk.question) : '';
+  const doneSpeech = talk?.closing ? closingSpeech(talk.closing) : '';
+  const voiceLine = phase === 'talk' ? (nudgeLine || sageNow) : phase === 'talk-done' ? doneSpeech : '';
+
+  useEffect(() => {
+    if (!voiceLine || !isSoundEnabled) return undefined;
+    void speakProvaVerdict(voiceLine, true);
+    return () => { stopProvaVoice(); };
+  }, [voiceLine, isSoundEnabled]);
+
+  const backToShelf = () => {
+    playClick();
+    skipRef.current = true;
+    stopRec();
+    stopProvaVoice();
+    setPhase('shelf');
+    setSay(null);
+    setResult(null);
+    setNudgeLine(null);
+    setMicNote(null);
+  };
 
   const startForm = (b: BookDoc) => {
     playClick();
-    if (attemptsToday(b) >= BOOK_ATTEMPTS_PER_DAY) {
-      setSay('Hoje já foram três tentativas desse livro. Amanhã a gente tenta de novo, com calma.');
+    const waitingDad = reports.some((r) =>
+      (r.bookId === b.id || r.titleKey === b.titleKey)
+      && r.needsParent
+      && !r.accepted
+      && r.parentDecision !== 'approved'
+      && r.parentDecision !== 'voided',
+    );
+    if (waitingDad) {
+      setSay('Seu pai ainda vai ler o que você contou. Espera a resposta dele.');
       return;
     }
     setBook(b);
@@ -180,9 +324,9 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
     setText('');
     setPasted(false);
     setSay(null);
-    setJudge(null);
-    setAnswer('');
     setResult(null);
+    setTalk(null);
+    setDraft('');
     typingStart.current = null;
     setPhase('form');
   };
@@ -204,14 +348,22 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
     }
   };
 
-  const finish = async (j: BookJudge, verify: BookVerify | undefined, verifyOk: boolean | null) => {
+  const finish = async (j: BookJudge) => {
     if (!childUid || !book) return;
     const gold = goldForBook(book);
-    const v = verdictOf({ judge: j, verifyOk, title: book.title, gold });
-    const needsParent = v.accepted && book.addedBy === 'child';
-    const attempt = attemptsToday(book) + 1;
+    const v = verdictOf({
+      judge: j,
+      verifyOk: null,
+      title: book.title,
+      gold,
+      priorRefusals: priorRefusalsOf(reports, book),
+    });
+    const childHold = v.accepted && book.addedBy === 'child';
+    const needsParent = v.needsParent || childHold;
+    const accepted = v.accepted && !needsParent;
+    const attempt = reports.filter((r) => r.bookId === book.id || r.titleKey === book.titleKey).length + 1;
     const typedMs = typingStart.current ? Math.round(performance.now() - typingStart.current) : 0;
-    const reportId = await saveBookReport(childUid, {
+    const id = await saveBookReport(childUid, {
       bookId: book.id,
       title: book.title,
       titleKey: book.titleKey,
@@ -225,26 +377,43 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
       date: today,
       readingDays: daysBetween(book.addedOn, today),
       judge: j,
-      verify,
       verdict: v.verdict,
-      accepted: v.accepted && !needsParent,
+      accepted,
       needsParent,
       flagged: v.flagged,
     });
-    if (v.accepted && !needsParent) {
-      const paid = await payBookReport(childUid, reportId, book, today);
+    setReportId(id);
+    setSourceText(text.trim());
+    if (accepted) {
+      const paid = await payBookReport(childUid, id, book, today);
       if (paid.paid) {
         playTaskComplete();
-        setResult({ say: v.say, accepted: true, gold: paid.gold, needsParent: false });
+        setResult({ say: v.say, accepted: true, gold: paid.gold, needsParent: false, reportId: id, canTalk: true });
       } else {
-        setResult({ say: paid.reason === 'day' ? 'Hoje eu já ouvi um livro. Amanhã conto com outro.' : 'Esse você já me contou.', accepted: false, gold: 0, needsParent: false });
+        setResult({
+          say: paid.reason === 'day' ? 'Hoje eu já ouvi um livro. Amanhã conto com outro.' : 'Esse você já me contou.',
+          accepted: false,
+          gold: 0,
+          needsParent: false,
+          reportId: id,
+          canTalk: false,
+        });
       }
-    } else if (v.accepted && needsParent) {
+    } else if (childHold) {
       playTaskComplete();
-      setResult({ say: `Acreditei.${j.comentario ? ` ${j.comentario}` : ''} Como esse livro entrou pela sua mão, o gold sai quando seu pai der o ok.`, accepted: true, gold: 0, needsParent: true });
+      setResult({
+        say: `Acreditei.${j.comentario ? ` ${j.comentario}` : ''} Como esse livro entrou pela sua mão, o gold sai quando seu pai der o ok.`,
+        accepted: true,
+        gold: 0,
+        needsParent: true,
+        reportId: id,
+        canTalk: false,
+      });
+    } else if (v.needsParent) {
+      setResult({ say: v.say, accepted: false, gold: 0, needsParent: true, reportId: id, canTalk: false });
     } else {
       playProvaMiss();
-      setResult({ say: v.say, accepted: false, gold: 0, needsParent: false });
+      setResult({ say: v.say, accepted: false, gold: 0, needsParent: false, reportId: id, canTalk: false });
     }
     setPhase('result');
   };
@@ -286,13 +455,7 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
         setSay('Piscei e perdi a linha. Me entrega de novo.');
         return;
       }
-      setJudge(j);
-      const askable = j.pergunta && j.respostaEsperada && j.leu >= 2 && j.suspeito !== 'fora_do_tema';
-      if (askable) {
-        setPhase('verify');
-        return;
-      }
-      await finish(j, undefined, null);
+      await finish(j);
     } catch (e) {
       console.warn('EstanteDoSabio: juiz falhou', e);
       setPhase('form');
@@ -302,41 +465,204 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
     }
   };
 
-  const sendAnswer = async () => {
-    if (!book || !judge || !judge.pergunta || !judge.respostaEsperada || busy) return;
-    if (answer.trim().length < 2) return;
+  const retry = () => {
     playClick();
+    setResult(null);
+    setPhase('form');
+  };
+
+  const runQuestion = async (b: BookDoc, id: string, source: string) => {
+    skipRef.current = false;
     setBusy(true);
-    setPhase('reading');
-    const t0 = performance.now();
+    setPhase('talk-wait');
     try {
-      const r = await verifyBookAnswer({ title: book.title, question: judge.pergunta, expected: judge.respostaEsperada, answer, text });
-      const wait = SABIO_LENDO_MIN_MS - (performance.now() - t0);
-      if (wait > 0) await new Promise((res) => window.setTimeout(res, wait));
-      const ok = r ? r.ok : true; // resposta malformada do conferente não castiga
-      await finish(judge, { question: judge.pergunta, expected: judge.respostaEsperada, answer: answer.trim(), ok }, ok);
-    } catch (e) {
-      console.warn('EstanteDoSabio: conferência falhou', e);
-      await finish(judge, { question: judge.pergunta, expected: judge.respostaEsperada, answer: answer.trim(), ok: true }, null);
+      const q = await fetchSageQuestion({ title: b.title, text: source });
+      if (skipRef.current) return;
+      const next: BookTalk = { theme: q.theme, question: q.question, turns: [{ by: 'sabio', text: q.question }] };
+      try { await saveBookTalk(id, next); } catch (e) { console.warn('EstanteDoSabio: guardar conversa', e); }
+      setTalk(next);
+      setNudgeUsed(false);
+      setNudgeLine(null);
+      setPhase('talk');
     } finally {
       setBusy(false);
     }
   };
 
-  const retry = () => {
-    playClick();
-    setResult(null);
-    setJudge(null);
-    setAnswer('');
-    setPhase('form');
+  const runFollow = async (b: BookDoc, id: string, current: BookTalk) => {
+    skipRef.current = false;
+    setBusy(true);
+    setPhase('talk-wait');
+    try {
+      const answer = [...current.turns].reverse().find((t) => t.by === 'heitor')?.text || 'Não sei';
+      const f = await fetchSageFollow({ title: b.title, theme: current.theme, question: current.question, answer });
+      if (skipRef.current) return;
+      const next: BookTalk = {
+        ...current,
+        flagged: Boolean(current.flagged || f.flagged),
+        turns: [...current.turns, { by: 'sabio', text: f.question, move: f.move }],
+      };
+      try { await saveBookTalk(id, next); } catch (e) { console.warn('EstanteDoSabio: guardar conversa', e); }
+      setTalk(next);
+      setNudgeUsed(false);
+      setNudgeLine(null);
+      setPhase('talk');
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const backToShelf = () => {
+  const runClosing = async (b: BookDoc, id: string, current: BookTalk) => {
+    if (!childUid) return;
+    skipRef.current = false;
+    setBusy(true);
+    setPhase('talk-wait');
+    try {
+      const answers = current.turns.filter((t) => t.by === 'heitor').map((t) => t.text);
+      const closing = await fetchSageClosing({ title: b.title, question: current.question, answers });
+      if (skipRef.current) return;
+      const next: BookTalk = {
+        ...current,
+        closing,
+        flagged: Boolean(current.flagged || answers.some(answerMissesStory)),
+      };
+      const out = await finishBookTalk(childUid, id, next);
+      setTalk({ ...next, doneAt: out.doneAt });
+      setXpJust(out.xp);
+      setPhase('talk-done');
+    } catch (e) {
+      console.warn('EstanteDoSabio: fecho', e);
+      setPhase('talk');
+      setMicNote('O Sábio piscou. Responde de novo que eu fecho a conversa.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openTalk = async (b: BookDoc, id: string, source: string, existing?: BookTalk) => {
     playClick();
+    stopRec();
+    const talk0: BookTalk = existing && (existing.question || existing.turns.length)
+      ? existing
+      : { theme: '', question: '', turns: [] };
+    setBook(b);
+    setReportId(id);
+    setSourceText(source);
+    setTalk(talk0);
+    setDraft('');
+    setNudgeUsed(false);
+    setNudgeLine(null);
+    setMicNote(null);
+    setXpJust(0);
+    setCanMic(false);
+    void micAvailable().then(setCanMic);
+    const step = talkStep(talk0);
+    if (step === 'done') {
+      setPhase('talk-done');
+      return;
+    }
+    if (step === 'need-question') {
+      await runQuestion(b, id, source);
+      return;
+    }
+    if (step === 'need-follow') {
+      await runFollow(b, id, talk0);
+      return;
+    }
+    if (step === 'need-closing') {
+      await runClosing(b, id, talk0);
+      return;
+    }
+    setPhase('talk');
+  };
+
+  const openFromShelf = (b: BookDoc) => {
+    const r = acceptedOf(b);
+    if (!r) return;
+    void openTalk(b, r.id, r.text, r.talk);
+  };
+
+  const skipTalk = async () => {
+    playClick();
+    skipRef.current = true;
+    stopRec();
+    stopProvaVoice();
+    const id = result?.reportId || reportId;
+    const base = talk ?? { theme: '', question: '', turns: [] as BookTalk['turns'] };
+    if (id && !base.doneAt) {
+      try { await saveBookTalk(id, { ...base, skipped: true }); } catch (e) { console.warn('EstanteDoSabio: deixar para depois', e); }
+    }
     setPhase('shelf');
     setSay(null);
-    setResult(null);
+    setNudgeLine(null);
   };
+
+  const submitTalk = async () => {
+    if (!book || !reportId || !talk || busy) return;
+    playClick();
+    stopRec();
+    const said = draft.trim();
+    if (needsNudge(said) && !nudgeUsed) {
+      setNudgeUsed(true);
+      setNudgeLine(SAGE_NUDGE);
+      return;
+    }
+    const line = said || 'Não sei';
+    const step = talkStep(talk);
+    const next: BookTalk = {
+      ...talk,
+      flagged: Boolean(talk.flagged || answerMissesStory(line)),
+      turns: [...talk.turns, { by: 'heitor', text: line }],
+    };
+    setDraft('');
+    setNudgeUsed(false);
+    setNudgeLine(null);
+    setTalk(next);
+    if (step === 'answer-2' || step === 'need-closing') await runClosing(book, reportId, next);
+    else await runFollow(book, reportId, next);
+  };
+
+  const toggleMic = () => {
+    playClick();
+    if (listening) {
+      stopRec();
+      return;
+    }
+    const Ctor = speechCtor();
+    if (!Ctor) {
+      setCanMic(false);
+      return;
+    }
+    const rec = new Ctor();
+    rec.lang = 'pt-BR';
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.onresult = (ev) => {
+      let heard = '';
+      for (let i = 0; i < ev.results.length; i++) heard += ev.results[i][0]?.transcript || '';
+      setDraft(heard.trim());
+    };
+    rec.onerror = () => {
+      stopRec();
+      setMicNote('O microfone não abriu. Escreve do seu jeito.');
+    };
+    rec.onend = () => setListening(false);
+    recRef.current = rec;
+    try {
+      rec.start();
+      setListening(true);
+      setMicNote(null);
+    } catch {
+      stopRec();
+      setMicNote('O microfone não abriu. Escreve do seu jeito.');
+    }
+  };
+
+  const step = talk ? talkStep(talk) : 'need-question';
+  const earlier = talk && sageNow
+    ? talk.turns.filter((t, i) => !(t.by === 'sabio' && t.text === sageNow && i === talk.turns.length - 1))
+    : [];
+  const qTestId = step === 'answer-2' ? 'livro-conversa-segunda' : 'livro-conversa-pergunta';
 
   const title = (
     <span className="flex items-center gap-2 min-w-0">
@@ -361,11 +687,15 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
               </p>
               {lastReply && (
                 <div className="mn-papiro-explain">
-                  <p className="mn-papiro-why">Seu pai leu o que você contou de "{lastReply.title}" e disse: {lastReply.parentReply}</p>
+                  <p className="mn-papiro-why">
+                    {replyAfterTalk
+                      ? `Seu pai leu a conversa e disse: ${lastReply.parentReply}`
+                      : `Seu pai leu o que você contou de "${lastReply.title}" e disse: ${lastReply.parentReply}`}
+                  </p>
                 </div>
               )}
             </Papiro>
-            <Shelf books={done} />
+            <Shelf books={done} pending={pendingIds} onTalk={openFromShelf} />
             <div className="mc-inv p-2 space-y-1">
               <p className="mc-lbl px-1">Para ler</p>
               {toRead.length === 0 && <p className="text-sm mc-muted px-1">Nenhum livro esperando. Peça para o pai pôr um na estante, ou proponha um.</p>}
@@ -516,29 +846,9 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
           </Papiro>
         )}
 
-        {phase === 'verify' && book && judge?.pergunta && (
-          <Papiro>
-            <SageHead kicker="Uma pergunta antes" />
-            <p className="mn-papiro-title" data-testid="livro-pergunta">{judge.pergunta}</p>
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Responde com o que você lembra."
-              rows={2}
-              className="mn-papiro-write"
-              data-testid="livro-resposta"
-            />
-            <div className="flex gap-2 mt-2">
-              <button type="button" className={`mc-btn min-h-[44px] px-6 font-bold ${answer.trim().length >= 2 && !busy ? 'mc-btn-green' : 'mc-btn-stone'}`} disabled={busy || answer.trim().length < 2} onClick={() => void sendAnswer()}>
-                Responder
-              </button>
-            </div>
-          </Papiro>
-        )}
-
         {phase === 'result' && book && result && (
           <Papiro>
-            <SageHead kicker={result.accepted ? 'Livro contado' : 'Ainda não'} />
+            <SageHead kicker={result.accepted ? 'Livro contado' : result.needsParent ? 'Para o seu pai' : 'Ainda não'} />
             <p className="mn-papiro-why mn-sabio-line" data-testid="livro-veredito">{result.say}</p>
             {result.accepted && result.gold > 0 && (
               <p className="mn-papiro-title flex items-center gap-2">
@@ -546,8 +856,17 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
                 +{result.gold} gold
               </p>
             )}
-            <div className="flex gap-2 mt-2">
-              {result.accepted ? (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {result.canTalk ? (
+                <>
+                  <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-6 font-bold" onClick={() => void openTalk(book, result.reportId, sourceText)}>
+                    Conversar
+                  </button>
+                  <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-6 font-bold" onClick={() => void skipTalk()}>
+                    Conversar depois
+                  </button>
+                </>
+              ) : result.accepted || result.needsParent ? (
                 <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-6 font-bold" onClick={backToShelf}>Ver a estante</button>
               ) : (
                 <>
@@ -556,6 +875,74 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
                 </>
               )}
             </div>
+          </Papiro>
+        )}
+
+        {phase === 'talk-wait' && (
+          <Papiro>
+            <SageHead kicker="O Sábio pensa" reading />
+            <p className="mn-papiro-why mn-sabio-line">{readingLineAt(readingMs)}</p>
+            <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-6 font-bold mt-2" onClick={() => void skipTalk()}>
+              Conversar depois
+            </button>
+          </Papiro>
+        )}
+
+        {phase === 'talk' && talk && (
+          <Papiro>
+            <SageHead kicker={step === 'answer-2' ? 'Mais uma' : 'Uma pergunta'} />
+            {earlier.length > 0 && (
+              <div className="mb-2" style={{ maxHeight: 72, overflow: 'auto' }}>
+                {earlier.map((t, i) => (
+                  <p key={`${t.by}-${i}`} className="text-sm" style={{ fontWeight: t.by === 'heitor' ? 500 : 700, margin: '0 0 4px' }}>
+                    {t.text}
+                  </p>
+                ))}
+              </div>
+            )}
+            {nudgeLine && <p className="mn-papiro-why mn-sabio-line">{nudgeLine}</p>}
+            <p className="mn-papiro-title mn-sabio-line" data-testid={qTestId}>{sageNow}</p>
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Com as suas palavras. Não sei também vale."
+              rows={2}
+              className="mn-papiro-write"
+              style={{ minHeight: 64 }}
+              data-testid="livro-conversa-resposta"
+            />
+            {micNote && <p className="mn-papiro-why">{micNote}</p>}
+            <div className="flex flex-wrap gap-2 mt-2">
+              <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-6 font-bold" disabled={busy} onClick={() => void submitTalk()}>
+                Responder
+              </button>
+              {canMic && (
+                <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-6 font-bold" onClick={toggleMic}>
+                  {listening ? 'Ouvindo' : 'Falar'}
+                </button>
+              )}
+              <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-6 font-bold" onClick={() => void skipTalk()}>
+                Conversar depois
+              </button>
+            </div>
+          </Papiro>
+        )}
+
+        {phase === 'talk-done' && talk?.closing && (
+          <Papiro>
+            <SageHead kicker="Para levar" />
+            <p className="mn-papiro-why mn-sabio-line" data-testid="livro-conversa-fecho">{doneSpeech}</p>
+            {xpJust > 0 && (
+              <p className="mn-papiro-title">+{xpJust} XP</p>
+            )}
+            {book?.parentReply && (
+              <div className="mn-papiro-explain">
+                <p className="mn-papiro-why">Seu pai leu a conversa e disse: {book.parentReply}</p>
+              </div>
+            )}
+            <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-6 font-bold mt-2" onClick={backToShelf}>
+              Ver a estante
+            </button>
           </Papiro>
         )}
       </div>
