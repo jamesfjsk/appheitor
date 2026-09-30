@@ -88,4 +88,18 @@ test('reflexão: 11 palavras, a de 26/09 e o piso de leitura', () => {
   expect(reflectionReady(real, about)).toBe(false);
 });
 
+test('retry: item de primeira não entra no "depois do aviso" (formato do mapeador, 30/09)', () => {
+  // learningService grava retryOk booleano em todo item; attempts 1 quando não houve segunda tentativa.
+  const rows = [
+    { date: '2026-09-29', skill: 'MAT.OP2', kind: 'knowledge', correct: true, attempts: 1, supportLevel: 0, retryOk: false },
+    { date: '2026-09-29', skill: 'CIE.CAUSA', kind: 'knowledge', correct: true, attempts: 1, supportLevel: 0, retryOk: false },
+    { date: '2026-09-29', skill: 'MAT.OP2', kind: 'knowledge', correct: false, attempts: 2, supportLevel: 1, retryOk: true },
+    { date: '2026-09-29', skill: 'ING.N1.BE', kind: 'knowledge', correct: false, attempts: 2, supportLevel: 3, retryOk: false },
+    { date: '2026-09-29', skill: 'HIS.FATO', kind: 'knowledge', correct: false, attempts: 1, supportLevel: 3, retryOk: false },
+  ];
+  const profile = buildProfile(rows, '2026-09-30');
+  expect(profile.retry.all).toEqual([1, 2]);
+  expect(profile.retry.d30).toEqual([1, 2]);
+});
+
 void run();

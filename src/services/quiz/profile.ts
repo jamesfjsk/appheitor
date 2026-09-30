@@ -117,7 +117,8 @@ export function buildProfile(items: ProfileItem[], today: string): LearningProfi
       });
     }
     if (skill.startsWith('ING.')) englishLastSkill = skill;
-    const hadSecond = (item.attempts ?? 0) >= 2 || typeof item.retryOk === 'boolean' || item.supportLevel === 1;
+    // retryOk vem booleano em todo item (learningService grava `=== true`): não serve para saber se houve 2ª tentativa.
+    const hadSecond = (item.attempts ?? 1) >= 2 || item.supportLevel === 1;
     if (retryable({ skill, kind }) && hadSecond) {
       const later = item.retryOk === true || item.supportLevel === 1;
       retry.all = [retry.all[0] + (later ? 1 : 0), retry.all[1] + 1];

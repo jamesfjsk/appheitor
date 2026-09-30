@@ -1209,3 +1209,80 @@ Foi commitado e publicado em 27/09, junto com o 14b, sem a revisão do líder. A
 - a foto do painel.
 
 **Nota de desenho:** no inglês, o `audioText` é a frase certa, então "Ouvir de novo" no aviso entregava a resposta. O `retryOk` de inglês ficaria perto de 100%. A correção 3 da P12 resolve isso.
+
+**29/09 — regras publicadas pelo líder, com o OK do pai.** `firestore.rules` e `storage.rules` do commit `b298536`, com `firebase deploy --only firestore:rules,storage`. As duas compilaram. O que entrou:
+- `assignments`, `assignmentBoards`, `assignmentRecurrences` e `careers`;
+- `talk` em `bookReports`;
+- `proofs/` no Storage.
+
+A base foi publicada no GitHub pelo pai no mesmo dia: a correção da meia-noite e a do "Aprovar" do livro estão no ar.
+
+## Três frentes — revisão de 30/09
+
+A barra rodou em cada pasta e no `main` juntado:
+- `tsc` com 0 erros;
+- `eslint` com 0 erros e os 8 avisos de sempre;
+- 45 + 15 arquivos de teste;
+- `vite build` e o build das functions.
+
+A junção no `main` (`6ed27ec`, `5cd3059`, `029f34b`) é idêntica à simulada pelo líder, sem conflito. Três revisores de código leram cada branch.
+
+### P15a — Encomendas: o pagamento está correto; juntar com correções
+
+- **`approveAssignment` segue o §9.**
+  - Todas as leituras vêm antes das escritas.
+  - A transação sai sem escrever se o status não é `submitted`.
+  - Confere `claimed` e se a linha `assignment_<id>` já existe.
+  - O saldo é gravado absoluto, com antes e depois.
+  - Material só por `increment`.
+  - Treino paga 0 gold, ignorando o documento.
+- **Não paga duas vezes** (clique duplo, dois aparelhos, rede caindo). O aparelho da criança não consegue pagar: a regra recusa `status → approved`.
+- As escritas da criança batem com as regras publicadas.
+- Nenhuma consulta precisa de índice novo.
+- As funções `openai` e `agendaReminders` ficaram intactas.
+- **Correções** (`PROMPT_CURSOR_2026-09-30_CORRECOES.md`, P15a-C):
+  - a Placa entope com avisos sem `until`;
+  - ajuste pedido depois do prazo mata a encomenda;
+  - o pai não retira encomenda antes da entrega;
+  - os testes de pagamento exercitam uma cópia (`settle.ts`), e não o código;
+  - as faixas usam 23 fixo em vez do R7;
+  - mais dez baixas, uma delas `ref.create()` na recorrência, **antes do deploy da função**.
+- A criança não é afetada enquanto o pai não criar uma encomenda: a aba mostra o quadro vazio.
+
+### P16 — a conversa do Sábio: juntar com correções
+
+- **O pagamento do livro ficou intocado:** `payBookReport`, `parentApproveReport`, `parentVoidReport` e `bookPayBlock`.
+- **Escrita da criança:** só `talk` e `updatedAt`, em relato aceito.
+- **XP da conversa:** 10 XP uma vez por relato (claim `booktalk:<id>`).
+- **As três perguntas grandes reais seguem a régua.** O fechamento falhou nas três:
+  - na Fábrica, foi a fala local;
+  - na Matilda, a pergunta para levar veio cortada no meio;
+  - no Pequeno Príncipe, ela não veio.
+
+  A causa é o parser, que zera a pergunta para caber em 45 palavras.
+- A pergunta da Matilda copiou a do banco §2, porque o prompt leva as perguntas do banco.
+- O validador deixa passar "Na competição, qual foi…".
+- O livro que vai ao pai na terceira entrega fica trancado: o pai só tem "Aprovar e pagar".
+- **Correções:** P16-C.
+
+### P12 — trava de geração e correções do 11: juntar; duas correções feitas pelo líder
+
+- **A trava nunca prende a prova de hoje:**
+  - a versão que roda e o `/version.json` vêm da mesma constante do build;
+  - a leitura fura o cache (`?t=`, `no-store`, e o `vercel.json` também manda `no-store`);
+  - no dev, o `version.json` volta vazio e só a conta de teste gera;
+  - a prova que já existe volta antes da trava.
+- **Todos os pontos de geração passam pela trava:** prova, pré-gerar de amanhã, plano, regenerar e `generateUpcomingDays`.
+- **As 11 correções do 11 estão certas,** menos o `retry` do perfil. O pagamento não mudou.
+- **Corrigido pelo líder em 30/09, no `main`:**
+  1. **`retry` contava todo item.** O mapeador de `learningService` grava `retryOk` booleano em todos, e isso era uma regressão. Agora `hadSecond = attempts >= 2 || supportLevel === 1`, com teste no formato do mapeador.
+  2. **`readPublishedVersion` sem tempo limite** podia deixar "O Sábio ainda escreve" sem fim numa rede pendurada. Agora `AbortSignal.timeout(4000)` devolve vazio, e vazio gera.
+- **Vai para a P12-C:**
+  - a recusa silenciosa na aba velha: pedir o recarregamento na hora e mostrar a mesa com o motivo;
+  - `localhost` com build de produção tratado como dev;
+  - a frase do painel;
+  - `d7` e `d30` com um dia a mais;
+  - o `wordCount` global, que também mudou a contagem do validador;
+  - as frases reais nos testes;
+  - `playText` "tocou" quando só não falhou.
+- **Ao publicar:** a trava só protege a aba que já roda o P12. O PC do Heitor recarrega sozinho quando ele voltar à aba; se ficar aberto sem uso até a noite, um Ctrl+F5 antes da meia-noite garante.
