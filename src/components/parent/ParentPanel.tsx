@@ -31,11 +31,12 @@ import HojeCard from './HojeCard';
 import WeeklyReport from './WeeklyReport';
 import CharactersPanel from './CharactersPanel';
 import EncomendasPanel from './EncomendasPanel';
+import CareerPanel, { CareerSync } from './CareerPanel';
 
 type TabType =
   | 'dashboard' | 'village' | 'tasks' | 'rewards' | 'reminders' | 'surprise' | 'quiz'
   | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system'
-  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books' | 'encomendas';
+  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books' | 'encomendas' | 'career';
 
 const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; label: string; icon: string }> }> = [
   {
@@ -55,6 +56,7 @@ const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; labe
       { id: 'rewards', label: 'Prêmios', icon: 'gift' },
       { id: 'tasks', label: 'Missões', icon: 'notes' },
       { id: 'encomendas', label: 'Encomendas', icon: 'notes' },
+      { id: 'career', label: 'Carreira', icon: 'trophy' },
       { id: 'surprise', label: 'Missão surpresa', icon: 'target' },
       { id: 'agenda', label: 'Agenda', icon: 'notes' },
     ],
@@ -94,6 +96,7 @@ const ParentPanel: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <ReadyBoot />
+      <CareerSync />
       <div className="max-w-7xl mx-auto px-4 py-6">
         <ParentHeader />
         <div className="mt-8 mb-6 space-y-4">
@@ -137,6 +140,7 @@ const ParentPanel: React.FC = () => {
           {activeTab === 'agenda' && <AgendaManager />}
           {activeTab === 'tasks' && <TaskManager tasks={tasks} />}
           {activeTab === 'encomendas' && <EncomendasPanel />}
+          {activeTab === 'career' && <CareerPanel />}
           {activeTab === 'rewards' && <RewardManager />}
           {activeTab === 'reminders' && <PlacaManager />}
           {activeTab === 'surprise' && <SurpriseMissionConfigComponent />}

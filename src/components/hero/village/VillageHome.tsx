@@ -37,6 +37,9 @@ import Oficina from './Oficina';
 import Mercado from './Mercado';
 import EnglishBase from '../english/base/EnglishBase';
 import Torre from './Torre';
+import Laboratorio from './Laboratorio';
+import { subscribeCareer, type CareerState } from '../../../services/careerService';
+import { labLevelOf } from '../../../services/village/career';
 import EstanteDoSabio from './EstanteDoSabio';
 import Cofrinho from './Cofrinho';
 import Agenda from './Agenda';
@@ -104,7 +107,7 @@ function shopBlocksDest(id: string): boolean {
   return id === 'market' || id === 'chest' || id === 'pack' || id === 'chest_streak';
 }
 
-type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | 'books' | null;
+type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | 'books' | 'lab' | null;
 
 interface Props {
   selectedPeriod: Period;
@@ -149,6 +152,12 @@ const VillageHome: React.FC<Props> = ({
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [agendaFlash, setAgendaFlash] = useState<string | null>(null);
   const { childUid } = useAuth();
+  const [career, setCareer] = useState<CareerState | null>(null);
+
+  useEffect(() => {
+    if (!childUid) return;
+    return subscribeCareer(childUid, setCareer);
+  }, [childUid]);
 
   useEffect(() => {
     setMusicDuck('mine', district === 'mine');
@@ -485,12 +494,13 @@ const VillageHome: React.FC<Props> = ({
       return;
     }
     if (id === 'reserva') {
+      if (career) { setDistrict('lab'); return; }
       toast('Esse lote espera outra obra.');
       return;
     }
     // broken() deriva de village.cracks, já na lista
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildings, hour, lockedShop, onOpenQuiz, playClick, quizGate, village.cracks, village.npcs, village.fullDays, village.claimed, today, childUid, due, done, minerLevel, pauseDays.dates, now.weekday, yesterdayCtx, quizLocked, nightClosed, liveBau]); // broken() usa village.cracks
+  }, [buildings, hour, lockedShop, onOpenQuiz, playClick, quizGate, village.cracks, village.npcs, village.fullDays, village.claimed, today, childUid, due, done, minerLevel, pauseDays.dates, now.weekday, yesterdayCtx, quizLocked, nightClosed, liveBau, career]); // broken() usa village.cracks
 
   useEffect(() => {
     if (!buildFx) return;
@@ -694,6 +704,7 @@ const VillageHome: React.FC<Props> = ({
           date={today}
           event={sceneEvent}
           chestLook={chestLook}
+          labLevel={career ? labLevelOf(career.rank) : 0}
         />
         {speech && (
           <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-3 mn-speech-next" onClick={dismissSpeech}>Continuar</button>
@@ -898,6 +909,7 @@ const VillageHome: React.FC<Props> = ({
         />
       )}
       {district === 'tower' && <Torre onClose={() => setDistrict(null)} />}
+      {district === 'lab' && <Laboratorio onClose={() => setDistrict(null)} />}
       {district === 'books' && <EstanteDoSabio onClose={() => setDistrict(null)} quizLocked={quizLocked} />}
     </div>
   );
