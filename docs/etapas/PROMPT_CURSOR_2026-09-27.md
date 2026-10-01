@@ -57,6 +57,8 @@ Faça o §16 "15a" do desenho, nesta ordem:
 
 ## Pacote 15b — Engenheiro da Vila
 
+**O núcleo foi feito pelo líder em 01/10** (ver `REVISAO_ETAPA_2_LANCAMENTO.md`, "15b núcleo"). Não refaça. O que sobra vira o 15b-2: as conquistas da Torre, a metacognição, a cerimônia de obra animada e o `hintsUsed`.
+
 Faça o §16 "15b" do desenho, nesta ordem:
 
 1. **Carreira:**

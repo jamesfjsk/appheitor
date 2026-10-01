@@ -1356,3 +1356,48 @@ Os sete itens estão feitos e testados. A barra passou depois da junção.
 - `requestVersionReload` não tinha trava contra laço: se o recarregamento não trouxesse a versão nova, recarregaria sem parar.
   - Agora recarrega uma vez por versão na aba (`mm_version_reload` no `sessionStorage`).
   - Depois disso, a mesa mostra "Recarregar agora".
+
+## 15b núcleo — feito pelo líder em 01/10 (pedido do pai: "vamos fazer funcionar hoje")
+
+O kit chegou, e o pai pediu o Laboratório no mesmo dia. O líder fez o núcleo do 15b na pasta `appheitor-p15b` e juntou no `main`, sem esperar a P15a-C.
+
+**Entrou:**
+- Os 14 treinos e o marco, gerados de `ENGENHEIRO_TREINOS.md` sem reescrever o texto, em `src/config/engenheiroTreinos.ts`. A carreira está em `src/config/careers.ts`.
+- Os puros de `src/services/village/career.ts`: treinos liberados, competência em três estados com ajuste do pai, título que nunca desce e nível da obra. São 5 testes.
+- A tela da criança, `Laboratorio.tsx`:
+  - os treinos, com "Abre depois do treino N";
+  - os passos e "Abrir o MakeCode";
+  - "Funciona quando";
+  - as pistas uma de cada vez;
+  - "Não funcionou?" com o Método do Engenheiro, depois do treino 7;
+  - "Mostrar ao pai", que entrega o treino;
+  - as competências e o próximo título;
+  - a faixa de promoção.
+- O Laboratório no lote `reserva`, com nível igual ao título. Só aparece com a carreira começada.
+- O painel ganhou a aba "Carreira":
+  - "Começar a carreira Engenheiro da Vila";
+  - a lista dos treinos;
+  - "Já fez fora do app";
+  - as competências editáveis;
+  - o aviso do marco 15.
+- O `CareerSync` fica montado no painel. Depois de cada aprovação (aba Encomendas, Conferir), ele recalcula a carreira e abre o treino seguinte.
+- O treino paga XP e 1 redstone pela tabela `CAREER_REWARDS`, nunca gold. É uma linha no `approveAssignment`.
+- Os treinos não aparecem no Quadro da Casa, porque moram no Laboratório.
+
+**Desvio do desenho, de propósito:** o §11.5 pedia que a transação de aprovação atualizasse a carreira. Aqui, quem atualiza é o `CareerSync`, no painel, logo depois da aprovação. O progresso sai das entregas aprovadas, e assim a transação que a P15a-C está refatorando ficou intocada, exceto pela linha da recompensa.
+- **Na junção da P15a-C:** conferir que o `approvalPlan` novo passa o `CAREER_REWARDS` ao `assignmentReward`.
+
+**Testado na conta de teste**, com o Chrome automático em 1280×720 e 1920×1080:
+- a Vila mostra o Laboratório, com "Laboratório" no hover;
+- a tela abre;
+- o treino 1 mostra as pistas;
+- "Mostrar ao pai" grava `submitted` no Firestore.
+
+As fotos estão em `docs/exemplos/telas/etapa-3/p15b/`. Os lados do pai (aprovar, "Já fez fora do app" e começar a carreira) pedem o login de admin e ficam para o pai conferir.
+
+**Fica para o 15b-2:**
+- as 8 conquistas da Torre;
+- a metacognição dos projetos;
+- a cerimônia de obra animada;
+- `hintsUsed` para o pai;
+- o rótulo "Treino" em vez de "0 gold" no Conferir.
