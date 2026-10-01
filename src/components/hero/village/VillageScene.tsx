@@ -784,10 +784,12 @@ interface Props {
   date?: string;
   event?: VillageSceneEvent | null;
   chestLook?: ChestMapLook;
+  /** Carreira começada: o Laboratório ocupa o lote reserva, com o nível do título (1 a 4). 0 = lote vazio. */
+  labLevel?: number;
 }
 
 const VillageScene: React.FC<Props> = ({
-  village, buildings, hour, gated, reducedMotion, speech, onClickSpot, onDismissSpeech, frozen = false, houseSmoke = false, buildFx = null, repairFx = null, className = '', date, event = null, chestLook = 'wait',
+  village, buildings, hour, gated, reducedMotion, speech, onClickSpot, onDismissSpeech, frozen = false, houseSmoke = false, buildFx = null, repairFx = null, className = '', date, event = null, chestLook = 'wait', labLevel = 0,
 }) => {
   const ref = useRef<HTMLCanvasElement>(null);
   const spots = useRef<Hotspot[]>([]);
@@ -1144,7 +1146,26 @@ const VillageScene: React.FC<Props> = ({
         const chestSrc = daily
           ? (chestLook === 'open' ? CHEST_DAILY_OPEN : CHEST_DAILY)
           : box.sprite;
-        const label = daily ? 'Baú do Dia' : (box.label || (id === 'mine' ? 'Mina' : id));
+        const lab = id === 'reserva' && labLevel > 0;
+        const label = daily ? 'Baú do Dia' : lab ? 'Laboratório' : (box.label || (id === 'mine' ? 'Mina' : id));
+        if (lab) {
+          const labSprite = img(`/assets/village/buildings/laboratorio-${Math.min(4, Math.max(1, labLevel))}.png`, bump);
+          const { destW, destH, dx, dy } = spriteBox({ ...box, id: 'mercado' }, false);
+          layers.push({
+            id,
+            y: box.y + box.h,
+            hit: {
+              id, x: dx, y: dy, w: destW, h: destH, label: gateName(id, gated, label),
+              sprite: labSprite || undefined, pixel: Boolean(labSprite), hover: 'building', door: box.door,
+            },
+            draw: (c) => {
+              if (!labSprite) return;
+              const pulse = pulseOf(id);
+              c.drawImage(labSprite, dx + pulse.shakeX, dy, destW, destH);
+            },
+          });
+          return;
+        }
         const spotSprite = chestSrc ? img(chestSrc, bump) : null;
         const bob = daily && chestLook === 'ready' ? chestLidBob(elapsed, reducedMotion) : 0;
         const hit: Hotspot = {
@@ -1717,7 +1738,7 @@ const VillageScene: React.FC<Props> = ({
       document.removeEventListener('visibilitychange', onVis);
       io.disconnect();
     };
-  }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick, houseSmoke, buildFx, repairFx, event, date, chestLook]);
+  }, [village, buildings, hour, gated, reducedMotion, anchors, speech, tick, houseSmoke, buildFx, repairFx, event, date, chestLook, labLevel]);
 
   const sceneXY = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = ref.current;

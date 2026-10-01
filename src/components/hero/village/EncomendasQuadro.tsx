@@ -103,7 +103,7 @@ const EncomendasQuadro: React.FC = () => {
   const projectCount = active.filter((row) => isProjectSize(row.size)).length;
 
   const board = useMemo(
-    () => rows.filter((row) => visible(row, today)).sort((a, b) => (RANK[effectiveStatus(a, today)] ?? 9) - (RANK[effectiveStatus(b, today)] ?? 9)),
+    () => rows.filter((row) => row.kind !== 'training' && visible(row, today)).sort((a, b) => (RANK[effectiveStatus(a, today)] ?? 9) - (RANK[effectiveStatus(b, today)] ?? 9)),
     [rows, today],
   );
 

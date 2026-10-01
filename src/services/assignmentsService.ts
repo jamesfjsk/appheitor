@@ -41,6 +41,7 @@ import { claimKey } from './village/claims';
 import { addDays, getTodayBrazil } from '../utils/clock';
 import { isProjectSize, nextStatus, proofReady, type StatusReason } from './assignments/machine';
 import { assignmentReward } from './assignments/rewards';
+import { CAREER_REWARDS } from '../config/careers';
 import { instanceDraft } from './assignments/recurrence';
 import {
   limitLine,
@@ -734,7 +735,7 @@ export async function approveAssignment(uid: string, id: string, review: Approva
           xp: Math.max(0, Math.round(Number(asRecord(data.reward)?.xp) || 0)),
           materials: cleanMaterials(asRecord(data.reward)?.materials as Partial<Record<Material, number>> | undefined),
         },
-      });
+      }, CAREER_REWARDS);
       const goldBefore = Math.max(0, Math.round(Number(pSnap.data()?.availableGold) || 0));
       const goldAfter = goldBefore + pay.gold;
       const prev = Array.isArray(data.reviews) ? data.reviews : [];
