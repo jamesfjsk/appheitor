@@ -1334,6 +1334,38 @@
         "seed": 44,
         "negative_description": "text, watermark, scary, blood"
       }
+    },
+    {
+      "file": "buildings/laboratorio-1.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "small wooden tinkerer workshop hut on grass, a round window glowing green like a screen, a thin antenna with a red light on the roof, a workbench by the door with a green circuit board, colored wires and a small toolbox, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/laboratorio-2.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "medium stone and wood workshop with a big glass window showing glowing green circuit boards, a small antenna on the roof, a workbench with wires and colored lights by the door, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/laboratorio-3.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "large two floor stone workshop laboratory, a roof antenna with a blinking red light, a gear sign over the door, windows glowing with green circuit panels, copper pipes on the wall, cute game building sprite"
+      }
+    },
+    {
+      "file": "buildings/laboratorio-4.png",
+      "kind": "building",
+      "endpoint": "generate-image-pixflux",
+      "body": {
+        "description": "grand stone and copper inventor laboratory tower, a big gear on the wall, a tall antenna with small sparks, a little wheeled rover machine parked by the door, windows glowing with green circuit panels, cute game building sprite"
+      }
     }
   ]
 }

@@ -180,7 +180,7 @@ Duas encomendas normais somam no máximo 14 gold: ninguém compra em duas tardes
 - **Quando aparece.** Só depois que o pai aperta "Começar a carreira Engenheiro da Vila" no painel, quando o kit estiver com o Heitor. Antes disso, o lote segue vazio.
 - **Nível da obra é o título da carreira:** n1 Aprendiz, n2 Técnico, n3 Engenheiro, n4 Inventor.
   - A obra não se compra com material: cresce quando ele é promovido, com a cerimônia de obra que já existe.
-  - Arte: `buildings/laboratorio-1..4.png`, do líder, conferida numa prancha antes de entrar. Só a n1 é necessária para o 15b.
+  - Arte: `buildings/laboratorio-1..4.png`, do líder. **Pronta em 01/10**, conferida na prancha `docs/arte/prancha-laboratorio.png`: n1 é a cabana de madeira com janela verde de tela, antena e bancada com placa; n2 é de pedra com janela de circuitos; n3 tem dois andares e engrenagem; n4 é a torre com engrenagem de cobre e um carrinho robô. Só a n1 é necessária para o 15b.
 - **O que abre ao tocar:** a tela da carreira (§11.6), com os treinos, os projetos e as ferramentas.
 - **Encomendas de engenharia** aparecem no Quadro da Casa, como todas as outras, e também numa lista "Projetos" dentro do Laboratório.
 

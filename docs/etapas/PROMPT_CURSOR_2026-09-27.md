@@ -10,7 +10,7 @@ Você é o Cursor do Miner Missions. Antes de qualquer linha, leia:
 
 **Conteúdo:** copie sem reescrever.
 - Os modelos de encomenda estão em `docs/conteudo/ENCOMENDAS_MODELOS.md`, e os treinos em `docs/conteudo/ENGENHEIRO_TREINOS.md`. Os dois passam pela amostra do pai antes.
-- A arte do Laboratório é do líder. O 15b só entra depois de ela estar em `public/assets/village/buildings/laboratorio-1.png`.
+- A arte do Laboratório está pronta desde 01/10: `public/assets/village/buildings/laboratorio-1.png` a `-4.png`, conferida em `docs/arte/prancha-laboratorio.png`.
 
 **Método:**
 - Barra: `npx tsc --noEmit -p tsconfig.app.json` com 0 erros; `npx eslint src --max-warnings 8` com 0 erros; `npm run test:english` e `npm run test:village` verdes; `npx vite build`.
