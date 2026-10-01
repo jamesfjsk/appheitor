@@ -249,6 +249,10 @@ export interface BaseDoc {
   noteStreak3: number;
   /** Lemas vistos (glossário lido, itens do Comerciante, substantivos do Recado) */
   vocab: Record<string, { seen: number; lastDate: string }>;
+  /** C1–C3 da Carta. Sem o campo, começa na C1. */
+  letterLevel?: 1 | 2 | 3;
+  letterPerfectStreak?: number;
+  letterWeakStreak?: number;
   contractsDone: number;
   /** Entregas do Comerciante concluídas (sobe o nível da Mina pelo desempenho) */
   merchantDone: number;

@@ -39,6 +39,10 @@ export interface MerchantPromptInput extends PromptInputBase {
 
 export interface LetterPromptInput extends PromptInputBase {
   genre: LetterGenre;
+  /** C1 usa o prompt curto. Sem isto, vale o nível do cartão. */
+  letterTier?: 1 | 2 | 3;
+  /** Padrão da unidade. O passo 2 preenche, quando o banco estiver aprovado. */
+  unitPattern?: string;
 }
 
 export type NotePromptInput = PromptInputBase;
@@ -300,6 +304,8 @@ function letterPrompt(input: LetterPromptInput): BuiltPrompt {
   const user = [
     commonUser(input),
     `Genre: ${input.genre} = ${LETTER_GENRE_HINTS[input.genre]}. Use a new sender name.`,
+    `Story motive: every sentence serves ONE motive. Pick from: a request for help, an invitation, a danger warning, lost and found, the way to a place, news of a game, a list for a task with the reason, or a thank-you. No loose fact. No adjective that does not belong (not "brave cat").`,
+    input.unitPattern ? `Use this sentence pattern at least twice: ${input.unitPattern}` : '',
     `Length of "text": ${minW}-${maxW} words. Aim for about ${targetWords} words (around ${targetSentences} short sentences) and count them: a text under ${minW} words is rejected.`,
     `Glossary: the NEW words of the text. ${gMin}-${gMax} entries; each "en" is a word that appears in the text and is NOT in the known vocabulary (a known word is never a glossary entry), written exactly as it appears in the text (if the text says "tools", write "tools", not "tool"); "pt" is the Portuguese meaning.`,
     `New words: on purpose, put ${gMin + 1}-${gMax} theme words the learner has NOT seen into the text (football: goalkeeper, whistle, net, referee, boots; mine: pickaxe, lantern, rope, tunnel, ladder; adjectives: lazy, brave, heavy) and list exactly those in the glossary. Entries that are known or absent are dropped, and fewer than 4 left rejects the whole text. Known words that can NOT be glossary entries: ${knownInline}.`,
@@ -396,6 +402,27 @@ function forgePrompt(input: ForgePromptInput): BuiltPrompt {
   return { system, user, maxTokens: PROMPT_MAX_TOKENS.forge };
 }
 
+function letterPromptC1(input: LetterPromptInput): BuiltPrompt {
+  const lv = levelFor(1);
+  const motive = input.unitPattern
+    ? `Also use this pattern at least twice: ${input.unitPattern}`
+    : 'Do not invent a grammar unit. One motive is enough.';
+  const system = commonSystem(lv, 'You write a very short story for a 10-year-old Brazilian beginner.');
+  const user = [
+    commonUser(input),
+    `Genre: ${input.genre}. Sender is a new name.`,
+    'Motive: one of these, and every sentence serves it: request for help, invitation, danger warning, lost and found, the way to a place, news of a game, a list for a task with the reason, or a thank-you.',
+    motive,
+    'Length of "text": 30 to 50 words. Simple present. No past tense.',
+    'Questions: 2 questions in Brazilian Portuguese. No English question words (what, where, who, why, how, is, are, do, can).',
+    'Each question has 3 options in Brazilian Portuguese, one correct. "answer" is the index 0-2. "evidence" is one sentence copied from the text. "explanation" is one line in Portuguese saying why the tempting option is wrong.',
+    'Glossary: 3 to 5 new words that appear in the text.',
+    'Schema:',
+    '{ "genre": "letter", "title": "...", "sender": "...", "text": "...", "glossary": [{ "en": "bag", "pt": "mochila" }], "questions": [{ "kind": "comprehension", "question": "Onde está a mochila?", "options": ["embaixo da cadeira", "na mesa", "na cama"], "answer": 0, "evidence": "My bag is under the chair.", "explanation": "..." }], "translation": "..." }',
+  ].join('\n\n');
+  return { system, user, maxTokens: PROMPT_MAX_TOKENS.letter };
+}
+
 export function buildPrompt(type: 'merchant', input: MerchantPromptInput): BuiltPrompt;
 export function buildPrompt(type: 'letter', input: LetterPromptInput): BuiltPrompt;
 export function buildPrompt(type: 'note', input: NotePromptInput): BuiltPrompt;
@@ -406,7 +433,9 @@ export function buildPrompt(type: ContractType, input: AnyPromptInput): BuiltPro
     case 'merchant':
       return merchantPrompt(input as MerchantPromptInput);
     case 'letter':
-      return letterPrompt(input as LetterPromptInput);
+      return (input as LetterPromptInput).letterTier === 1
+        ? letterPromptC1(input as LetterPromptInput)
+        : letterPrompt(input as LetterPromptInput);
     case 'note':
       return notePrompt(input as NotePromptInput);
     case 'forge':

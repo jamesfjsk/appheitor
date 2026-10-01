@@ -30,6 +30,8 @@ import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
 import { validateForge, validateLetter, validateMerchant, validateNote, type MerchantValidation, type ValidationResult } from './english/validators';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
+import { letterAfterReviews, letterLevelOf, parseLetterReview, c1QuestionOk, type LetterReview } from './english/letterLevel';
+import { pickC1Letter } from '../data/englishC1Letters';
 import { currentUsageMonth, getUsage, isOverCap } from './aiUsage';
 import { addDays } from './dailyQuizService';
 import { generationBlock, guardHost, refuseMessage } from './generationGuard';
@@ -73,6 +75,8 @@ export interface GenerateInput {
   genre?: LetterGenre;
   /** Reserva: chaves (offlineKey) dos contratos recentes, para não repetir */
   avoidOffline?: string[];
+  /** Nível próprio da Carta. Sem isto, a geração trata como C1. */
+  letterTier?: 1 | 2 | 3;
   merchantDone?: number;
   avoidMerchantSteps?: string[];
 }
@@ -369,7 +373,143 @@ async function generateMerchant(input: GenerateInput): Promise<Generated<Merchan
   return { content: best.content, source: allReplaced ? 'offline' : 'ai', problems: best.problems };
 }
 
+function c1FromBank(seed: number): LetterContent {
+  const letter = pickC1Letter(seed);
+  return {
+    genre: 'letter',
+    title: letter.title,
+    sender: letter.sender,
+    text: letter.text,
+    glossary: letter.glossary,
+    questions: letter.questions.map((q) => ({
+      kind: 'comprehension' as const,
+      question: q.question,
+      options: [...q.options],
+      answer: q.answer,
+      evidence: q.evidence,
+      explanation: q.explanation,
+    })),
+    translation: letter.translation,
+  };
+}
+
+function c1FromRaw(raw: unknown): LetterContent | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const row = raw as Record<string, unknown>;
+  const text = typeof row.text === 'string' ? row.text.trim() : '';
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length < 30 || words.length > 50) return null;
+  if (!Array.isArray(row.questions)) return null;
+  const questions: LetterContent['questions'] = [];
+  for (const item of row.questions.slice(0, 2)) {
+    if (!item || typeof item !== 'object') return null;
+    const q = item as Record<string, unknown>;
+    const question = typeof q.question === 'string' ? q.question.trim() : '';
+    if (!c1QuestionOk(question)) return null;
+    const options = Array.isArray(q.options) ? q.options.filter((o): o is string => typeof o === 'string' && o.trim().length > 0) : [];
+    if (options.length !== 3) return null;
+    if (q.answer !== 0 && q.answer !== 1 && q.answer !== 2) return null;
+    const evidence = typeof q.evidence === 'string' ? q.evidence : '';
+    if (!evidence || !text.includes(evidence)) return null;
+    questions.push({
+      kind: 'comprehension',
+      question,
+      options,
+      answer: q.answer,
+      evidence,
+      explanation: typeof q.explanation === 'string' ? q.explanation : '',
+    });
+  }
+  if (questions.length < 2) return null;
+  const glossary = Array.isArray(row.glossary)
+    ? row.glossary.flatMap((g) => {
+      if (!g || typeof g !== 'object') return [];
+      const rowg = g as { en?: unknown; pt?: unknown };
+      if (typeof rowg.en !== 'string' || typeof rowg.pt !== 'string') return [];
+      return [{ en: rowg.en, pt: rowg.pt }];
+    }).slice(0, 5)
+    : [];
+  if (glossary.length < 3) return null;
+  return {
+    genre: 'letter',
+    title: typeof row.title === 'string' && row.title ? row.title : 'Carta',
+    sender: typeof row.sender === 'string' && row.sender ? row.sender : 'Friend',
+    text,
+    glossary,
+    questions,
+    translation: typeof row.translation === 'string' ? row.translation : '',
+  };
+}
+
+async function reviewLetter(content: LetterContent): Promise<LetterReview | null> {
+  if (!isAIConfigured()) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CONTRACT_TIMEOUT_MS);
+  try {
+    const { json } = await callOpenAI(
+      'You review a short English story for a 10-year-old. Reply with ONE JSON object only.',
+      [
+        `Text:\n${content.text}`,
+        `Questions:\n${content.questions.map((q) => `${q.question} | ${q.options.join(' / ')}`).join('\n')}`,
+        'Schema: { "coherence": 4, "oneAnswer": true, "oneSentence": true, "withoutReading": false }',
+        'coherence is 1 to 5 and passes at 4. oneAnswer is true only when each question has one right option. oneSentence is true only when the proof is a single sentence of the text. withoutReading is true when the child can answer without the story.',
+      ].join('\n\n'),
+      300,
+      { model: 'gpt-4o', temperature: 0, withUsage: true, signal: controller.signal },
+    );
+    return parseLetterReview(json);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function generateC1Letter(input: GenerateInput): Promise<Generated<LetterContent>> {
+  const bank = (): Generated<LetterContent> => ({
+    content: c1FromBank(input.seed),
+    source: 'offline',
+    problems: ['revisor reprovou ou a carta não coube no C1; banco'],
+  });
+  if (!isAIConfigured()) return bank();
+  let first: LetterContent | null = null;
+  let firstReview: LetterReview | null = null;
+  let second: LetterContent | null = null;
+  let secondReview: LetterReview | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const prompt = buildPrompt('letter', {
+        level: 1,
+        theme: themeOf(input),
+        vocabKnown: input.vocabKnown,
+        avoidNames: input.avoidNames,
+        seed: input.seed + attempt,
+        genre: input.genre ?? 'letter',
+        letterTier: 1,
+        retryProblems: attempt ? ['The previous story failed the review. Write a new one.'] : undefined,
+      });
+      const content = c1FromRaw(await ask(prompt));
+      const review = content ? await reviewLetter(content) : null;
+      if (attempt === 0) {
+        first = content;
+        firstReview = review;
+        if (letterAfterReviews(review, null) === 'first') break;
+      } else {
+        second = content;
+        secondReview = review;
+      }
+    } catch {
+      /* tenta de novo, ou cai no banco */
+    }
+  }
+  const pick = letterAfterReviews(firstReview, secondReview);
+  if (pick === 'first' && first) return { content: first, source: 'ai', problems: [] };
+  if (pick === 'second' && second) return { content: second, source: 'ai', problems: [] };
+  return bank();
+}
+
 async function generateLetter(input: GenerateInput): Promise<Generated<LetterContent>> {
+  if ((input.letterTier ?? 1) === 1) return generateC1Letter(input);
   const lv = levelFor(input.level);
   const genre = input.genre ?? pickOne(createRng(mixSeed(input.seed, 'genre')), LETTER_GENRES);
   let problems: string[] = [];
@@ -492,6 +632,7 @@ export interface DayContext {
   avoidOffline: string[];
   merchantDone: number;
   avoidMerchantSteps: string[];
+  letterTier: 1 | 2 | 3;
   /** Sempre null. O pedido da Mesa saiu; o campo fica para os documentos antigos. */
   themeRequest: string | null;
 }
@@ -600,6 +741,7 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
   ];
   return {
     level: lv.level,
+    letterTier: letterLevelOf(ctx.base, lv.level),
     daySeed,
     specs,
     vocabKnown,
@@ -660,6 +802,7 @@ function inputFor(day: DayContext, spec: DaySpec, date: string, seed: number, ex
     avoidNames: day.avoidNames,
     themeRequest: day.themeRequest,
     genre: spec.genre,
+    letterTier: day.letterTier,
     avoidOffline: day.avoidOffline,
     merchantDone: day.merchantDone,
     avoidMerchantSteps: day.avoidMerchantSteps,
