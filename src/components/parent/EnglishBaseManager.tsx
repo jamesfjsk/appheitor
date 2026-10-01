@@ -492,7 +492,8 @@ const LevelCard = ({ current, selected, saving, disabled, onSelect, onSave }: Le
     <div className="bg-white rounded-2xl border border-gray-200 p-6">
       <h3 className="mb-1 text-lg font-bold text-gray-900">Nível do conteúdo</h3>
       <p className="mb-4 text-sm text-gray-500">
-        Define a gramática e o tamanho dos textos que a IA pode usar. Ele não vê este número: a Vila mostra o nível de cada obra.
+        Define a gramática e o tamanho dos textos que a IA pode usar. Só muda aqui: a Mina não sobe de nível sozinha. Ele não vê este
+        número: a Vila mostra o nível de cada obra.
       </p>
       <div className="mb-4 flex gap-2">
         {([1, 2, 3] as LevelNumber[]).map((n) => (

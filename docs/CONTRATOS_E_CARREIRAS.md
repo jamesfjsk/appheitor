@@ -536,7 +536,7 @@ Treinos            Projetos            Ferramentas
 
 ### 11.7 Segurança da carreira
 
-- **Só baixa tensão:** micro:bit por USB ou pilhas AA (3 V), componentes de 3,3 V, LEDs com resistor e o que vier no kit ELECFREAKS.
+- **Só baixa tensão:** micro:bit por USB ou pilhas AAA (3 V), componentes de 3,3 V, LEDs com resistor e o que vem no kit da Casa da Robótica (CE02, chegou em 01/10).
 - **Proibido em qualquer conteúdo, treino ou modelo de encomenda:**
   - tomada, 127 ou 220 V, rede elétrica da casa;
   - fonte aberta, capacitor grande;

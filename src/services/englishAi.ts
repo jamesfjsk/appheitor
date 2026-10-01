@@ -24,7 +24,7 @@ import type {
 import { CONTRACT_MATERIAL, MERCHANT_CATALOGS } from '../config/englishBase';
 import { FORGE_TAG_TARGETS, LETTER_GENRES, levelFor } from '../config/englishLevels';
 import { forgeItemMixFor, forgeTargetFor, lastForgeScore, yesterdayMistakes } from './english/prompts';
-import { buildMerchantRoom, merchantKey, merchantLevelFromSkill, merchantStepKey, offlineSentences } from './english/merchantRoom';
+import { buildMerchantRoom, merchantKey, merchantStepKey, offlineSentences } from './english/merchantRoom';
 import { normalize } from './english/notePrecheck';
 import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
@@ -538,8 +538,8 @@ function letterContextOf(contract: Contract | null): { names: string[]; items: s
 
 /** Escolhas do dia: temas, gênero da Carta, alvo da Ferraria, 5º contrato, vocabulário e nomes a evitar */
 export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' | 'base' | 'recentPlans'>): DayContext {
-  const playLevel = Math.max(ctx.level, merchantLevelFromSkill(ctx.base.merchantDone, ctx.base.merchantPerfect));
-  const lv = levelFor(playLevel);
+  // Só o nível do painel. O do Comerciante levava todos os contratos ao nível 3 (30/09).
+  const lv = levelFor(ctx.level);
   const daySeed = seedFromString(`${ctx.uid}|${ctx.date}`);
   const rng = createRng(mixSeed(daySeed, 'day'));
   const recent = ctx.recentPlans.filter((p) => p.date < ctx.date).sort((a, b) => b.date.localeCompare(a.date));

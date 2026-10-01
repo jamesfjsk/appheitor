@@ -82,6 +82,8 @@ Hoje: grade de cartões cinza "RECADO / COMERCIANTE / CARTA / FERRARIA" com "Abr
 
 ## 4. Conteúdo: o que muda por dia e por nível
 
+**Substituído pelo §9 em 30/09/2026.** Fica o registro do que foi pedido antes.
+
 - **Temas**: os 24 por nível de `englishLevels.ts` (a escrever) rodam sem repetir em 30 dias; o tema do dia aparece na entrada ("Hoje: a fazenda").
 - **Dificuldade** por desempenho no tipo, no molde da Vagoneta — não por calendário e não pelo slider do pai. No Comerciante: 3 entregas com todos os pedidos de primeira sobem para o nível 2 (3 pedidos, entram under/next to); 7 entregas e 5 perfeitas sobem para o 3 (4 pedidos, sala maior). Nunca desce no meio do dia. O plano de amanhã é regenerado quando o nível sobe. Pedido já feito (item + preposição + lugar) não volta; quantidade e itens da bandeja mudam a cada dia.
 - **Vocabulário**: cada contrato usa 60% de palavras já vistas (`vocab`) e 40% novas; a palavra nova aparece primeiro na Carta (leitura), depois no Comerciante (ouvir), depois no Recado (escrever): é o caminho ler, ouvir, escrever.
@@ -125,3 +127,185 @@ Cada entrega: um tipo por vez, o antigo continua funcionando até o novo passar 
 
 **Ordem**: a Entrega do Comerciante (inglês) é o molde e entra primeiro; logo depois, com o mesmo motor de cena, entram **Carta em português** e **Feira** (dinheiro), que reaproveitam mecânicas prontas; Mapa, Linha do tempo e Laboratório são mecânicas novas e vêm em seguida, uma por entrega, sempre com fundo e sprites do líder antes do código e ficha pedagógica por galeria. O painel do pai ganha "onde ele erra" por galeria.
 
+
+## 9. O inglês por unidades (30/09/2026)
+
+Pedido do pai em 30/09: "tem algo errado no inglês". Esta seção substitui o §4 (conteúdo e nível) e muda a Ferraria (§3.3), a Carta (§3.4) e a nota do Recado (§3.2). A cena, a economia e o Comerciante (§3.1) continuam.
+
+### 9.1 O que os dados mostram (15/09 a 30/09: 12 dias de Mina, 11 seguidos)
+
+| Contrato | Acerto de primeira | O que acontece |
+|---|---|---|
+| Comerciante | 61% (72% no nível 2) | melhora a cada semana; é o único que ensina |
+| Carta | 43% (19% no nível 2) | responde em 6 a 15 segundos; não lê |
+| Recado | 1 de 3 em 11 de 11 | acerta na segunda tentativa, e a nota não muda |
+| Ferraria | 16% | 0 de 6 em 6 das 12 |
+
+As causas, da mais pesada para a mais leve:
+
+1. **O nível subia pelo Comerciante e levava tudo junto.** Com a quinta entrega perfeita do Comerciante, em 30/09, a Mina inteira foi para o nível 3 no plano de 01/10: cartas de 101 e 111 palavras e Ferraria de "must". O nível do painel era ignorado.
+   - Corrigido pelo líder em 30/09: vale só o nível do painel, e a Mina não sobe de nível sozinha.
+2. **A Ferraria cobra sem ensinar, e erra na pergunta.**
+   - Foram 12 Ferrarias com 7 regras, e a regra muda quase todo dia. A regra só aparece depois do erro.
+   - Muitas barras têm duas respostas certas:
+     - "Scout Rafael ___ kick the ball well." (can / can't);
+     - "I see ___ lantern near the shed." (a / the);
+     - "There are ___ planks on the bridge." (some / no).
+   - Há barras fora da regra do dia. Na de don't/doesn't de 29/09, duas eram de is/are e de some/any.
+   - Opções com erro de grafia ensinam grafia errada: "appless", "emeraldes".
+   - Montar frases de 7 ou 8 palavras, com "the" repetido, deu 0 de 6 em quatro dias (21, 23, 24 e 25/09). Exemplo: "{shed boots leo the next to the put}".
+   - Resultado: nas últimas, ele leva de 40 a 80 segundos para 6 barras. Ele chuta.
+3. **A Carta não tem história.**
+   - O texto é uma lista com as palavras do tema: "The brave cat loves blue torches.", "I like the watchtower because it is brave.".
+   - As perguntas são em inglês.
+   - O glossário só abre segurando 400 ms: foram 6 toques nas últimas 6 cartas.
+   - Não há motivo para ler.
+4. **O Recado mede frase decorada, não recado.**
+   - A nota é a da primeira tentativa, e um verbo escorregado vale "bloqueante" (1 de 3), mesmo com o recado completo e claro.
+   - Em 30/09 ele escreveu "I want play soccer. I do my homework first. I wait because my homework is first.". Na segunda tentativa, "I want to play soccer. I do my homework first. I wait because my homework is first.". Nada faltou, e a nota foi 1 de 3. A correção dele nunca aparece.
+   - Em 30/09, o pedido citava duas ideias, e o "não pode faltar" cobrava três.
+5. **Nada volta.**
+   - "Palavra conhecida" é palavra vista uma vez.
+   - O erro de ontem não volta em 3 e 10 dias, como o §4 pedia.
+   - A prova usa sempre o inglês do nível 1.
+6. **O Comerciante paga no máximo 2.** O texto em inglês sempre abre depois do primeiro ouvir, e o `textShown` corta a entrega perfeita para 2.
+
+**Por que o Comerciante funciona:**
+- a mesma mecânica todo dia;
+- uma regra pequena (in, on, under, next to);
+- a resposta calculada pelo jogo, nunca ambígua;
+- o erro volta na hora.
+
+Ele é o molde do resto.
+
+### 9.2 A ideia: uma unidade por vez
+
+Uma **unidade** é um padrão de frase com uma lição curta: am/is/are, want to + ação, can/can't. O banco está em `docs/conteudo/INGLES_UNIDADES.md`, com 10 unidades dos níveis 1 e 2.
+
+- **A unidade dura até o selo:** 2 Ferrarias da unidade com pelo menos 5 de 6 de primeira, em quaisquer dias.
+  - Dura no mínimo 2 dias e no máximo 6 Ferrarias.
+  - Sem selo em 6, ela fica "para rever": a seguinte começa, e ela volta na revisão.
+- **Todos os contratos do dia usam a unidade:**
+  - a Ferraria treina o padrão (§9.3);
+  - o Recado usa o molde da unidade;
+  - na Carta, o padrão aparece pelo menos duas vezes;
+  - a pergunta de inglês da prova usa o padrão.
+- O Comerciante segue a própria trilha, a das preposições.
+- O Heitor começa na U1. Se já souber, sela em 2 dias.
+
+### 9.3 Ferraria: ensina, depois pede, e cada barra tem uma resposta só
+
+- **Lição antes.**
+  - No primeiro dia da unidade, o Ferreiro mostra o cartão da lição antes da primeira barra: a regra em uma ou duas linhas, dois exemplos com áudio e um "não é assim".
+  - Nos outros dias, "Ver a regra" fica ao lado da bigorna, grátis e contado (`lessonViews`).
+- **As barras saem de moldes, não da IA.**
+  - Cada unidade tem moldes com as listas do banco (sujeitos, ações, coisas), e o jogo calcula a resposta, como no Comerciante. A IA sai da Ferraria.
+  - Cada barra passa pelo validador:
+    - exatamente uma opção certa;
+    - todas as opções bem escritas, nada de "appless";
+    - a barra treina a regra da unidade;
+    - montar tem até 5 peças, sem palavra repetida; frase longa vira peças maiores ("I eat" | "because" | "I am hungry");
+    - escrever pede uma palavra só e aceita a palavra sem apóstrofo, com apóstrofo curvo, com maiúscula, e "does not" no lugar de "doesn't".
+- **Os degraus da unidade:**
+  - dia 1: 2 de escolher (2 opções), 3 de completar (3 opções) e 1 de montar;
+  - do dia 2 em diante: 1 de escolher, 2 de completar, 2 de montar e 1 de escrever.
+- **Desce na hora.** Dois erros seguidos: o cartão da lição volta, e a próxima barra é de escolher.
+- **Barras antigas.** No fim, entram até 2 barras de revisão:
+  - as erradas voltam em 1, 3 e 7 dias (caixas);
+  - cada unidade selada volta uma vez por semana;
+  - a frase do Recado com erro vira uma barra dele: "Qual está certa? 'I want play soccer.' ou 'I want to play soccer.'".
+- **O alvo nunca vem da etiqueta do Recado.** Saem o `FORGE_TAG_TARGETS` como escolha do alvo e o "Frases completas".
+- Paga como hoje: os acertos de primeira sobre o total de barras.
+
+### 9.4 Carta: uma história curta com motivo
+
+- **A Carta tem nível próprio** (`letterLevel`), abaixo do teto do painel:
+
+  | Nível | Tamanho | Perguntas | Opções | Glossário |
+  |---|---|---|---|---|
+  | C1 | 30 a 50 palavras | em português | 3, em português | 3 a 5 |
+  | C2 | 50 a 70 palavras | em português | em inglês, copiadas do texto | 4 a 6 |
+  | C3 | 70 a 100 palavras | em inglês, uma de inferência | em inglês | 6 a 8 |
+
+  - Sobe com 3 Cartas seguidas com tudo certo de primeira.
+  - Desce com 2 seguidas com no máximo 1 certa.
+  - O Heitor começa na C1.
+- **A carta tem um motivo, e cada frase serve a ele.**
+  - Os oito motivos: pedido de ajuda, convite, aviso de perigo, achado e perdido, caminho até um lugar, notícia de um jogo, lista para uma tarefa (com o porquê) e agradecimento.
+  - Sem coisa solta e sem adjetivo que não cabe ("brave cat", "brave watchtower").
+- **Revisor** (`gpt-4o`), como o da prova, confere:
+  - a nota de coerência;
+  - uma resposta por pergunta;
+  - a resposta numa frase só (a evidência);
+  - que não dá para responder sem ler.
+
+  Se reprovar, gera de novo uma vez. Se reprovar de novo, usa o banco offline.
+- **Glossário por toque.** As palavras do glossário vêm sublinhadas. O toque curto mostra a tradução e fala a palavra (`glossaryTaps`). Sai o hover de 400 ms.
+- **Continuam:**
+  - a trava de leitura (14b);
+  - a evidência antes das opções;
+  - a voz lendo a carta.
+
+### 9.5 Recado: nota pelo recado, e a correção conta
+
+- **A nota:**
+  - 3: as ideias do pedido, sem erro;
+  - 2: as ideias, com 1 ou 2 erros que não mudam o sentido;
+  - 1: faltou uma ideia, o sentido se perdeu, ou houve 3 erros ou mais;
+  - 0: não é inglês.
+- **A ideia vale pelo sentido, com qualquer palavra e em qualquer ordem.**
+  - O juiz decide pelo sentido.
+  - O `matchesInfo` (variantes fixas, na ordem) fica só para quando a IA falha.
+- **Erro que não muda o sentido não bloqueia.** "I want play soccer" é erro pequeno. Só bloqueia o erro com `meaningLost: true`, que o juiz marca.
+- **O pedido cita todas as ideias do "não pode faltar",** nem mais nem menos. É o validador do conteúdo que confere.
+- **A segunda tentativa aparece.**
+  - O Capataz diz "Na segunda: 3 de 3. O quadro está certo.", e o resultado grava `details.secondScore`.
+  - O pagamento continua só pela primeira (decisão 23).
+  - O painel mostra as duas.
+- **A dica é grátis** e só aparece depois da primeira tentativa (decisão 43, AP2). Sai o custo de 1 ferro.
+- O molde do dia vem da unidade (banco). O erro dele vira barra de revisão na Ferraria (§9.3).
+
+Com a nota nova, os Recados de 28/09 e de 30/09 teriam dado 2 de 3 na primeira tentativa e 3 de 3 na segunda.
+
+### 9.6 Comerciante, nível, palavras, prova e painel
+
+- **Comerciante:**
+  - o `merchantMaterial` não corta mais por `textShown`: entrega perfeita paga 3;
+  - volta a ter nível próprio (`merchantLevelFromSkill`), agora com o teto no nível do painel e com descida: 2 entregas seguidas com metade ou menos de primeira descem 1;
+  - o pedido errado volta em 3 e em 10 dias (§4).
+- **Nível:**
+  - o do painel vira **teto**, e cada contrato anda pelo próprio resultado abaixo dele;
+  - a Mina não sobe o teto sozinha. Quando a última unidade do nível é selada, o painel sugere subir.
+- **Palavra conhecida** é a vista em 3 contratos (`seen >= 3`). O glossário e o `vocabKnown` usam essa conta.
+- **Prova:** a pergunta de inglês recebe a unidade atual e o nível da Carta.
+- **Painel:** cartão "Inglês: como ele vai", com:
+  - a unidade atual, o dia nela e as Ferrarias dela;
+  - as unidades seladas e as "para rever";
+  - o acerto de primeira em 7 dias, por contrato;
+  - o nível da Carta e o do Comerciante;
+  - os 5 últimos Recados, com a primeira e a segunda tentativa lado a lado, e o erro que mais volta.
+
+### 9.7 Dados
+
+- **`englishBase` ganha:**
+  - `unit: { id, startedOn, forges: [{ date, first, max }] }`;
+  - `units: Record<id, { sealedOn?: string; review?: true }>`;
+  - `letterLevel` e `merchantLevel`;
+  - `reviewQueue: [{ key, box, due, item }]`, com no máximo 30 itens.
+- **O contrato grava** `contract.level`, o nível usado nele.
+- **`result.details` ganha:**
+  - `lessonViews`;
+  - `review` nas barras de revisão;
+  - `secondScore` no Recado;
+  - `glossaryTaps` na Carta.
+- A regra de `englishBase` no Firestore não tem lista de campos, então não muda.
+
+### 9.8 Ordem
+
+É uma frente só, a P17, em quatro passos, com um commit por passo:
+1. Recado;
+2. Ferraria, que depende do banco aprovado pelo pai;
+3. Carta;
+4. Comerciante, painel e prova.
+
+O pacote está em `docs/etapas/PROMPT_CURSOR_2026-09-30_INGLES.md`.

@@ -17,7 +17,6 @@ import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, applyPickaxeBonu
 import { cracksOf, isBroken, liveBuildingLevel, ruinUseError } from './village/repair';
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
-import { merchantLevelFromSkill } from './english/merchantRoom';
 import { normalizedTokens } from './english/notePrecheck';
 import { assertAiBudget, buildDailyContracts, regenerateSingle } from './englishAi';
 import { prefetchAudio } from './englishTts';
@@ -562,7 +561,6 @@ export async function completeContract(
   let contractType = '';
   let wordsMastered = 0;
   let perfect = false;
-  let roseLevel = 0;
   let out: CompleteResult | null = null;
 
   await runTransaction(db, async (tx) => {
@@ -599,10 +597,7 @@ export async function completeContract(
     perfect = Number(outcome.score) >= Number(outcome.max) && Number(outcome.max) > 0;
     const merchantDone = base.merchantDone + (contract.type === 'merchant' ? 1 : 0);
     const merchantPerfect = base.merchantPerfect + (contract.type === 'merchant' && perfect ? 1 : 0);
-    const nextLevel =
-      contract.type === 'merchant'
-        ? Math.max(base.level, merchantLevelFromSkill(merchantDone, merchantPerfect))
-        : base.level;
+    // O nível é só o do painel (setBaseLevel). Até 30/09 o Comerciante subia o nível de todos os contratos.
 
     const materials = { ...base.materials, [contract.material]: base.materials[contract.material] + material };
     // Recado no estágio 2: a "Dica" custa 1 ferro (a tela só a libera com ferro em caixa)
@@ -617,7 +612,6 @@ export async function completeContract(
         : { scaffoldStage: base.scaffoldStage, noteStreak3: base.noteStreak3 };
     const nextBase: BaseDoc = {
       ...base,
-      level: nextLevel,
       materials,
       vocab,
       ...scaffold,
@@ -627,7 +621,6 @@ export async function completeContract(
       merchantPerfect,
       updatedAt: finishedAt,
     };
-    if (nextLevel > base.level) roseLevel = nextLevel;
     wordsMastered = Object.values(vocab).filter((v) => (v?.seen ?? 0) >= 3).length;
     const before = affordableIds(base);
     const unlockedBuildings = affordableIds(nextBase).filter((id) => !before.includes(id));
@@ -679,14 +672,6 @@ export async function completeContract(
     await bumpFriend(uid, 'comerciante', 2);
   } catch (e) {
     console.warn('stats contrato', e);
-  }
-  if (roseLevel > 0) {
-    for (let i = 1; i <= UPCOMING_MAX_DAYS; i++) {
-      const next = addDays(today, i);
-      const plan = await getPlan(uid, next);
-      if (!plan || plan.level === roseLevel || hasDone(plan)) continue;
-      await regeneratePlan(uid, next).catch((e) => console.warn('plano futuro', e));
-    }
   }
   return out;
 }

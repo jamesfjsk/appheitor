@@ -1286,3 +1286,61 @@ A junção no `main` (`6ed27ec`, `5cd3059`, `029f34b`) é idêntica à simulada 
   - as frases reais nos testes;
   - `playText` "tocou" quando só não falhou.
 - **Ao publicar:** a trava só protege a aba que já roda o P12. O PC do Heitor recarrega sozinho quando ele voltar à aba; se ficar aberto sem uso até a noite, um Ctrl+F5 antes da meia-noite garante.
+
+## 30/09 — ontem e hoje (dados do Heitor até 10h35)
+
+**Sistema:**
+- Nenhum erro desde 27/09.
+- O PC dele roda a base `b298536`, e a correção da meia-noite vale.
+- A junção das três frentes (`029f34b`) está no GitHub e entra no PC dele no próximo recarregamento. As correções do líder de 30/09 (`68b026a`) estão commitadas, mas ainda não publicadas.
+- Desde 28/09, todas as provas saem do código novo.
+- Saldo: 43 gold (13 em 29/09).
+
+**Prova:**
+- **29/09: 7/7.** As três da ideia do dia saíram em 5 a 6 s. As de raciocínio levaram de 27 a 78 s. A reflexão, 41 palavras, foi a história do xarope.
+- **30/09: 8/8**, sem dilema (o gerador não pôs).
+  - A aplicação saiu em 1,3 s: a resposta era um termo da própria ideia ("Efeito manada").
+  - As de raciocínio levaram de 18 a 75 s.
+  - Ciências aceitou uma certa imprecisa: sem o oxigênio das árvores, "O ar ficaria mais poluído".
+  - Reflexão de 34 palavras, outra história dele: concordou com a turma, e a professora mostrou que estava errado.
+- **A segunda tentativa do 11 ainda não apareceu:** nenhum erro em item com escada (`supportLevel` 0 em tudo).
+- **Linha de desafio:** 82% nos 14 dias até 30/09. Deve passar de 90% quando os dias de 18 a 21/09 saírem da janela, perto de 05/10.
+- **Banco de reserva:** 6 das 60 usadas em 5 dias (C09, H01, M01, M02, M03, M04).
+
+**Missões:**
+- 29/09: 5/8 (−3), todas feitas entre 18h56 e 20h08. As da manhã ficaram.
+- 30/09: nenhuma até 10h35.
+
+**Mina: o inglês não melhora.**
+- **Cartas:**
+  - 29/09: 0/2 e 0/3; 30/09: 1/2.
+  - Ele ouve (19 a 40 s), mas não acha a frase: `shown` em quase todas, `found` uma vez.
+- **Ferraria:** 1/6 (don't/doesn't) e 2/6 (can/can't), com 3 a 9 s por peça e de 1 a 2 certas no refazer. Cada dia é uma regra nova do nível 2, que ele nunca viu.
+- **Mercador:** 3/3 e 2/3.
+- **Recado:** 1/3, com esforço.
+- Proposta, no próximo desenho do líder:
+  - a regra nova vem com uma tela curta antes da primeira peça;
+  - a mesma regra fica 2 ou 3 dias;
+  - a Carta volta ao nível em que ele acha a frase.
+
+**Livros:** a Matilda segue sem a aprovação do pai. A Fábrica ainda não teve a conversa: o 16 não tinha chegado ao PC dele.
+
+## 30/09 — inglês: o nível subia sozinho (correção do líder) e o desenho novo
+
+**Achado:**
+- o plano de 01/10 saiu no nível 3: cartas de 101 e 111 palavras e Ferraria de "must";
+- a causa foi a quinta entrega perfeita do Comerciante, que subia o nível de todos os contratos. O `dayContextFor` usava o maior valor entre o nível do painel e o do Comerciante, e por isso baixar o nível no painel não adiantava;
+- a Carta estava em 19% no nível 2 e a Ferraria em 16%.
+
+**Corrigido pelo líder:**
+- `englishAi.ts`: o `dayContextFor` usa só `ctx.level`;
+- `englishBaseService.ts`: o `completeContract` não sobe mais o nível, e sai a regeneração dos planos futuros na subida;
+- `EnglishBaseManager.tsx`: uma frase no cartão do nível, "Só muda aqui: a Mina não sobe de nível sozinha.";
+- os contadores `merchantDone` e `merchantPerfect` continuam gravando e voltam a ser usados no nível próprio do Comerciante (P17, passo 4);
+- barra: tsc 0, eslint 0 erros (8 avisos), `test:english` e `test:village` verdes, build ok.
+
+**O pai, depois do push:**
+1. Ctrl+F5 no painel;
+2. Mina, "Nível do conteúdo", Nível 2, salvar. Isso regenera os planos de 01/10 em diante que estão no 3.
+
+**Desenho novo:** `MINA_CONTRATOS.md` §9, o banco em `docs/conteudo/INGLES_UNIDADES.md` (amostra do pai: U1 e U5) e a frente em `PROMPT_CURSOR_2026-09-30_INGLES.md`.

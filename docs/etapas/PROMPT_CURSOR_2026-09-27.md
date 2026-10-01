@@ -67,7 +67,8 @@ Faça o §16 "15b" do desenho, nesta ordem:
 3. **Painel:**
    - "Começar Engenheiro da Vila";
    - o progresso da carreira, com as competências editáveis;
-   - o marco 15.
+   - o marco 15;
+   - "Já fez fora do app": o pai marca os treinos feitos antes de o Laboratório abrir (o primeiro dia, 1 a 3, desde 01/10), com o XP e a redstone normais.
 4. **Laboratório no lote `reserva`:**
    - construção `laboratorio`, sem custo, com nível igual ao título da carreira;
    - a tela da carreira (§11.6);

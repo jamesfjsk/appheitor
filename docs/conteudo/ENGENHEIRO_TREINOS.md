@@ -3,8 +3,8 @@
 Conteúdo da carreira (`docs/CONTRATOS_E_CARREIRAS.md` §11). O Cursor copia para `src/config/careers.ts` sem reescrever.
 
 - **Treinos:** 14, mais um marco, a primeira encomenda de engenharia.
-- **Ferramentas:** BBC micro:bit V2 e o editor MakeCode (`makecode.microbit.org`), com os componentes do kit ELECFREAKS: protoboard, LEDs, resistores, LDR, botões, buzzer, cabos, shield.
-- **Tensão:** tudo em 3 V, por USB ou pilhas AA.
+- **Ferramentas:** BBC micro:bit V2 e o editor MakeCode (`makecode.microbit.org`), com o kit que chegou em 01/10: "Kit Iniciante Robótica para micro:bit e Scratch" (Casa da Robótica, CE02). Ele traz micro:bit V2, cabo USB, suporte com 2 pilhas AAA, protoboard de 400 furos, shield de expansão, buzzer, 15 LEDs, 2 LEDs RGB, 2 LDR, 4 botões com capas, resistores de 220 Ω (20) e de 10 kΩ (10), 20 fios macho-macho e 5 garras jacaré. Não vêm motor, servo nem sensor ultrassônico.
+- **Tensão:** tudo em 3 V, por USB ou pelas 2 pilhas AAA do kit.
 - **Recompensa:** XP e 1 redstone por treino, **nunca gold**.
 - **Entrega:** "Mostrar ao pai" funcionando. A frase "O que você aprendeu?" é opcional.
 - **Pistas:** em degraus, sempre na mesma ordem:
@@ -120,7 +120,7 @@ Conteúdo da carreira (`docs/CONTRATOS_E_CARREIRAS.md` §11). O Cursor copia par
 
 ### 7. LED externo: o primeiro circuito
 - **Objetivo:** acender um LED na protoboard pelo pino 0.
-- **Vai usar:** shield ou garras, protoboard, 1 LED, 1 resistor de 220 ou 330 Ω, 2 fios.
+- **Vai usar:** shield ou garras, protoboard, 1 LED, 1 resistor de 220 Ω (vermelho, vermelho, marrom), 2 fios.
 - **Passos:**
   1. Monte o caminho: pino 0, resistor, perna comprida do LED, perna curta do LED, GND.
   2. No código, em "sempre": "escrever digital pino P0 para 1", "pausa 500", "escrever digital P0 para 0", "pausa 500".
@@ -136,14 +136,14 @@ Conteúdo da carreira (`docs/CONTRATOS_E_CARREIRAS.md` §11). O Cursor copia par
 
 ### 8. Buzzer: som de fora
 - **Objetivo:** tocar uma melodia num buzzer ligado no pino 0.
-- **Vai usar:** buzzer do kit, 2 fios. No módulo de 3 pinos: S no P0, V no 3V, G no GND.
+- **Vai usar:** o buzzer do kit e 2 fios. A perna marcada com + (ou a mais comprida) vai no P0, e a outra no GND.
 - **Passos:**
-  1. Ligue o buzzer: P0 e GND (ou S, V e G no módulo).
+  1. Ligue o buzzer: + no P0 e a outra perna no GND.
   2. Em "no botão A pressionado", coloque "tocar melodia".
 - **Funciona quando:** o som sai do buzzer. O alto-falante da placa pode tocar junto; tudo bem.
 - **Pistas:**
   1. Ligado?
-  2. O fio do sinal está no P0? No módulo, S vai no P0.
+  2. O fio da perna + está no P0?
   3. O botão A é a entrada, e o buzzer é a saída. Você está apertando o A?
   4. Tem o bloco de melodia dentro do "no botão A pressionado"?
   5. Buzzer tem lado: troque os dois fios de lugar e teste de novo.
@@ -262,6 +262,6 @@ Conteúdo da carreira (`docs/CONTRATOS_E_CARREIRAS.md` §11). O Cursor copia par
 - Nada ligado em tomada, 127 ou 220 V.
 - Nada de fonte aberta, capacitor grande ou bateria de lítio solta.
 - Nada de solda sem adulto.
-- Tudo aqui é 3 V, por USB ou pilhas AA.
+- Tudo aqui é 3 V, por USB ou pelas 2 pilhas AAA do kit.
 - Os treinos 1 a 14 **não** pedem a faixa FAÇA COM UM ADULTO.
 - O projeto 14 pede um adulto só se precisar prender o micro:bit na gaveta com fita ou cola quente.
