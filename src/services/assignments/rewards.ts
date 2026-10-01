@@ -4,6 +4,8 @@
 import type { AssignmentReward, AssignmentSize } from '../../types/assignment';
 import type { Material } from '../../types/english';
 import { DEFAULT_ECONOMY } from '../../config/village';
+import { isoWeekOf } from '../../utils/clock';
+import { isProjectSize } from './machine';
 
 export interface BandSetting {
   minDays: number;
@@ -99,6 +101,43 @@ export interface WeekMeter {
   approved: number;
   cap: number;
   left: number;
+}
+
+/** Gold aprovado na semana ISO, só das faixas curtas. */
+export function usedShortGold(
+  rows: ReadonlyArray<{ size?: AssignmentSize; status: string; payoutGold?: number; payoutDay?: string | null }>,
+  week: string,
+): number {
+  return rows.reduce((sum, row) => {
+    if (!countsTowardWeeklyCap(row.size) || row.status !== 'approved') return sum;
+    if (!row.payoutDay || isoWeekOf(row.payoutDay) !== week) return sum;
+    return sum + Math.max(0, Math.round(Number(row.payoutGold) || 0));
+  }, 0);
+}
+
+/** Até 1 D por semana de prazo. */
+export function projectWeekCap(dayGold: number, weeks: number): number {
+  const span = Math.max(1, Math.floor(Number(weeks)) || 1);
+  return Math.max(0, Math.round(span * Math.max(0, dayGold)));
+}
+
+export function projectOverCap(gold: number, dayGold: number, weeks: number): boolean {
+  if (gold <= 0) return false;
+  return gold > projectWeekCap(dayGold, weeks);
+}
+
+/** Curta usa o teto de 2 D. Projeto passa por "até 1 D por semana de prazo". */
+export function needsCapWarn(input: {
+  size?: AssignmentSize;
+  gold: number;
+  usedShort: number;
+  dayGold: number;
+  weeks?: number;
+  capDays?: number;
+}): boolean {
+  if (isProjectSize(input.size)) return projectOverCap(input.gold, input.dayGold, input.weeks ?? 1);
+  if (!countsTowardWeeklyCap(input.size)) return false;
+  return overCap(input.usedShort, input.gold, input.dayGold, input.capDays);
 }
 
 export function weekMeter(offered: number, approved: number, dayGold: number, capDays = DEFAULT_ECONOMY.assignmentWeeklyCapDays): WeekMeter {

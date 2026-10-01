@@ -352,14 +352,21 @@ async function runAssignmentDay(date: string): Promise<{ created: string[]; expi
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
-    await ref.set(body);
+    try {
+      await ref.create(body);
+    } catch (err) {
+      const code = typeof err === 'object' && err && 'code' in err ? String((err as { code: unknown }).code) : '';
+      if (code === '6' || code === 'already-exists' || code.includes('ALREADY_EXISTS')) continue;
+      throw err;
+    }
     const text = `Encomenda nova na Casa: ${title}`.slice(0, 90);
+    const until = typeof dueOn === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dueOn) ? dueOn : ymdAdd(date, 2);
     await db.collection('notices').doc(`asg_${id}_new`).set({
       userId,
       type: 'recado',
       text,
       when: date,
-      until: null,
+      until,
       ackAt: null,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
@@ -399,7 +406,10 @@ export const generateAssignmentsNow = onCall({ region: REGION }, async (request)
   if (!request.auth) throw new HttpsError('unauthenticated', 'Entre como o pai.');
   const user = await db.doc(`users/${request.auth.uid}`).get();
   if (user.data()?.role !== 'admin') throw new HttpsError('permission-denied', 'Só o pai gera encomendas.');
+  const today = nowBrazil().date;
   const raw = request.data as { date?: string } | undefined;
-  const date = raw?.date && /^\d{4}-\d{2}-\d{2}$/.test(raw.date) ? raw.date : nowBrazil().date;
-  return runAssignmentDay(date);
+  if (raw?.date && raw.date !== today) {
+    throw new HttpsError('invalid-argument', 'Só gera a encomenda de hoje.');
+  }
+  return runAssignmentDay(today);
 });

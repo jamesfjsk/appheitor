@@ -1,5 +1,6 @@
 // Frases da criança. O número muda; a boca é a do desenho (§6.2).
 
+import type { ProofKind } from '../../types/proof';
 import { WEEKDAY_NAME } from './labels';
 
 export function newCardKicker(): string {
@@ -65,6 +66,21 @@ export function expiredLine(): string {
 
 export function emptyBoardLine(): string {
   return 'O quadro está limpo. O pai ainda não pregou encomenda nenhuma.';
+}
+
+export function showHow(kinds: readonly ProofKind[]): string {
+  const bits: string[] = [];
+  if (kinds.includes('checklist')) bits.push('marca o que ficou pronto');
+  if (kinds.includes('questions')) bits.push('responde as perguntas');
+  if (kinds.includes('inPerson')) bits.push('mostra ao pai quando ele vier conferir');
+  if (kinds.includes('photo')) bits.push('a foto fica com o pai, na hora de conferir');
+  if (bits.length === 0) return 'Mostra o que ficou pronto.';
+  const text = bits.join(', ');
+  return `${text.charAt(0).toUpperCase()}${text.slice(1)}.`;
+}
+
+export function materialLine(label: string, qty: number): string {
+  return `Também entra ${qty} de ${label.toLowerCase()}.`;
 }
 
 export function showFatherLine(): string {

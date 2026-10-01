@@ -2,9 +2,15 @@ import { expect, run, test } from '../../english/__tests__/harness';
 import { INCOME_GROUP, gamesOutearnedMissions, incomeBucket, weekIncome } from '../../assignments/buckets';
 import { effectiveStatus, nextStatus, proofReady, statusCtx } from '../../assignments/machine';
 import { instanceDraft, instanceId, weekdayIndex } from '../../assignments/recurrence';
-import { assignmentReward, bandFor, overCap, suggestedGold, weeklyCapLeft } from '../../assignments/rewards';
-import { settleApproval, type SettleState } from '../../assignments/settle';
+import { approvalPlan, materialsForCreate, type ApprovalSnap } from '../../assignments/approval';
+import { deadlineWeeks, dueAtIso, nextDueOn, submitInTime } from '../../assignments/due';
+import { noticeUntil, orderFatherNotices } from '../../assignments/placa';
+import { needsCapWarn, projectOverCap, projectWeekCap, usedShortGold, assignmentReward, bandFor, overCap, suggestedGold, weeklyCapLeft } from '../../assignments/rewards';
+import { noticesForNow } from '../notices';
+import { isoWeekOf } from '../../../utils/clock';
 import type { AssignmentRecurrence } from '../../../types/assignment';
+import type { NoticeContext } from '../../../types/village';
+import { INITIAL_MATERIALS } from '../../../config/englishBase';
 
 const paid = (patch: Partial<StatusCtxShape> = {}) => statusCtx({ kind: 'paid', proofComplete: true, ...patch });
 
@@ -154,40 +160,70 @@ test('incomeBucket com todas as fontes', () => {
   expect(gamesOutearnedMissions({ ...week, play: 200, life: 10 })).toBe(true);
 });
 
-function submitted(gold = 6, kind: 'paid' | 'training' = 'paid'): SettleState {
+function submitted(gold = 6, kind: 'paid' | 'training' = 'paid', board = ['caixa', 'outra']): ApprovalSnap {
   return {
+    id: 'caixa',
     status: 'submitted',
     kind,
     reward: { gold, xp: 15 },
     claimed: false,
     txExists: false,
     gold: 10,
-    txs: [],
+    board,
+    baseExists: true,
+    progressExists: true,
+    villageExists: true,
   };
 }
 
-test('aprovar duas vezes num armazenamento falso paga uma vez', () => {
-  const first = settleApproval(submitted(6), 'caixa');
-  expect(first.result).toEqual({ wrote: true, paid: true, gold: 6 });
-  expect(first.state.gold).toBe(16);
-  expect(first.state.txs).toHaveLength(1);
-  expect(first.state.txs[0].id).toBe('assignment_caixa');
-  expect(first.state.txs[0].balanceBefore).toBe(10);
-  expect(first.state.txs[0].balanceAfter).toBe(16);
-  expect(first.state.claimed).toBe(true);
-  const second = settleApproval(first.state, 'caixa');
-  expect(second.result).toEqual({ wrote: false, reason: 'already' });
-  expect(second.state.gold).toBe(16);
-  expect(second.state.txs).toHaveLength(1);
-  const crashed = settleApproval({ ...submitted(6), claimed: true, status: 'submitted' }, 'caixa');
-  expect(crashed.result).toEqual({ wrote: true, paid: false, reason: 'claim_exists' });
-  expect(crashed.state.gold).toBe(10);
-  expect(crashed.state.txs).toHaveLength(0);
-  const training = settleApproval(submitted(99, 'training'), 'treino');
-  expect(training.result).toEqual({ wrote: true, paid: true, gold: 0 });
-  expect(training.state.gold).toBe(10);
-  expect(training.state.txs).toHaveLength(0);
-  expect(training.state.claimed).toBe(true);
+test('aprovar duas vezes paga uma vez e poda o quadro', () => {
+  const first = approvalPlan(submitted(6));
+  if (!first.write || !first.paid) throw new Error('devia pagar');
+  expect(first.reward.gold).toBe(6);
+  expect(first.goldAfter).toBe(16);
+  expect(first.line?.id).toBe('assignment_caixa');
+  expect(first.line?.balanceBefore).toBe(10);
+  expect(first.line?.balanceAfter).toBe(16);
+  expect(first.claim).toBe('assignment:caixa');
+  expect(first.board).toEqual(['outra']);
+  const second = approvalPlan({
+    ...submitted(6, 'paid', first.board),
+    status: 'approved',
+    claimed: true,
+    txExists: true,
+    gold: first.goldAfter,
+  });
+  expect(second).toEqual({ write: false, reason: 'already' });
+  const crashed = approvalPlan({ ...submitted(6), claimed: true });
+  if (!crashed.write || crashed.paid) throw new Error('claim existente não paga');
+  expect(crashed.reason).toBe('claim_exists');
+  expect(crashed.goldAfter).toBe(10);
+  expect(crashed.line).toBe(null);
+  expect(crashed.board).toEqual(['caixa', 'outra']);
+});
+
+test('treino com gold no documento paga 0 e não abre linha', () => {
+  const training = approvalPlan({ ...submitted(99, 'training'), id: 'treino', board: ['treino'] });
+  if (!training.write || !training.paid) throw new Error('devia gravar o treino');
+  expect(training.reward.gold).toBe(0);
+  expect(training.goldAfter).toBe(10);
+  expect(training.line).toBe(null);
+  expect(training.claim).toBe('assignment:treino');
+  expect(training.board).toEqual([]);
+});
+
+test('sem englishBase o material nasce do padrão, sem chave com ponto', () => {
+  const plan = approvalPlan({
+    ...submitted(6),
+    baseExists: false,
+    reward: { gold: 6, xp: 15, materials: { madeira: 2 } },
+  });
+  if (!plan.write || !plan.paid || !plan.material) throw new Error('devia criar o material');
+  expect(plan.material.create).toBe(true);
+  expect(plan.material.materials.madeira).toBe(INITIAL_MATERIALS.madeira + 2);
+  expect(plan.material.materials.ferro).toBe(INITIAL_MATERIALS.ferro);
+  expect(Object.keys(plan.material.materials).some((key) => key.includes('.'))).toBe(false);
+  expect(Object.keys(materialsForCreate({ pedra: 1 })).some((key) => key.includes('.'))).toBe(false);
 });
 
 test('ajuste e nova entrega pagam uma vez', () => {
@@ -195,10 +231,18 @@ test('ajuste e nova entrega pagam uma vez', () => {
   expect(nextStatus('submitted', 'request_changes', ctx)).toEqual({ ok: true, status: 'needs_changes' });
   expect(nextStatus('needs_changes', 'submit', ctx)).toEqual({ ok: true, status: 'submitted' });
   expect(nextStatus('submitted', 'submit', ctx)).toEqual({ ok: false, reason: 'transicao' });
-  const paidOnce = settleApproval(submitted(6), 'cabos');
-  const again = settleApproval(paidOnce.state, 'cabos');
-  expect(again.state.txs).toHaveLength(1);
-  expect(again.state.gold).toBe(16);
+  const paidOnce = approvalPlan({ ...submitted(6), id: 'cabos' });
+  if (!paidOnce.write || !paidOnce.paid) throw new Error('devia pagar');
+  const again = approvalPlan({
+    ...submitted(6),
+    id: 'cabos',
+    status: 'approved',
+    claimed: true,
+    txExists: Boolean(paidOnce.line),
+    gold: paidOnce.goldAfter,
+  });
+  expect(again).toEqual({ write: false, reason: 'already' });
+  expect(paidOnce.goldAfter).toBe(16);
   expect(proofReady(
     { kinds: ['checklist'], questions: [] },
     { kinds: ['checklist'], checklist: [true, false] },
@@ -209,6 +253,75 @@ test('ajuste e nova entrega pagam uma vez', () => {
     { kinds: ['checklist', 'questions'], checklist: [true], answers: [{ q: 'O que você testou?', a: 'a vagoneta' }] },
     1,
   )).toBe(true);
+});
+
+test('ajuste depois do prazo ganha dueAt novo e a entrega passa', () => {
+  const today = '2026-09-29';
+  expect(nextDueOn('2026-10-05', today)).toBe(null);
+  expect(nextDueOn('2026-09-29', today)).toBe('2026-09-30');
+  expect(nextDueOn('2026-09-28', today)).toBe('2026-09-30');
+  expect(nextDueOn('2026-09-28', today, '2026-10-02')).toBe('2026-10-02');
+  expect(nextDueOn('2026-09-28', today, today)).toBe('2026-09-30');
+  const renewed = nextDueOn('2026-09-28', today) as string;
+  const late = '2026-09-30T15:00:00.000-03:00';
+  expect(submitInTime(late, dueAtIso('2026-09-28'))).toBe(false);
+  expect(submitInTime(late, dueAtIso(renewed))).toBe(true);
+});
+
+test('faixas e teto usam o R7, e o projeto passa com até 1 D por semana', () => {
+  const day = '2026-09-29';
+  const week = isoWeekOf(day);
+  expect(usedShortGold([
+    { size: 'normal', status: 'approved', payoutGold: 6, payoutDay: day },
+    { size: 'projeto', status: 'approved', payoutGold: 40, payoutDay: day },
+    { size: 'normal', status: 'submitted', payoutGold: 6, payoutDay: day },
+    { size: 'normal', status: 'approved', payoutGold: 4, payoutDay: '2026-09-01' },
+  ], week)).toBe(6);
+  expect(deadlineWeeks('2026-09-01', '2026-09-15')).toBe(2);
+  expect(projectWeekCap(22, 2)).toBe(44);
+  expect(projectOverCap(40, 22, 2)).toBe(false);
+  expect(projectOverCap(45, 22, 2)).toBe(true);
+  expect(needsCapWarn({ size: 'projeto', gold: 40, usedShort: 40, dayGold: 22, weeks: 2 })).toBe(false);
+  expect(needsCapWarn({ size: 'normal', gold: 6, usedShort: 40, dayGold: 22 })).toBe(true);
+  expect(bandFor('normal', 22).minGold).toBe(4);
+  expect(bandFor('normal', 30).minGold).toBe(6);
+});
+
+test('placa cheia de encomendas ainda mostra o recado do pai', () => {
+  const today = '2026-10-01';
+  expect(noticeUntil('new', today, '2026-10-04')).toBe('2026-10-04');
+  expect(noticeUntil('new', today)).toBe('2026-10-03');
+  expect(noticeUntil('ok', today)).toBe('2026-10-02');
+  expect(noticeUntil('fix', today)).toBe('2026-10-02');
+  const father = { id: 'pai', type: 'recado' as const, text: 'Treino às 16h' };
+  const orders = [1, 2, 3, 4].map((n) => ({
+    id: `asg_caixa${n}_new`,
+    type: 'recado' as const,
+    text: `Encomenda nova na Casa: caixa ${n}`,
+    until: '2026-10-06',
+  }));
+  const expired = { id: 'asg_velha_ok', type: 'recado' as const, text: 'Entrega aprovada: +6 gold', until: '2026-09-01' };
+  const ctx: NoticeContext = {
+    due: 0,
+    done: 0,
+    minDueForChest: 3,
+    chestOpenHour: 18,
+    chestOpened: true,
+    birthdayMmDd: '03-01',
+    gold: 10,
+    nearestReward: null,
+    avgGoldPerDay: 9,
+    tomorrowQuizTitle: null,
+    pauseDates: [],
+    vacation: false,
+    fatherNotices: orderFatherNotices([expired, ...orders, father]),
+    dismissed: [],
+  };
+  const items = noticesForNow(ctx, today, 10);
+  expect(items.some((item) => item.text === 'Treino às 16h')).toBe(true);
+  expect(items.some((item) => item.text.includes('Entrega aprovada'))).toBe(false);
+  expect(items.length).toBeLessThanOrEqual(3);
+  expect(items.filter((item) => item.text.startsWith('Encomenda nova')).length).toBe(2);
 });
 
 run();

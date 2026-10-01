@@ -6,6 +6,8 @@ import { useClock } from '../../../contexts/ClockContext';
 import { useSound } from '../../../contexts/SoundContext';
 import type { Assignment, AssignmentStatus } from '../../../types/assignment';
 import { acceptAssignment, dropAssignment, submitAssignment, subscribeAssignments } from '../../../services/assignmentsService';
+import { MATERIAL_LABELS } from '../../../config/englishBase';
+import type { Material } from '../../../types/english';
 import { effectiveStatus, isProjectSize } from '../../../services/assignments/machine';
 import { SPECIALTY_LABEL, SIZE_TIME, WEEKDAY_NAME, competencyName } from '../../../services/assignments/labels';
 import { templateById } from '../../../services/assignments/templates';
@@ -20,11 +22,13 @@ import {
   expiredLine,
   goldGainLine,
   limitLine,
+  materialLine,
   newCardKicker,
   offlineLine,
   planAsk,
   projectLimitLine,
   rewardLine,
+  showHow,
   sinceLine,
   submittedLine,
   adultBand,
@@ -233,6 +237,15 @@ const EncomendasQuadro: React.FC = () => {
               <p className="text-sm font-bold">Para ficar pronto</p>
               {selected.criteria.map((line) => <p key={line} className="text-sm">· {line}</p>)}
             </div>
+            <div className="space-y-1">
+              <p className="text-sm font-bold">Como mostrar</p>
+              <p className="text-sm">{showHow(selected.proof.kinds)}</p>
+            </div>
+            {selected.reward.materials && (Object.entries(selected.reward.materials) as Array<[Material, number]>)
+              .filter(([, qty]) => qty > 0)
+              .map(([name, qty]) => (
+                <p key={name} className="text-sm">{materialLine(MATERIAL_LABELS[name], qty)}</p>
+              ))}
             <p className="text-sm flex items-center gap-2">
               <img src={GOLD} alt="" className="w-8 h-8 mc-pixel" draggable={false} />
               <span className="mc-num">{rewardLine(selected.reward.gold)}</span>
@@ -281,7 +294,12 @@ const EncomendasQuadro: React.FC = () => {
             <button type="button" className="mc-btn mc-btn-green min-h-[44px] w-full" onClick={() => { playClick(); setMode('proof'); }}>
               {eff === 'needs_changes' ? 'Entregar de novo' : 'Entregar'}
             </button>
-            <button type="button" className="mc-btn mc-btn-wood min-h-[44px] w-full" onClick={() => { playClick(); setMode('drop'); }}>
+            <button
+              type="button"
+              data-testid="desistir-encomenda"
+              className="min-h-[44px] px-1 text-sm underline text-left"
+              onClick={() => { playClick(); setMode('drop'); }}
+            >
               Desistir desta encomenda
             </button>
           </>
