@@ -15,7 +15,8 @@ import { judgeReflection, type ReflectionJudge } from '../../services/aiDailyQui
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
 import { setAppBusy } from '../../services/appUpdate';
-import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionGate, reflectionMinWords, reflectionThemeHits, SAGE_DOT_MS, SAGE_LINE_MS, sageReadFrame, sageReadSpeech, wordCount, retryable } from '../../services/quiz/provaRules';
+import { VERSION_PANEL, VERSION_TABLE } from '../../services/generationGuard';
+import { EXPLAIN_READ_MS, LESSON_READ_MS, quizScoreOf, readingMs, readRingDash, reflectionGate, reflectionMinWords, reflectionThemeHits, reflectionWordCount, SAGE_DOT_MS, SAGE_LINE_MS, sageReadFrame, sageReadSpeech, retryable } from '../../services/quiz/provaRules';
 import { nudgeFor, nudgeIdsInWindow, rememberNudge, resultLine } from '../../services/quiz/nudge';
 import { SAGE_LOCAL_OK } from '../../services/quiz/sageSay';
 import type { BankAttempt } from '../../services/quiz/bankWrite';
@@ -198,6 +199,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const count = progress.quizQuestionCount || DAILY_QUIZ_QUESTIONS;
 
   const [quiz, setQuiz] = useState<StoredDailyQuiz | null>(null);
+  const [stale, setStale] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('prompt');
@@ -263,6 +265,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     if (!childUid || !enabled) return;
     const unsub = subscribeDailyQuiz(childUid, today, (q) => {
       setQuiz(q);
+      if (q && q.questions.length > 0) setStale(false);
       setLoaded(true);
       // chave antiga gravada por engano (aba que virou a meia-noite) não pode manter o dia destrancado
       if (q && !q.completed) { localStorage.removeItem(QUIZ_DONE_KEY(childUid, today)); onPending?.(); }
@@ -277,9 +280,17 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     try {
       const q = await ensureDailyQuiz(childUid, today, today, count);
       setQuiz(q);
+      setStale(false);
     } catch (e) {
       console.error('DailyQuiz: erro ao preparar a prova', e);
-      setError('A mesa ainda está vazia. Tenta de novo.');
+      const message = e instanceof Error ? e.message : '';
+      if (message === VERSION_PANEL) {
+        setStale(true);
+        setError(null);
+      } else {
+        setStale(false);
+        setError('A mesa ainda está vazia. Tenta de novo.');
+      }
     } finally {
       setGenerating(false);
     }
@@ -585,7 +596,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
       title: quiz.theme.title,
       lesson: quiz.theme.lesson,
     };
-    if (wordCount(reflection) < reflectionMinWords(village.launchedOn, today)) return;
+    if (reflectionWordCount(reflection) < reflectionMinWords(village.launchedOn, today)) return;
     const gate = reflectionGate(reflection, about, village.launchedOn, today, offtopicAsked.current);
     if (!gate.ok) {
       if (gate.code === 'offtopic') offtopicAsked.current = true;
@@ -740,12 +751,44 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
 
   const readFrame = saving ? sageReadFrame(readMs, verdictAt.current) : null;
 
-  if (!enabled || !open || !quiz) return null;
+  if (!enabled || !open) return null;
+  if (!quiz) {
+    if (!stale) return null;
+    return (
+      <AnimatePresence>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 pb-24 sm:p-4 sm:pb-24 mn-veil">
+          <div className="mc-modal mn-prova-sheet is-scroll mc-pop mn-child-sheet w-full max-w-3xl" role="dialog" aria-label="Prova do dia">
+            <div className="mn-child-body">
+              <div className="mn-prova-scroll-scene">
+                <PapyrusUnroll open={1}>
+                  <SageOnPaper kicker="Prova do dia" />
+                  <h3 className="mn-papiro-title">A prova de hoje ainda espera</h3>
+                  <p>{VERSION_TABLE}</p>
+                </PapyrusUnroll>
+              </div>
+            </div>
+            <div className="mn-child-foot">
+              <button
+                type="button"
+                onClick={() => { playClick(); window.location.reload(); }}
+                className="mc-btn mc-btn-green min-h-[44px] px-6"
+              >
+                Recarregar agora
+              </button>
+              <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
+                Voltar à Vila
+              </button>
+            </div>
+          </div>
+        </div>
+      </AnimatePresence>
+    );
+  }
 
   const explainText = selected && question ? question.explanation : '';
   const counted = quizScoreOf(quiz.questions, quiz.answers?.length ? quiz.answers : answers);
   const reflectMin = reflectionMinWords(village.launchedOn, today);
-  const canDeliver = wordCount(reflection) >= reflectMin;
+  const canDeliver = reflectionWordCount(reflection) >= reflectMin;
 
   return (
     <AnimatePresence>
@@ -1029,7 +1072,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                   className={`mc-btn min-h-[44px] px-6 ${canDeliver ? 'mc-btn-green' : 'mc-btn-stone'}`}
                 >
                   Entregar
-                  <span className="mc-num ml-2" data-testid="reflect-count">{wordCount(reflection)} / {reflectMin}</span>
+                  <span className="mc-num ml-2" data-testid="reflect-count">{reflectionWordCount(reflection)} / {reflectMin}</span>
                 </button>
                 <button type="button" onClick={postpone} className="mc-btn mc-btn-stone min-h-[44px] px-6">
                   Voltar à Vila

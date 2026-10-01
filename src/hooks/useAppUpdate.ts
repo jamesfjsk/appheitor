@@ -64,6 +64,8 @@ export function useAppUpdate(): void {
     const refresh = async () => {
       const next = await fetchLatest();
       if (dead || !next) return;
+      // A sondagem segue o ocioso de sempre. Recarregar na hora fica só para a geração recusada,
+      // para não perder o texto que o pai digita no painel quando sai uma versão nova.
       latest = next;
     };
 

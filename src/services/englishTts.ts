@@ -12,6 +12,7 @@ import { functions, db } from '../config/firebase';
 import { DEFAULT_MODULES } from '../config/village';
 import { getSettings } from './settingsService';
 import type { ModuleSettings } from '../types/village';
+import { playbackCounts, type PlaybackReason } from './english/playback';
 
 const TTS_MODEL = 'gpt-4o-mini-tts';
 const TTS_VOICE = 'nova';
@@ -146,29 +147,29 @@ function playUrl(url: string): Promise<boolean> {
       el.removeEventListener('ended', onEnded);
       el.removeEventListener('error', onError);
     };
-    const finish = (ok: boolean) => {
+    const finish = (reason: PlaybackReason) => {
       if (settled) return;
       settled = true;
       clearTimeout(guard);
       detach();
       if (current === el) current = null;
-      if (currentSettle === finishTrue) currentSettle = null;
-      resolve(ok);
+      if (currentSettle === onStop) currentSettle = null;
+      resolve(playbackCounts(reason));
     };
-    const finishTrue = () => finish(true);
-    const onEnded = () => finish(true);
-    const onError = () => finish(false);
-    guard = window.setTimeout(onEnded, PLAY_GUARD_MS);
+    const onStop = () => finish('stopped');
+    const onEnded = () => finish('ended');
+    const onError = () => finish('error');
+    guard = window.setTimeout(() => finish('timeout'), PLAY_GUARD_MS);
     el.addEventListener('ended', onEnded);
     el.addEventListener('error', onError);
-    currentSettle = finishTrue;
+    currentSettle = onStop;
     current = el;
     el.currentTime = 0;
     el.play().catch(onError);
   });
 }
 
-/** Toca o mp3 da voz nova. Sem URL, silêncio. Nunca rejeita. false = a voz não saiu. */
+/** Toca o mp3 da voz nova. Sem URL, silêncio. Nunca rejeita. false = não saiu, foi cortado ou estourou o tempo. */
 export async function playText(text: string, opts?: PlayTextOpts): Promise<boolean> {
   stopAudio();
   const normalized = normalizeText(text);

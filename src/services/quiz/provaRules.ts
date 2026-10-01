@@ -17,8 +17,13 @@ export function normalizeQuizText(s: string): string {
     .replace(/\s+/g, ' ');
 }
 
-/** Palavra de verdade. Vírgula solta, ponto e o "…" do molde não contam. */
+/** Palavra do validador. "12 + 8" tem 3. Pontuação solta conta. */
 export function wordCount(s: string): number {
+  return s.trim().split(/\s+/).filter(Boolean).length;
+}
+
+/** Palavra da reflexão. Vírgula solta, ponto e o "…" do molde não contam. */
+export function reflectionWordCount(s: string): number {
   return s
     .trim()
     .split(/\s+/)
@@ -234,7 +239,7 @@ export function reflectOfftopicSay(title: string): string {
 export function reflectionLocalSay(text: string, about: { prompt: string; title: string; lesson: string }): string | null {
   const trimmed = text.trim();
   // Piso da primeira semana. O de 12 palavras fica em reflectionGate.
-  if (wordCount(trimmed) < 8) return REFLECT_SHORT;
+  if (reflectionWordCount(trimmed) < 8) return REFLECT_SHORT;
   if (hasKeyMash(trimmed)) return REFLECT_MASH;
   if (hasRepeatedWord(trimmed, 4) || uniqueWordCount(trimmed) < 6) return REFLECT_THIN;
   if (contentWords(trimmed).length < 3) return REFLECT_SHORT;
@@ -247,7 +252,7 @@ export function reflectionLocalSay(text: string, about: { prompt: string; title:
 export function reflectionOk(text: string, about?: { prompt: string; title: string; lesson: string }): boolean {
   if (about) return reflectionLocalSay(text, about) === null;
   const trimmed = text.trim();
-  if (wordCount(trimmed) < REFLECTION_MIN_WORDS) return false;
+  if (reflectionWordCount(trimmed) < REFLECTION_MIN_WORDS) return false;
   if (hasRepeatedWord(trimmed, 4)) return false;
   if (hasKeyMash(trimmed)) return false;
   if (uniqueWordCount(trimmed) < 6) return false;
@@ -330,7 +335,7 @@ export function reflectionGate(
   offtopicAsked: boolean,
 ): ReflectionGate {
   const trimmed = text.trim();
-  if (wordCount(trimmed) < reflectionMinWords(launchedOn, today)) return { ok: false, code: 'short', say: REFLECT_SHORT };
+  if (reflectionWordCount(trimmed) < reflectionMinWords(launchedOn, today)) return { ok: false, code: 'short', say: REFLECT_SHORT };
   if (hasKeyMash(trimmed)) return { ok: false, code: 'mash', say: REFLECT_MASH };
   if (hasRepeatedWord(trimmed, 4) || uniqueWordCount(trimmed) < 6) return { ok: false, code: 'thin', say: REFLECT_THIN };
   if (contentWords(trimmed).length < 3) return { ok: false, code: 'short', say: REFLECT_SHORT };

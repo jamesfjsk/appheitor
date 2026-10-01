@@ -1344,3 +1344,15 @@ A junção no `main` (`6ed27ec`, `5cd3059`, `029f34b`) é idêntica à simulada 
 2. Mina, "Nível do conteúdo", Nível 2, salvar. Isso regenera os planos de 01/10 em diante que estão no 3.
 
 **Desenho novo:** `MINA_CONTRATOS.md` §9, o banco em `docs/conteudo/INGLES_UNIDADES.md` (amostra do pai: U1 e U5) e a frente em `PROMPT_CURSOR_2026-09-30_INGLES.md`.
+
+## P12-C — revisão de 01/10: junta, com uma correção do líder
+
+Os sete itens estão feitos e testados. A barra passou depois da junção.
+
+**Corrigido pelo líder na junção:**
+- A sondagem de 10 minutos (`useAppUpdate`) passou a recarregar na hora, sem o ocioso e sem o intervalo. Assim, depois de cada push, o painel recarregaria no meio de um texto digitado pelo pai.
+  - Agora o recarregamento imediato fica só para a geração recusada, que era o pedido do item 1.
+  - A sondagem volta ao ocioso de sempre.
+- `requestVersionReload` não tinha trava contra laço: se o recarregamento não trouxesse a versão nova, recarregaria sem parar.
+  - Agora recarrega uma vez por versão na aba (`mm_version_reload` no `sessionStorage`).
+  - Depois disso, a mesa mostra "Recarregar agora".

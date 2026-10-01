@@ -21,8 +21,8 @@ import { normalizedTokens } from './english/notePrecheck';
 import { assertAiBudget, buildDailyContracts, regenerateSingle } from './englishAi';
 import { prefetchAudio } from './englishTts';
 import { addDays } from './dailyQuizService';
-import { mayGenerateNow } from './generationGuard';
-import { readPublishedVersion } from './appUpdate';
+import { generationBlock, guardHost, refuseMessage } from './generationGuard';
+import { readPublishedVersion, requestVersionReload } from './appUpdate';
 import { getAppVersion } from './observability';
 import { getTodayBrazil } from '../utils/timezone';
 import { addVillageStats } from './village/stats';
@@ -38,13 +38,15 @@ const RECENT_LOOKBACK_DAYS = 30;
 const UPCOMING_MAX_DAYS = 7;
 export const planId = (uid: string, date: string): string => `${uid}_${date}`;
 
-async function planGenerationVersion(uid: string): Promise<string | null> {
+async function planGenerationVersion(uid: string): Promise<string> {
   const running = getAppVersion();
   const latest = await readPublishedVersion();
   const dev = Boolean(import.meta.env.DEV);
-  if (!mayGenerateNow({ running, latest, dev, uid })) {
-    console.warn('plano: esta aba não gera', { running, latest, dev, uid });
-    return null;
+  const block = generationBlock({ running, latest, dev, uid, hostname: guardHost() });
+  if (block) {
+    console.warn('plano: esta aba não gera', { running, latest, dev, uid, block });
+    if (block === 'version') requestVersionReload(latest, running);
+    throw new Error(refuseMessage(block));
   }
   return running;
 }
@@ -440,7 +442,6 @@ async function ensurePlanInner(uid: string, date: string, onProgress?: (ready: n
   const existing = await getPlan(uid, date);
   if (existing?.status === 'ready') return existing;
   const version = await planGenerationVersion(uid);
-  if (!version) throw new Error('O plano espera a versão nova.');
   for (let attempt = 0; attempt < WAIT_ATTEMPTS; attempt++) {
     const base = await ensureBase(uid);
     const lease = await acquireLease(uid, date, base.level, false);
@@ -480,7 +481,6 @@ async function regeneratePlan(uid: string, date: string): Promise<DailyPlan> {
   if (running) await running.catch(() => undefined);
   const task = (async () => {
     const version = await planGenerationVersion(uid);
-    if (!version) throw new Error('O plano espera a versão nova.');
     const base = await ensureBase(uid);
     const lease = await acquireLease(uid, date, base.level, true);
     if (lease.kind !== 'acquired') throw new Error('Não foi possível assumir a regeneração do plano.');
@@ -805,7 +805,6 @@ export async function setBaseLevel(uid: string, level: number): Promise<void> {
 /** Regenera um contrato aberto (version + 1); o plano passa a 'mixed' quando as fontes divergem */
 export async function regenerateContract(uid: string, date: string, contractId: string): Promise<void> {
   const generatedVersion = await planGenerationVersion(uid);
-  if (!generatedVersion) throw new Error('O plano espera a versão nova.');
   const ref = planRef(uid, date);
   const plan = await getPlan(uid, date);
   if (!plan) throw new Error('Plano não encontrado.');
@@ -831,8 +830,7 @@ export async function regenerateContract(uid: string, date: string, contractId: 
 
 /** Garante hoje..hoje+days em sequência (máximo 7); planos prontos ficam como estão */
 export async function generateUpcomingDays(uid: string, days: number, onProgress?: (done: number, total: number) => void): Promise<void> {
-  const version = await planGenerationVersion(uid);
-  if (!version) throw new Error('O plano espera a versão nova.');
+  await planGenerationVersion(uid);
   const count = Math.min(UPCOMING_MAX_DAYS, Math.max(0, Math.floor(num(days))));
   const today = getTodayBrazil();
   const total = count + 1;

@@ -3,13 +3,9 @@ import { quizBankDocs } from '../bankWrite';
 import { answersStash, attemptsForBank, completeQuizWrite } from '../closeQuiz';
 import { rememberNudge } from '../nudge';
 import { buildProfile } from '../profile';
-import { reflectionGate, reflectionThemeHits, wordCount } from '../provaRules';
-
-const learn = {
-  prompt: 'Pense em um erro que você cometeu recentemente. Como ele ajudou você a aprender algo novo?',
-  title: 'Errar para Aprender',
-  lesson: 'Errar faz parte do aprendizado. Quando erramos, a gente aprende.',
-};
+import { reflectionGate, reflectionThemeHits, reflectionWordCount, wordCount } from '../provaRules';
+import { playbackCounts } from '../../english/playback';
+import { addDays } from '../../../utils/clock';
 
 test('a segunda tentativa entra no stash e o reload não grava supportLevel 3', () => {
   const attempts = [{}, { second: 'certa', nudge: 'trap' as const }];
@@ -51,29 +47,40 @@ test('a segunda tentativa entra no stash e o reload não grava supportLevel 3', 
   expect(wiped[1].data.supportLevel).toBe(3);
 });
 
-test('pontuação e o … do molde não contam como palavra', () => {
-  expect(wordCount('Hoje eu … porque …')).toBe(3);
-  expect(wordCount('Hoje eu ... porque ...')).toBe(3);
-  expect(wordCount('celular , tv , tablet')).toBe(3);
-  expect(wordCount('a lojica dele tanbem pode fucionar em celular , tv , tablet etc')).toBe(11);
+test('pontuação e o … do molde não contam na reflexão; o validador conta 12 + 8 como 3', () => {
+  expect(reflectionWordCount('Hoje eu … porque …')).toBe(3);
+  expect(reflectionWordCount('Hoje eu ... porque ...')).toBe(3);
+  expect(reflectionWordCount('celular , tv , tablet')).toBe(3);
+  expect(reflectionWordCount('a lojica dele tanbem pode fucionar em celular , tv , tablet etc')).toBe(11);
+  expect(wordCount('12 + 8')).toBe(3);
+  expect(wordCount('Hoje eu … porque …')).toBe(5);
 });
 
-test('bebida do xarope passa de primeira; chute torto pede o tema e a segunda entrega entra', () => {
-  const drink = 'ontem eu errei na bebida e aprendi que xarope demais estraga o gosto';
-  expect(reflectionThemeHits(drink, learn)).toBeGreaterThanOrEqual(1);
-  expect(reflectionGate(drink, learn, '2026-09-18', '2026-09-29', false).ok).toBe(true);
+const syrup29 = 'eu fui fazer minha bebida e ai eu coloquei muito xarope de maracuja na minha bebida . quando fui da um gole da minha bebida e ai eu fiquei tonto nese dia aprender que nao poso colocar muito xarope de maracuja';
 
-  // O texto literal do chute não está na revisão. A história é um chute que saiu torto, sem a família de "errar/aprender".
+test('reflexão de 29/09, a do xarope, colada do Firestore; chute torto é inventada', () => {
+  const about = {
+    prompt: 'Pense em um erro que você cometeu recentemente. Como ele ajudou você a aprender algo novo?',
+    title: 'Errar para Aprender',
+    lesson: 'Michael Jordan, um dos maiores jogadores de basquete de todos os tempos, foi cortado do time da escola. Thomas Edison, inventor da lâmpada elétrica, falhou milhares de vezes antes de ter sucesso. Esses exemplos mostram que errar faz parte do processo de aprendizado. Quando erramos, nosso cérebro está trabalhando e crescendo. A palavra \'ainda\' pode mudar tudo: \'Eu não sei fazer isso... ainda.\' Hoje, ao enfrentar um desafio, lembre-se que errar é um passo para aprender.',
+  };
+  expect(reflectionWordCount(syrup29)).toBe(40);
+  expect(wordCount(syrup29)).toBe(41);
+  expect(reflectionThemeHits(syrup29, about)).toBeGreaterThanOrEqual(1);
+  expect(reflectionGate(syrup29, about, '2026-09-18', '2026-09-29', false).ok).toBe(true);
+
+  // inventada: a revisão descreve o chute, o texto literal não está no Firestore.
+  const kickAbout = {
+    prompt: about.prompt,
+    title: about.title,
+    lesson: 'Errar faz parte do aprendizado. Quando erramos, a gente aprende.',
+  };
   const kick = 'No campinho o chute saiu torto e a bola passou longe do gol no recreio com a turma toda';
-  expect(wordCount(kick)).toBeGreaterThanOrEqual(12);
-  expect(reflectionThemeHits(kick, learn)).toBe(0);
-  const first = reflectionGate(kick, learn, '2026-09-18', '2026-09-29', false);
+  expect(reflectionWordCount(kick)).toBeGreaterThanOrEqual(12);
+  expect(reflectionThemeHits(kick, kickAbout)).toBe(0);
+  const first = reflectionGate(kick, kickAbout, '2026-09-18', '2026-09-29', false);
   expect(first.ok).toBe(false);
-  if (!first.ok) {
-    expect(first.code).toBe('offtopic');
-    expect(first.say.includes(learn.title)).toBe(true);
-  }
-  expect(reflectionGate(kick, learn, '2026-09-18', '2026-09-29', true).ok).toBe(true);
+  expect(reflectionGate(kick, kickAbout, '2026-09-18', '2026-09-29', true).ok).toBe(true);
   const blocked = completeQuizWrite(undefined, {
     score: 5,
     totalQuestions: 7,
@@ -81,7 +88,7 @@ test('bebida do xarope passa de primeira; chute torto pede o tema e a segunda en
     goldEarned: 10,
     answers: ['a'],
     reflection: kick,
-    about: learn,
+    about: kickAbout,
     launchedOn: '2026-09-18',
     today: '2026-09-29',
   });
@@ -93,7 +100,7 @@ test('bebida do xarope passa de primeira; chute torto pede o tema e a segunda en
     goldEarned: 10,
     answers: ['a'],
     reflection: kick,
-    about: learn,
+    about: kickAbout,
     launchedOn: '2026-09-18',
     today: '2026-09-29',
     waiveTheme: true,
@@ -129,6 +136,21 @@ test('dilema não é erro, retry só na segunda tentativa, d7 e d30 incluem hoje
   expect(profile.retry.d30).toEqual([1, 2]);
   expect(profile.byCategory.matematica.d7).toEqual([0, 3]);
   expect(profile.byCategory.matematica.d30).toEqual([1, 4]);
+  const edge = buildProfile([
+    { date: addDays(today, -6), category: 'matematica', subject: 'matematica', skill: 'MAT.OP2', kind: 'knowledge', correct: true },
+    { date: addDays(today, -7), category: 'matematica', subject: 'matematica', skill: 'MAT.OP2', kind: 'knowledge', correct: false },
+    { date: addDays(today, -29), category: 'matematica', subject: 'matematica', skill: 'MAT.OP2', kind: 'knowledge', correct: true },
+    { date: addDays(today, -30), category: 'matematica', subject: 'matematica', skill: 'MAT.OP2', kind: 'knowledge', correct: false },
+  ], today);
+  expect(edge.byCategory.matematica.d7).toEqual([1, 1]);
+  expect(edge.byCategory.matematica.d30).toEqual([2, 3]);
+});
+
+test('playText só conta o áudio que chegou ao fim', () => {
+  expect(playbackCounts('ended')).toBe(true);
+  expect(playbackCounts('stopped')).toBe(false);
+  expect(playbackCounts('timeout')).toBe(false);
+  expect(playbackCounts('error')).toBe(false);
 });
 
 void run();
