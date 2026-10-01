@@ -600,8 +600,6 @@ export async function completeContract(
     // O nível é só o do painel (setBaseLevel). Até 30/09 o Comerciante subia o nível de todos os contratos.
 
     const materials = { ...base.materials, [contract.material]: base.materials[contract.material] + material };
-    // Recado no estágio 2: a "Dica" custa 1 ferro (a tela só a libera com ferro em caixa)
-    if (contract.type === 'note' && outcome.details?.hintUsed === true) materials.ferro = Math.max(0, materials.ferro - 1);
     const vocab = { ...base.vocab };
     for (const lemma of new Set(lemmasOf(contract, outcome))) {
       vocab[lemma] = { seen: (vocab[lemma]?.seen ?? 0) + 1, lastDate: date };

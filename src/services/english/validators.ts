@@ -394,6 +394,28 @@ export function validateLetter(raw: unknown, level: number, vocabKnown: string[]
 
 const NUMBER_SET = new Set(NUMBER_WORDS);
 
+/** Frases do pedido: uma ideia por frase, na ordem do "não pode faltar". */
+export function briefSentences(brief: string): string[] {
+  return brief
+    .split(/[.!?]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+/** O pedido cita cada ideia na frase da mesma posição, nem mais nem menos frases. */
+export function briefIdeaProblems(brief: string, infos: NoteInfo[]): string[] {
+  const sentences = briefSentences(brief);
+  if (sentences.length !== infos.length) {
+    return [`pedido com ${sentences.length} frases (esperado ${infos.length}, uma ideia cada)`];
+  }
+  const problems: string[] = [];
+  infos.forEach((info, i) => {
+    const pt = info.pt.trim().toLowerCase();
+    if (!pt || !sentences[i].toLowerCase().includes(pt)) problems.push(`frase ${i + 1} não cita "${info.pt}"`);
+  });
+  return problems;
+}
+
 /** model precisa conter as 3 infos (pré-checagem); banco 10-14 sem dígitos; templates do nível quando faltam */
 export function validateNote(raw: unknown, level: number): ValidationResult<NoteContent> {
   const lv = levelFor(level);
@@ -417,6 +439,12 @@ export function validateNote(raw: unknown, level: number): ValidationResult<Note
   if (mustInclude.length < 3) {
     ok = false;
     problems.push(`mustInclude com ${mustInclude.length} informações válidas (esperado 3)`);
+  } else if (brief) {
+    const ideaProblems = briefIdeaProblems(brief, mustInclude);
+    if (ideaProblems.length) {
+      ok = false;
+      problems.push(...ideaProblems);
+    }
   }
   const model = str(r.model);
   if (!model) {

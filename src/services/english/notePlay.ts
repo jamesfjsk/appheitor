@@ -336,6 +336,24 @@ export function recadoGrade(score: number): string {
   return 'O quadro ainda não falou o pedido. Olha o giz.';
 }
 
+/** Segunda tentativa: a nota aparece, e no 3 o Capataz fecha o quadro. Não paga. */
+export function secondAttemptLine(score: number): string {
+  const n = Math.max(0, Math.min(3, Math.floor(score)));
+  if (n === 3) return 'Na segunda: 3 de 3. O quadro está certo.';
+  return `Na segunda: ${n} de 3.`;
+}
+
+/** Pregos pelo sentido, quando o juiz mandou as ideias. Sem isso, a pré-checagem. */
+export function pegsFromJudgement(j: NoteJudgement, written: string, infos: NoteInfo[]): PegReview[] {
+  if (j.ideas && j.ideas.length > 0) {
+    return infos.map((info) => {
+      const idea = j.ideas?.find((item) => item.pt.toLowerCase() === info.pt.toLowerCase());
+      return { pt: info.pt, en: info.en[0] ?? info.pt, ok: idea ? idea.ok : false };
+    });
+  }
+  return pegReview(written, infos);
+}
+
 export type ChalkTok = { text: string; mark: 'same' | 'bad' | 'good' };
 
 const wordsOf = (s: string): string[] => s.split(/\s+/).filter(Boolean);

@@ -85,10 +85,18 @@ test('levenshtein: transposição vizinha vale 1, troca dupla vale 2', () => {
 
 // ---------- nota: "other" bloqueia mesmo com fix curto ----------
 
-test('other é bloqueante (palavra em português curta: em -> in), spelling curto continua pequeno', () => {
+test('other perde o sentido só quando o juiz marca; falta de to nunca perde', () => {
   expect(classifyNoteError({ wrong: 'em the cave', fix: 'in the cave', tag: 'other' })).toBe('blocking');
   expect(classifyNoteError({ wrong: 'em the cave', fix: 'in the cave', tag: 'spelling' })).toBe('small');
-  expect(noteScore({ isEnglish: true, errors: [{ wrong: 'e', fix: 'and', tag: 'other' }], missing: [], corrected: '', note: '' })).toBe(1);
+  expect(noteScore({ isEnglish: true, errors: [{ wrong: 'e', fix: 'and', tag: 'other', meaningLost: true }], missing: [], corrected: '', note: '' })).toBe(1);
+  expect(noteScore({
+    isEnglish: true,
+    ideas: [{ pt: 'quero jogar', ok: true }],
+    errors: [{ wrong: 'want play', fix: 'want to play', tag: 'verb', meaningLost: true }],
+    missing: [],
+    corrected: '',
+    note: '',
+  })).toBe(2);
 });
 
 // ---------- embaralhamento ----------
@@ -160,7 +168,7 @@ test('validateLetter: glossário exige 4 válidas em qualquer nível (não o mí
 
 test('validateNote: sem ruído em problems quando a IA não manda templates; molde ruim da IA é descartado', () => {
   const note = {
-    brief: 'Peça 2 espadas e 1 picareta para a caverna.',
+    brief: 'Peça 2 espadas. Peça 1 picareta. Diga que é para a caverna.',
     mustInclude: [swords, { pt: '1 picareta', en: ['one pickaxe', 'a pickaxe'] }, cave],
     wordBank: ['need', 'sword', 'pickaxe', 'cave', 'for', 'have', 'want', 'torch', 'dog', 'and', 'is', 'the'],
     model: 'I need two swords and one pickaxe. The pickaxe is for the cave.',

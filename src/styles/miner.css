@@ -3777,6 +3777,15 @@ div.mn-pack-cell {
   word-spacing: 0.2em;
   line-height: 1.55;
 }
+.nb-second {
+  margin: 0 0 8px;
+  font-family: Fredoka, "Comic Neue", sans-serif;
+  font-size: var(--nb-chip, 15px);
+  font-weight: 700;
+  color: #ffe566;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
 .nb-fix-line { margin-top: 10px; }
 .nb-bad {
   color: #f3b4a8;

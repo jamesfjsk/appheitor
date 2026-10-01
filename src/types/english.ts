@@ -162,6 +162,14 @@ export interface NoteError {
   wrong: string;
   fix: string;
   tag: NoteErrorTag;
+  /** true só quando o leitor não entende. Falta de "to" ou de artigo nunca fica true. */
+  meaningLost?: boolean;
+}
+
+/** Ideia do pedido, julgada pelo sentido, com qualquer palavra e em qualquer ordem. */
+export interface NoteIdea {
+  pt: string;
+  ok: boolean;
 }
 
 export interface NoteLesson {
@@ -172,7 +180,9 @@ export interface NoteLesson {
 export interface NoteJudgement {
   isEnglish: boolean;
   errors: NoteError[];
-  /** Informações (pt) que faltaram */
+  /** Uma entrada por ideia do pedido. Ausente só no julgamento antigo. */
+  ideas?: NoteIdea[];
+  /** Informações (pt) que faltaram. Com a IA no ar, sai de `ideas`; o `missingInfos` local só entra se a IA falhar. */
   missing: string[];
   /** Edição mínima do texto da criança */
   corrected: string;
@@ -233,7 +243,7 @@ export interface BaseDoc {
   level: number;
   materials: Record<Material, number>;
   buildings: Record<BuildingId, number>;
-  /** 0 molde+banco; 1 só banco; 2 banco vira "Dica" paga (1 ferro) */
+  /** 0 molde+banco; 1 só banco; 2 o banco fica na dica grátis, depois da primeira tentativa */
   scaffoldStage: ScaffoldStage;
   /** Notas 3 seguidas no Recado (retira o andaime) */
   noteStreak3: number;

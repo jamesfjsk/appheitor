@@ -590,7 +590,7 @@ const NOTES_1: OfflineNote[] = [
     level: 1,
     theme: 'a lição da tarde',
     content: {
-      brief: 'Escreva um recado para o papai. Diga que você faz a lição primeiro. Depois você joga bola.',
+      brief: 'Diga ao papai que faço a lição. Diga que é primeiro. Diga que jogo bola.',
       mustInclude: [
         { pt: 'faço a lição', en: ['my homework', 'the homework', 'do my homework'] },
         { pt: 'primeiro', en: ['homework first', 'do first', 'first'] },
@@ -606,7 +606,7 @@ const NOTES_1: OfflineNote[] = [
     level: 1,
     theme: 'a pia da cozinha',
     content: {
-      brief: 'Escreva um recado para a mamãe. Diga que você lava o prato. Diga que é para ela.',
+      brief: 'Diga à mamãe que lavo o prato. Mostre o prato limpo. Diga que é para a mamãe.',
       mustInclude: [
         { pt: 'lavo o prato', en: ['wash the plate', 'I wash the plate', 'wash plate'] },
         { pt: 'o prato', en: ['the plate', 'plate'] },
@@ -622,7 +622,7 @@ const NOTES_1: OfflineNote[] = [
     level: 1,
     theme: 'a mochila da noite',
     content: {
-      brief: 'Escreva um recado para você. Diga que a mochila fica na cadeira. Diga que você está pronto para a escola.',
+      brief: 'Diga que a mochila está aí. Diga que fica na cadeira. Diga que está pronto para a escola.',
       mustInclude: [
         { pt: 'a mochila', en: ['my bag', 'the bag', 'bag'] },
         { pt: 'na cadeira', en: ['on the chair', 'on my chair', 'on chair'] },
@@ -638,7 +638,7 @@ const NOTES_1: OfflineNote[] = [
     level: 1,
     theme: 'um copo de água',
     content: {
-      brief: 'Escreva um recado para a mamãe. Peça com educação uma água. Diga que você tem sede.',
+      brief: 'Diga por favor. Diga que quero água. Diga que tenho sede.',
       mustInclude: [
         { pt: 'por favor', en: ['Please, I want', 'please I want', 'Please'] },
         { pt: 'quero água', en: ['I want water', 'want water', 'want a water', 'need water'] },
@@ -654,7 +654,7 @@ const NOTES_1: OfflineNote[] = [
     level: 1,
     theme: 'o jogo de amanhã',
     content: {
-      brief: 'Escreva um recado para o amigo. Peça desculpa. Diga que você está atrasado para o jogo.',
+      brief: 'Diga desculpa ao amigo. Diga que estou atrasado. Diga que é para o jogo.',
       mustInclude: [
         { pt: 'desculpa', en: ['I am sorry', 'am sorry', 'sorry'] },
         { pt: 'estou atrasado', en: ['I am late', 'am late', 'late'] },
@@ -670,7 +670,7 @@ const NOTES_1: OfflineNote[] = [
     level: 1,
     theme: 'o almoço em casa',
     content: {
-      brief: 'Escreva um recado para o papai. Agradeça o almoço. Diga que você gosta da comida.',
+      brief: 'Diga obrigado ao papai. Diga que é pelo almoço. Diga que gosto da comida.',
       mustInclude: [
         { pt: 'obrigado', en: ['Thank you', 'thank you', 'thanks'] },
         { pt: 'pelo almoço', en: ['for lunch', 'thank you for lunch'] },
@@ -689,7 +689,7 @@ const NOTES_2: OfflineNote[] = [
     level: 2,
     theme: 'bola depois da lição',
     content: {
-      brief: 'Escreva um recado para o papai. Peça permissão para jogar bola. Diga que a lição já está pronta.',
+      brief: 'Peça permissão para jogar bola. A lição já está pronta. Diga que é porque a lição está pronta.',
       mustInclude: [
         { pt: 'jogar bola', en: ['play soccer', 'play football', 'Can I play soccer'] },
         { pt: 'a lição', en: ['my homework', 'the homework', 'homework'] },
@@ -705,7 +705,7 @@ const NOTES_2: OfflineNote[] = [
     level: 2,
     theme: 'a tela depois do jantar',
     content: {
-      brief: 'Escreva um recado para a mamãe. Diga que você não liga a tela agora. Explique que é porque o jantar vem primeiro.',
+      brief: 'Diga que não quero a tela. O jantar ainda espera. Diga que é porque o jantar vem primeiro.',
       mustInclude: [
         { pt: 'não quero a tela', en: ["don't want the screen", 'do not want the screen', 'not want the screen', "don't want screen", 'not want screen'] },
         { pt: 'o jantar', en: ['dinner', 'because dinner'] },
@@ -721,7 +721,7 @@ const NOTES_2: OfflineNote[] = [
     level: 2,
     theme: 'a palavra difícil',
     content: {
-      brief: 'Escreva um recado para o professor. Peça ajuda com esta palavra. Explique que é porque ela é nova.',
+      brief: 'Peça ajuda ao professor. Aponte esta palavra. Diga que é porque é nova.',
       mustInclude: [
         { pt: 'ajuda', en: ['help me', 'Please help me', 'help'] },
         { pt: 'esta palavra', en: ['this word', 'the word', 'word'] },
@@ -737,7 +737,7 @@ const NOTES_2: OfflineNote[] = [
     level: 2,
     theme: 'água no treino',
     content: {
-      brief: 'Escreva um recado para o time. Diga que você bebe água no jogo. Explique que é porque você está com calor.',
+      brief: 'Diga que bebo água. Diga que é no jogo. Diga que é porque estou com calor.',
       mustInclude: [
         { pt: 'bebo água', en: ['drink water', 'I drink water'] },
         { pt: 'no jogo', en: ['at the game', 'in the game', 'at soccer', 'at the soccer game'] },
@@ -753,7 +753,7 @@ const NOTES_2: OfflineNote[] = [
     level: 2,
     theme: 'a cama feita',
     content: {
-      brief: 'Escreva um recado para a mamãe. Diga que a cama está pronta. Explique que é porque você quer o quarto limpo.',
+      brief: 'Diga que a cama está pronta. Olhe o quarto. Diga que é porque você quer o quarto limpo.',
       mustInclude: [
         { pt: 'a cama está pronta', en: ['The bed is ready', 'bed is ready', 'the bed'] },
         { pt: 'o quarto', en: ['a clean room', 'the room', 'room'] },
@@ -769,7 +769,7 @@ const NOTES_2: OfflineNote[] = [
     level: 2,
     theme: 'atraso em casa',
     content: {
-      brief: 'Escreva um recado para o amigo. Peça desculpa pelo atraso. Explique que é porque você ajuda em casa.',
+      brief: 'Diga desculpa. Diga que chegou atrasado. Diga que é porque ajudo em casa.',
       mustInclude: [
         { pt: 'desculpa', en: ['I am sorry', 'am sorry', 'sorry'] },
         { pt: 'atrasado', en: ['I am late', 'am late', 'late'] },
@@ -788,7 +788,7 @@ const NOTES_3: OfflineNote[] = [
     level: 3,
     theme: 'a lição agora',
     content: {
-      brief: 'Escreva um recado para o papai. Diga que você está fazendo a lição agora. Diga que depois você quer jogar. Diga que você deve esperar.',
+      brief: 'Diga que estou fazendo a lição. Diga que é para jogar. Diga que devo esperar.',
       mustInclude: [
         { pt: 'estou fazendo a lição', en: ['doing my homework', 'I am doing', 'am doing my homework'] },
         { pt: 'para jogar', en: ['to play', 'want to play', 'to play after'] },
@@ -804,7 +804,7 @@ const NOTES_3: OfflineNote[] = [
     level: 3,
     theme: 'o prato na pia',
     content: {
-      brief: 'Escreva um recado para a mamãe. Diga que você está lavando o prato. Diga que você deve guardar o copo. Diga que é para ela.',
+      brief: 'Diga que estou lavando o prato. Diga que devo guardar o copo. Diga que é para a mamãe.',
       mustInclude: [
         { pt: 'estou lavando o prato', en: ['washing the plate', 'I am washing', 'am washing the plate'] },
         { pt: 'devo guardar o copo', en: ['I must put', 'must put the cup'] },
@@ -820,7 +820,7 @@ const NOTES_3: OfflineNote[] = [
     level: 3,
     theme: 'tela apagada',
     content: {
-      brief: 'Escreva um recado para você. Diga que a tela está apagada agora. Diga que você deve dormir para jogar amanhã.',
+      brief: 'Diga que a tela está apagada. Diga que devo dormir. Diga que é para jogar amanhã.',
       mustInclude: [
         { pt: 'a tela está apagada', en: ['screen is off', 'The screen is off', 'is off now'] },
         { pt: 'devo dormir', en: ['I must sleep', 'must sleep'] },
@@ -836,7 +836,7 @@ const NOTES_3: OfflineNote[] = [
     level: 3,
     theme: 'a mochila de amanhã',
     content: {
-      brief: 'Escreva um recado para o papai. Diga que você está pondo os livros na mochila. Diga que você deve terminar hoje. Diga que é para a escola.',
+      brief: 'Diga que estou pondo os livros na mochila. Diga que devo terminar hoje. Diga que é para a escola.',
       mustInclude: [
         { pt: 'estou pondo os livros', en: ['putting books', 'I am putting', 'am putting books'] },
         { pt: 'devo terminar', en: ['I must finish', 'must finish'] },
@@ -852,7 +852,7 @@ const NOTES_3: OfflineNote[] = [
     level: 3,
     theme: 'o jantar em família',
     content: {
-      brief: 'Escreva um recado para a mamãe. Agradeça o jantar. Diga que você deve ajudar na cozinha. Diga que você está lavando agora.',
+      brief: 'Diga obrigado pelo jantar. Diga que devo ajudar na cozinha. Diga que estou lavando agora.',
       mustInclude: [
         { pt: 'obrigado pelo jantar', en: ['Thank you for dinner', 'for dinner', 'thank you'] },
         { pt: 'devo ajudar', en: ['I must help', 'must help'] },
@@ -868,7 +868,7 @@ const NOTES_3: OfflineNote[] = [
     level: 3,
     theme: 'a verdade ao amigo',
     content: {
-      brief: 'Escreva um recado para o amigo. Peça desculpa. Diga que você deve falar a verdade. Diga que você está tentando agora.',
+      brief: 'Diga desculpa ao amigo. Diga que devo falar a verdade. Diga que estou tentando agora.',
       mustInclude: [
         { pt: 'desculpa', en: ['I am sorry', 'am sorry', 'sorry'] },
         { pt: 'devo falar a verdade', en: ['must tell the truth', 'I must tell', 'tell the truth'] },

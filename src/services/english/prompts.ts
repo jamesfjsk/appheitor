@@ -337,7 +337,7 @@ function notePrompt(input: NotePromptInput): BuiltPrompt {
     bullet(lv.noteInfoKinds.map((k, i) => `info ${i + 1}: ${k}`)),
     'Rules:',
     bullet([
-      '"brief": 1-2 sentences in Portuguese, natural, e.g. "Escreva um recado para o papai. Diga que você faz a lição primeiro. Depois você joga bola." It mentions ONLY the 3 infos and never gives the English words. The note is to dad, mom, a friend, a teacher, or himself — never to the blacksmith.',
+      '"brief": exactly 3 sentences in Portuguese, in the SAME order as the 3 infos. Sentence 1 states only info 1 and contains the exact "pt" text of info 1; sentence 2 only info 2 with its exact "pt"; sentence 3 only info 3 with its exact "pt". No fourth sentence and no extra idea. Never give the English words. The note is to dad, mom, a friend, a teacher, or himself — never to the blacksmith. Example: "Diga ao papai que faço a lição. Diga que é primeiro. Diga que jogo bola."',
       '"mustInclude": the 3 infos in the same order as the brief; "pt" is how a hint would describe it in Portuguese ("faço a lição"); "en" lists 3-5 accepted English variants of the SAME info, each 2-5 words: the first one is the exact phrase copied from the model answer, the others are short wordings a child would type ("my homework", "the homework", "homework first"); for a reason or deal include the connector ("because dinner is first", "for mom")',
       `"model": a correct answer with ${sentences} sentences, each at most ${lv.maxWords} words, that contains WORD BY WORD one "en" variant of each info; the validator checks this literally, so if the model says "because dinner is first" that exact phrase must be one of the variants`,
       '"wordBank": 10-14 English words in base form: every content word of the model (nouns in singular, verbs, adjectives, prepositions) plus 3 distractor content words from home/school/football; no number words (one, two...), no digits, no a/an/the, no pronouns, no capital letters, no mine words (torch, sword, pickaxe, cave, tunnel, miner)',
@@ -448,7 +448,7 @@ export function buildJudgePrompt(input: JudgePromptInput): BuiltPrompt {
     input.template ? `Template shown on screen: ${input.template}` : 'No template was shown.',
     `Learner text:\n"""\n${input.text}\n"""`,
     'Schema:',
-    '{ "isEnglish": true, "errors": [{ "wrong": "I play soccer first", "fix": "I do my homework first", "tag": "word_order" }], "missing": ["faço a lição"], "corrected": "...", "note": "...", "lessons": [{ "pt": "faço a lição", "say": "..." }] }',
+    '{ "isEnglish": true, "ideas": [{ "pt": "faço a lição", "ok": true }, { "pt": "primeiro", "ok": true }, { "pt": "jogo bola", "ok": true }], "errors": [{ "wrong": "want play", "fix": "want to play", "tag": "verb", "meaningLost": false }], "corrected": "...", "note": "...", "lessons": [{ "pt": "faço a lição", "say": "..." }] }',
   ].join('\n\n');
   return { system, user, maxTokens: PROMPT_MAX_TOKENS.judge };
 }

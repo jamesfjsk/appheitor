@@ -3,6 +3,7 @@ import type { NoteError, NoteJudgement } from '../../../types/english';
 import {
   applyFurnaceBonus,
   classifyNoteError,
+  errorLosesMeaning,
   forgeMaterial,
   letterMaterial,
   materialFor,
@@ -23,7 +24,12 @@ const judge = (errors: NoteError[], missing: string[] = [], isEnglish = true): O
   note: '',
 });
 
-const err = (wrong: string, fix: string, tag: NoteError['tag']): NoteError => ({ wrong, fix, tag });
+const err = (wrong: string, fix: string, tag: NoteError['tag'], meaningLost = false): NoteError => ({
+  wrong,
+  fix,
+  tag,
+  ...(meaningLost ? { meaningLost: true } : {}),
+});
 
 const noteCases: { name: string; j: Omit<NoteJudgement, 'score'>; level?: number; expected: 0 | 1 | 2 | 3 }[] = [
   { name: 'não é inglês', j: judge([], [], false), expected: 0 },
@@ -32,21 +38,88 @@ const noteCases: { name: string; j: Omit<NoteJudgement, 'score'>; level?: number
   { name: '1 plural', j: judge([err('two sword', 'two swords', 'plural')]), expected: 2 },
   { name: 'artigo + preposição', j: judge([err('a apple', 'an apple', 'article'), err('in the table', 'on the table', 'preposition')]), expected: 2 },
   { name: '3 pequenos', j: judge([err('a apple', 'an apple', 'article'), err('sword', 'swords', 'plural'), err('in', 'on', 'preposition')]), expected: 1 },
-  { name: 'verbo errado', j: judge([err('I has', 'I have', 'verb')]), expected: 1 },
-  { name: 'ordem muda o sentido', j: judge([err('the dog for', 'for the dog', 'word_order')]), expected: 1 },
+  { name: 'verbo que não muda o sentido', j: judge([err('I has', 'I have', 'verb')]), expected: 2 },
+  { name: 'ordem que perde o sentido', j: judge([err('the dog for', 'for the dog', 'word_order', true)]), expected: 1 },
   { name: 'grafia com 2 letras', j: judge([err('swrod', 'sword', 'spelling')]), expected: 2 },
-  { name: 'palavra em português (other, fix grande)', j: judge([err('espada', 'sword', 'other')]), expected: 1 },
+  { name: 'palavra em português que perde o sentido', j: judge([err('espada', 'sword', 'other', true)]), expected: 1 },
   { name: 'dígito no nível 1 é ignorado', j: judge([err('2 swords', 'two swords', 'spelling')]), level: 1, expected: 3 },
   { name: 'dígito no nível 2 conta como pequeno', j: judge([err('2 swords', 'two swords', 'spelling')]), level: 2, expected: 2 },
   { name: 'só maiúscula/pontuação é ignorado', j: judge([err('i need', 'I need', 'other'), err('swords', 'swords.', 'other')]), expected: 3 },
   { name: 'faltou informação com erro pequeno continua 1', j: judge([err('sword', 'swords', 'plural')], ['1 picareta']), expected: 1 },
 ];
 
-test('noteScore: 14 casos da regra 4.5(c)', () => {
+test('noteScore: 14 casos da regra 9.5', () => {
   for (const c of noteCases) {
     const got = noteScore(c.j, c.level ?? 1);
     if (got !== c.expected) throw new Error(`${c.name}: esperado ${c.expected}, recebido ${got}`);
   }
+});
+
+const ideasOk = [
+  { pt: 'quero jogar bola', ok: true },
+  { pt: 'faço a lição primeiro', ok: true },
+  { pt: 'espero porque a lição vem primeiro', ok: true },
+];
+
+test('frases reais do Firestore, coladas inteiras', () => {
+  const set30first = 'I want play soccer. I do my homework first. I wait because my homework is first.';
+  const set30second = 'I want to play soccer. I do my homework first. I wait because my homework is first.';
+  const set28 = "I don't want play soccer now. I do my homework first because homework is important.";
+  const set29 = 'Can I wait I do now? I can because dinner is first.';
+  const portugues = 'Eu quero jogar bola. Eu faço a lição primeiro. Eu espero porque a lição vem primeiro.';
+
+  const first30 = noteScore({
+    isEnglish: true,
+    ideas: ideasOk,
+    errors: [{ wrong: 'want play', fix: 'want to play', tag: 'verb', meaningLost: true }],
+    missing: [],
+    corrected: set30second,
+    note: set30first,
+  });
+  if (first30 !== 2) throw new Error(`30/09 primeira: esperado 2, recebido ${first30}`);
+  expect(errorLosesMeaning({ wrong: 'want play', fix: 'want to play', tag: 'verb', meaningLost: true })).toBeFalsy();
+
+  const second30 = noteScore({
+    isEnglish: true,
+    ideas: ideasOk,
+    errors: [],
+    missing: [],
+    corrected: set30second,
+    note: set30second,
+  });
+  if (second30 !== 3) throw new Error(`30/09 segunda: esperado 3, recebido ${second30}`);
+
+  const first28 = noteScore({
+    isEnglish: true,
+    ideas: ideasOk,
+    errors: [{ wrong: 'want play', fix: 'want to play', tag: 'verb', meaningLost: true }],
+    missing: [],
+    corrected: "I don't want to play soccer now. I do my homework first because homework is important.",
+    note: set28,
+  });
+  if (first28 !== 2) throw new Error(`28/09 primeira: esperado 2, recebido ${first28}`);
+
+  const invented29 = {
+    fonte: 'inventado' as const,
+    text: set29,
+    judgement: {
+      isEnglish: true,
+      ideas: [
+        { pt: 'quero jogar bola', ok: false },
+        { pt: 'faço a lição primeiro', ok: false },
+        { pt: 'espero porque a lição vem primeiro', ok: true },
+      ],
+      errors: [{ wrong: 'Can I wait I do now', fix: 'I want to play soccer', tag: 'word_order' as const, meaningLost: true }],
+      missing: ['quero jogar bola', 'faço a lição primeiro'],
+      corrected: '',
+      note: set29,
+    },
+  };
+  expect(invented29.fonte).toBe('inventado');
+  expect(invented29.text).toBe(set29);
+  expect(noteScore(invented29.judgement)).toBe(1);
+
+  expect(noteScore({ isEnglish: false, errors: [], missing: [], corrected: portugues, note: portugues })).toBe(0);
 });
 
 test('classifyNoteError por etiqueta e tamanho do fix', () => {

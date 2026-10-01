@@ -219,7 +219,7 @@ const EMERGENCY: Record<OfflineType, unknown> = {
       'Olá, amigo! Eu sou Bram, o velho minerador. Eu moro ao lado da caverna. Minha caverna é escura e fria. Eu tenho duas espadas e um mapa, mas preciso de uma tocha. Há três morcegos na caverna. Você pode me dar uma tocha? Obrigado, meu amigo.',
   },
   note: {
-    brief: 'Escreva um recado para o papai. Diga que você faz a lição primeiro. Depois você joga bola.',
+    brief: 'Diga ao papai que faço a lição. Diga que é primeiro. Diga que jogo bola.',
     mustInclude: [
       { pt: 'faço a lição', en: ['my homework', 'the homework', 'do my homework'] },
       { pt: 'primeiro', en: ['homework first', 'do first', 'first'] },

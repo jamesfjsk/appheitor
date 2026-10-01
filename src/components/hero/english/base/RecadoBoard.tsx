@@ -9,7 +9,7 @@ import { useData } from '../../../../contexts/DataContext';
 import { useSound } from '../../../../contexts/SoundContext';
 import { FirestoreService } from '../../../../services/firestoreService';
 import { completeContract } from '../../../../services/englishBaseService';
-import { explainNoteMiss, judgeNote, precheckNote } from '../../../../services/englishJudge';
+import { judgeNote } from '../../../../services/englishJudge';
 import { playText, prefetchAudio, stopAudio, TTS_SPEED_SLOW } from '../../../../services/englishTts';
 import { PT_TALK } from '../../../../services/quiz/provaSpeak';
 import { DESIGN } from '../../../../services/english/merchantPlay';
@@ -25,8 +25,9 @@ import {
   moldFromTemplates,
   pegLesson,
   pegLit,
-  pegReview,
+  pegsFromJudgement,
   recadoGrade,
+  secondAttemptLine,
   splitTemplate,
   trayForStage,
 } from '../../../../services/english/notePlay';
@@ -100,16 +101,14 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
   const [freeText, setFreeText] = useState('');
   const [focusGap, setFocusGap] = useState(0);
   const [hintUsed, setHintUsed] = useState(false);
-  const [freeAttemptUsed, setFreeAttemptUsed] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [redoUsed, setRedoUsed] = useState(false);
-  const [missing, setMissing] = useState<ReturnType<typeof precheckNote>>([]);
   const [judgement, setJudgement] = useState<NoteJudgement | null>(null);
   const [firstJudge, setFirstJudge] = useState<NoteJudgement | null>(null);
   const [secondJudge, setSecondJudge] = useState<NoteJudgement | null>(null);
   const [firstAnswer, setFirstAnswer] = useState('');
   const [secondAnswer, setSecondAnswer] = useState('');
-  const [helped, setHelped] = useState(false);
+  const helped = false;
   const [answer, setAnswer] = useState('');
   const [balloon, setBalloon] = useState(content.brief);
   const [beat, setBeat] = useState<Beat>(null);
@@ -131,7 +130,6 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
   const written = templateUsed ? fillTemplate(templateUsed, fills) : freeText;
   const pegs = pegLit(written.replace(/___/g, ''), content.mustInclude);
   const bankOn = scaffold < 2 || hintUsed;
-  const canHint = scaffold === 2 && !hintUsed && base.materials.ferro >= 1;
   const childWrote = templateUsed ? fills.some((f) => f.trim().length > 0) : freeText.trim().length > 0;
   const dirty = childWrote;
   const listened = listens > 0;
@@ -246,30 +244,6 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     playClick();
     setAttempts((a) => a + 1);
     try {
-    const miss = precheckNote(t, content);
-    if (miss.length > 0 && !freeAttemptUsed) {
-      stopAudio();
-      setSpeaking(null);
-      setMissing(miss);
-      setFreeAttemptUsed(true);
-      setHelped(true);
-      setPhase('judging');
-      setBalloon('O Capataz lê o quadro...');
-      const tip = await explainNoteMiss({
-        text: t,
-        content,
-        missing: miss,
-        level,
-        template: templateUsed,
-      });
-      setPhase('write');
-      setBalloon(tip.say);
-      sfx.fail();
-      pulse('miss');
-      void speakLine(tip.say);
-      return;
-    }
-    setMissing([]);
     setPhase('judging');
     setBalloon('O Capataz lê o quadro...');
     const j = await judgeNote({
@@ -289,7 +263,10 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
       setSecondAnswer(t);
     }
     setPhase('judged');
-    const tip = explainJudge(j, content.mustInclude, content.brief, t);
+    const isSecond = Boolean(firstJudge);
+    const tip = isSecond
+      ? { say: secondAttemptLine(j.score), hear: '' }
+      : explainJudge(j, content.mustInclude, content.brief, t);
     setBalloon(tip.say);
     if (j.score === 3) {
       sfx.checkpoint();
@@ -311,7 +288,6 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
     sfx.next();
     setRedoUsed(true);
     setJudgement(null);
-    setMissing([]);
     setPhase('write');
     setBalloon(content.brief);
   };
@@ -337,13 +313,13 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
         listens,
         textShown: false,
         scaffoldStage: scaffold,
-        precheckMissing: freeAttemptUsed,
         redoUsed,
         pegsOn: allPegsOn(firstAnswer || answer, content.mustInclude),
         firstAnswer: firstAnswer || answer,
         firstNote: paid.note,
         secondAnswer: secondAnswer || null,
         secondNote: secondJudge?.note ?? null,
+        ...(secondJudge ? { secondScore: secondJudge.score } : {}),
       },
     };
     setOutcome(out);
@@ -398,6 +374,9 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
   const chalkPx = Math.max(14, box.h * (22 / DESIGN.h));
   const chipPx = Math.max(12, box.h * (15 / DESIGN.h));
   const showBank = phase === 'write' && bankOn;
+  const boardText = (secondJudge ? secondAnswer : firstAnswer) || answer;
+  const secondLine = secondJudge && phase === 'judged' ? secondAttemptLine(secondJudge.score) : '';
+  const hintReady = phase === 'write' && scaffold === 2 && !hintUsed && attempts > 0;
 
   return (
     <div className={`md-play${beat === 'miss' ? ' is-miss' : ''}`} data-testid="recado-board">
@@ -433,7 +412,7 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
 
           {phase !== 'finale' && (
             <div className="md-speech">
-              <div className={`md-balloon${beat === 'miss' || missing.length > 0 ? ' is-fix' : ''}${beat === 'ok' ? ' is-ok' : ''}`} data-testid="recado-balloon">
+              <div className={`md-balloon${beat === 'miss' ? ' is-fix' : ''}${beat === 'ok' ? ' is-ok' : ''}`} data-testid="recado-balloon">
                 <p className="md-balloon-pt">{balloon}</p>
               </div>
               {phase === 'write' && (
@@ -495,15 +474,21 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
             <div className="nb-board" data-testid="recado-quadro">
               {phase === 'judged' && judgement ? (
                 <div className="nb-chalk" data-testid="recado-chalk">
-                  <ChalkLines written={firstAnswer || answer} corrected={(judgement.corrected || guide).trim()} />
-                  <ul className="nb-pegs" data-testid="recado-pegs">
-                    {pegReview(firstAnswer || answer, content.mustInclude).map((p) => (
-                      <li key={p.pt} className={`nb-peg ${p.ok ? 'is-on' : 'is-off'}`}>
-                        <i />
-                        <span className="nb-peg-pt">{pegLesson(p, judgement, content.brief, firstAnswer || answer)}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {secondLine ? <p className="nb-second" data-testid="recado-second-score">{secondLine}</p> : null}
+                  <ChalkLines
+                    written={boardText}
+                    corrected={secondLine ? boardText : (judgement.corrected || guide).trim()}
+                  />
+                  {secondLine ? null : (
+                    <ul className="nb-pegs" data-testid="recado-pegs">
+                      {pegsFromJudgement(judgement, boardText, content.mustInclude).map((p) => (
+                        <li key={p.pt} className={`nb-peg ${p.ok ? 'is-on' : 'is-off'}`}>
+                          <i />
+                          <span className="nb-peg-pt">{pegLesson(p, judgement, content.brief, boardText)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ) : templateUsed ? (
                 <p className="nb-template" data-testid="recado-template">
@@ -591,18 +576,14 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
             </div>
           )}
 
-          {phase === 'write' && scaffold === 2 && !hintUsed && (
+          {hintReady && (
             <button
               type="button"
               className="mc-btn mc-btn-stone md-undo"
               onClick={() => {
                 playClick();
-                if (!canHint) {
-                  setBalloon('Sem ferro para a dica. Escreve do jeito que lembra.');
-                  return;
-                }
                 setHintUsed(true);
-                setBalloon(content.brief);
+                setBalloon('As palavras do quadro estão na bandeja.');
               }}
               data-testid="recado-hint"
             >
@@ -688,12 +669,12 @@ const Finale: React.FC<{
   const { playClick } = useSound();
   const count = Math.max(0, reward.materialEarned);
   const allIn = judgement.score >= 3;
-  const rows = pegReview(answer, infos);
+  const rows = pegsFromJudgement(judgement, answer, infos);
   const heard = (judgement.corrected || model).trim() || model;
   const [voice, setVoice] = useState<'load' | 'play' | null>(null);
   const missed = rows.filter((r) => !r.ok);
   const grade = judgement.note && !isLazyNote(judgement.note) ? judgement.note : recadoGrade(judgement.score);
-  const gradeAgain = second ? (second.note && !isLazyNote(second.note) ? second.note : recadoGrade(second.score)) : '';
+  const againLine = second ? secondAttemptLine(second.score) : '';
   const pedido = brief.length > 80 ? `${brief.slice(0, 77)}…` : brief;
 
   const say = async (text: string, slow = false) => {
@@ -714,7 +695,7 @@ const Finale: React.FC<{
           <p className="md-balloon-pt" data-testid="recado-grade">{grade}</p>
           <p className="md-sentence" data-testid="recado-first-line">{answer}</p>
           {again ? <p className="md-sentence" data-testid="recado-second-line">{again}</p> : null}
-          {gradeAgain ? <p className="md-sentence" data-testid="recado-grade-2">{gradeAgain}</p> : null}
+          {againLine ? <p className="md-sentence" data-testid="recado-grade-2">{againLine}</p> : null}
           <p className="md-sentence" data-testid="recado-pedido">O pedido era: {pedido}</p>
           {missed.map((p) => (
             <p key={p.pt} className="md-sentence md-finale-miss">{p.en}</p>
