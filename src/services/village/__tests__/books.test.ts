@@ -17,7 +17,11 @@ import {
   parseBookJudge,
   parseVerify,
   PARENT_HOLD_SAY,
+  isThirdDelivery,
+  parentReturnFields,
   priorRefusalsOf,
+  reportBlocksRetell,
+  returnedSay,
   readingLineAt,
   sameBook,
   sizeForPages,
@@ -155,6 +159,16 @@ test('verdictOf: leu 2 com faltou aceita, opinião não recusa, fato não decide
   expect(terceira.needsParent).toBe(true);
   expect(terceira.accepted).toBe(false);
   expect(terceira.say).toBe(PARENT_HOLD_SAY);
+  expect(isThirdDelivery({ needsParent: true, accepted: false, verdict: 'falta', parentDecision: undefined })).toBe(true);
+  expect(isThirdDelivery({ needsParent: false, accepted: false, verdict: 'falta' })).toBe(false);
+  expect(isThirdDelivery({ needsParent: true, accepted: false, verdict: 'aceito' })).toBe(false);
+  const back = parentReturnFields('Conta de novo o meio, na escola.');
+  expect(back.parentDecision).toBe('returned');
+  expect(back.parentReply).toBe('Conta de novo o meio, na escola.');
+  expect('claimed' in back).toBe(false);
+  expect(returnedSay(back.parentReply)).toBe('Seu pai leu e disse: Conta de novo o meio, na escola.');
+  expect(reportBlocksRetell({ needsParent: true, accepted: false })).toBe(true);
+  expect(reportBlocksRetell({ needsParent: true, accepted: false, parentDecision: 'returned' })).toBe(false);
   const terceiraBoa = verdictOf({ judge: { ...base, faltou: ['fim'] }, verifyOk: null, title: 'Matilda', gold: 15, priorRefusals: 2 });
   expect(terceiraBoa.accepted).toBe(true);
   expect(faltouPull(['meio'], 'Matilda')).toContain('meio');

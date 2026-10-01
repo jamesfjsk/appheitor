@@ -11,7 +11,6 @@ export const BOOK_MAX_WORDS = 600;
 export const BOOK_MIN_WORDS_START = 40;   // pai, 22/09: 80 era muito para começar (baixou para 50, depois 40)
 export const BOOK_MIN_WORDS_AFTER = 80;
 export const BOOK_EASY_BOOKS = 5;          // até este número de livros aceitos, o mínimo é o de começo e o molde aparece
-export const BOOK_ATTEMPTS_PER_DAY = 3;
 export const BOOK_JUDGE_MODEL = 'gpt-4o';
 export const BOOK_VERIFY_MODEL = 'gpt-4o'; // precisa conhecer o livro para não recusar resposta certa (caso Menino Maluquinho, 22/09)
 
@@ -364,7 +363,7 @@ export function verdictOf(input: VerdictInput): Verdict {
   const { judge } = input;
   const faltou = judge.faltou.filter((f) => f !== 'opiniao');
   const hold = (input.priorRefusals ?? 0) >= 2;
-  const factFlag = input.verifyOk === false;
+  const fromFact = input.verifyOk === false;
   const toParent = (flagged: boolean): Verdict => ({
     verdict: 'falta',
     accepted: false,
@@ -374,11 +373,11 @@ export function verdictOf(input: VerdictInput): Verdict {
   });
 
   if (judge.suspeito === 'fora_do_tema' || judge.leu === 0) {
-    if (hold) return toParent(factFlag);
+    if (hold) return toParent(fromFact);
     return {
       verdict: 'fora',
       accepted: false,
-      flagged: factFlag,
+      flagged: fromFact,
       needsParent: false,
       say: `Isso não parece ser sobre "${input.title}". Me conta desse livro mesmo.`,
     };
@@ -398,19 +397,49 @@ export function verdictOf(input: VerdictInput): Verdict {
     return {
       verdict: 'aceito',
       accepted: true,
-      flagged: judge.suspeito !== 'nenhum' || factFlag,
+      flagged: judge.suspeito !== 'nenhum' || fromFact,
       needsParent: false,
       say: `Acreditei.${comment} +${input.gold} gold.`,
     };
   }
-  if (hold) return toParent(factFlag);
+  if (hold) return toParent(fromFact);
   return {
     verdict: 'falta',
     accepted: false,
-    flagged: factFlag,
+    flagged: fromFact,
     needsParent: false,
     say: faltouPull(faltou, input.title, ganchoOf(judge)),
   };
+}
+
+/** O livro fica trancado enquanto o pai não decidiu. "Devolver" destranca, sem mexer no claim. */
+export function reportBlocksRetell(r: { needsParent: boolean; accepted: boolean; parentDecision?: string }): boolean {
+  return r.needsParent
+    && !r.accepted
+    && r.parentDecision !== 'approved'
+    && r.parentDecision !== 'voided'
+    && r.parentDecision !== 'returned';
+}
+
+/** Terceira entrega é o teto de recusas, não o número da tentativa. */
+export function isThirdDelivery(r: { needsParent: boolean; accepted: boolean; verdict: string; parentDecision?: string }): boolean {
+  return r.needsParent
+    && !r.accepted
+    && r.verdict !== 'aceito'
+    && r.parentDecision !== 'approved'
+    && r.parentDecision !== 'voided'
+    && r.parentDecision !== 'returned';
+}
+
+/** O que o pai grava ao devolver. Não inclui claimed, gold nem accepted. */
+export function parentReturnFields(phrase: string): { parentDecision: 'returned'; parentReply: string } {
+  const parentReply = phrase.trim().slice(0, 240);
+  if (!parentReply) throw new Error('frase vazia');
+  return { parentDecision: 'returned', parentReply };
+}
+
+export function returnedSay(phrase: string): string {
+  return `Seu pai leu e disse: ${phrase.trim()}`;
 }
 
 // ---------- o Sábio lendo ----------
