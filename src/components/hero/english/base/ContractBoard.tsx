@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import type { BaseDoc, Contract, DailyPlan } from '../../../../types/english';
 import { CONTRACT_ICONS, CONTRACT_LABELS, MATERIAL_ICONS, MATERIAL_LABELS } from '../../../../config/englishBase';
+import { unitById } from '../../../../config/englishUnits';
 import { REWARDED_OTHER_SLOTS } from '../../../../config/englishRewards';
 import { visibleCracks } from '../../../../config/village';
 import { useVillage } from '../../../../contexts/VillageContext';
@@ -141,6 +142,13 @@ const ContractBoard: React.FC<Props> = ({ plan, base, onOpen, onRedo, onGoVillag
       {furnaceBonus && (
         <p className="text-xs mc-diamond mb-3">Fornalha acesa: +1 material no primeiro contrato de hoje.</p>
       )}
+
+      {Object.entries(base.units ?? {}).filter(([, row]) => row.sealedOn).map(([id]) => (
+        <div key={id} className="mc-card p-3 mb-3" data-testid={`seal-${id}`}>
+          <p className="mc-lbl">Selo do Ferreiro</p>
+          <p className="text-base text-white">{unitById(id).name}</p>
+        </div>
+      ))}
 
       {openIds.length > 0 && (
         <div className="mb-4">

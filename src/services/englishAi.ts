@@ -24,13 +24,16 @@ import type {
 import { CONTRACT_MATERIAL, MERCHANT_CATALOGS } from '../config/englishBase';
 import { FORGE_TAG_TARGETS, LETTER_GENRES, levelFor } from '../config/englishLevels';
 import { forgeItemMixFor, forgeTargetFor, lastForgeScore, yesterdayMistakes } from './english/prompts';
-import { buildMerchantRoom, merchantKey, merchantStepKey, offlineSentences } from './english/merchantRoom';
+import { buildMerchantRoom, merchantKey, merchantStepKey, merchantStepsForDay, nextMerchantLevel, offlineSentences } from './english/merchantRoom';
 import { normalize } from './english/notePrecheck';
 import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
-import { validateForge, validateLetter, validateMerchant, validateNote, type MerchantValidation, type ValidationResult } from './english/validators';
+import { validateLetter, validateMerchant, validateNote, type MerchantValidation, type ValidationResult } from './english/validators';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
 import { letterAfterReviews, letterLevelOf, parseLetterReview, c1QuestionOk, type LetterReview } from './english/letterLevel';
+import { forgeItemsFor } from './english/forgeMolds';
+import { unitById } from '../config/englishUnits';
+import { currentUnit, dayInUnit, knownLemmas } from './english/units';
 import { pickC1Letter } from '../data/englishC1Letters';
 import { currentUsageMonth, getUsage, isOverCap } from './aiUsage';
 import { addDays } from './dailyQuizService';
@@ -52,7 +55,6 @@ const TAG_MIN_COUNT = 2;
 const OFFLINE_REPEAT_DAYS = 30;
 /** Lemas conhecidos que entram no prompt (os mais vistos primeiro) */
 const VOCAB_PROMPT_MAX = 80;
-const YESTERDAY_MISTAKES = 2;
 
 export type GeneratedSource = 'ai' | 'offline';
 
@@ -75,10 +77,15 @@ export interface GenerateInput {
   genre?: LetterGenre;
   /** Reserva: chaves (offlineKey) dos contratos recentes, para não repetir */
   avoidOffline?: string[];
+  /** Unidade aberta e o dia nela. Sem isto, a Ferraria usa a U1 no dia 1. */
+  unitId?: string;
+  dayInUnit?: number;
   /** Nível próprio da Carta. Sem isto, a geração trata como C1. */
   letterTier?: 1 | 2 | 3;
   merchantDone?: number;
   avoidMerchantSteps?: string[];
+  /** Pedidos errados que voltam hoje. */
+  preferMerchantSteps?: string[];
 }
 
 export interface GeneratedContract {
@@ -331,7 +338,7 @@ async function generateMerchant(input: GenerateInput): Promise<Generated<Merchan
   const lv = levelFor(input.level);
   const avoid = new Set(input.avoidOffline ?? []);
   const banned = new Set((input.avoidMerchantSteps ?? []).map((k) => k.toLowerCase()));
-  const roomOpts = { done: input.merchantDone ?? 0, avoidSteps: [...banned] };
+  const roomOpts = { done: input.merchantDone ?? 0, avoidSteps: [...banned], preferSteps: input.preferMerchantSteps };
   const clashes = (room: ReturnType<typeof buildMerchantRoom>): boolean =>
     avoid.has(merchantKey(room.steps)) || room.steps.some((s) => banned.has(merchantStepKey(s)));
   let room = buildMerchantRoom(input.seed, lv.level, MERCHANT_CATALOGS.spots, MERCHANT_CATALOGS.items, roomOpts);
@@ -432,7 +439,7 @@ function c1FromRaw(raw: unknown, vocabKnown: string[] = []): LetterContent | nul
       return [{ en: rowg.en, pt: rowg.pt }];
     }).slice(0, 5)
     : [];
-  if (glossary.length < 2) return null;
+  if (glossary.length < 3) return null;
   return {
     genre: 'letter',
     title: typeof row.title === 'string' && row.title ? row.title : 'Carta',
@@ -538,7 +545,32 @@ async function generateLetter(input: GenerateInput): Promise<Generated<LetterCon
   return { ...offline, problems: [...problems, ...offline.problems] };
 }
 
+function noteFromUnit(unit: ReturnType<typeof unitById>, which: 0 | 1): NoteContent {
+  const mold = unit.notes[which];
+  return {
+    brief: mold.brief,
+    mustInclude: mold.ideas.map((pt) => ({ pt, en: pt.split(/\s+/).slice(0, 3) })),
+    templates: [mold.mold],
+    wordBank: [],
+    model: mold.model,
+    hint: '',
+  };
+}
+
+function noteKeepsPattern(unit: ReturnType<typeof unitById>, model: string): boolean {
+  const text = model.toLowerCase();
+  return unit.notes.some((note) => {
+    const keys = note.model.toLowerCase().replace(/[^a-z' ]/g, ' ').split(/\s+/).filter((w) => w.length > 3);
+    return keys.filter((w) => text.includes(w)).length >= 2;
+  });
+}
+
 async function generateNote(input: GenerateInput): Promise<Generated<NoteContent>> {
+  const unit = unitById(input.unitId || 'u1');
+  const day = input.dayInUnit ?? 1;
+  if (day <= 2) {
+    return { content: noteFromUnit(unit, day === 1 ? 0 : 1), source: 'offline', problems: [] };
+  }
   const lv = levelFor(input.level);
   let problems: string[] = [];
   if (isAIConfigured()) {
@@ -554,11 +586,10 @@ async function generateNote(input: GenerateInput): Promise<Generated<NoteContent
         }),
       (raw) => validateNote(raw, lv.level)
     );
-    if (result) return { content: result.content, source: 'ai', problems: p };
+    if (result && noteKeepsPattern(unit, result.content.model)) return { content: result.content, source: 'ai', problems: p };
     problems = p;
   }
-  const offline = offlineFor('note', lv.level, input.seed, input.avoidOffline ?? [], (raw, level) => validateNote(raw, level));
-  return { ...offline, problems: [...problems, ...offline.problems] };
+  return { content: noteFromUnit(unit, 0), source: 'offline', problems };
 }
 
 /** Alvo por id ou rótulo (rotação do nível ou etiqueta do Recado); sem id, rotação pela semente */
@@ -574,31 +605,27 @@ export function resolveForgeTarget(level: number, target: string | undefined, se
 }
 
 async function generateForge(input: GenerateInput): Promise<Generated<ForgeContent>> {
-  const lv = levelFor(input.level);
-  const target = resolveForgeTarget(lv.level, input.forgeTarget, input.seed);
-  let problems: string[] = [];
-  if (isAIConfigured()) {
-    const { result, problems: p } = await askValidated(
-      (retryProblems) =>
-        buildPrompt('forge', {
-          level: lv.level,
-          theme: themeOf(input),
-          vocabKnown: input.vocabKnown,
-          avoidNames: input.avoidNames,
-          seed: input.seed,
-          target,
-          letterNames: input.letterContext?.names ?? [],
-          letterItems: input.letterContext?.items ?? [],
-          yesterdayMistakes: (input.retryItems ?? []).slice(0, YESTERDAY_MISTAKES),
-          retryProblems,
-        }),
-      (raw) => validateForge(raw, lv.level, input.seed)
-    );
-    if (result) return { content: { ...result.content, target: result.content.target || target.label }, source: 'ai', problems: p };
-    problems = p;
-  }
-  const offline = offlineFor('forge', lv.level, input.seed, input.avoidOffline ?? [], (raw, level) => validateForge(raw, level, input.seed));
-  return { ...offline, problems: [...problems, ...offline.problems] };
+  const id = input.unitId || 'u1';
+  const day = input.dayInUnit ?? 1;
+  const unit = unitById(id);
+  const items = forgeItemsFor(id, day, input.seed);
+  return {
+    content: {
+      target: unit.name,
+      items,
+      unitId: id,
+      dayInUnit: day,
+      lesson: {
+        name: unit.name,
+        text: unit.lesson,
+        examples: unit.examples,
+        wrong: unit.wrong,
+        right: unit.right,
+      },
+    },
+    source: 'offline',
+    problems: [],
+  };
 }
 
 /** Um contrato de um tipo: IA validada, retentativa e reserva. Nunca rejeita. */
@@ -634,8 +661,12 @@ export interface DayContext {
   retryItems: ForgeItem[];
   avoidOffline: string[];
   merchantDone: number;
+  merchantLevel: 1 | 2 | 3;
   avoidMerchantSteps: string[];
+  preferMerchantSteps: string[];
   letterTier: 1 | 2 | 3;
+  unitId: string;
+  dayInUnit: number;
   /** Sempre null. O pedido da Mesa saiu; o campo fica para os documentos antigos. */
   themeRequest: string | null;
 }
@@ -716,10 +747,7 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
     yesterdayMax: yesterday.max,
   });
 
-  const vocabKnown = Object.entries(ctx.base.vocab)
-    .sort((a, b) => b[1].seen - a[1].seen || a[0].localeCompare(b[0]))
-    .map(([lemma]) => lemma)
-    .slice(0, VOCAB_PROMPT_MAX);
+  const vocabKnown = knownLemmas(ctx.base.vocab).slice(0, VOCAB_PROMPT_MAX);
   const avoidNames = unique(contractsOf(lastWeek, 'letter').map((c) => (c.type === 'letter' ? c.content.sender : '')).filter(Boolean));
   const avoidOffline = unique(
     recent
@@ -727,11 +755,15 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
       .flatMap((p) => Object.values(p.contracts).map((c) => offlineKey(c.type, c.content)))
       .filter(Boolean)
   );
-  const avoidMerchantSteps = unique(
-    contractsOf(recent, 'merchant').flatMap((c) =>
-      c.type === 'merchant' ? c.content.steps.map((s) => merchantStepKey(s)) : []
-    )
+  const merchantRows = recent.flatMap((p) =>
+    Object.values(p.contracts).flatMap((c) =>
+      c.type === 'merchant' && c.status === 'done' && c.result
+        ? [{ date: p.date, keys: c.content.steps.map((s) => merchantStepKey(s)), score: Number(c.result.score) || 0, max: Number(c.result.max) || 0 }]
+        : [],
+    ),
   );
+  const merchantSplit = merchantStepsForDay(merchantRows, ctx.date);
+  const avoidMerchantSteps = merchantSplit.avoid;
 
   // O 5º contrato alterna por paridade do dia: segundo Comerciante ou segunda Carta com outro tema
   const fifth: DaySpec = dayIndex % 2 === 0 ? { id: 'c5', type: 'merchant', theme: secondTheme } : { id: 'c5', type: 'letter', theme: secondTheme, genre: genre2 };
@@ -745,6 +777,8 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
   return {
     level: lv.level,
     letterTier: letterLevelOf(ctx.base, lv.level),
+    unitId: currentUnit(ctx.base, ctx.date).id,
+    dayInUnit: dayInUnit(currentUnit(ctx.base, ctx.date), ctx.date),
     daySeed,
     specs,
     vocabKnown,
@@ -753,7 +787,16 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
     retryItems: yesterdayMistakes(recent, ctx.date, forgeItemMixFor(lv.level, forgeTarget.kind)),
     avoidOffline,
     merchantDone: ctx.base.merchantDone,
+    merchantLevel: nextMerchantLevel({
+      stored: ctx.base.merchantLevel,
+      ceiling: lv.level,
+      done: ctx.base.merchantDone,
+      perfect: ctx.base.merchantPerfect,
+      weakStreak: ctx.base.merchantWeakStreak ?? 0,
+      halfOrLess: false,
+    }).level,
     avoidMerchantSteps,
+    preferMerchantSteps: merchantSplit.due,
     themeRequest: null,
   };
 }
@@ -767,6 +810,7 @@ interface GeneratedFull {
 async function generateFor(spec: DaySpec, input: GenerateInput, target: ForgeTarget, version: number): Promise<GeneratedFull> {
   const base = {
     id: spec.id,
+    level: input.level,
     material: CONTRACT_MATERIAL[spec.type],
     theme: spec.theme,
     version,
@@ -790,14 +834,20 @@ async function generateFor(spec: DaySpec, input: GenerateInput, target: ForgeTar
     case 'forge': {
       const g = await generateForge(input);
       // O rótulo "Ferraria" já aparece acima do título no quadro, na casca e no resultado
-      return { contract: { ...base, type: 'forge', title: target.label, content: g.content }, source: g.source, problems: g.problems };
+      return { contract: { ...base, type: 'forge', title: g.content.target || target.label, content: g.content }, source: g.source, problems: g.problems };
     }
   }
 }
 
+function levelOfContract(day: DayContext, spec: DaySpec): number {
+  if (spec.type === 'merchant') return day.merchantLevel;
+  if (spec.type === 'letter') return day.letterTier;
+  return unitById(day.unitId).level;
+}
+
 function inputFor(day: DayContext, spec: DaySpec, date: string, seed: number, extra: Partial<GenerateInput> = {}): GenerateInput {
   return {
-    level: day.level,
+    level: levelOfContract(day, spec),
     theme: spec.theme,
     date,
     seed,
@@ -806,9 +856,12 @@ function inputFor(day: DayContext, spec: DaySpec, date: string, seed: number, ex
     themeRequest: day.themeRequest,
     genre: spec.genre,
     letterTier: day.letterTier,
+    unitId: day.unitId,
+    dayInUnit: day.dayInUnit,
     avoidOffline: day.avoidOffline,
     merchantDone: day.merchantDone,
     avoidMerchantSteps: day.avoidMerchantSteps,
+    preferMerchantSteps: day.preferMerchantSteps,
     ...extra,
   };
 }

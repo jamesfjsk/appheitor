@@ -14,6 +14,7 @@ import {
   type MerchantSpotDef,
 } from '../../config/englishBase';
 import { NUMBER_WORDS } from '../../config/englishLevels';
+import { addDays } from '../../utils/clock';
 import { createRng, pickOne, randInt, seededShuffle } from './shuffle';
 
 /** Nível 1 = in/on; depois entram under e next to. Uma regra por sessão. */
@@ -21,7 +22,7 @@ export function lessonRelations(level: number): Relation[] {
   return clampLevel(level) === 1 ? ['in', 'on'] : ['in', 'on', 'under', 'next_to'];
 }
 
-/** Sobe pelo que ele acertou de primeira, no molde da Vagoneta. Nunca desce. */
+/** Sobe pelo que ele acertou de primeira. O teto e a descida ficam em `nextMerchantLevel`. */
 export function merchantLevelFromSkill(done: number, perfect: number): 1 | 2 | 3 {
   const d = Math.max(0, Math.floor(Number(done) || 0));
   const p = Math.max(0, Math.floor(Number(perfect) || 0));
@@ -30,8 +31,91 @@ export function merchantLevelFromSkill(done: number, perfect: number): 1 | 2 | 3
   return 1;
 }
 
+/** Sem campo, o menor entre o teto e o desempenho. Dois meios-acertos seguidos descem 1. */
+export function nextMerchantLevel(input: {
+  stored?: number;
+  ceiling: number;
+  done: number;
+  perfect: number;
+  weakStreak: number;
+  halfOrLess: boolean;
+}): { level: 1 | 2 | 3; weakStreak: number } {
+  const cap = Math.min(3, Math.max(1, Math.round(input.ceiling))) as 1 | 2 | 3;
+  const skill = merchantLevelFromSkill(input.done, input.perfect);
+  const stored = input.stored === 1 || input.stored === 2 || input.stored === 3 ? input.stored : Math.min(cap, skill);
+  const current = Math.min(cap, stored) as 1 | 2 | 3;
+  if (input.halfOrLess) {
+    const weak = input.weakStreak + 1;
+    if (weak >= 2) return { level: Math.max(1, current - 1) as 1 | 2 | 3, weakStreak: 0 };
+    return { level: current, weakStreak: weak };
+  }
+  return { level: Math.min(cap, Math.max(current, skill)) as 1 | 2 | 3, weakStreak: 0 };
+}
+
+export function merchantRetryOn(date: string): [string, string] {
+  return [addDays(date, 3), addDays(date, 10)];
+}
+
+/** Pedido que não saiu inteiro de primeira volta em +3 e +10. Os outros ficam de fora. */
+export function merchantStepsForDay(
+  rows: { date: string; keys: string[]; score: number; max: number }[],
+  today: string,
+): { avoid: string[]; due: string[] } {
+  const due = new Set<string>();
+  const avoid = new Set<string>();
+  for (const row of rows) {
+    const back = new Set(merchantRetryOn(row.date));
+    const missed = row.max > 0 && row.score < row.max;
+    for (const key of row.keys) {
+      const clean = key.toLowerCase();
+      if (missed && back.has(today)) due.add(clean);
+      else avoid.add(clean);
+    }
+  }
+  for (const key of due) avoid.delete(key);
+  return { avoid: [...avoid], due: [...due] };
+}
+
 export function merchantStepKey(step: { item: string; relation: string; spot: string }): string {
   return `${step.item} ${step.relation} ${step.spot}`.toLowerCase();
+}
+
+function parseMerchantStepKey(key: string): { item: string; relation: Relation; spot: string } | null {
+  const parts = key.toLowerCase().trim().split(/\s+/);
+  if (parts.length !== 3) return null;
+  const relation = parts[1];
+  if (relation !== 'in' && relation !== 'on' && relation !== 'under' && relation !== 'next_to') return null;
+  return { item: parts[0], relation, spot: parts[2] };
+}
+
+function forceDueStep(
+  steps: MerchantStep[],
+  chosen: MerchantItemDef[],
+  spots: MerchantSpotDef[],
+  catalog: MerchantItemDef[],
+  level: number,
+  prefer: string[] | undefined,
+): void {
+  const raw = prefer?.find(Boolean);
+  if (!raw || steps.length === 0) return;
+  const parsed = parseMerchantStepKey(raw);
+  if (!parsed) return;
+  if (steps.some((s) => merchantStepKey(s) === raw.toLowerCase())) return;
+  if (!lessonRelations(level).includes(parsed.relation)) return;
+  const spotOk = spots.some((s) => s.id === parsed.spot && s.relations.includes(parsed.relation));
+  const def = catalog.find((it) => it.id === parsed.item);
+  if (!spotOk || !def) return;
+  if (steps.slice(1).some((s) => s.spot === parsed.spot)) return;
+  steps[0] = { ...steps[0], item: parsed.item, relation: parsed.relation, spot: parsed.spot };
+  const at = chosen.findIndex((it) => it.id === parsed.item);
+  if (at === 0) return;
+  if (at > 0) {
+    const tmp = chosen[0];
+    chosen[0] = chosen[at];
+    chosen[at] = tmp;
+  } else {
+    chosen[0] = def;
+  }
 }
 
 export interface MerchantRoomOpts {
@@ -39,6 +123,8 @@ export interface MerchantRoomOpts {
   done?: number;
   /** Pedidos já usados (item+relação+lugar). Não voltam. */
   avoidSteps?: string[];
+  /** Pedido errado que volta hoje. Entra no primeiro passo quando a sala aceita. */
+  preferSteps?: string[];
 }
 
 /** O par que um brasileiro troca: in/on, under/next to. */
@@ -185,6 +271,7 @@ export function buildMerchantRoom(
     steps.push({ item: itemId, qty, relation: want, spot: spot.id });
     usedSpots.add(spot.id);
   }
+  forceDueStep(steps, chosen, spots, itemsCatalog, lv, opts.preferSteps);
   const items = chosen.map((it, i) => {
     if (i < count) {
       const qty = steps[i].qty;

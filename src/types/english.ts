@@ -130,10 +130,21 @@ export interface ForgeTarget {
   kind: 'order' | 'form';
 }
 
+export interface ForgeLesson {
+  name: string;
+  text: string;
+  examples: { en: string; pt: string }[];
+  wrong: string;
+  right: string;
+}
+
 export interface ForgeContent {
   target: string;
-  /** 6 itens; 2 deles reaproveitam erros de ontem quando existem */
+  /** 6 itens; até 2 podem ser revisão */
   items: ForgeItem[];
+  unitId?: string;
+  dayInUnit?: number;
+  lesson?: ForgeLesson;
 }
 
 // ---------- Contratos ----------
@@ -141,6 +152,8 @@ export interface ForgeContent {
 export interface ContractBase {
   id: string;
   type: ContractType;
+  /** Nível usado neste contrato. O plano guarda o teto do painel. */
+  level?: number;
   material: Material;
   theme: string;
   title: string;
@@ -253,6 +266,13 @@ export interface BaseDoc {
   letterLevel?: 1 | 2 | 3;
   letterPerfectStreak?: number;
   letterWeakStreak?: number;
+  /** Unidade aberta. Sem o campo, a próxima Ferraria começa na U1. */
+  unit?: { id: string; startedOn: string; forges: { date: string; first: number; max: number }[] };
+  units?: Record<string, { sealedOn?: string; review?: true }>;
+  /** Nível do Comerciante. Sem o campo, começa pelo desempenho, sob o teto do painel. */
+  merchantLevel?: number;
+  merchantWeakStreak?: number;
+  reviewQueue?: { key: string; box: 1 | 3 | 7; due: string; item: ForgeItem }[];
   contractsDone: number;
   /** Entregas do Comerciante concluídas (sobe o nível da Mina pelo desempenho) */
   merchantDone: number;

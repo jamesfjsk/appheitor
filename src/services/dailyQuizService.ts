@@ -24,6 +24,9 @@ import { quizBankDocs } from './quiz/bankWrite';
 import { avoidQuestionsFromRecent, type DedupeNeedle } from './quiz/dedupe';
 import { challengeLine, type ChallengeItem } from './quiz/challengeLine';
 import { pickTheme, rotationProfileFrom, type ThemeHistoryEntry } from './quiz/rotation';
+import { letterLevelOf } from './english/letterLevel';
+import { currentUnit } from './english/units';
+import { unitById } from '../config/englishUnits';
 
 export type { QuizAbout, QuizTiming };
 export { payThenComplete, answersStash, shouldOpenReflection, completeQuizWrite } from './quiz/closeQuiz';
@@ -313,6 +316,19 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
   const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
   const bank = await loadQuizBankNeedles(userId, today);
   const challenge = challengeLine(await loadChallengeItems(userId, today), today) ?? undefined;
+  const baseSnap = await getDoc(doc(db, 'englishBase', userId));
+  const rawBase = baseSnap.exists()
+    ? (baseSnap.data() as { level?: number; letterLevel?: 1 | 2 | 3; unit?: { id?: string } })
+    : {};
+  const panelLevel = rawBase.level === 1 || rawBase.level === 2 || rawBase.level === 3 ? rawBase.level : 1;
+  const letter = rawBase.letterLevel === 1 || rawBase.letterLevel === 2 || rawBase.letterLevel === 3
+    ? { letterLevel: rawBase.letterLevel }
+    : null;
+  const open = currentUnit(
+    { unit: rawBase.unit?.id ? { id: rawBase.unit.id, startedOn: date, forges: [] } : undefined },
+    date,
+  );
+  const unit = unitById(open.id);
   const generated = await generateDailyQuiz({
     seed: pick.theme,
     count,
@@ -323,6 +339,8 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     depth: pick.depth,
     bank,
     ...(challenge ? { challenge } : {}),
+    englishLevel: letterLevelOf(letter, panelLevel),
+    englishUnit: `${unit.name}: ${unit.lesson}`,
   });
   const theme: DailyQuizTheme = {
     ...generated.theme,

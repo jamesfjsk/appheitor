@@ -1440,3 +1440,29 @@ As fotos estão em `docs/exemplos/telas/etapa-3/p15b/`. Os lados do pai (aprovar
 **02/10, depois da junção:**
 - **O pai aprovou** o banco de unidades (amostra U1 e U5) e as cartas reserva C1 (c1-03 e c1-07). O passo 2 da P17 está liberado.
 - **Funções publicadas pelo líder, com o ok do pai:** `assignmentRecurrences` (agendada) e `generateAssignmentsNow` (callable), na região southamerica-east1. Não estavam publicadas antes: o deploy as criou.
+
+## 02/10, noite — P17 passos 2 e 4: junta, com correções do líder (74895f3)
+
+**Ferraria por unidades.** O líder conferiu uma a uma todas as barras do banco (o conjunto inteiro, e não só a semente 1). Duas tinham mais de uma resposta certa e foram trocadas:
+- **U5:** "I want ___." com "water / to water / to". "I want to water." e "I want to." também são frases certas. A origem foi o próprio banco do líder, que pôs "water", palavra que também é verbo, entre as coisas. Agora as opções são "an apple / to an apple / to apple".
+- **U10:** "I am late because ___ bus is slow." com "the / a / is". "a bus" também serve, e a barra testava artigo, não o because. Agora é "I stay home because ___ is cold." com "it / I / is".
+
+**Testado na tela, na conta de teste:**
+- o cartão da lição abre antes da primeira barra, com a regra, os dois exemplos com tradução, o "não é assim" riscado e "Vamos à bigorna";
+- a primeira barra tem duas opções;
+- o "?" mostra a regra de novo.
+
+**Corrigido pelo líder:** o título do contrato da Ferraria vinha do rodízio antigo ("Ordem do pedido"). Agora é o nome da unidade.
+
+**Passo 4:**
+- o Comerciante paga 3 na entrega perfeita e tem nível próprio, com teto no painel;
+- o pedido errado volta em 3 e em 10 dias;
+- o contrato grava o `contract.level`;
+- a palavra conhecida é a vista em 3 contratos;
+- a prova recebe a unidade aberta;
+- o cartão "Inglês: como ele vai" está no painel. Ficou sem foto, porque pede o login do pai.
+
+**Pendente:**
+- a C2 com perguntas em português;
+- o revisor da carta ainda aceita uma prova que não sustenta a resposta (caso "Para onde Luna quer que você vá?");
+- a Ferraria ainda mostra um cronômetro na tela, que é antigo, da casca do contrato.

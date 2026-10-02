@@ -55,6 +55,9 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
   const [gapWrong, setGapWrong] = useState<number[]>([]);
   const [speaking, setSpeaking] = useState(false);
   const [itemReady, setItemReady] = useState(false);
+  const [lessonOpen, setLessonOpen] = useState(() => (contract.content.dayInUnit ?? 1) === 1 && Boolean(contract.content.lesson));
+  const [lessonViews, setLessonViews] = useState(0);
+  const [missRow, setMissRow] = useState(0);
   const itemStart = useRef(0);
   const msPerItem = useRef<number[]>(items.map(() => 0));
 
@@ -96,10 +99,13 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
     if (ok) {
       sfx.hit(t === 1 ? 2 : 0);
       setResolved('correct');
+      setMissRow(0);
       record(true, t);
       return;
     }
     sfx.miss();
+    setMissRow((n) => n + 1);
+    if (t >= 2 || missRow + 1 >= 2) setLessonOpen(true);
     if (t >= maxTries) {
       setResolved('revealed');
       record(false, t);
@@ -140,7 +146,7 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
       max: items.length,
       materialEarned: forgeMaterial(hits),
       // wrongItems: índices lidos por englishAi.yesterdayMistakes (2 deles voltam na Ferraria de amanhã)
-      details: { perItem: earned, wrongItems: wrongIdx, redo: wrongIdx, redoCorrect, target: contract.content.target, msPerItem: msPerItem.current },
+      details: { perItem: earned, wrongItems: wrongIdx, redo: wrongIdx, redoCorrect, target: contract.content.target, msPerItem: msPerItem.current, lessonViews },
     });
   };
 
@@ -187,6 +193,36 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
     );
   }
 
+  if (lessonOpen && contract.content.lesson) {
+    const lesson = contract.content.lesson;
+    return (
+      <div className="mc-card p-4" data-testid="forge-lesson">
+        <p className="mc-lbl mb-2">{lesson.name}</p>
+        <p className="text-base text-white mb-3">{lesson.text}</p>
+        {lesson.examples.map((ex) => (
+          <button
+            key={ex.en}
+            type="button"
+            className="mc-btn mc-btn-stone w-full text-left mb-2 min-h-[44px]"
+            onClick={() => { void playText(ex.en); }}
+          >
+            {ex.en}
+            <span className="block text-sm opacity-80">{ex.pt}</span>
+          </button>
+        ))}
+        <p className="text-sm line-through opacity-70">{lesson.wrong}</p>
+        <p className="text-sm mb-3">{lesson.right}</p>
+        <button
+          type="button"
+          className="mc-btn mc-btn-green min-h-[44px] px-4"
+          onClick={() => { setLessonOpen(false); setLessonViews((n) => n + 1); }}
+        >
+          Vamos à bigorna
+        </button>
+      </div>
+    );
+  }
+
   if (!item) return null;
 
   const showRule = tries > 0 && !(resolved === 'correct' && tries === 1);
@@ -199,6 +235,11 @@ const ForgeContract: React.FC<ContractScreenProps<'forge'>> = ({ contract, sfx, 
           {phase === 'redo' ? `Repescagem ${pos + 1} de ${order.length} (só treino)` : `Peça ${pos + 1} de ${order.length}`}
         </span>
         <span className="text-xs mc-muted">{contract.content.target}</span>
+        {(contract.content.dayInUnit ?? 1) > 1 && contract.content.lesson && (
+          <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-3" onClick={() => { setLessonOpen(true); setLessonViews((n) => n + 1); }}>
+            Ver a regra
+          </button>
+        )}
       </div>
       <div className="mc-bar mb-3"><div className="mc-bar-fill" style={{ width: `${((phase === 'main' ? pos : items.length) / items.length) * 100}%` }} /></div>
 

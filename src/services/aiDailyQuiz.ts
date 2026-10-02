@@ -193,6 +193,8 @@ export async function generateDailyQuiz(opts: {
   signal?: AbortSignal;
   forceOffline?: boolean;
   englishLevel?: number;
+  /** Nome e lição da unidade aberta. */
+  englishUnit?: string;
   /** Ângulo e profundidade do motor (§8.2). Entram no prompt. */
   angle?: string;
   depth?: 1 | 2 | 3;
@@ -241,6 +243,7 @@ export async function generateDailyQuiz(opts: {
     age,
     weekday,
     englishLevel,
+    englishUnit: opts.englishUnit,
     avoidHashes,
     angle: opts.angle,
     depth: opts.depth,
@@ -308,7 +311,7 @@ Conte os objetos antes de responder.`;
     const repeatedTexts = cut.rejected
       .map((row) => String(judged.kept[row.n - 1]?.question ?? '').trim())
       .filter(Boolean);
-    const user = `${replacementBrief(holes, opts.date, englishLevel)}
+    const user = `${replacementBrief(holes, opts.date, englishLevel, opts.englishUnit)}
 Ideia do dia, já escrita. LIC.IDEIA e LIC.APLICA precisam usar uma palavra dela:
 ${theme.lesson}
 Cada objeto traz subject, skill, kind, bloom, answer igual a uma option, why com 16 palavras em português e trap com 16 palavras ou mais. Trap curto mata a pergunta. O trap começa com "Quem marca" seguido do texto exato de uma opção errada. A opção certa não pode ser a única mais longa. Matemática em duas etapas, com os dois números na pergunta (500 g e 2 kg não fecham: escreva 500 g e 2000 g). Inglês: why em português, frase de no máximo 7 palavras. A ideia não começa com "O que é". O dilema pergunta "Qual atitude é a mais justa?", com subject "tema". ${DILEMMA_RULE}
@@ -327,6 +330,7 @@ ${[...fallen, ...repeatedTexts, ...approved, ...opts.avoidQuestions.slice(0, 30)
           age,
           weekday,
           englishLevel,
+          englishUnit: opts.englishUnit,
           avoidHashes,
           angle: opts.angle,
           depth: opts.depth,
@@ -395,7 +399,7 @@ ${[...fallen, ...repeatedTexts, ...approved, ...opts.avoidQuestions.slice(0, 30)
       .filter((q): q is RawQuestion => q != null)
       .map((q) => String(q.question ?? '').trim())
       .filter(Boolean);
-    const user = `${replacementBrief(holes, opts.date, englishLevel)}
+    const user = `${replacementBrief(holes, opts.date, englishLevel, opts.englishUnit)}
 Ideia do dia, já escrita. LIC.IDEIA e LIC.APLICA precisam usar uma palavra dela:
 ${theme.lesson}
 Cada objeto traz subject, skill, kind, bloom, answer igual a uma option, why com 16 palavras em português e trap com 16 palavras ou mais. Trap curto mata a pergunta. O trap começa com "Quem marca" seguido do texto exato de uma opção errada. A opção certa não pode ser a única mais longa. Matemática em duas etapas, com os dois números na pergunta (500 g e 2 kg não fecham: escreva 500 g e 2000 g). Inglês: why em português, frase de no máximo 7 palavras. A ideia não começa com "O que é". O dilema pergunta "Qual atitude é a mais justa?", com subject "tema". ${DILEMMA_RULE}
@@ -412,6 +416,7 @@ ${[...bannedTexts, ...seatedTexts, ...opts.avoidQuestions.slice(0, 30)].map((q) 
           age,
           weekday,
           englishLevel,
+          englishUnit: opts.englishUnit,
           avoidHashes,
           angle: opts.angle,
           depth: opts.depth,

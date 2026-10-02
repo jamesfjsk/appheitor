@@ -26,6 +26,10 @@ import type {
 } from '../../types/english';
 import { LEVELS, levelFor, type LevelNumber } from '../../config/englishLevels';
 import { BUILDINGS, CONTRACT_ICONS, CONTRACT_LABELS, MATERIALS, MATERIAL_ICONS, MATERIAL_LABELS, baseLevel } from '../../config/englishBase';
+import { unitById } from '../../config/englishUnits';
+import { letterLevelOf } from '../../services/english/letterLevel';
+import { nextMerchantLevel } from '../../services/english/merchantRoom';
+import { currentUnit, dayInUnit } from '../../services/english/units';
 import {
   ensureDailyPlan,
   generateUpcomingDays,
@@ -647,6 +651,95 @@ const UsageCard = ({ usage, month, capReached, nearCap }: UsageCardProps) => {
 
 // ---------- Painel ----------
 
+const HowHeGoes = ({ base, recent, today }: { base: BaseDoc | null; recent: DailyPlan[] | null; today: string }) => {
+  const unit = currentUnit(base, today);
+  const info = unitById(unit.id);
+  const day = dayInUnit(unit, today);
+  const book = base?.units ?? {};
+  const sealed = Object.entries(book).filter(([, row]) => row.sealedOn);
+  const review = Object.entries(book).filter(([, row]) => row.review);
+  const from = addDays(today, -6);
+  const week = (recent ?? []).filter((p) => p.date >= from && p.date <= today);
+  const rates = new Map<string, { hit: number; n: number }>();
+  for (const plan of week) {
+    for (const contract of Object.values(plan.contracts)) {
+      if (contract.status !== 'done' || !contract.result || contract.result.max <= 0) continue;
+      const row = rates.get(contract.type) ?? { hit: 0, n: 0 };
+      row.n += 1;
+      if (contract.result.score >= contract.result.max) row.hit += 1;
+      rates.set(contract.type, row);
+    }
+  }
+  const notes = (recent ?? [])
+    .flatMap((plan) =>
+      Object.values(plan.contracts)
+        .filter((contract) => contract.type === 'note' && contract.status === 'done' && contract.result)
+        .map((contract) => ({ date: plan.date, contract })),
+    )
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5);
+  const tags = new Map<string, number>();
+  for (const row of notes) {
+    for (const error of row.contract.result?.correction?.errors ?? []) {
+      tags.set(error.tag, (tags.get(error.tag) ?? 0) + 1);
+    }
+  }
+  const top = [...tags.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (!base) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 p-6" data-testid="english-how">
+        <h2 className="text-xl font-bold text-gray-900">Inglês: como ele vai</h2>
+        <p className="mt-3 text-sm text-gray-800">A base ainda está chegando.</p>
+      </div>
+    );
+  }
+  const letter = letterLevelOf(base, base.level);
+  const merchant = nextMerchantLevel({
+    stored: base?.merchantLevel,
+    ceiling: base?.level ?? 1,
+    done: base?.merchantDone ?? 0,
+    perfect: base?.merchantPerfect ?? 0,
+    weakStreak: base?.merchantWeakStreak ?? 0,
+    halfOrLess: false,
+  }).level;
+  const nameOf = (id: string) => unitById(id).name;
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-6" data-testid="english-how">
+      <h2 className="text-xl font-bold text-gray-900">Inglês: como ele vai</h2>
+      <p className="mt-3 text-sm text-gray-800">
+        Unidade {info.name}, dia {day}. Ferrarias: {unit.forges.length === 0 ? 'ainda nenhuma nesta unidade.' : unit.forges.map((row) => `${fmtDate(row.date)} ${row.first}/${row.max}`).join(' · ')}
+      </p>
+      <p className="mt-2 text-sm text-gray-800">
+        Seladas: {sealed.length ? sealed.map(([id, row]) => `${nameOf(id)} (${fmtDate(row.sealedOn ?? '')})`).join(' · ') : 'nenhuma ainda.'}
+        {' '}Para rever: {review.length ? review.map(([id]) => nameOf(id)).join(' · ') : 'nenhuma.'}
+      </p>
+      <p className="mt-2 text-sm text-gray-800">
+        Carta no nível {letter}. Comerciante no nível {merchant}. O teto do painel é {base?.level ?? 1}.
+      </p>
+      <p className="mt-2 text-sm text-gray-800">
+        Acerto de primeira, últimos 7 dias:{' '}
+        {rates.size === 0
+          ? 'ainda sem contrato concluído nesta semana.'
+          : [...rates.entries()].map(([type, row]) => `${CONTRACT_LABELS[type as Contract['type']]} ${row.hit} de ${row.n}`).join(' · ')}
+      </p>
+      <div className="mt-3 space-y-1 text-sm text-gray-800">
+        <p className="font-semibold text-gray-900">Últimos recados</p>
+        {notes.length === 0 && <p>Ainda sem recado concluído.</p>}
+        {notes.map((row) => {
+          const second = row.contract.result?.details?.secondScore;
+          return (
+            <p key={`${row.date}-${row.contract.id}`}>
+              {fmtDate(row.date)}: primeira {row.contract.result?.score}/{row.contract.result?.max}
+              {typeof second === 'number' ? `, segunda ${second}/${row.contract.result?.max}` : ''}
+            </p>
+          );
+        })}
+        <p>O erro que mais volta: {top ? `${TAG_LABELS[top[0] as NoteErrorTag]} (${top[1]})` : 'ainda sem etiqueta.'}</p>
+      </div>
+    </div>
+  );
+};
+
 const EnglishBaseManager: React.FC = () => {
   const { childUid } = useAuth();
   const today = getTodayBrazil();
@@ -758,6 +851,7 @@ const EnglishBaseManager: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <HowHeGoes base={base} recent={recent} today={today} />
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <div className="mb-1 flex items-center gap-3">
           <Hammer className="w-6 h-6 text-blue-600" />
