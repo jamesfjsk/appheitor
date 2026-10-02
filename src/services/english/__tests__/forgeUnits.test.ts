@@ -2,7 +2,7 @@ import { expect, run, test } from './harness';
 import { UNIT_ORDER } from '../../../config/englishUnits';
 import { checkForgeItem, forgeItemsFor, soleAnswer, typedAccepts } from '../forgeMolds';
 import { dueReviews, noteMistakeBar, reviewQueue, weeklySeal } from '../review';
-import { currentUnit, unitAfterForge, type UnitBook } from '../units';
+import { currentUnit, knownLemmas, unitAfterForge, type UnitBook } from '../units';
 
 const book = (id: string, startedOn: string): UnitBook => ({
   unit: { id, startedOn, forges: [] },
@@ -72,6 +72,11 @@ test('caixas da revisão e o erro do Recado vira barra', () => {
   expect(dueReviews(second, '2026-10-05')).toHaveLength(1);
   expect(weeklySeal('2026-10-01', '2026-10-08', null)).toBe(true);
   expect(weeklySeal('2026-10-01', '2026-10-08', '2026-10-08')).toBe(false);
+});
+
+test('palavra conhecida é a vista 3 vezes', () => {
+  expect(knownLemmas({ cat: { seen: 2 }, dog: { seen: 3 }, egg: { seen: 5 } })).toEqual(['egg', 'dog']);
+  expect(knownLemmas({})).toEqual([]);
 });
 
 void run();

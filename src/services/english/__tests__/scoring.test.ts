@@ -144,12 +144,12 @@ test('andaime: sobe a cada 2 notas 3 seguidas, nunca desce', () => {
   expect(s.scaffoldStage).toBe(2);
 });
 
-test('merchantMaterial: 3/2/1/0 e teto 2 com texto mostrado', () => {
+test('merchantMaterial: 3 de 3 paga 3 mesmo com o texto aberto', () => {
   expect(merchantMaterial(3, 3, false)).toBe(3);
   expect(merchantMaterial(2, 3, false)).toBe(2);
   expect(merchantMaterial(1, 3, false)).toBe(1);
   expect(merchantMaterial(0, 3, false)).toBe(0);
-  expect(merchantMaterial(3, 3, true)).toBe(2);
+  expect(merchantMaterial(3, 3, true)).toBe(3);
   expect(merchantMaterial(2, 2, false)).toBe(3);
   expect(merchantMaterial(1, 2, false)).toBe(2);
   expect(merchantMaterial(4, 4, false)).toBe(3);
@@ -184,7 +184,7 @@ test('forgeMaterial e noteMaterial', () => {
 });
 
 test('materialFor despacha por tipo', () => {
-  expect(materialFor('merchant', { hits: 2, steps: 2, textShown: true })).toBe(2);
+  expect(materialFor('merchant', { hits: 2, steps: 2, textShown: true })).toBe(3);
   expect(materialFor('letter', { hits: 3, evidenceOk: true })).toBe(3);
   expect(materialFor('note', { score: 2 })).toBe(2);
   expect(materialFor('forge', { hits: 5 })).toBe(3);

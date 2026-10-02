@@ -86,3 +86,11 @@ export function unitAfterForge(book: UnitBook, input: { date: string; first: num
     book: { units, unit: { ...book.unit, forges } },
   };
 }
+
+/** Palavra conhecida: vista em 3 contratos. As mais vistas vêm primeiro. */
+export function knownLemmas(vocab: Record<string, { seen: number }> | null | undefined): string[] {
+  return Object.entries(vocab ?? {})
+    .filter(([, row]) => row.seen >= 3)
+    .sort((a, b) => b[1].seen - a[1].seen || a[0].localeCompare(b[0]))
+    .map(([lemma]) => lemma);
+}

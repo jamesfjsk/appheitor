@@ -143,6 +143,8 @@ export interface BuildPromptInput {
   age: number;
   weekday: number;
   englishLevel: number;
+  /** Unidade aberta, para a pergunta de inglês. */
+  englishUnit?: string;
   avoidHashes?: string[];
   /** Ângulo do dia (§8.2). Entra no texto do prompt. */
   angle?: string;
@@ -176,7 +178,7 @@ export function buildPrompt(input: BuildPromptInput): string {
   const knowledge = Math.max(input.count - LESSON_QUESTIONS, 2);
   const areas = Array.from({ length: knowledge }, (_, i) => knowledgeAreasForWeekday(input.weekday)[i % 5]);
   const date = input.date ?? '';
-  const areaLines = areas.map((area, i) => `${i + 4}) ${areaRule(area, date, input.englishLevel)}`).join('\n');
+  const areaLines = areas.map((area, i) => `${i + 4}) ${areaRule(area, date, input.englishLevel, input.englishUnit)}`).join('\n');
   const lv = levelFor(input.englishLevel);
   const avoid = (input.avoidHashes ?? []).slice(0, 60);
   const avoidBlock = avoid.length
@@ -257,7 +259,7 @@ AUTO-REVISÃO (obrigatória, na mesma resposta): antes de devolver o JSON, conte
 
 const OPTION_SIZE = 'As 4 opções têm o mesmo tamanho (± 2 palavras) e nenhuma é caricata.';
 
-export function replacementBrief(slots: QuizSlot[], date = '', englishLevel = 1): string {
+export function replacementBrief(slots: QuizSlot[], date = '', englishLevel = 1, englishUnit = ''): string {
   const lines = slots.map((slot) => {
     const pos = slot.index + 1;
     if (slot.skill === 'LIC.DILEMA') {
@@ -275,7 +277,7 @@ export function replacementBrief(slots: QuizSlot[], date = '', englishLevel = 1)
 ${moldOfDay('matemática', date)}`;
     }
     if (slot.skill.startsWith('ING.')) {
-      return `${pos}) posição ${pos}, kind knowledge, skill ${slot.skill}. ${areaRule('inglês', date, englishLevel)}`;
+      return `${pos}) posição ${pos}, kind knowledge, skill ${slot.skill}. ${areaRule('inglês', date, englishLevel, englishUnit)}`;
     }
     if (slot.skill === 'HIS.FATO' || slot.skill === 'GEO.FATO') {
       return `${pos}) posição ${pos}, kind knowledge, skill ${slot.skill}. ${areaRule('história ou geografia', date, englishLevel)}`;
@@ -304,16 +306,17 @@ Nível de inglês ${lv.level}: teto ${lv.maxWords} palavras. why e trap com 16 p
 MODELO de dilema (copie a forma, troque a história):
 {"question":"Você prometeu ajudar seu irmão no dever às 17h, e os amigos chamaram para um jogo às 17h. Qual atitude é a mais justa?","options":["Aviso os amigos e ajudo meu irmão","Jogo agora e ajudo meu irmão depois","Ajudo meu irmão bem rápido","Peço para minha mãe ajudar ele"],"answer":"Aviso os amigos e ajudo meu irmão","why":"Quem avisa os amigos cumpre a promessa ao irmão e combina o jogo sem deixar ninguém esperando.","trap":"Quem marca Jogo agora e ajudo meu irmão depois atende a vontade de jogar, mas o irmão fica esperando e a promessa atrasa.","kind":"dilemma","subject":"tema","skill":"LIC.DILEMA","bloom":"analisar"}
 
-${replacementBrief(slots, input.date ?? '', input.englishLevel)}
+${replacementBrief(slots, input.date ?? '', input.englishLevel, input.englishUnit)}
 
 Responda SOMENTE com o JSON.`;
 }
 
-function areaRule(area: string, date: string, englishLevel: number): string {
+function areaRule(area: string, date: string, englishLevel: number, englishUnit?: string): string {
   const mold = moldOfDay(area, date, englishLevel);
+  const unit = englishUnit ? ` Unidade de hoje: ${englishUnit}` : '';
   if (area === 'matemática') return `matemática — MAT.OP2, duas etapas, números até 1000, fração, porcentagem, tempo ou dinheiro. Molde de hoje: ${mold}`;
   if (area === 'ciências') return `ciências — o mecanismo, não o efeito óbvio (CIE.CAUSA). Molde de hoje: ${mold}`;
-  if (area === 'inglês') return `inglês — uma só forma correta, a regra do dia. Molde de hoje: ${mold} Use as quatro opções do molde. Nada de passado (had, was, were, did).`;
+  if (area === 'inglês') return `inglês — uma só forma correta, a regra do dia.${unit} Molde de hoje: ${mold} Use as quatro opções do molde. Nada de passado (had, was, were, did).`;
   if (area === 'história ou geografia') return `história ou geografia — HIS.FATO ou GEO.FATO. ${HISTORY_LINE} Molde de hoje: ${mold}`;
   return 'cenário de futebol — a partida é o cenário; ensina matemática, ciências, inglês ou história; scenario "futebol"; subject não é futebol';
 }

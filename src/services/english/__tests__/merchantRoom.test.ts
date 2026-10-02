@@ -1,7 +1,7 @@
 import { expect, run, test } from './harness';
 import type { MerchantStep } from '../../../types/english';
 import { MERCHANT_CATALOGS, MERCHANT_ITEMS, MERCHANT_SPOTS } from '../../../config/englishBase';
-import { buildMerchantContent, buildMerchantRoom, CONTRAST_OF, evaluateRoom, gapped, KITCHEN_ITEMS, lessonRelations, merchantKey, merchantLevelFromSkill, merchantStepKey, offlineSentences, roomSizeFor, stepsFor, warehouseSpots } from '../merchantRoom';
+import { buildMerchantContent, buildMerchantRoom, CONTRAST_OF, evaluateRoom, gapped, KITCHEN_ITEMS, lessonRelations, merchantKey, merchantLevelFromSkill, merchantRetryOn, merchantStepKey, merchantStepsForDay, nextMerchantLevel, offlineSentences, roomSizeFor, stepsFor, warehouseSpots } from '../merchantRoom';
 
 test('nível do Comerciante sobe pelo desempenho, nunca no chute', () => {
   expect(merchantLevelFromSkill(0, 0)).toBe(1);
@@ -187,6 +187,31 @@ test('buildMerchantContent monta o contrato inteiro', () => {
   expect(c.translation).toHaveLength(c.steps.length);
   c.gapped.forEach((g) => expect(g.split('___').length - 1).toBe(2));
   c.sentences.forEach((s) => expect(s).toMatch(/^(Put|Then put|Now put|Please put) .+ the \w+\.$/));
+});
+
+test('merchantLevel sobe, desce e para no teto', () => {
+  const up = nextMerchantLevel({ ceiling: 3, done: 3, perfect: 3, weakStreak: 0, halfOrLess: false });
+  expect(up).toEqual({ level: 2, weakStreak: 0 });
+  const held = nextMerchantLevel({ stored: 2, ceiling: 3, done: 3, perfect: 3, weakStreak: 0, halfOrLess: true });
+  expect(held).toEqual({ level: 2, weakStreak: 1 });
+  const down = nextMerchantLevel({ stored: 2, ceiling: 3, done: 4, perfect: 3, weakStreak: 1, halfOrLess: true });
+  expect(down).toEqual({ level: 1, weakStreak: 0 });
+  const cap = nextMerchantLevel({ stored: 2, ceiling: 2, done: 7, perfect: 5, weakStreak: 0, halfOrLess: false });
+  expect(cap.level).toBe(2);
+  const fresh = nextMerchantLevel({ ceiling: 1, done: 7, perfect: 5, weakStreak: 0, halfOrLess: false });
+  expect(fresh.level).toBe(1);
+});
+
+test('pedido errado volta em 3 e em 10 dias', () => {
+  expect(merchantRetryOn('2026-10-01')).toEqual(['2026-10-04', '2026-10-11']);
+  const rows = [{ date: '2026-10-01', keys: ['apple in box'], score: 1, max: 2 }];
+  expect(merchantStepsForDay(rows, '2026-10-02').due).toEqual([]);
+  expect(merchantStepsForDay(rows, '2026-10-02').avoid).toEqual(['apple in box']);
+  expect(merchantStepsForDay(rows, '2026-10-04').due).toEqual(['apple in box']);
+  expect(merchantStepsForDay(rows, '2026-10-04').avoid).toEqual([]);
+  expect(merchantStepsForDay(rows, '2026-10-11').due).toEqual(['apple in box']);
+  const perfect = [{ date: '2026-10-01', keys: ['apple in box'], score: 2, max: 2 }];
+  expect(merchantStepsForDay(perfect, '2026-10-04').due).toEqual([]);
 });
 
 void run();

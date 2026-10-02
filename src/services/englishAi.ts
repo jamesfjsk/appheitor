@@ -24,7 +24,7 @@ import type {
 import { CONTRACT_MATERIAL, MERCHANT_CATALOGS } from '../config/englishBase';
 import { FORGE_TAG_TARGETS, LETTER_GENRES, levelFor } from '../config/englishLevels';
 import { forgeItemMixFor, forgeTargetFor, lastForgeScore, yesterdayMistakes } from './english/prompts';
-import { buildMerchantRoom, merchantKey, merchantStepKey, offlineSentences } from './english/merchantRoom';
+import { buildMerchantRoom, merchantKey, merchantStepKey, merchantStepsForDay, nextMerchantLevel, offlineSentences } from './english/merchantRoom';
 import { normalize } from './english/notePrecheck';
 import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
@@ -33,7 +33,7 @@ import { callOpenAI, isAIConfigured } from './aiQuiz';
 import { letterAfterReviews, letterLevelOf, parseLetterReview, c1QuestionOk, type LetterReview } from './english/letterLevel';
 import { forgeItemsFor } from './english/forgeMolds';
 import { unitById } from '../config/englishUnits';
-import { currentUnit, dayInUnit } from './english/units';
+import { currentUnit, dayInUnit, knownLemmas } from './english/units';
 import { pickC1Letter } from '../data/englishC1Letters';
 import { currentUsageMonth, getUsage, isOverCap } from './aiUsage';
 import { addDays } from './dailyQuizService';
@@ -84,6 +84,8 @@ export interface GenerateInput {
   letterTier?: 1 | 2 | 3;
   merchantDone?: number;
   avoidMerchantSteps?: string[];
+  /** Pedidos errados que voltam hoje. */
+  preferMerchantSteps?: string[];
 }
 
 export interface GeneratedContract {
@@ -336,7 +338,7 @@ async function generateMerchant(input: GenerateInput): Promise<Generated<Merchan
   const lv = levelFor(input.level);
   const avoid = new Set(input.avoidOffline ?? []);
   const banned = new Set((input.avoidMerchantSteps ?? []).map((k) => k.toLowerCase()));
-  const roomOpts = { done: input.merchantDone ?? 0, avoidSteps: [...banned] };
+  const roomOpts = { done: input.merchantDone ?? 0, avoidSteps: [...banned], preferSteps: input.preferMerchantSteps };
   const clashes = (room: ReturnType<typeof buildMerchantRoom>): boolean =>
     avoid.has(merchantKey(room.steps)) || room.steps.some((s) => banned.has(merchantStepKey(s)));
   let room = buildMerchantRoom(input.seed, lv.level, MERCHANT_CATALOGS.spots, MERCHANT_CATALOGS.items, roomOpts);
@@ -659,7 +661,9 @@ export interface DayContext {
   retryItems: ForgeItem[];
   avoidOffline: string[];
   merchantDone: number;
+  merchantLevel: 1 | 2 | 3;
   avoidMerchantSteps: string[];
+  preferMerchantSteps: string[];
   letterTier: 1 | 2 | 3;
   unitId: string;
   dayInUnit: number;
@@ -743,10 +747,7 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
     yesterdayMax: yesterday.max,
   });
 
-  const vocabKnown = Object.entries(ctx.base.vocab)
-    .sort((a, b) => b[1].seen - a[1].seen || a[0].localeCompare(b[0]))
-    .map(([lemma]) => lemma)
-    .slice(0, VOCAB_PROMPT_MAX);
+  const vocabKnown = knownLemmas(ctx.base.vocab).slice(0, VOCAB_PROMPT_MAX);
   const avoidNames = unique(contractsOf(lastWeek, 'letter').map((c) => (c.type === 'letter' ? c.content.sender : '')).filter(Boolean));
   const avoidOffline = unique(
     recent
@@ -754,11 +755,15 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
       .flatMap((p) => Object.values(p.contracts).map((c) => offlineKey(c.type, c.content)))
       .filter(Boolean)
   );
-  const avoidMerchantSteps = unique(
-    contractsOf(recent, 'merchant').flatMap((c) =>
-      c.type === 'merchant' ? c.content.steps.map((s) => merchantStepKey(s)) : []
-    )
+  const merchantRows = recent.flatMap((p) =>
+    Object.values(p.contracts).flatMap((c) =>
+      c.type === 'merchant' && c.status === 'done' && c.result
+        ? [{ date: p.date, keys: c.content.steps.map((s) => merchantStepKey(s)), score: Number(c.result.score) || 0, max: Number(c.result.max) || 0 }]
+        : [],
+    ),
   );
+  const merchantSplit = merchantStepsForDay(merchantRows, ctx.date);
+  const avoidMerchantSteps = merchantSplit.avoid;
 
   // O 5º contrato alterna por paridade do dia: segundo Comerciante ou segunda Carta com outro tema
   const fifth: DaySpec = dayIndex % 2 === 0 ? { id: 'c5', type: 'merchant', theme: secondTheme } : { id: 'c5', type: 'letter', theme: secondTheme, genre: genre2 };
@@ -782,7 +787,16 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
     retryItems: yesterdayMistakes(recent, ctx.date, forgeItemMixFor(lv.level, forgeTarget.kind)),
     avoidOffline,
     merchantDone: ctx.base.merchantDone,
+    merchantLevel: nextMerchantLevel({
+      stored: ctx.base.merchantLevel,
+      ceiling: lv.level,
+      done: ctx.base.merchantDone,
+      perfect: ctx.base.merchantPerfect,
+      weakStreak: ctx.base.merchantWeakStreak ?? 0,
+      halfOrLess: false,
+    }).level,
     avoidMerchantSteps,
+    preferMerchantSteps: merchantSplit.due,
     themeRequest: null,
   };
 }
@@ -796,6 +810,7 @@ interface GeneratedFull {
 async function generateFor(spec: DaySpec, input: GenerateInput, target: ForgeTarget, version: number): Promise<GeneratedFull> {
   const base = {
     id: spec.id,
+    level: input.level,
     material: CONTRACT_MATERIAL[spec.type],
     theme: spec.theme,
     version,
@@ -824,9 +839,15 @@ async function generateFor(spec: DaySpec, input: GenerateInput, target: ForgeTar
   }
 }
 
+function levelOfContract(day: DayContext, spec: DaySpec): number {
+  if (spec.type === 'merchant') return day.merchantLevel;
+  if (spec.type === 'letter') return day.letterTier;
+  return unitById(day.unitId).level;
+}
+
 function inputFor(day: DayContext, spec: DaySpec, date: string, seed: number, extra: Partial<GenerateInput> = {}): GenerateInput {
   return {
-    level: day.level,
+    level: levelOfContract(day, spec),
     theme: spec.theme,
     date,
     seed,
@@ -840,6 +861,7 @@ function inputFor(day: DayContext, spec: DaySpec, date: string, seed: number, ex
     avoidOffline: day.avoidOffline,
     merchantDone: day.merchantDone,
     avoidMerchantSteps: day.avoidMerchantSteps,
+    preferMerchantSteps: day.preferMerchantSteps,
     ...extra,
   };
 }

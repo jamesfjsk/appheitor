@@ -152,6 +152,8 @@ export interface ForgeContent {
 export interface ContractBase {
   id: string;
   type: ContractType;
+  /** Nível usado neste contrato. O plano guarda o teto do painel. */
+  level?: number;
   material: Material;
   theme: string;
   title: string;

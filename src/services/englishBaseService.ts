@@ -19,6 +19,7 @@ import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
 import { letterLevelOf, nextLetterLevel } from './english/letterLevel';
 import { currentUnit, unitAfterForge } from './english/units';
+import { nextMerchantLevel } from './english/merchantRoom';
 import { normalizedTokens } from './english/notePrecheck';
 import { assertAiBudget, buildDailyContracts, regenerateSingle } from './englishAi';
 import { prefetchAudio } from './englishTts';
@@ -172,6 +173,10 @@ export function fromBaseDoc(uid: string, data: Record<string, unknown>): BaseDoc
         }
       : {}),
     ...(isRecord(data.units) ? { units: data.units as BaseDoc['units'] } : {}),
+    ...(data.merchantLevel === 1 || data.merchantLevel === 2 || data.merchantLevel === 3
+      ? { merchantLevel: data.merchantLevel as 1 | 2 | 3 }
+      : {}),
+    merchantWeakStreak: num(data.merchantWeakStreak),
     contractsDone: num(data.contractsDone),
     merchantDone: num(data.merchantDone),
     merchantPerfect: num(data.merchantPerfect),
@@ -620,7 +625,18 @@ export async function completeContract(
     perfect = Number(outcome.score) >= Number(outcome.max) && Number(outcome.max) > 0;
     const merchantDone = base.merchantDone + (contract.type === 'merchant' ? 1 : 0);
     const merchantPerfect = base.merchantPerfect + (contract.type === 'merchant' && perfect ? 1 : 0);
-    // O nível é só o do painel (setBaseLevel). Até 30/09 o Comerciante subia o nível de todos os contratos.
+    // O teto continua só o do painel. O Comerciante anda no próprio nível, por baixo dele.
+    const halfOrLess = contract.type === 'merchant' && num(outcome.max) > 0 && num(outcome.score) * 2 <= num(outcome.max);
+    const merchantNext = contract.type === 'merchant'
+      ? nextMerchantLevel({
+          stored: base.merchantLevel,
+          ceiling: base.level,
+          done: merchantDone,
+          perfect: merchantPerfect,
+          weakStreak: base.merchantWeakStreak ?? 0,
+          halfOrLess,
+        })
+      : null;
 
     const materials = { ...base.materials, [contract.material]: base.materials[contract.material] + material };
     const vocab = { ...base.vocab };
@@ -657,6 +673,7 @@ export async function completeContract(
       contractsDone: base.contractsDone + 1,
       merchantDone,
       merchantPerfect,
+      ...(merchantNext ? { merchantLevel: merchantNext.level, merchantWeakStreak: merchantNext.weakStreak } : {}),
       letterLevel: letterMoved || contract.type === 'letter' ? letterNext : base.letterLevel,
       letterPerfectStreak: letterMoved ? 0 : letterPerfectStreak,
       letterWeakStreak: letterMoved ? 0 : letterWeakStreak,

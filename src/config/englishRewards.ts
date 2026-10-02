@@ -37,14 +37,14 @@ export const BUILD_XP: [number, number, number] = [0, 0, 0];
 
 const clampMaterial = (n: number): MaterialCount => Math.max(0, Math.min(MAX_MATERIAL, Math.floor(n))) as MaterialCount;
 
-/** 3 = todos os passos; 2 = errou 1; 1 = acertou >= 1; teto 2 se o texto completo apareceu */
+/** 3 = todos os passos; 2 = errou 1; 1 = acertou pelo menos 1. O texto aberto não corta. */
 export function merchantMaterial(hits: number, steps: number, textShown: boolean): MaterialCount {
+  void textShown;
   if (steps <= 0) return 0;
-  let m: MaterialCount = 0;
-  if (hits >= steps) m = 3;
-  else if (hits === steps - 1) m = 2;
-  else if (hits >= 1) m = 1;
-  return textShown ? (Math.min(m, MERCHANT_TEXT_SHOWN_CAP) as MaterialCount) : m;
+  if (hits >= steps) return 3;
+  if (hits === steps - 1) return 2;
+  if (hits >= 1) return 1;
+  return 0;
 }
 
 /**

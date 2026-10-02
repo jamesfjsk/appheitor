@@ -97,4 +97,19 @@ test('10b-2: dois dias seguidos não repetem o molde na mesma área', () => {
   expect(a === b).toBe(false);
 });
 
+test('a pergunta de inglês recebe a unidade aberta', () => {
+  const text = buildPrompt({
+    seed: QUIZ_THEMES[0],
+    count: 8,
+    spare: 3,
+    age: 10,
+    weekday: 1,
+    englishLevel: 2,
+    englishUnit: 'am / is / are: I usa am.',
+    date: '2026-12-07',
+  });
+  expect(text.includes('Unidade de hoje: am / is / are: I usa am.')).toBe(true);
+  expect(text.includes('Nível 2') || text.includes('nível 2') || text.includes('Nível de inglês 2')).toBe(true);
+});
+
 void run();
