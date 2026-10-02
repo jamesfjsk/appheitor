@@ -53,7 +53,7 @@ const INSTRUCTIONS: Record<ContractType, string> = {
   merchant:
     'O comerciante fala em inglês o que quer em cada lugar da sala. Clique em Ouvir para cada pedido (pode repetir). Depois clique num item da bandeja, clique no lugar certo e escolha a posição e a quantidade. Quando a sala estiver pronta, clique em Entregar.',
   letter:
-    'Leia o texto em inglês. Passe o mouse (ou segure o dedo) nas palavras sublinhadas para ver o significado. Responda às 3 perguntas. Numa delas você vai clicar na frase do texto que prova a resposta.',
+    'Leia o texto em inglês. Toque na palavra sublinhada: ela mostra o que quer dizer, e a voz fala. Responda às perguntas. Numa delas você clica na frase que prova.',
   note:
     'Leia o pedido em português e escreva o recado em inglês com as 3 informações. As palavras do banco ajudam. O ferreiro lê o recado e dá a nota em ferro: 3 é recado perfeito.',
   forge:
