@@ -100,7 +100,7 @@ const POOLS: Record<string, Raw[]> = {
     { kind: 'build', item: build(['I need', 'to sleep'], 'Ação pede to.') },
     { kind: 'type', item: typed('We want ___ eat pizza.', 'We want ___ eat pizza.', ['to'], 'Ação pede to.') },
     { kind: 'choose', item: choosePair('I need to read.', 'I need read.', 'Ação pede to.') },
-    { kind: 'gap', item: gap('I want ___.', ['water', 'to water', 'to'], 0, 'Coisa fica sem to.') },
+    { kind: 'gap', item: gap('I want ___.', ['an apple', 'to an apple', 'to apple'], 0, 'Coisa fica sem to.') },
   ],
   u6: [
     { kind: 'choose', item: gap('A fish ___ walk.', ['can', "can't"], 1, 'Um peixe não anda.') },
@@ -160,7 +160,7 @@ const POOLS: Record<string, Raw[]> = {
     { kind: 'build', item: build(['I wait', 'because', 'dinner is first'], 'because liga o que acontece ao motivo.') },
     { kind: 'type', item: typed('I am late ___ the bus is slow.', 'I am late ___ the bus is slow.', ['because'], 'because liga o motivo.') },
     { kind: 'choose', item: choosePair('I sleep because I am tired.', 'I sleep because am tired.', 'O motivo tem alguém fazendo.') },
-    { kind: 'gap', item: gap('I am late because ___ bus is slow.', ['the', 'a', 'is'], 0, 'O motivo tem alguém fazendo.') },
+    { kind: 'gap', item: gap('I stay home because ___ is cold.', ['it', 'I', 'is'], 0, 'O motivo tem alguém fazendo.') },
   ],
 };
 

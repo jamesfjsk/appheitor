@@ -834,7 +834,7 @@ async function generateFor(spec: DaySpec, input: GenerateInput, target: ForgeTar
     case 'forge': {
       const g = await generateForge(input);
       // O rótulo "Ferraria" já aparece acima do título no quadro, na casca e no resultado
-      return { contract: { ...base, type: 'forge', title: target.label, content: g.content }, source: g.source, problems: g.problems };
+      return { contract: { ...base, type: 'forge', title: g.content.target || target.label, content: g.content }, source: g.source, problems: g.problems };
     }
   }
 }
