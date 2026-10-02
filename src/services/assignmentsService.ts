@@ -22,6 +22,7 @@ import {
 import { ref, uploadBytes } from 'firebase/storage';
 import { httpsCallable } from 'firebase/functions';
 import { auth, db, functions, storage } from '../config/firebase';
+import { initialBaseDoc } from '../config/englishBase';
 import { DEFAULT_ECONOMY } from '../config/village';
 import type {
   Assignment,
@@ -36,11 +37,13 @@ import type { Material } from '../types/english';
 import type { Proof, ProofSpec } from '../types/proof';
 import type { EconomySettings } from '../types/village';
 import { getSettings } from './settingsService';
-import { saveNotice } from './villageService';
+import { ackNotice, saveNotice } from './villageService';
 import { claimKey } from './village/claims';
 import { addDays, getTodayBrazil } from '../utils/clock';
+import { approvalPlan } from './assignments/approval';
+import { nextDueOn } from './assignments/due';
 import { isProjectSize, nextStatus, proofReady, type StatusReason } from './assignments/machine';
-import { assignmentReward } from './assignments/rewards';
+import { noticeUntil } from './assignments/placa';
 import { CAREER_REWARDS } from '../config/careers';
 import { instanceDraft } from './assignments/recurrence';
 import {
@@ -388,28 +391,80 @@ function bodyOf(draft: AssignmentDraft, userId: string, today: string, createdBy
   });
 }
 
-async function postNotice(uid: string, id: string, text: string, today: string): Promise<void> {
+async function postNotice(uid: string, id: string, text: string, today: string, until: string): Promise<void> {
   await saveNotice(uid, {
     id,
     type: 'recado',
     text,
     when: today,
+    until,
   });
 }
 
-export async function createAssignment(uid: string, draft: AssignmentDraft, today = getTodayBrazil()): Promise<string> {
+async function createOnce(target: ReturnType<typeof doc>, data: DocumentData): Promise<boolean> {
+  let created = false;
+  await runTransaction(db, async (tx) => {
+    created = false;
+    const snap = await tx.get(target);
+    if (snap.exists()) return;
+    tx.set(target, data);
+    created = true;
+  });
+  return created;
+}
+
+export async function compressProofPhoto(file: Blob): Promise<Blob> {
+  const bitmap = await createImageBitmap(file);
+  try {
+    const edge = Math.max(bitmap.width, bitmap.height);
+    const scale = Math.min(1, 1600 / Math.max(1, edge));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new AssignmentError('foto', 'A foto não entrou.');
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((out) => resolve(out), 'image/jpeg', 0.8);
+    });
+    if (!blob) throw new AssignmentError('foto', 'A foto não entrou.');
+    return blob;
+  } finally {
+    bitmap.close();
+  }
+}
+
+export async function createAssignment(
+  uid: string,
+  draft: AssignmentDraft,
+  today = getTodayBrazil(),
+): Promise<{ id: string; onBoard: boolean }> {
   const title = draft.title.trim();
   const deliverable = draft.deliverable.trim();
   const criteria = draft.criteria.map((line) => line.trim()).filter(Boolean);
+  const questions = (draft.proof.questions ?? []).map((line) => line.trim()).filter(Boolean);
   if (!title || !deliverable || criteria.length === 0) {
     throw new AssignmentError('vazio', 'Falta o título, a entrega ou o que precisa ficar pronto.');
   }
   if (!SPECIALTIES.has(draft.specialty)) throw new AssignmentError('vazio', 'Escolhe a especialidade.');
+  if (draft.proof.kinds.includes('questions') && questions.length === 0) {
+    throw new AssignmentError('vazio', 'Uma encomenda com perguntas precisa de pelo menos uma.');
+  }
   const dueOn = draft.dueOn && /^\d{4}-\d{2}-\d{2}$/.test(draft.dueOn) ? draft.dueOn : today;
-  const clean: AssignmentDraft = { ...draft, title, deliverable, criteria, dueOn };
+  const clean: AssignmentDraft = {
+    ...draft,
+    title,
+    deliverable,
+    criteria,
+    dueOn,
+    proof: questions.length ? { kinds: draft.proof.kinds, questions } : { kinds: draft.proof.kinds },
+  };
   try {
-    let assignmentId = '';
-    if (draft.recurring && draft.weekdays && draft.weekdays.length > 0) {
+    if (draft.recurring) {
+      const weekdays = (draft.weekdays ?? []).filter((day) => day >= 0 && day <= 6);
+      if (weekdays.length === 0) throw new AssignmentError('vazio', 'Escolhe os dias da recorrência.');
       const recRef = doc(collection(db, 'assignmentRecurrences'));
       const rec: AssignmentRecurrence = {
         id: recRef.id,
@@ -429,7 +484,7 @@ export async function createAssignment(uid: string, draft: AssignmentDraft, toda
         },
         competencies: draft.competencies,
         adult: draft.adult,
-        weekdays: draft.weekdays,
+        weekdays,
         dueAfterDays: Math.max(0, Math.floor(draft.dueAfterDays ?? 0)),
         active: true,
       };
@@ -440,24 +495,22 @@ export async function createAssignment(uid: string, draft: AssignmentDraft, toda
         updatedAt: serverTimestamp(),
       }));
       const todayDraft = instanceDraft(rec, today);
-      if (todayDraft) {
-        const existing = await getDoc(doc(db, 'assignments', todayDraft.id));
-        if (existing.exists()) return todayDraft.id;
-        assignmentId = todayDraft.id;
-        await setDoc(doc(db, 'assignments', assignmentId), defined({
-          ...bodyOf(clean, uid, today, 'system', todayDraft.dueOn),
-          recurrenceId: rec.id,
-          periodKey: today,
-        }));
+      if (!todayDraft) return { id: rec.id, onBoard: false };
+      const target = doc(db, 'assignments', todayDraft.id);
+      const created = await createOnce(target, defined({
+        ...bodyOf(clean, uid, today, 'system', todayDraft.dueOn),
+        recurrenceId: rec.id,
+        periodKey: today,
+      }));
+      if (created) {
+        await postNotice(uid, `asg_${todayDraft.id}_new`, placaNew(title), today, noticeUntil('new', today, todayDraft.dueOn));
       }
+      return { id: todayDraft.id, onBoard: true };
     }
-    if (!assignmentId) {
-      const ref = doc(collection(db, 'assignments'));
-      assignmentId = ref.id;
-      await setDoc(ref, bodyOf(clean, uid, today, 'admin', dueOn));
-    }
-    await postNotice(uid, `asg_${assignmentId}_new`, placaNew(title), today);
-    return assignmentId;
+    const createdRef = doc(collection(db, 'assignments'));
+    await setDoc(createdRef, bodyOf(clean, uid, today, 'admin', dueOn));
+    await postNotice(uid, `asg_${createdRef.id}_new`, placaNew(title), today, noticeUntil('new', today, dueOn));
+    return { id: createdRef.id, onBoard: true };
   } catch (error) {
     rethrow(error);
   }
@@ -525,6 +578,11 @@ export async function acceptAssignment(id: string, plan?: string): Promise<void>
       }));
       writeBoard(tx, boardRef, boardSnap.exists(), uid, [...still, id]);
     });
+    try {
+      await ackNotice(`asg_${id}_new`);
+    } catch {
+      /* o aviso pode já ter sido lido */
+    }
   } catch (error) {
     rethrow(error);
   }
@@ -611,7 +669,10 @@ export async function dropAssignment(id: string): Promise<void> {
   }
 }
 
-export async function requestChanges(id: string, input: { note: string; missing?: number[] }): Promise<void> {
+export async function requestChanges(
+  id: string,
+  input: { note: string; missing?: number[]; dueOn?: string },
+): Promise<void> {
   const note = input.note.trim();
   if (!note) throw new AssignmentError('frase', 'Escreve uma frase curta sobre o que ainda falta.');
   const today = getTodayBrazil();
@@ -635,8 +696,11 @@ export async function requestChanges(id: string, input: { note: string; missing?
       if (!move.ok) throw new AssignmentError(move.reason, 'Ela ainda não foi entregue.');
       const prev = Array.isArray(data.reviews) ? data.reviews : [];
       const missing = (input.missing ?? []).map((n) => Math.floor(n)).filter((n) => n >= 0);
-      tx.update(ref, {
+      const renewed = nextDueOn(str(data.dueOn) || undefined, today, input.dueOn);
+      tx.update(ref, defined({
         status: 'needs_changes',
+        dueOn: renewed || undefined,
+        dueAt: renewed ? dueTimestamp(renewed) : undefined,
         reviews: [...prev, defined({
           at: Timestamp.now(),
           verdict: 'needs_changes',
@@ -644,9 +708,39 @@ export async function requestChanges(id: string, input: { note: string; missing?
           note,
         })],
         updatedAt: serverTimestamp(),
-      });
+      }));
     });
-    if (uid) await postNotice(uid, `asg_${id}_fix`, placaChanges(), today);
+    if (uid) await postNotice(uid, `asg_${id}_fix`, placaChanges(), today, noticeUntil('fix', today));
+  } catch (error) {
+    rethrow(error);
+  }
+}
+
+const OPEN_DUE: ReadonlySet<string> = new Set(['available', 'accepted', 'needs_changes']);
+
+export async function changeDue(id: string, dueOn: string): Promise<void> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dueOn)) throw new AssignmentError('prazo', 'Escolhe o dia do prazo.');
+  try {
+    await runTransaction(db, async (tx) => {
+      const ref = doc(db, 'assignments', id);
+      const snap = await tx.get(ref);
+      if (!snap.exists()) throw new AssignmentError('sumiu', 'Essa encomenda não está no quadro.');
+      const data = snap.data();
+      if (!OPEN_DUE.has(String(data.status))) {
+        throw new AssignmentError('transicao', 'O prazo desta já não muda.');
+      }
+      const uid = str(data.userId);
+      const boardRef = doc(db, 'assignmentBoards', uid);
+      const boardSnap = uid ? await tx.get(boardRef) : null;
+      tx.update(ref, {
+        dueOn,
+        dueAt: dueTimestamp(dueOn),
+        updatedAt: serverTimestamp(),
+      });
+      if (uid && boardSnap?.exists()) {
+        writeBoard(tx, boardRef, true, uid, boardList(boardSnap.data()));
+      }
+    });
   } catch (error) {
     rethrow(error);
   }
@@ -697,6 +791,9 @@ export async function approveAssignment(uid: string, id: string, review: Approva
   const outcome: ApproveOutcome = { paid: false, gold: 0, already: false };
   try {
     await runTransaction(db, async (tx) => {
+      outcome.paid = false;
+      outcome.gold = 0;
+      outcome.already = false;
       const aRef = doc(db, 'assignments', id);
       const pRef = doc(db, 'progress', uid);
       const vRef = doc(db, 'village', uid);
@@ -712,32 +809,36 @@ export async function approveAssignment(uid: string, id: string, review: Approva
       if (!aSnap.exists()) throw new AssignmentError('sumiu', 'Essa encomenda não está no quadro.');
       const data = aSnap.data();
       if (str(data.userId) !== uid) throw new AssignmentError('sumiu', 'Essa encomenda é de outro minerador.');
-      if (data.status === 'approved') {
-        outcome.already = true;
+      const rewardRec = asRecord(data.reward);
+      const claimedMap = (vSnap.data()?.claimed || {}) as Record<string, unknown>;
+      const plan = approvalPlan({
+        id,
+        status: data.status,
+        kind: data.kind === 'training' ? 'training' : 'paid',
+        templateId: str(data.templateId) || undefined,
+        reward: {
+          gold: Math.max(0, Math.round(Number(rewardRec?.gold) || 0)),
+          xp: Math.max(0, Math.round(Number(rewardRec?.xp) || 0)),
+          materials: cleanMaterials(rewardRec?.materials as Partial<Record<Material, number>> | undefined),
+        },
+        claimed: Boolean(claimedMap[claimKey('assignment', id)]),
+        txExists: gSnap.exists(),
+        gold: Math.max(0, Math.round(Number(pSnap.data()?.availableGold) || 0)),
+        board: boardList(boardSnap.data()),
+        baseExists: bSnap.exists(),
+        progressExists: pSnap.exists(),
+        villageExists: vSnap.exists(),
+      }, CAREER_REWARDS);
+      if (!plan.write) {
+        if (plan.reason === 'already') outcome.already = true;
+        if (plan.reason === 'missing_pocket') throw new AssignmentError('bolso', 'O bolso do minerador não apareceu.');
         return;
       }
-      if (data.status !== 'submitted') return;
-      const key = claimKey('assignment', id);
-      const claimed = (vSnap.data()?.claimed || {}) as Record<string, unknown>;
-      if (claimed[key] || gSnap.exists()) {
+      if (!plan.paid) {
         tx.update(aRef, { status: 'approved', updatedAt: serverTimestamp() });
         outcome.already = true;
         return;
       }
-      if (!pSnap.exists() || !vSnap.exists()) {
-        throw new AssignmentError('bolso', 'O bolso do minerador não apareceu.');
-      }
-      const pay = assignmentReward({
-        kind: data.kind === 'training' ? 'training' : 'paid',
-        templateId: str(data.templateId) || undefined,
-        reward: {
-          gold: Math.max(0, Math.round(Number(asRecord(data.reward)?.gold) || 0)),
-          xp: Math.max(0, Math.round(Number(asRecord(data.reward)?.xp) || 0)),
-          materials: cleanMaterials(asRecord(data.reward)?.materials as Partial<Record<Material, number>> | undefined),
-        },
-      }, CAREER_REWARDS);
-      const goldBefore = Math.max(0, Math.round(Number(pSnap.data()?.availableGold) || 0));
-      const goldAfter = goldBefore + pay.gold;
       const prev = Array.isArray(data.reviews) ? data.reviews : [];
       const missing = (review.missing ?? []).map((n) => Math.floor(n)).filter((n) => n >= 0);
       const competencies = (review.competencies ?? []).map((item) => item.trim()).filter(Boolean);
@@ -753,63 +854,67 @@ export async function approveAssignment(uid: string, id: string, review: Approva
         sawItWorking: review.sawItWorking ? true : undefined,
         overCap: review.overCap ? true : undefined,
       });
-      const payout = defined({
-        txId: `assignment_${id}`,
-        gold: pay.gold,
-        xp: pay.xp,
-        materials: pay.materials,
-        at: Timestamp.now(),
-      });
       tx.update(aRef, {
         status: 'approved',
-        payout,
+        payout: defined({
+          txId: `assignment_${id}`,
+          gold: plan.reward.gold,
+          xp: plan.reward.xp,
+          materials: plan.reward.materials,
+          at: Timestamp.now(),
+        }),
         reviews: [...prev, entry],
         updatedAt: serverTimestamp(),
       });
       const progressPatch: Record<string, unknown> = { updatedAt: serverTimestamp() };
-      if (pay.gold > 0) {
-        progressPatch.availableGold = goldAfter;
-        progressPatch.totalGoldEarned = increment(pay.gold);
+      if (plan.reward.gold > 0) {
+        progressPatch.availableGold = plan.goldAfter;
+        progressPatch.totalGoldEarned = increment(plan.reward.gold);
       }
-      if (pay.xp > 0) progressPatch.totalXP = increment(pay.xp);
-      if (pay.gold > 0 || pay.xp > 0) tx.update(pRef, progressPatch);
-      if (pay.gold > 0) {
+      if (plan.reward.xp > 0) progressPatch.totalXP = increment(plan.reward.xp);
+      if (plan.reward.gold > 0 || plan.reward.xp > 0) tx.update(pRef, progressPatch);
+      if (plan.line) {
         tx.set(gRef, defined({
           userId: uid,
-          amount: pay.gold,
+          amount: plan.line.amount,
           type: 'earned',
           source: 'assignment',
           description: `Encomenda: ${str(data.title)}`,
           relatedId: id,
           relatedTitle: str(data.title),
-          balanceBefore: goldBefore,
-          balanceAfter: goldAfter,
+          balanceBefore: plan.line.balanceBefore,
+          balanceAfter: plan.line.balanceAfter,
           createdAt: serverTimestamp(),
           createdBy: auth.currentUser?.uid,
         }));
       }
       tx.update(vRef, {
-        [`claimed.${key}`]: new Date().toISOString(),
+        [`claimed.${plan.claim}`]: new Date().toISOString(),
         updatedAt: serverTimestamp(),
       });
-      if (pay.materials) {
+      if (plan.material?.create) {
+        const seed = initialBaseDoc(uid, new Date().toISOString());
+        tx.set(bRef, {
+          ...seed,
+          materials: { ...seed.materials, ...plan.material.materials },
+          updatedAt: serverTimestamp(),
+        });
+      } else if (plan.material) {
         const mats: Record<string, unknown> = { updatedAt: serverTimestamp() };
-        for (const [name, qty] of Object.entries(pay.materials)) {
-          if (qty > 0) mats[`materials.${name}`] = increment(qty);
+        for (const [name, qty] of Object.entries(plan.material.materials)) {
+          if (qty && qty > 0 && !name.includes('.')) mats[`materials.${name}`] = increment(qty);
         }
-        if (bSnap.exists()) tx.update(bRef, mats);
-        else tx.set(bRef, { userId: uid, ...mats }, { merge: true });
+        tx.update(bRef, mats);
       }
-      const active = boardList(boardSnap.data()).filter((item) => item !== id);
-      if (boardSnap.exists() || active.length > 0) {
-        writeBoard(tx, boardRef, boardSnap.exists(), uid, active);
+      if (boardSnap.exists() || plan.board.length > 0) {
+        writeBoard(tx, boardRef, boardSnap.exists(), uid, plan.board);
       }
       outcome.paid = true;
-      outcome.gold = pay.gold;
+      outcome.gold = plan.reward.gold;
     });
     if (outcome.paid && uid) {
       const text = outcome.gold > 0 ? placaApproved(outcome.gold) : 'Entrega aprovada.';
-      await postNotice(uid, `asg_${id}_ok`, text, getTodayBrazil());
+      await postNotice(uid, `asg_${id}_ok`, text, getTodayBrazil(), noticeUntil('ok', getTodayBrazil()));
     }
     return outcome;
   } catch (error) {
@@ -819,9 +924,10 @@ export async function approveAssignment(uid: string, id: string, review: Approva
 
 export async function uploadProofPhoto(uid: string, assignmentId: string, file: File, index: number): Promise<string> {
   if (!file.type.startsWith('image/')) throw new AssignmentError('foto', 'A foto precisa ser uma imagem.');
-  if (file.size > 3 * 1024 * 1024) throw new AssignmentError('foto', 'A foto passou de 3 MB.');
+  const blob = await compressProofPhoto(file);
+  if (blob.size > 3 * 1024 * 1024) throw new AssignmentError('foto', 'A foto passou de 3 MB.');
   const path = `proofs/${uid}/assignments/${assignmentId}/${index}.jpg`;
-  await uploadBytes(ref(storage, path), file, { contentType: file.type });
+  await uploadBytes(ref(storage, path), blob, { contentType: 'image/jpeg' });
   return path;
 }
 
@@ -841,10 +947,8 @@ export async function spawnRecurrences(uid: string, date: string): Promise<{ cre
     if (!rec || !rec.active) continue;
     const draft = instanceDraft(rec, date);
     if (!draft) continue;
-    const ref = doc(db, 'assignments', draft.id);
-    const existing = await getDoc(ref);
-    if (existing.exists()) continue;
-    await setDoc(ref, defined({
+    const target = doc(db, 'assignments', draft.id);
+    const createdNow = await createOnce(target, defined({
       userId: draft.userId,
       kind: 'paid',
       templateId: draft.templateId,
@@ -871,7 +975,8 @@ export async function spawnRecurrences(uid: string, date: string): Promise<{ cre
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }));
-    await postNotice(uid, `asg_${draft.id}_new`, placaNew(draft.title), date);
+    if (!createdNow) continue;
+    await postNotice(uid, `asg_${draft.id}_new`, placaNew(draft.title), date, noticeUntil('new', date, draft.dueOn));
     created.push(draft.id);
   }
   const openSnap = await getDocs(query(collection(db, 'assignments'), where('userId', '==', uid)));
@@ -902,9 +1007,7 @@ export async function generateAssignmentsNow(uid: string): Promise<{ created: st
       expired: res.data.expired ?? [],
       via: 'server',
     };
-  } catch (error) {
-    const code = typeof error === 'object' && error && 'code' in error ? String((error as { code: string }).code) : '';
-    if (!code.includes('not-found') && !code.includes('unavailable')) rethrow(error);
+  } catch {
     const local = await spawnRecurrences(uid, getTodayBrazil());
     return { ...local, via: 'device' };
   }

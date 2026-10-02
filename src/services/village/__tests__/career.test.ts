@@ -1,6 +1,7 @@
 import { expect, run, test } from '../../english/__tests__/harness';
 import { CAREER_REWARDS, ENGENHEIRO, trainingTemplateId } from '../../../config/careers';
 import { assignmentReward } from '../../assignments/rewards';
+import { approvalPlan } from '../../assignments/approval';
 import {
   careerSnapshot,
   competencyLevels,
@@ -65,6 +66,14 @@ test('carreira: treino paga XP e 1 redstone, nunca gold, mesmo com gold no docum
   expect(pay.gold).toBe(0);
   expect(pay.xp).toBe(25);
   expect(pay.materials).toEqual({ redstone: 1 });
+});
+
+test('carreira: a aprovação do treino, pelo plano da transação, paga XP e redstone e nenhum gold', () => {
+  const plan = approvalPlan({
+    id: 'eng_x_7', status: 'submitted', kind: 'training', templateId: 'eng-7', reward: { gold: 40, xp: 0 },
+    claimed: false, txExists: false, gold: 10, board: [], baseExists: true, progressExists: true, villageExists: true,
+  }, CAREER_REWARDS);
+  expect(plan.write && plan.paid ? [plan.reward.gold, plan.reward.xp, plan.line, plan.material?.materials] : null).toEqual([0, 25, null, { redstone: 1 }]);
 });
 
 void run();

@@ -49,9 +49,17 @@ Módulos puros não importam Firebase nem `import.meta.env`. O serviço (`assign
 - `weekdayIndex(date)` — 0 = domingo, fuso de Brasília.
 - `dueOnFor`, `comingWeekday`, `recurrenceDue`, `instanceDraft`.
 
-### `settle.ts`
+### `approval.ts`
 
-- `settleApproval(state, id, config?)` — armazenamento falso do §9. A segunda chamada em `approved` não escreve. Treino não abre linha de gold.
+- `approvalPlan(snap)` — o plano que a transação de `approveAssignment` escreve: recompensa, saldo novo, linha, claim, material e quadro. A segunda chamada em `approved` não escreve. Treino com gold no documento paga 0. O quadro perde o id. Sem `englishBase`, o material nasce de `initialBaseDoc`, sem chave com ponto.
+
+### `due.ts` e `placa.ts`
+
+- `nextDueOn` — ajuste pedido renova o prazo quando o atual já passou ou vence hoje. Padrão: amanhã.
+- `submitInTime` — a entrega nova passa em `request.time < dueAt`.
+- `noticeUntil` — `_new` até o `dueOn` (ou 3 dias); `_ok` e `_fix` por 2 dias.
+- `orderFatherNotices` — o recado do pai fica na frente das encomendas.
+- `usedShortGold`, `projectOverCap` — a soma da semana e o teto do projeto (até 1 D por semana), com o R7 do dia. O 23 de `incomeDayGold` é só a reserva.
 
 ### `templates.ts`
 

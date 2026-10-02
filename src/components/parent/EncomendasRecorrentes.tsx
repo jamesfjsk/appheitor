@@ -20,7 +20,7 @@ const EncomendasRecorrentes: React.FC<{ uid: string; rows: AssignmentRecurrence[
             void generateAssignmentsNow(uid)
               .then((out) => toast.success(out.via === 'server'
                 ? `Geradas: ${out.created.length}. Prazo passado: ${out.expired.length}.`
-                : `A função ainda não está no ar. Gravei daqui: ${out.created.length}.`))
+                : `Gravei daqui: ${out.created.length}. Prazo passado: ${out.expired.length}.`))
               .catch((error: unknown) => toast.error(error instanceof Error ? error.message : 'Não deu para gerar.'))
               .finally(() => setBusy(false));
           }}

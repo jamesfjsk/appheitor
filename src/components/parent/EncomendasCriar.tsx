@@ -7,7 +7,10 @@ import type { Material } from '../../types/english';
 import { DEFAULT_ECONOMY } from '../../config/village';
 import { subscribeSettings } from '../../services/settingsService';
 import { createAssignment } from '../../services/assignmentsService';
-import { bandFor, countsTowardWeeklyCap, suggestedGold, weeklyCapGold } from '../../services/assignments/rewards';
+import { bandFor, countsTowardWeeklyCap, suggestedGold, usedShortGold, weeklyCapGold } from '../../services/assignments/rewards';
+import { listGoldTransactions } from '../../services/goldTx';
+import { referenceIncome } from '../../services/village/income';
+import { getVillage } from '../../services/villageService';
 import { SIZE_LABEL, SPECIALTY_LABEL, WEEKDAY_NAME, COMPETENCY_LABEL } from '../../services/assignments/labels';
 import { ASSIGNMENT_TEMPLATES, templateById, templateDraft } from '../../services/assignments/templates';
 import { comingWeekday } from '../../services/assignments/recurrence';
@@ -38,6 +41,8 @@ const EncomendasCriar: React.FC<{
 }> = ({ uid, rows, seed, onSeedUsed }) => {
   const today = getTodayBrazil();
   const [economy, setEconomy] = useState<EconomySettings>(DEFAULT_ECONOMY);
+  const [dayGold, setDayGold] = useState(DEFAULT_ECONOMY.incomeDayGold);
+  const [goldTouched, setGoldTouched] = useState(false);
   const [templateId, setTemplateId] = useState('');
   const [title, setTitle] = useState('');
   const [story, setStory] = useState('');
@@ -64,6 +69,21 @@ const EncomendasCriar: React.FC<{
     (value) => setEconomy(value as unknown as EconomySettings),
   ), []);
 
+  useEffect(() => {
+    let live = true;
+    void Promise.all([listGoldTransactions(uid, 200), getVillage(uid)]).then(([txs, village]) => {
+      if (!live) return;
+      const recent = txs.filter((t) => Date.now() - t.createdAt.getTime() < 7 * 86400000);
+      const reserve = economy.incomeDayGold || DEFAULT_ECONOMY.incomeDayGold;
+      setDayGold(referenceIncome(recent, reserve, {
+        launchedOn: village.launchedOn,
+        launchedAt: village.launchedAt,
+        today: getTodayBrazil(),
+      }));
+    }).catch(() => { /* o 23 de reserva fica */ });
+    return () => { live = false; };
+  }, [uid, economy.incomeDayGold]);
+
   const apply = (draft: AssignmentDraft) => {
     setTemplateId(draft.templateId || '');
     setTitle(draft.title);
@@ -74,8 +94,9 @@ const EncomendasCriar: React.FC<{
     setKinds(draft.proof.kinds.length ? draft.proof.kinds : ['checklist']);
     setSpecialty(draft.specialty);
     setSize(draft.size);
-    const band = bandFor(draft.size, economy.incomeDayGold, economy.assignmentBands);
-    setGold(draft.reward.gold > 0 ? draft.reward.gold : suggestedGold(draft.size, economy.incomeDayGold));
+    const band = bandFor(draft.size, dayGold, economy.assignmentBands);
+    setGoldTouched(true);
+    setGold(draft.reward.gold > 0 ? draft.reward.gold : suggestedGold(draft.size, dayGold));
     setXp(draft.reward.xp > 0 ? draft.reward.xp : band.xp);
     setMats(draft.reward.materials || {});
     setComps(draft.competencies);
@@ -97,33 +118,40 @@ const EncomendasCriar: React.FC<{
   const pickTemplate = (id: string) => {
     const template = templateById(id);
     if (!template) return;
-    const band = bandFor(template.size, economy.incomeDayGold, economy.assignmentBands);
-    const draft = templateDraft(template, comingWeekday(today, 0), suggestedGold(template.size, economy.incomeDayGold), band.xp);
+    const band = bandFor(template.size, dayGold, economy.assignmentBands);
+    const draft = templateDraft(template, comingWeekday(today, 0), suggestedGold(template.size, dayGold), band.xp);
     apply({ ...draft, recurring: template.recurring === 'suggest', weekdays: template.weekdays });
     if (template.recurring === 'suggest') setRecurring(true);
   };
 
   const onSize = (next: AssignmentSize) => {
     setSize(next);
-    const band = bandFor(next, economy.incomeDayGold, economy.assignmentBands);
-    setGold(suggestedGold(next, economy.incomeDayGold));
+    const band = bandFor(next, dayGold, economy.assignmentBands);
+    setGoldTouched(false);
+    setGold(suggestedGold(next, dayGold));
     setXp(band.xp);
   };
 
-  const band = bandFor(size, economy.incomeDayGold, economy.assignmentBands);
+  const band = bandFor(size, dayGold, economy.assignmentBands);
+
+  useEffect(() => {
+    if (goldTouched) return;
+    setGold(suggestedGold(size, dayGold));
+    setXp(band.xp);
+  }, [dayGold, goldTouched, size, band.xp]);
   const week = isoWeekOf(today);
   const offered = rows.reduce((sum, row) => {
     if (!countsTowardWeeklyCap(row.size) || row.status === 'cancelled' || row.status === 'expired') return sum;
     if (row.availableOn && isoWeekOf(row.availableOn) === week) return sum + row.reward.gold;
     return sum;
   }, 0);
-  const approved = rows.reduce((sum, row) => {
-    if (!countsTowardWeeklyCap(row.size) || row.status !== 'approved') return sum;
-    const day = dayOf(row.payout?.at);
-    if (day && isoWeekOf(day) === week) return sum + (row.payout?.gold ?? 0);
-    return sum;
-  }, 0);
-  const cap = weeklyCapGold(economy.incomeDayGold, economy.assignmentWeeklyCapDays);
+  const approved = usedShortGold(rows.map((row) => ({
+    size: row.size,
+    status: row.status,
+    payoutGold: row.payout?.gold,
+    payoutDay: dayOf(row.payout?.at),
+  })), week);
+  const cap = weeklyCapGold(dayGold, economy.assignmentWeeklyCapDays);
 
   const save = async () => {
     setBusy(true);
@@ -151,8 +179,8 @@ const EncomendasCriar: React.FC<{
         weekdays,
         dueAfterDays,
       };
-      await createAssignment(uid, draft, today);
-      toast.success('Encomenda no quadro.');
+      const made = await createAssignment(uid, draft, today);
+      toast.success(made.onBoard ? 'Encomenda no quadro.' : 'Salvei a repetição. Hoje não é dia dela.');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Não deu para criar.');
     } finally {
@@ -213,7 +241,7 @@ const EncomendasCriar: React.FC<{
       <p className="text-sm text-gray-700">{band.minGold} a {band.maxGold} gold · {bandTalk(size)}</p>
       <div className="grid grid-cols-2 gap-3">
         <label className="text-sm">Gold
-          <input type="number" min={0} className="mt-1 w-full border rounded px-2 py-2" value={gold} onChange={(e) => setGold(Math.max(0, Math.round(Number(e.target.value) || 0)))} />
+          <input type="number" min={0} className="mt-1 w-full border rounded px-2 py-2" value={gold} onChange={(e) => { setGoldTouched(true); setGold(Math.max(0, Math.round(Number(e.target.value) || 0))); }} />
         </label>
         <label className="text-sm">XP
           <input type="number" min={0} className="mt-1 w-full border rounded px-2 py-2" value={xp} onChange={(e) => setXp(Math.max(0, Math.round(Number(e.target.value) || 0)))} />

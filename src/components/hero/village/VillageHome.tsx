@@ -12,6 +12,7 @@ import { dueTasksOn, periodAllowedAt } from '../../../services/village/schedule'
 import { chestAllowed, chestMapLook, chestWaitCopy, warehouseHoldsChest } from '../../../services/village/chest';
 import { liveBuildingLevel } from '../../../services/village/repair';
 import { noticesForNow, habitTipForNow, pickLine } from '../../../services/village/notices';
+import { orderFatherNotices } from '../../../services/assignments/placa';
 import { nextEvents, occurrencesBetween, reminderDue } from '../../../services/village/agenda';
 import { markAgendaDone, subscribeAgenda, updateAgendaItem, weeklyOrganizedBonus } from '../../../services/agendaService';
 import { completeNight, repairLot, settleAfter, talkToNpc } from '../../../services/villageService';
@@ -82,7 +83,7 @@ function MailNote({
         <p className="mn-mail-note-body">{body}</p>
         {meta ? <p className="mn-mail-note-meta">{meta}</p> : null}
       </div>
-      {action}
+      {action ? <div className="mn-mail-note-act">{action}</div> : null}
     </article>
   );
 }
@@ -324,7 +325,7 @@ const VillageHome: React.FC<Props> = ({
     tomorrowQuizTitle: null,
     pauseDates: pauseDays.dates,
     vacation: false,
-    fatherNotices: notices,
+    fatherNotices: orderFatherNotices(notices),
     dismissed: village.noticesDismissed,
   }, today, hour);
   const habit = habitTipForNow(today, hour);
@@ -651,7 +652,7 @@ const VillageHome: React.FC<Props> = ({
                   body={item.text}
                   action={item.key.startsWith('father:asg') ? (
                     <span className="flex gap-1 shrink-0">
-                      <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-2" onClick={() => { playClick(); setCasaTab('encomendas'); setDistrict('house'); setLot(null); setPlacaOpen(false); }}>Ver na Casa</button>
+                      <button type="button" data-testid="placa-ver-casa" className="mc-btn mc-btn-green min-h-[44px] px-2" onClick={() => { playClick(); void ackNotice(item.key.replace('father:', '')); setCasaTab('encomendas'); setDistrict('house'); setLot(null); setPlacaOpen(false); }}>Ver na Casa</button>
                       <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-2" onClick={() => { playClick(); void ackNotice(item.key.replace('father:', '')); }}>Combinado</button>
                     </span>
                   ) : item.kind === 'father' ? (
