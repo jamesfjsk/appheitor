@@ -1,6 +1,6 @@
 import { expect, run, test } from './harness';
 import type { NoteInfo, NoteJudgement } from '../../../types/english';
-import { allPegsOn, chalkDiff, chalkLine, explainJudge, explainSayOk, fillTemplate, gapCount, gapWidthCh, isLazyNote, missingLine, moldBySentences, moldFromModel, moldFromTemplates, pegLesson, pegLit, pegReview, pegSay, recadoGrade, splitTemplate, teachFromRecado, trayForStage, trayWords } from '../notePlay';
+import { allPegsOn, chalkDiff, chalkLine, explainJudge, explainSayOk, fillTemplate, gapCount, gapWidthCh, isLazyNote, missingLine, moldBySentences, moldFromModel, moldFromTemplates, pegLesson, pegLit, pegReview, pegSay, pegsFromJudgement, recadoGrade, secondAttemptLine, splitTemplate, teachFromRecado, trayForStage, trayWords } from '../notePlay';
 
 const infos: NoteInfo[] = [
   { pt: '2 tochas', en: ['two torches', '2 torches'] },
@@ -39,6 +39,15 @@ test('chalkLine e missingLine falam do quadro', () => {
   };
   expect(chalkLine(j)).toContain('two');
   expect(recadoGrade(3)).toContain('Três pregos');
+  expect(secondAttemptLine(3)).toBe('Na segunda: 3 de 3. O quadro está certo.');
+  expect(secondAttemptLine(2)).toBe('Na segunda: 2 de 3.');
+  expect(secondAttemptLine(0)).toBe('Na segunda: 0 de 3.');
+  const byMeaning = pegsFromJudgement(
+    { isEnglish: true, errors: [], ideas: [{ pt: '2 tochas', ok: true }, { pt: 'uma tocha azul', ok: false }, { pt: 'para a caverna', ok: true }], missing: [], corrected: '', note: '', score: 1 },
+    'hello',
+    infos
+  );
+  expect(byMeaning.map((p) => p.ok)).toEqual([true, false, true]);
   const diff = chalkDiff('I need two torch', 'I need two torches');
   expect(diff.left.some((t) => t.mark === 'bad' && t.text === 'torch')).toBeTruthy();
   expect(diff.right.some((t) => t.mark === 'good' && t.text === 'torches')).toBeTruthy();

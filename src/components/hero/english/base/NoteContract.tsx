@@ -1,16 +1,17 @@
 // ========================================
-// A Base: contrato do Recado. Brief em PT, molde de referência conforme o andaime,
-// fichas do banco inseridas no cursor (estágios 0-1) ou "Dica" paga em ferro (estágio 2),
-// pré-checagem local com 1 tentativa livre e juiz por IA com diff por palavra.
+// A Base: contrato do Recado (caminho antigo, sem a porta v2).
+// O juiz lê o sentido. A segunda tentativa aparece e não paga.
+// A dica é grátis e só entra depois da primeira tentativa.
 // ========================================
 
 import React, { useRef, useState } from 'react';
 import { Volume2 } from 'lucide-react';
-import type { NoteInfo, NoteJudgement } from '../../../../types/english';
+import type { NoteJudgement } from '../../../../types/english';
 import { MATERIAL_ICONS } from '../../../../config/englishBase';
 import { noteMaterial } from '../../../../config/englishRewards';
-import { judgeNote, precheckNote } from '../../../../services/englishJudge';
+import { judgeNote } from '../../../../services/englishJudge';
 import { playText } from '../../../../services/englishTts';
+import { secondAttemptLine } from '../../../../services/english/notePlay';
 import { seedFromString } from '../../../../services/english/shuffle';
 import type { ContractScreenProps } from './ContractShell';
 
@@ -91,11 +92,14 @@ const NoteContract: React.FC<ContractScreenProps<'note'>> = ({ contract, level, 
   const { content } = contract;
   const [text, setText] = useState('');
   const [stage, setStage] = useState<Stage>('write');
-  const [missing, setMissing] = useState<NoteInfo[] | null>(null);
-  const [freeAttemptUsed, setFreeAttemptUsed] = useState(false);
   const [hintUsed, setHintUsed] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [judgement, setJudgement] = useState<NoteJudgement | null>(null);
+  const [firstJudge, setFirstJudge] = useState<NoteJudgement | null>(null);
+  const [secondJudge, setSecondJudge] = useState<NoteJudgement | null>(null);
+  const [firstAnswer, setFirstAnswer] = useState('');
+  const [secondAnswer, setSecondAnswer] = useState('');
+  const [redoUsed, setRedoUsed] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const areaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -103,7 +107,7 @@ const NoteContract: React.FC<ContractScreenProps<'note'>> = ({ contract, level, 
   // Molde de referência (estágio 0): escolhido por semente estável do contrato, nunca preenche sozinho
   const templateUsed = scaffold === 0 && content.templates.length > 0 ? content.templates[seedFromString(`${contract.id}|${contract.theme}`) % content.templates.length] : null;
   const bankVisible = scaffold < 2 || hintUsed;
-  const canBuyHint = scaffold === 2 && !hintUsed && base.materials.ferro >= 1;
+  const hintReady = stage === 'write' && scaffold === 2 && !hintUsed && attempts > 0;
 
   /** Insere a ficha no cursor com os espaços necessários e devolve o foco */
   const insertWord = (w: string) => {
@@ -128,17 +132,16 @@ const NoteContract: React.FC<ContractScreenProps<'note'>> = ({ contract, level, 
     const t = text.trim();
     if (stage !== 'write' || words(t).length < 2) return;
     setAttempts((a) => a + 1);
-    const miss = precheckNote(t, content);
-    if (miss.length > 0 && !freeAttemptUsed) {
-      setMissing(miss);
-      setFreeAttemptUsed(true);
-      sfx.miss();
-      return;
-    }
-    setMissing(null);
     setStage('judging');
     const j = await judgeNote({ text: t, content, level, scaffoldStage: scaffold, templateUsed });
     setJudgement(j);
+    if (!firstJudge) {
+      setFirstJudge(j);
+      setFirstAnswer(t);
+    } else {
+      setSecondJudge(j);
+      setSecondAnswer(t);
+    }
     setStage('judged');
     if (j.score === 3) sfx.checkpoint();
     else if (j.score === 0) sfx.miss();
@@ -153,15 +156,33 @@ const NoteContract: React.FC<ContractScreenProps<'note'>> = ({ contract, level, 
   };
 
   const deliver = () => {
-    if (!judgement) return;
+    const paid = firstJudge ?? judgement;
+    if (!paid) return;
     onFinish({
-      score: judgement.score,
+      score: paid.score,
       max: 3,
-      materialEarned: noteMaterial(judgement.score),
-      answer: text.trim(),
-      correction: judgement,
-      details: { hintUsed, templateUsed, attempts, scaffoldStage: scaffold, precheckMissing: freeAttemptUsed },
+      materialEarned: noteMaterial(paid.score),
+      answer: firstAnswer || text.trim(),
+      correction: paid,
+      details: {
+        hintUsed,
+        templateUsed,
+        attempts,
+        scaffoldStage: scaffold,
+        redoUsed,
+        firstAnswer: firstAnswer || text.trim(),
+        secondAnswer: secondAnswer || null,
+        ...(secondJudge ? { secondScore: secondJudge.score } : {}),
+      },
     });
+  };
+
+  const redo = () => {
+    if (redoUsed || !judgement || judgement.score >= 3) return;
+    sfx.hit(1);
+    setRedoUsed(true);
+    setJudgement(null);
+    setStage('write');
   };
 
   const diff = judgement && judgement.corrected ? wordDiff(text.trim(), judgement.corrected) : null;
@@ -201,10 +222,9 @@ const NoteContract: React.FC<ContractScreenProps<'note'>> = ({ contract, level, 
           />
           <p className="text-[11px] mc-muted mt-1">{words(text).length} palavras</p>
 
-          {/* Banco de palavras ou Dica paga */}
           {bankVisible ? (
             <div className="mt-2">
-              <p className="mc-font text-[9px] mc-muted uppercase mb-1">Banco de palavras {hintUsed && <span className="mc-warn">(dica usada: 1 ferro)</span>}</p>
+              <p className="mc-font text-[9px] mc-muted uppercase mb-1">Banco de palavras</p>
               <div className="flex flex-wrap gap-1.5">
                 {content.wordBank.map((w) => (
                   <button key={w} onClick={() => insertWord(w)} disabled={stage === 'judging'} className="mc-slot px-2 py-1 text-sm text-white hover:mc-slot-selected" data-testid={`bank-${w}`}>
@@ -213,22 +233,13 @@ const NoteContract: React.FC<ContractScreenProps<'note'>> = ({ contract, level, 
                 ))}
               </div>
             </div>
-          ) : (
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <button onClick={() => setHintUsed(true)} disabled={!canBuyHint} className="mc-btn mc-btn-stone px-3 py-2 text-sm font-bold" data-testid="note-hint">
-                <img src={MATERIAL_ICONS.ferro} alt="" className="w-5 h-5 mc-pixel" draggable={false} />
-                Dica (custa 1 ferro)
+          ) : hintReady ? (
+            <div className="mt-2">
+              <button type="button" onClick={() => setHintUsed(true)} className="mc-btn mc-btn-stone px-3 py-2 text-sm font-bold" data-testid="note-hint">
+                Dica
               </button>
-              {!canBuyHint && base.materials.ferro < 1 && <span className="text-xs mc-muted">Sem ferro para a dica.</span>}
             </div>
-          )}
-
-          {missing && missing.length > 0 && (
-            <div className="mc-card p-3 mt-3" data-testid="note-missing">
-              <p className="text-sm mc-warn font-bold">Faltou dizer: {missing.map((m) => m.pt).join('; ')}.</p>
-              <p className="text-xs text-white/80 mt-1">Complete o recado e envie de novo.</p>
-            </div>
-          )}
+          ) : null}
 
           <div className="flex justify-end mt-3">
             <button onClick={() => void submit()} disabled={stage === 'judging' || words(text).length < 2} className="mc-btn mc-btn-green px-6 py-3 text-base font-bold uppercase" data-testid="note-submit">
@@ -242,6 +253,7 @@ const NoteContract: React.FC<ContractScreenProps<'note'>> = ({ contract, level, 
         <div data-testid="note-judged">
           <IronStars score={judgement.score} />
           <p className="mc-font text-[10px] text-center text-white mt-2">{judgement.score} de 3 em ferro</p>
+          {secondJudge ? <p className="text-sm text-center text-white mt-2" data-testid="note-second-score">{secondAttemptLine(secondJudge.score)}</p> : null}
 
           {!judgement.isEnglish && <p className="text-sm mc-bad text-center mt-2">O ferreiro não entendeu: parece que o recado não está em inglês.</p>}
           {judgement.missing.length > 0 && <p className="text-sm mc-warn text-center mt-2">Faltou: {judgement.missing.join('; ')}.</p>}
@@ -276,7 +288,10 @@ const NoteContract: React.FC<ContractScreenProps<'note'>> = ({ contract, level, 
             </div>
           )}
 
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end gap-2 mt-4">
+            {judgement.score < 3 && !redoUsed && (
+              <button type="button" onClick={redo} className="mc-btn mc-btn-stone px-6 py-3 text-base font-bold uppercase" data-testid="note-redo">De novo</button>
+            )}
             <button onClick={deliver} className="mc-btn mc-btn-green px-6 py-3 text-base font-bold uppercase" data-testid="note-deliver">Entregar o recado</button>
           </div>
         </div>

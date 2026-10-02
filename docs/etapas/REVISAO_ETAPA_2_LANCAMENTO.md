@@ -1401,3 +1401,38 @@ As fotos estão em `docs/exemplos/telas/etapa-3/p15b/`. Os lados do pai (aprovar
 - a cerimônia de obra animada;
 - `hintsUsed` para o pai;
 - o rótulo "Treino" em vez de "0 gold" no Conferir.
+
+## 02/10 — revisão e junção da P15a-C, da P16-C e da P17 (passos 1 e 3)
+
+**P15a-C (bd76fbb): junta.**
+- O `approvalPlan` é puro, e a transação só grava o que ele manda.
+- A Placa tem validade, e o ajuste pedido renova o prazo.
+- O R7 do dia vale nas faixas e no teto.
+- A função usa `ref.create()`, e a callable só aceita a data de hoje.
+- **Na junção:** o `approvalPlan` recebe o `CAREER_REWARDS` (treino paga XP e redstone). Teste novo em `career.test.ts`.
+- **Deploy das funções:** pendente, depende do ok do pai.
+
+**P16-C (6584c3e): junta.**
+- A pergunta para levar chega inteira nas três conversas reais.
+- O validador recusa cópia do banco, pergunta de fato no meio da frase e elogio.
+- "Devolver com uma frase" destranca o livro sem mexer no `claimed`.
+
+**P17, passos 1 e 3 (03344cf, 54de912, 212172e): junta, com correções do líder (0370f3c).**
+- **Recado:** a nota segue o §9.5, e o "to" ou o artigo que falta nunca perde o sentido, por regra e não só pelo juiz. A segunda tentativa aparece, e a dica é grátis.
+  - **Corrigido pelo líder:** o juiz e a fala de correção diziam "Heitor escreveu…". Agora falam com ele por "você", sem o nome.
+  - O juiz ganhou regras explícitas para `ideas` e `meaningLost`.
+- **Carta C1:** as cartas geradas ao vivo pelo líder (a frente não tinha feito) mostraram dois problemas:
+  - 2 de 3 passavam de 50 palavras;
+  - o revisor dava 4 a uma carta que era lista de coisas ("I need a sword and boots… There is a cat next to the fridge").
+- **Corrigido pelo líder:**
+  - o prompt da C1 não manda mais reusar 60% do vocabulário, pede cerca de 40 palavras e no máximo 3 objetos com função;
+  - o revisor tem uma régua de coerência firme;
+  - a pergunta precisa começar com palavra de pergunta em português (sai "Você pode abrir o galpão?", que se responde "Sim" sem ler);
+  - o glossário só aceita palavra que ele ainda não viu.
+- **Segunda rodada ao vivo:** 4 de 4 cartas entre 30 e 50 palavras; o revisor passou as 2 coerentes e reprovou as 2 confusas, que vão para outra tentativa ou para o banco.
+- **Banco C1 (10 cartas):** lidas pelo líder, todas boas. Corrigidos "Walk slow" e o título "We won", que estava no passado. A amostra do pai (c1-03 e c1-07) fica pedida.
+- **Pendente na P17:**
+  - o passo 2, que espera o ok do pai em U1 e U5;
+  - o passo 4;
+  - a C2 com perguntas em português: hoje a C2 ainda usa o prompt antigo, com perguntas em inglês. Só aparece depois de 3 cartas C1 perfeitas seguidas.
+- **O plano de amanhã já estava gerado com a carta antiga.** Para a C1 aparecer amanhã, o pai regenera o plano de amanhã no painel da Mina depois do push.

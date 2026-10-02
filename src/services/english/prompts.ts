@@ -39,6 +39,10 @@ export interface MerchantPromptInput extends PromptInputBase {
 
 export interface LetterPromptInput extends PromptInputBase {
   genre: LetterGenre;
+  /** C1 usa o prompt curto. Sem isto, vale o nível do cartão. */
+  letterTier?: 1 | 2 | 3;
+  /** Padrão da unidade. O passo 2 preenche, quando o banco estiver aprovado. */
+  unitPattern?: string;
 }
 
 export type NotePromptInput = PromptInputBase;
@@ -300,6 +304,8 @@ function letterPrompt(input: LetterPromptInput): BuiltPrompt {
   const user = [
     commonUser(input),
     `Genre: ${input.genre} = ${LETTER_GENRE_HINTS[input.genre]}. Use a new sender name.`,
+    `Story motive: every sentence serves ONE motive. Pick from: a request for help, an invitation, a danger warning, lost and found, the way to a place, news of a game, a list for a task with the reason, or a thank-you. No loose fact. No adjective that does not belong (not "brave cat").`,
+    input.unitPattern ? `Use this sentence pattern at least twice: ${input.unitPattern}` : '',
     `Length of "text": ${minW}-${maxW} words. Aim for about ${targetWords} words (around ${targetSentences} short sentences) and count them: a text under ${minW} words is rejected.`,
     `Glossary: the NEW words of the text. ${gMin}-${gMax} entries; each "en" is a word that appears in the text and is NOT in the known vocabulary (a known word is never a glossary entry), written exactly as it appears in the text (if the text says "tools", write "tools", not "tool"); "pt" is the Portuguese meaning.`,
     `New words: on purpose, put ${gMin + 1}-${gMax} theme words the learner has NOT seen into the text (football: goalkeeper, whistle, net, referee, boots; mine: pickaxe, lantern, rope, tunnel, ladder; adjectives: lazy, brave, heavy) and list exactly those in the glossary. Entries that are known or absent are dropped, and fewer than 4 left rejects the whole text. Known words that can NOT be glossary entries: ${knownInline}.`,
@@ -337,7 +343,7 @@ function notePrompt(input: NotePromptInput): BuiltPrompt {
     bullet(lv.noteInfoKinds.map((k, i) => `info ${i + 1}: ${k}`)),
     'Rules:',
     bullet([
-      '"brief": 1-2 sentences in Portuguese, natural, e.g. "Escreva um recado para o papai. Diga que você faz a lição primeiro. Depois você joga bola." It mentions ONLY the 3 infos and never gives the English words. The note is to dad, mom, a friend, a teacher, or himself — never to the blacksmith.',
+      '"brief": exactly 3 sentences in Portuguese, in the SAME order as the 3 infos. Sentence 1 states only info 1 and contains the exact "pt" text of info 1; sentence 2 only info 2 with its exact "pt"; sentence 3 only info 3 with its exact "pt". No fourth sentence and no extra idea. Never give the English words. The note is to dad, mom, a friend, a teacher, or himself — never to the blacksmith. Example: "Diga ao papai que faço a lição. Diga que é primeiro. Diga que jogo bola."',
       '"mustInclude": the 3 infos in the same order as the brief; "pt" is how a hint would describe it in Portuguese ("faço a lição"); "en" lists 3-5 accepted English variants of the SAME info, each 2-5 words: the first one is the exact phrase copied from the model answer, the others are short wordings a child would type ("my homework", "the homework", "homework first"); for a reason or deal include the connector ("because dinner is first", "for mom")',
       `"model": a correct answer with ${sentences} sentences, each at most ${lv.maxWords} words, that contains WORD BY WORD one "en" variant of each info; the validator checks this literally, so if the model says "because dinner is first" that exact phrase must be one of the variants`,
       '"wordBank": 10-14 English words in base form: every content word of the model (nouns in singular, verbs, adjectives, prepositions) plus 3 distractor content words from home/school/football; no number words (one, two...), no digits, no a/an/the, no pronouns, no capital letters, no mine words (torch, sword, pickaxe, cave, tunnel, miner)',
@@ -396,6 +402,33 @@ function forgePrompt(input: ForgePromptInput): BuiltPrompt {
   return { system, user, maxTokens: PROMPT_MAX_TOKENS.forge };
 }
 
+function letterPromptC1(input: LetterPromptInput): BuiltPrompt {
+  const lv = levelFor(1);
+  const motive = input.unitPattern
+    ? `Also use this pattern at least twice: ${input.unitPattern}`
+    : 'Do not invent a grammar unit. One motive is enough.';
+  const known = input.vocabKnown.length ? input.vocabKnown.join(', ') : '(none yet)';
+  const avoid = input.avoidNames.length ? input.avoidNames.join(', ') : '(none)';
+  const system = commonSystem(lv, 'You write a very short note for a 10-year-old Brazilian beginner. It reads like a real note a child would send, never like a list of things.');
+  const user = [
+    `Theme of the day (in Portuguese, keep the note around it): ${input.theme}`,
+    `Names to avoid (used recently): ${avoid}. Variation seed: ${input.seed >>> 0}.`,
+    input.retryProblems && input.retryProblems.length ? `The previous note was rejected. Fix: ${input.retryProblems.join('; ')}` : '',
+    `Genre: ${input.genre}. Sender is a new name.`,
+    'Motive: one of these, and every sentence serves it: request for help, invitation, danger warning, lost and found, the way to a place, news of a game, a list for a task with the reason, or a thank-you.',
+    'At most 3 different objects in the whole note, and each one has a job in the motive. No sentence about a thing that does not help the motive (never "There is a cat next to the fridge" in a note about a fair).',
+    motive,
+    'Length of "text": about 40 words, in 5 or 6 short sentences, never under 30 or over 50. Count the words before you answer. Simple present. No past tense.',
+    `Words he already knows (use one only when it fits the motive; never add a thing just to reuse a word): ${known}`,
+    'Questions: 2 questions in Brazilian Portuguese. No English question words (what, where, who, why, how, is, are, do, can).',
+    'Each question has 3 options in Brazilian Portuguese, one correct. "answer" is the index 0-2. "evidence" is one sentence copied from the text. "explanation" is one line in Portuguese saying why the tempting option is wrong.',
+    'Glossary: 3 to 5 words that appear in the text and are NOT in the known list.',
+    'Schema:',
+    '{ "genre": "letter", "title": "...", "sender": "...", "text": "...", "glossary": [{ "en": "bag", "pt": "mochila" }], "questions": [{ "kind": "comprehension", "question": "Onde está a mochila?", "options": ["embaixo da cadeira", "na mesa", "na cama"], "answer": 0, "evidence": "My bag is under the chair.", "explanation": "..." }], "translation": "..." }',
+  ].filter(Boolean).join('\n\n');
+  return { system, user, maxTokens: PROMPT_MAX_TOKENS.letter };
+}
+
 export function buildPrompt(type: 'merchant', input: MerchantPromptInput): BuiltPrompt;
 export function buildPrompt(type: 'letter', input: LetterPromptInput): BuiltPrompt;
 export function buildPrompt(type: 'note', input: NotePromptInput): BuiltPrompt;
@@ -406,7 +439,9 @@ export function buildPrompt(type: ContractType, input: AnyPromptInput): BuiltPro
     case 'merchant':
       return merchantPrompt(input as MerchantPromptInput);
     case 'letter':
-      return letterPrompt(input as LetterPromptInput);
+      return (input as LetterPromptInput).letterTier === 1
+        ? letterPromptC1(input as LetterPromptInput)
+        : letterPrompt(input as LetterPromptInput);
     case 'note':
       return notePrompt(input as NotePromptInput);
     case 'forge':
@@ -421,7 +456,8 @@ export const NOTE_ERROR_TAGS = ['plural', 'article', 'verb', 'spelling', 'word_o
 export function buildJudgePrompt(input: JudgePromptInput): BuiltPrompt {
   const lv = levelFor(input.level);
   const system = [
-    'You are the Capataz of the Vila teaching a 10-year-old Brazilian beginner (Heitor). The recado is a life note (homework, soccer, plate, please) — never a mine shopping list.',
+    'You are the Capataz of the Vila teaching a 10-year-old Brazilian beginner. The recado is a life note (homework, soccer, plate, please) — never a mine shopping list.',
+    'Every Portuguese line talks TO him, in the second person ("Você escreveu..."). Never use his name and never talk about him in the third person.',
     'Reply with ONE JSON object only, no markdown.',
     levelCard(lv),
     'Correction rules:',
@@ -432,6 +468,8 @@ export function buildJudgePrompt(input: JudgePromptInput): BuiltPrompt {
         : 'digits instead of number words count as one "spelling" error',
       'each entry of "errors" is one real mistake: "wrong" is the exact piece of the learner text, "fix" is the corrected piece, "tag" is one of ' + NOTE_ERROR_TAGS.join('/'),
       'use "verb" for a missing or wrong verb, "word_order" for order that changes the meaning, "spelling" for a misspelled English word, "other" only for a Portuguese word or a wrong word that breaks the sentence (it counts as a serious error; never use it for style)',
+      '"ideas": one entry per required info, in the same order; "ok" is true when the learner text says that idea in any words and in any order, even with grammar mistakes',
+      '"meaningLost" on an error: true only when a reader would not understand that idea; a missing "to", an article, a plural or a small spelling slip never loses the meaning',
       '"missing": the "pt" of each required info that is absent from the learner text (empty array when all are present)',
       '"corrected": the learner text with the MINIMAL edits that fix the listed errors; keep the learner wording and word order whenever it is acceptable; do not rewrite it as the model',
       '"note": 2 or 3 short Portuguese sentences about the MAIN error in THIS recado. Teach the meaning using the brief. Quote a bit of what he wrote. Give the English of that piece only. Never repeat the full model. Never say "faltou dizer" or "informações". Never praise. Never a generic dictionary line that could fit any recado. Empty string when there are no errors.',
@@ -448,7 +486,7 @@ export function buildJudgePrompt(input: JudgePromptInput): BuiltPrompt {
     input.template ? `Template shown on screen: ${input.template}` : 'No template was shown.',
     `Learner text:\n"""\n${input.text}\n"""`,
     'Schema:',
-    '{ "isEnglish": true, "errors": [{ "wrong": "I play soccer first", "fix": "I do my homework first", "tag": "word_order" }], "missing": ["faço a lição"], "corrected": "...", "note": "...", "lessons": [{ "pt": "faço a lição", "say": "..." }] }',
+    '{ "isEnglish": true, "ideas": [{ "pt": "faço a lição", "ok": true }, { "pt": "primeiro", "ok": true }, { "pt": "jogo bola", "ok": true }], "errors": [{ "wrong": "want play", "fix": "want to play", "tag": "verb", "meaningLost": false }], "corrected": "...", "note": "...", "lessons": [{ "pt": "faço a lição", "say": "..." }] }',
   ].join('\n\n');
   return { system, user, maxTokens: PROMPT_MAX_TOKENS.judge };
 }
@@ -457,7 +495,7 @@ export function buildJudgePrompt(input: JudgePromptInput): BuiltPrompt {
 export function buildExplainPrompt(input: JudgePromptInput & { missing: { pt: string; en: string[] }[] }): BuiltPrompt {
   const first = input.missing[0];
   const system = [
-    'You are the Capataz of the Vila. A 10-year-old Brazilian just missed a recado (a life note in English).',
+    'You are the Capataz of the Vila. A 10-year-old Brazilian just missed a recado (a life note in English). Talk to him as "você"; never use his name or the third person.',
     'Reply with ONE JSON object only, no markdown.',
     'Write the spoken correction in Portuguese: 2 or 3 short sentences. Voice of a game NPC, not a dashboard, not a dictionary.',
     bullet([

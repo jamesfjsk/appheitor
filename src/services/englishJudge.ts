@@ -6,11 +6,11 @@
 // sai da pré-checagem e a note avisa que a correção não veio.
 // ========================================
 
-import type { NoteContent, NoteError, NoteErrorTag, NoteInfo, NoteJudgement, NoteLesson } from '../types/english';
+import type { NoteContent, NoteError, NoteErrorTag, NoteIdea, NoteInfo, NoteJudgement, NoteLesson } from '../types/english';
 import { NOTE_ERROR_TAGS, buildExplainPrompt, buildJudgePrompt } from './english/prompts';
 import { missingInfos, wordDistance } from './english/notePrecheck';
 import { explainSayOk, isLazyNote, teachFromRecado } from './english/notePlay';
-import { noteScore } from './english/scoring';
+import { errorLosesMeaning, noteScore } from './english/scoring';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
 
 const JUDGE_MODEL = 'gpt-4.1-mini';
@@ -94,23 +94,42 @@ function parseErrors(raw: unknown): NoteError[] {
     const tagRaw = str(item.tag);
     // Etiqueta fora do conjunto é deslize de formato da IA: "spelling" deixa a distância em letras decidir a gravidade
     const tag: NoteErrorTag = isTag(tagRaw) ? tagRaw : 'spelling';
-    out.push({ wrong, fix, tag });
+    const error: NoteError = { wrong, fix, tag, meaningLost: item.meaningLost === true };
+    error.meaningLost = errorLosesMeaning(error);
+    out.push(error);
   }
   return out;
 }
 
-/** Nota só pela pré-checagem, quando a IA não responde: 3 infos presentes -> 2, senão 1 */
+function parseIdeas(raw: unknown, infos: NoteInfo[]): NoteIdea[] {
+  if (!Array.isArray(raw)) return [];
+  const byPt = new Map<string, boolean>();
+  for (const item of raw) {
+    if (!isRecord(item)) continue;
+    const pt = str(item.pt);
+    if (!pt) continue;
+    byPt.set(pt.toLowerCase(), item.ok === true);
+  }
+  if (byPt.size === 0) return [];
+  return infos.map((info) => ({ pt: info.pt, ok: byPt.get(info.pt.toLowerCase()) === true }));
+}
+
+/** Nota só pela pré-checagem, quando a IA não responde. O missingInfos local só entra aqui. */
 function fallbackJudgement(input: JudgeInput, missing: NoteInfo[], reason: string): NoteJudgement {
   const text = input.text.trim();
   const isEnglish = text.length > 0;
   const missingPt = missing.map((m) => m.pt);
-  const score: NoteJudgement['score'] = !isEnglish ? 0 : missingPt.length === 0 ? 2 : 1;
+  const ideas: NoteIdea[] = input.content.mustInclude.map((info) => ({
+    pt: info.pt,
+    ok: !missingPt.some((m) => m.toLowerCase() === info.pt.toLowerCase()),
+  }));
   const first = missing[0];
   const note = first
     ? teachFromRecado(first, input.content.brief, text).say
     : `Os três pregos acenderam. A correção fina (${reason}) não veio desta vez.`;
   const lessons = parseLessons(null, input.content.mustInclude, input.content.brief, text, missingPt);
-  return { isEnglish, errors: [], missing: missingPt, corrected: text, note, lessons, score };
+  const partial = { isEnglish, errors: [] as NoteError[], ideas, missing: missingPt, corrected: text, note, lessons };
+  return { ...partial, score: noteScore(partial, input.level) };
 }
 
 /**
@@ -153,8 +172,9 @@ export async function judgeNote(input: JudgeInput): Promise<NoteJudgement> {
   const r = isRecord(raw) ? raw : {};
   const isEnglish = r.isEnglish !== false;
   const errors = parseErrors(r.errors);
-  // Faltas: união do que a IA apontou com o que a pré-checagem não achou
-  const missing = Array.from(new Set([...strArray(r.missing), ...preMissing.map((m) => m.pt)]));
+  const ideas = parseIdeas(r.ideas, input.content.mustInclude);
+  // A pré-checagem local não entra quando a IA responde. Sem ideias, vale só a lista que a IA mandou.
+  const missing = ideas.length > 0 ? ideas.filter((idea) => !idea.ok).map((idea) => idea.pt) : strArray(r.missing);
   let corrected = str(r.corrected);
   if (!corrected || wordDistance(text, corrected) > errors.length + 1) corrected = applyFixes(text, errors);
   let note = str(r.note);
@@ -164,7 +184,7 @@ export async function judgeNote(input: JudgeInput): Promise<NoteJudgement> {
     else if (errors.length) note = NOTE_BY_TAG[errors[0].tag];
   }
   const lessons = parseLessons(r.lessons, input.content.mustInclude, input.content.brief, text, missing);
-  const partial = { isEnglish, errors, missing, corrected, note, lessons };
+  const partial = { isEnglish, errors, ideas: ideas.length > 0 ? ideas : undefined, missing, corrected, note, lessons };
   return { ...partial, score: noteScore(partial, input.level) };
 }
 

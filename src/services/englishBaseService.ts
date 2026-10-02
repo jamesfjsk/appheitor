@@ -17,6 +17,7 @@ import { MAX_MATERIAL, REWARDED_OTHER_SLOTS, applyFurnaceBonus, applyPickaxeBonu
 import { cracksOf, isBroken, liveBuildingLevel, ruinUseError } from './village/repair';
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
+import { letterLevelOf, nextLetterLevel } from './english/letterLevel';
 import { normalizedTokens } from './english/notePrecheck';
 import { assertAiBudget, buildDailyContracts, regenerateSingle } from './englishAi';
 import { prefetchAudio } from './englishTts';
@@ -149,6 +150,11 @@ export function fromBaseDoc(uid: string, data: Record<string, unknown>): BaseDoc
     scaffoldStage: (stage >= 2 ? 2 : stage >= 1 ? 1 : 0) as ScaffoldStage,
     noteStreak3: num(data.noteStreak3),
     vocab,
+    letterPerfectStreak: num(data.letterPerfectStreak),
+    letterWeakStreak: num(data.letterWeakStreak),
+    ...(data.letterLevel === 1 || data.letterLevel === 2 || data.letterLevel === 3
+      ? { letterLevel: data.letterLevel as 1 | 2 | 3 }
+      : {}),
     contractsDone: num(data.contractsDone),
     merchantDone: num(data.merchantDone),
     merchantPerfect: num(data.merchantPerfect),
@@ -600,8 +606,6 @@ export async function completeContract(
     // O nível é só o do painel (setBaseLevel). Até 30/09 o Comerciante subia o nível de todos os contratos.
 
     const materials = { ...base.materials, [contract.material]: base.materials[contract.material] + material };
-    // Recado no estágio 2: a "Dica" custa 1 ferro (a tela só a libera com ferro em caixa)
-    if (contract.type === 'note' && outcome.details?.hintUsed === true) materials.ferro = Math.max(0, materials.ferro - 1);
     const vocab = { ...base.vocab };
     for (const lemma of new Set(lemmasOf(contract, outcome))) {
       vocab[lemma] = { seen: (vocab[lemma]?.seen ?? 0) + 1, lastDate: date };
@@ -610,6 +614,17 @@ export async function completeContract(
       contract.type === 'note'
         ? nextScaffoldStage(base.scaffoldStage, base.noteStreak3, outcome.correction?.score ?? outcome.score)
         : { scaffoldStage: base.scaffoldStage, noteStreak3: base.noteStreak3 };
+    const letterNow = letterLevelOf(base, base.level);
+    const letterHits = num(outcome.score);
+    const letterMax = num(outcome.max);
+    const letterPerfect = contract.type === 'letter' && letterMax > 0 && letterHits >= letterMax;
+    const letterWeak = contract.type === 'letter' && letterHits <= 1;
+    const letterPerfectStreak = letterPerfect ? (base.letterPerfectStreak ?? 0) + 1 : contract.type === 'letter' ? 0 : (base.letterPerfectStreak ?? 0);
+    const letterWeakStreak = letterWeak ? (base.letterWeakStreak ?? 0) + 1 : contract.type === 'letter' ? 0 : (base.letterWeakStreak ?? 0);
+    const letterNext = contract.type === 'letter'
+      ? nextLetterLevel(letterNow, base.level, letterPerfectStreak, letterWeakStreak)
+      : letterNow;
+    const letterMoved = contract.type === 'letter' && letterNext !== letterNow;
     const nextBase: BaseDoc = {
       ...base,
       materials,
@@ -619,6 +634,9 @@ export async function completeContract(
       contractsDone: base.contractsDone + 1,
       merchantDone,
       merchantPerfect,
+      letterLevel: letterMoved || contract.type === 'letter' ? letterNext : base.letterLevel,
+      letterPerfectStreak: letterMoved ? 0 : letterPerfectStreak,
+      letterWeakStreak: letterMoved ? 0 : letterWeakStreak,
       updatedAt: finishedAt,
     };
     wordsMastered = Object.values(vocab).filter((v) => (v?.seen ?? 0) >= 3).length;

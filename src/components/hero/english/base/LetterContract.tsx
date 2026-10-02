@@ -1,7 +1,7 @@
 // ========================================
-// A Base: contrato da Carta. Texto sempre visível (duas colunas no PC), glossário
-// por hover de 400 ms ou toque longo, 3 perguntas com feedback; ao errar a evidência
-// é destacada; na decisão a criança clica na frase que prova; tradução no fim.
+// A Base: contrato da Carta. Texto sempre visível. Glossário sublinhado:
+// o toque curto mostra a tradução e fala a palavra. A leitura trava antes
+// das opções. Na decisão, a criança clica na frase que prova.
 // ========================================
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -11,9 +11,6 @@ import { letterMaterial } from '../../../../config/englishRewards';
 import { letterAskEmpty, letterGateMs, letterQuestionStep, type LetterAsk } from '../../../../services/english/letterGate';
 import { playText, prefetchAudio, stopAudio } from '../../../../services/englishTts';
 import type { ContractScreenProps } from './ContractShell';
-
-const HOVER_MS = 400;
-const TOUCH_KEEP_MS = 1200;
 
 interface Segment {
   text: string;
@@ -104,51 +101,26 @@ function segment(sentence: string, glossary: Map<string, string>, maxWords: numb
   return segs;
 }
 
-/** Palavra do glossário: tradução após 400 ms de hover, toque longo ou foco */
+/** Palavra do glossário: toque curto mostra a tradução e fala a palavra. */
 const GlossWord: React.FC<{ text: string; pt: string; onShow: () => void }> = ({ text, pt, onShow }) => {
   const [show, setShow] = useState(false);
-  const timer = useRef(0);
-  const hideTimer = useRef(0);
 
-  const arm = () => {
-    window.clearTimeout(timer.current);
-    window.clearTimeout(hideTimer.current);
-    timer.current = window.setTimeout(() => {
-      setShow(true);
-      onShow();
-    }, HOVER_MS);
+  const tap = () => {
+    setShow(true);
+    onShow();
+    void playText(text);
   };
-  const disarm = () => {
-    window.clearTimeout(timer.current);
-    setShow(false);
-  };
-  /** No toque, a tradução fica um pouco depois de soltar */
-  const release = () => {
-    window.clearTimeout(timer.current);
-    hideTimer.current = window.setTimeout(() => setShow(false), TOUCH_KEEP_MS);
-  };
-  useEffect(() => () => {
-    window.clearTimeout(timer.current);
-    window.clearTimeout(hideTimer.current);
-  }, []);
 
   return (
     <span className="relative inline-block">
-      <span
-        tabIndex={0}
-        className="underline decoration-dotted decoration-2 underline-offset-2 cursor-help text-sky-900 font-semibold"
-        onMouseEnter={arm}
-        onMouseLeave={disarm}
-        onTouchStart={arm}
-        onTouchEnd={release}
-        onTouchCancel={disarm}
-        onTouchMove={disarm}
-        onFocus={arm}
-        onBlur={disarm}
-        onContextMenu={(e) => e.preventDefault()}
+      <button
+        type="button"
+        className="underline decoration-dotted decoration-2 underline-offset-2 cursor-pointer text-sky-900 font-semibold bg-transparent border-0 p-0"
+        onClick={tap}
+        data-testid="gloss-word"
       >
         {text}
-      </span>
+      </button>
       {show && (
         <span role="tooltip" className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 z-20 whitespace-nowrap mc-panel text-white text-xs px-2 py-1 rounded">
           {pt}
@@ -171,7 +143,7 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
     ask: letterAskEmpty(),
     optionsOpen: item.kind !== 'comprehension',
   })));
-  const [glossaryHovers, setGlossaryHovers] = useState(0);
+  const [glossaryTaps, setGlossaryTaps] = useState(0);
   const [reading, setReading] = useState(false);
   const [readingId, setReadingId] = useState<number | null>(null);
   const [finished, setFinished] = useState(false);
@@ -309,7 +281,7 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
       materialEarned: letterMaterial(hits, evidenceOk, questions.length),
       answer: qs.map((s) => (s.picked === null ? '-' : String(s.picked))).join(','),
       details: {
-        glossaryHovers,
+        glossaryTaps,
         evidenceHits,
         evidenceOk,
         answers: qs.map((s) => s.picked),
@@ -364,7 +336,7 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
                 >
                   {s.segments.map((seg, k) =>
                     seg.gloss !== undefined ? (
-                      <GlossWord key={k} text={seg.text} pt={seg.gloss} onShow={() => setGlossaryHovers((n) => n + 1)} />
+                      <GlossWord key={k} text={seg.text} pt={seg.gloss} onShow={() => setGlossaryTaps((n) => n + 1)} />
                     ) : (
                       <React.Fragment key={k}>{seg.text}</React.Fragment>
                     )

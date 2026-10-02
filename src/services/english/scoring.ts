@@ -70,13 +70,49 @@ export function classifyNoteError(e: NoteError, level = 1): NoteErrorSeverity {
   }
 }
 
-/** 0 = não é inglês; 1 = faltou informação, erro bloqueante ou 3+ pequenos; 2 = 1-2 pequenos; 3 = limpo */
+const FUNCTION_WORDS = new Set(['to', 'a', 'an', 'the']);
+
+const wordTokens = (s: string): string[] => plain(s).split(' ').filter(Boolean);
+
+/** A diferença entre o escrito e o conserto é só pôr ou tirar "to" ou artigo. */
+function onlyFunctionWords(wrong: string, fix: string): boolean {
+  const a = wordTokens(wrong);
+  const b = wordTokens(fix);
+  if (a.join(' ') === b.join(' ')) return false;
+  const [shorter, longer] = a.length <= b.length ? [a, b] : [b, a];
+  const pool = [...shorter];
+  const extra: string[] = [];
+  for (const w of longer) {
+    const i = pool.indexOf(w);
+    if (i >= 0) pool.splice(i, 1);
+    else extra.push(w);
+  }
+  return pool.length === 0 && extra.length > 0 && extra.every((w) => FUNCTION_WORDS.has(w));
+}
+
+/**
+ * Artigo, ou só "to"/artigo a mais ou a menos, nunca perde o sentido (§9.5).
+ * Nos outros erros vale a marca do juiz. Sem marca, o sentido fica.
+ */
+export function errorLosesMeaning(e: NoteError): boolean {
+  if (e.tag === 'article') return false;
+  if (onlyFunctionWords(e.wrong, e.fix)) return false;
+  return e.meaningLost === true;
+}
+
+/**
+ * §9.5: 3 = as ideias, sem erro; 2 = as ideias, com 1 ou 2 erros que não mudam o sentido;
+ * 1 = faltou ideia, o sentido se perdeu, ou 3 erros ou mais; 0 = não é inglês.
+ * Sem `ideas`, a falta vem de `missing` (caminho da IA caída).
+ */
 export function noteScore(j: Omit<NoteJudgement, 'score'>, level = 1): 0 | 1 | 2 | 3 {
   if (!j.isEnglish) return 0;
-  const severities = j.errors.map((e) => classifyNoteError(e, level)).filter((s) => s !== 'ignored');
-  if (j.missing.length > 0 || severities.includes('blocking')) return 1;
-  if (severities.length === 0) return 3;
-  return severities.length <= 2 ? 2 : 1;
+  const ideaMissing = j.ideas && j.ideas.length > 0 ? j.ideas.some((idea) => !idea.ok) : j.missing.length > 0;
+  const counted = j.errors.filter((e) => classifyNoteError(e, level) !== 'ignored');
+  const meaningLost = counted.some((e) => errorLosesMeaning(e));
+  if (ideaMissing || meaningLost || counted.length >= 3) return 1;
+  if (counted.length === 0) return 3;
+  return 2;
 }
 
 /** Sobe um estágio a cada 2 notas 3 seguidas (0 -> 1 -> 2); qualquer nota menor zera a sequência */

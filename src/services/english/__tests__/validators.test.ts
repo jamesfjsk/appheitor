@@ -165,7 +165,7 @@ test('validateLetter rejeita 6 casos ruins', () => {
 // ---------- Recado ----------
 
 const goodNote = {
-  brief: 'Peça ao ferreiro 2 espadas e 1 picareta e diga que a picareta é para a caverna.',
+  brief: 'Peça 2 espadas. Peça 1 picareta. Diga que é para a caverna.',
   mustInclude: [
     { pt: '2 espadas', en: ['two swords', '2 swords'] },
     { pt: '1 picareta', en: ['one pickaxe', 'a pickaxe', '1 pickaxe'] },
@@ -197,6 +197,7 @@ test('validateNote rejeita 6 casos ruins e corta banco grande', () => {
   expect(forbidden.ok).toBeFalsy();
   expect(forbidden.problems.join(' ')).toContain('went');
   expect(validateNote({ ...goodNote, brief: '' }, 1).ok).toBeFalsy();
+  expect(validateNote({ ...goodNote, brief: 'Peça 2 espadas e 1 picareta para a caverna.' }, 1).ok).toBeFalsy();
   const big = validateNote({ ...goodNote, wordBank: [...goodNote.wordBank, 'apple', 'bone', 'map', 'key', 'ball'] }, 1);
   expect(big.ok).toBeTruthy();
   expect(big.content.wordBank).toHaveLength(14);
