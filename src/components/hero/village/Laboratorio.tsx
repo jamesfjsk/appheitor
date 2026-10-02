@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import ChildSheet from './ChildSheet';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSound } from '../../../contexts/SoundContext';
-import { ENGENHEIRO, MAKECODE_URL, METODO_PASSOS, TRAINING_TUTORIALS, tutorialUrl, type CompetencyLevel } from '../../../config/careers';
+import { ENGENHEIRO, MAKECODE_URL, METODO_PASSOS, TRAINING_KIT_PAGES, TRAINING_TUTORIALS, tutorialUrl, type CompetencyLevel } from '../../../config/careers';
 import type { TrainingDef } from '../../../config/engenheiroTreinos';
 import type { Assignment } from '../../../types/assignment';
 import { subscribeAssignments, submitAssignment } from '../../../services/assignmentsService';
@@ -237,6 +237,20 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       ? 'O tutorial guiado mostra cada bloco, em português.'
                       : 'O tutorial guiado está em inglês, mas a animação mostra cada bloco.'}
                   </p>
+                )}
+              </div>
+            )}
+            {TRAINING_KIT_PAGES[openT.n] && (
+              <div className="mc-inv p-2 text-sm" data-testid="lab-pdf">
+                <p className="mc-lbl">No PDF do kit</p>
+                <ul className="space-y-0.5">
+                  {TRAINING_KIT_PAGES[openT.n].map((k) => (
+                    <li key={k.label}>{k.label}, página {k.page}</li>
+                  ))}
+                </ul>
+                {TRAINING_KIT_PAGES[openT.n].filter((k) => k.note).map((k) => <p key={`n-${k.label}`} className="text-xs mc-muted mt-1">{k.note}</p>)}
+                {career.kitPdfUrl && (
+                  <a href={career.kitPdfUrl} target="_blank" rel="noopener noreferrer" className="mc-btn mc-btn-stone inline-flex items-center min-h-[40px] px-3 mt-2">Abrir o PDF do kit</a>
                 )}
               </div>
             )}

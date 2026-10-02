@@ -10,6 +10,7 @@ import { subscribeAssignments } from '../../services/assignmentsService';
 import {
   activitiesOf,
   markTrainingDoneOffApp,
+  setKitPdfUrl,
   setManualLevel,
   startCareer,
   subscribeCareer,
@@ -59,6 +60,7 @@ const CareerPanel: React.FC = () => {
   const [career, setCareer] = useState<CareerState | null | undefined>(undefined);
   const [rows, setRows] = useState<Assignment[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [pdfDraft, setPdfDraft] = useState<string | null>(null);
 
   useEffect(() => {
     if (!childUid) return;
@@ -121,6 +123,31 @@ const CareerPanel: React.FC = () => {
             </ul>
           </div>
         )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-2">
+        <h3 className="text-lg font-bold text-gray-900">PDF do kit</h3>
+        <p className="text-sm text-gray-500">
+          O link do tutorial em PDF que veio com o kit. Cada treino mostra a lição e a página do PDF, e com o link aparece o botão
+          "Abrir o PDF do kit". O link fica só na carreira dele.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <input
+            type="url"
+            value={pdfDraft ?? career.kitPdfUrl ?? ''}
+            onChange={(e) => setPdfDraft(e.target.value)}
+            placeholder="https://drive.google.com/..."
+            className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+          />
+          <button
+            type="button"
+            disabled={busy !== null || pdfDraft === null}
+            onClick={() => run('pdf', () => setKitPdfUrl(childUid, pdfDraft ?? '').then(() => setPdfDraft(null)), 'Link do PDF salvo.')}
+            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            Salvar
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 p-6">

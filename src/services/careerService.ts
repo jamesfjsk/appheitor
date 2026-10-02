@@ -20,6 +20,8 @@ export interface CareerState {
   tools: string[];
   promotions: Record<string, string>;
   celebrate?: RankId;
+  /** Link do PDF do kit, posto pelo pai. Fica aqui, e não no código, porque o PDF tem direitos autorais. */
+  kitPdfUrl?: string;
 }
 
 const RANKS = new Set<RankId>(['aprendiz', 'tecnico', 'engenheiro', 'inventor']);
@@ -43,6 +45,7 @@ export function fromCareer(raw: Record<string, unknown> | undefined): CareerStat
     tools: strs(e.tools),
     promotions: (e.promotions && typeof e.promotions === 'object' ? e.promotions : {}) as Record<string, string>,
     celebrate: RANKS.has(e.celebrate as RankId) ? (e.celebrate as RankId) : undefined,
+    kitPdfUrl: typeof e.kitPdfUrl === 'string' && /^https:\/\//.test(e.kitPdfUrl) ? e.kitPdfUrl : undefined,
   };
 }
 
@@ -156,6 +159,16 @@ export async function syncCareer(uid: string, rows: Assignment[], state: CareerS
     'engenheiro.updatedAt': serverTimestamp(),
   }));
   return rose;
+}
+
+/** O pai guarda o link do PDF do kit. Vazio apaga. */
+export async function setKitPdfUrl(uid: string, url: string): Promise<void> {
+  const clean = url.trim();
+  if (clean && !/^https:\/\//.test(clean)) throw new Error('O link precisa começar com https://');
+  await updateDoc(doc(db, 'careers', uid), {
+    'engenheiro.kitPdfUrl': clean || null,
+    'engenheiro.updatedAt': serverTimestamp(),
+  });
 }
 
 /** O pai ajusta uma competência que viu fora do app. "nenhum" apaga. */

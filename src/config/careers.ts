@@ -106,4 +106,32 @@ export const TRAINING_TUTORIALS: Record<number, { path: string; pt: boolean }> =
   5: { path: 'dice', pt: true },
 };
 
+/**
+ * Onde cada treino aparece no PDF do kit ("Projetos para começar", Casa da Robótica, 98 páginas), conferido em 02/10/2026.
+ * Página = número impresso no rodapé, que é o mesmo do leitor de PDF. O link do PDF fica na carreira (painel), nunca no código.
+ */
+export const TRAINING_KIT_PAGES: Record<number, Array<{ label: string; page: number; note?: string }>> = {
+  1: [
+    { label: 'Sobre o Micro:bit e os pinos', page: 11 },
+    { label: 'MakeCode: criar o projeto e baixar', page: 16 },
+    { label: 'Lição 01: Coração na matriz de LED', page: 18 },
+  ],
+  2: [{ label: 'Lição 03: Crachá', page: 24 }],
+  3: [{ label: 'Lição 02: Coração batendo', page: 21 }],
+  4: [{ label: 'Lição 15: LED RGB (o contador com variável)', page: 60 }],
+  5: [{ label: 'Lição 04: Dado', page: 27 }],
+  6: [{ label: 'Lição 08: Sol', page: 39 }],
+  7: [
+    { label: 'Sobre a protoboard', page: 13 },
+    { label: 'Como usar o Shield', page: 14 },
+    { label: 'Lição 09: Pisca LED', page: 42 },
+  ],
+  8: [{ label: 'Lição 17: Buzzer', page: 66 }],
+  10: [{ label: 'Lição 16: Sensor de luz - LDR', page: 63, note: 'O PDF liga o LDR no P0. No treino ele vai no P2: funciona igual, desde que o código leia o mesmo pino do fio.' }],
+  11: [
+    { label: 'Lição 16: Sensor de luz - LDR', page: 63 },
+    { label: 'Lição 09: Pisca LED', page: 42 },
+  ],
+};
+
 export const tutorialUrl = (path: string): string => `https://makecode.microbit.org/?lang=pt-BR#tutorial:/projects/${path}`;
