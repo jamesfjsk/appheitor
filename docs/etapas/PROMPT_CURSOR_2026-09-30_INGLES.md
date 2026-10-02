@@ -27,7 +27,7 @@ Você é o Cursor do Miner Missions, na frente P17. Antes de qualquer linha, lei
   - `npm run test:english` e `npm run test:village`;
   - `npx vite build`.
 - **Um commit por passo:** `git add -A` e `git commit -m "p17: passo N, <resumo>"`. Siga para o passo seguinte. O líder revisa o branch no fim.
-- **O passo 2 espera o "ok" do pai na amostra do banco** (U1 e U5). Se o "ok" não tiver chegado, faça o passo 3 antes e volte.
+- **O banco foi aprovado pelo pai em 02/10.** O passo 2 pode começar.
 - **Sem restilizar:**
   - CSS novo vai em `src/styles/miner.css`;
   - o painel continua em Tailwind branco e azul;

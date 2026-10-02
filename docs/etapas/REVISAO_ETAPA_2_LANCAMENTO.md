@@ -1436,3 +1436,7 @@ As fotos estão em `docs/exemplos/telas/etapa-3/p15b/`. Os lados do pai (aprovar
   - o passo 4;
   - a C2 com perguntas em português: hoje a C2 ainda usa o prompt antigo, com perguntas em inglês. Só aparece depois de 3 cartas C1 perfeitas seguidas.
 - **O plano de amanhã já estava gerado com a carta antiga.** Para a C1 aparecer amanhã, o pai regenera o plano de amanhã no painel da Mina depois do push.
+
+**02/10, depois da junção:**
+- **O pai aprovou** o banco de unidades (amostra U1 e U5) e as cartas reserva C1 (c1-03 e c1-07). O passo 2 da P17 está liberado.
+- **Funções publicadas pelo líder, com o ok do pai:** `assignmentRecurrences` (agendada) e `generateAssignmentsNow` (callable), na região southamerica-east1. Não estavam publicadas antes: o deploy as criou.

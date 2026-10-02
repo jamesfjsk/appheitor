@@ -2,7 +2,7 @@
 
 Conteúdo do §9 de `docs/MINA_CONTRATOS.md`, escrito pelo líder em 30/09/2026.
 
-**Amostra do pai: U1 e U5** (20% do banco). O resto entra depois do "ok" dele. Os recados falam de casa, escola e futebol. Se um molde não combinar com a vida do Heitor, o pai troca na amostra.
+**Aprovado pelo pai em 02/10/2026** (amostra: U1 e U5). Os recados falam de casa, escola e futebol. Se um molde não combinar com a vida do Heitor, o pai troca na amostra.
 
 **O Cursor transcreve para `src/config/englishUnits.ts`, sem mudar o texto.**
 
