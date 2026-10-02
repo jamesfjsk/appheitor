@@ -18,6 +18,7 @@ import { cracksOf, isBroken, liveBuildingLevel, ruinUseError } from './village/r
 import { VERB_LEMMAS } from '../config/englishLevels';
 import { nextScaffoldStage } from './english/scoring';
 import { letterLevelOf, nextLetterLevel } from './english/letterLevel';
+import { currentUnit, unitAfterForge } from './english/units';
 import { normalizedTokens } from './english/notePrecheck';
 import { assertAiBudget, buildDailyContracts, regenerateSingle } from './englishAi';
 import { prefetchAudio } from './englishTts';
@@ -155,6 +156,22 @@ export function fromBaseDoc(uid: string, data: Record<string, unknown>): BaseDoc
     ...(data.letterLevel === 1 || data.letterLevel === 2 || data.letterLevel === 3
       ? { letterLevel: data.letterLevel as 1 | 2 | 3 }
       : {}),
+    ...(isRecord(data.unit) && typeof data.unit.id === 'string'
+      ? {
+          unit: {
+            id: String(data.unit.id),
+            startedOn: str(data.unit.startedOn),
+            forges: Array.isArray(data.unit.forges)
+              ? data.unit.forges.filter(isRecord).map((row) => ({
+                  date: str(row.date),
+                  first: num(row.first),
+                  max: num(row.max),
+                }))
+              : [],
+          },
+        }
+      : {}),
+    ...(isRecord(data.units) ? { units: data.units as BaseDoc['units'] } : {}),
     contractsDone: num(data.contractsDone),
     merchantDone: num(data.merchantDone),
     merchantPerfect: num(data.merchantPerfect),
@@ -625,6 +642,12 @@ export async function completeContract(
       ? nextLetterLevel(letterNow, base.level, letterPerfectStreak, letterWeakStreak)
       : letterNow;
     const letterMoved = contract.type === 'letter' && letterNext !== letterNow;
+    const forgeBook = contract.type === 'forge'
+      ? unitAfterForge(
+          { unit: currentUnit(base, date), units: base.units ?? {} },
+          { date, first: num(outcome.score), max: num(outcome.max) },
+        ).book
+      : null;
     const nextBase: BaseDoc = {
       ...base,
       materials,
@@ -637,6 +660,7 @@ export async function completeContract(
       letterLevel: letterMoved || contract.type === 'letter' ? letterNext : base.letterLevel,
       letterPerfectStreak: letterMoved ? 0 : letterPerfectStreak,
       letterWeakStreak: letterMoved ? 0 : letterWeakStreak,
+      ...(forgeBook ? { unit: forgeBook.unit, units: forgeBook.units } : {}),
       updatedAt: finishedAt,
     };
     wordsMastered = Object.values(vocab).filter((v) => (v?.seen ?? 0) >= 3).length;
