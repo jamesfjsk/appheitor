@@ -134,4 +134,40 @@ export const TRAINING_KIT_PAGES: Record<number, Array<{ label: string; page: num
   ],
 };
 
+export type VideoLang = 'fala' | 'dublado' | 'legenda';
+
+/**
+ * Vídeos em português, de canais confiáveis e marcados como feitos para crianças. Aprovados pelo pai em 02/10/2026.
+ * "dublado": gravado em inglês, com faixa de áudio em português do Brasil.
+ */
+export const TRAINING_VIDEOS: Record<number, Array<{ title: string; id: string; minutes: string; lang: VideoLang }>> = {
+  1: [
+    { title: 'Primeiros passos com o MakeCode (Fabio Souza)', id: 'dd4H0SV-7xY', minutes: '4:43', lang: 'fala' },
+    { title: 'Introdução ao micro:bit (fundação micro:bit)', id: 'u2u7UJSRuko', minutes: '2:10', lang: 'legenda' },
+    { title: 'Como usar um micro:bit (Science Buddies)', id: 'ItcTxWW3c5Q', minutes: '11:07', lang: 'dublado' },
+  ],
+  2: [{ title: 'Matriz de LEDs simples e fácil (microbitando)', id: 'k6w4E42xGyc', minutes: '8:04', lang: 'fala' }],
+  3: [{ title: 'Matriz de LEDs simples e fácil (microbitando)', id: 'k6w4E42xGyc', minutes: '8:04', lang: 'fala' }],
+  4: [
+    { title: 'Como usar os botões (Science Buddies)', id: 'SH3M1WZs7FM', minutes: '6:46', lang: 'dublado' },
+    { title: 'Botões do micro:bit (fundação micro:bit)', id: 'hnT0qHM3_hQ', minutes: '0:47', lang: 'legenda' },
+  ],
+  5: [{ title: 'Controle de movimento (Science Buddies)', id: 'KMzc3NE9FcI', minutes: '4:48', lang: 'dublado' }],
+  6: [{ title: 'Como usar o sensor de luz (Science Buddies)', id: 'tfk9F09I_5Y', minutes: '5:44', lang: 'dublado' }],
+  7: [
+    { title: 'Como usar uma protoboard (Science Buddies)', id: '6WReFkfrUIk', minutes: '12:20', lang: 'dublado' },
+    { title: 'Os pinos do micro:bit (fundação micro:bit)', id: 'EDgdHb0R96I', minutes: '1:30', lang: 'legenda' },
+  ],
+  9: [{ title: 'Os pinos do micro:bit (fundação micro:bit)', id: 'EDgdHb0R96I', minutes: '1:30', lang: 'legenda' }],
+  11: [{ title: 'Se... senão com o micro:bit (Science Buddies)', id: 'Ocx7H4e6Geg', minutes: '10:14', lang: 'dublado' }],
+};
+
+export const VIDEO_LANG_LINE: Record<VideoLang, string> = {
+  fala: 'falado em português',
+  dublado: 'dublado em português',
+  legenda: 'com legenda em português',
+};
+
+export const videoUrl = (id: string): string => `https://www.youtube.com/watch?v=${id}`;
+
 export const tutorialUrl = (path: string): string => `https://makecode.microbit.org/?lang=pt-BR#tutorial:/projects/${path}`;
