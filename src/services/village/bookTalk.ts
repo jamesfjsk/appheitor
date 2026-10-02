@@ -5,7 +5,7 @@
 // ========================================
 
 import type { BookTalk, BookTalkClosing, BookTalkTurn, SageMove } from '../../types';
-import { bookWordCount, normalizeBookText, titleKeyOf } from './books';
+import { bookWordCount, normalizeBookText, textSimilarity, titleKeyOf } from './books';
 
 export const BOOK_TALK_XP = 10;
 export const BOOK_TALK_MODEL = 'gpt-4o';
@@ -21,10 +21,13 @@ export const LOCAL_CLOSING: BookTalkClosing = {
   takeHome: '',
 };
 
-export type SageReject = 'fato' | 'licao' | 'perguntas' | 'tamanho';
+export type SageReject = 'fato' | 'licao' | 'perguntas' | 'tamanho' | 'copia';
 
-const FACT = /^(qual|quem|quando|onde|quantos|quantas|como se chama)\b/;
+const FACT_WORD = 'qual|quem|quando|onde|quantos|quantas|como se chama';
+const FACT = new RegExp(`^(?:${FACT_WORD})\\b`);
+const FACT_AFTER = new RegExp(`[,:;]\\s*(?:${FACT_WORD})\\b`, 'i');
 const LESSON = ['voce aprendeu', 'a licao', 'o certo e', 'devemos'];
+const QUESTION_PRAISE = ['muito bem', 'parabens', 'que inteligente'];
 
 function hasPhrase(text: string, phrase: string): boolean {
   return new RegExp(`(?:^|\\s)${phrase}(?:\\s|$)`).test(text);
@@ -39,20 +42,31 @@ function questionHeads(text: string): string[] {
   }).filter(Boolean);
 }
 
-/** As seis regras do §1, no que dá para checar sem opinar: tamanho, uma pergunta, fato, lição. */
+function factQuestion(raw: string): boolean {
+  const plain = raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  if (FACT_AFTER.test(plain)) return true;
+  return questionHeads(raw).some((h) => FACT.test(h));
+}
+
+/** As seis regras do §1, no que dá para checar sem opinar: tamanho, um "?", fato, lição, elogio. */
 export function checkSageQuestion(text: string): { ok: boolean; reason: SageReject | null } {
   const raw = text.replace(/\s+/g, ' ').trim();
   const words = bookWordCount(raw);
   if (!raw || words === 0 || words > 30) return { ok: false, reason: 'tamanho' };
-  if ((raw.match(/\?/g) || []).length > 1) return { ok: false, reason: 'perguntas' };
+  if ((raw.match(/\?/g) || []).length !== 1) return { ok: false, reason: 'perguntas' };
   const n = normalizeBookText(raw);
   if (LESSON.some((p) => hasPhrase(n, p))) return { ok: false, reason: 'licao' };
-  if (questionHeads(raw).some((h) => FACT.test(h))) return { ok: false, reason: 'fato' };
+  if (QUESTION_PRAISE.some((p) => hasPhrase(n, p))) return { ok: false, reason: 'licao' };
+  if (factQuestion(raw)) return { ok: false, reason: 'fato' };
   return { ok: true, reason: null };
 }
 
+/** Vazia, ou "sei lá" sem palavra de conteúdo. "Não sei" e "não lembro" valem. */
 export function needsNudge(text: string): boolean {
-  return !/[a-zà-ú]/i.test(text);
+  const n = normalizeBookText(text);
+  if (!n) return true;
+  if (/^(nao sei|nao lembro)$/.test(n)) return false;
+  return !n.split(' ').some((w) => w.length >= 4);
 }
 
 /** "Não sei" vale. Marca em silêncio só quando a frase mostra que ele não leu. */
@@ -289,10 +303,36 @@ function foreignExamples(title: string): string[] {
   return out;
 }
 
-const IDEA_LIST = GENERIC.map((g) => {
-  const ok = checkSageQuestion(g.question).ok;
-  return ok ? `- ${g.label} (${g.theme}): ${g.question}` : `- ${g.label} (${g.theme})`;
-}).join('\n');
+/** Só os nomes das ideias (§2). A pergunta pronta não entra no prompt: a IA copia. */
+const IDEA_LIST = GENERIC.map((g) => `- ${g.label} (${g.theme})`).join('\n');
+
+const EDITION_NAMES = 'Use os nomes do relato dele, na edição brasileira. Na Matilda, a professora é a Sra. Mel, não Sra. Honey.';
+
+const THEME_CONCEPT: Record<string, string> = {
+  familia: 'o que é família',
+  justica: 'justiça',
+  castigo: 'o castigo',
+  sorte: 'sorte e mérito',
+  poder: 'o poder',
+  ler: 'o que a leitura faz',
+  crescer: 'crescer',
+  felicidade: 'a felicidade',
+  importante: 'o que é importante',
+  unico: 'o que torna uma coisa única',
+  dono: 'o que é ser dono',
+  cuidar: 'cuidar de alguém',
+  verdade: 'a verdade',
+  coragem: 'a coragem',
+  regras: 'as regras',
+  amizade: 'a amizade',
+};
+
+const THEME_ALIAS: Record<string, string> = {
+  ler: 'crescer',
+  castigo: 'justica',
+  unico: 'importante',
+  cuidar: 'familia',
+};
 
 const MOVE_TABLE = `por_que: ele deu uma opinião sem motivo. Forma: "Por que você acha isso?"
 exemplo: ele deu um motivo, mas ficou no ar. Forma: "Tem algum momento do livro que mostra isso?"
@@ -348,10 +388,39 @@ export function parseSageQuestion(raw: unknown): { theme: string; question: stri
   return { theme, question };
 }
 
-/** Lixo, ou pergunta que o validador recusa, cai no banco. */
+function bankLines(): string[] {
+  const out: string[] = GENERIC.map((g) => g.question);
+  for (const book of Object.values(BOOKS)) {
+    for (const item of book) {
+      out.push(item.question);
+      for (const line of Object.values(item.follows)) if (line) out.push(line);
+    }
+  }
+  return out;
+}
+
+/**
+ * A mesma medida do projeto (`textSimilarity` ≥ 0,8: palavras de 4+ letras em comum, sobre o maior conjunto).
+ * Uma cópia embutida depois da cena conta na janela do tamanho da linha do banco.
+ */
+export function copiesBankQuestion(question: string): boolean {
+  const qWords = question.trim().split(/\s+/).filter(Boolean);
+  return bankLines().some((line) => {
+    if (textSimilarity(question, line) >= 0.8) return true;
+    const content = normalizeBookText(line).split(' ').filter((w) => w.length >= 4);
+    const bLen = line.trim().split(/\s+/).filter(Boolean).length;
+    if (content.length < 4 || bLen < 4 || qWords.length < bLen) return false;
+    for (let i = 0; i <= qWords.length - bLen; i++) {
+      if (textSimilarity(qWords.slice(i, i + bLen).join(' '), line) >= 0.8) return true;
+    }
+    return false;
+  });
+}
+
+/** Lixo, pergunta recusada ou cópia do banco cai no banco local. */
 export function parseTalk(raw: unknown, title: string): { theme: string; question: string } {
   const parsed = parseSageQuestion(raw);
-  if (parsed && checkSageQuestion(parsed.question).ok) return parsed;
+  if (parsed && checkSageQuestion(parsed.question).ok && !copiesBankQuestion(parsed.question)) return parsed;
   return localQuestion(title, parsed?.theme);
 }
 
@@ -365,33 +434,97 @@ export function parseSageFollow(raw: unknown): { move: SageMove; question: strin
   return { move, question, flagged: r.flagged === true };
 }
 
-const PRAISE = ['muito bem', 'que inteligente', 'resposta certa', 'resposta errada'];
+const PRAISE = ['muito bem', 'que inteligente', 'resposta certa', 'resposta errada', 'parabens'];
 
-export function parseSageClosing(raw: unknown): BookTalkClosing | null {
+const RESTATE_MAX = 25;
+const CONCEPT_MAX = 15;
+const HOME_MAX = 20;
+
+function fitsHome(q: string): boolean {
+  return q.includes('?') && bookWordCount(q) <= HOME_MAX;
+}
+
+/** Pergunta do banco para a ideia da conversa. Inteira: nunca cortada no meio. */
+export function takeHomeFromBank(title: string, theme?: string): string {
+  const key = (theme || '').replace(/ /g, '_');
+  const generic = GENERIC.find((g) => g.theme === key) || GENERIC.find((g) => g.theme === THEME_ALIAS[key]);
+  if (generic && fitsHome(generic.question)) return generic.question;
+  const book = bookOf(title);
+  const item = book?.find((q) => q.theme === key);
+  if (item && fitsHome(item.question)) return item.question;
+  if (item) {
+    for (const line of Object.values(item.follows)) {
+      if (line && fitsHome(line)) return line;
+    }
+  }
+  const any = GENERIC.find((g) => fitsHome(g.question));
+  return any?.question || GENERIC[0].question;
+}
+
+function shapeRestate(text: string): string | null {
+  let t = text.replace(/\s+/g, ' ').trim();
+  if (!t) return null;
+  t = t.replace(/\b(pra|para) mim\b/gi, 'para você');
+  if (!/^você disse que\b/i.test(t)) {
+    const body = t.replace(/^[«"']+/, '').replace(/[.?!]+$/, '');
+    const lower = body.charAt(0).toLowerCase() + body.slice(1);
+    t = `Você disse que ${lower}`;
+  }
+  t = t.replace(/\s+/g, ' ').trim();
+  if (bookWordCount(t) > RESTATE_MAX) {
+    const sentence = t.split(/(?<=[.!?])\s+/)[0] || '';
+    if (sentence && bookWordCount(sentence) <= RESTATE_MAX && /^você disse que\b/i.test(sentence)) t = sentence;
+    else t = `${t.split(/\s+/).slice(0, RESTATE_MAX).join(' ').replace(/[,:;]+$/, '')}.`;
+  }
+  if (!/[.!?]$/.test(t)) t = `${t.replace(/[,:;]$/, '')}.`;
+  if (/\bpara mim\b/i.test(t)) return null;
+  if (!/^você disse que\b/i.test(t)) return null;
+  return t;
+}
+
+function shapeConcept(text: string, theme?: string): string {
+  const t = text.replace(/\s+/g, ' ').trim();
+  const n = normalizeBookText(t);
+  if (t && bookWordCount(t) <= CONCEPT_MAX && !PRAISE.some((p) => hasPhrase(n, p))) {
+    return /[.!?]$/.test(t) ? t : `${t}.`;
+  }
+  const key = (theme || '').replace(/ /g, '_');
+  const name = THEME_CONCEPT[key] || THEME_CONCEPT[THEME_ALIAS[key] || ''] || 'essa ideia';
+  return `Você acabou de pensar sobre ${name}.`;
+}
+
+/**
+ * Cada parte no seu teto. A pergunta para levar, se vier vazia, sem "?" ou longa demais,
+ * é trocada por uma do banco. Nunca é cortada palavra por palavra.
+ */
+export function parseSageClosing(raw: unknown, ctx?: { title?: string; theme?: string }): BookTalkClosing | null {
   const r = asObj(raw);
   if (!r) return null;
-  const restate = str(r.restate);
-  let concept = str(r.concept);
+  const restateRaw = str(r.restate);
   let takeHome = str(r.takeHome) || str(r.take_home) || str(r.pergunta);
   takeHome = takeHome.replace(/^pergunta para (levar|o jantar)\s*:\s*/i, '').trim();
-  if (!restate || !concept) return null;
-  const fit = (home: string, idea: string) => bookWordCount(`${restate} ${idea} ${home}`.trim());
-  while (takeHome && fit(takeHome, concept) > 45) {
-    const bits = takeHome.split(' ');
-    bits.pop();
-    takeHome = bits.join(' ').replace(/[,:;]$/, '').trim();
-  }
-  if (takeHome && !/[?.!]$/.test(takeHome)) takeHome = '';
-  while (fit(takeHome, concept) > 45 && concept.split(' ').length > 4) {
-    const bits = concept.split(' ');
-    bits.pop();
-    concept = bits.join(' ').replace(/[,:;]$/, '').trim();
-  }
-  const all = `${restate} ${concept} ${takeHome}`.trim();
-  if (bookWordCount(all) > 45) return null;
-  const n = normalizeBookText(all);
+  const conceptRaw = str(r.concept);
+  if (!restateRaw || !conceptRaw) return null;
+  const n = normalizeBookText(`${restateRaw} ${conceptRaw} ${takeHome}`);
   if (PRAISE.some((p) => hasPhrase(n, p))) return null;
-  return { restate, concept, takeHome };
+  const restate = shapeRestate(restateRaw);
+  if (!restate) return null;
+  const concept = shapeConcept(conceptRaw, ctx?.theme);
+  const homeOk = fitsHome(takeHome) && !PRAISE.some((p) => hasPhrase(normalizeBookText(takeHome), p));
+  const nextHome = homeOk ? takeHome : takeHomeFromBank(ctx?.title || '', ctx?.theme);
+  if (!fitsHome(nextHome)) return null;
+  return { restate, concept, takeHome: nextHome };
+}
+
+/** Fecho local completo: a ideia dele, o nome do que ele pensou e uma pergunta do banco. */
+export function localFullClosing(input: { title: string; theme?: string; answers: string[] }): BookTalkClosing {
+  const said = input.answers.map((a) => a.trim()).filter(Boolean).join(' ');
+  const restate = shapeRestate(said) || 'Você disse que ainda está pensando nisso.';
+  return {
+    restate,
+    concept: shapeConcept('', input.theme),
+    takeHome: takeHomeFromBank(input.title, input.theme),
+  };
 }
 
 export function parseStoredTalk(raw: unknown): BookTalk | undefined {
@@ -411,7 +544,7 @@ export function parseStoredTalk(raw: unknown): BookTalk | undefined {
   }
   const question = str(r.question);
   const theme = str(r.theme);
-  if (!question && turns.length === 0 && !r.closing) return undefined;
+  if (!question && turns.length === 0 && !r.closing && r.skipped !== true) return undefined;
   let closing: BookTalkClosing | undefined;
   if (r.closing && typeof r.closing === 'object') {
     const c = r.closing as Record<string, unknown>;
@@ -434,7 +567,8 @@ export function parseStoredTalk(raw: unknown): BookTalk | undefined {
 export function rejectionHint(reason: SageReject | null): string {
   if (reason === 'fato') return 'A anterior era pergunta de fato (qual, quem, quando, onde, quantos, como se chama). Manda uma sem resposta certa.';
   if (reason === 'licao') return 'A anterior dava lição. Não diga o que ele aprendeu, a lição, o certo é, nem devemos.';
-  if (reason === 'perguntas') return 'A anterior tinha mais de uma pergunta. Uma só, um ponto de interrogação.';
+  if (reason === 'perguntas') return 'A anterior não tinha exatamente uma pergunta. Uma só, um ponto de interrogação.';
+  if (reason === 'copia') return 'A anterior parecia uma pergunta pronta do banco. Faz outra, saindo de uma cena deste livro.';
   return 'A anterior passou de 30 palavras ou veio vazia. Encurta.';
 }
 
@@ -452,8 +586,12 @@ Regras, todas obrigatórias:
 4. Cabe em até 30 palavras e tem uma pergunta só, um "?" só.
 5. Não é prova. Não comece a pergunta com Qual, Quem, Quando, Onde, Quantos, nem "como se chama".
 6. Não dá lição. Nada de "o que você aprendeu", "a lição", "o certo é", "devemos".
+7. Não elogie. Nada de "muito bem", "parabéns" ou "que inteligente".
+8. Não copie uma pergunta pronta. A cena e as palavras são deste livro e deste relato.
 
-Ideias grandes (escolha uma; "theme" é o id entre parênteses):
+${EDITION_NAMES}
+
+Ideias grandes (escolha uma; "theme" é o id entre parênteses). Só o nome, sem a pergunta pronta:
 ${IDEA_LIST}
 
 ${sample}
@@ -476,6 +614,7 @@ Regras:
 - Não faça pergunta de fato (qual, quem, quando, onde, quantos, como se chama).
 - "move" é um destes ids: por_que, exemplo, e_se, outro_lado, sua_vida, duas_saidas.
 - "flagged": true só se a resposta mostra que ele não conhece a história (diz que não leu, fala de outro livro, inventa um fato que não existe). "Não sei" não é flagged. Na dúvida, false.
+- ${EDITION_NAMES}
 
 Responda SOMENTE com JSON: {"move":"por_que","question":"...","flagged":false}`;
   const user = `Pergunta que você fez: ${input.question}\n\nResposta dele: ${input.answer.trim() || 'Não sei'}`;
@@ -483,13 +622,14 @@ Responda SOMENTE com JSON: {"move":"por_que","question":"...","flagged":false}`;
 }
 
 export function buildSageClosingPrompt(input: { title: string; question: string; answers: string[] }): { system: string; user: string } {
-  const system = `Você é o Sábio de uma vila. Feche a conversa sobre "${input.title}" em no máximo 45 palavras, em três partes.
+  const system = `Você é o Sábio de uma vila. Feche a conversa sobre "${input.title}" em três partes, cada uma no seu tamanho.
 
-1. "restate": devolva a ideia DELE com as palavras dele, escritas certo. Sem nota.
-2. "concept": dê nome ao que ele pensou, numa frase. Gente pensa nisso há muito tempo. Sem "muito bem" e sem "que inteligente".
-3. "takeHome": uma pergunta para ele levar para casa, sem resposta certa. Não repita a pergunta que você já fez.
+1. "restate": até 25 palavras. Sempre comece por "Você disse que…", na terceira pessoa, com as palavras dele escritas certo. Nunca "Para mim…" na sua voz.
+2. "concept": até 15 palavras. Dê nome ao que ele pensou. Gente pensa nisso há muito tempo. Sem "muito bem" e sem "que inteligente".
+3. "takeHome": até 20 palavras, com um "?". Uma pergunta para ele levar para casa, sem resposta certa. Não repita a pergunta que você já fez. Não corte a pergunta no meio.
 
 Não corrija a ideia. Não dê a sua opinião. Não faça sermão. Não diga "resposta certa" nem "resposta errada".
+${EDITION_NAMES}
 Forma, de uma conversa sobre família (não copie o assunto se ele não falou disso): "Você disse que família é quem cuida, mesmo sem ser do mesmo sangue." / "Você acabou de pensar sobre o que é família." / "quem cuidou de você de um jeito que você nunca esqueceu?"
 
 Responda SOMENTE com JSON: {"restate":"...","concept":"...","takeHome":"..."}`;

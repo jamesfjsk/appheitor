@@ -27,12 +27,15 @@ import {
   minWordsFor,
   priorRefusalsOf,
   readingLineAt,
+  reportBlocksRetell,
+  returnedSay,
   verdictOf,
 } from '../../../services/village/books';
 import {
   SAGE_NUDGE,
   answerMissesStory,
   closingSpeech,
+  localFullClosing,
   needsNudge,
   talkStep,
 } from '../../../services/village/bookTalk';
@@ -221,6 +224,7 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
   const [nudgeLine, setNudgeLine] = useState<string | null>(null);
   const [xpJust, setXpJust] = useState(0);
   const [canMic, setCanMic] = useState(false);
+  const [heardSage, setHeardSage] = useState(false);
   const [listening, setListening] = useState(false);
   const [micNote, setMicNote] = useState<string | null>(null);
   const typingStart = useRef<number | null>(null);
@@ -281,9 +285,14 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
     return ids;
   }, [done, reports]);
   const lastReply = done.find((b) => b.parentReply);
+  const returnedNote = reports.find((r) => r.parentDecision === 'returned' && r.parentReply);
+  const returnedOf = (b: BookDoc) => reports.find((r) =>
+    (r.bookId === b.id || r.titleKey === b.titleKey) && r.parentDecision === 'returned' && r.parentReply,
+  )?.parentReply;
   const replyAfterTalk = Boolean(lastReply && reports.some((r) => r.accepted && (r.bookId === lastReply.id || r.titleKey === lastReply.titleKey) && r.talk?.doneAt));
 
   const sageNow = talk ? ([...talk.turns].reverse().find((t) => t.by === 'sabio')?.text || talk.question) : '';
+  useEffect(() => { setHeardSage(false); }, [sageNow]);
   const doneSpeech = talk?.closing ? closingSpeech(talk.closing) : '';
   const voiceLine = phase === 'talk' ? (nudgeLine || sageNow) : phase === 'talk-done' ? doneSpeech : '';
 
@@ -308,11 +317,7 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
   const startForm = (b: BookDoc) => {
     playClick();
     const waitingDad = reports.some((r) =>
-      (r.bookId === b.id || r.titleKey === b.titleKey)
-      && r.needsParent
-      && !r.accepted
-      && r.parentDecision !== 'approved'
-      && r.parentDecision !== 'voided',
+      (r.bookId === b.id || r.titleKey === b.titleKey) && reportBlocksRetell(r),
     );
     if (waitingDad) {
       setSay('Seu pai ainda vai ler o que você contou. Espera a resposta dele.');
@@ -519,7 +524,7 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
     setPhase('talk-wait');
     try {
       const answers = current.turns.filter((t) => t.by === 'heitor').map((t) => t.text);
-      const closing = await fetchSageClosing({ title: b.title, question: current.question, answers });
+      const closing = await fetchSageClosing({ title: b.title, theme: current.theme, question: current.question, answers });
       if (skipRef.current) return;
       const next: BookTalk = {
         ...current,
@@ -532,8 +537,12 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
       setPhase('talk-done');
     } catch (e) {
       console.warn('EstanteDoSabio: fecho', e);
-      setPhase('talk');
-      setMicNote('O Sábio piscou. Responde de novo que eu fecho a conversa.');
+      const answers = current.turns.filter((t) => t.by === 'heitor').map((t) => t.text);
+      const closing = localFullClosing({ title: b.title, theme: current.theme, answers });
+      const next: BookTalk = { ...current, closing };
+      setTalk(next);
+      setPhase('talk-done');
+      setMicNote('Guardei o que você pensou. A pergunta fica para o jantar.');
     } finally {
       setBusy(false);
     }
@@ -622,6 +631,15 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
     else await runFollow(book, reportId, next);
   };
 
+  const speakSage = () => {
+    playClick();
+    setHeardSage(true);
+    const line = nudgeLine || sageNow;
+    if (!line) return;
+    stopProvaVoice();
+    void speakProvaVerdict(line, true);
+  };
+
   const toggleMic = () => {
     playClick();
     if (listening) {
@@ -685,6 +703,11 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
                     ? 'Hoje eu já ouvi um livro. Amanhã conto com outro.'
                     : 'Terminou um livro? Me conta como se eu nunca tivesse ouvido falar dele.'}
               </p>
+              {returnedNote?.parentReply && (
+                <div className="mn-papiro-explain">
+                  <p className="mn-papiro-why" data-testid="livro-pai-devolveu">{returnedSay(returnedNote.parentReply)}</p>
+                </div>
+              )}
               {lastReply && (
                 <div className="mn-papiro-explain">
                   <p className="mn-papiro-why">
@@ -706,6 +729,9 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
                     <p className="text-xs mc-muted">
                       {b.pages} páginas · vale {goldForBook(b)} gold{b.addedBy === 'child' ? ' · proposto por você' : ''}
                     </p>
+                    {returnedOf(b) && (
+                      <p className="text-sm" data-testid={`livro-devolvido-${b.id}`}>{returnedSay(returnedOf(b) || '')}</p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -916,9 +942,12 @@ const EstanteDoSabio: React.FC<Props> = ({ onClose, quizLocked }) => {
               <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-6 font-bold" disabled={busy} onClick={() => void submitTalk()}>
                 Responder
               </button>
-              {canMic && (
-                <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-6 font-bold" onClick={toggleMic}>
-                  {listening ? 'Ouvindo' : 'Falar'}
+              <button type="button" className="mc-btn mc-btn-stone min-h-[44px] px-6 font-bold" onClick={speakSage}>
+                Falar
+              </button>
+              {canMic && heardSage && (
+                <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-6 font-bold" onClick={toggleMic}>
+                  {listening ? 'Ouvindo' : 'Dizer'}
                 </button>
               )}
               <button type="button" className="mc-btn mc-btn-wood min-h-[44px] px-6 font-bold" onClick={() => void skipTalk()}>

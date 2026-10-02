@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import type { BookDoc, BookReportDoc } from '../../types';
-import { BOOK_GOLD_MAX, LIKED_LABELS, faltouParentLine, goldForBook, goldForSize, sizeForPages } from '../../services/village/books';
-import { addBook, parentApproveReport, parentVoidReport, setBookGold, setParentReply, subscribeBookReports, subscribeBooks } from '../../services/bookService';
+import { BOOK_GOLD_MAX, LIKED_LABELS, faltouParentLine, goldForBook, goldForSize, isThirdDelivery, sizeForPages } from '../../services/village/books';
+import { addBook, parentApproveReport, parentReturnReport, parentVoidReport, setBookGold, setParentReply, subscribeBookReports, subscribeBooks } from '../../services/bookService';
 
 const VERDICT_LABEL: Record<string, string> = {
   aceito: 'Aceito',
@@ -32,6 +32,7 @@ const BooksPanel: React.FC = () => {
   const [goldEdit, setGoldEdit] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [replies, setReplies] = useState<Record<string, string>>({});
+  const [returns, setReturns] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<string | null>(null);
 
   useEffect(() => {
@@ -103,6 +104,24 @@ const BooksPanel: React.FC = () => {
       toast.success('Pergunta copiada');
     } catch {
       toast.error('Não deu para copiar');
+    }
+  };
+
+  const giveBack = async (r: BookReportDoc) => {
+    if (!childUid) return;
+    const phrase = (returns[r.id] ?? '').trim();
+    if (!phrase) {
+      toast.error('Escreve uma frase para ele.');
+      return;
+    }
+    setBusy(r.id);
+    try {
+      await parentReturnReport(r.id, phrase);
+      toast.success('Devolvido. O livro destrancou.');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Não deu para devolver');
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -222,7 +241,7 @@ const BooksPanel: React.FC = () => {
                   {j ? ` · leu ${j.leu}/3` : ''}
                   {suspect ? ` · ${suspect}` : ''}
                   {r.paidGold ? ` · pago ${r.paidGold} gold` : ''}
-                  {r.parentDecision === 'approved' ? ' · aprovado por você' : r.parentDecision === 'voided' ? ' · anulado' : ''}
+                  {r.parentDecision === 'approved' ? ' · aprovado por você' : r.parentDecision === 'voided' ? ' · anulado' : r.parentDecision === 'returned' ? ' · devolvido' : ''}
                 </p>
               </div>
               <p className="text-xs text-gray-600">
@@ -230,14 +249,11 @@ const BooksPanel: React.FC = () => {
                 {j?.motivo ? ` · ${j.motivo}` : ''}
                 {j?.faltou && faltouParentLine(j.faltou) ? ` · ${faltouParentLine(j.faltou)}` : ''}
               </p>
-              {r.needsParent && !r.accepted && r.attempt >= 3 && r.parentDecision !== 'approved' && (
+              {isThirdDelivery(r) && (
                 <p className="text-xs text-gray-700">Terceira entrega. O Sábio guardou para você ler.</p>
               )}
-              {j?.pergunta && !r.verify && (
-                <p className="text-xs text-gray-600">Pergunta de fato, só sinal: {j.pergunta}</p>
-              )}
               {r.verify && (
-                <p className="text-xs text-gray-600">Pergunta: {r.verify.question} · ele: "{r.verify.answer}" · {r.verify.ok ? 'bateu' : 'não bateu'}</p>
+                <p className="text-xs text-gray-600">Pergunta de fato, só sinal: {r.verify.question} · ele: "{r.verify.answer}" · {r.verify.ok ? 'bateu' : 'não bateu'}</p>
               )}
               {r.talk?.flagged && (
                 <p className="text-sm text-amber-900">A resposta da conversa não mostra que ele conhece a história.</p>
@@ -282,8 +298,31 @@ const BooksPanel: React.FC = () => {
                 {open === r.id ? 'esconder o texto' : 'ver o texto'}
               </button>
               {open === r.id && <p className="text-sm whitespace-pre-wrap bg-white border border-gray-200 rounded p-2">{r.text}</p>}
+              {r.needsParent && !r.accepted && r.parentDecision !== 'approved' && r.parentDecision !== 'voided' && r.parentDecision !== 'returned' && (
+                <div className="flex gap-2 items-start pt-1">
+                  <input
+                    value={returns[r.id] ?? ''}
+                    onChange={(e) => setReturns((m) => ({ ...m, [r.id]: e.target.value.slice(0, 240) }))}
+                    className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                    placeholder="Uma frase para ele"
+                    data-testid={`livro-devolver-frase-${r.id}`}
+                  />
+                  <button
+                    type="button"
+                    disabled={busy === r.id}
+                    onClick={() => void giveBack(r)}
+                    className="px-3 py-2 rounded bg-amber-700 text-white text-sm font-medium disabled:opacity-50"
+                    data-testid={`livro-devolver-${r.id}`}
+                  >
+                    Devolver com uma frase
+                  </button>
+                </div>
+              )}
+              {r.parentDecision === 'returned' && r.parentReply && (
+                <p className="text-sm text-gray-800">Devolvido: {r.parentReply}</p>
+              )}
               <div className="flex gap-2 pt-1">
-                {!r.accepted && r.parentDecision !== 'voided' && (
+                {!r.accepted && r.parentDecision !== 'voided' && r.parentDecision !== 'returned' && (
                   <button type="button" disabled={busy === r.id} onClick={() => void approve(r)} className="px-3 py-1.5 rounded bg-green-600 text-white text-sm font-medium disabled:opacity-50">
                     Aprovar e pagar
                   </button>

@@ -9,7 +9,9 @@ import {
   buildSageQuestionPrompt,
   checkSageQuestion,
   closingSpeech,
+  copiesBankQuestion,
   localFollow,
+  localFullClosing,
   localQuestion,
   needsNudge,
   parseSageClosing,
@@ -39,6 +41,12 @@ test('checkSageQuestion: as seis regras do §1', () => {
   expect(checkSageQuestion('Onde fica a fábrica de chocolate?').reason).toBe('fato');
   expect(checkSageQuestion('Quantos bilhetes dourados existiam?').reason).toBe('fato');
   expect(checkSageQuestion('Como se chama o menino pobre?').reason).toBe('fato');
+  expect(checkSageQuestion('Na competição, qual foi a primeira criança a sair?').reason).toBe('fato');
+  expect(checkSageQuestion('No jardim: quem ficou com a rosa?').reason).toBe('fato');
+  expect(checkSageQuestion('Ele mereceu ou teve sorte').reason).toBe('perguntas');
+  expect(checkSageQuestion('Muito bem, você pensou na família?').reason).toBe('licao');
+  expect(checkSageQuestion('Parabéns, isso é justiça ou vingança?').reason).toBe('licao');
+  expect(checkSageQuestion('Que inteligente pensar se quem manda tem razão?').reason).toBe('licao');
   expect(checkSageQuestion('O que você aprendeu com esse livro?').reason).toBe('licao');
   expect(checkSageQuestion('A lição do livro é cuidar das pessoas?').reason).toBe('licao');
   expect(checkSageQuestion('O certo é obedecer sempre?').reason).toBe('licao');
@@ -86,6 +94,9 @@ test('fechamento: lixo cai no banco; pergunta grande de outro livro no prompt', 
   expect(closingSpeech({ restate: 'Guardei o que você pensou.', concept: 'O seu pai vai ler.', takeHome: '' })).toBe(LOCAL_CLOSING_LINE);
   expect(needsNudge('   ')).toBe(true);
   expect(needsNudge('não sei')).toBe(false);
+  expect(needsNudge('sei lá')).toBe(true);
+  expect(needsNudge('ok')).toBe(true);
+  expect(needsNudge('família é quem cuida')).toBe(false);
   expect(SAGE_NUDGE).toContain('suas palavras');
   expect(answerMissesStory('não sei')).toBe(false);
   expect(answerMissesStory('eu não li esse livro')).toBe(true);
@@ -93,8 +104,11 @@ test('fechamento: lixo cai no banco; pergunta grande de outro livro no prompt', 
 
   const matilda = buildSageQuestionPrompt({ title: 'Matilda', text: 'ela lia muitos livros na biblioteca' });
   expect(matilda.system).not.toContain('Os pais da Matilda');
-  expect(matilda.system).not.toContain('Sra. Mel');
   expect(matilda.system).not.toContain('Trunchbull');
+  expect(matilda.system).not.toContain('nascer junto ou cuidar');
+  expect(matilda.system).toContain('Sra. Mel');
+  expect(matilda.system).toContain('não Sra. Honey');
+  expect(matilda.system).toContain('Família (familia)');
   expect(matilda.system).toContain('A raposa diz que o essencial');
   expect(matilda.system).toContain(FABRICA_Q);
   expect(matilda.user).toContain('ela lia muitos livros');
@@ -106,7 +120,58 @@ test('fechamento: lixo cai no banco; pergunta grande de outro livro no prompt', 
   expect(principe.system).not.toContain('homem de negócios');
   const fecha = buildSageClosingPrompt({ title: 'Matilda', question: MATILDA_Q, answers: ['quem cuida'] });
   expect(fecha.system).toContain('takeHome');
+  expect(fecha.system).toContain('até 25 palavras');
+  expect(fecha.system).toContain('até 15 palavras');
+  expect(fecha.system).toContain('até 20 palavras');
+  expect(fecha.system).toContain('Você disse que');
+  expect(fecha.system).not.toContain('45 palavras');
+  expect(fecha.system).toContain('Sra. Mel');
   expect(fecha.user).toContain('quem cuida');
+
+  const pergunta14 = 'O que na sua vida importa de verdade mesmo quando não dá para ver?';
+  const principeReal = parseSageClosing({
+    restate: 'Você disse que algo ou alguém é importante quando você ama e cuida, mesmo sem ver, como a rosa do Pequeno Príncipe e sua família.',
+    concept: 'Você acabou de pensar sobre a importância do amor e cuidado invisíveis.',
+    takeHome: pergunta14,
+  }, { title: 'O Pequeno Príncipe', theme: 'importante' });
+  expect(principeReal?.takeHome).toBe(pergunta14);
+  expect(principeReal?.restate.startsWith('Você disse que')).toBe(true);
+  expect(principeReal?.restate.toLowerCase().includes('para mim')).toBe(false);
+
+  const longa = `${Array.from({ length: 21 }, () => 'casa').join(' ')}?`;
+  const trocada = parseSageClosing({
+    restate: 'Você disse que família é quem cuida.',
+    concept: 'Você pensou sobre o que é família.',
+    takeHome: longa,
+  }, { title: 'Matilda', theme: 'familia' });
+  expect(trocada?.takeHome).toBe('O que faz alguém ser da sua família: nascer junto ou cuidar?');
+  expect(trocada?.takeHome.includes('casa')).toBe(false);
+
+  const voz = parseSageClosing({
+    restate: 'Para mim, família é cuidado, não só sangue.',
+    concept: 'Você acabou de pensar sobre o que é família.',
+    takeHome: 'quem cuidou de você de um jeito que você nunca esqueceu?',
+  }, { title: 'Matilda', theme: 'familia' });
+  expect(voz?.restate.startsWith('Você disse que')).toBe(true);
+  expect(voz?.restate.toLowerCase().includes('para mim')).toBe(false);
+  expect(voz?.takeHome).toBe('quem cuidou de você de um jeito que você nunca esqueceu?');
+
+  const matilda29 = 'Matilda escolhe viver com a Sra. Honey e não com seus pais; o que faz alguém ser da sua família: nascer junto ou cuidar e amar você?';
+  expect(copiesBankQuestion(matilda29)).toBe(true);
+  expect(copiesBankQuestion('Se o Charlie achou a moeda na neve, o que pesa mais: o que a gente faz ou o que acontece com a gente?')).toBe(false);
+
+  const fechoLocal = localFullClosing({
+    title: 'Matilda',
+    theme: 'familia',
+    answers: ['Pra mim familia e quem cuida, nao so sangue.'],
+  });
+  expect(fechoLocal.restate.startsWith('Você disse que')).toBe(true);
+  expect(fechoLocal.restate.toLowerCase().includes('para mim')).toBe(false);
+  expect(fechoLocal.concept.includes('?')).toBe(false);
+  expect(fechoLocal.takeHome.includes('?')).toBe(true);
+  expect(fechoLocal.concept.split(' ').length <= 15).toBe(true);
+
+  expect(parseStoredTalk({ skipped: true })?.skipped).toBe(true);
 
   expect(talkStep({ question: '', turns: [] })).toBe('need-question');
   expect(talkStep({ question: 'Q?', turns: [{ by: 'sabio', text: 'Q?' }] })).toBe('answer-1');

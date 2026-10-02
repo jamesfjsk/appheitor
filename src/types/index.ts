@@ -569,7 +569,9 @@ export interface BookReportDoc {
   flagged: boolean;
   paidGold: number;
   paidXp: number;
-  parentDecision?: 'approved' | 'voided';
+  parentDecision?: 'approved' | 'voided' | 'returned';
+  /** Frase do pai quando devolve o relato, sem pagar. */
+  parentReply?: string;
   talk?: BookTalk;
   createdAt: Date;
   updatedAt?: Date;
