@@ -86,7 +86,7 @@ export const C1_LETTERS: C1Letter[] = [
     motive: 'danger',
     title: 'The wet floor',
     sender: 'Ana',
-    text: 'Stop. I am Ana. The floor in the kitchen is wet. The cup is on the floor. Please do not run. Walk slow. The wet floor is next to the table. I do not want a fall. Tell mom, please.',
+    text: 'Stop. I am Ana. The floor in the kitchen is wet. The cup is on the floor. Please do not run. Walk slowly. The wet floor is next to the table. I do not want a fall. Tell mom, please.',
     glossary: [
       { en: 'floor', pt: 'chão' },
       { en: 'wet', pt: 'molhado' },
@@ -174,7 +174,7 @@ export const C1_LETTERS: C1Letter[] = [
   {
     id: 'c1-06',
     motive: 'game',
-    title: 'We won',
+    title: 'The big game',
     sender: 'Theo',
     text: 'Hello, dad. I am Theo. My team plays soccer today. We have ten players. The score is three to one. We win the game. I have one goal. The game is at school. I am happy. See you at home.',
     glossary: [

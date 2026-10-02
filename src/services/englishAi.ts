@@ -393,7 +393,7 @@ function c1FromBank(seed: number): LetterContent {
   };
 }
 
-function c1FromRaw(raw: unknown): LetterContent | null {
+function c1FromRaw(raw: unknown, vocabKnown: string[] = []): LetterContent | null {
   if (!raw || typeof raw !== 'object') return null;
   const row = raw as Record<string, unknown>;
   const text = typeof row.text === 'string' ? row.text.trim() : '';
@@ -421,15 +421,18 @@ function c1FromRaw(raw: unknown): LetterContent | null {
     });
   }
   if (questions.length < 2) return null;
+  const known = new Set(vocabKnown.map((w) => w.toLowerCase()));
   const glossary = Array.isArray(row.glossary)
     ? row.glossary.flatMap((g) => {
       if (!g || typeof g !== 'object') return [];
       const rowg = g as { en?: unknown; pt?: unknown };
       if (typeof rowg.en !== 'string' || typeof rowg.pt !== 'string') return [];
+      // Glossário é palavra nova: a que ele já viu sai
+      if (known.has(rowg.en.trim().toLowerCase())) return [];
       return [{ en: rowg.en, pt: rowg.pt }];
     }).slice(0, 5)
     : [];
-  if (glossary.length < 3) return null;
+  if (glossary.length < 2) return null;
   return {
     genre: 'letter',
     title: typeof row.title === 'string' && row.title ? row.title : 'Carta',
@@ -452,7 +455,7 @@ async function reviewLetter(content: LetterContent): Promise<LetterReview | null
         `Text:\n${content.text}`,
         `Questions:\n${content.questions.map((q) => `${q.question} | ${q.options.join(' / ')}`).join('\n')}`,
         'Schema: { "coherence": 4, "oneAnswer": true, "oneSentence": true, "withoutReading": false }',
-        'coherence is 1 to 5 and passes at 4. oneAnswer is true only when each question has one right option. oneSentence is true only when the proof is a single sentence of the text. withoutReading is true when the child can answer without the story.',
+        'Be strict. coherence is 1 to 5 and passes at 4: 5 = every sentence serves one motive, like a real note a child would send; 4 = one small detail is extra; 3 or less = any sentence about a thing that does not serve the motive, or a list of things ("I need a sword and boots" in a note about a fair). oneAnswer is true only when each question has one right option. oneSentence is true only when the proof is a single sentence of the text. withoutReading is true when the child can answer without the story.',
       ].join('\n\n'),
       300,
       { model: 'gpt-4o', temperature: 0, withUsage: true, signal: controller.signal },
@@ -488,7 +491,7 @@ async function generateC1Letter(input: GenerateInput): Promise<Generated<LetterC
         letterTier: 1,
         retryProblems: attempt ? ['The previous story failed the review. Write a new one.'] : undefined,
       });
-      const content = c1FromRaw(await ask(prompt));
+      const content = c1FromRaw(await ask(prompt), input.vocabKnown);
       const review = content ? await reviewLetter(content) : null;
       if (attempt === 0) {
         first = content;

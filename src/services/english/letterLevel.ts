@@ -52,10 +52,13 @@ export function motiveFor(seed: number): (typeof LETTER_MOTIVES)[number] {
   return LETTER_MOTIVES[i];
 }
 
-/** C1: a pergunta não traz palavra de pergunta em inglês. */
+/** Pergunta de informação, que só se responde lendo. "Você pode...?" com "Sim" não serve. */
+const PT_QUESTION_START = /^(onde|o que|quem|quando|quantos|quantas|qual|quais|por que|como|para onde|para que|de onde|pelo que|com quem|em que)(?![a-zà-ú])/i;
+
+/** C1: pergunta em português, sem palavra de pergunta em inglês, e de informação (sem sim ou não). */
 export function c1QuestionOk(question: string): boolean {
   const q = question.trim();
-  return q.length > 0 && !EN_QUESTION.test(q);
+  return q.length > 0 && !EN_QUESTION.test(q) && PT_QUESTION_START.test(q);
 }
 
 export interface LetterReview {

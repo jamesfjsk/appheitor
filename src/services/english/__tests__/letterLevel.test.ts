@@ -31,6 +31,10 @@ test('C1 recusa palavra de pergunta em inglês', () => {
   expect(c1QuestionOk('Where is the bag?')).toBeFalsy();
   expect(c1QuestionOk('Who has the book?')).toBeFalsy();
   expect(c1QuestionOk('Can you help Mia?')).toBeFalsy();
+  // 01/10, carta gerada ao vivo: pergunta de sim ou não se responde sem ler
+  expect(c1QuestionOk('Você pode abrir o galpão?')).toBeFalsy();
+  expect(c1QuestionOk('Para onde a caixa vai?')).toBeTruthy();
+  expect(c1QuestionOk('Pelo que ele agradece?')).toBeTruthy();
 });
 
 test('revisor com lixo cai no banco', () => {
