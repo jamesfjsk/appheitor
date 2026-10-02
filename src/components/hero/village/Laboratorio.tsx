@@ -5,7 +5,8 @@ import toast from 'react-hot-toast';
 import ChildSheet from './ChildSheet';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSound } from '../../../contexts/SoundContext';
-import { ENGENHEIRO, MAKECODE_URL, METODO_PASSOS, TRAINING_KIT_PAGES, TRAINING_TUTORIALS, TRAINING_VIDEOS, VIDEO_LANG_LINE, tutorialUrl, videoUrl, type CompetencyLevel } from '../../../config/careers';
+import { ENGENHEIRO, MAKECODE_URL, METODO_PASSOS, TRAINING_KIT_PAGES, TRAINING_TUTORIALS, TRAINING_VIDEOS, VIDEO_LANG_LINE, tutorialUrl, videoEmbedUrl, type CompetencyLevel, type VideoLang } from '../../../config/careers';
+import { setAppBusy } from '../../../services/appUpdate';
 import type { TrainingDef } from '../../../config/engenheiroTreinos';
 import type { Assignment } from '../../../types/assignment';
 import { subscribeAssignments, submitAssignment } from '../../../services/assignmentsService';
@@ -46,6 +47,13 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [learned, setLearned] = useState('');
   const [busy, setBusy] = useState(false);
   const [party, setParty] = useState<string | null>(null);
+  const [video, setVideo] = useState<{ id: string; title: string; lang: VideoLang } | null>(null);
+
+  // Vídeo aberto conta como ocupado: a versão nova não recarrega a página no meio dele
+  useEffect(() => {
+    setAppBusy('lab-video', Boolean(video));
+    return () => setAppBusy('lab-video', false);
+  }, [video]);
 
   useEffect(() => {
     if (!childUid) return;
@@ -96,6 +104,7 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const openTraining = (n: number) => {
     playClick();
     setOpenN(n);
+    setVideo(null);
     setHints(0);
     setMetodo(false);
     setLearned('');
@@ -133,7 +142,7 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           key={id}
           type="button"
           className={`mc-slot rounded px-3 min-h-[44px] ${tab === id ? 'mc-slot-selected' : ''}`}
-          onClick={() => { playClick(); setTab(id); setOpenN(null); }}
+          onClick={() => { playClick(); setTab(id); setOpenN(null); setVideo(null); }}
         >
           {label}
         </button>
@@ -202,7 +211,7 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         {tab === 'treinos' && openT && (
           <div className="space-y-3" data-testid="lab-treino-aberto">
-            <button type="button" className="mc-btn mc-btn-dark min-h-[40px] px-3" onClick={() => { playClick(); setOpenN(null); }}>Voltar aos treinos</button>
+            <button type="button" className="mc-btn mc-btn-dark min-h-[40px] px-3" onClick={() => { playClick(); setOpenN(null); setVideo(null); }}>Voltar aos treinos</button>
             <div>
               <p className="mc-title text-sm">Treino {openT.n}: {openT.title}</p>
               <p className="text-xs mc-muted">{openT.time} · vale {openT.xp} XP e 1 redstone</p>
@@ -243,21 +252,39 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             {TRAINING_VIDEOS[openT.n] && (
               <div className="mc-inv p-2 text-sm" data-testid="lab-videos">
                 <p className="mc-lbl">Vídeos</p>
+                {video && (
+                  <div className="space-y-2 mb-2" data-testid="lab-player">
+                    <p className="font-bold">{video.title}</p>
+                    <div className="relative w-full overflow-hidden rounded bg-black" style={{ paddingTop: '56.25%' }}>
+                      <iframe
+                        key={video.id}
+                        className="absolute inset-0 h-full w-full"
+                        src={videoEmbedUrl(video.id, video.lang)}
+                        title={video.title}
+                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        referrerPolicy="strict-origin-when-cross-origin"
+                      />
+                    </div>
+                    <button type="button" className="mc-btn mc-btn-dark min-h-[40px] px-3" onClick={() => { playClick(); setVideo(null); }}>Fechar o vídeo</button>
+                    <p className="text-xs mc-muted">Se o vídeo não aparecer, este computador está bloqueando. Avise o seu pai.</p>
+                  </div>
+                )}
                 <div className="space-y-1">
                   {TRAINING_VIDEOS[openT.n].map((v) => (
-                    <a
+                    <button
                       key={v.id}
-                      href={videoUrl(v.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mc-row rounded px-2 py-2 flex items-center gap-2 min-h-[44px]"
+                      type="button"
+                      onClick={() => { playClick(); setVideo({ id: v.id, title: v.title, lang: v.lang }); }}
+                      className={`mc-row rounded px-2 py-2 w-full flex items-center gap-2 min-h-[44px] text-left ${video?.id === v.id ? 'mc-slot-selected' : ''}`}
+                      data-testid={`lab-video-${v.id}`}
                     >
                       <span className="flex-1 min-w-0">
                         <span className="block font-bold truncate">{v.title}</span>
                         <span className="block text-xs mc-muted">{v.minutes} · {VIDEO_LANG_LINE[v.lang]}</span>
                       </span>
-                      <span className="text-xs shrink-0">Assistir</span>
-                    </a>
+                      <span className="text-xs shrink-0">{video?.id === v.id ? 'Tocando' : 'Assistir'}</span>
+                    </button>
                   ))}
                 </div>
                 {TRAINING_VIDEOS[openT.n].some((v) => v.lang === 'dublado') && (

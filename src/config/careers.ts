@@ -168,6 +168,13 @@ export const VIDEO_LANG_LINE: Record<VideoLang, string> = {
   legenda: 'com legenda em português',
 };
 
-export const videoUrl = (id: string): string => `https://www.youtube.com/watch?v=${id}`;
+/**
+ * Tocador embutido no Laboratório (youtube-nocookie): o YouTube pode continuar bloqueado no PC dele.
+ * Sem vídeos sugeridos de outros canais; legenda em português ligada nos vídeos legendados.
+ */
+export function videoEmbedUrl(id: string, lang: VideoLang): string {
+  const caption = lang === 'legenda' ? '&cc_load_policy=1&cc_lang_pref=pt' : '';
+  return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1&hl=pt-BR${caption}`;
+}
 
 export const tutorialUrl = (path: string): string => `https://makecode.microbit.org/?lang=pt-BR#tutorial:/projects/${path}`;
