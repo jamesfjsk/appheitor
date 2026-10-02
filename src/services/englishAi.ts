@@ -439,7 +439,7 @@ function c1FromRaw(raw: unknown, vocabKnown: string[] = []): LetterContent | nul
       return [{ en: rowg.en, pt: rowg.pt }];
     }).slice(0, 5)
     : [];
-  if (glossary.length < 2) return null;
+  if (glossary.length < 3) return null;
   return {
     genre: 'letter',
     title: typeof row.title === 'string' && row.title ? row.title : 'Carta',

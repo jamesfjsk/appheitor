@@ -101,32 +101,24 @@ function segment(sentence: string, glossary: Map<string, string>, maxWords: numb
   return segs;
 }
 
-/** Palavra do glossário: toque curto mostra a tradução e fala a palavra. */
+/** Palavra do glossário: toque curto mostra a tradução na linha de baixo e fala a palavra. */
 const GlossWord: React.FC<{ text: string; pt: string; onShow: () => void }> = ({ text, pt, onShow }) => {
-  const [show, setShow] = useState(false);
-
-  const tap = () => {
-    setShow(true);
+  const tap = (event: React.MouseEvent) => {
+    event.stopPropagation();
     onShow();
     void playText(text);
   };
 
   return (
-    <span className="relative inline-block">
-      <button
-        type="button"
-        className="underline decoration-dotted decoration-2 underline-offset-2 cursor-pointer text-sky-900 font-semibold bg-transparent border-0 p-0"
-        onClick={tap}
-        data-testid="gloss-word"
-      >
-        {text}
-      </button>
-      {show && (
-        <span role="tooltip" className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 z-20 whitespace-nowrap mc-panel text-white text-xs px-2 py-1 rounded">
-          {pt}
-        </span>
-      )}
-    </span>
+    <button
+      type="button"
+      className="underline decoration-dotted decoration-2 underline-offset-2 cursor-pointer text-sky-900 font-semibold bg-transparent border-0 p-0"
+      aria-label={pt}
+      onClick={tap}
+      data-testid="gloss-word"
+    >
+      {text}
+    </button>
   );
 };
 
@@ -144,6 +136,7 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
     optionsOpen: item.kind !== 'comprehension',
   })));
   const [glossaryTaps, setGlossaryTaps] = useState(0);
+  const [glossNow, setGlossNow] = useState('');
   const [reading, setReading] = useState(false);
   const [readingId, setReadingId] = useState<number | null>(null);
   const [finished, setFinished] = useState(false);
@@ -336,7 +329,7 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
                 >
                   {s.segments.map((seg, k) =>
                     seg.gloss !== undefined ? (
-                      <GlossWord key={k} text={seg.text} pt={seg.gloss} onShow={() => setGlossaryTaps((n) => n + 1)} />
+                      <GlossWord key={k} text={seg.text} pt={seg.gloss} onShow={() => { setGlossaryTaps((n) => n + 1); setGlossNow(`${seg.text} — ${seg.gloss}`); }} />
                     ) : (
                       <React.Fragment key={k}>{seg.text}</React.Fragment>
                     )
@@ -347,7 +340,7 @@ const LetterContract: React.FC<ContractScreenProps<'letter'>> = ({ contract, sfx
             );
           })}
         </div>
-        <p className="text-[11px] mc-muted mt-1">Palavras sublinhadas: passe o mouse ou segure o dedo para ver o significado.</p>
+        <p className="text-[11px] mc-muted mt-1" data-testid="gloss-line">{glossNow || 'Toque na palavra sublinhada. Ela mostra o que quer dizer.'}</p>
       </div>
 
       {/* Perguntas ou tradução */}
