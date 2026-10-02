@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import ChildSheet from './ChildSheet';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSound } from '../../../contexts/SoundContext';
-import { ENGENHEIRO, MAKECODE_URL, METODO_PASSOS, type CompetencyLevel } from '../../../config/careers';
+import { ENGENHEIRO, MAKECODE_URL, METODO_PASSOS, TRAINING_TUTORIALS, tutorialUrl, type CompetencyLevel } from '../../../config/careers';
 import type { TrainingDef } from '../../../config/engenheiroTreinos';
 import type { Assignment } from '../../../types/assignment';
 import { subscribeAssignments, submitAssignment } from '../../../services/assignmentsService';
@@ -164,7 +164,15 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
         {tab === 'treinos' && !openT && (
           <div className="space-y-1">
-            <p className="text-sm">Cada treino ensina uma coisa. Faça, veja funcionar e mostre ao seu pai. Ele aprova e o próximo abre.</p>
+            <div className="mc-inv p-2 text-sm" data-testid="lab-como">
+              <p className="mc-lbl">Como funciona</p>
+              <ol className="list-decimal pl-5 space-y-0.5">
+                <li>Abra o treino liberado e leia o objetivo.</li>
+                <li>Abra o MakeCode e siga os passos. Alguns treinos têm um tutorial guiado, que mostra cada bloco.</li>
+                <li>Travou? Veja uma pista de cada vez.</li>
+                <li>Funcionou? Aperte "Mostrar ao pai" e mostre a ele. Quando ele aprovar, o próximo treino abre.</li>
+              </ol>
+            </div>
             {ENGENHEIRO.trainings.map((t) => {
               const row = byN[t.n];
               const st = row?.status;
@@ -215,7 +223,21 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <div className="mc-inv p-2 text-sm">
                 <p className="mc-lbl">Passos</p>
                 <ol className="list-decimal pl-5 space-y-1">{openT.steps.map((s) => <li key={s}>{s}</li>)}</ol>
-                <a href={MAKECODE_URL} target="_blank" rel="noopener noreferrer" className="mc-btn mc-btn-stone inline-flex items-center min-h-[40px] px-3 mt-2">Abrir o MakeCode</a>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  {TRAINING_TUTORIALS[openT.n] && (
+                    <a href={tutorialUrl(TRAINING_TUTORIALS[openT.n].path)} target="_blank" rel="noopener noreferrer" className="mc-btn mc-btn-green inline-flex items-center min-h-[40px] px-3" data-testid="lab-tutorial">
+                      Tutorial guiado
+                    </a>
+                  )}
+                  <a href={MAKECODE_URL} target="_blank" rel="noopener noreferrer" className="mc-btn mc-btn-stone inline-flex items-center min-h-[40px] px-3">Abrir o MakeCode</a>
+                </div>
+                {TRAINING_TUTORIALS[openT.n] && (
+                  <p className="text-xs mc-muted mt-1">
+                    {TRAINING_TUTORIALS[openT.n].pt
+                      ? 'O tutorial guiado mostra cada bloco, em português.'
+                      : 'O tutorial guiado está em inglês, mas a animação mostra cada bloco.'}
+                  </p>
+                )}
               </div>
             )}
             <div className="mc-inv p-2 text-sm">

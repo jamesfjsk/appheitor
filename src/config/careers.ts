@@ -94,4 +94,16 @@ export const METODO_PASSOS = [
   'Se ainda não funcionar, conte o que já tentou.',
 ];
 
-export const MAKECODE_URL = 'https://makecode.microbit.org';
+export const MAKECODE_URL = 'https://makecode.microbit.org/?lang=pt-BR';
+
+/**
+ * Tutoriais guiados oficiais do MakeCode, passo a passo, com animação do bloco a arrastar.
+ * Conferidos em 02/10/2026: "name-tag" e "dice" abrem em português; "flashing-heart" tem o texto em inglês.
+ */
+export const TRAINING_TUTORIALS: Record<number, { path: string; pt: boolean }> = {
+  2: { path: 'name-tag', pt: true },
+  3: { path: 'flashing-heart', pt: false },
+  5: { path: 'dice', pt: true },
+};
+
+export const tutorialUrl = (path: string): string => `https://makecode.microbit.org/?lang=pt-BR#tutorial:/projects/${path}`;
