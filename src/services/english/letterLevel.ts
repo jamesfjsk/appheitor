@@ -61,6 +61,103 @@ export function c1QuestionOk(question: string): boolean {
   return q.length > 0 && !EN_QUESTION.test(q) && PT_QUESTION_START.test(q);
 }
 
+/** A opção da C2 está no texto, palavra por palavra, na mesma ordem. */
+export function c2OptionInText(text: string, option: string): boolean {
+  const phrase = option.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (!phrase) return false;
+  const hay = ` ${text.toLowerCase().replace(/[^a-z' ]/g, ' ').replace(/\s+/g, ' ')} `;
+  const words = phrase.replace(/[^a-z' ]/g, ' ').split(/\s+/).filter(Boolean);
+  if (!words.length) return false;
+  return hay.includes(` ${words.join(' ')} `);
+}
+
+/** C2: três opções distintas, cada uma copiada do texto. */
+export function c2OptionsOk(text: string, options: string[]): boolean {
+  if (options.length !== 3) return false;
+  const seen = new Set<string>();
+  for (const option of options) {
+    const key = option.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    if (!c2OptionInText(text, option)) return false;
+  }
+  return true;
+}
+
+export interface C2Letter {
+  title: string;
+  sender: string;
+  text: string;
+  glossary: { en: string; pt: string }[];
+  questions: { question: string; options: string[]; answer: number; evidence: string; explanation: string }[];
+  translation: string;
+}
+
+/** C2: 50 a 70 palavras, pergunta em português, 3 opções copiadas do texto, glossário de 4 a 6. */
+export function parseC2Letter(raw: unknown): { ok: boolean; problems: string[]; letter: C2Letter | null } {
+  const problems: string[] = [];
+  if (!raw || typeof raw !== 'object') return { ok: false, problems: ['formato'], letter: null };
+  const row = raw as Record<string, unknown>;
+  const text = typeof row.text === 'string' ? row.text.trim() : '';
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length < 50 || words.length > 70) problems.push(`texto com ${words.length} palavras`);
+  const questions: C2Letter['questions'] = [];
+  const rawQuestions = Array.isArray(row.questions) ? row.questions : [];
+  for (const item of rawQuestions.slice(0, 3)) {
+    if (!item || typeof item !== 'object') continue;
+    const q = item as Record<string, unknown>;
+    const question = typeof q.question === 'string' ? q.question.trim() : '';
+    const options = Array.isArray(q.options) ? q.options.filter((o): o is string => typeof o === 'string' && o.trim().length > 0).map((o) => o.trim()) : [];
+    const answer = q.answer;
+    const evidence = typeof q.evidence === 'string' ? q.evidence.trim() : '';
+    if (!c1QuestionOk(question)) {
+      problems.push(`pergunta fora do português: ${question || '(vazia)'}`);
+      continue;
+    }
+    if (!c2OptionsOk(text, options)) {
+      problems.push(`opções da C2: ${question}`);
+      continue;
+    }
+    if (answer !== 0 && answer !== 1 && answer !== 2) {
+      problems.push(`answer: ${question}`);
+      continue;
+    }
+    if (!evidence || !text.toLowerCase().includes(evidence.toLowerCase())) {
+      problems.push(`prova fora do texto: ${question}`);
+      continue;
+    }
+    questions.push({
+      question,
+      options,
+      answer,
+      evidence,
+      explanation: typeof q.explanation === 'string' ? q.explanation : '',
+    });
+  }
+  if (questions.length < 2) problems.push(`só ${questions.length} pergunta(s)`);
+  const glossary = Array.isArray(row.glossary)
+    ? row.glossary.flatMap((g) => {
+      if (!g || typeof g !== 'object') return [];
+      const rowg = g as { en?: unknown; pt?: unknown };
+      if (typeof rowg.en !== 'string' || typeof rowg.pt !== 'string') return [];
+      const en = rowg.en.trim();
+      const inText = c2OptionInText(text, en) || text.toLowerCase().includes(en.toLowerCase());
+      if (!en || !inText) return [];
+      return [{ en, pt: rowg.pt.trim() }];
+    }).slice(0, 6)
+    : [];
+  if (glossary.length < 4 || glossary.length > 6) problems.push(`glossário com ${glossary.length}`);
+  const letter: C2Letter = {
+    title: typeof row.title === 'string' && row.title.trim() ? row.title.trim() : 'Carta',
+    sender: typeof row.sender === 'string' && row.sender.trim() ? row.sender.trim() : 'Friend',
+    text,
+    glossary,
+    questions: questions.slice(0, 2),
+    translation: typeof row.translation === 'string' ? row.translation : '',
+  };
+  return { ok: problems.length === 0, problems, letter: problems.length === 0 ? letter : null };
+}
+
 export interface LetterReview {
   coherence: number;
   oneAnswer: boolean;

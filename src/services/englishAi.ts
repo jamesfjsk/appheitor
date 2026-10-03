@@ -30,7 +30,7 @@ import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
 import { validateLetter, validateMerchant, validateNote, type MerchantValidation, type ValidationResult } from './english/validators';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
-import { letterAfterReviews, letterLevelOf, parseLetterReview, c1QuestionOk, type LetterReview } from './english/letterLevel';
+import { letterAfterReviews, letterLevelOf, parseLetterReview, c1QuestionOk, parseC2Letter, type LetterReview } from './english/letterLevel';
 import { forgeItemsFor } from './english/forgeMolds';
 import { unitById } from '../config/englishUnits';
 import { currentUnit, dayInUnit, knownLemmas } from './english/units';
@@ -518,8 +518,67 @@ async function generateC1Letter(input: GenerateInput): Promise<Generated<LetterC
   return bank();
 }
 
+function c2FromRaw(raw: unknown, vocabKnown: string[] = []): LetterContent | null {
+  const parsed = parseC2Letter(raw);
+  if (!parsed.letter) return null;
+  const known = new Set(vocabKnown.map((w) => w.toLowerCase()));
+  const glossary = parsed.letter.glossary.filter((g) => !known.has(g.en.toLowerCase()));
+  if (glossary.length < 4) return null;
+  return {
+    genre: 'letter',
+    title: parsed.letter.title,
+    sender: parsed.letter.sender,
+    text: parsed.letter.text,
+    glossary: glossary.slice(0, 6),
+    questions: parsed.letter.questions.map((q) => ({ kind: 'comprehension' as const, ...q })),
+    translation: parsed.letter.translation,
+  };
+}
+
+async function generateC2Letter(input: GenerateInput): Promise<Generated<LetterContent>> {
+  const bank = (): Generated<LetterContent> => offlineFor('letter', 2, input.seed, input.avoidOffline ?? [], (raw, level) => validateLetter(raw, level, [], input.seed));
+  if (!isAIConfigured()) return { ...bank(), problems: ['C2 sem IA; banco do nível 2'] };
+  const unit = unitById(input.unitId || 'u1');
+  let first: LetterContent | null = null;
+  let firstReview: LetterReview | null = null;
+  let second: LetterContent | null = null;
+  let secondReview: LetterReview | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const prompt = buildPrompt('letter', {
+        level: 2,
+        theme: themeOf(input),
+        vocabKnown: input.vocabKnown,
+        avoidNames: input.avoidNames,
+        seed: input.seed + attempt,
+        genre: input.genre ?? 'letter',
+        letterTier: 2,
+        unitPattern: unit.lesson,
+        retryProblems: attempt ? ['The previous story failed the review or the C2 shape. Write a new one, 50 to 70 words, Portuguese questions, 3 English options copied from the text.'] : undefined,
+      });
+      const content = c2FromRaw(await ask(prompt), input.vocabKnown);
+      const review = content ? await reviewLetter(content) : null;
+      if (attempt === 0) {
+        first = content;
+        firstReview = review;
+        if (letterAfterReviews(review, null) === 'first') break;
+      } else {
+        second = content;
+        secondReview = review;
+      }
+    } catch {
+      /* tenta de novo, ou cai no banco */
+    }
+  }
+  const pick = letterAfterReviews(firstReview, secondReview);
+  if (pick === 'first' && first) return { content: first, source: 'ai', problems: [] };
+  if (pick === 'second' && second) return { content: second, source: 'ai', problems: [] };
+  return { ...bank(), problems: ['revisor reprovou a C2 ou a carta não coube; banco do nível 2'] };
+}
+
 async function generateLetter(input: GenerateInput): Promise<Generated<LetterContent>> {
   if ((input.letterTier ?? 1) === 1) return generateC1Letter(input);
+  if (input.letterTier === 2) return generateC2Letter(input);
   const lv = levelFor(input.level);
   const genre = input.genre ?? pickOne(createRng(mixSeed(input.seed, 'genre')), LETTER_GENRES);
   let problems: string[] = [];

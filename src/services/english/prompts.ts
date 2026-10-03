@@ -429,6 +429,33 @@ function letterPromptC1(input: LetterPromptInput): BuiltPrompt {
   return { system, user, maxTokens: PROMPT_MAX_TOKENS.letter };
 }
 
+function letterPromptC2(input: LetterPromptInput): BuiltPrompt {
+  const lv = levelFor(2);
+  const motive = input.unitPattern
+    ? `Also use this pattern at least twice: ${input.unitPattern}`
+    : 'Do not invent a grammar unit. One motive is enough.';
+  const known = input.vocabKnown.length ? input.vocabKnown.join(', ') : '(none yet)';
+  const avoid = input.avoidNames.length ? input.avoidNames.join(', ') : '(none)';
+  const system = commonSystem(lv, 'You write a short note for a 10-year-old Brazilian beginner. It reads like a real note a child would send, never like a list of things.');
+  const user = [
+    `Theme of the day (in Portuguese, keep the note around it): ${input.theme}`,
+    `Names to avoid (used recently): ${avoid}. Variation seed: ${input.seed >>> 0}.`,
+    input.retryProblems && input.retryProblems.length ? `The previous note was rejected. Fix: ${input.retryProblems.join('; ')}` : '',
+    `Genre: ${input.genre}. Sender is a new name.`,
+    'Motive: one of these, and every sentence serves it: request for help, invitation, danger warning, lost and found, the way to a place, news of a game, a list for a task with the reason, or a thank-you.',
+    'At most 3 different objects in the whole note, and each one has a job in the motive. No sentence about a thing that does not help the motive.',
+    motive,
+    'Length of "text": 50 to 70 words, in short sentences. Count the words before you answer. Never under 50 or over 70. Simple present. No past tense.',
+    `Words he already knows (use one only when it fits the motive): ${known}`,
+    'Questions: 2 questions in Brazilian Portuguese. No English question words (what, where, who, why, how, is, are, do, can). Each question starts with Onde, O que, Quem, Quando, Quantos, Quantas, Qual, Quais, Por que, Como, Para onde, Para que, De onde, Pelo que, Com quem or Em que.',
+    'Each question has exactly 3 options in English. Write the text first. Then copy three short phrases that already appear in that text, in the same order and the same words, and use only those as the options. Do not invent a phrase. Count the words of the text and stay between 55 and 65. One option is correct. "answer" is the index 0-2. "evidence" is one sentence copied from the text that, alone, shows the right option. "explanation" is one line in Portuguese saying why the tempting option is wrong.',
+    'Glossary: 4 to 6 words that appear in the text and are NOT in the known list.',
+    'Schema:',
+    '{ "genre": "letter", "title": "...", "sender": "...", "text": "...", "glossary": [{ "en": "field", "pt": "campinho" }], "questions": [{ "kind": "comprehension", "question": "Para onde Luna quer que você vá?", "options": ["the new field", "the old gate", "the red bag"], "answer": 0, "evidence": "Come to the new field.", "explanation": "..." }], "translation": "..." }',
+  ].filter(Boolean).join('\n\n');
+  return { system, user, maxTokens: PROMPT_MAX_TOKENS.letter };
+}
+
 export function buildPrompt(type: 'merchant', input: MerchantPromptInput): BuiltPrompt;
 export function buildPrompt(type: 'letter', input: LetterPromptInput): BuiltPrompt;
 export function buildPrompt(type: 'note', input: NotePromptInput): BuiltPrompt;
@@ -438,10 +465,12 @@ export function buildPrompt(type: ContractType, input: AnyPromptInput): BuiltPro
   switch (type) {
     case 'merchant':
       return merchantPrompt(input as MerchantPromptInput);
-    case 'letter':
-      return (input as LetterPromptInput).letterTier === 1
-        ? letterPromptC1(input as LetterPromptInput)
-        : letterPrompt(input as LetterPromptInput);
+    case 'letter': {
+      const tier = (input as LetterPromptInput).letterTier;
+      if (tier === 1) return letterPromptC1(input as LetterPromptInput);
+      if (tier === 2) return letterPromptC2(input as LetterPromptInput);
+      return letterPrompt(input as LetterPromptInput);
+    }
     case 'note':
       return notePrompt(input as NotePromptInput);
     case 'forge':
