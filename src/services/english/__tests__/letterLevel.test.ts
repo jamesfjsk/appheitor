@@ -44,10 +44,12 @@ test('revisor com lixo cai no banco', () => {
   if (parseLetterReview({ coherence: 'alta' }) !== null) throw new Error('texto');
   if (parseLetterReview({ lixo: true }) !== null) throw new Error('lixo');
   expect(letterAfterReviews(null, null)).toBe('offline');
-  expect(letterAfterReviews(parseLetterReview({ coherence: 2, oneAnswer: true, oneSentence: true, withoutReading: false }), null)).toBe('offline');
-  const ok = parseLetterReview({ coherence: 4, oneAnswer: true, oneSentence: true, withoutReading: false });
+  expect(letterAfterReviews(parseLetterReview({ coherence: 2, oneAnswer: true, oneSentence: true, withoutReading: false, evidenceSupports: true }), null)).toBe('offline');
+  const ok = parseLetterReview({ coherence: 4, oneAnswer: true, oneSentence: true, withoutReading: false, evidenceSupports: true });
   expect(letterAfterReviews(null, ok)).toBe('second');
   expect(letterAfterReviews(ok, null)).toBe('first');
+  const proof = parseLetterReview({ coherence: 5, oneAnswer: true, oneSentence: true, withoutReading: false, evidenceSupports: false });
+  expect(letterAfterReviews(proof, null)).toBe('offline');
 });
 
 test('banco C1: 10 cartas, 30 a 50 palavras, pergunta sem inglês de pergunta', () => {

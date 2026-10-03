@@ -460,9 +460,9 @@ async function reviewLetter(content: LetterContent): Promise<LetterReview | null
       'You review a short English story for a 10-year-old. Reply with ONE JSON object only.',
       [
         `Text:\n${content.text}`,
-        `Questions:\n${content.questions.map((q) => `${q.question} | ${q.options.join(' / ')}`).join('\n')}`,
-        'Schema: { "coherence": 4, "oneAnswer": true, "oneSentence": true, "withoutReading": false }',
-        'Be strict. coherence is 1 to 5 and passes at 4: 5 = every sentence serves one motive, like a real note a child would send; 4 = one small detail is extra; 3 or less = any sentence about a thing that does not serve the motive, or a list of things ("I need a sword and boots" in a note about a fair). oneAnswer is true only when each question has one right option. oneSentence is true only when the proof is a single sentence of the text. withoutReading is true when the child can answer without the story.',
+        `Questions:\n${content.questions.map((q) => `${q.question} | certa: ${q.options[q.answer] ?? ''} | prova: ${q.evidence}`).join('\n')}`,
+        'Schema: { "coherence": 4, "oneAnswer": true, "oneSentence": true, "withoutReading": false, "evidenceSupports": true }',
+        'Be strict. coherence is 1 to 5 and passes at 4: 5 = every sentence serves one motive, like a real note a child would send; 4 = one small detail is extra; 3 or less = any sentence about a thing that does not serve the motive, or a list of things ("I need a sword and boots" in a note about a fair). oneAnswer is true only when each question has one right option. oneSentence is true only when the proof is a single sentence of the text. withoutReading is true when the child can answer without the story. evidenceSupports is true ONLY when the proof sentence, alone, shows that the right option is right. If the proof does not name the place, the person or the thing the question asks, evidenceSupports is false.',
       ].join('\n\n'),
       300,
       { model: 'gpt-4o', temperature: 0, withUsage: true, signal: controller.signal },

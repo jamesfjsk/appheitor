@@ -163,6 +163,8 @@ export interface LetterReview {
   oneAnswer: boolean;
   oneSentence: boolean;
   withoutReading: boolean;
+  /** A frase da prova, sozinha, mostra que a opção certa é a certa. */
+  evidenceSupports: boolean;
 }
 
 export function parseLetterReview(raw: unknown): LetterReview | null {
@@ -173,18 +175,20 @@ export function parseLetterReview(raw: unknown): LetterReview | null {
   if (typeof row.oneAnswer !== 'boolean') return null;
   if (typeof row.oneSentence !== 'boolean') return null;
   if (typeof row.withoutReading !== 'boolean') return null;
+  if (typeof row.evidenceSupports !== 'boolean') return null;
   return {
     coherence,
     oneAnswer: row.oneAnswer,
     oneSentence: row.oneSentence,
     withoutReading: row.withoutReading,
+    evidenceSupports: row.evidenceSupports,
   };
 }
 
 /** Passa com coerência 4 ou mais, uma resposta, evidência numa frase, e não dá para responder sem ler. */
 export function letterReviewPasses(review: LetterReview | null): boolean {
   if (!review) return false;
-  return review.coherence >= 4 && review.oneAnswer && review.oneSentence && review.withoutReading === false;
+  return review.coherence >= 4 && review.oneAnswer && review.oneSentence && review.withoutReading === false && review.evidenceSupports === true;
 }
 
 /** Lixo nas duas leituras cai no banco. A segunda só existe se a primeira reprovou. */
