@@ -23,6 +23,7 @@ import {
   buildMerchantOutcome,
   correctionFix,
   gradeLine,
+  merchantHelp,
   missKind,
   praiseLine,
   hitSlot,
@@ -165,6 +166,7 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
   const finishing = useRef(false);
   const resolving = useRef(false);
   const draggingItem = useRef(false);
+  const supportRef = useRef<number[]>(steps.map(() => 0));
   const [box, setBox] = useState({ w: DESIGN.w, h: DESIGN.h });
 
   const layoutSeed = useMemo(
@@ -481,12 +483,20 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     }
     sfx.fail();
     setBeat('miss');
+    const itemLabel = content.items.find((it) => it.id === step.item)?.id ?? step.item;
+    const help = merchantHelp(tries, itemLabel);
+    supportRef.current = supportRef.current.map((n, i) => (i === stepIndex ? Math.max(n, help.supportLevel) : n));
     const fix = correctionFix(step, placements[0] ?? null);
-    setCorrection(fix.en);
-    if (!saidFix[stepIndex]) {
-      setSaidFix((prev) => prev.map((v, i) => (i === stepIndex ? true : v)));
+    if (help.supportLevel < 3) {
+      setCorrection(null);
+      setBalloon(help.hint ?? (content.translation[stepIndex] || ''));
+    } else {
+      setCorrection(fix.en);
+      if (!saidFix[stepIndex]) {
+        setSaidFix((prev) => prev.map((v, i) => (i === stepIndex ? true : v)));
+      }
+      setBalloon(fix.en);
     }
-    setBalloon(fix.en);
     const slot = live.find((s) => s.spot.id === step.spot);
     if (slot) setLook({ x: slot.anchor.x + slot.anchor.w / 2, y: slot.anchor.y + slot.anchor.h / 2 });
     const returning = [...placements];
@@ -510,8 +520,15 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     }
     void (async () => {
       setSpeaking('play');
-      await playText(fix.en, { lang: 'en' });
-      await playText(fix.pt, PT_TALK);
+      if (help.supportLevel === 1) {
+        const heard = floorShot ? `Put the ${floorItem} under the window.` : content.sentences[stepIndex];
+        await playText(heard, { lang: 'en' });
+      } else if (help.supportLevel === 2 && help.hint) {
+        await playText(help.hint, PT_TALK);
+      } else {
+        await playText(fix.en, { lang: 'en' });
+        await playText(fix.pt, PT_TALK);
+      }
       setSpeaking(null);
       doneResolve();
     })();
@@ -546,6 +563,7 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
       textShown: shown,
       glossaryHovers: gloss,
       misses: missRows,
+      supportLevel: supportRef.current,
     });
     setOutcome(out);
     let got: CompleteReward;

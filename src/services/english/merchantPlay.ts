@@ -317,6 +317,21 @@ export function missKind(step: MerchantStep, placed: MerchantPlacement | null): 
   return 'spot';
 }
 
+/**
+ * Escada do pedido errado. 1: ouve de novo, sem a frase certa.
+ * 2: aponta a preposição, que é a palavra logo depois do item.
+ * 3: a frase certa, como antes.
+ */
+export function merchantHelp(errors: number, itemLabel: string): { supportLevel: 1 | 2 | 3; hint: string | null } {
+  const n = Math.max(1, Math.floor(Number(errors) || 1));
+  if (n <= 1) return { supportLevel: 1, hint: null };
+  if (n === 2) {
+    const word = itemLabel.trim() || 'isso';
+    return { supportLevel: 2, hint: `Presta atenção na palavra depois de ${word}.` };
+  }
+  return { supportLevel: 3, hint: null };
+}
+
 /** Em português: traduz a palavra e aponta o lugar. Ensina a acertar de novo. */
 export function correctionLine(
   step: MerchantStep,
@@ -446,6 +461,7 @@ export function buildMerchantOutcome(args: {
   textShown: boolean;
   glossaryHovers: string[];
   misses?: MissKind[][];
+  supportLevel?: number[];
 }): ContractOutcome {
   const firstHits = args.firstOk.filter(Boolean).length;
   const finalHits = args.lastOk.filter(Boolean).length;
@@ -467,6 +483,7 @@ export function buildMerchantOutcome(args: {
       glossaryHovers: args.glossaryHovers,
       // Firestore recusa array dentro de array. Cada pedido vira um mapa.
       misses: (args.misses ?? []).map((kinds, step) => ({ step, kinds })),
+      supportLevel: args.supportLevel ?? [],
     },
   };
 }
