@@ -2,7 +2,7 @@ import { expect, run, test } from '../../english/__tests__/harness';
 import { QUIZ_THEMES } from '../../../config/quizCurriculum';
 import { addDays } from '../../../utils/clock';
 import { buildPrompt } from '../dailyPrompt';
-import { avoidQuestionsFromRecent, dropRepeated, isRepeatedQuestion, nearDuplicate } from '../dedupe';
+import { avoidQuestionsFromRecent, dropRepeated, isRepeatedQuestion, nearDuplicate, sameQuestionSkeleton } from '../dedupe';
 import { normalizeQuestion } from '../hash';
 import { prepareTodayThenTomorrow } from '../prefetch';
 
@@ -178,6 +178,29 @@ test('P1.8: o avoid da segunda chamada contém os enunciados da primeira', async
   expect(calls).toHaveLength(2);
   expect(calls[0]).toHaveLength(0);
   expect(calls[1].some((q) => q.includes('2026-09-23'))).toBe(true);
+});
+
+test('esqueleto: futebol molhado e as três frases There ___ dos dias 30/09 a 02/10', () => {
+  const wet = 'Durante um jogo de futebol, o gramado está molhado. Como isso afeta a bola?';
+  const wind = 'Durante um jogo de futebol, o vento está forte. Como isso afeta a bola?';
+  const cat = 'There ___ a cat under the table.';
+  const fish = 'There ___ a fish in the aquarium.';
+  const dog = 'There ___ a dog in the garden.';
+  expect(sameQuestionSkeleton(wet, wind)).toBe(true);
+  expect(sameQuestionSkeleton(cat, fish)).toBe(true);
+  expect(sameQuestionSkeleton(fish, dog)).toBe(true);
+  expect(sameQuestionSkeleton(cat, dog)).toBe(true);
+  expect(sameQuestionSkeleton(wet, cat)).toBe(false);
+  expect(isRepeatedQuestion(
+    { subject: 'inglês', question: fish },
+    [{ date: '2026-10-01', subject: 'inglês', question: cat }],
+    '2026-10-02',
+  )).toBe(true);
+  expect(isRepeatedQuestion(
+    { subject: 'inglês', question: fish },
+    [{ date: '2026-09-01', subject: 'inglês', question: cat }],
+    '2026-10-02',
+  )).toBe(false);
 });
 
 void run();

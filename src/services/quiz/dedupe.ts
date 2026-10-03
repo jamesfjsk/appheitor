@@ -70,6 +70,8 @@ export function isRepeatedQuestion(
   const since = addDays(today, -180);
   const window = bank.filter((b) => b.date >= since && b.date <= today && b.question.trim());
   if (window.some((b) => (b.hash || normalizeQuestion(b.question)) === hash)) return true;
+  const week = addDays(today, -7);
+  if (window.some((b) => b.date >= week && sameQuestionSkeleton(q.question, b.question))) return true;
   const recent = [...window].sort(byNewest).slice(0, 60);
   return recent.some((b) => nearDuplicate(q, b));
 }
@@ -86,6 +88,39 @@ export function newestStatements(items: DatedStatement[], limit = 60): DatedStat
     if (a.date !== b.date) return a.date < b.date ? 1 : -1;
     return (b.n ?? 0) - (a.n ?? 0);
   }).slice(0, limit);
+}
+
+const SKELETON_KEEP = new Set([
+  'durante', 'um', 'uma', 'o', 'a', 'os', 'as', 'de', 'do', 'da', 'em', 'no', 'na',
+  'para', 'por', 'com', 'como', 'isso', 'que', 'e', 'esta', 'estao', 'afeta', 'afetam',
+  'there', 'the', 'an', 'under', 'in', 'on', 'next', 'to', 'is', 'are', 'am',
+  'where', 'what', 'when', 'who', 'how', 'why',
+]);
+
+/** Tira substantivos e o miolo entre o artigo e o verbo. O que muda vira "nome". */
+export function questionSkeleton(text: string): string {
+  return normalizeQuestion(text)
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => (SKELETON_KEEP.has(word) ? word : 'nome'))
+    .join(' ');
+}
+
+function questionFrame(text: string): '' | 'afeta' | 'there' {
+  const n = normalizeQuestion(text);
+  if (n.includes('como isso afeta')) return 'afeta';
+  if (n.startsWith('there')) return 'there';
+  return '';
+}
+
+/** Mesmo esqueleto: as frases de 30/09 a 02/10 que só trocam o substantivo. */
+export function sameQuestionSkeleton(a: string, b: string): boolean {
+  const frame = questionFrame(a);
+  if (!frame || frame !== questionFrame(b)) return false;
+  return nearDuplicate(
+    { subject: 'esqueleto', question: questionSkeleton(a) },
+    { subject: 'esqueleto', question: questionSkeleton(b) },
+  );
 }
 
 export function avoidQuestionsFromRecent(

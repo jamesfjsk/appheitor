@@ -316,7 +316,7 @@ function areaRule(area: string, date: string, englishLevel: number, englishUnit?
   const unit = englishUnit ? ` Unidade de hoje: ${englishUnit}` : '';
   if (area === 'matemática') return `matemática — MAT.OP2, duas etapas, números até 1000, fração, porcentagem, tempo ou dinheiro. Molde de hoje: ${mold}`;
   if (area === 'ciências') return `ciências — o mecanismo, não o efeito óbvio (CIE.CAUSA). Molde de hoje: ${mold}`;
-  if (area === 'inglês') return `inglês — uma só forma correta, a regra do dia.${unit} Molde de hoje: ${mold} Use as quatro opções do molde. Nada de passado (had, was, were, did).`;
+  if (area === 'inglês') return `inglês — uma só forma correta, a regra do dia.${unit} Mude o sujeito, o lugar e a forma. Não repita o esqueleto dos últimos 7 dias. Molde de hoje: ${mold} Use as quatro opções do molde. Nada de passado (had, was, were, did).`;
   if (area === 'história ou geografia') return `história ou geografia — HIS.FATO ou GEO.FATO. ${HISTORY_LINE} Molde de hoje: ${mold}`;
   return 'cenário de futebol — a partida é o cenário; ensina matemática, ciências, inglês ou história; scenario "futebol"; subject não é futebol';
 }
