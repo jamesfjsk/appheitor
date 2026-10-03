@@ -19,11 +19,10 @@ import type {
   LetterGenre,
   MerchantContent,
   NoteContent,
-  NoteErrorTag,
 } from '../types/english';
 import { CONTRACT_MATERIAL, MERCHANT_CATALOGS } from '../config/englishBase';
 import { FORGE_TAG_TARGETS, LETTER_GENRES, levelFor } from '../config/englishLevels';
-import { forgeItemMixFor, forgeTargetFor, lastForgeScore, yesterdayMistakes } from './english/prompts';
+import { forgeItemMixFor, yesterdayMistakes } from './english/prompts';
 import { buildMerchantRoom, merchantKey, merchantStepKey, merchantStepsForDay, nextMerchantLevel, offlineSentences } from './english/merchantRoom';
 import { normalize } from './english/notePrecheck';
 import { buildPrompt, type BuiltPrompt } from './english/prompts';
@@ -48,9 +47,6 @@ const CONTRACT_TIMEOUT_MS = 30_000; // picos de lentidão da API chegaram a 30 s
 const ATTEMPTS = 2;
 /** Dias de planos consultados para nomes a evitar e temas recentes */
 const RECENT_NAMES_DAYS = 7;
-/** Planos consultados para a etiqueta mais frequente dos Recados */
-const RECENT_TAG_PLANS = 5;
-const TAG_MIN_COUNT = 2;
 /** Reserva não repete conteúdo usado neste período */
 const OFFLINE_REPEAT_DAYS = 30;
 /** Lemas conhecidos que entram no prompt (os mais vistos primeiro) */
@@ -736,23 +732,6 @@ function contractsOf(plans: DailyPlan[], type: ContractType): Contract[] {
   return plans.flatMap((p) => p.order.map((id) => p.contracts[id]).filter((c): c is Contract => Boolean(c) && c.type === type));
 }
 
-/** Etiqueta mais frequente nos Recados dos últimos planos (>= 2 ocorrências), ou null */
-function frequentTag(plans: DailyPlan[]): NoteErrorTag | null {
-  const counts = new Map<NoteErrorTag, number>();
-  for (const c of contractsOf(plans.slice(0, RECENT_TAG_PLANS), 'note')) {
-    for (const e of c.result?.correction?.errors ?? []) counts.set(e.tag, (counts.get(e.tag) ?? 0) + 1);
-  }
-  let best: NoteErrorTag | null = null;
-  let bestCount = 0;
-  for (const [tag, n] of counts) {
-    if (n > bestCount) {
-      best = tag;
-      bestCount = n;
-    }
-  }
-  return bestCount >= TAG_MIN_COUNT ? best : null;
-}
-
 /** Nomes próprios da Carta (remetente, falantes do diálogo, maiúsculas fora do início da frase) */
 function letterContextOf(contract: Contract | null): { names: string[]; items: string[] } {
   if (!contract || contract.type !== 'letter') return { names: [], items: [] };
@@ -796,15 +775,8 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
   const genre2 = genre2Pool.length ? pickOne(rng, genre2Pool) : genre1;
 
   const dayIndex = dayIndexOf(ctx.date);
-  const tag = frequentTag(recent);
-  const yesterday = lastForgeScore(recent, ctx.date);
-  const forgeTarget = forgeTargetFor({
-    targets: lv.forgeTargets,
-    dayIndex,
-    tag,
-    yesterdayScore: yesterday.score,
-    yesterdayMax: yesterday.max,
-  });
+  const openUnit = unitById(currentUnit(ctx.base, ctx.date).id);
+  const forgeTarget: ForgeTarget = { id: openUnit.id, label: openUnit.name, kind: 'form' };
 
   const vocabKnown = knownLemmas(ctx.base.vocab).slice(0, VOCAB_PROMPT_MAX);
   const avoidNames = unique(contractsOf(lastWeek, 'letter').map((c) => (c.type === 'letter' ? c.content.sender : '')).filter(Boolean));
