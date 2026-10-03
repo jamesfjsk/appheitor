@@ -123,7 +123,7 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const proof: Proof = asks
       ? { kinds: ['inPerson', 'questions'], answers: [{ q: asks, a: note }] }
       : { kinds: ['inPerson'], ...(note ? { note } : {}) };
-    void submitAssignment(openRow.id, proof)
+    void submitAssignment(openRow.id, proof, { hintsUsed: hints })
       .then(() => {
         playTaskComplete();
         toast.success('Agora mostre ao seu pai funcionando. Ele aprova no painel.');
@@ -166,7 +166,7 @@ const Laboratorio: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         {party && (
           <div className="mc-inv p-3 text-center space-y-2" data-testid="lab-promocao">
             <p className="mc-title text-sm">Você agora é {RANK_NAME[party]} da Vila.</p>
-            <p className="text-sm">O Laboratório cresceu. O Ferreiro veio ver.</p>
+            <p className="text-sm">O Laboratório cresceu. O Ferreiro diz: o circuito novo já está de pé.</p>
             <button type="button" className="mc-btn mc-btn-green min-h-[44px] px-6" onClick={() => { playClick(); closeParty(); }}>Continuar</button>
           </div>
         )}

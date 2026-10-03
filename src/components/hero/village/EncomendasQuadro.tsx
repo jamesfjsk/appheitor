@@ -76,6 +76,7 @@ function visible(row: Assignment, today: string): boolean {
 }
 
 function asksMeta(row: Assignment): boolean {
+  if (row.kind === 'training' && row.templateId === 'eng-12') return true;
   return row.size === 'projeto' || row.size === 'grande' || Boolean(templateById(row.templateId)?.meta);
 }
 

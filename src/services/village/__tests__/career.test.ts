@@ -4,6 +4,7 @@ import { assignmentReward } from '../../assignments/rewards';
 import { approvalPlan } from '../../assignments/approval';
 import {
   careerSnapshot,
+  careerTowerStats,
   competencyLevels,
   labLevelOf,
   rankFor,
@@ -74,6 +75,21 @@ test('carreira: a aprovação do treino, pelo plano da transação, paga XP e re
     claimed: false, txExists: false, gold: 10, board: [], baseExists: true, progressExists: true, villageExists: true,
   }, CAREER_REWARDS);
   expect(plan.write && plan.paid ? [plan.reward.gold, plan.reward.xp, plan.line, plan.material?.materials] : null).toEqual([0, 25, null, { redstone: 1 }]);
+});
+
+test('Torre: treino 7 acende o Primeiro circuito e o Técnico é o degrau 1', () => {
+  const stats = careerTowerStats({
+    approvedPaid: 1,
+    fixed: 0,
+    trainings: [1, 2, 3, 4, 5, 6, 7],
+    projects: 0,
+    projectFixed: 0,
+    rank: 'tecnico',
+  });
+  expect(stats.training7).toBe(1);
+  expect(stats.careerRank).toBe(1);
+  expect(stats.assignmentsApproved).toBe(1);
+  expect(stats.bugsFixed).toBe(0);
 });
 
 void run();

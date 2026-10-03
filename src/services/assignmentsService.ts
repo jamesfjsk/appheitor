@@ -205,6 +205,7 @@ function parseSubmissions(raw: unknown): AssignmentSubmission[] {
       proof: parseProof(row.proof),
       whatWentWrong: str(row.whatWentWrong) || undefined,
       whatChanged: str(row.whatChanged) || undefined,
+      ...(typeof row.hintsUsed === 'number' ? { hintsUsed: Math.max(0, Math.floor(row.hintsUsed)) } : {}),
     }) as AssignmentSubmission;
   }).filter((item): item is AssignmentSubmission => Boolean(item));
 }
@@ -591,7 +592,7 @@ export async function acceptAssignment(id: string, plan?: string): Promise<void>
 export async function submitAssignment(
   id: string,
   proof: Proof,
-  extra?: { whatWentWrong?: string; whatChanged?: string },
+  extra?: { whatWentWrong?: string; whatChanged?: string; hintsUsed?: number },
 ): Promise<void> {
   const today = getTodayBrazil();
   try {
@@ -623,6 +624,7 @@ export async function submitAssignment(
         proof: cleanProof(proof),
         whatWentWrong: extra?.whatWentWrong?.trim() || undefined,
         whatChanged: extra?.whatChanged?.trim() || undefined,
+        ...(typeof extra?.hintsUsed === 'number' ? { hintsUsed: Math.max(0, Math.floor(extra.hintsUsed)) } : {}),
       });
       tx.update(ref, {
         status: 'submitted',

@@ -35,6 +35,25 @@ const RANK_ORDER: RankId[] = ['aprendiz', 'tecnico', 'engenheiro', 'inventor'];
 
 export const rankIndex = (rank: RankId): number => Math.max(0, RANK_ORDER.indexOf(rank));
 
+/** Números da Torre. Reescritos inteiros a cada sync, para não somar duas vezes. */
+export function careerTowerStats(input: {
+  approvedPaid: number;
+  fixed: number;
+  trainings: number[];
+  projects: number;
+  projectFixed: number;
+  rank: RankId;
+}): Record<string, number> {
+  return {
+    assignmentsApproved: input.approvedPaid,
+    assignmentsFixed: input.fixed,
+    training7: input.trainings.includes(7) ? 1 : 0,
+    bugsFixed: input.trainings.includes(12) || input.projectFixed > 0 ? 1 : 0,
+    projectsDone: input.projects,
+    careerRank: rankIndex(input.rank),
+  };
+}
+
 /** Nível da obra do Laboratório: n1 Aprendiz ... n4 Inventor. */
 export const labLevelOf = (rank: RankId): number => rankIndex(rank) + 1;
 

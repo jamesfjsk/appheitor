@@ -36,6 +36,7 @@ export interface AssignmentSubmission {
   proof: Proof;
   whatWentWrong?: string;
   whatChanged?: string;
+  hintsUsed?: number;
 }
 
 export interface AssignmentReview {

@@ -169,7 +169,13 @@ const EncomendasConferir: React.FC<{
             <li key={row.id} className="border border-gray-200 rounded p-3">
               <button type="button" className="text-left w-full" onClick={() => choose(row)}>
                 <p className="font-semibold text-gray-900">{row.title}</p>
-                <p className="text-sm text-gray-600">{SPECIALTY_LABEL[row.specialty]} · {row.reward.gold} gold{row.drops > 0 ? ` · desistiu ${row.drops}` : ''}</p>
+                <p className="text-sm text-gray-600">
+                  {row.kind === 'training'
+                    ? `Treino · ${row.reward.xp} XP e 1 redstone`
+                    : `${SPECIALTY_LABEL[row.specialty]} · ${row.reward.gold} gold`}
+                  {row.drops > 0 ? ` · desistiu ${row.drops}` : ''}
+                  {typeof proof?.hintsUsed === 'number' && proof.hintsUsed > 0 ? ` · pistas ${proof.hintsUsed}` : ''}
+                </p>
               </button>
               {current?.id === row.id && proof && (
                 <div className="mt-3 space-y-2 text-sm text-gray-800">
