@@ -1466,3 +1466,30 @@ As fotos estão em `docs/exemplos/telas/etapa-3/p15b/`. Os lados do pai (aprovar
 - a C2 com perguntas em português;
 - o revisor da carta ainda aceita uma prova que não sustenta a resposta (caso "Para onde Luna quer que você vá?");
 - a Ferraria ainda mostra um cronômetro na tela, que é antigo, da casca do contrato.
+
+## 04/10 — P18: junta, com correções do líder (fdaeb5a)
+
+**Os sete itens estão feitos:**
+1. C2 em português.
+2. O revisor confere se a prova sustenta a resposta (`evidenceSupports`).
+3. Sem cronômetro na tela.
+4. A escada do Comerciante.
+5. O esqueleto da prova em 7 dias, só nos dois moldes que repetiram.
+6. A Torre do Laboratório, o `hintsUsed` e o "Treino" no Conferir.
+7. A Ferraria do dia segue a unidade.
+
+**Corrigido pelo líder:**
+- **Escada do Comerciante:** no degrau 1, o balão mostrava a tradução do pedido em português, o que entregava a preposição. Agora diz "Ouve o pedido de novo." e o pedido toca outra vez.
+- **Carta C2:**
+  - as cartas ao vivo da frente usavam frases inteiras como opção, e numa delas "Onde estão os balões?" tinha como certa "The balloons are red and blue.". Agora a opção tem até 4 palavras e é do tipo que a pergunta pede.
+  - no teste do líder, as 4 cartas copiaram o exemplo do prompt ("Luna", "the new field"). O exemplo virou um modelo neutro.
+  - na segunda rodada, as 4 cartas foram reprovadas pelo validador (lista de coisas, opção errada, uma em português). **Com o `gpt-4.1-mini`, a C2 ao vivo ainda não presta.**
+  - a reserva da C2 era o banco antigo do nível 2, com perguntas em inglês. Passou a ser o banco C1 aprovado pelo pai.
+- **Pendente:**
+  - a C2 boa: gerar com o `gpt-4o`, ou um banco C2 escrito pelo líder com amostra do pai. A C2 só aparece depois de 3 cartas C1 perfeitas seguidas;
+  - as fotos dos itens 3, 4 e 6: na conta de teste, a Mina só abre com a prova do dia feita.
+
+**Dado do Heitor:**
+- 02/10: fez as 8 missões, mas na Mina só os dois Comerciantes;
+- 03/10, sábado: fez a prova e 6 missões, e não abriu a Mina. A Ferraria por unidades ainda não foi jogada;
+- o treino 1 do Laboratório ainda não foi entregue.

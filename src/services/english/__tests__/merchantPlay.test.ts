@@ -9,6 +9,7 @@ import {
   correctionFix,
   correctionLine,
   gradeLine,
+  merchantHelp,
   missKind,
   praiseLine,
   hitSlot,
@@ -253,6 +254,14 @@ test('parseMerchantScene recusa lixo e aceita o JSON da cena', () => {
   expect(parseMerchantScene({ size: { w: 10, h: 10 } })).toBe(null);
   const ok = parseMerchantScene(DEFAULT_MERCHANT_SCENE);
   expect(ok?.spots).toHaveLength(4);
+});
+
+test('escada do Comerciante: ouve, aponta a preposição, depois a frase', () => {
+  expect(merchantHelp(1, 'apple')).toEqual({ supportLevel: 1, hint: null });
+  expect(merchantHelp(2, 'apple').hint).toBe('Presta atenção na palavra depois de apple.');
+  expect(merchantHelp(2, 'apple').supportLevel).toBe(2);
+  expect(merchantHelp(3, 'apple')).toEqual({ supportLevel: 3, hint: null });
+  expect(merchantHelp(4, 'apple').supportLevel).toBe(3);
 });
 
 void run();

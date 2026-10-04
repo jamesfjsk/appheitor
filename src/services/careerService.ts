@@ -9,7 +9,8 @@ import { ENGENHEIRO, trainingTemplateId, type CompetencyLevel, type RankId } fro
 import type { TrainingDef } from '../config/engenheiroTreinos';
 import type { Assignment } from '../types/assignment';
 import { approveAssignment } from './assignmentsService';
-import { careerSnapshot, rankIndex, type CareerActivity, type ManualLevels } from './village/career';
+import { careerSnapshot, careerTowerStats, rankIndex, type CareerActivity, type ManualLevels } from './village/career';
+import { bumpVillage } from './village/statsBump';
 
 export interface CareerState {
   startedAt: string;
@@ -148,6 +149,17 @@ export async function syncCareer(uid: string, rows: Assignment[], state: CareerS
     || !same(snap.competencies, state.competencies)
     || !same(snap.trainingsDone, state.trainingsDone)
     || !same(snap.tools, state.tools);
+  const acts = activitiesOf(rows);
+  await bumpVillage(uid, {}, {
+    set: careerTowerStats({
+      approvedPaid: acts.filter((a) => a.kind === 'paid').length,
+      fixed: acts.filter((a) => a.fixedAfterFailure).length,
+      trainings: snap.trainingsDone,
+      projects: snap.counters.projects,
+      projectFixed: acts.filter((a) => a.kind === 'paid' && a.fixedAfterFailure).length,
+      rank: snap.rank,
+    }),
+  });
   if (!changed) return null;
   await updateDoc(doc(db, 'careers', uid), defined({
     'engenheiro.rank': snap.rank,

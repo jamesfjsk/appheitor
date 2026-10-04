@@ -19,18 +19,17 @@ import type {
   LetterGenre,
   MerchantContent,
   NoteContent,
-  NoteErrorTag,
 } from '../types/english';
 import { CONTRACT_MATERIAL, MERCHANT_CATALOGS } from '../config/englishBase';
 import { FORGE_TAG_TARGETS, LETTER_GENRES, levelFor } from '../config/englishLevels';
-import { forgeItemMixFor, forgeTargetFor, lastForgeScore, yesterdayMistakes } from './english/prompts';
+import { forgeItemMixFor, yesterdayMistakes } from './english/prompts';
 import { buildMerchantRoom, merchantKey, merchantStepKey, merchantStepsForDay, nextMerchantLevel, offlineSentences } from './english/merchantRoom';
 import { normalize } from './english/notePrecheck';
 import { buildPrompt, type BuiltPrompt } from './english/prompts';
 import { createRng, mixSeed, pickOne, seedFromString } from './english/shuffle';
 import { validateLetter, validateMerchant, validateNote, type MerchantValidation, type ValidationResult } from './english/validators';
 import { callOpenAI, isAIConfigured } from './aiQuiz';
-import { letterAfterReviews, letterLevelOf, parseLetterReview, c1QuestionOk, type LetterReview } from './english/letterLevel';
+import { letterAfterReviews, letterLevelOf, parseLetterReview, c1QuestionOk, parseC2Letter, type LetterReview } from './english/letterLevel';
 import { forgeItemsFor } from './english/forgeMolds';
 import { unitById } from '../config/englishUnits';
 import { currentUnit, dayInUnit, knownLemmas } from './english/units';
@@ -48,9 +47,6 @@ const CONTRACT_TIMEOUT_MS = 30_000; // picos de lentidão da API chegaram a 30 s
 const ATTEMPTS = 2;
 /** Dias de planos consultados para nomes a evitar e temas recentes */
 const RECENT_NAMES_DAYS = 7;
-/** Planos consultados para a etiqueta mais frequente dos Recados */
-const RECENT_TAG_PLANS = 5;
-const TAG_MIN_COUNT = 2;
 /** Reserva não repete conteúdo usado neste período */
 const OFFLINE_REPEAT_DAYS = 30;
 /** Lemas conhecidos que entram no prompt (os mais vistos primeiro) */
@@ -460,9 +456,9 @@ async function reviewLetter(content: LetterContent): Promise<LetterReview | null
       'You review a short English story for a 10-year-old. Reply with ONE JSON object only.',
       [
         `Text:\n${content.text}`,
-        `Questions:\n${content.questions.map((q) => `${q.question} | ${q.options.join(' / ')}`).join('\n')}`,
-        'Schema: { "coherence": 4, "oneAnswer": true, "oneSentence": true, "withoutReading": false }',
-        'Be strict. coherence is 1 to 5 and passes at 4: 5 = every sentence serves one motive, like a real note a child would send; 4 = one small detail is extra; 3 or less = any sentence about a thing that does not serve the motive, or a list of things ("I need a sword and boots" in a note about a fair). oneAnswer is true only when each question has one right option. oneSentence is true only when the proof is a single sentence of the text. withoutReading is true when the child can answer without the story.',
+        `Questions:\n${content.questions.map((q) => `${q.question} | certa: ${q.options[q.answer] ?? ''} | prova: ${q.evidence}`).join('\n')}`,
+        'Schema: { "coherence": 4, "oneAnswer": true, "oneSentence": true, "withoutReading": false, "evidenceSupports": true }',
+        'Be strict. coherence is 1 to 5 and passes at 4: 5 = every sentence serves one motive, like a real note a child would send; 4 = one small detail is extra; 3 or less = any sentence about a thing that does not serve the motive, or a list of things ("I need a sword and boots" in a note about a fair). oneAnswer is true only when each question has one right option. oneSentence is true only when the proof is a single sentence of the text. withoutReading is true when the child can answer without the story. evidenceSupports is true ONLY when the proof sentence, alone, shows that the right option is right. If the proof does not name the place, the person or the thing the question asks, evidenceSupports is false.',
       ].join('\n\n'),
       300,
       { model: 'gpt-4o', temperature: 0, withUsage: true, signal: controller.signal },
@@ -518,8 +514,68 @@ async function generateC1Letter(input: GenerateInput): Promise<Generated<LetterC
   return bank();
 }
 
+function c2FromRaw(raw: unknown, vocabKnown: string[] = []): LetterContent | null {
+  const parsed = parseC2Letter(raw);
+  if (!parsed.letter) return null;
+  const known = new Set(vocabKnown.map((w) => w.toLowerCase()));
+  const glossary = parsed.letter.glossary.filter((g) => !known.has(g.en.toLowerCase()));
+  if (glossary.length < 4) return null;
+  return {
+    genre: 'letter',
+    title: parsed.letter.title,
+    sender: parsed.letter.sender,
+    text: parsed.letter.text,
+    glossary: glossary.slice(0, 6),
+    questions: parsed.letter.questions.map((q) => ({ kind: 'comprehension' as const, ...q })),
+    translation: parsed.letter.translation,
+  };
+}
+
+async function generateC2Letter(input: GenerateInput): Promise<Generated<LetterContent>> {
+  // Reserva da C2 é o banco C1, aprovado pelo pai: perguntas em português e carta com motivo. O banco antigo do nível 2 tem perguntas em inglês.
+  const bank = (): Generated<LetterContent> => ({ content: c1FromBank(input.seed), source: 'offline', problems: [] });
+  if (!isAIConfigured()) return { ...bank(), problems: ['C2 sem IA; banco do nível 2'] };
+  const unit = unitById(input.unitId || 'u1');
+  let first: LetterContent | null = null;
+  let firstReview: LetterReview | null = null;
+  let second: LetterContent | null = null;
+  let secondReview: LetterReview | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const prompt = buildPrompt('letter', {
+        level: 2,
+        theme: themeOf(input),
+        vocabKnown: input.vocabKnown,
+        avoidNames: input.avoidNames,
+        seed: input.seed + attempt,
+        genre: input.genre ?? 'letter',
+        letterTier: 2,
+        unitPattern: unit.lesson,
+        retryProblems: attempt ? ['The previous story failed the review or the C2 shape. Write a new one, 50 to 70 words, Portuguese questions, 3 English options copied from the text.'] : undefined,
+      });
+      const content = c2FromRaw(await ask(prompt), input.vocabKnown);
+      const review = content ? await reviewLetter(content) : null;
+      if (attempt === 0) {
+        first = content;
+        firstReview = review;
+        if (letterAfterReviews(review, null) === 'first') break;
+      } else {
+        second = content;
+        secondReview = review;
+      }
+    } catch {
+      /* tenta de novo, ou cai no banco */
+    }
+  }
+  const pick = letterAfterReviews(firstReview, secondReview);
+  if (pick === 'first' && first) return { content: first, source: 'ai', problems: [] };
+  if (pick === 'second' && second) return { content: second, source: 'ai', problems: [] };
+  return { ...bank(), problems: ['revisor reprovou a C2 ou a carta não coube; banco do nível 2'] };
+}
+
 async function generateLetter(input: GenerateInput): Promise<Generated<LetterContent>> {
   if ((input.letterTier ?? 1) === 1) return generateC1Letter(input);
+  if (input.letterTier === 2) return generateC2Letter(input);
   const lv = levelFor(input.level);
   const genre = input.genre ?? pickOne(createRng(mixSeed(input.seed, 'genre')), LETTER_GENRES);
   let problems: string[] = [];
@@ -677,23 +733,6 @@ function contractsOf(plans: DailyPlan[], type: ContractType): Contract[] {
   return plans.flatMap((p) => p.order.map((id) => p.contracts[id]).filter((c): c is Contract => Boolean(c) && c.type === type));
 }
 
-/** Etiqueta mais frequente nos Recados dos últimos planos (>= 2 ocorrências), ou null */
-function frequentTag(plans: DailyPlan[]): NoteErrorTag | null {
-  const counts = new Map<NoteErrorTag, number>();
-  for (const c of contractsOf(plans.slice(0, RECENT_TAG_PLANS), 'note')) {
-    for (const e of c.result?.correction?.errors ?? []) counts.set(e.tag, (counts.get(e.tag) ?? 0) + 1);
-  }
-  let best: NoteErrorTag | null = null;
-  let bestCount = 0;
-  for (const [tag, n] of counts) {
-    if (n > bestCount) {
-      best = tag;
-      bestCount = n;
-    }
-  }
-  return bestCount >= TAG_MIN_COUNT ? best : null;
-}
-
 /** Nomes próprios da Carta (remetente, falantes do diálogo, maiúsculas fora do início da frase) */
 function letterContextOf(contract: Contract | null): { names: string[]; items: string[] } {
   if (!contract || contract.type !== 'letter') return { names: [], items: [] };
@@ -737,15 +776,8 @@ export function dayContextFor(ctx: Pick<BuildContext, 'uid' | 'date' | 'level' |
   const genre2 = genre2Pool.length ? pickOne(rng, genre2Pool) : genre1;
 
   const dayIndex = dayIndexOf(ctx.date);
-  const tag = frequentTag(recent);
-  const yesterday = lastForgeScore(recent, ctx.date);
-  const forgeTarget = forgeTargetFor({
-    targets: lv.forgeTargets,
-    dayIndex,
-    tag,
-    yesterdayScore: yesterday.score,
-    yesterdayMax: yesterday.max,
-  });
+  const openUnit = unitById(currentUnit(ctx.base, ctx.date).id);
+  const forgeTarget: ForgeTarget = { id: openUnit.id, label: openUnit.name, kind: 'form' };
 
   const vocabKnown = knownLemmas(ctx.base.vocab).slice(0, VOCAB_PROMPT_MAX);
   const avoidNames = unique(contractsOf(lastWeek, 'letter').map((c) => (c.type === 'letter' ? c.content.sender : '')).filter(Boolean));

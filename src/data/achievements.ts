@@ -160,6 +160,15 @@ export const GAME_ACHIEVEMENTS: GameAchievement[] = [
   a('curioso', 'segredos', 'bronze', 'Curioso', 'Falou com os quatro NPCs no mesmo dia.', 'heart', 'talksSameDay', 1, { hidden: true }),
   a('lua_da_vila', 'segredos', 'prata', 'Lua da Vila', 'Abriu a Vila depois das 21h num dia completo.', 'moon', 'nightComplete', 1, { hidden: true }),
   a('colecionador', 'segredos', 'ouro', 'Colecionador', 'Os quatro cosméticos de marco.', 'crown', 'milestonesOwned', 4, { hidden: true }),
+
+  a('primeira_entrega', 'obras', 'bronze', 'Primeira entrega', 'A primeira encomenda aprovada.', 'chest', 'assignmentsApproved', 1),
+  a('entrega_corrigida', 'obras', 'bronze', 'Entrega corrigida', 'Uma encomenda aprovada depois de um ajuste.', 'chest', 'assignmentsFixed', 1),
+  a('primeiro_circuito', 'obras', 'bronze', 'Primeiro circuito', 'O treino 7 aprovado.', 'torch', 'training7', 1),
+  a('primeiro_erro', 'obras', 'bronze', 'Primeiro erro encontrado', 'O treino 12 ou um projeto que ele corrigiu.', 'torch', 'bugsFixed', 1),
+  a('primeiro_projeto', 'obras', 'prata', 'Primeiro projeto', 'Um projeto de engenharia aprovado.', 'star', 'projectsDone', 1),
+  a('tecnico_vila', 'obras', 'prata', 'Técnico da Vila', 'A promoção a Técnico.', 'star', 'careerRank', 1),
+  a('engenheiro_vila', 'obras', 'ouro', 'Engenheiro da Vila', 'A promoção a Engenheiro.', 'trophy', 'careerRank', 2),
+  a('inventor_vila', 'obras', 'exclusiva', 'Inventor da Vila', 'A promoção a Inventor.', 'trophy', 'careerRank', 3),
 ];
 
 export const GAME_ACHIEVEMENT_BY_ID: Record<string, GameAchievement> = Object.fromEntries(

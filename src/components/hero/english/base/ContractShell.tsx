@@ -1,5 +1,5 @@
 // ========================================
-// A Base: casca de um contrato. Dona do cronômetro, da instrução em PT por tipo,
+// A Base: casca de um contrato. O tempo fica gravado, sem número na tela. Dona da instrução em PT por tipo,
 // do "Aceitar contrato", da transação completeContract, do XP/gold e do resultado.
 // O contrato recebido já é uma cópia: o snapshot do plano é ignorado até terminar.
 // ========================================
@@ -85,12 +85,6 @@ const GENERATING_RETRIES = 12;
 const GENERATING_WAIT_MS = 5_000;
 const isStillGenerating = (e: unknown): boolean => e instanceof Error && /sendo gerado/.test(e.message);
 
-const formatClock = (sec: number): string => {
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return `${m}:${s < 10 ? '0' : ''}${s}`;
-};
-
 /** Primeira construção (na ordem da grade) que já dá para erguer */
 const firstBuildable = (base: BaseDoc): BuildingId | null => {
   for (const b of BUILDINGS) {
@@ -104,20 +98,12 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
   const { playClick, playTaskComplete } = useSound();
   const [phase, setPhase] = useState<Phase>('intro');
   const [showInstr, setShowInstr] = useState(() => readInstrCount(contract.type) < INSTRUCTION_TIMES);
-  const [elapsed, setElapsed] = useState(0);
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [result, setResult] = useState<{ outcome: ContractOutcome; reward: CompleteReward } | null>(null);
   const [failMsg, setFailMsg] = useState('');
   const startedAtRef = useRef(0);
   const finishingRef = useRef(false);
   const spendLot = firstBuildable(base);
-
-  // Cronômetro só durante o jogo
-  useEffect(() => {
-    if (phase !== 'play') return;
-    const id = window.setInterval(() => setElapsed(Math.floor((Date.now() - startedAtRef.current) / 1000)), 1000);
-    return () => window.clearInterval(id);
-  }, [phase]);
 
   // Áudio pendente não pode vazar para o quadro
   useEffect(() => () => stopAudio(), []);
@@ -126,7 +112,6 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
     playClick();
     bumpInstrCount(contract.type);
     startedAtRef.current = Date.now();
-    setElapsed(0);
     setShowInstr(false);
     setPhase('play');
   };
@@ -182,7 +167,7 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
 
   return (
     <div data-testid="contract-shell">
-      {/* Barra do contrato: tipo, título, cronômetro, ajuda e sair */}
+      {/* Barra do contrato: tipo, título, ajuda e sair. O tempo fica só em durationSec. */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <img
           src={CONTRACT_ICONS[contract.type]}
@@ -194,9 +179,6 @@ const ContractShell: React.FC<Props> = ({ uid, date, contract, level, base, sfx,
           <p className="mc-font text-[9px] mc-muted uppercase">{CONTRACT_LABELS[contract.type]}</p>
           <p className="text-sm font-bold text-white truncate">{contract.title}</p>
         </div>
-        {phase === 'play' && (
-          <span className="mc-font text-[10px] text-white tabular-nums" aria-label="Tempo">{formatClock(elapsed)}</span>
-        )}
         {canToggleInstr && (
           <button onClick={() => setShowInstr((v) => !v)} aria-label="Instruções" className="mc-btn mc-btn-dark w-9 h-9 p-0">
             <HelpCircle className="w-5 h-5" />
