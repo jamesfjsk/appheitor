@@ -90,6 +90,8 @@ test('C2: pergunta em português e opções copiadas do texto', () => {
   expect(short.split(/\s+/).filter(Boolean).length).toBe(60);
   expect(c2OptionsOk(short, ['the new field', 'the old gate', 'under the bench'])).toBeTruthy();
   expect(c2OptionsOk(short, ['the new field', 'the kitchen', 'under the bench'])).toBeFalsy();
+  // 04/10: carta ao vivo com frase inteira como opção ("Onde estão os balões?" -> "The balloons are red and blue.")
+  expect(c2OptionsOk('The balloons are red and blue. The cake is big. My dog is happy.', ['The balloons are red and blue.', 'The cake is big.', 'My dog is happy.'])).toBeFalsy();
   const parsed = parseC2Letter({
     title: 'O campinho',
     sender: 'Luna',

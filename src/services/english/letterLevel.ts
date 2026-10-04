@@ -78,6 +78,8 @@ export function c2OptionsOk(text: string, options: string[]): boolean {
   for (const option of options) {
     const key = option.trim().toLowerCase().replace(/\s+/g, ' ');
     if (!key || seen.has(key)) return false;
+    // Opção é um pedaço curto (lugar, coisa, ação), nunca a frase inteira
+    if (key.split(' ').length > 4) return false;
     seen.add(key);
     if (!c2OptionInText(text, option)) return false;
   }

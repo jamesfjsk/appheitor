@@ -532,7 +532,8 @@ function c2FromRaw(raw: unknown, vocabKnown: string[] = []): LetterContent | nul
 }
 
 async function generateC2Letter(input: GenerateInput): Promise<Generated<LetterContent>> {
-  const bank = (): Generated<LetterContent> => offlineFor('letter', 2, input.seed, input.avoidOffline ?? [], (raw, level) => validateLetter(raw, level, [], input.seed));
+  // Reserva da C2 é o banco C1, aprovado pelo pai: perguntas em português e carta com motivo. O banco antigo do nível 2 tem perguntas em inglês.
+  const bank = (): Generated<LetterContent> => ({ content: c1FromBank(input.seed), source: 'offline', problems: [] });
   if (!isAIConfigured()) return { ...bank(), problems: ['C2 sem IA; banco do nível 2'] };
   const unit = unitById(input.unitId || 'u1');
   let first: LetterContent | null = null;

@@ -489,7 +489,8 @@ const MerchantDelivery: React.FC<Props> = ({ uid, date, contract, sfx, onDone, o
     const fix = correctionFix(step, placements[0] ?? null);
     if (help.supportLevel < 3) {
       setCorrection(null);
-      setBalloon(help.hint ?? (content.translation[stepIndex] || ''));
+      // Degrau 1 só pede para ouvir de novo: a tradução entregaria a preposição
+      setBalloon(help.hint ?? 'Ouve o pedido de novo.');
     } else {
       setCorrection(fix.en);
       if (!saidFix[stepIndex]) {
