@@ -217,4 +217,11 @@ test('catálogo de lógica tem várias regras, não só ímpar e sem o 5', () =>
   expect(seen.size >= 4).toBe(true);
 });
 
+test('a fala da etapa 3 não junta dois números com ponto ("Me traz 15. 3 caixas." parecia 15,3)', () => {
+  const p3 = sessionFor('heitor-vagoneta', '2026-09-16', 1)[2];
+  if (!p3) throw new Error('sessão incompleta');
+  expect(/\d\.\s*\d/.test(askOf(p3))).toBe(false);
+  expect(askOf(p3)).toBe(`Me traz ${p3.target} com ${p3.needCount} caixas.`);
+});
+
 void run();

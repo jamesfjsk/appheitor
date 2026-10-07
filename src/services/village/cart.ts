@@ -217,7 +217,8 @@ export function askOf(puzzle: CartPuzzle): string {
   if (puzzle.kind === 'product') return 'Vezes.';
   if (puzzle.kind === 'divide') return 'Quanto em cada monte?';
   if (puzzle.kind === 'logic') return `Me traz ${puzzle.target}. ${ruleLine(puzzle.rule)}`;
-  if (puzzle.needCount !== null) return `Me traz ${puzzle.target}. ${puzzle.needCount} caixas.`;
+  // "Me traz 15. 3 caixas." parecia 15,3 na tela (pai, 07/10)
+  if (puzzle.needCount !== null) return `Me traz ${puzzle.target} com ${puzzle.needCount} caixas.`;
   if (puzzle.loaded > 0) return `Fecha ${puzzle.target}.`;
   return `Me traz ${puzzle.target}.`;
 }
