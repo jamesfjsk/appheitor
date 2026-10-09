@@ -8,9 +8,9 @@ import { useSound } from '../../contexts/SoundContext';
 import { FirestoreService } from '../../services/firestoreService';
 import { getTodayBrazil } from '../../utils/clock';
 import { DailyQuiz as DailyQuizDoc } from '../../types';
-import { addDays, completeDailyQuiz, ensureDailyQuiz, payThenComplete, quizRewards, regenerateDailyQuiz, shouldOpenReflection, stashQuizAnswers, subscribeDailyQuiz, type QuizTiming, type StoredDailyQuiz } from '../../services/dailyQuizService';
+import { addDays, completeDailyQuiz, ensureDailyQuiz, payThenComplete, quizRewards, markQuizResume, regenerateDailyQuiz, shouldOpenReflection, stashQuizAnswers, stashQuizProgress, subscribeDailyQuiz, type QuizTiming, type StoredDailyQuiz } from '../../services/dailyQuizService';
 import { prepareTodayThenTomorrow } from '../../services/quiz/prefetch';
-import { freshQuizUi } from '../../services/quiz/closeQuiz';
+import { freshQuizUi, resumeJoke, resumePoint } from '../../services/quiz/closeQuiz';
 import { judgeReflection, type ReflectionJudge } from '../../services/aiDailyQuiz';
 import { DAILY_QUIZ_QUESTIONS } from '../../config/rules';
 import { quizDoneToday, quizOpensOnRequest } from '../../services/village/quizGate';
@@ -208,6 +208,8 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [tryPhase, setTryPhase] = useState<'open' | 'nudge' | 'retry' | 'done'>('open');
+  /** A fala do Sábio quando a prova volta de uma recarregada; some no "Continuar". */
+  const [resumeLine, setResumeLine] = useState<string | null>(null);
   const [secondPick, setSecondPick] = useState<string | null>(null);
   const [nudgeText, setNudgeText] = useState('');
   const [optionsLocked, setOptionsLocked] = useState(false);
@@ -394,7 +396,40 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
       setPhase('results');
       return;
     }
+    // Prova começada: volta na pergunta seguinte, sem refazer as que já foram (pai, 09/10)
+    const resume = quiz ? resumePoint(quiz) : null;
+    if (resume) {
+      setAnswers(resume.answers);
+      setCurrent(resume.answers.length);
+      timingsRef.current = resume.timings;
+      attemptsRef.current = resume.attempts;
+      setSelected(null);
+      setSecondPick(null);
+      setNudgeText('');
+      setTryPhase('open');
+      stepLock.current = false;
+      const n = resume.answers.length + 1;
+      const line = resumeJoke(n, quiz?.resumes ?? 0);
+      setResumeLine(line);
+      if (childUid) {
+        void markQuizResume(childUid, today, n).catch((e) => console.warn('DailyQuiz: não deu para marcar a volta', e));
+      }
+      if (isSoundEnabled) void speakProvaVerdict(line, true);
+      setPhase('questions');
+      return;
+    }
     setPhase('lesson');
+  };
+
+  /** A escolha vai para o doc na hora: recarregar a página não refaz a pergunta. */
+  const saveProgress = (partial: string[]) => {
+    if (!childUid) return;
+    const timings = timingsRef.current.slice();
+    while (timings.length < current) timings.push({ msToAnswer: 0, msReadingExplain: 0 });
+    timings[current] = { msToAnswer: Math.max(1, Math.round(choseAt.current - askedAt.current)), msReadingExplain: 0 };
+    void stashQuizProgress(childUid, today, partial, timings, attemptsRef.current).catch((e) => {
+      console.warn('DailyQuiz: não deu para guardar a resposta', e);
+    });
   };
 
   useEffect(() => {
@@ -421,6 +456,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
     setTryPhase('open');
     setSecondPick(null);
     setNudgeText('');
+    setResumeLine(null);
     attemptsRef.current = [];
     offtopicAsked.current = false;
     waiveThemeRef.current = false;
@@ -489,11 +525,13 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
       else playProvaMiss();
       const slot = attemptsRef.current[current] ?? {};
       attemptsRef.current[current] = { ...slot, second: option, nudge: slot.nudge };
+      if (selected) saveProgress([...answers, selected]);
       speak([question.why, question.trap].filter(Boolean).join(' ') || question.explanation);
       return;
     }
     choseAt.current = performance.now();
     setSelected(option);
+    saveProgress([...answers, option]);
     if (question.kind === 'dilemma') playClick();
     else if (ok) playProvaHit();
     else playProvaMiss();
@@ -561,7 +599,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
   };
 
   useEffect(() => {
-    if (phase !== 'questions' || !question || question.subject !== 'ingles' || !question.audioText) {
+    if (phase !== 'questions' || !question || resumeLine || question.subject !== 'ingles' || !question.audioText) {
       setOptionsLocked(false);
       return;
     }
@@ -578,7 +616,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
       stop = true;
       stopProvaVoice();
     };
-  }, [phase, current, question]);
+  }, [phase, current, question, resumeLine]);
 
   useEffect(() => {
     if (phase === 'results' && reflectStarted.current === 0) reflectStarted.current = performance.now();
@@ -844,7 +882,22 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                   </>
                 )}
 
-                {phase === 'questions' && question && (
+                {phase === 'questions' && question && resumeLine && (
+                  <div data-testid="quiz-resume">
+                    <SageOnPaper kicker="Você voltou" step={`${current + 1} de ${quiz.questions.length}`} />
+                    <p className="mn-papiro-title">{resumeLine}</p>
+                    <p className="mn-papiro-why">As respostas que você já deu continuam valendo.</p>
+                    <button
+                      type="button"
+                      className="mc-btn mc-btn-green min-h-[44px] px-6 mt-3"
+                      onClick={() => { playClick(); stopProvaVoice(); setResumeLine(null); askedAt.current = performance.now(); }}
+                    >
+                      Continuar
+                    </button>
+                  </div>
+                )}
+
+                {phase === 'questions' && question && !resumeLine && (
                   <>
                     <SageOnPaper
                       kicker={question.kind === 'dilemma' ? 'E você?' : question.kind === 'lesson' ? 'Sobre a ideia' : question.subject}
@@ -881,8 +934,10 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                         );
                         let rowClass = 'mn-prova-opt';
                         if (question.kind === 'dilemma') {
-                          // dilema não tem errada (decisão 33): a escolha dele acende, as outras apagam
-                          if (tryPhase === 'done' && isFirst) rowClass += ' is-right';
+                          // dilema não tem errada (decisão 33): nada fica vermelho. A escolha dele fica marcada
+                          // em neutro e a atitude mais justa acende; antes a escolha dele ficava verde (09/10)
+                          if (tryPhase === 'done' && isCorrect) rowClass += ' is-right';
+                          else if (tryPhase === 'done' && isFirst) rowClass += ' is-mine';
                           else if (tryPhase === 'done') rowClass += ' is-dim';
                         }
                         else if (showRight && isCorrect) rowClass += ' is-right';
@@ -920,6 +975,13 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                                 : secondPick
                                   ? resultLine('seg', current)
                                   : resultLine('fato', current)}
+                          </p>
+                        )}
+                        {question.kind === 'dilemma' && (
+                          <p className="mn-papiro-why" data-testid="quiz-dilemma-line">
+                            {selected === question.answer
+                              ? 'Você escolheu a atitude que cuida dos dois lados.'
+                              : 'Você escolheu outra atitude. Veja o que a mais justa resolve.'}
                           </p>
                         )}
                         <p>{question.why || question.explanation}</p>
@@ -1041,7 +1103,7 @@ const DailyQuiz: React.FC<DailyQuizProps> = ({ onComplete, onPending, openReques
                 Começar
               </ReadWaitButton>
             )}
-            {phase === 'questions' && (
+            {phase === 'questions' && !resumeLine && (
               <ReadWaitButton
                 text={explainText || question?.question || ''}
                 min={EXPLAIN_READ_MS.min}

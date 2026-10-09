@@ -122,6 +122,9 @@ export interface DailyQuiz {
   reflectionNote?: string;
   /** Tempo por pergunta, na ordem. Não aparece na tela. */
   timings?: { msToAnswer: number; msReadingExplain: number }[];
+  /** Quantas vezes a prova voltou de uma recarregada, e em que pergunta (09/10). */
+  resumes?: number;
+  resumeLog?: { at: string; question: number }[];
   completedAt?: Date;
 }
 

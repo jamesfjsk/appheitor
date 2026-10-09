@@ -464,7 +464,7 @@ export function validateQuestion(raw: RawQuestion, ctx: ValidateCtx = {}): Rejec
   const whyMin = skill === 'LIC.DILEMA' || q.kind === 'dilemma' ? 8 : 12;
   if (wordCount(why) < whyMin || wordCount(trap) < 12) r.push('why_curto');
   if (whyCircular(why)) r.push('why_circular');
-  if ((skill === 'LIC.DILEMA' || q.kind === 'dilemma') && dilemaComCerta(why)) r.push('dilema_com_certa');
+  if ((skill === 'LIC.DILEMA' || q.kind === 'dilemma') && (dilemaComCerta(why) || dilemaDeConta(options, why, trap))) r.push('dilema_com_certa');
   if (!skill.startsWith('LIC.') && FATO_SOLTO.test(normalizeQuizText(question))) r.push('fato_solto');
   if (why && explicacaoEmIngles(why)) r.push('explicacao_em_ingles');
   if (why && answer && !whyCitesAnswer(why, answer)) r.push('why_sem_resposta');
@@ -772,4 +772,20 @@ export function stripCertaPrefix(why: string): string {
 
 function dilemaComCerta(why: string): boolean {
   return /a resposta certa|a certa e/.test(normalizeQuizText(why));
+}
+
+const NUMERO = /\b(\d+|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|metade|dobro|triplo)\b/g;
+
+/**
+ * Dilema é escolha entre atitudes, cada uma com vantagem e preço. Se duas opções só mudam no número
+ * ("Divido em 3 partes iguais" e "Divido em 2 partes iguais") ou o why/trap fala de erro ("esquece que são 3"),
+ * a pergunta tem uma certa de fato e não é dilema (prova do Heitor, 09/10).
+ */
+export function dilemaDeConta(options: string[], why: string, trap: string): boolean {
+  const bare = options.map((o) => normalizeQuizText(o).replace(NUMERO, '#').replace(/\s+/g, ' ').trim());
+  const numbered = options.filter((o) => normalizeQuizText(o).replace(NUMERO, '#') !== normalizeQuizText(o));
+  if (numbered.length >= 2 && new Set(bare).size < bare.length) return true;
+  // "esquece o irmão" é preço de atitude; "esquece que são 3" é erro de conta
+  const text = normalizeQuizText(`${why} ${trap}`);
+  return /\bconta errada|\bcalcul/.test(text) || (/\besquece que\b/.test(text) && /\b(\d+|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)\b/.test(text));
 }

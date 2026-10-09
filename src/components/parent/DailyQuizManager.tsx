@@ -113,6 +113,12 @@ const DailyQuizManager: React.FC = () => {
             <p className="mt-2 font-semibold text-gray-800">Reflexão: {quiz.reflectionPrompt}</p>
             <p className="mt-1 text-gray-700 italic">{quiz.reflection ? `"${quiz.reflection}"` : 'Ainda não respondeu.'}</p>
             {quiz.reflectionNote && <p className="mt-1 text-gray-500">{quiz.reflectionNote}</p>}
+            {(quiz.resumes ?? 0) > 0 && (
+              <p className="mt-2 text-amber-700">
+                Recarregou a prova {quiz.resumes} {quiz.resumes === 1 ? 'vez' : 'vezes'}
+                {quiz.resumeLog?.length ? ` (na pergunta ${quiz.resumeLog.map((r) => r.question).join(', ')})` : ''}. As respostas já dadas ficaram valendo.
+              </p>
+            )}
           </div>
         )}
 

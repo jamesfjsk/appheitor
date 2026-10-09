@@ -12,6 +12,7 @@ import {
   fillAnyArea,
   quizSlots,
   selectValidQuestions,
+  dilemaDeConta,
   stripCertaPrefix,
   validateQuestion,
   type RawQuestion,
@@ -478,6 +479,27 @@ test('dilema_com_certa: o why do dilema não diz qual é a certa', () => {
     why: 'Chamar o amigo muda o jogo para os dois. Ficar quieto abandona quem quer entrar no recreio.',
   });
   expect(ok.includes('dilema_com_certa')).toBe(false);
+});
+
+test('dilema_com_certa: o dilema da barra de chocolate (09/10) é conta, não atitude', () => {
+  const chocolate = validateQuestion({
+    question: 'Você e dois amigos têm uma barra de chocolate. Qual atitude é a mais justa?',
+    options: ['Divido em 3 partes iguais', 'Dou tudo para um amigo', 'Fico com a maior parte', 'Divido em 2 partes iguais'],
+    answer: 'Divido em 3 partes iguais',
+    why: 'Dividir em 3 partes iguais garante que todos recebam a mesma quantidade de chocolate.',
+    trap: "Quem marca 'Divido em 2 partes iguais' esquece que são 3 amigos, não 2.",
+    skill: 'LIC.DILEMA',
+    subject: 'tema',
+    bloom: 'analisar',
+    kind: 'dilemma',
+  });
+  expect(chocolate.includes('dilema_com_certa')).toBe(true);
+  // o modelo do prompt, com atitudes de verdade, continua passando
+  expect(dilemaDeConta(
+    ['Aviso os amigos e ajudo meu irmão', 'Jogo agora e ajudo meu irmão depois', 'Ajudo meu irmão bem rápido', 'Peço para minha mãe ajudar ele'],
+    'Quem avisa os amigos cumpre a promessa ao irmão e combina o jogo sem deixar ninguém esperando.',
+    'Quem marca Jogo agora e ajudo meu irmão depois atende a vontade de jogar, mas o irmão fica esperando e a promessa atrasa.',
+  )).toBe(false);
 });
 
 test('lote curto chega a 8: substituição de 1 e banco de qualquer área; dilema vazio vira conhecimento', () => {

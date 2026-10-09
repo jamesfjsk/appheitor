@@ -883,6 +883,12 @@
 .mn-prova-opt.is-dim {
   opacity: 0.4;
 }
+/* Dilema: a escolha dele, sem certo nem errado */
+.mn-prova-opt.is-mine {
+  background: #f3e4bd;
+  color: #4a3510;
+  border-left-color: #c9962a;
+}
 .mn-prova-opt-letter {
   flex: 0 0 22px;
   width: 22px;

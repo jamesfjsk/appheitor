@@ -3,7 +3,7 @@
 // O mesmo documento guarda a prova gerada e, depois, o resultado.
 // ========================================
 
-import { collection, deleteField, doc, getDoc, getDocs, onSnapshot, orderBy, query, serverTimestamp, setDoc, Timestamp, where, writeBatch } from 'firebase/firestore';
+import { arrayUnion, collection, deleteField, doc, getDoc, getDocs, increment, onSnapshot, orderBy, query, serverTimestamp, setDoc, Timestamp, where, writeBatch } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { DailyQuiz, DailyQuizQuestion, DailyQuizSanitize, DailyQuizTheme } from '../types';
 import { generateDailyQuiz } from './aiDailyQuiz';
@@ -15,7 +15,7 @@ import { addDays } from '../utils/clock';
 import { bumpChallenge } from './challengesService';
 import { nextQuizStreak } from './village/stats';
 import { perfectQuiz } from './quiz/provaRules';
-import { answersStash, attemptsForBank, completeQuizWrite, readAttempts, type QuizAbout, type QuizTiming } from './quiz/closeQuiz';
+import { answersStash, attemptsForBank, completeQuizWrite, progressStash, readAttempts, type QuizAbout, type QuizTiming } from './quiz/closeQuiz';
 import type { BankAttempt } from './quiz/bankWrite';
 import { generationBlock, guardHost, refuseMessage } from './generationGuard';
 import { readPublishedVersion, requestVersionReload } from './appUpdate';
@@ -130,6 +130,9 @@ export { addDays };
 export type StoredDailyQuiz = DailyQuiz & {
   attempts?: BankAttempt[];
   generatedVersion?: string;
+  /** Quantas vezes a prova voltou de uma recarregada, e em que pergunta. */
+  resumes?: number;
+  resumeLog?: { at: string; question: number }[];
 };
 
 async function generationVersion(userId: string): Promise<string> {
@@ -174,6 +177,15 @@ function fromDoc(id: string, data: Record<string, unknown>): StoredDailyQuiz | n
     timings: readTimings(data.timings),
     ...(attempts ? { attempts } : {}),
     ...(typeof data.generatedVersion === 'string' ? { generatedVersion: data.generatedVersion } : {}),
+    ...(typeof data.resumes === 'number' ? { resumes: data.resumes } : {}),
+    ...(Array.isArray(data.resumeLog)
+      ? {
+        resumeLog: (data.resumeLog as unknown[]).flatMap((row) => {
+          const r = row as { at?: unknown; question?: unknown };
+          return typeof r?.at === 'string' && typeof r?.question === 'number' ? [{ at: r.at, question: r.question }] : [];
+        }),
+      }
+      : {}),
     completedAt: (data.completedAt as Timestamp | undefined)?.toDate?.(),
     sanitize: readSanitize(data.sanitize),
     ...(data.raw && typeof data.raw === 'object' ? { raw: data.raw } : {}),
@@ -413,6 +425,33 @@ export async function stashQuizAnswers(
     userId,
     date,
     ...answersStash(answers, score, totalQuestions, timings, attempts),
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+}
+
+/** A prova voltou de uma recarregada: o pai vê no painel quantas vezes e em que pergunta. */
+export async function markQuizResume(userId: string, date: string, question: number): Promise<void> {
+  await setDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), {
+    userId,
+    date,
+    resumes: increment(1),
+    resumeLog: arrayUnion({ at: new Date().toISOString(), question }),
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+}
+
+/** Cada escolha vai para o doc na hora: recarregar a página não refaz a pergunta. */
+export async function stashQuizProgress(
+  userId: string,
+  date: string,
+  answers: string[],
+  timings?: QuizTiming[],
+  attempts?: BankAttempt[],
+): Promise<void> {
+  await setDoc(doc(db, 'dailyQuizzes', dailyQuizId(userId, date)), {
+    userId,
+    date,
+    ...progressStash(answers, timings, attempts),
     updatedAt: serverTimestamp(),
   }, { merge: true });
 }

@@ -109,6 +109,61 @@ export function answersStash(
   };
 }
 
+/**
+ * Resposta gravada na hora da escolha (pai, 09/10: recarregar a página refazia a prova inteira).
+ * Só respostas, tempos e tentativas; a reflexão continua no stash do fim.
+ */
+export function progressStash(
+  answers: string[],
+  timings?: QuizTiming[],
+  attempts?: BankAttempt[],
+): { answers: string[]; timings?: QuizTiming[]; attempts?: BankAttempt[] } {
+  const timingsOut = timings?.slice(0, answers.length).map((t) => ({
+    msToAnswer: t && t.msToAnswer > 0 ? t.msToAnswer : 0,
+    msReadingExplain: t && t.msReadingExplain > 0 ? t.msReadingExplain : 0,
+  }));
+  const attemptsOut = attempts ? answers.map((_, i) => cleanAttempt(attempts[i])) : undefined;
+  return {
+    answers,
+    ...(timingsOut ? { timings: timingsOut } : {}),
+    ...(attemptsOut ? { attempts: attemptsOut } : {}),
+  };
+}
+
+/** O Sábio quando a prova volta de uma recarregada (pai, 09/10: "uma piadinha antes de mostrar de onde parou"). */
+export const RESUME_JOKES = [
+  'Opa, a página piscou e você sumiu! Eu guardei tudo. Você estava na pergunta {n}.',
+  'Achou que ia escapar? A mesa lembra de tudo. Seguimos da pergunta {n}.',
+  'Recarregar não apaga a memória do Sábio. Vamos da pergunta {n}.',
+  'O vento fechou a porta, mas as suas respostas ficaram na mesa. Pergunta {n}.',
+  'Até o Sábio pisca às vezes. Você parou na pergunta {n}.',
+];
+
+/** Uma fala por volta, girando pelo número de voltas do dia. */
+export function resumeJoke(question: number, resumesSoFar: number): string {
+  const i = Math.abs(Math.floor(resumesSoFar)) % RESUME_JOKES.length;
+  return RESUME_JOKES[i].replace('{n}', String(question));
+}
+
+/** Prova começada e não terminada: volta na pergunta seguinte à última respondida. */
+export function resumePoint(quiz: {
+  completed?: boolean;
+  awaitingReflection?: boolean;
+  answers?: string[];
+  questions: unknown[];
+  timings?: QuizTiming[];
+  attempts?: unknown;
+}): { answers: string[]; timings: QuizTiming[]; attempts: BankAttempt[] } | null {
+  if (quiz.completed || quiz.awaitingReflection) return null;
+  const answers = Array.isArray(quiz.answers) ? quiz.answers.filter((a): a is string => typeof a === 'string') : [];
+  if (answers.length === 0 || answers.length >= quiz.questions.length) return null;
+  return {
+    answers,
+    timings: (quiz.timings ?? []).slice(0, answers.length),
+    attempts: (readAttempts(quiz.attempts) ?? []).slice(0, answers.length),
+  };
+}
+
 export function shouldOpenReflection(quiz: {
   completed?: boolean;
   awaitingReflection?: boolean;
