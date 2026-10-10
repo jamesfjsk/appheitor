@@ -434,7 +434,8 @@ export const CAPE_SPRITE: Record<string, string> = {
 
 export function lookBodySrc(character: VillageCharacter): string {
   if (character.hat && HAT_SPRITE[character.hat]) return HAT_SPRITE[character.hat];
-  if (character.cape && character.cape !== 'cape_vila') return CAPE_SPRITE[character.cape] || ISO_MINER;
+  // A capa é pano por cima da folha de passos. Trocar o corpo pelo PNG parado
+  // desliga a caminhada e o passo vira o esmaga-e-sobe (parece pulo).
   return ISO_MINER;
 }
 

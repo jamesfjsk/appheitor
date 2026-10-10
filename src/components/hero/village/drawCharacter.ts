@@ -1,4 +1,4 @@
-import { CAPE_HEX, HAIR_HEX, HAT_SPRITE, CAPE_SPRITE, PANTS_HEX, PICK_OVERLAY, SHIRT_HEX, SKIN_HEX } from '../../../config/village';
+import { CAPE_HEX, HAIR_HEX, CAPE_SPRITE, PANTS_HEX, PICK_OVERLAY, SHIRT_HEX, SKIN_HEX } from '../../../config/village';
 import type { VillageCharacter, VillageGear } from '../../../types/village';
 
 export const TORSO_MASK_SRC = '/assets/village/masks/torso.png';
@@ -294,11 +294,10 @@ export function paintCharacterLook(
 }
 
 export function lookOverlaySrc(character: VillageCharacter, gear?: VillageGear | null): { hat: string | null; cape: string | null; pickaxe: string | null } {
-  const hatOn = Boolean(character.hat && HAT_SPRITE[character.hat]);
   const pickLv = Math.max(0, Math.min(4, gear?.pickaxe ?? 0));
   return {
     hat: null,
-    cape: character.cape && character.cape !== 'cape_vila' && hatOn ? CAPE_SPRITE[character.cape] || null : null,
+    cape: character.cape && character.cape !== 'cape_vila' ? CAPE_SPRITE[character.cape] || null : null,
     pickaxe: PICK_OVERLAY[pickLv] || PICK_OVERLAY[0],
   };
 }
