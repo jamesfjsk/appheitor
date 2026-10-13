@@ -32,11 +32,13 @@ import WeeklyReport from './WeeklyReport';
 import CharactersPanel from './CharactersPanel';
 import EncomendasPanel from './EncomendasPanel';
 import CareerPanel, { CareerSync } from './CareerPanel';
+import ChatPanel from './ChatPanel';
+import { useChatUnread } from './useChatUnread';
 
 type TabType =
   | 'dashboard' | 'village' | 'tasks' | 'rewards' | 'reminders' | 'surprise' | 'quiz'
   | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system'
-  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books' | 'encomendas' | 'career';
+  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books' | 'encomendas' | 'career' | 'chat';
 
 const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; label: string; icon: string }> }> = [
   {
@@ -44,6 +46,7 @@ const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; labe
     label: 'Hoje',
     tabs: [
       { id: 'dashboard', label: 'Hoje', icon: 'chart' },
+      { id: 'chat', label: 'Conversa', icon: 'phone' },
     ],
   },
   {
@@ -90,6 +93,7 @@ const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; labe
 const ParentPanel: React.FC = () => {
   const { tasks, progress, loading } = useData();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const chatUnread = useChatUnread();
 
   if (loading) return <LoadingSpinner message="Carregando painel administrativo..." />;
 
@@ -118,6 +122,9 @@ const ParentPanel: React.FC = () => {
                       <FlashIcon name={tab.icon} className="w-4 h-4" />
                     </span>
                     {tab.label}
+                    {tab.id === 'chat' && chatUnread > 0 && activeTab !== 'chat' && (
+                      <span className="ml-1.5 rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white">{chatUnread}</span>
+                    )}
                   </button>
                 ))}
               </nav>
@@ -141,6 +148,7 @@ const ParentPanel: React.FC = () => {
           {activeTab === 'tasks' && <TaskManager tasks={tasks} />}
           {activeTab === 'encomendas' && <EncomendasPanel />}
           {activeTab === 'career' && <CareerPanel />}
+          {activeTab === 'chat' && <ChatPanel />}
           {activeTab === 'rewards' && <RewardManager />}
           {activeTab === 'reminders' && <PlacaManager />}
           {activeTab === 'surprise' && <SurpriseMissionConfigComponent />}

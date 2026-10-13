@@ -16,6 +16,7 @@ const SUN = '/assets/english/ui/sun.webp';
 const SUNSET = '/assets/english/ui/sunset.webp';
 const MOON = '/assets/english/ui/moon.webp';
 const LETTER = '/assets/english/ui/base/c_letter.webp';
+const NOTE = '/assets/english/ui/base/c_note.webp';
 const WEEKDAY_SHORT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 interface HeroHeaderProps {
@@ -35,11 +36,14 @@ interface HeroHeaderProps {
   placaCount?: number;
   placaOpen?: boolean;
   onOpenPlaca?: () => void;
+  chatCount?: number;
+  onOpenChat?: () => void;
 }
 
 const HeroHeader: React.FC<HeroHeaderProps> = ({
   progress, onOpenGold, onOpenPack, onOpenTower, nextEventLabel, avatarSrc, avatar, subtitle,
   extraButton, fullDays, hour, compact = false, crackLine, placaCount, placaOpen, onOpenPlaca,
+  chatCount, onOpenChat,
 }) => {
   const { hour: clockHour, minute, today, weekday, period } = useClock();
   const { logout } = useAuth();
@@ -126,8 +130,25 @@ const HeroHeader: React.FC<HeroHeaderProps> = ({
       )}
     </button>
   ) : null;
+  const chatNew = (chatCount ?? 0) > 0;
+  const chatChip = onOpenChat ? (
+    <button
+      type="button"
+      className={`mc-btn mc-btn-dark w-[44px] h-[44px] p-0 mn-placa-chip${chatNew ? ' has-mail' : ''}`}
+      data-testid="chat-chip"
+      onClick={() => { playClick(); onOpenChat(); }}
+      title={chatNew ? `Conversa com o pai, ${chatCount} ${chatCount === 1 ? 'mensagem nova' : 'mensagens novas'}` : 'Conversa com o pai'}
+      aria-label={chatNew ? `Conversa com o pai, ${chatCount} mensagens novas` : 'Conversa com o pai'}
+    >
+      <img src={NOTE} alt="" className="mc-pixel" draggable={false} />
+      {chatNew && (
+        <span className="mn-placa-badge" aria-hidden>{chatCount! > 9 ? '9+' : chatCount}</span>
+      )}
+    </button>
+  ) : null;
   const actions = (
     <div className="flex gap-1 shrink-0">
+      {chatChip}
       {placaChip}
       <button
         type="button"

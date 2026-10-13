@@ -437,6 +437,38 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Conversa do pai com o filho (13/10/2026). O filho só grava a hora em que leu
+    // e só manda mensagem como 'filho'; apagar e corrigir é do pai.
+    match /familyChat/{uid} {
+      allow get: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow create: if isAdmin() || (signedIn() && uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['userId', 'childReadAt']));
+      allow update: if isAdmin() || (signedIn() && uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userId', 'childReadAt']));
+      allow delete: if isAdmin();
+
+      match /messages/{msgId} {
+        allow read: if signedIn() && (isAdmin() || uid == request.auth.uid);
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly(['from', 'text', 'image', 'createdAt', 'via'])
+          && request.resource.data.text is string
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.createdAt == request.time
+          && (!('image' in request.resource.data) || request.resource.data.image.path.matches('chat/' + uid + '/.*'))
+          && (
+            (isAdmin() && request.resource.data.from == 'pai' && request.resource.data.via == 'painel')
+            || (uid == request.auth.uid && request.resource.data.from == 'filho' && request.resource.data.via == 'app')
+          );
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // Ligação com o Telegram: só o pai lê; quem grava é a Cloud Function
+    match /telegramLink/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     match /quizBank/{id} {
       allow get, list: if signedIn() && (isAdmin() || resource == null || resource.data.userId == request.auth.uid);
       allow create: if signedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid)

@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase-admin/app';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { getMessaging } from 'firebase-admin/messaging';
 import { getDownloadURL, getStorage } from 'firebase-admin/storage';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
@@ -8,6 +7,9 @@ import { defineSecret } from 'firebase-functions/params';
 import { createHash } from 'crypto';
 import { AI_MONTHLY_USD_CAP, estimateMonthUsd } from './aiPrices';
 import { nowBrazil } from './clock';
+import { sendPush, tokensOf } from './push';
+
+export { chatRelay, chatSeen, telegramSetup, telegramWebhook } from './telegram';
 
 initializeApp();
 const db = getFirestore();
@@ -118,23 +120,6 @@ async function bumpUsage(model: string, calls: number, inputTokens = 0, outputTo
   }, { merge: true });
 }
 
-async function tokensOf(uid: string): Promise<string[]> {
-  const snap = await db.doc(`users/${uid}`).get();
-  const raw = snap.data()?.fcmTokens;
-  if (Array.isArray(raw)) return raw.filter((t): t is string => typeof t === 'string' && t.length > 8);
-  if (raw && typeof raw === 'object') return Object.keys(raw);
-  return [];
-}
-
-async function sendPush(tokens: string[], title: string, body: string): Promise<void> {
-  const unique = [...new Set(tokens)];
-  if (unique.length === 0) return;
-  await getMessaging().sendEachForMulticast({
-    tokens: unique,
-    notification: { title, body },
-    webpush: { notification: { title, body } },
-  });
-}
 
 export const openai = onCall({ region: REGION, secrets: [OPENAI_API_KEY] }, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Entre na conta para usar a IA.');

@@ -3875,3 +3875,169 @@ div.mn-pack-cell {
 /* Estante do Sábio: rostos e nota sobre o papiro (texto claro sobre o slot escuro) */
 .mn-livro-slot { color: #f3e9d2; font-weight: 600; }
 .mn-livro-slot.mc-slot-selected { color: var(--mc-gold-hi); }
+
+/* --------------------------------------------------------------------------
+   Conversa com o pai (13/10/2026): papel para o pai, pedra verde para ele.
+   -------------------------------------------------------------------------- */
+.mn-chat-sheet {
+  height: min(86vh, 760px);
+}
+.mn-chat-sheet .mn-child-body {
+  background: #1b1715;
+  box-shadow: inset 0 6px 10px rgba(0, 0, 0, 0.35);
+}
+.mn-chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 8px;
+  min-height: 100%;
+}
+.mn-chat-day {
+  align-self: center;
+  margin: 8px 0 2px;
+  padding: 2px 12px;
+  font-size: 12px;
+  color: var(--mc-inv);
+  background: var(--mc-stone-2);
+  border: 2px solid var(--mc-edge);
+}
+.mn-chat-row {
+  display: flex;
+  max-width: 82%;
+}
+.mn-chat-row.is-pai { align-self: flex-start; }
+.mn-chat-row.is-filho { align-self: flex-end; }
+.mn-chat-bubble {
+  position: relative;
+  min-width: 72px;
+  padding: 8px 12px 6px;
+  border: 3px solid var(--mc-edge);
+  font-size: 16px;
+  line-height: 1.35;
+}
+.mn-chat-row.is-pai .mn-chat-bubble {
+  background: #f3e4bd;
+  color: #3a2a10;
+  box-shadow: inset 3px 3px 0 #fff6dc, inset -3px -3px 0 #d6bd84;
+}
+.mn-chat-row.is-filho .mn-chat-bubble {
+  background: #35552a;
+  color: #ffffff;
+  box-shadow: inset 3px 3px 0 #5b8a45, inset -3px -3px 0 #22381a;
+}
+.mn-chat-who {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mc-gold-lo);
+}
+.mn-chat-text {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mn-chat-meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  text-align: right;
+  opacity: 0.75;
+}
+.mn-chat-img-btn {
+  display: block;
+  padding: 0;
+  margin: 2px 0 6px;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.mn-chat-img {
+  display: block;
+  max-width: min(280px, 62vw);
+  max-height: 280px;
+  border: 2px solid var(--mc-edge);
+  object-fit: cover;
+}
+.mn-chat-seen {
+  align-self: flex-end;
+  margin-top: -4px;
+  font-size: 12px;
+  color: var(--mc-grass-hi);
+}
+.mn-chat-empty {
+  margin: auto;
+  padding: 24px 12px;
+  text-align: center;
+}
+.mn-chat-empty img {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 10px;
+}
+.mn-chat-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mn-chat-compose-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.mn-chat-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  max-height: 120px;
+  padding: 9px 10px;
+  resize: none;
+  font: inherit;
+  font-size: 16px;
+  color: #1f1a17;
+  background: #efe9e1;
+  border: 3px solid var(--mc-edge);
+  box-shadow: inset 2px 2px 0 #cfc6bb;
+  field-sizing: content;
+}
+.mn-chat-input:focus {
+  outline: 3px solid var(--mc-gold-hi);
+  outline-offset: 0;
+}
+.mn-chat-preview {
+  position: relative;
+  align-self: flex-start;
+}
+.mn-chat-preview img {
+  display: block;
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border: 3px solid var(--mc-edge);
+}
+.mn-chat-preview .mc-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+}
+.mn-chat-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(10, 8, 6, 0.88);
+}
+.mn-chat-zoom img {
+  max-width: 100%;
+  max-height: 100%;
+  border: 3px solid var(--mc-edge);
+}
+.mn-chat-zoom-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}

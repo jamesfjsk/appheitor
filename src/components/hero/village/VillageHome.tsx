@@ -40,6 +40,9 @@ import EnglishBase from '../english/base/EnglishBase';
 import Torre from './Torre';
 import Laboratorio from './Laboratorio';
 import { subscribeCareer, type CareerState } from '../../../services/careerService';
+import Conversa from './Conversa';
+import { subscribeChat, subscribeChatMeta, type ChatMeta } from '../../../services/familyChatService';
+import { unreadFor, type ChatMessage } from '../../../services/village/familyChat';
 import { labLevelOf } from '../../../services/village/career';
 import EstanteDoSabio from './EstanteDoSabio';
 import Cofrinho from './Cofrinho';
@@ -108,7 +111,7 @@ function shopBlocksDest(id: string): boolean {
   return id === 'market' || id === 'chest' || id === 'pack' || id === 'chest_streak';
 }
 
-type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | 'books' | 'lab' | null;
+type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | 'books' | 'lab' | 'chat' | null;
 
 interface Props {
   selectedPeriod: Period;
@@ -126,7 +129,7 @@ const VillageHome: React.FC<Props> = ({
 }) => {
   const { village, materials, buildings, economy, pauseDays, notices, ackNotice } = useVillage();
   const { tasks, progress, flashReminders } = useData();
-  const { playClick, playHammer, setMusicDuck } = useSound();
+  const { playClick, playHammer, playNotification, setMusicDuck } = useSound();
   const { hour, today, now, driftMs } = useClock();
   const { isPunished } = usePunishment();
   const { isActive: vacationOn, config: vacation } = useVacation();
@@ -159,6 +162,37 @@ const VillageHome: React.FC<Props> = ({
     if (!childUid) return;
     return subscribeCareer(childUid, setCareer);
   }, [childUid]);
+
+  // Conversa com o pai: selo de não lidas no topo e aviso quando chega mensagem nova
+  const [chat, setChat] = useState<ChatMessage[] | null>(null);
+  const [chatMeta, setChatMeta] = useState<ChatMeta>({});
+  const lastPaiMsg = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!childUid) return;
+    const a = subscribeChat(childUid, setChat);
+    const b = subscribeChatMeta(childUid, setChatMeta);
+    return () => { a(); b(); };
+  }, [childUid]);
+  const chatUnread = chat ? unreadFor(chat, 'filho', chatMeta.childReadAt) : 0;
+  useEffect(() => {
+    if (!chat) return;
+    const last = [...chat].reverse().find((m) => m.from === 'pai');
+    const id = last?.id ?? null;
+    const before = lastPaiMsg.current;
+    lastPaiMsg.current = id;
+    if (before === undefined || !id || id === before || district === 'chat') return;
+    playNotification();
+    toast((t) => (
+      <button
+        type="button"
+        className="text-left"
+        data-testid="chat-toast"
+        onClick={() => { toast.dismiss(t.id); setLot(null); setPlacaOpen(false); setDistrict('chat'); }}
+      >
+        <b>O pai mandou uma mensagem.</b> Toque para abrir.
+      </button>
+    ), { duration: 8000 });
+  }, [chat, district, playNotification]);
 
   useEffect(() => {
     setMusicDuck('mine', district === 'mine');
@@ -596,6 +630,8 @@ const VillageHome: React.FC<Props> = ({
         placaCount={placaCount}
         placaOpen={placaOpen}
         onOpenPlaca={() => setPlacaOpen((v) => !v)}
+        chatCount={chatUnread}
+        onOpenChat={() => { setLot(null); setPlacaOpen(false); setDistrict('chat'); }}
         extraButton={
           <span className="mn-fs-btn">
             <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0" title="Tela cheia" onClick={() => { playClick(); fullscreen(); }}>
@@ -911,6 +947,9 @@ const VillageHome: React.FC<Props> = ({
       )}
       {district === 'tower' && <Torre onClose={() => setDistrict(null)} />}
       {district === 'lab' && <Laboratorio onClose={() => setDistrict(null)} />}
+      {district === 'chat' && childUid && (
+        <Conversa childUid={childUid} messages={chat ?? []} meta={chatMeta} onClose={() => setDistrict(null)} />
+      )}
       {district === 'books' && <EstanteDoSabio onClose={() => setDistrict(null)} quizLocked={quizLocked} />}
     </div>
   );
