@@ -215,8 +215,10 @@ export const chatRelay = onDocumentCreated(
     if (m.from !== 'filho') return;
 
     const db = getFirestore();
-    const name = await childName(uid);
     const link = (await db.doc(LINK).get()).data() as Link | undefined;
+    // Só a conversa da criança ligada sai do app (a conta de teste não chega no celular do pai)
+    if (link?.childUid && link.childUid !== uid) return;
+    const name = await childName(uid);
     const token = TELEGRAM_BOT_TOKEN.value();
     if (link?.parentChatId && token) {
       try {
