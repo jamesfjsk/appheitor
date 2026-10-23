@@ -76,12 +76,21 @@ export function missingLine(infos: NoteInfo[]): string {
 /** Degrau 1: só o banco, forma base, minúsculas. O resto ele digita (R6). */
 export function trayForStage(stage: number, model: string, bank: string[], extraPhrases: string[] = []): string[] {
   if (stage !== 1) return trayWords(model, bank, extraPhrases);
+  // Minúscula para não entregar o começo da frase; "I" e nomes (maiúscula no meio da frase-guia) ficam como são
+  const keep = new Set(['I']);
+  for (const sentence of model.split(/[.!?]+/)) {
+    for (const w of sentence.trim().split(/\s+/).slice(1)) {
+      const clean = w.replace(/[,;:"“”]/g, '');
+      if (/^[A-Z]/.test(clean)) keep.add(clean);
+    }
+  }
   const seen = new Set<string>();
   const out: string[] = [];
   for (const raw of bank) {
-    const t = raw.replace(/[.,!?;:"“”]/g, '').trim().toLowerCase();
-    if (!t || seen.has(t)) continue;
-    seen.add(t);
+    const word = raw.replace(/[.,!?;:"“”]/g, '').trim();
+    const t = keep.has(word) ? word : word.toLowerCase();
+    if (!t || seen.has(t.toLowerCase())) continue;
+    seen.add(t.toLowerCase());
     out.push(t);
   }
   return out;

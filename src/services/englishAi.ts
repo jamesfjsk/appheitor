@@ -32,7 +32,7 @@ import { callOpenAI, isAIConfigured } from './aiQuiz';
 import { letterAfterReviews, letterLevelOf, parseLetterReview, c1QuestionOk, parseC2Letter, type LetterReview } from './english/letterLevel';
 import { forgeItemsFor } from './english/forgeMolds';
 import { unitById } from '../config/englishUnits';
-import { currentUnit, dayInUnit, knownLemmas } from './english/units';
+import { currentUnit, dayInUnit, knownLemmas, noteFromUnit } from './english/units';
 import { pickC1Letter } from '../data/englishC1Letters';
 import { currentUsageMonth, getUsage, isOverCap } from './aiUsage';
 import { addDays } from './dailyQuizService';
@@ -601,16 +601,15 @@ async function generateLetter(input: GenerateInput): Promise<Generated<LetterCon
   return { ...offline, problems: [...problems, ...offline.problems] };
 }
 
-function noteFromUnit(unit: ReturnType<typeof unitById>, which: 0 | 1): NoteContent {
-  const mold = unit.notes[which];
-  return {
-    brief: mold.brief,
-    mustInclude: mold.ideas.map((pt) => ({ pt, en: pt.split(/\s+/).slice(0, 3) })),
-    templates: [mold.mold],
-    wordBank: [],
-    model: mold.model,
-    hint: '',
-  };
+/** O Recado da unidade para hoje, sem repetir o que já saiu nos últimos dias; null quando os dois já saíram. */
+function unitNoteFor(unit: ReturnType<typeof unitById>, day: number, avoid: string[]): NoteContent | null {
+  const order: Array<0 | 1> = day <= 1 ? [0, 1] : [1, 0];
+  const seen = new Set(avoid);
+  for (const which of order) {
+    const note = noteFromUnit(unit, which);
+    if (!seen.has(offlineKey('note', note))) return note;
+  }
+  return null;
 }
 
 function noteKeepsPattern(unit: ReturnType<typeof unitById>, model: string): boolean {
@@ -625,7 +624,9 @@ async function generateNote(input: GenerateInput): Promise<Generated<NoteContent
   const unit = unitById(input.unitId || 'u1');
   const day = input.dayInUnit ?? 1;
   if (day <= 2) {
-    return { content: noteFromUnit(unit, day === 1 ? 0 : 1), source: 'offline', problems: [] };
+    // Sem Ferraria a unidade fica no dia 2: o mesmo Recado voltava todo dia. Os dois já saíram? Vai para a IA no padrão da unidade.
+    const fresh = unitNoteFor(unit, day, input.avoidOffline ?? []);
+    if (fresh) return { content: fresh, source: 'offline', problems: [] };
   }
   const lv = levelFor(input.level);
   let problems: string[] = [];

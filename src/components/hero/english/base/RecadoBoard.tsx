@@ -546,6 +546,7 @@ const RecadoBoard: React.FC<Props> = ({ uid, date, contract, level, base, sfx, o
                   disabled={phase !== 'write'}
                   rows={3}
                   maxLength={300}
+                  placeholder={listened ? 'Escreva aqui, em inglês.' : 'Ouça e escreva aqui, em inglês.'}
                   spellCheck={false}
                   autoCorrect="off"
                   autoCapitalize="off"

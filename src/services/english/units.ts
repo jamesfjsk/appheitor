@@ -1,6 +1,7 @@
 // Estado da unidade (§9.2). Sem o campo, a primeira Ferraria começa na U1.
 
-import { nextUnitId, UNIT_ORDER } from '../../config/englishUnits';
+import { nextUnitId, UNIT_ORDER, type EnglishUnit } from '../../config/englishUnits';
+import type { NoteContent } from '../../types/english';
 
 export interface ForgeMark {
   date: string;
@@ -93,4 +94,19 @@ export function knownLemmas(vocab: Record<string, { seen: number }> | null | und
     .filter(([, row]) => row.seen >= 3)
     .sort((a, b) => b[1].seen - a[1].seen || a[0].localeCompare(b[0]))
     .map(([lemma]) => lemma);
+}
+
+export function noteFromUnit(unit: EnglishUnit, which: 0 | 1): NoteContent {
+  const mold = unit.notes[which];
+  const words = mold.model.replace(/[.,!?]/g, ' ').split(/\s+/).filter(Boolean);
+  return {
+    brief: mold.brief,
+    // Os pregos acendem pelas palavras em inglês de cada ideia (antes vinham as palavras em português e nunca acendiam)
+    mustInclude: mold.ideas.map((pt, i) => ({ pt, en: mold.keys[i] })),
+    templates: [mold.mold],
+    // No degrau "escrever" o quadro só mostra o banco: sem ele o Recado aparecia vazio (23/10/2026)
+    wordBank: [...new Set(words)],
+    model: mold.model,
+    hint: '',
+  };
 }
