@@ -15,6 +15,8 @@ import {
   type TelegramLink,
 } from '../../services/familyChatService';
 import { Check, CheckCheck, Smile } from 'lucide-react';
+import AnimatedEmoji from '../chat/AnimatedEmoji';
+import { splitEmojis } from '../../services/village/emojiTools';
 import {
   CHAT_MAX_CHARS,
   CHAT_REACTIONS,
@@ -214,7 +216,13 @@ const ChatPanel: React.FC = () => {
                         />
                       </a>
                     )}
-                    {m.text && <p className={big ? 'text-4xl leading-tight' : 'whitespace-pre-wrap break-words'}>{m.text}</p>}
+                    {big ? (
+                      <span className="flex items-end gap-0.5">
+                        {splitEmojis(m.text).map((e, k) => <AnimatedEmoji key={`${e}-${k}`} emoji={e} size={64} />)}
+                      </span>
+                    ) : (
+                      m.text && <p className="whitespace-pre-wrap break-words">{m.text}</p>
+                    )}
                     <p className={`mt-1 flex items-center justify-end gap-1 text-[11px] ${mine && !big ? 'text-blue-100' : 'text-gray-400'}`}>
                       {m.via === 'telegram' ? 'pelo Telegram · ' : ''}{chatClock(m.at)}
                       {mine && m.at && (read ? <CheckCheck className="h-3.5 w-3.5" aria-label="Ele viu" /> : <Check className="h-3.5 w-3.5" aria-label="Enviada" />)}

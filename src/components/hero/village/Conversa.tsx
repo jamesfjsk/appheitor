@@ -1,18 +1,23 @@
 // Conversa com o pai (pedido do pai, 13/10/2026). O pai responde pelo painel ou pelo Telegram.
 // As mensagens chegam do VillageHome, que também conta as não lidas para o selo no topo.
-// 25/10: emojis, reações nas mensagens do pai, balões agrupados e "visto" com dois tiques.
-import React, { useEffect, useRef, useState } from 'react';
+// 25/10: emojis, reações, balões agrupados e "visto" com dois tiques.
+// 25/10 (noite): painel de emojis do tamanho do Telegram, emoji animado, efeitos na tela e fundo à escolha.
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
-import { Check, CheckCheck, ImagePlus, SendHorizontal, Smile, SmilePlus, X } from 'lucide-react';
+import { Check, CheckCheck, ImagePlus, Palette, SendHorizontal, Smile, SmilePlus, X } from 'lucide-react';
 import ChildSheet from './ChildSheet';
+import EmojiPicker from './chat/EmojiPicker';
+import WallpaperPicker from './chat/WallpaperPicker';
+import AnimatedEmoji from '../../chat/AnimatedEmoji';
+import ChatEffects, { type EffectShot } from '../../chat/ChatEffects';
 import { useSound } from '../../../contexts/SoundContext';
 import { setAppBusy } from '../../../services/appUpdate';
+import { compressProofPhoto } from '../../../services/assignmentsService';
 import { markChatRead, sendChatMessage, setChatReaction, type ChatMeta } from '../../../services/familyChatService';
 import {
   CHAT_MAX_CHARS,
   CHAT_REACTIONS,
-  EMOJI_GROUPS,
   canSend,
   chatClock,
   chatDay,
@@ -25,25 +30,55 @@ import {
   unreadFor,
   type ChatMessage,
 } from '../../../services/village/familyChat';
+import { chatEffectFor, splitEmojis, wallpaperById, type ChatEffect } from '../../../services/village/emojiTools';
 
 const NOTE = '/assets/english/ui/base/c_note.webp';
 const RECENT_KEY = 'mm_chat_recent_emojis';
-const RECENT_MAX = 16;
+const RECENT_MAX = 24;
+const wallKey = (uid: string) => `mm_chat_wall_${uid}`;
+const photoKey = (uid: string) => `mm_chat_wall_photo_${uid}`;
+
+function readStore(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStore(key: string, value: string): boolean {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function readRecent(): string[] {
   try {
-    const raw = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]') as unknown;
+    const raw = JSON.parse(readStore(RECENT_KEY) || '[]') as unknown;
     return Array.isArray(raw) ? raw.filter((e): e is string => typeof e === 'string').slice(0, RECENT_MAX) : [];
   } catch {
     return [];
   }
 }
 
-function saveRecent(list: string[]): void {
+const motionOk = (): boolean => {
   try {
-    localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX)));
-  } catch { /* aba privada */ }
-}
+    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return true;
+  }
+};
+
+const blobToDataUrl = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
 
 const Conversa: React.FC<{
   childUid: string;
@@ -59,8 +94,16 @@ const Conversa: React.FC<{
   const [zoom, setZoom] = useState<string | null>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [recent, setRecent] = useState<string[]>(readRecent);
-  const [emojiTab, setEmojiTab] = useState<string>(() => (readRecent().length ? 'recentes' : EMOJI_GROUPS[0].id));
   const [reactingTo, setReactingTo] = useState<string | null>(null);
+  const [wallId, setWallId] = useState<string>(() => readStore(wallKey(childUid)) || 'pedra');
+  const [wallPhoto, setWallPhoto] = useState<string | null>(() => readStore(photoKey(childUid)));
+  const [wallOpen, setWallOpen] = useState(false);
+  const [shots, setShots] = useState<EffectShot[]>([]);
+  const [replays, setReplays] = useState<Record<string, number>>({});
+  const shotId = useRef(1);
+  const lastSeenMsg = useRef<string | null>(null);
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -77,9 +120,26 @@ const Conversa: React.FC<{
     if (unread > 0 || !meta.childReadAt) void markChatRead(childUid, 'filho').catch(() => undefined);
   }, [childUid, unread, meta.childReadAt]);
 
+  const fire = useCallback((kind: ChatEffect | 'burst', emoji: string, rect?: DOMRect) => {
+    if (!motionOk()) return;
+    const id = shotId.current++;
+    const x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+    const y = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+    setShots((list) => [...list.slice(-3), { id, kind, emoji, x, y }]);
+  }, []);
+  const doneShot = useCallback((id: number) => setShots((list) => list.filter((s) => s.id !== id)), []);
+
+  // Mensagem nova de um emoji só (dele ou do pai) enche a tela, como no Telegram
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
-  }, [lastId]);
+    const before = lastSeenMsg.current;
+    lastSeenMsg.current = lastId || null;
+    if (!before || !lastId || before === lastId) return;
+    const list = messagesRef.current;
+    const m = list[list.length - 1];
+    const fx = m && !m.image ? chatEffectFor(m.text) : null;
+    if (fx) fire(fx.kind, fx.emoji);
+  }, [lastId, fire]);
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
@@ -109,7 +169,7 @@ const Conversa: React.FC<{
     setText(next.text);
     const list = [emoji, ...recent.filter((e) => e !== emoji)].slice(0, RECENT_MAX);
     setRecent(list);
-    saveRecent(list);
+    writeStore(RECENT_KEY, JSON.stringify(list));
     window.requestAnimationFrame(() => {
       el?.focus();
       el?.setSelectionRange(next.caret, next.caret);
@@ -137,19 +197,52 @@ const Conversa: React.FC<{
     }
   };
 
-  const react = (m: ChatMessage, emoji: string) => {
+  const react = (m: ChatMessage, emoji: string, rect?: DOMRect) => {
     playClick();
     setReactingTo(null);
+    if (m.reaction !== emoji) fire('burst', emoji, rect);
     void setChatReaction(childUid, m.id, m.reaction === emoji ? null : emoji).catch(() => {
       playError();
       toast('Não deu para reagir. Tente de novo.');
     });
   };
 
+  const tapBig = (m: ChatMessage, el: HTMLElement) => {
+    playClick();
+    setReplays((r) => ({ ...r, [m.id]: (r[m.id] ?? 0) + 1 }));
+    const list = splitEmojis(m.text);
+    fire('burst', list[0] ?? m.text, el.getBoundingClientRect());
+    const fx = chatEffectFor(m.text);
+    if (fx) fire(fx.kind, fx.emoji);
+  };
+
+  const chooseWall = (id: string) => {
+    playClick();
+    setWallId(id);
+    writeStore(wallKey(childUid), id);
+  };
+
+  const wallFromPhoto = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      playError();
+      toast('Escolha uma foto ou imagem.');
+      return;
+    }
+    try {
+      const data = await blobToDataUrl(await compressProofPhoto(file));
+      if (!writeStore(photoKey(childUid), data)) throw new Error('cheio');
+      setWallPhoto(data);
+      chooseWall('foto');
+    } catch {
+      playError();
+      toast('Essa foto não coube. Tente outra.');
+    }
+  };
+
   const seen = seenByOther(messages, 'filho', meta.parentReadAt);
   const nowIso = new Date().toISOString();
-  const tabs = recent.length ? [{ id: 'recentes', label: 'Recentes', emojis: recent }, ...EMOJI_GROUPS] : EMOJI_GROUPS;
-  const shownTab = tabs.find((t) => t.id === emojiTab) ?? tabs[0];
+  const wall = wallpaperById(wallId === 'foto' && !wallPhoto ? 'pedra' : wallId);
+  const wallImage = wall.id === 'foto' ? wallPhoto : wall.image;
 
   const header = (
     <div className="mn-wood-head mn-chat-head">
@@ -158,6 +251,16 @@ const Conversa: React.FC<{
         <h2 className="mc-title text-sm truncate">Conversa com o pai</h2>
         <p className="mn-chat-status" data-testid="chat-status">{lastSeenLine(meta.parentReadAt, nowIso)}</p>
       </div>
+      <button
+        type="button"
+        className={`mc-btn mc-btn-dark w-11 h-11 p-0 shrink-0${wallOpen ? ' is-on' : ''}`}
+        onClick={() => { playClick(); setWallOpen((v) => !v); }}
+        aria-label="Fundo da conversa"
+        title="Fundo da conversa"
+        data-testid="chat-wall"
+      >
+        <Palette />
+      </button>
       <button type="button" className="mc-btn mc-btn-dark w-11 h-11 p-0 shrink-0" onClick={onClose} aria-label="Fechar">
         <X />
       </button>
@@ -166,31 +269,7 @@ const Conversa: React.FC<{
 
   const footer = (
     <div className="mn-chat-compose">
-      {emojiOpen && (
-        <div className="mn-chat-emoji" data-testid="chat-emoji-panel">
-          <div className="mn-chat-emoji-tabs" role="tablist">
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                role="tab"
-                aria-selected={shownTab.id === t.id}
-                className={`mn-chat-emoji-tab${shownTab.id === t.id ? ' is-on' : ''}`}
-                onClick={() => { playClick(); setEmojiTab(t.id); }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-          <div className="mn-chat-emoji-grid">
-            {shownTab.emojis.map((e) => (
-              <button key={e} type="button" className="mn-chat-emoji-btn" onClick={() => putEmoji(e)} aria-label={`Pôr ${e}`}>
-                {e}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {emojiOpen && <EmojiPicker recent={recent} onPick={putEmoji} />}
       {preview && (
         <div className="mn-chat-preview">
           <img src={preview} alt="Foto escolhida" />
@@ -263,8 +342,24 @@ const Conversa: React.FC<{
   );
 
   return (
-    <ChildSheet onClose={onClose} header={header} footer={footer} wide="md" className="mn-chat-sheet">
-      <div className="mn-chat-list" data-testid="chat-list" onClick={() => setReactingTo(null)}>
+    <ChildSheet
+      onClose={onClose}
+      header={header}
+      footer={footer}
+      wide="md"
+      className={`mn-chat-sheet wall-${wall.id}${wallImage ? ' has-wall-image' : ''}`}
+      style={wallImage ? ({ '--chat-wall': `url("${wallImage}")` } as React.CSSProperties) : undefined}
+    >
+      {wallOpen && (
+        <WallpaperPicker
+          current={wall.id}
+          photo={wallPhoto}
+          onPick={chooseWall}
+          onPhoto={(f) => void wallFromPhoto(f)}
+          onClose={() => setWallOpen(false)}
+        />
+      )}
+      <div className="mn-chat-list" data-testid="chat-list" onClick={() => { setReactingTo(null); setWallOpen(false); }}>
         {messages.length === 0 && (
           <div className="mn-chat-empty">
             <img src={NOTE} alt="" className="mc-pixel" draggable={false} />
@@ -278,6 +373,8 @@ const Conversa: React.FC<{
           const mine = m.from === 'filho';
           const { first, last } = chatGroup(messages, i);
           const big = !m.image && isEmojiOnly(m.text);
+          const bigList = big ? splitEmojis(m.text) : [];
+          const bigSize = bigList.length === 1 ? 112 : bigList.length === 2 ? 84 : 64;
           const lastMine = mine && !messages.slice(i + 1).some((x) => x.from === 'filho');
           const read = mine && Boolean(m.at && meta.parentReadAt && meta.parentReadAt >= m.at);
           const rowClass = [
@@ -294,9 +391,12 @@ const Conversa: React.FC<{
                 <div
                   className={`mn-chat-bubble${big ? ' is-big' : ''}`}
                   onClick={(e) => {
-                    if (mine) return;
                     e.stopPropagation();
-                    setReactingTo((v) => (v === m.id ? null : m.id));
+                    if (big) {
+                      tapBig(m, e.currentTarget);
+                      return;
+                    }
+                    if (!mine) setReactingTo((v) => (v === m.id ? null : m.id));
                   }}
                 >
                   {!mine && (first || newDay) && !big && <span className="mn-chat-who">Pai</span>}
@@ -315,7 +415,15 @@ const Conversa: React.FC<{
                       />
                     </button>
                   )}
-                  {m.text && <span className={big ? 'mn-chat-big' : 'mn-chat-text'}>{m.text}</span>}
+                  {big ? (
+                    <span className="mn-chat-big" data-testid="chat-big-emoji">
+                      {bigList.map((e, k) => (
+                        <AnimatedEmoji key={`${e}-${k}`} emoji={e} size={bigSize} replay={replays[m.id] ?? 0} />
+                      ))}
+                    </span>
+                  ) : (
+                    m.text && <span className="mn-chat-text">{m.text}</span>
+                  )}
                   <span className="mn-chat-meta">
                     {chatClock(m.at)}
                     {mine && m.at && (read
@@ -344,7 +452,7 @@ const Conversa: React.FC<{
                         type="button"
                         role="menuitem"
                         className={`mn-chat-react-pick${m.reaction === r ? ' is-on' : ''}`}
-                        onClick={() => react(m, r)}
+                        onClick={(e) => react(m, r, e.currentTarget.getBoundingClientRect())}
                         aria-label={m.reaction === r ? `Tirar ${r}` : `Reagir com ${r}`}
                       >
                         {r}
@@ -359,6 +467,7 @@ const Conversa: React.FC<{
         })}
         <div ref={endRef} />
       </div>
+      <ChatEffects shots={shots} onDone={doneShot} />
       {zoom && createPortal(
         <div className="mn-chat-zoom" role="dialog" aria-label="Foto" onClick={(e) => { e.stopPropagation(); setZoom(null); }}>
           <img src={zoom} alt="Foto" />

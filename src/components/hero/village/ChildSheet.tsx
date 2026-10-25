@@ -19,13 +19,16 @@ const ChildSheet: React.FC<{
   wide?: Wide;
   className?: string;
   veilClass?: string;
+  /** variáveis de CSS da folha (o fundo escolhido na Conversa) */
+  style?: React.CSSProperties;
   children: React.ReactNode;
 }> = ({
-  onClose, title, header, tabs, footer, wide = 'lg', className, veilClass = 'mn-veil', children,
+  onClose, title, header, tabs, footer, wide = 'lg', className, veilClass = 'mn-veil', style, children,
 }) => (
   <div className={`fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 ${veilClass}`} onClick={onClose}>
     <div
       className={`mc-modal mc-pop mn-child-sheet rounded-lg w-full ${WIDE[wide]} ${className || ''} text-white`}
+      style={style}
       onClick={(e) => e.stopPropagation()}
     >
       {(header || title) && (
