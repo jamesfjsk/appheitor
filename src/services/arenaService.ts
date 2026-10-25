@@ -79,6 +79,50 @@ export async function payChessSchool(uid: string, kind: 'licao' | 'desafio', id:
   return { paid, xp: paid ? xp : 0 };
 }
 
+/** Partida com o pai: vitória 30 XP e 1 redstone, empate 15, derrota 10 (jogou com o pai). Uma vez por partida. */
+export async function payChessPai(
+  uid: string,
+  n: number,
+  result: 'win' | 'loss' | 'draw',
+  color: Side,
+  moves: number,
+): Promise<{ paid: boolean; xp: number; material: Material | null }> {
+  if (!uid || !n) return { paid: false, xp: 0, material: null };
+  const xp = result === 'win' ? 30 : result === 'draw' ? 15 : 10;
+  const material: Material | null = result === 'win' ? 'redstone' : null;
+  const key = claimKey('xadrez', 'pai', n);
+  const vRef = doc(db, 'village', uid);
+  const bRef = doc(db, 'englishBase', uid);
+  const pRef = doc(db, 'progress', uid);
+  const now = new Date().toISOString();
+  let paid = false;
+  let totalXP = 0;
+  await runTransaction(db, async (tx) => {
+    const [vSnap, bSnap, pSnap] = await Promise.all([tx.get(vRef), tx.get(bRef), tx.get(pRef)]);
+    const village = vSnap.exists() ? fromVillageDoc(uid, (vSnap.data() || {}) as Record<string, unknown>) : initialVillageDoc(uid, now);
+    if (hasClaim(village, key)) return;
+    const claimed = { ...village.claimed, [key]: now };
+    if (vSnap.exists()) tx.update(vRef, { claimed, updatedAt: now });
+    else tx.set(vRef, { ...village, claimed, updatedAt: now });
+    if (material) {
+      const base = bSnap.exists() ? fromBaseDoc(uid, (bSnap.data() || {}) as Record<string, unknown>) : initialBaseDoc(uid, now);
+      const materials = { ...base.materials, [material]: (base.materials[material] ?? 0) + 1 };
+      if (bSnap.exists()) tx.update(bRef, { materials, updatedAt: now });
+      else tx.set(bRef, { ...base, materials, updatedAt: now });
+    }
+    if (pSnap.exists()) {
+      totalXP = (Number(pSnap.data()?.totalXP) || 0) + xp;
+      tx.update(pRef, { totalXP, level: getLevelFromXP(totalXP), updatedAt: serverTimestamp() });
+    }
+    paid = true;
+  });
+  if (paid) {
+    await logChessGame(uid, { mode: 'pai', level: 0, result, color, moves, date: now.slice(0, 10) }, true).catch(() => undefined);
+    if (totalXP) await bumpVillage(uid, {}, { level: getLevelFromXP(totalXP) }).catch(() => undefined);
+  }
+  return { paid, xp: paid ? xp : 0, material: paid ? material : null };
+}
+
 /** Paga a vitória contra o robô (se ainda couber hoje) e registra a partida. */
 export async function payChessWin(uid: string, levelId: number, date: string, color: Side, moves: number): Promise<ChessPay> {
   if (!uid) throw new Error('Entre com a conta da criança para jogar.');

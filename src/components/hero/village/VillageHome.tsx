@@ -45,6 +45,8 @@ import Conversa from './Conversa';
 const ArenaScene = React.lazy(() => import('./arena/ArenaScene'));
 import { subscribeChat, subscribeChatMeta, type ChatMeta } from '../../../services/familyChatService';
 import { unreadFor, type ChatMessage } from '../../../services/village/familyChat';
+import { subscribeMatch } from '../../../services/arena/matchStore';
+import { payChessPai } from '../../../services/arenaService';
 import { labLevelOf } from '../../../services/village/career';
 import EstanteDoSabio from './EstanteDoSabio';
 import Cofrinho from './Cofrinho';
@@ -163,6 +165,33 @@ const VillageHome: React.FC<Props> = ({
   useEffect(() => {
     if (!childUid) return;
     return subscribeCareer(childUid, setCareer);
+  }, [childUid]);
+
+  // Xadrez com o pai: aviso quando ele joga e prêmio quando a partida acaba (uma vez por partida)
+  const lastPaiLance = useRef<string | null | undefined>(undefined);
+  const districtRef = useRef<District>(null);
+  districtRef.current = district;
+  useEffect(() => {
+    if (!childUid) return;
+    return subscribeMatch(childUid, (m) => {
+      if (!m) return;
+      const key = m.lastMove && m.lastMove.by === 'pai' ? `${m.n}:${m.moves}` : null;
+      const before = lastPaiLance.current;
+      lastPaiLance.current = key;
+      // Dentro da Arena o tabuleiro já mostra; o aviso é para quando ele está na Vila
+      if (before !== undefined && key && key !== before && m.status === 'playing' && districtRef.current !== 'arena') {
+        toast((t) => (
+          <button type="button" className="text-left" onClick={() => { toast.dismiss(t.id); setLot(null); setDistrict('arena'); }}>
+            <b>O pai jogou no xadrez: {m.lastMove?.line}.</b> Sua vez! Toque para abrir a Arena.
+          </button>
+        ), { duration: 9000 });
+      }
+      if (m.status === 'over' && m.result) {
+        void payChessPai(childUid, m.n, m.result, m.childColor, m.moves).then((r) => {
+          if (r.paid) toast.success(`Partida com o pai: +${r.xp} XP${r.material ? ' e 1 redstone' : ''}.`);
+        }).catch(() => undefined);
+      }
+    });
   }, [childUid]);
 
   // Conversa com o pai: selo de não lidas no topo e aviso quando chega mensagem nova

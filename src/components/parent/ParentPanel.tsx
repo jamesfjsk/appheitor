@@ -33,12 +33,14 @@ import CharactersPanel from './CharactersPanel';
 import EncomendasPanel from './EncomendasPanel';
 import CareerPanel, { CareerSync } from './CareerPanel';
 import ChatPanel from './ChatPanel';
+// A Arena (xadrez) só carrega quando a aba abre
+const ArenaPanel = React.lazy(() => import('./ArenaPanel'));
 import { useChatUnread } from './useChatUnread';
 
 type TabType =
   | 'dashboard' | 'village' | 'tasks' | 'rewards' | 'reminders' | 'surprise' | 'quiz'
   | 'english' | 'birthday' | 'notifications' | 'history' | 'rewardsHistory' | 'notes' | 'system'
-  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books' | 'encomendas' | 'career' | 'chat';
+  | 'goals' | 'challenges' | 'balanca' | 'agenda' | 'characters' | 'books' | 'encomendas' | 'career' | 'chat' | 'arena';
 
 const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; label: string; icon: string }> }> = [
   {
@@ -60,6 +62,7 @@ const GROUPS: Array<{ id: string; label: string; tabs: Array<{ id: TabType; labe
       { id: 'tasks', label: 'Missões', icon: 'notes' },
       { id: 'encomendas', label: 'Encomendas', icon: 'notes' },
       { id: 'career', label: 'Carreira', icon: 'trophy' },
+      { id: 'arena', label: 'Arena', icon: 'gamepad' },
       { id: 'surprise', label: 'Missão surpresa', icon: 'target' },
       { id: 'agenda', label: 'Agenda', icon: 'notes' },
     ],
@@ -149,6 +152,11 @@ const ParentPanel: React.FC = () => {
           {activeTab === 'encomendas' && <EncomendasPanel />}
           {activeTab === 'career' && <CareerPanel />}
           {activeTab === 'chat' && <ChatPanel />}
+          {activeTab === 'arena' && (
+            <React.Suspense fallback={<p className="text-sm text-gray-500">Carregando…</p>}>
+              <ArenaPanel />
+            </React.Suspense>
+          )}
           {activeTab === 'rewards' && <RewardManager />}
           {activeTab === 'reminders' && <PlacaManager />}
           {activeTab === 'surprise' && <SurpriseMissionConfigComponent />}

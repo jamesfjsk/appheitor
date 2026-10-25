@@ -7,14 +7,12 @@ import { createHash, randomBytes } from 'crypto';
 import { gunzipSync } from 'zlib';
 import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { getDownloadURL, getStorage } from 'firebase-admin/storage';
-import { defineSecret } from 'firebase-functions/params';
 import { onDocumentCreated, onDocumentUpdated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { sendPush, tokensOf } from './push';
+import { LINK, REGION, TELEGRAM_BOT_TOKEN, childName, tg, type Link } from './telegramApi';
+import { onChessCommand } from './arena';
 
-const REGION = 'southamerica-east1';
-const TELEGRAM_BOT_TOKEN = defineSecret('TELEGRAM_BOT_TOKEN');
-const LINK = 'telegramLink/main';
 const MAX_TEXT = 1000;
 const MAX_PHOTO = 5 * 1024 * 1024;
 const DELIVERED = '🕊';
@@ -22,7 +20,6 @@ const SEEN = '👀';
 /** Onde o site serve as figurinhas do jogo (public/assets/stickers); o Telegram baixa de lá */
 const SITE = 'https://www.flashmissons.com';
 
-type Link = { botUsername?: string; pairCode?: string; parentChatId?: string; parentName?: string; childUid?: string };
 type TgReactionUpdate = {
   chat: { id: number; type: string };
   message_id: number;
@@ -53,29 +50,12 @@ function projectId(): string {
   return process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || '';
 }
 
-async function tg<T = unknown>(token: string, method: string, body: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const data = (await res.json()) as { ok: boolean; result?: T; description?: string };
-  if (!data.ok) throw new Error(`telegram ${method}: ${data.description ?? res.status}`);
-  return data.result as T;
-}
-
 async function react(token: string, chatId: string, messageId: number, emoji: string): Promise<void> {
   try {
     await tg(token, 'setMessageReaction', { chat_id: chatId, message_id: messageId, reaction: [{ type: 'emoji', emoji }] });
   } catch (e) {
     console.warn('telegram: reação', e);
   }
-}
-
-async function childName(uid: string): Promise<string> {
-  const raw = (await getFirestore().doc(`users/${uid}`).get()).data()?.displayName;
-  const first = typeof raw === 'string' ? raw.trim().split(/\s+/)[0] : '';
-  return first || 'Heitor';
 }
 
 async function savePhoto(
@@ -133,6 +113,14 @@ async function onTelegramMessage(token: string, msg: TgMessage | undefined): Pro
   }
   if (chatId !== link.parentChatId) {
     if (start) await say('Este robô é de uma família só.');
+    return;
+  }
+  // Xadrez com o pai pelo Telegram: 'lance e4', 'xadrez', 'novoxadrez' (arena.ts)
+  const chess = /^\/?(?:(xadrez)|(novoxadrez)(?:\s+(brancas|pretas))?|lance\s+(\S+))\s*$/i.exec((msg.text ?? '').trim());
+  if (chess) {
+    if (chess[1]) await onChessCommand(token, chatId, uid, 'xadrez', '');
+    else if (chess[2]) await onChessCommand(token, chatId, uid, 'novoxadrez', (chess[3] ?? 'brancas').toLowerCase());
+    else await onChessCommand(token, chatId, uid, 'lance', chess[4] ?? '');
     return;
   }
   if (msg.text?.startsWith('/')) {

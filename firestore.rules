@@ -480,6 +480,35 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Xadrez com o pai (25/10/2026): uma partida por criança. O filho cria a dele e só mexe na vez dele
+    // (ou desiste); a validade do lance é do chess.js no app e no robô do Telegram.
+    match /arenaMatches/{uid} {
+      allow get: if signedIn() && (isAdmin() || uid == request.auth.uid);
+      allow create: if isAdmin() || (signedIn() && uid == request.auth.uid
+        && request.resource.data.childUid == uid);
+      allow update: if isAdmin() || (signedIn() && uid == request.auth.uid
+        && request.resource.data.childUid == uid
+        && (
+          // lance dele, ou desistência (desistir é sempre derrota)
+          (resource.data.status == 'playing'
+            && request.resource.data.n == resource.data.n
+            && request.resource.data.childColor == resource.data.childColor
+            && (
+              // na vez dele: um lance (que pode acabar a partida) ou desistir
+              (resource.data.turn == resource.data.childColor
+                && (request.resource.data.status == 'playing'
+                  || request.resource.data.result == 'loss'
+                  || request.resource.data.moves == resource.data.moves + 1))
+              // na vez do pai: só desistir
+              || (request.resource.data.status == 'over' && request.resource.data.result == 'loss')
+            ))
+          // partida nova depois da que acabou
+          || (resource.data.status == 'over' && request.resource.data.status == 'playing'
+            && request.resource.data.n != resource.data.n)
+        ));
+      allow delete: if isAdmin();
+    }
+
     // Ligação com o Telegram: só o pai lê; quem grava é a Cloud Function
     match /telegramLink/{id} {
       allow read: if isAdmin();

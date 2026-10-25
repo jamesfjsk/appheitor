@@ -1,9 +1,11 @@
 // Arena da Vila (25/10/2026): o lugar dos jogos de raciocínio (MUNDO.md, roteiro Etapa 4B).
 // Começa pelo xadrez: contra o computador (4 níveis), contra o pai e a Escola do Sábio.
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import BotGame from './BotGame';
 import EscolaSabio from './EscolaSabio';
+import PaiMatch from './PaiMatch';
+import { subscribeMatch, type ArenaMatch } from '../../../../services/arena/matchService';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useSound } from '../../../../contexts/SoundContext';
 import { useVillage } from '../../../../contexts/VillageContext';
@@ -13,7 +15,7 @@ import { claimKey, hasClaim } from '../../../../services/village/claims';
 import { getTodayBrazil } from '../../../../utils/clock';
 import { MATERIAL_LABELS } from '../../../../config/englishBase';
 
-type View = 'menu' | 'niveis' | 'jogo' | 'escola';
+type View = 'menu' | 'niveis' | 'jogo' | 'escola' | 'pai';
 
 const CAPATAZ = '/assets/village/npc/olheiro-iso.png';
 
@@ -27,6 +29,9 @@ const ArenaScene: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [level, setLevel] = useState(saved?.level ?? 1);
   const [escola, setEscola] = useState<{ kind: 'licao' | 'desafio'; index: number } | null>(null);
   const [escolaTitle, setEscolaTitle] = useState('');
+  const [match, setMatch] = useState<ArenaMatch | null>(null);
+  useEffect(() => (childUid ? subscribeMatch(childUid, setMatch) : undefined), [childUid]);
+  const paiTurn = Boolean(match && match.status === 'playing' && match.turn === match.childColor);
   const today = getTodayBrazil();
   const paidToday = useMemo(
     () => Array.from({ length: PAID_WINS_PER_DAY }, (_, i) => claimKey('xadrez', 'vitoria', today, i + 1)).filter((k) => hasClaim(village, k)).length,
@@ -56,14 +61,14 @@ const ArenaScene: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setEscola(null);
       return;
     }
-    if (view === 'niveis' || view === 'escola') {
+    if (view === 'niveis' || view === 'escola' || view === 'pai') {
       setView('menu');
       return;
     }
     onClose();
   };
 
-  const title = view === 'escola' ? (escola ? escolaTitle : 'Escola do Sábio') : view === 'jogo' && game ? `Xadrez contra o ${levelById(game.level).name}` : view === 'niveis' ? 'Contra o computador' : 'Arena';
+  const title = view === 'pai' ? 'Xadrez com o pai' : view === 'escola' ? (escola ? escolaTitle : 'Escola do Sábio') : view === 'jogo' && game ? `Xadrez contra o ${levelById(game.level).name}` : view === 'niveis' ? 'Contra o computador' : 'Arena';
 
   return (
     <div className="ar-scene" data-testid="arena-scene">
@@ -96,11 +101,12 @@ const ArenaScene: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <span className="ar-door-title">Contra o computador</span>
               <span className="ar-door-sub">4 adversários, do Gato ao Sábio</span>
             </button>
-            <div className="ar-door is-soon" aria-disabled>
+            <button type="button" className="ar-door" onClick={() => { playClick(); setView('pai'); }} data-testid="arena-pai">
+              {paiTurn && <span className="ar-door-badge">Sua vez!</span>}
               <img src="/assets/arena/pieces/wk.png" alt="" className="mc-pixel" />
               <span className="ar-door-title">Contra o pai</span>
-              <span className="ar-door-sub">Cada um joga quando pode. Chega já já.</span>
-            </div>
+              <span className="ar-door-sub">{match?.status === 'playing' ? (paiTurn ? 'O pai jogou. É a sua vez!' : 'Esperando o pai jogar.') : 'Cada um joga quando pode.'}</span>
+            </button>
             <button type="button" className="ar-door" onClick={() => { playClick(); setEscola(null); setView('escola'); }} data-testid="arena-escola">
               <img src="/assets/village/npc/sabio-iso.png" alt="" className="mc-pixel" />
               <span className="ar-door-title">Escola do Sábio</span>
@@ -144,6 +150,7 @@ const ArenaScene: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
       )}
 
+      {view === 'pai' && <PaiMatch uid={childUid} />}
       {view === 'escola' && <EscolaSabio uid={childUid} open={escola} onOpen={setEscola} onTitle={setEscolaTitle} />}
 
       {view === 'jogo' && game && (

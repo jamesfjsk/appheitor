@@ -10,6 +10,7 @@ import { nowBrazil } from './clock';
 import { sendPush, tokensOf } from './push';
 
 export { chatReaction, chatRelay, chatSeen, telegramSetup, telegramWebhook } from './telegram';
+export { arenaTurn } from './arena';
 
 initializeApp();
 const db = getFirestore();

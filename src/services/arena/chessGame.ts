@@ -1,6 +1,6 @@
 // Xadrez da Arena (25/10/2026). Puro: regras pelo chess.js, textos em português, níveis e prêmio.
 // O robô roda num Web Worker (chessBot.ts); aqui só o que dá para testar sem navegador.
-import { Chess, type Move } from 'chess.js';
+import type { Chess, Move } from 'chess.js';
 import type { Material } from '../../types/english';
 
 export type Side = 'w' | 'b';
