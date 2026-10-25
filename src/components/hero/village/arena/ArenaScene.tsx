@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import BotGame from './BotGame';
+import EscolaSabio from './EscolaSabio';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useSound } from '../../../../contexts/SoundContext';
 import { useVillage } from '../../../../contexts/VillageContext';
@@ -12,7 +13,7 @@ import { claimKey, hasClaim } from '../../../../services/village/claims';
 import { getTodayBrazil } from '../../../../utils/clock';
 import { MATERIAL_LABELS } from '../../../../config/englishBase';
 
-type View = 'menu' | 'niveis' | 'jogo';
+type View = 'menu' | 'niveis' | 'jogo' | 'escola';
 
 const CAPATAZ = '/assets/village/npc/olheiro-iso.png';
 
@@ -24,6 +25,8 @@ const ArenaScene: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [view, setView] = useState<View>('menu');
   const [game, setGame] = useState<{ level: number; color: Side; resume: SavedBotGame | null; n: number } | null>(null);
   const [level, setLevel] = useState(saved?.level ?? 1);
+  const [escola, setEscola] = useState<{ kind: 'licao' | 'desafio'; index: number } | null>(null);
+  const [escolaTitle, setEscolaTitle] = useState('');
   const today = getTodayBrazil();
   const paidToday = useMemo(
     () => Array.from({ length: PAID_WINS_PER_DAY }, (_, i) => claimKey('xadrez', 'vitoria', today, i + 1)).filter((k) => hasClaim(village, k)).length,
@@ -49,14 +52,18 @@ const ArenaScene: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setGame(null);
       return;
     }
-    if (view === 'niveis') {
+    if (view === 'escola' && escola) {
+      setEscola(null);
+      return;
+    }
+    if (view === 'niveis' || view === 'escola') {
       setView('menu');
       return;
     }
     onClose();
   };
 
-  const title = view === 'jogo' && game ? `Xadrez contra o ${levelById(game.level).name}` : view === 'niveis' ? 'Contra o computador' : 'Arena';
+  const title = view === 'escola' ? (escola ? escolaTitle : 'Escola do Sábio') : view === 'jogo' && game ? `Xadrez contra o ${levelById(game.level).name}` : view === 'niveis' ? 'Contra o computador' : 'Arena';
 
   return (
     <div className="ar-scene" data-testid="arena-scene">
@@ -94,11 +101,11 @@ const ArenaScene: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <span className="ar-door-title">Contra o pai</span>
               <span className="ar-door-sub">Cada um joga quando pode. Chega já já.</span>
             </div>
-            <div className="ar-door is-soon" aria-disabled>
+            <button type="button" className="ar-door" onClick={() => { playClick(); setEscola(null); setView('escola'); }} data-testid="arena-escola">
               <img src="/assets/village/npc/sabio-iso.png" alt="" className="mc-pixel" />
               <span className="ar-door-title">Escola do Sábio</span>
-              <span className="ar-door-sub">Aprenda cada peça e resolva desafios. Chega já já.</span>
-            </div>
+              <span className="ar-door-sub">Como cada peça anda e desafios de xeque-mate</span>
+            </button>
           </div>
         </div>
       )}
@@ -136,6 +143,8 @@ const ArenaScene: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
         </div>
       )}
+
+      {view === 'escola' && <EscolaSabio uid={childUid} open={escola} onOpen={setEscola} onTitle={setEscolaTitle} />}
 
       {view === 'jogo' && game && (
         <BotGame

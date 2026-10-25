@@ -5227,3 +5227,108 @@ div.mn-pack-cell {
 @media (prefers-reduced-motion: reduce) {
   .ar-scene, .ar-end, .ch-piece.is-landed, .ch-sq.is-hint { animation: none; }
 }
+
+/* Escola do Sábio (25/10/2026) */
+.ch-mark {
+  position: absolute;
+  inset: 22%;
+  width: 56%;
+  height: 56%;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 1;
+  animation: es-bob 1.4s ease-in-out infinite;
+}
+@keyframes es-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8%); }
+}
+.es-sabio {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.es-sabio img {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+.es-sabio p {
+  margin: 0 0 6px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #f3e4bd;
+  color: #3a2a10;
+  border: 3px solid var(--mc-edge);
+  font-size: 15px;
+  font-weight: 600;
+}
+.es-h {
+  margin: 22px 0 10px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mc-gold-hi);
+}
+.es-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+.es-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border-radius: 14px;
+  border: 3px solid var(--mc-edge);
+  background: linear-gradient(180deg, #4a3d33, #2f2722);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.es-card:hover { transform: translateY(-2px); }
+.es-card img { width: 64px; height: 64px; image-rendering: pixelated; }
+.es-done {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--mc-grass);
+  color: #ffffff;
+}
+.es-puzzles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 8px;
+}
+.es-puzzle {
+  display: grid;
+  place-items: center;
+  height: 52px;
+  border-radius: 12px;
+  border: 3px solid var(--mc-edge);
+  background: #ecd9b0;
+  color: #3a2a10;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.es-puzzle svg { width: 22px; height: 22px; }
+.es-puzzle.is-done { background: var(--mc-grass); color: #ffffff; }
+.es-stars {
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--mc-gold);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch-mark { animation: none; }
+}

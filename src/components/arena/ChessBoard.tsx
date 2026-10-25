@@ -24,8 +24,14 @@ const ChessBoard: React.FC<{
   onMove: (m: BoardMove) => void;
   onSelect?: () => void;
   className?: string;
-}> = ({ fen, orientation, movable, lastMove, hint, onMove, onSelect, className }) => {
-  const chess = useMemo(() => new Chess(fen), [fen]);
+  /** tabuleiro de treino (Escola): sem rei e sem fim de jogo */
+  free?: boolean;
+  /** casas com diamante para pegar */
+  marks?: string[];
+  /** só esta peça mexe */
+  pieceFilter?: PieceType;
+}> = ({ fen, orientation, movable, lastMove, hint, onMove, onSelect, className, free = false, marks, pieceFilter }) => {
+  const chess = useMemo(() => new Chess(fen, free ? { skipValidation: true } : undefined), [fen, free]);
   const [selected, setSelected] = useState<string | null>(null);
   const [promo, setPromo] = useState<{ from: string; to: string } | null>(null);
   const [seenFen, setSeenFen] = useState(fen);
@@ -50,7 +56,7 @@ const ChessBoard: React.FC<{
     return null;
   }, [chess]);
 
-  const canMove = movable !== null && chess.turn() === movable && !chess.isGameOver();
+  const canMove = movable !== null && chess.turn() === movable && (free || !chess.isGameOver());
   const ranks = orientation === 'w' ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
   const files = orientation === 'w' ? FILES : [...FILES].reverse();
 
@@ -67,7 +73,7 @@ const ChessBoard: React.FC<{
       setSelected(null);
       return;
     }
-    if (piece && piece.color === movable) {
+    if (piece && piece.color === movable && (!pieceFilter || piece.type === pieceFilter)) {
       onSelect?.();
       setSelected(sq === selected ? null : sq);
       return;
@@ -90,7 +96,7 @@ const ChessBoard: React.FC<{
               selected === sq ? 'is-sel' : '',
               checkSquare === sq ? 'is-check' : '',
               hint && (hint.from === sq || hint.to === sq) ? 'is-hint' : '',
-              canMove && piece && piece.color === movable ? 'is-mine' : '',
+              canMove && piece && piece.color === movable && (!pieceFilter || piece.type === pieceFilter) ? 'is-mine' : '',
             ].filter(Boolean).join(' ');
             return (
               <button
@@ -112,6 +118,7 @@ const ChessBoard: React.FC<{
                     draggable={false}
                   />
                 )}
+                {marks?.includes(sq) && <img src="/assets/english/ui/diamond.webp" alt="" className="ch-mark" draggable={false} />}
                 {targets.has(sq) && <span className={targets.get(sq) ? 'ch-take' : 'ch-dot'} aria-hidden />}
               </button>
             );
