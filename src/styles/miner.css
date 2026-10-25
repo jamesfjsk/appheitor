@@ -4058,7 +4058,7 @@ div.mn-pack-cell {
 .mn-chat-react-badge {
   position: absolute;
   bottom: -14px;
-  right: 8px;
+  left: 10px;
   padding: 1px 6px;
   border-radius: 999px;
   background: #2a241f;
