@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   markChatRead,
   sendChatMessage,
+  setChatReaction,
   subscribeChat,
   subscribeChatMeta,
   subscribeTelegramLink,
@@ -13,7 +14,21 @@ import {
   type ChatMeta,
   type TelegramLink,
 } from '../../services/familyChatService';
-import { CHAT_MAX_CHARS, canSend, chatClock, chatDay, chatDayLabel, seenByOther, unreadFor, type ChatMessage } from '../../services/village/familyChat';
+import { Check, CheckCheck, Smile } from 'lucide-react';
+import {
+  CHAT_MAX_CHARS,
+  CHAT_REACTIONS,
+  EMOJI_GROUPS,
+  canSend,
+  chatClock,
+  chatDay,
+  chatDayLabel,
+  insertAtCaret,
+  isEmojiOnly,
+  seenByOther,
+  unreadFor,
+  type ChatMessage,
+} from '../../services/village/familyChat';
 
 const TelegramCard: React.FC = () => {
   const [link, setLink] = useState<TelegramLink | null | undefined>(undefined);
@@ -103,6 +118,9 @@ const ChatPanel: React.FC = () => {
   const [sending, setSending] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [reactingTo, setReactingTo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!childUid) return;
@@ -136,12 +154,25 @@ const ChatPanel: React.FC = () => {
     try {
       await sendChatMessage(childUid, 'pai', text, photo, 'painel');
       setText('');
+      setEmojiOpen(false);
       dropPhoto();
     } catch (e) {
       toast.error(e instanceof Error && e.message ? e.message : 'Não deu para enviar.');
     } finally {
       setSending(false);
     }
+  };
+
+  const putEmoji = (emoji: string) => {
+    const el = inputRef.current;
+    const next = insertAtCaret(text, el?.selectionStart ?? text.length, el?.selectionEnd ?? text.length, emoji);
+    setText(next.text);
+    window.requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(next.caret, next.caret); });
+  };
+
+  const react = (m: ChatMessage, emoji: string) => {
+    setReactingTo(null);
+    void setChatReaction(childUid, m.id, m.reaction === emoji ? null : emoji).catch(() => toast.error('Não deu para reagir.'));
   };
 
   const nowIso = new Date().toISOString();
@@ -162,13 +193,17 @@ const ChatPanel: React.FC = () => {
             const newDay = i === 0 || (day && day !== chatDay(rows[i - 1].at));
             const mine = m.from === 'pai';
             const lastMine = mine && !rows.slice(i + 1).some((x) => x.from === 'pai');
+            const big = !m.image && isEmojiOnly(m.text);
+            const read = mine && Boolean(m.at && meta.childReadAt && meta.childReadAt >= m.at);
             return (
               <React.Fragment key={m.id}>
                 {newDay && (
                   <p className="text-center text-xs font-semibold text-gray-400 pt-2">{chatDayLabel(m.at, nowIso)}</p>
                 )}
-                <div className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm ${mine ? 'bg-blue-600 text-white' : 'bg-white text-gray-900 border border-gray-200'}`}>
+                <div className={`group relative flex items-center gap-1 ${mine ? 'justify-end' : 'justify-start'} ${m.reaction ? 'pb-3' : ''}`}>
+                  <div
+                    className={`relative max-w-[80%] rounded-2xl px-3 py-2 text-sm ${big ? 'bg-transparent' : mine ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-gray-900 border border-gray-200 shadow-sm'}`}
+                  >
                     {m.image && (
                       <a href={m.image.url} target="_blank" rel="noreferrer" className="block mb-1">
                         <img
@@ -179,11 +214,41 @@ const ChatPanel: React.FC = () => {
                         />
                       </a>
                     )}
-                    {m.text && <p className="whitespace-pre-wrap break-words">{m.text}</p>}
-                    <p className={`mt-1 text-right text-[11px] ${mine ? 'text-blue-100' : 'text-gray-400'}`}>
+                    {m.text && <p className={big ? 'text-4xl leading-tight' : 'whitespace-pre-wrap break-words'}>{m.text}</p>}
+                    <p className={`mt-1 flex items-center justify-end gap-1 text-[11px] ${mine && !big ? 'text-blue-100' : 'text-gray-400'}`}>
                       {m.via === 'telegram' ? 'pelo Telegram · ' : ''}{chatClock(m.at)}
+                      {mine && m.at && (read ? <CheckCheck className="h-3.5 w-3.5" aria-label="Ele viu" /> : <Check className="h-3.5 w-3.5" aria-label="Enviada" />)}
                     </p>
+                    {m.reaction && (
+                      <span className="absolute -bottom-3 right-2 rounded-full border border-gray-200 bg-white px-1.5 text-sm shadow-sm">{m.reaction}</span>
+                    )}
                   </div>
+                  {!mine && (
+                    <button
+                      type="button"
+                      onClick={() => setReactingTo((v) => (v === m.id ? null : m.id))}
+                      className="rounded-full p-1 text-gray-400 opacity-0 hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100"
+                      aria-label="Reagir"
+                      title="Reagir"
+                    >
+                      <Smile className="h-4 w-4" />
+                    </button>
+                  )}
+                  {reactingTo === m.id && (
+                    <div className="absolute bottom-full left-0 z-10 mb-1 flex gap-1 rounded-full border border-gray-200 bg-white p-1 shadow-lg">
+                      {CHAT_REACTIONS.map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => react(m, r)}
+                          className={`h-8 w-8 rounded-full text-lg hover:bg-gray-100 ${m.reaction === r ? 'bg-blue-50' : ''}`}
+                          aria-label={`Reagir com ${r}`}
+                        >
+                          {r}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {lastMine && seen && <p className="text-right text-xs text-gray-400">Ele viu</p>}
               </React.Fragment>
@@ -191,6 +256,20 @@ const ChatPanel: React.FC = () => {
           })}
         </div>
         <div className="border-t border-gray-100 p-3 space-y-2">
+          {emojiOpen && (
+            <div className="max-h-40 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50 p-2">
+              {EMOJI_GROUPS.map((g) => (
+                <div key={g.id} className="mb-1">
+                  <p className="px-1 text-xs font-semibold text-gray-400">{g.label}</p>
+                  <div className="flex flex-wrap">
+                    {g.emojis.map((e) => (
+                      <button key={e} type="button" onClick={() => putEmoji(e)} className="h-9 w-9 rounded-lg text-xl hover:bg-gray-200">{e}</button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           {photo && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span className="truncate">Foto: {photo.name}</span>
@@ -213,7 +292,17 @@ const ChatPanel: React.FC = () => {
             >
               Foto
             </button>
+            <button
+              type="button"
+              onClick={() => setEmojiOpen((v) => !v)}
+              className={`rounded-xl border border-gray-200 p-2 text-gray-600 hover:bg-gray-50 ${emojiOpen ? 'bg-gray-100' : ''}`}
+              aria-label="Emojis"
+              title="Emojis"
+            >
+              <Smile className="h-5 w-5" />
+            </button>
             <textarea
+              ref={inputRef}
               value={text}
               maxLength={CHAT_MAX_CHARS}
               rows={2}

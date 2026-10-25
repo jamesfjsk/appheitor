@@ -4,7 +4,7 @@
 // A foto vai para o Storage em chat/{childUid}/{id}.jpg, comprimida no aparelho.
 // A ponte com o Telegram é feita pelas Cloud Functions (functions/src/telegram.ts).
 
-import { collection, doc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, deleteField, doc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, functions, storage } from '../config/firebase';
@@ -30,6 +30,7 @@ function fromMessage(id: string, raw: Record<string, unknown>): ChatMessage | nu
     ...(img && typeof img.path === 'string' && typeof img.url === 'string' ? { image: { path: img.path, url: img.url } } : {}),
     at: iso(raw.createdAt),
     via,
+    ...(typeof raw.reaction === 'string' && raw.reaction ? { reaction: raw.reaction } : {}),
   };
 }
 
@@ -100,6 +101,11 @@ export function subscribeTelegramLink(onChange: (link: TelegramLink | null) => v
 export async function telegramSetup(action: 'link' | 'unlink' | 'test'): Promise<void> {
   const call = httpsCallable<{ action: string }, { ok: boolean }>(functions, 'telegramSetup');
   await call({ action });
+}
+
+/** Reação numa mensagem do outro lado; null tira. O Telegram do pai recebe a do filho (functions/src/telegram.ts). */
+export async function setChatReaction(childUid: string, msgId: string, reaction: string | null): Promise<void> {
+  await updateDoc(doc(db, 'familyChat', childUid, 'messages', msgId), { reaction: reaction ?? deleteField() });
 }
 
 export async function sendChatMessage(

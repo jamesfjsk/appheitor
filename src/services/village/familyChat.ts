@@ -17,6 +17,8 @@ export interface ChatMessage {
   /** ISO; vazio enquanto o servidor não carimbou */
   at: string;
   via: ChatVia;
+  /** Reação de quem recebeu: o filho reage às do pai, o pai às do filho */
+  reaction?: string;
 }
 
 export const CHAT_MAX_CHARS = 1000;
@@ -66,6 +68,15 @@ export function chatDayLabel(iso: string, nowIso: string): string {
   return `${day.slice(8, 10)}/${day.slice(5, 7)}`;
 }
 
+/** Linha do topo da conversa: quando o outro lado olhou por último. */
+export function lastSeenLine(iso: string | undefined, nowIso: string): string {
+  if (!iso) return 'ainda não abriu a conversa';
+  const label = chatDayLabel(iso, nowIso);
+  if (label === 'Hoje') return `viu hoje às ${chatClock(iso)}`;
+  if (label === 'Ontem') return `viu ontem às ${chatClock(iso)}`;
+  return `viu em ${label}`;
+}
+
 /** "14:05" hoje, "ontem 14:05", ou "12/10 14:05", no horário de São Paulo. */
 export function chatTimeLabel(iso: string, nowIso: string): string {
   if (!iso) return 'enviando...';
@@ -76,3 +87,54 @@ export function chatTimeLabel(iso: string, nowIso: string): string {
   return `${label} ${time}`;
 }
 
+// Emojis e reações (pedido do pai, 25/10/2026: "opção de emoticon" e "mais moderno").
+// A mesma lista vale para o filho e para o painel. As reações são as que o robô do Telegram também consegue pôr.
+
+export const CHAT_REACTIONS = ['❤️', '👍', '🤣', '😱', '😢', '🔥'] as const;
+
+export const EMOJI_GROUPS: Array<{ id: string; label: string; emojis: string[] }> = [
+  {
+    id: 'caras',
+    label: 'Carinhas',
+    emojis: ['😀', '😂', '🤣', '😊', '😍', '🥰', '😘', '😎', '🤩', '🥳', '😜', '🤪', '😇', '🤗', '🤔', '😮', '😱', '😢', '😭', '😴', '😡', '🤯', '🙃', '😅'],
+  },
+  {
+    id: 'gestos',
+    label: 'Gestos',
+    emojis: ['👍', '👎', '👏', '🙌', '🙏', '💪', '✌️', '👋', '🤝', '👊', '❤️', '💙', '💚', '💛', '💜', '🔥', '⭐', '✨', '💯', '🎉', '✅', '❌', '❓', '💤'],
+  },
+  {
+    id: 'coisas',
+    label: 'Coisas',
+    emojis: ['⚽', '🎮', '📚', '✏️', '🍕', '🍔', '🍟', '🍦', '🍫', '🍎', '🐶', '🐱', '🦖', '🐉', '🚀', '✈️', '🏠', '☀️', '🌙', '🌧️', '⛏️', '💎', '🏆', '🎁'],
+  },
+];
+
+const EMOJI_ONLY = /^(?:\s*\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?)*){1,3}\s*$/u;
+
+/** Só emoji (até 3): a mensagem aparece grande, sem balão. */
+export function isEmojiOnly(text: string): boolean {
+  const t = text.trim();
+  return t.length > 0 && EMOJI_ONLY.test(t);
+}
+
+/** Põe o emoji onde está o cursor e devolve onde o cursor fica. */
+export function insertAtCaret(text: string, start: number, end: number, insert: string): { text: string; caret: number } {
+  const a = Math.max(0, Math.min(start, text.length));
+  const b = Math.max(a, Math.min(end, text.length));
+  const next = (text.slice(0, a) + insert + text.slice(b)).slice(0, CHAT_MAX_CHARS);
+  return { text: next, caret: Math.min(a + insert.length, next.length) };
+}
+
+const GROUP_GAP_MS = 5 * 60 * 1000;
+
+/** Mensagens seguidas do mesmo lado, no mesmo dia e com até 5 minutos entre elas formam um grupo. */
+export function chatGroup(messages: ChatMessage[], i: number): { first: boolean; last: boolean } {
+  const same = (a: ChatMessage | undefined, b: ChatMessage | undefined): boolean => {
+    if (!a || !b || a.from !== b.from) return false;
+    if (!a.at || !b.at) return true;
+    if (chatDay(a.at) !== chatDay(b.at)) return false;
+    return Math.abs(new Date(b.at).getTime() - new Date(a.at).getTime()) <= GROUP_GAP_MS;
+  };
+  return { first: !same(messages[i - 1], messages[i]), last: !same(messages[i], messages[i + 1]) };
+}

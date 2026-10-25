@@ -9,7 +9,7 @@ import { AI_MONTHLY_USD_CAP, estimateMonthUsd } from './aiPrices';
 import { nowBrazil } from './clock';
 import { sendPush, tokensOf } from './push';
 
-export { chatRelay, chatSeen, telegramSetup, telegramWebhook } from './telegram';
+export { chatReaction, chatRelay, chatSeen, telegramSetup, telegramWebhook } from './telegram';
 
 initializeApp();
 const db = getFirestore();

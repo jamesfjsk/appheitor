@@ -459,7 +459,13 @@ service cloud.firestore {
             (isAdmin() && request.resource.data.from == 'pai' && request.resource.data.via == 'painel')
             || (uid == request.auth.uid && request.resource.data.from == 'filho' && request.resource.data.via == 'app')
           );
-        allow update, delete: if isAdmin();
+        // O filho reage às mensagens do pai (25/10/2026), só com as 6 reações da lista
+        allow update: if isAdmin() || (signedIn() && uid == request.auth.uid
+          && resource.data.from == 'pai'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reaction'])
+          && (!('reaction' in request.resource.data)
+            || request.resource.data.reaction in ['❤️', '👍', '🤣', '😱', '😢', '🔥']));
+        allow delete: if isAdmin();
       }
     }
 

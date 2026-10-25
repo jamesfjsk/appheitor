@@ -7,7 +7,7 @@ import { createHash, randomBytes } from 'crypto';
 import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { getDownloadURL, getStorage } from 'firebase-admin/storage';
 import { defineSecret } from 'firebase-functions/params';
-import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
+import { onDocumentCreated, onDocumentUpdated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { sendPush, tokensOf } from './push';
 
@@ -20,6 +20,14 @@ const DELIVERED = '🕊';
 const SEEN = '👀';
 
 type Link = { botUsername?: string; pairCode?: string; parentChatId?: string; parentName?: string; childUid?: string };
+type TgReactionUpdate = {
+  chat: { id: number; type: string };
+  message_id: number;
+  new_reaction?: Array<{ type: string; emoji?: string }>;
+};
+/** O coração do Telegram vem sem o seletor de variação; o app guarda com ele. */
+const tgEmoji = (e: string) => e.replace(/\uFE0F/g, '');
+const appEmoji = (e: string) => (e === '❤' ? '❤️' : e);
 type TgMessage = {
   message_id: number;
   chat: { id: number; type: string };
@@ -140,6 +148,19 @@ async function onTelegramMessage(token: string, msg: TgMessage | undefined): Pro
   await react(token, chatId, msg.message_id, DELIVERED);
 }
 
+/** O pai reagiu no Telegram a uma mensagem do filho: a reação aparece no balão dele na Vila. */
+async function onTelegramReaction(r: TgReactionUpdate | undefined): Promise<void> {
+  if (!r?.chat || r.chat.type !== 'private') return;
+  const db = getFirestore();
+  const link = (await db.doc(LINK).get()).data() as Link | undefined;
+  if (!link?.childUid || String(r.chat.id) !== link.parentChatId) return;
+  const snap = await db.collection(`familyChat/${link.childUid}/messages`).where('tgOutId', '==', r.message_id).limit(1).get();
+  const row = snap.docs[0];
+  if (!row) return;
+  const emoji = r.new_reaction?.find((x) => x.type === 'emoji' && x.emoji)?.emoji;
+  await row.ref.update({ reaction: emoji ? appEmoji(emoji) : FieldValue.delete() });
+}
+
 /** Telegram chama aqui a cada mensagem enviada ao robô. */
 export const telegramWebhook = onRequest(
   { region: REGION, secrets: [TELEGRAM_BOT_TOKEN], invoker: 'public', maxInstances: 2 },
@@ -150,7 +171,9 @@ export const telegramWebhook = onRequest(
       return;
     }
     try {
-      await onTelegramMessage(token, (req.body as { message?: TgMessage } | undefined)?.message);
+      const body = req.body as { message?: TgMessage; message_reaction?: TgReactionUpdate } | undefined;
+      if (body?.message_reaction) await onTelegramReaction(body.message_reaction);
+      else await onTelegramMessage(token, body?.message);
     } catch (e) {
       console.error('telegram: mensagem', e);
     }
@@ -187,7 +210,7 @@ export const telegramSetup = onCall({ region: REGION, secrets: [TELEGRAM_BOT_TOK
   await tg(token, 'setWebhook', {
     url: `https://${REGION}-${projectId()}.cloudfunctions.net/telegramWebhook`,
     secret_token: hookSecret(token),
-    allowed_updates: ['message'],
+    allowed_updates: ['message', 'message_reaction'],
   });
   await ref.set({
     botUsername: bot.username,
@@ -222,15 +245,18 @@ export const chatRelay = onDocumentCreated(
     const token = TELEGRAM_BOT_TOKEN.value();
     if (link?.parentChatId && token) {
       try {
+        let sent: { message_id: number };
         if (imageUrl) {
-          await tg(token, 'sendPhoto', {
+          sent = await tg<{ message_id: number }>(token, 'sendPhoto', {
             chat_id: link.parentChatId,
             photo: imageUrl,
             caption: (text ? `${name}: ${text}` : `${name} mandou uma foto`).slice(0, 1024),
           });
         } else {
-          await tg(token, 'sendMessage', { chat_id: link.parentChatId, text: `${name}: ${text}` });
+          sent = await tg<{ message_id: number }>(token, 'sendMessage', { chat_id: link.parentChatId, text: `${name}: ${text}` });
         }
+        // Guarda o id no Telegram: a reação do pai lá volta para este balão
+        await event.data?.ref.update({ tgOutId: sent.message_id });
         return;
       } catch (e) {
         console.error('telegram: envio', e);
@@ -257,8 +283,26 @@ export const chatSeen = onDocumentWritten(
     const snap = await db.collection(`familyChat/${event.params.uid}/messages`).where('tgSeen', '==', false).limit(20).get();
     for (const d of snap.docs) {
       const id = d.get('tgMessageId');
-      if (typeof id === 'number') await react(token, link.parentChatId, id, SEEN);
+      const mine = d.get('reaction');
+      if (typeof id === 'number') await react(token, link.parentChatId, id, typeof mine === 'string' && mine ? tgEmoji(mine) : SEEN);
       await d.ref.update({ tgSeen: true });
     }
+  },
+);
+
+/** Ele reagiu a uma mensagem do pai que veio do Telegram: a reação aparece lá, na mensagem do pai. */
+export const chatReaction = onDocumentUpdated(
+  { document: 'familyChat/{uid}/messages/{msgId}', region: REGION, secrets: [TELEGRAM_BOT_TOKEN] },
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after || after.from !== 'pai' || before.reaction === after.reaction) return;
+    const id = after.tgMessageId;
+    if (typeof id !== 'number') return;
+    const link = (await getFirestore().doc(LINK).get()).data() as Link | undefined;
+    const token = TELEGRAM_BOT_TOKEN.value();
+    if (!link?.parentChatId || !token) return;
+    const emoji = typeof after.reaction === 'string' && after.reaction ? tgEmoji(after.reaction) : SEEN;
+    await react(token, link.parentChatId, id, emoji);
   },
 );
