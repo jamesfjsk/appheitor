@@ -9,7 +9,8 @@ export function quizLockedFor(opts: {
 }
 
 export function quizBlocksDest(id: string): boolean {
-  if (id === 'build:arena' || id === 'arena') return false;
+  // A Arena virou jogo (xadrez, 25/10/2026): abre depois da prova, como a Mina
+  if (id === 'build:arena' || id === 'arena') return true;
   return id === 'market'
     || id === 'workshop'
     || id === 'mine'

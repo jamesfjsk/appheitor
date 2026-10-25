@@ -41,6 +41,8 @@ import Torre from './Torre';
 import Laboratorio from './Laboratorio';
 import { subscribeCareer, type CareerState } from '../../../services/careerService';
 import Conversa from './Conversa';
+// A Arena (xadrez) só carrega quando ele abre
+const ArenaScene = React.lazy(() => import('./arena/ArenaScene'));
 import { subscribeChat, subscribeChatMeta, type ChatMeta } from '../../../services/familyChatService';
 import { unreadFor, type ChatMessage } from '../../../services/village/familyChat';
 import { labLevelOf } from '../../../services/village/career';
@@ -111,7 +113,7 @@ function shopBlocksDest(id: string): boolean {
   return id === 'market' || id === 'chest' || id === 'pack' || id === 'chest_streak';
 }
 
-type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | 'books' | 'lab' | 'chat' | null;
+type District = 'mine' | 'library' | 'workshop' | 'market' | 'tower' | 'chest' | 'bank' | 'pack' | 'agenda' | 'house' | 'extrato' | 'books' | 'lab' | 'chat' | 'arena' | null;
 
 interface Props {
   selectedPeriod: Period;
@@ -432,24 +434,9 @@ const VillageHome: React.FC<Props> = ({
       return;
     }
     if (id === 'build:arena' || id === 'arena') {
-      const state = village.npcs.olheiro;
-      const ctx: DialogueCtx = {
-        hour,
-        weekday: now.weekday,
-        level: minerLevel,
-        tier: state?.tier || 0,
-        fullDays: village.fullDays,
-        baseLevels: buildings,
-        yesterday: yesterdayCtx,
-        today: { done, due: due.length, quizDone: !quizLocked },
-        pause: pauseDays.dates.includes(today),
-        punish: lockedShop,
-        firstTime: new Set(state?.lastTalkDate ? [] : ['olheiro']),
-      };
-      const entry = pickDialogue('olheiro', ctx, state?.seen || [], (state?.seen || []).slice(-14));
-      const lines = entry?.lines?.length ? entry.lines : [VILLAGE_LINES.olheiro?.[0]?.text].filter(Boolean) as string[];
-      if (lines[0]) setSpeech({ npc: 'olheiro', text: lines[0], rest: lines.slice(1) });
-      if (childUid) void talkToNpc(childUid, 'olheiro', today, 0, entry?.id).catch(() => undefined);
+      // Arena (25/10/2026): abre a cena dos jogos; começa pelo xadrez
+      setLot(null);
+      setDistrict('arena');
       return;
     }
     if (lockedShop && shopBlocksDest(id)) {
@@ -947,6 +934,11 @@ const VillageHome: React.FC<Props> = ({
       )}
       {district === 'tower' && <Torre onClose={() => setDistrict(null)} />}
       {district === 'lab' && <Laboratorio onClose={() => setDistrict(null)} />}
+      {district === 'arena' && (
+        <React.Suspense fallback={<div className="ar-scene" data-testid="arena-loading"><p className="p-6 text-center">Abrindo a Arena...</p></div>}>
+          <ArenaScene onClose={() => setDistrict(null)} />
+        </React.Suspense>
+      )}
       {district === 'chat' && childUid && (
         <Conversa childUid={childUid} messages={chat ?? []} meta={chatMeta} onClose={() => setDistrict(null)} />
       )}

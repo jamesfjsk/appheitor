@@ -16,10 +16,12 @@
     "test:village": "node scripts/run-english-tests.mjs village"
   },
   "dependencies": {
+    "chess.js": "^1.4.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "firebase": "^12.1.0",
     "framer-motion": "^12.23.12",
+    "js-chess-engine": "^2.4.6",
     "lottie-web": "^5.13.0",
     "lucide-react": "^0.344.0",
     "phaser": "^3.90.0",

@@ -472,6 +472,14 @@ service cloud.firestore {
       }
     }
 
+    // Arena (25/10/2026): registro das partidas, para o painel do pai. A criança só cria as dela.
+    match /arenaLog/{id} {
+      allow read: if signedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasOnly(['userId', 'game', 'mode', 'level', 'result', 'color', 'moves', 'date', 'paid', 'createdAt']);
+      allow update, delete: if isAdmin();
+    }
+
     // Ligação com o Telegram: só o pai lê; quem grava é a Cloud Function
     match /telegramLink/{id} {
       allow read: if isAdmin();

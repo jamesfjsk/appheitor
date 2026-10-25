@@ -26,9 +26,9 @@ test('quizLockedFor respeita quizEnabled e completed', () => {
   expect(quizLockedFor({ quizRequired: true, completed: false })).toBe(true);
 });
 
-test('arena landmark não entra no portão da prova', () => {
-  expect(quizBlocksDest('build:arena')).toBe(false);
-  expect(quizBlocksDest('arena')).toBe(false);
+test('arena (xadrez) abre depois da prova, como a Mina', () => {
+  expect(quizBlocksDest('build:arena')).toBe(true);
+  expect(quizBlocksDest('arena')).toBe(true);
   expect(quizBlocksDest('build:mesa')).toBe(true);
 });
 

@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => {
     root,
     plugins: [react(), versionJsonPlugin(version)],
     optimizeDeps: {
-      include: ['phaser'],
+      include: ['phaser', 'chess.js', 'js-chess-engine'],
       exclude: ['lucide-react'],
     },
     define: {

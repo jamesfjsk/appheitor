@@ -30,7 +30,8 @@ export type ClaimKind =
   | 'ach'
   | 'friend'
   | 'redstone'
-  | 'assignment';
+  | 'assignment'
+  | 'xadrez';
 export type NoticeType = 'compromisso' | 'regra' | 'viagem' | 'visita' | 'recado';
 export type HabitId = 'agua' | 'postura' | 'alongar' | 'tela' | 'arrumar' | 'sono' | 'gentileza';
 
