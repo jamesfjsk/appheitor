@@ -9,7 +9,7 @@ import { httpsCallable } from 'firebase/functions';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, functions, storage } from '../config/firebase';
 import { compressProofPhoto } from './assignmentsService';
-import { CHAT_PAGE, cleanChatText, type ChatMessage, type ChatSide, type ChatVia } from './village/familyChat';
+import { CHAT_PAGE, STICKER_ID, cleanChatText, type ChatMessage, type ChatSide, type ChatVia, type TgSticker } from './village/familyChat';
 
 export interface ChatMeta {
   childReadAt?: string;
@@ -17,6 +17,13 @@ export interface ChatMeta {
 }
 
 const iso = (v: unknown): string => (v instanceof Timestamp ? v.toDate().toISOString() : typeof v === 'string' ? v : '');
+
+function tgStickerOf(raw: unknown): TgSticker | null {
+  const t = raw as { kind?: unknown; url?: unknown; emoji?: unknown } | undefined;
+  if (!t || typeof t.url !== 'string') return null;
+  if (t.kind !== 'image' && t.kind !== 'lottie' && t.kind !== 'video') return null;
+  return { kind: t.kind, url: t.url, ...(typeof t.emoji === 'string' ? { emoji: t.emoji } : {}) };
+}
 
 function fromMessage(id: string, raw: Record<string, unknown>): ChatMessage | null {
   const from = raw.from === 'pai' || raw.from === 'filho' ? raw.from : null;
@@ -31,6 +38,8 @@ function fromMessage(id: string, raw: Record<string, unknown>): ChatMessage | nu
     at: iso(raw.createdAt),
     via,
     ...(typeof raw.reaction === 'string' && raw.reaction ? { reaction: raw.reaction } : {}),
+    ...(typeof raw.sticker === 'string' && STICKER_ID.test(raw.sticker) ? { sticker: raw.sticker } : {}),
+    ...(tgStickerOf(raw.tgSticker) ? { tgSticker: tgStickerOf(raw.tgSticker)! } : {}),
   };
 }
 
@@ -106,6 +115,18 @@ export async function telegramSetup(action: 'link' | 'unlink' | 'test'): Promise
 /** Reação numa mensagem do outro lado; null tira. O Telegram do pai recebe a do filho (functions/src/telegram.ts). */
 export async function setChatReaction(childUid: string, msgId: string, reaction: string | null): Promise<void> {
   await updateDoc(doc(db, 'familyChat', childUid, 'messages', msgId), { reaction: reaction ?? deleteField() });
+}
+
+/** Figurinha do jogo: vai na hora, sem texto. */
+export async function sendChatSticker(childUid: string, from: ChatSide, stickerId: string, via: ChatVia): Promise<void> {
+  if (!STICKER_ID.test(stickerId)) return;
+  await setDoc(doc(collection(db, 'familyChat', childUid, 'messages')), {
+    from,
+    text: '',
+    sticker: stickerId,
+    createdAt: serverTimestamp(),
+    via,
+  });
 }
 
 export async function sendChatMessage(

@@ -19,7 +19,20 @@ export interface ChatMessage {
   via: ChatVia;
   /** Reação de quem recebeu: o filho reage às do pai, o pai às do filho */
   reaction?: string;
+  /** Figurinha do jogo: public/assets/stickers/<id>.webp */
+  sticker?: string;
+  /** Figurinha do Telegram que o pai mandou, guardada no Storage */
+  tgSticker?: TgSticker;
 }
+
+export interface TgSticker {
+  kind: 'image' | 'lottie' | 'video';
+  url: string;
+  emoji?: string;
+}
+
+export const STICKER_ID = /^[a-z0-9-]{1,40}$/;
+export const stickerUrl = (id: string): string => `/assets/stickers/${id}.webp`;
 
 export const CHAT_MAX_CHARS = 1000;
 export const CHAT_PAGE = 80;

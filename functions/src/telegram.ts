@@ -4,6 +4,7 @@
 // O pai escreve no Telegram -> mensagem 'pai' na Conversa; o filho escreve na Vila -> chega no Telegram.
 // Reações no Telegram: pomba quando a mensagem chegou na Vila, olhos quando ele abriu a Conversa.
 import { createHash, randomBytes } from 'crypto';
+import { gunzipSync } from 'zlib';
 import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { getDownloadURL, getStorage } from 'firebase-admin/storage';
 import { defineSecret } from 'firebase-functions/params';
@@ -18,6 +19,8 @@ const MAX_TEXT = 1000;
 const MAX_PHOTO = 5 * 1024 * 1024;
 const DELIVERED = '🕊';
 const SEEN = '👀';
+/** Onde o site serve as figurinhas do jogo (public/assets/stickers); o Telegram baixa de lá */
+const SITE = 'https://www.flashmissons.com';
 
 type Link = { botUsername?: string; pairCode?: string; parentChatId?: string; parentName?: string; childUid?: string };
 type TgReactionUpdate = {
@@ -36,6 +39,7 @@ type TgMessage = {
   caption?: string;
   photo?: Array<{ file_id: string; file_size?: number }>;
   document?: { file_id: string; mime_type?: string; file_size?: number };
+  sticker?: { file_id: string; is_animated?: boolean; is_video?: boolean; emoji?: string; file_size?: number };
 };
 
 const hookSecret = (token: string) => createHash('sha256').update(`mm-conversa:${token}`).digest('hex').slice(0, 48);
@@ -74,14 +78,35 @@ async function childName(uid: string): Promise<string> {
   return first || 'Heitor';
 }
 
-async function savePhoto(token: string, fileId: string, path: string, contentType: string): Promise<{ path: string; url: string } | null> {
+async function savePhoto(
+  token: string,
+  fileId: string,
+  path: string,
+  contentType: string,
+  transform?: (bytes: Buffer) => Buffer,
+): Promise<{ path: string; url: string } | null> {
   const file = await tg<{ file_path?: string; file_size?: number }>(token, 'getFile', { file_id: fileId });
   if (!file.file_path || (file.file_size ?? 0) > MAX_PHOTO) return null;
   const res = await fetch(`https://api.telegram.org/file/bot${token}/${file.file_path}`);
   if (!res.ok) throw new Error(`telegram: download ${res.status}`);
+  const raw = Buffer.from(await res.arrayBuffer());
   const out = getStorage().bucket().file(path);
-  await out.save(Buffer.from(await res.arrayBuffer()), { contentType, resumable: false });
+  await out.save(transform ? transform(raw) : raw, { contentType, resumable: false });
   return { path, url: await getDownloadURL(out) };
+}
+
+/** Figurinha do Telegram: a parada vira imagem, a animada (.tgs, lottie com gzip) vira JSON, a de vídeo fica .webm. */
+async function saveTelegramSticker(token: string, sticker: NonNullable<TgMessage['sticker']>, base: string) {
+  if (sticker.is_animated) {
+    const saved = await savePhoto(token, sticker.file_id, `${base}.json`, 'application/json', (b) => gunzipSync(b));
+    return saved ? { kind: 'lottie' as const, ...saved } : null;
+  }
+  if (sticker.is_video) {
+    const saved = await savePhoto(token, sticker.file_id, `${base}.webm`, 'video/webm');
+    return saved ? { kind: 'video' as const, ...saved } : null;
+  }
+  const saved = await savePhoto(token, sticker.file_id, `${base}.webp`, 'image/webp');
+  return saved ? { kind: 'image' as const, ...saved } : null;
 }
 
 async function onTelegramMessage(token: string, msg: TgMessage | undefined): Promise<void> {
@@ -115,11 +140,32 @@ async function onTelegramMessage(token: string, msg: TgMessage | undefined): Pro
     return;
   }
 
+  if (msg.sticker) {
+    const stickerRef = db.collection(`familyChat/${uid}/messages`).doc();
+    const saved = await saveTelegramSticker(token, msg.sticker, `chat/${uid}/${stickerRef.id}`);
+    if (!saved) {
+      await say('Essa figurinha é grande demais.');
+      return;
+    }
+    await stickerRef.set({
+      from: 'pai',
+      text: '',
+      tgSticker: { kind: saved.kind, url: saved.url, path: saved.path, ...(msg.sticker.emoji ? { emoji: msg.sticker.emoji } : {}) },
+      createdAt: FieldValue.serverTimestamp(),
+      via: 'telegram',
+      tgMessageId: msg.message_id,
+      tgSeen: false,
+    });
+    await db.doc(`familyChat/${uid}`).set({ userId: uid, parentReadAt: FieldValue.serverTimestamp() }, { merge: true });
+    await react(token, chatId, msg.message_id, DELIVERED);
+    return;
+  }
+
   const isImageDoc = Boolean(msg.document?.mime_type?.startsWith('image/'));
   const fileId = msg.photo?.length ? msg.photo[msg.photo.length - 1].file_id : isImageDoc ? msg.document!.file_id : null;
   const text = clean(msg.text ?? msg.caption ?? '');
   if (!text && !fileId) {
-    await say('Por enquanto a Conversa leva texto e foto.');
+    await say('Por enquanto a Conversa leva texto, foto e figurinha.');
     return;
   }
 
@@ -232,7 +278,8 @@ export const chatRelay = onDocumentCreated(
     const imageUrl = typeof m.image?.url === 'string' ? m.image.url : '';
 
     if (m.from === 'pai') {
-      await sendPush(await tokensOf(uid), 'Mensagem do pai', text || 'O pai mandou uma foto.');
+      const what = m.sticker || m.tgSticker ? 'O pai mandou uma figurinha.' : 'O pai mandou uma foto.';
+      await sendPush(await tokensOf(uid), 'Mensagem do pai', text || what);
       return;
     }
     if (m.from !== 'filho') return;
@@ -246,7 +293,13 @@ export const chatRelay = onDocumentCreated(
     if (link?.parentChatId && token) {
       try {
         let sent: { message_id: number };
-        if (imageUrl) {
+        if (typeof m.sticker === 'string' && /^[a-z0-9-]{1,40}$/.test(m.sticker)) {
+          // Figurinha do jogo chega como figurinha de verdade no Telegram
+          sent = await tg<{ message_id: number }>(token, 'sendSticker', {
+            chat_id: link.parentChatId,
+            sticker: `${SITE}/assets/stickers/${m.sticker}.webp`,
+          });
+        } else if (imageUrl) {
           sent = await tg<{ message_id: number }>(token, 'sendPhoto', {
             chat_id: link.parentChatId,
             photo: imageUrl,
@@ -265,7 +318,7 @@ export const chatRelay = onDocumentCreated(
     // Sem Telegram ligado (ou se falhou): aviso no celular do pai
     const admins = await db.collection('users').where('role', '==', 'admin').get();
     const tokens = (await Promise.all(admins.docs.map((a) => tokensOf(a.id)))).flat();
-    await sendPush(tokens, `Mensagem do ${name}`, text || `${name} mandou uma foto.`);
+    await sendPush(tokens, `Mensagem do ${name}`, text || (m.sticker ? `${name} mandou uma figurinha.` : `${name} mandou uma foto.`));
   },
 );
 

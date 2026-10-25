@@ -4,8 +4,16 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Clock3, Search, X } from 'lucide-react';
 import type { EmojiGroup } from '../../../../data/emojiCatalog';
 import { searchEmojis } from '../../../../services/village/emojiTools';
+import { CHAT_STICKERS } from '../../../../data/stickers';
+import { stickerUrl } from '../../../../services/village/familyChat';
 
-const EmojiPicker: React.FC<{ recent: string[]; onPick: (emoji: string) => void }> = ({ recent, onPick }) => {
+const EmojiPicker: React.FC<{
+  recent: string[];
+  onPick: (emoji: string) => void;
+  /** com isto aparece a aba Figurinhas; a figurinha vai na hora */
+  onSticker?: (id: string) => void;
+}> = ({ recent, onPick, onSticker }) => {
+  const [mode, setMode] = useState<'emojis' | 'figurinhas'>('emojis');
   const [catalog, setCatalog] = useState<EmojiGroup[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [query, setQuery] = useState('');
@@ -58,8 +66,52 @@ const EmojiPicker: React.FC<{ recent: string[]; onPick: (emoji: string) => void 
     </div>
   );
 
+  const modes = onSticker ? (
+    <div className="mn-ep-modes" role="tablist">
+      <button type="button" role="tab" aria-selected={mode === 'emojis'} className={`mn-ep-mode${mode === 'emojis' ? ' is-on' : ''}`} onClick={() => setMode('emojis')}>
+        Emojis
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === 'figurinhas'}
+        className={`mn-ep-mode${mode === 'figurinhas' ? ' is-on' : ''}`}
+        onClick={() => setMode('figurinhas')}
+        data-testid="chat-stickers-tab"
+      >
+        Figurinhas
+      </button>
+    </div>
+  ) : null;
+
+  if (onSticker && mode === 'figurinhas') {
+    return (
+      <div className="mn-ep" data-testid="chat-emoji-panel">
+        {modes}
+        <div className="mn-ep-scroll">
+          <div className="mn-ep-stickers">
+            {CHAT_STICKERS.map((st) => (
+              <button
+                key={st.id}
+                type="button"
+                className="mn-ep-sticker"
+                onClick={() => onSticker(st.id)}
+                aria-label={`Mandar a figurinha: ${st.label}`}
+                title={st.label}
+                data-testid={`sticker-${st.id}`}
+              >
+                <img src={stickerUrl(st.id)} alt="" loading="lazy" draggable={false} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mn-ep" data-testid="chat-emoji-panel">
+      {modes}
       <div className="mn-ep-search">
         <Search className="mn-ep-search-icon" aria-hidden />
         <input

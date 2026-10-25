@@ -5,28 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { AnimationItem } from 'lottie-web';
 import { NOTO_ANIMATED } from '../../data/notoAnimated';
 import { notoKey, notoLottieUrl } from '../../services/village/emojiTools';
-
-type LottiePlayer = (typeof import('lottie-web/build/player/lottie_light'))['default'];
-
-let player: Promise<LottiePlayer> | null = null;
-const loadPlayer = (): Promise<LottiePlayer> => {
-  player ??= import('lottie-web/build/player/lottie_light').then((m) => m.default);
-  return player;
-};
-
-const files = new Map<string, Promise<unknown>>();
-const loadFile = (key: string): Promise<unknown> => {
-  let p = files.get(key);
-  if (!p) {
-    p = fetch(notoLottieUrl(key)).then((r) => {
-      if (!r.ok) throw new Error(`emoji ${key}: ${r.status}`);
-      return r.json();
-    });
-    p.catch(() => files.delete(key));
-    files.set(key, p);
-  }
-  return p;
-};
+import { loadAnimationFile, loadPlayer } from './lottiePlayer';
 
 const AnimatedEmoji: React.FC<{
   emoji: string;
@@ -47,7 +26,7 @@ const AnimatedEmoji: React.FC<{
     if (!key || !el) return;
     let alive = true;
     let seen: IntersectionObserver | null = null;
-    Promise.all([loadPlayer(), loadFile(key)])
+    Promise.all([loadPlayer(), loadAnimationFile(notoLottieUrl(key))])
       .then(([lottie, data]) => {
         if (!alive) return;
         const anim = lottie.loadAnimation({

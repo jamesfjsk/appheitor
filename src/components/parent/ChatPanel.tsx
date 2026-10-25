@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   markChatRead,
   sendChatMessage,
+  sendChatSticker,
   setChatReaction,
   subscribeChat,
   subscribeChatMeta,
@@ -16,6 +17,8 @@ import {
 } from '../../services/familyChatService';
 import { Check, CheckCheck, Smile } from 'lucide-react';
 import AnimatedEmoji from '../chat/AnimatedEmoji';
+import StickerView from '../chat/StickerView';
+import { CHAT_STICKERS } from '../../data/stickers';
 import { splitEmojis } from '../../services/village/emojiTools';
 import {
   CHAT_MAX_CHARS,
@@ -28,6 +31,7 @@ import {
   insertAtCaret,
   isEmojiOnly,
   seenByOther,
+  stickerUrl,
   unreadFor,
   type ChatMessage,
 } from '../../services/village/familyChat';
@@ -172,6 +176,11 @@ const ChatPanel: React.FC = () => {
     window.requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(next.caret, next.caret); });
   };
 
+  const sendSticker = (id: string) => {
+    setEmojiOpen(false);
+    void sendChatSticker(childUid, 'pai', id, 'painel').catch(() => toast.error('Não deu para mandar a figurinha.'));
+  };
+
   const react = (m: ChatMessage, emoji: string) => {
     setReactingTo(null);
     void setChatReaction(childUid, m.id, m.reaction === emoji ? null : emoji).catch(() => toast.error('Não deu para reagir.'));
@@ -195,7 +204,8 @@ const ChatPanel: React.FC = () => {
             const newDay = i === 0 || (day && day !== chatDay(rows[i - 1].at));
             const mine = m.from === 'pai';
             const lastMine = mine && !rows.slice(i + 1).some((x) => x.from === 'pai');
-            const big = !m.image && isEmojiOnly(m.text);
+            const stick = Boolean(m.sticker || m.tgSticker);
+            const big = stick || (!m.image && isEmojiOnly(m.text));
             const read = mine && Boolean(m.at && meta.childReadAt && meta.childReadAt >= m.at);
             return (
               <React.Fragment key={m.id}>
@@ -216,7 +226,9 @@ const ChatPanel: React.FC = () => {
                         />
                       </a>
                     )}
-                    {big ? (
+                    {stick ? (
+                      <StickerView sticker={m.sticker} tg={m.tgSticker} size={110} />
+                    ) : big ? (
                       <span className="flex items-end gap-0.5">
                         {splitEmojis(m.text).map((e, k) => <AnimatedEmoji key={`${e}-${k}`} emoji={e} size={64} />)}
                       </span>
@@ -265,7 +277,15 @@ const ChatPanel: React.FC = () => {
         </div>
         <div className="border-t border-gray-100 p-3 space-y-2">
           {emojiOpen && (
-            <div className="max-h-40 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50 p-2">
+            <div className="max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50 p-2">
+              <p className="px-1 text-xs font-semibold text-gray-400">Figurinhas (vão na hora)</p>
+              <div className="mb-2 flex flex-wrap gap-1">
+                {CHAT_STICKERS.map((st) => (
+                  <button key={st.id} type="button" onClick={() => sendSticker(st.id)} className="h-16 w-16 rounded-lg hover:bg-gray-200" title={st.label}>
+                    <img src={stickerUrl(st.id)} alt={st.label} className="h-full w-full object-contain" loading="lazy" />
+                  </button>
+                ))}
+              </div>
               {EMOJI_GROUPS.map((g) => (
                 <div key={g.id} className="mb-1">
                   <p className="px-1 text-xs font-semibold text-gray-400">{g.label}</p>

@@ -2,6 +2,9 @@ import { expect, run, test } from '../../english/__tests__/harness';
 import { CHAT_WALLPAPERS, chatEffectFor, notoKey, searchEmojis, splitEmojis, wallpaperById } from '../emojiTools';
 import { NOTO_ANIMATED } from '../../../data/notoAnimated';
 import { EMOJI_CATALOG } from '../../../data/emojiCatalog';
+import { CHAT_STICKERS } from '../../../data/stickers';
+import { STICKER_ID } from '../familyChat';
+import { existsSync } from 'node:fs';
 
 test('emoji animado: acha o código do Noto, com e sem o seletor de variação', () => {
   expect(notoKey('😂', NOTO_ANIMATED)).toBe('1f602');
@@ -46,6 +49,15 @@ test('fundos: ids únicos e o padrão é a pedra', () => {
   expect(new Set(CHAT_WALLPAPERS.map((w) => w.id)).size).toBe(CHAT_WALLPAPERS.length);
   expect(wallpaperById('nada').id).toBe('pedra');
   expect(wallpaperById('mina').image?.startsWith('/assets/')).toBe(true);
+});
+
+test('figurinhas: id que a regra aceita, sem repetir, e o arquivo existe', () => {
+  expect(CHAT_STICKERS.length >= 20).toBe(true);
+  expect(new Set(CHAT_STICKERS.map((s) => s.id)).size).toBe(CHAT_STICKERS.length);
+  for (const s of CHAT_STICKERS) {
+    if (!STICKER_ID.test(s.id)) throw new Error('id fora da regra: ' + s.id);
+    if (!existsSync(`public/assets/stickers/${s.id}.webp`)) throw new Error('sem arquivo: ' + s.id);
+  }
 });
 
 void run();

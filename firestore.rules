@@ -450,11 +450,14 @@ service cloud.firestore {
       match /messages/{msgId} {
         allow read: if signedIn() && (isAdmin() || uid == request.auth.uid);
         allow create: if signedIn()
-          && request.resource.data.keys().hasOnly(['from', 'text', 'image', 'createdAt', 'via'])
+          && request.resource.data.keys().hasOnly(['from', 'text', 'image', 'sticker', 'createdAt', 'via'])
           && request.resource.data.text is string
           && request.resource.data.text.size() <= 1000
           && request.resource.data.createdAt == request.time
           && (!('image' in request.resource.data) || request.resource.data.image.path.matches('chat/' + uid + '/.*'))
+          // figurinha do jogo (25/10/2026): só o id, a imagem fica em /assets/stickers
+          && (!('sticker' in request.resource.data)
+            || (request.resource.data.sticker is string && request.resource.data.sticker.matches('^[a-z0-9-]{1,40}$')))
           && (
             (isAdmin() && request.resource.data.from == 'pai' && request.resource.data.via == 'painel')
             || (uid == request.auth.uid && request.resource.data.from == 'filho' && request.resource.data.via == 'app')

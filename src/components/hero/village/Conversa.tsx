@@ -10,11 +10,12 @@ import ChildSheet from './ChildSheet';
 import EmojiPicker from './chat/EmojiPicker';
 import WallpaperPicker from './chat/WallpaperPicker';
 import AnimatedEmoji from '../../chat/AnimatedEmoji';
+import StickerView from '../../chat/StickerView';
 import ChatEffects, { type EffectShot } from '../../chat/ChatEffects';
 import { useSound } from '../../../contexts/SoundContext';
 import { setAppBusy } from '../../../services/appUpdate';
 import { compressProofPhoto } from '../../../services/assignmentsService';
-import { markChatRead, sendChatMessage, setChatReaction, type ChatMeta } from '../../../services/familyChatService';
+import { markChatRead, sendChatMessage, sendChatSticker, setChatReaction, type ChatMeta } from '../../../services/familyChatService';
 import {
   CHAT_MAX_CHARS,
   CHAT_REACTIONS,
@@ -197,6 +198,15 @@ const Conversa: React.FC<{
     }
   };
 
+  const sendSticker = (id: string) => {
+    playQuill();
+    setEmojiOpen(false);
+    void sendChatSticker(childUid, 'filho', id, 'app').catch(() => {
+      playError();
+      toast('Não deu para mandar a figurinha. Tente de novo.');
+    });
+  };
+
   const react = (m: ChatMessage, emoji: string, rect?: DOMRect) => {
     playClick();
     setReactingTo(null);
@@ -210,9 +220,10 @@ const Conversa: React.FC<{
   const tapBig = (m: ChatMessage, el: HTMLElement) => {
     playClick();
     setReplays((r) => ({ ...r, [m.id]: (r[m.id] ?? 0) + 1 }));
-    const list = splitEmojis(m.text);
+    const stick = Boolean(m.sticker || m.tgSticker);
+    const list = stick ? ['✨'] : splitEmojis(m.text);
     fire('burst', list[0] ?? m.text, el.getBoundingClientRect());
-    const fx = chatEffectFor(m.text);
+    const fx = stick ? null : chatEffectFor(m.text);
     if (fx) fire(fx.kind, fx.emoji);
   };
 
@@ -269,7 +280,7 @@ const Conversa: React.FC<{
 
   const footer = (
     <div className="mn-chat-compose">
-      {emojiOpen && <EmojiPicker recent={recent} onPick={putEmoji} />}
+      {emojiOpen && <EmojiPicker recent={recent} onPick={putEmoji} onSticker={sendSticker} />}
       {preview && (
         <div className="mn-chat-preview">
           <img src={preview} alt="Foto escolhida" />
@@ -372,7 +383,8 @@ const Conversa: React.FC<{
           const newDay = i === 0 || (day && day !== chatDay(messages[i - 1].at));
           const mine = m.from === 'filho';
           const { first, last } = chatGroup(messages, i);
-          const big = !m.image && isEmojiOnly(m.text);
+          const stick = Boolean(m.sticker || m.tgSticker);
+          const big = stick || (!m.image && isEmojiOnly(m.text));
           const bigList = big ? splitEmojis(m.text) : [];
           const bigSize = bigList.length === 1 ? 112 : bigList.length === 2 ? 84 : 64;
           const lastMine = mine && !messages.slice(i + 1).some((x) => x.from === 'filho');
@@ -415,7 +427,9 @@ const Conversa: React.FC<{
                       />
                     </button>
                   )}
-                  {big ? (
+                  {stick ? (
+                    <StickerView sticker={m.sticker} tg={m.tgSticker} size={150} replay={replays[m.id] ?? 0} />
+                  ) : big ? (
                     <span className="mn-chat-big" data-testid="chat-big-emoji">
                       {bigList.map((e, k) => (
                         <AnimatedEmoji key={`${e}-${k}`} emoji={e} size={bigSize} replay={replays[m.id] ?? 0} />

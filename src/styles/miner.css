@@ -4661,3 +4661,182 @@ div.mn-pack-cell {
   .mn-ep { animation: none; }
   .mn-fx { display: none; }
 }
+
+/* --------------------------------------------------------------------------
+   Figurinhas da Conversa (25/10/2026): mexem ao aparecer e a cada toque.
+   -------------------------------------------------------------------------- */
+.mn-sticker {
+  position: relative;
+  display: inline-block;
+  transform-origin: 50% 90%;
+  animation-duration: 0.9s;
+  animation-iteration-count: 2;
+  animation-timing-function: ease-in-out;
+}
+.mn-sticker img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+}
+.mn-sticker.anim-wave { animation-name: mn-st-wave; }
+.mn-sticker.anim-bounce { animation-name: mn-st-bounce; }
+.mn-sticker.anim-jump { animation-name: mn-st-jump; }
+.mn-sticker.anim-pulse { animation-name: mn-st-pulse; }
+.mn-sticker.anim-shake { animation-name: mn-st-shake; animation-duration: 0.6s; }
+.mn-sticker.anim-spin { animation-name: mn-st-spin; animation-iteration-count: 1; animation-duration: 1.1s; }
+.mn-sticker.anim-sway { animation-name: mn-st-sway; animation-duration: 1.6s; }
+.mn-sticker.anim-tilt { animation-name: mn-st-tilt; animation-duration: 1.4s; }
+.mn-sticker.anim-wiggle { animation-name: mn-st-wiggle; animation-duration: 0.7s; }
+.mn-sticker.anim-bob { animation-name: mn-st-bob; animation-duration: 0.8s; }
+@keyframes mn-st-wave {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-9deg); }
+  75% { transform: rotate(9deg); }
+}
+@keyframes mn-st-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-16px) scale(1.04); }
+  70% { transform: translateY(0) scale(1.05, 0.95); }
+}
+@keyframes mn-st-jump {
+  0%, 100% { transform: translateY(0) scale(1); }
+  20% { transform: translateY(0) scale(1.08, 0.9); }
+  50% { transform: translateY(-30px) scale(0.95, 1.06); }
+  80% { transform: translateY(0) scale(1.06, 0.94); }
+}
+@keyframes mn-st-pulse {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.1); }
+  55% { transform: scale(0.97); }
+}
+@keyframes mn-st-shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20% { transform: translateX(-6px) rotate(-4deg); }
+  40% { transform: translateX(6px) rotate(4deg); }
+  60% { transform: translateX(-4px) rotate(-2deg); }
+  80% { transform: translateX(4px) rotate(2deg); }
+}
+@keyframes mn-st-spin {
+  0% { transform: rotate(0) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+@keyframes mn-st-sway {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(-5deg) translateX(-4px); }
+}
+@keyframes mn-st-tilt {
+  0%, 100% { transform: rotate(0); }
+  30%, 70% { transform: rotate(-10deg); }
+}
+@keyframes mn-st-wiggle {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-7deg); }
+  40% { transform: rotate(7deg); }
+  60% { transform: rotate(-4deg); }
+  80% { transform: rotate(4deg); }
+}
+@keyframes mn-st-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.mn-sticker-extra span {
+  position: absolute;
+  bottom: 40%;
+  font-size: 26px;
+  line-height: 1;
+  opacity: 0;
+  font-family: "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
+  animation: mn-st-float 1.8s ease-out 2;
+}
+.mn-sticker-extra span:nth-child(1) { left: 8%; animation-delay: 0.1s; }
+.mn-sticker-extra span:nth-child(2) { right: 6%; animation-delay: 0.5s; font-size: 22px; }
+.mn-sticker-extra span:nth-child(3) { left: 46%; animation-delay: 0.9s; font-size: 18px; }
+@keyframes mn-st-float {
+  0% { opacity: 0; transform: translateY(0) scale(0.6); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-80px) scale(1.15); }
+}
+.mn-sticker-img,
+.mn-sticker-video,
+.mn-sticker-lottie {
+  display: block;
+  object-fit: contain;
+}
+.mn-sticker-missing {
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #d8cbb0;
+  font-size: 13px;
+}
+.mn-chat-bubble.is-big .mn-sticker + .mn-chat-meta,
+.mn-chat-bubble.is-big .mn-sticker-img + .mn-chat-meta,
+.mn-chat-bubble.is-big .mn-sticker-video + .mn-chat-meta,
+.mn-chat-bubble.is-big .mn-sticker-lottie + .mn-chat-meta {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(20, 16, 12, 0.55);
+  width: fit-content;
+  margin-left: auto;
+}
+/* Abas Emojis / Figurinhas e a grade de figurinhas */
+.mn-ep-modes {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+  margin: 8px 8px 0;
+  padding: 3px;
+  border-radius: 999px;
+  background: #1b1715;
+}
+.mn-ep-mode {
+  flex: 1 1 0;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #d8cbb0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mn-ep-mode.is-on {
+  background: var(--mc-gold);
+  color: #2a1f05;
+}
+.mn-ep-stickers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+  padding-top: 8px;
+}
+.mn-ep-sticker {
+  aspect-ratio: 1;
+  padding: 4px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.12s;
+}
+.mn-ep-sticker img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.mn-ep-sticker:hover {
+  background: rgba(255, 255, 255, 0.07);
+  transform: scale(1.08) rotate(-3deg);
+}
+.mn-ep-sticker:active { transform: scale(0.94); }
+@media (prefers-reduced-motion: reduce) {
+  .mn-sticker,
+  .mn-sticker-extra span { animation: none; }
+  .mn-sticker-extra { display: none; }
+}
