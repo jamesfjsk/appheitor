@@ -21,6 +21,7 @@ import { generationBlock, guardHost, refuseMessage } from './generationGuard';
 import { readPublishedVersion, requestVersionReload } from './appUpdate';
 import { getAppVersion } from './observability';
 import { quizBankDocs } from './quiz/bankWrite';
+import { reviewCandidates, type BankRow } from './quiz/reviewFill';
 import { avoidQuestionsFromRecent, type DedupeNeedle } from './quiz/dedupe';
 import { challengeLine, type ChallengeItem } from './quiz/challengeLine';
 import { pickTheme, rotationProfileFrom, type ThemeHistoryEntry } from './quiz/rotation';
@@ -250,7 +251,8 @@ export async function regenerateDailyQuiz(userId: string, date: string, today: s
   return buildAndSave(userId, date, today, count, version);
 }
 
-async function loadQuizBankNeedles(userId: string, today: string): Promise<DedupeNeedle[]> {
+/** quizBank dele dos últimos 180 dias: as linhas inteiras (para a revisão) e as agulhas (para o corte de repetida). */
+async function loadQuizBank(userId: string, today: string): Promise<{ rows: BankRow[]; needles: DedupeNeedle[] }> {
   const since = addDays(today, -180);
   try {
     const snap = await getDocs(query(
@@ -259,19 +261,18 @@ async function loadQuizBankNeedles(userId: string, today: string): Promise<Dedup
       where('date', '>=', since),
       orderBy('date', 'desc'),
     ));
-    return snap.docs.map((d) => {
-      const data = d.data();
-      return {
-        date: String(data.date ?? ''),
-        subject: String(data.subject ?? ''),
-        question: String(data.question ?? ''),
-        ...(typeof data.hash === 'string' ? { hash: data.hash } : {}),
-        ...(typeof data.n === 'number' ? { n: data.n } : {}),
-      };
-    });
+    const rows = snap.docs.map((d) => d.data() as BankRow);
+    const needles = rows.map((data) => ({
+      date: String(data.date ?? ''),
+      subject: String(data.subject ?? ''),
+      question: String(data.question ?? ''),
+      ...(typeof data.hash === 'string' ? { hash: data.hash } : {}),
+      ...(typeof (data as { n?: unknown }).n === 'number' ? { n: (data as { n: number }).n } : {}),
+    }));
+    return { rows, needles };
   } catch (e) {
     console.warn('quizBank leitura', e);
-    return [];
+    return { rows: [], needles: [] };
   }
 }
 
@@ -326,7 +327,8 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     60,
   );
   const modules = await getSettings('modules', DEFAULT_MODULES as unknown as Record<string, unknown>) as unknown as ModuleSettings;
-  const bank = await loadQuizBankNeedles(userId, today);
+  const { rows: bankRows, needles: bank } = await loadQuizBank(userId, today);
+  const review = reviewCandidates(bankRows, today, avoid);
   const challenge = challengeLine(await loadChallengeItems(userId, today), today) ?? undefined;
   const baseSnap = await getDoc(doc(db, 'englishBase', userId));
   const rawBase = baseSnap.exists()
@@ -350,6 +352,7 @@ async function buildAndSave(userId: string, date: string, today: string, count: 
     angle: pick.angle,
     depth: pick.depth,
     bank,
+    review,
     ...(challenge ? { challenge } : {}),
     englishLevel: letterLevelOf(letter, panelLevel),
     englishUnit: `${unit.name}: ${unit.lesson}`,

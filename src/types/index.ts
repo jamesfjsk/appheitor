@@ -54,6 +54,8 @@ export interface DailyQuizSanitize {
   secondReplacement?: number;
   /** Vagas preenchidas por pergunta válida de qualquer área do banco. */
   offlineAnyArea?: number;
+  /** Vagas preenchidas com revisão: perguntas que ele respondeu há 30 dias ou mais (26/10/2026). */
+  fromReview?: number;
   /** Aprovação no limite do revisor. A pergunta fica. */
   duvidas?: { n: number; question: string; motivo: string }[];
   /** Hash igual ou quase igual ao quizBank. Conta para a reserva. */

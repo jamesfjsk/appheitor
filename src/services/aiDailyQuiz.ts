@@ -202,6 +202,8 @@ export async function generateDailyQuiz(opts: {
   bank?: DedupeNeedle[];
   /** Linha extra quando ele acerta quase tudo e responde rápido. */
   challenge?: string;
+  /** Revisão: perguntas dele de 30 dias ou mais (reviewFill.ts). Última camada quando faltam vagas. */
+  review?: RawQuestion[];
 }): Promise<GeneratedDailyQuiz> {
   const age = childAgeToday();
   const weekday = weekdayOf(opts.date);
@@ -470,13 +472,31 @@ ${[...bannedTexts, ...seatedTexts, ...opts.avoidQuestions.slice(0, 30)].map((q) 
     };
   }
 
+  // Revisão espaçada (26/10/2026): o banco de reserva acabou para ele (já viu quase tudo em 180 dias) e a
+  // prova saía com 4 a 6 perguntas. Ainda faltando vaga, entram as que ele respondeu há 30 dias ou mais,
+  // as erradas primeiro; primeiro as que passam no validador de hoje, depois as outras.
+  let fromReview = 0;
+  if (seated.missing.length > 0 && opts.review?.length) {
+    const taken = new Set(seated.placed.filter((q): q is RawQuestion => q != null).map((q) => hashOf(String(q.question ?? ''))));
+    const reviewPool = opts.review.filter((q) => !taken.has(hashOf(String(q.question ?? ''))));
+    const strict = selectValidQuestions(reviewPool, ctx, true).kept;
+    const strictHashes = new Set(strict.map((q) => hashOf(String(q.question ?? ''))));
+    const loose = reviewPool.filter((q) => !strictHashes.has(hashOf(String(q.question ?? ''))));
+    const topped = fillAnyArea(seated.placed, [...strict, ...loose]);
+    fromReview = topped.used;
+    seated = {
+      placed: topped.placed,
+      missing: slots.filter((_, i) => topped.placed[i] == null),
+    };
+  }
+
   const ordered = seated.placed.filter((q): q is RawQuestion => q != null);
   if (ordered.length === 0) return offlineQuiz({ kept: 0, dropped, perQuestion, duvidas: [] });
 
   const questions = ordered.map((q) => toDaily(q));
   const published = new Set(questions.map((q) => q.question));
   const duvidasOut = duvidas.filter((item) => published.has(item.question));
-  const aiKept = questions.length - fromOffline;
+  const aiKept = questions.length - fromOffline - fromReview;
   return {
     theme,
     questions,
@@ -492,6 +512,7 @@ ${[...bannedTexts, ...seatedTexts, ...opts.avoidQuestions.slice(0, 30)].map((q) 
       fromOffline,
       secondReplacement,
       offlineAnyArea,
+      ...(fromReview ? { fromReview } : {}),
       duvidas: duvidasOut,
       ...(rejected.length ? { rejected } : {}),
     },
