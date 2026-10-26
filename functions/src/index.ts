@@ -11,6 +11,7 @@ import { sendPush, tokensOf } from './push';
 
 export { chatReaction, chatRelay, chatSeen, telegramSetup, telegramWebhook } from './telegram';
 export { arenaTurn } from './arena';
+export { dailyReport, quizNudge } from './report';
 
 initializeApp();
 const db = getFirestore();

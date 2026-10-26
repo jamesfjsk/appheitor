@@ -12,6 +12,8 @@ import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { sendPush, tokensOf } from './push';
 import { LINK, REGION, TELEGRAM_BOT_TOKEN, childName, tg, type Link } from './telegramApi';
 import { onChessCommand } from './arena';
+import { dailyReportText } from './report';
+import { nowBrazil } from './clock';
 
 const MAX_TEXT = 1000;
 const MAX_PHOTO = 5 * 1024 * 1024;
@@ -113,6 +115,11 @@ async function onTelegramMessage(token: string, msg: TgMessage | undefined): Pro
   }
   if (chatId !== link.parentChatId) {
     if (start) await say('Este robô é de uma família só.');
+    return;
+  }
+  // Resumo do dia dele, quando o pai pede (report.ts)
+  if (/^\/?resumo$/i.test((msg.text ?? '').trim())) {
+    await say((await dailyReportText(uid, nowBrazil().date)).text);
     return;
   }
   // Xadrez com o pai pelo Telegram: 'lance e4', 'xadrez', 'novoxadrez' (arena.ts)
